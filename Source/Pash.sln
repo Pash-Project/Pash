@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pash.ConfigurationSection", "Pash.ConfigurationSection\Pash.ConfigurationSection.csproj", "{F597CB0B-E83B-4052-A6FA-35D61B5F341D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pash.Microsoft.Commands.Management", "Pash.Microsoft.Commands.Management\Pash.Microsoft.Commands.Management.csproj", "{91225A72-A021-4B7D-BA56-5E1B7AC02F03}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pash.Microsoft.PowerShell.Commands.Utility", "Pash.Microsoft.PowerShell.Commands.Utility\Pash.Microsoft.PowerShell.Commands.Utility.csproj", "{0E1D573C-C57D-4A83-A739-3A38E719D87E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pash.System.Management", "Pash.System.Management\Pash.System.Management.csproj", "{C5E303EC-5684-4C95-B0EC-2593E6662403}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PashConsole", "PashConsole\PashConsole.csproj", "{BB348EAD-1713-4760-9953-BC721A203885}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F597CB0B-E83B-4052-A6FA-35D61B5F341D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F597CB0B-E83B-4052-A6FA-35D61B5F341D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F597CB0B-E83B-4052-A6FA-35D61B5F341D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F597CB0B-E83B-4052-A6FA-35D61B5F341D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91225A72-A021-4B7D-BA56-5E1B7AC02F03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91225A72-A021-4B7D-BA56-5E1B7AC02F03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91225A72-A021-4B7D-BA56-5E1B7AC02F03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91225A72-A021-4B7D-BA56-5E1B7AC02F03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E1D573C-C57D-4A83-A739-3A38E719D87E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E1D573C-C57D-4A83-A739-3A38E719D87E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E1D573C-C57D-4A83-A739-3A38E719D87E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E1D573C-C57D-4A83-A739-3A38E719D87E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5E303EC-5684-4C95-B0EC-2593E6662403}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5E303EC-5684-4C95-B0EC-2593E6662403}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5E303EC-5684-4C95-B0EC-2593E6662403}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5E303EC-5684-4C95-B0EC-2593E6662403}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB348EAD-1713-4760-9953-BC721A203885}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB348EAD-1713-4760-9953-BC721A203885}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB348EAD-1713-4760-9953-BC721A203885}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB348EAD-1713-4760-9953-BC721A203885}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

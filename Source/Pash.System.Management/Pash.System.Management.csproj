@@ -1,0 +1,267 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C5E303EC-5684-4C95-B0EC-2593E6662403}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>System.Management.Automation</RootNamespace>
+    <AssemblyName>System.Management.Automation</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="GoldParser, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\bin\GoldParser.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Automation\ ValidateEnumeratedArgumentsAttribute.cs" />
+    <Compile Include="Automation\AliasAttribute.cs" />
+    <Compile Include="Automation\AliasInfo.cs" />
+    <Compile Include="Automation\AllowEmptyCollectionAttribute.cs" />
+    <Compile Include="Automation\AllowEmptyStringAttribute.cs" />
+    <Compile Include="Automation\AllowNullAttribute.cs" />
+    <Compile Include="Automation\ChildItemCmdletProviderIntrinsics.cs" />
+    <Compile Include="Automation\Cmdlet.cs" />
+    <Compile Include="Automation\CmdletAttribute.cs" />
+    <Compile Include="Automation\CmdletInfo.cs" />
+    <Compile Include="Automation\CmdletProviderManagementIntrinsics.cs" />
+    <Compile Include="Automation\CommandInvocationIntrinsics.cs" />
+    <Compile Include="Automation\CommandNotFoundException.cs" />
+    <Compile Include="Automation\CommandParameterInfo.cs" />
+    <Compile Include="Automation\CommandParameterSetInfo.cs" />
+    <Compile Include="Automation\ConfirmImpact.cs" />
+    <Compile Include="Automation\ContentCmdletProviderIntrinsics.cs" />
+    <Compile Include="Automation\CopyContainers.cs" />
+    <Compile Include="Automation\DefaultCommandRuntime.cs" />
+    <Compile Include="Automation\DriveManagementIntrinsics.cs" />
+    <Compile Include="Automation\EngineIntrinsics.cs" />
+    <Compile Include="Automation\ErrorCategory.cs" />
+    <Compile Include="Automation\ExtendedTypeSystemException.cs" />
+    <Compile Include="Automation\FunctionInfo.cs" />
+    <Compile Include="Automation\GettingValueExceptionEventArgs.cs" />
+    <Compile Include="Automation\Host\BufferCell.cs" />
+    <Compile Include="Automation\Host\BufferCellType.cs" />
+    <Compile Include="Automation\Host\ChoiceDescription.cs" />
+    <Compile Include="Automation\Host\ControlKeyStates.cs" />
+    <Compile Include="Automation\Host\Coordinates.cs" />
+    <Compile Include="Automation\Host\FieldDescription.cs" />
+    <Compile Include="Automation\Host\KeyInfo.cs" />
+    <Compile Include="Automation\Host\PSHostRawUserInterface.cs" />
+    <Compile Include="Automation\Host\PSHostUserInterface.cs" />
+    <Compile Include="Automation\Host\ReadKeyOptions.cs" />
+    <Compile Include="Automation\Host\Rectangle.cs" />
+    <Compile Include="Automation\Host\Size.cs" />
+    <Compile Include="Automation\ICommandRuntime.cs" />
+    <Compile Include="Automation\IContainsErrorRecord.cs" />
+    <Compile Include="Automation\IDynamicParameters.cs" />
+    <Compile Include="Automation\Internal\AutomationNull.cs" />
+    <Compile Include="Automation\Internal\CmdletMetadataAttribute.cs" />
+    <Compile Include="Automation\Internal\InternalCommand.cs" />
+    <Compile Include="Automation\Internal\ParsingBaseAttribute.cs" />
+    <Compile Include="Automation\InvocationInfo.cs" />
+    <Compile Include="Automation\ItemCmdletProviderIntrinsics.cs" />
+    <Compile Include="Automation\ParameterAttribute.cs" />
+    <Compile Include="Automation\PathInfo.cs" />
+    <Compile Include="Automation\PathInfoStack.cs" />
+    <Compile Include="Automation\PathIntrinsics.cs" />
+    <Compile Include="Automation\ProgressRecordType.cs" />
+    <Compile Include="Automation\PropertyCmdletProviderIntrinsics.cs" />
+    <Compile Include="Automation\ProviderIntrinsics.cs" />
+    <Compile Include="Automation\ProviderNotFoundException.cs" />
+    <Compile Include="Automation\Provider\CmdletProvider.cs" />
+    <Compile Include="Automation\CommandInfo.cs" />
+    <Compile Include="Automation\CommandTypes.cs" />
+    <Compile Include="Automation\ErrorCategoryInfo.cs" />
+    <Compile Include="Automation\ErrorDetails.cs" />
+    <Compile Include="Automation\ErrorRecord.cs" />
+    <Compile Include="Automation\IResourceSupplier.cs" />
+    <Compile Include="Automation\ProgressRecord.cs" />
+    <Compile Include="Automation\ProviderInfo.cs" />
+    <Compile Include="Automation\PSCorePSSnapIn.cs" />
+    <Compile Include="Automation\PSCredentialTypes.cs" />
+    <Compile Include="Automation\PSCredentialUIOptions.cs" />
+    <Compile Include="Automation\PSCustomObject.cs" />
+    <Compile Include="Automation\PSInstaller.cs">
+    </Compile>
+    <Compile Include="Automation\PSMemberInfoCollectionImplementation.cs" />
+    <Compile Include="Automation\PSMemberSet.cs" />
+    <Compile Include="Automation\PSMemberTypes.cs" />
+    <Compile Include="Automation\PSNoteProperty.cs" />
+    <Compile Include="Automation\PSSnapIn.cs">
+    </Compile>
+    <Compile Include="Automation\PSSnapInCommandBase.cs" />
+    <Compile Include="Automation\PSSnapInInfo.cs" />
+    <Compile Include="Automation\PSSnapinQualifiedName.cs" />
+    <Compile Include="Automation\PSVariable.cs" />
+    <Compile Include="Automation\PSVariableIntrinsics.cs" />
+    <Compile Include="Automation\PSSnapInInstaller.cs">
+    </Compile>
+    <Compile Include="Automation\ReturnContainers.cs" />
+    <Compile Include="Automation\Runspaces\Command.cs" />
+    <Compile Include="Automation\Runspaces\CommandCollection.cs" />
+    <Compile Include="Automation\Runspaces\CommandParameter.cs" />
+    <Compile Include="Automation\Runspaces\CommandParameterCollection.cs" />
+    <Compile Include="Automation\Runspaces\Pipeline.cs" />
+    <Compile Include="Automation\Runspaces\PipelineReader.cs" />
+    <Compile Include="Automation\Runspaces\PipelineResultTypes.cs" />
+    <Compile Include="Automation\Runspaces\PipelineState.cs" />
+    <Compile Include="Automation\Runspaces\PipelineStateEventArgs.cs" />
+    <Compile Include="Automation\Runspaces\PipelineStateInfo.cs" />
+    <Compile Include="Automation\Runspaces\PipelineWriter.cs" />
+    <Compile Include="Automation\Runspaces\ProviderConfigurationEntry.cs" />
+    <Compile Include="Automation\Runspaces\Runspace.cs" />
+    <Compile Include="Automation\Runspaces\RunspaceConfiguration.cs" />
+    <Compile Include="Automation\Runspaces\RunspaceConfigurationEntry.cs" />
+    <Compile Include="Automation\Runspaces\RunspaceConfigurationEntryCollection.cs" />
+    <Compile Include="Automation\Runspaces\RunspaceFactory.cs" />
+    <Compile Include="Automation\Runspaces\RunspaceStateEventArgs.cs" />
+    <Compile Include="Automation\Runspaces\RunspaceStateInfo.cs" />
+    <Compile Include="Automation\Runspaces\ScriptConfigurationEntry.cs" />
+    <Compile Include="Automation\Runspaces\SessionStateProxy.cs" />
+    <Compile Include="Automation\RuntimeException.cs" />
+    <Compile Include="Automation\ScopedItemOptions.cs" />
+    <Compile Include="Automation\ScriptBlock.cs" />
+    <Compile Include="Automation\ScriptInfo.cs" />
+    <Compile Include="Automation\SecurityDescriptorCmdletProviderIntrinsics.cs" />
+    <Compile Include="Automation\SessionState.cs" />
+    <Compile Include="Automation\SessionStateCategory.cs" />
+    <Compile Include="Automation\SessionStateException.cs" />
+    <Compile Include="Automation\SettingValueExceptionEventArgs.cs" />
+    <Compile Include="Automation\SetValueException.cs" />
+    <Compile Include="Automation\ShouldProcessReason.cs" />
+    <Compile Include="Automation\SwitchParameter.cs" />
+    <Compile Include="Automation\ValidateArgumentsAttribute.cs" />
+    <Compile Include="Automation\ValidateNotNullAttribute.cs" />
+    <Compile Include="Automation\ValidateNotNullOrEmptyAttribute.cs" />
+    <Compile Include="Automation\ValidateRangeAttribute.cs" />
+    <Compile Include="Automation\ValidateSetAttribute.cs" />
+    <Compile Include="Automation\VerbsCommon.cs" />
+    <Compile Include="Automation\WildcardOptions.cs" />
+    <Compile Include="Automation\WildcardPattern.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\AddPSSnapinCommand.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\AliasProviderDynamicParameters.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\EnvironmentProvider.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\FileSystemCmdletProviderEncoding.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\FileSystemContentDynamicParametersBase.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\FileSystemContentReaderDynamicParameters.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\FileSystemContentWriterDynamicParameters.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\FunctionProviderDynamicParameters.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\GetCommandCommand.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\GetHelpCommand.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\GetHistoryCommand.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\GetPSSnapinCommand.cs" />
+    <Compile Include="Automation\ItemNotFoundException.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\Internal\Format\FrontEndCommandBase.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\RemovePSSnapinCommand.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\VariableProvider.cs" />
+    <Compile Include="Pash\Implementation\CommandManager.cs" />
+    <Compile Include="Pash\Implementation\CommandProcessor.cs" />
+    <Compile Include="Pash\Implementation\CommandProcessorBase.cs" />
+    <Compile Include="Pash\Implementation\ProviderRuntime.cs" />
+    <Compile Include="Pash\Implementation\SessionStateGlobal.cs" />
+    <Compile Include="Pash\Implementation\PipelineCommandRuntime.cs" />
+    <Compile Include="Pash\Implementation\LocalRunspaceConfiguration.cs" />
+    <Compile Include="Pash\Implementation\PSObjectPipelineReader.cs" />
+    <Compile Include="Pash\Implementation\ExecutionContext.cs" />
+    <Compile Include="Pash\Implementation\LocalHost.cs" />
+    <Compile Include="Pash\Implementation\LocalHostRawUserInterface.cs" />
+    <Compile Include="Pash\Implementation\LocalHostUserInterface.cs" />
+    <Compile Include="Pash\Implementation\LocalPipeline.cs" />
+    <Compile Include="Pash\Implementation\ObjectlPipelineReader.cs" />
+    <Compile Include="Pash\Implementation\LocalRunspace.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\AliasProvider.cs" />
+    <Compile Include="Automation\Provider\CmdletProviderAttribute.cs" />
+    <Compile Include="Automation\Provider\ContainerCmdletProvider.cs" />
+    <Compile Include="Automation\Provider\DriveCmdletProvider.cs" />
+    <Compile Include="Automation\Provider\IContentCmdletProvider.cs" />
+    <Compile Include="Automation\Provider\IContentReader.cs" />
+    <Compile Include="Automation\Provider\IContentWriter.cs" />
+    <Compile Include="Automation\Provider\IDynamicPropertyCmdletProvider.cs" />
+    <Compile Include="Automation\Provider\IPropertyCmdletProvider.cs" />
+    <Compile Include="Automation\Provider\ISecurityDescriptorCmdletProvider.cs" />
+    <Compile Include="Automation\Provider\ItemCmdletProvider.cs" />
+    <Compile Include="Automation\Provider\NavigationCmdletProvider.cs" />
+    <Compile Include="Automation\Provider\ProviderCapabilities.cs" />
+    <Compile Include="Automation\PSCmdlet.cs" />
+    <Compile Include="Automation\PSCredential.cs" />
+    <Compile Include="Automation\PSDriveInfo.cs" />
+    <Compile Include="Automation\PSHost.cs" />
+    <Compile Include="Automation\PSMemberInfo.cs" />
+    <Compile Include="Automation\PSMemberInfoCollection.cs" />
+    <Compile Include="Automation\PSMethodInfo.cs" />
+    <Compile Include="Automation\PSObject.cs" />
+    <Compile Include="Automation\PSObjectTypeDescriptionProvider.cs" />
+    <Compile Include="Automation\PSPropertyInfo.cs" />
+    <Compile Include="Automation\ReadOnlyPSMemberInfoCollection.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\FileSystemProvider.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\FunctionProvider.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\SessionStateProviderBase.cs" />
+    <Compile Include="Pash\Implementation\ObjectStream.cs" />
+    <Compile Include="Pash\Implementation\ObjectStreamWriter.cs" />
+    <Compile Include="Pash\Implementation\PipelineProcessor.cs" />
+    <Compile Include="Pash\Implementation\ScriptProcessor.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AdditionExpressionNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AnyWordNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\ArrayNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AssignmentNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\CmdletNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\NumberNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\ParamsListNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\PashParser.cs" />
+    <Compile Include="Pash\ParserIntrinsics\PashParserImplementation.cs" />
+    <Compile Include="Pash\ParserIntrinsics\PipelineNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\RangeNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\StringNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\ValueOfNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\VariableNode.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Pash\ParserIntrinsics\PashGrammar.cgt">
+    </EmbeddedResource>
+    <None Include="Pash\ParserIntrinsics\PashGrammar.grm">
+    </None>
+    <None Include="System.Management.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Pash.ConfigurationSection\Pash.ConfigurationSection.csproj">
+      <Project>{F597CB0B-E83B-4052-A6FA-35D61B5F341D}</Project>
+      <Name>Pash.ConfigurationSection</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

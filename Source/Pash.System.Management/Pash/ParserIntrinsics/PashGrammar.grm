@@ -1,0 +1,273 @@
+"Name"            = 'Pash (PowerShell-like) Grammar'
+"Author"          = 'IgorM'
+"Version"         = '1.0'
+"About"           = 'Pash Script grammar.'
+
+"Case Sensitive"  = False
+"Start Symbol"    = <statementListRule>
+
+! Grammar was taken from the Appendix C: Windows PowerShell in Action book (http://www.manning.com/payette/)
+
+!===============================
+! Character sets
+!===============================
+
+! Special comment definition
+Comment Start = '/*'
+Comment End = '*/'
+Comment Line   = '#'
+
+NewLine = {CR}{LF}
+        | {CR}
+        | {LF}
+{WS} = {Whitespace} - {CR} - {LF}
+Whitespace = {WS}+
+
+ExecCall = [&\.]
+
+{StringTokenCharSet1} = {Printable} - [''] + {CR} + {LF}
+{StringTokenCharSet2} = {Printable} - ["] + {CR} + {LF}
+
+{SimpleTextCharSet} = {Printable} - {Whitespace} - [''|$()']''['"+=#.,]
+{SimpleTextCharSetNoDashAndNumber} = {SimpleTextCharSet} - [-] - {Number}
+
+{HexNumber} = {Number} + [abcdefABCDEF]
+
+
+! ########################################
+!     Tokenized Rules
+! ########################################
+
+!*
+<ComparisonOperatorToken> =
+		"-eq" | "-ne" | "-ge" | "-gt" | "-lt" | "-le" |
+		"-ieq" | "-ine" | "-ige" | "-igt" | "-ilt" | "-ile" |
+		"-ceq" | "-cne" | "-cge" | "-cgt" | "-clt" | "-cle" |
+		"-like" | "-notlike" | "-match" | "-notmatch" |
+		"-ilike" | "-inotlike" | "-imatch" | "-inotmatch" |
+		"-clike" | "-cnotlike" | "-cmatch" | "-cnotmatch" |
+		"-contains" | "-notcontains" |
+		"-icontains" | "-inotcontains" |
+		"-ccontains" | "-cnotcontains" |
+		"-isnot" | "-is" | "-as" |
+		"-replace" | "-ireplace" | "-creplace"
+*!
+! <AssignmentOperatorToken> = "=" | "+=" | "-=" | "*=" | "/=" | "%="
+AssignmentOperatorToken = '=' | '+=' | '-=' | '*=' | '/=' | '%='
+
+! <LogicalOperatorToken> = "-and" | "-or"
+! <BitwiseOperatorToken> = "-band" | "-bor"
+! <RedirectionOperatorToken> = "2>&1" | ">>" | ">" | "<<" | "<" | ">|" | "2>" | "2>>" | "1>>"
+! <FunctionDeclarationToken> = "function" | "filter"
+! <ExpandableStringToken> = ".*"
+
+! <StringToken> = '.*'
+StringToken = ''{StringTokenCharSet1}*''
+            | ["]{StringTokenCharSet2}*["]
+
+! <VariableToken> = \$[:alnum:]+ | \${.+}
+VariableToken = '$'{AlphaNumeric}+
+
+! <ParameterToken> = -[:letter:]+[:]{0 |1}
+ParameterToken = [-]{Letter}{AlphaNumeric}*':'?
+
+! <CallArguementSeparatorToken> = ' |'
+
+! <CommaToken> = ' |'
+CommaToken = ','
+
+! <MinusMinusToken> = '--'
+
+! <RangeOperatorToken> = '..'
+RangeOperatorToken = '..'
+
+! <NumberToken> = C# number pattern...
+NumberToken = {Number}+
+            | '0'[xX]{HexNumber}+
+            | {Number}+'.'{Number}+
+
+! <ReferenceOperatorToken> = "." | "::" | "["
+
+! <ParameterArgumentToken> = [^-($0-9].*[^ \t]
+!ParameterArgumentToken = {ParameterArgumentTokenCharSet}+
+
+! <UnaryOperatorToken> = "!" | "-not" | "+" | "-" | "-bnot" | <attributeSpecificationToken>
+! <FormatOperatorToken> = '-f'
+! <LoopLabelToken> = [:letter:][:alnum:]*:
+! <ParameterToken> = "param"
+! <PrePostfixOperatorToken> = '++' | <MinusMinusToken>
+! <MultiplyOperatorToken> = '*' | '/' | '%'
+
+! <AdditionOperatorToken> = '+' | '-' | emDash | enDash | horizontalBar
+AdditionOperatorToken = '+' | '-'
+
+! <AttributeSpecificationToken> = \[..*\]
+! <StatementSeparatorToken> = ';' | '&&' | '||' | <end-of-line>
+
+! TODO: <CmdletNameToken> = [^$0-9(@"'][^ \t]*
+!CmdletNameToken = {Letter}+[-]?{Letter}+
+
+AnyWordToken = {SimpleTextCharSetNoDashAndNumber}{SimpleTextCharSet}+
+
+! TODO: why the general comment declaration is not working?
+CommentToken = '#'{Printable}+
+
+! ########################################
+!     Statement
+! ########################################
+
+! <statementListRule> = <statementRule> [ <statementSeparatorToken> <statementRule> ]*
+
+<statementSeparatorToken> ::= NewLine <statementSeparatorToken>
+                            | 
+
+<statementListRule> ::= <statementRule>
+                      | <statementRule> <statementSeparatorToken> <statementListRule>
+
+<statementRule> ::= <pipelineRule>
+                  | CommentToken
+!*                  | <ifStatementRule>
+                  | <switchStatementRule>
+                  | <foreachStatementRule>
+                  | <forWhileStatementRule>
+                  | <doWhileStatementRule>
+                  | <functionDeclarationRule>
+                  | <parameterDeclarationRule>
+                  | <flowControlStatementRule>
+                  | <trapStatementRule>
+                  | <finallyStatementRule>
+*!                    
+
+! ########################################
+!     Pipeline
+! ########################################
+
+! A pipeline can look like'
+!   get-childitem -recurse -filter *.cs | sort name
+!   2+2 |3 |4 | sort  
+! sort a literal array in a pipeline...
+!   . profile.msh | count-object    
+! . source a script
+!   & "c:\a path\with spaces.doc"   
+! execute a path with spaces in it
+!   get-childitem | sort-object > c:/tmp/junk.txt  
+! use i/o redirection...
+!*
+get-childitem -recurse -filter *.ps1 | sort name
+(2+3),3,4 | sort
+
+& "c:\a path\with spaces.ps1" | % { $_.length }
+get-childitem | sort-object > c:/tmp/junk.txt
+
+$a = dir | sort length
+*!
+
+! <pipelineRule> ::= <assignmentStatement> | <firstPipelineElement> [ '|' <cmdletCall> ]*
+!<pipelineRule> ::= <firstPipelineElement>
+!                 | <firstPipelineElement> '|' <cmdletCall>
+<pipelineRule> ::= <cmdletCall>
+                  | <cmdletCall> '|' <pipelineRule>
+                  | <assignmentStatementRule>
+                  | <assignmentStatementRule> '|' <pipelineRule>
+
+! <assignmentStatementRule> ::= <lvalueExpression> <AssignmentOperatorToken> <pipelineRule>
+<assignmentStatementRule> ::= <lvalueExpression> AssignmentOperatorToken <pipelineRule>
+
+! <lvalueExpression> ::= <lvalue> [? |? <lvalue>]*
+<lvalueExpression> ::= <lvalue>
+
+! <lvalue> ::= <simpleLvalue> <propertyOrArrayReferenceOperator>*
+<lvalue> ::= <simpleLvalue>
+
+! <simpleLvalue> ::= <AttributeSpecificationToken>* <variableToken>
+<simpleLvalue> ::= variableToken
+
+!<firstPipelineElement> ::= <expressionRule> 
+!                         | <cmdletCall>
+
+! TODO: <cmdletCall> ::= [ '&' | '.' | <empty> ] [ <name> | <expressionRule> ] [ <parameterToken> | <parameterArgumentToken> | <postfixOperatorRule> | <redirectionRule> ]*
+
+<ParameterArgumentToken> ::= <valueRule> | AnyWordToken | ParameterToken
+<cmletParamsList> ::= <ParameterArgumentToken> <cmletParamsList>
+                    | <ParameterArgumentToken> 
+
+<cmdletName> ::= AnyWordToken
+<cmdletCall> ::= ExecCall <cmdletName> <cmletParamsList>
+               | ExecCall <cmdletName>
+               | <cmdletName> <cmletParamsList>
+               | <cmdletName>
+               | <expressionRule>
+
+! ########################################
+!     Expression
+! ########################################
+
+<expressionRule> ::= <logicalExpressionRule>
+
+! <logicalExpressionRule> = <bitwiseExpressionRule> [<LogicalOperatorToken> <bitwiseExpressionRule>]*
+<logicalExpressionRule> ::= <bitwiseExpressionRule>
+
+! <bitwiseExpressionRule> = <comparisonExpressionRule> [<BitwiseOperatorToken> comparisonExpressionRule>]*
+<bitwiseExpressionRule> ::= <comparisonExpressionRule>
+
+! <comparisonExpressionRule> = <addExpressionRule> [ <ComparisonOperatorToken> <addExpressionRule> ]*
+<comparisonExpressionRule> ::= <addExpressionRule>
+
+! <addExpressionRule> = <multiplyExpressionRule> [ <AdditionOperatorToken> <multiplyExpressionRule> ]*
+<addExpressionRule> ::= <multiplyExpressionRule>
+                      | <multiplyExpressionRule> AdditionOperatorToken <addExpressionRule>
+
+! <multiplyExpressionRule> = <formatExpressionRule> [ <MultiplyOperatorToken> <formatExpressionRule> ]
+<multiplyExpressionRule> ::= <formatExpressionRule>
+
+! <formatExpressionRule> = <rangeExpressionRule> [ <FormatOperatorToken> <rangeExpressionRule> ]*
+<formatExpressionRule> ::= <rangeExpressionRule>
+
+! <rangeExpressionRule> = <arrayLiteralRule> [ <RangeOperatorToken> <arrayLiteralRule> ]*
+<rangeExpressionRule> ::= <arrayLiteralRule>
+                        | <arrayLiteralRule> RangeOperatorToken <rangeExpressionRule>
+
+! <arrayLiteralRule> = <postfixOperatorRule> [ <CommaToken> <postfixOperatorRule> ]*
+<arrayLiteralRule> ::= <postfixOperatorRule>
+                     | <postfixOperatorRule> CommaToken <arrayLiteralRule>
+
+! <postfixOperatorRule> = <lvalueExpression> <PrePostfixOperatorToken> | <propertyOrArrayReferenceRule>
+<postfixOperatorRule> ::= <propertyOrArrayReferenceRule>
+
+! <propertyOrArrayReferenceRule> = <valueRule> <propertyOrArrayReferenceOperator>*
+<propertyOrArrayReferenceRule> ::= <valueRule>
+
+! <propertyOrArrayReferenceOperator> = '[' <expressionRule> ']' ] | '.' [ <PropertyNameToken> <parseCallRule>{0|1} | <valueRule> ]
+!<propertyOrArrayReferenceOperator> ::= '[' <expressionRule> ']'
+!                                     | '.' <parseCallRule>
+!                                     | '.' <valueRule>
+
+! <parseCallRule> = '(' <arrayLiteralRule> ')'
+!<parseCallRule> ::= '(' <arrayLiteralRule> ')'
+
+! ########################################
+!     Value
+! ########################################
+!*
+<valueRule> = 
+		'(' <assignmentStatementRule> ')' 
+		| '$(' <statementListRule> ')' 
+		| '@(' <statementListRule> ')' 
+		| <cmdletBodyRule> 
+		| '@{' <hashLiteralRule> '}' 
+		| <unaryOperatorToken> <propertyOrArrayReferenceRule> 
+		| <AttributeSpecificationToken> <propertyOrArrayReferenceRule> 
+		| <AttributeSpecificationToken> 
+		| <PrePostfixOperatorToken> <lvalue> 
+		| <NumberToken> 
+		| <StringToken> 
+		| <ExpandableStringToken> 
+		| <variableToken>
+*!
+<valueRule> ::= StringToken
+              | variableToken
+              | NumberToken
+              | '$(' <statementRule> ')'
+		| '(' <assignmentStatementRule> ')' 
+
+! <hashLiteralRule> = <keyExpression> '=' <pipelineRule> [ <statementSeparatorToken> <hashLiteralRule> ]*

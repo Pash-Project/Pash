@@ -1,0 +1,878 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="System.Management.Automation.ChildItemCmdletProviderIntrinsics" Collapsed="true">
+    <Position X="16.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAABAAAAAAAAAAAAAAAAACAQAAAAAAAA=</HashCode>
+      <FileName>Automation\ChildItemCmdletProviderIntrinsics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Cmdlet" Collapsed="true">
+    <Position X="4.5" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>SAAAABAIAwAMCBAAQAQIQAgEAACABBAgABAYAAAAAUQ=</HashCode>
+      <FileName>Automation\Cmdlet.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.CmdletAttribute" Collapsed="true">
+    <Position X="11" Y="11" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABCAAAAAAAAAAAAAAAAAAAAAAAAAAJAAEAAAA=</HashCode>
+      <FileName>Automation\CmdletAttribute.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.CmdletProviderManagementIntrinsics" Collapsed="true">
+    <Position X="22" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAgAAAAAgAAA=</HashCode>
+      <FileName>Automation\CmdletProviderManagementIntrinsics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.CommandInfo" Collapsed="true">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACACEAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\CommandInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.CommandInvocationIntrinsics" Collapsed="true">
+    <Position X="27.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAEAAAAAABEAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\CommandInvocationIntrinsics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.ContentCmdletProviderIntrinsics" Collapsed="true">
+    <Position X="22" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAABAEAA=</HashCode>
+      <FileName>Automation\ContentCmdletProviderIntrinsics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.DriveManagementIntrinsics" Collapsed="true">
+    <Position X="23.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAALBAAACABAAAAAAAAAAAAgAAAAAAAAA=</HashCode>
+      <FileName>Automation\DriveManagementIntrinsics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.ErrorCategoryInfo" Collapsed="true">
+    <Position X="25.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAgAAAAgEAACAA=</HashCode>
+      <FileName>Automation\ErrorCategoryInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.ErrorDetails" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="27.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\ErrorDetails.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="System.Management.Automation.ErrorRecord" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="16.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACAAUAAAAAAAgAAAAAAAAAABAAAAAAAA=</HashCode>
+      <FileName>Automation\ErrorRecord.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="System.Management.Automation.GettingValueExceptionEventArgs" Collapsed="true">
+    <Position X="22" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAABAA=</HashCode>
+      <FileName>Automation\GettingValueExceptionEventArgs.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.ItemCmdletProviderIntrinsics" Collapsed="true">
+    <Position X="23.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAIAIBCBAAAAABAAAAgAAAAAAAAAAAAFAgAA=</HashCode>
+      <FileName>Automation\ItemCmdletProviderIntrinsics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.ParameterAttribute" Collapsed="true">
+    <Position X="8.5" Y="12.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAgAAgAAEgAQQAAAAAAAAAAAAAQAgBAAAAAAA=</HashCode>
+      <FileName>Automation\ParameterAttribute.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.PathInfo" Collapsed="true">
+    <Position X="27.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAAEAAIEAAAAAAAAAAAAgAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\PathInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.PathInfoStack" Collapsed="true">
+    <Position X="16.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\PathInfoStack.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.PathIntrinsics" Collapsed="true">
+    <Position X="18.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIQACAAAABAAQAAAkiAAggBAAIIEIgAAABAAAQAAA=</HashCode>
+      <FileName>Automation\PathIntrinsics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.ProgressRecord" Collapsed="true">
+    <Position X="27.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\ProgressRecord.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.PropertyCmdletProviderIntrinsics" Collapsed="true">
+    <Position X="16.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAABCBAAAAABAAAAgAAAAAAAAAAAABAgAA=</HashCode>
+      <FileName>Automation\PropertyCmdletProviderIntrinsics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.ProviderInfo" Collapsed="true">
+    <Position X="18.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAgAAAEAAAAAAQAAAQAgAAAAQAAgAAAAAA=</HashCode>
+      <FileName>Automation\ProviderInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.ProviderIntrinsics" Collapsed="true">
+    <Position X="20.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAAAAAAAAABAAEAAAAAEAAAAAAAQAAAAA=</HashCode>
+      <FileName>Automation\ProviderIntrinsics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.PSCmdlet" Collapsed="true">
+    <Position X="4.5" Y="15.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAABAAUAASEAAAAAAAAICAAAAAAQAACAAEA=</HashCode>
+      <FileName>Automation\PSCmdlet.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.PSCredential" Collapsed="true">
+    <Position X="22" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\PSCredential.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.PSDriveInfo" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="23.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAkACQEgACAAgwAAgAAAIAAAAAAAAIAAiA=</HashCode>
+      <FileName>Automation\PSDriveInfo.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="System.Management.Automation.PSMemberInfo" Collapsed="true">
+    <Position X="12.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\PSMemberInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.PSMemberInfoCollection&lt;T&gt;" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="25.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAEAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\PSMemberInfoCollection.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="System.Management.Automation.PSMethodInfo" Collapsed="true">
+    <Position X="11.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\PSMethodInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.PSObject" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="27.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAgAABAQQEgAAAQAAAAgCAAJAAAAAEAAACIUA=</HashCode>
+      <FileName>Automation\PSObject.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="System.Management.Automation.PSObjectTypeDescriptionProvider" Collapsed="true">
+    <Position X="16.75" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\PSObjectTypeDescriptionProvider.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.PSPropertyInfo" Collapsed="true">
+    <Position X="13.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\PSPropertyInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.PSVariable" Collapsed="true">
+    <Position X="18.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAgAAAAAAAAAAQQAAAAAAAAAAAgAARAAAA=</HashCode>
+      <FileName>Automation\PSVariable.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.PSVariableIntrinsics" Collapsed="true">
+    <Position X="20.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAABABAAAAABAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\PSVariableIntrinsics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.ReadOnlyPSMemberInfoCollection&lt;T&gt;" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="22" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAEAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\ReadOnlyPSMemberInfoCollection.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="System.Management.Automation.RuntimeException" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="16.75" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\RuntimeException.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="System.Management.Automation.ScriptBlock" Collapsed="true">
+    <Position X="18.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAAAAIAAAEAAACAAAAAAAAAAAAAACAAQAFAAA=</HashCode>
+      <FileName>Automation\ScriptBlock.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.SecurityDescriptorCmdletProviderIntrinsics" Collapsed="true">
+    <Position X="20.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAAAAABCBAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\SecurityDescriptorCmdletProviderIntrinsics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.SessionState" Collapsed="true">
+    <Position X="22" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAEAAIAAAAAAAAAAAAAgAAAAEAAAAAAAAA=</HashCode>
+      <FileName>Automation\SessionState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.SettingValueExceptionEventArgs" Collapsed="true">
+    <Position X="25.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAA=</HashCode>
+      <FileName>Automation\SettingValueExceptionEventArgs.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.VerbsCommon" Collapsed="true">
+    <Position X="27.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAIQAAAAAIAABChAAAAABAAAAgAAAAAQAAAAQABAgAA=</HashCode>
+      <FileName>Automation\VerbsCommon.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Host.ChoiceDescription" Collapsed="true">
+    <Position X="18.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\Host\ChoiceDescription.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Host.FieldDescription" Collapsed="true">
+    <Position X="20.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAAEAAABQAARQAAJAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>Automation\Host\FieldDescription.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Host.PSHostRawUserInterface" Collapsed="true">
+    <Position X="13.5" Y="6.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAgAgAAAAAgAIQAiIAIACQICAAAAACQAAAEAAAABAA=</HashCode>
+      <FileName>Automation\Host\PSHostRawUserInterface.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Host.PSHostUserInterface" Collapsed="true">
+    <Position X="11.5" Y="12.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>QABAAAAAAgAAAAAIAAAIACAIQAAIAAACAAAAAIEAAAA=</HashCode>
+      <FileName>Automation\Host\PSHostUserInterface.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Host.PSHost" Collapsed="true">
+    <Position X="7.5" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAABACAACAAAAAAEAAAAAAQAAAAAAgAAAAAEAAAAUoA=</HashCode>
+      <FileName>Automation\PSHost.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Internal.CmdletMetadataAttribute" Collapsed="true">
+    <Position X="9.5" Y="9.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\Internal\CmdletMetadataAttribute.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Internal.ParsingBaseAttribute" Collapsed="true">
+    <Position X="8.5" Y="11" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\Internal\ParsingBaseAttribute.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Provider.CmdletProvider" Collapsed="true">
+    <Position X="3.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAIAiQECBEAQKAIDAAAABAICBAAIACQgAKIAAQ=</HashCode>
+      <FileName>Automation\Provider\CmdletProvider.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="System.Management.Automation.Provider.CmdletProviderAttribute" Collapsed="true">
+    <Position X="20.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAQAAA=</HashCode>
+      <FileName>Automation\Provider\CmdletProviderAttribute.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Provider.ContainerCmdletProvider" Collapsed="true">
+    <Position X="3" Y="7.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AASAABEAAAAAAAAEAAAAAAAQgAAEAAAFACAAACCAAAA=</HashCode>
+      <FileName>Automation\Provider\ContainerCmdletProvider.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Provider.DriveCmdletProvider" Collapsed="true">
+    <Position X="3" Y="4.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAEAA=</HashCode>
+      <FileName>Automation\Provider\DriveCmdletProvider.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Provider.ItemCmdletProvider" Collapsed="true">
+    <Position X="3" Y="6.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAICAAAAABEAAIAAAAAAgAAAAAAAQBACAAAEAAAA=</HashCode>
+      <FileName>Automation\Provider\ItemCmdletProvider.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Provider.NavigationCmdletProvider" Collapsed="true">
+    <Position X="0.75" Y="9" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAEAAABAAAAAAAAAABAIAAAAAAAoAAAAAAAAAA=</HashCode>
+      <FileName>Automation\Provider\NavigationCmdletProvider.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Runspaces.Command" Collapsed="true">
+    <Position X="23.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAQkAAAACAAAAAAAAAAACIAAEACAAgQ=</HashCode>
+      <FileName>Automation\Runspaces\Command.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Runspaces.CommandCollection" Collapsed="true">
+    <Position X="25.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\Runspaces\CommandCollection.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Runspaces.CommandParameter" Collapsed="true">
+    <Position X="18.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Automation\Runspaces\CommandParameter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Runspaces.CommandParameterCollection" Collapsed="true">
+    <Position X="20.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\Runspaces\CommandParameterCollection.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Runspaces.Pipeline" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="12.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAgAAACAIAQAAAAgIAAAAEgAAAAASIAAIAACAQCA=</HashCode>
+      <FileName>Automation\Runspaces\Pipeline.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Orientation="Right" Position="0.309" Collapsed="true" />
+  </Class>
+  <Class Name="System.Management.Automation.Runspaces.PipelineReader&lt;T&gt;" Collapsed="true">
+    <Position X="9" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAgEAAAAAAAAAQQhKAAAAAAAAAAAAICAAAA=</HashCode>
+      <FileName>Automation\Runspaces\PipelineReader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Runspaces.PipelineStateEventArgs" Collapsed="true">
+    <Position X="23.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAA=</HashCode>
+      <FileName>Automation\Runspaces\PipelineStateEventArgs.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Runspaces.PipelineStateInfo" Collapsed="true">
+    <Position X="25.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAABAAAABA=</HashCode>
+      <FileName>Automation\Runspaces\PipelineStateInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Runspaces.PipelineWriter" Collapsed="true">
+    <Position X="0.5" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAQAIAAAAAAAAAAAAIGIAAA=</HashCode>
+      <FileName>Automation\Runspaces\PipelineWriter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Runspaces.Runspace" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAABAAACAAKAAAAAQgCAAAAAAAAASEAEAAAACAQCA=</HashCode>
+      <FileName>Automation\Runspaces\Runspace.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="System.Management.Automation.Runspaces.RunspaceConfiguration" Collapsed="true">
+    <Position X="3.75" Y="11.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Automation\Runspaces\RunspaceConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Runspaces.RunspaceFactory" Collapsed="true">
+    <Position X="23.75" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\Runspaces\RunspaceFactory.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Runspaces.RunspaceStateEventArgs" Collapsed="true">
+    <Position X="25.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\Runspaces\RunspaceStateEventArgs.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Runspaces.RunspaceStateInfo" Collapsed="true">
+    <Position X="27.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\Runspaces\RunspaceStateInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.Runspaces.SessionStateProxy" Collapsed="true">
+    <Position X="23.75" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAQAA=</HashCode>
+      <FileName>Automation\Runspaces\SessionStateProxy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.PowerShell.Commands.AliasProvider" Collapsed="true">
+    <Position X="5.75" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAICAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQEAA=</HashCode>
+      <FileName>Microsoft.PowerShell\Commands\AliasProvider.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.PowerShell.Commands.FileSystemProvider" Collapsed="true">
+    <Position X="0.75" Y="10.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>EIAIAJEQACABAEAGAAAABIBAsAEAUAAEhSAAAAWSEAA=</HashCode>
+      <FileName>Microsoft.PowerShell\Commands\FileSystemProvider.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Microsoft.PowerShell.Commands.FunctionProvider" Collapsed="true">
+    <Position X="3.5" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Microsoft.PowerShell\Commands\FunctionProvider.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.PowerShell.Commands.SessionStateProviderBase" Collapsed="true">
+    <Position X="4.25" Y="9" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAJEAAAAABEAEAAAAAIAAsAAAAAAEBCCAAASCAAA=</HashCode>
+      <FileName>Microsoft.PowerShell\Commands\SessionStateProviderBase.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="System.Management.Automation.AliasInfo" Collapsed="true">
+    <Position X="0.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAgCEAAAAAAAAAAAAAAEAAABAAAAABIAAA=</HashCode>
+      <FileName>Automation\AliasInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.ScriptInfo" Collapsed="true">
+    <Position X="5.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACAAEAAAAAAAACAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\ScriptInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.CmdletInfo" Collapsed="true">
+    <Position X="7.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AKACAAAAAAABDAIAAAAAAAAAAAAQAAAAAQCAgAAAAAA=</HashCode>
+      <FileName>Automation\CmdletInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.FunctionInfo" Collapsed="true">
+    <Position X="3" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACAAAAAAAAAAACAAAAAAAAAAAAABAAAA=</HashCode>
+      <FileName>Automation\FunctionInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Pash.Implementation.CommandManager" Collapsed="true">
+    <Position X="16.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAABAAQAAAAAAAAAAAAAEBAQAAAEgAAAAA=</HashCode>
+      <FileName>Pash\Implementation\CommandManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Pash.Implementation.ScriptProcessor" Collapsed="true">
+    <Position X="9" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAAAAQIAAQAAEAAAAAEAAAAAABAIAAAAAAA=</HashCode>
+      <FileName>Pash\Implementation\ScriptProcessor.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Pash.Implementation.CommandProcessorBase" Collapsed="true">
+    <Position X="7.5" Y="3.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQIAAQQAAAAEAAAAAAAAABAIAAAAAAA=</HashCode>
+      <FileName>Pash\Implementation\CommandProcessorBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Pash.Implementation.ExecutionContext" Collapsed="true">
+    <Position X="18.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAEAQAAAIEAAAAAAIEAACAAAAQAABgAAABA=</HashCode>
+      <FileName>Pash\Implementation\ExecutionContext.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Pash.Implementation.LocalHost" Collapsed="true">
+    <Position X="7.5" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAABACAACAAAAAAEAIIAAAQAAAAAAgAAAABMAABQUoA=</HashCode>
+      <FileName>Pash\Implementation\LocalHost.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Pash.Implementation.LocalHostRawUserInterface" Collapsed="true">
+    <Position X="13.5" Y="7.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAgAgAAAAAgAIQAiIAIAAQACAAAAACQAAAEAAAABAA=</HashCode>
+      <FileName>Pash\Implementation\LocalHostRawUserInterface.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Pash.Implementation.LocalHostUserInterface" Collapsed="true">
+    <Position X="11.5" Y="13.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>QABAAAAAAgAAAAAIAAAIACAIQAAIAAACAAAAAIEAAAA=</HashCode>
+      <FileName>Pash\Implementation\LocalHostUserInterface.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Pash.Implementation.LocalPipeline" Collapsed="true">
+    <Position X="12.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAQCAgCAIAQAAAAgJAAIBEoQAAACQIAAIAACAACA=</HashCode>
+      <FileName>Pash\Implementation\LocalPipeline.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Pash.Implementation.LocalRunspace" Collapsed="true">
+    <Position X="0.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAABAgAAAAKAAAAAAgAAAAAIAAAAyEAEAAAACAACA=</HashCode>
+      <FileName>Pash\Implementation\LocalRunspace.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Pash.Implementation.LocalRunspaceConfiguration" Collapsed="true">
+    <Position X="3.5" Y="12.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Pash\Implementation\LocalRunspaceConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Pash.Implementation.ObjectPipelineReader" Collapsed="true">
+    <Position X="7.5" Y="7.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAgEAAAAAAAAAQQhKAAAAAAAAAAAAICAABA=</HashCode>
+      <FileName>Pash\Implementation\ObjectlPipelineReader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Pash.Implementation.ObjectStream" Collapsed="true">
+    <Position X="25.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAABAAAAAAAAAAAhAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>Pash\Implementation\ObjectStream.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Pash.Implementation.ObjectStreamWriter" Collapsed="true">
+    <Position X="0.5" Y="12.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAABAAAAAAAAQAIAAAAAAAAAAAAIGIABA=</HashCode>
+      <FileName>Pash\Implementation\ObjectStreamWriter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Pash.Implementation.PipelineProcessor" Collapsed="true">
+    <Position X="22" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAEAAAAAAAA=</HashCode>
+      <FileName>Pash\Implementation\PipelineProcessor.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Pash.Implementation.PSObjectPipelineReader" Collapsed="true">
+    <Position X="10" Y="7.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAgEAAAAAAAAAQQhKAAAAAEAAAAAAICAABA=</HashCode>
+      <FileName>Pash\Implementation\PSObjectPipelineReader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.CommandProcessor" Collapsed="true">
+    <Position X="6.5" Y="4.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAAAAAAAQIBASAABAAAAAAAAAAAABAIAAAAAAA=</HashCode>
+      <FileName>Pash\Implementation\CommandProcessor.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Management.Automation.PipelineCommandRuntime" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="20.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAIAgAADBAAQAAIQAAAAAAACFAgAAARAAAAAAA=</HashCode>
+      <FileName>Pash\Implementation\PipelineCommandRuntime.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Struct Name="System.Management.Automation.SwitchParameter" Collapsed="true">
+    <Position X="25.5" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAABAEgAAAAAAAAAAAQoAAAAAAAAAAAyA=</HashCode>
+      <FileName>Automation\SwitchParameter.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="System.Management.Automation.Host.BufferCell" Collapsed="true">
+    <Position X="16.75" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAAgAAAEgAAAAAAACAAAAIAAAAAAAAAACiA=</HashCode>
+      <FileName>Automation\Host\BufferCell.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="System.Management.Automation.Host.Coordinates" Collapsed="true">
+    <Position X="18.5" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEgAAAAAAAAAAAAIAAAAAAAAAAYiA=</HashCode>
+      <FileName>Automation\Host\Coordinates.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="System.Management.Automation.Host.KeyInfo" Collapsed="true">
+    <Position X="20.25" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAEgAAAAAAAAAAAAMAEAAAAAAAACiA=</HashCode>
+      <FileName>Automation\Host\KeyInfo.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="System.Management.Automation.Host.Rectangle" Collapsed="true">
+    <Position X="22" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEgAAQAAAAAAAIAIAACACAAAAAAiA=</HashCode>
+      <FileName>Automation\Host\Rectangle.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="System.Management.Automation.Host.Size" Collapsed="true">
+    <Position X="23.75" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAEgAAAAEAAAAAAAIAAAAAAAAAAAiA=</HashCode>
+      <FileName>Automation\Host\Size.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Interface Name="System.Management.Automation.IContainsErrorRecord" Collapsed="true">
+    <Position X="16.75" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\IContainsErrorRecord.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="System.Management.Automation.IResourceSupplier" Collapsed="true">
+    <Position X="23.75" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\IResourceSupplier.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="System.Management.Automation.Provider.IContentCmdletProvider" Collapsed="true">
+    <Position X="18.5" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAIAAMAAAAAAAAAAAAAQCAAA=</HashCode>
+      <FileName>Automation\Provider\IContentCmdletProvider.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="System.Management.Automation.Provider.IContentReader" Collapsed="true">
+    <Position X="20.25" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACAAAAAAgAAAAAAAAAAAAAACAAAA=</HashCode>
+      <FileName>Automation\Provider\IContentReader.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="System.Management.Automation.Provider.IContentWriter" Collapsed="true">
+    <Position X="22" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAGAAAA=</HashCode>
+      <FileName>Automation\Provider\IContentWriter.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="System.Management.Automation.Provider.IDynamicPropertyCmdletProvider" Collapsed="true">
+    <Position X="0.5" Y="15.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAgAAAAKAAIAAIAAAAAAAAAAAQAAARAAAAAACAAAA=</HashCode>
+      <FileName>Automation\Provider\IDynamicPropertyCmdletProvider.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="System.Management.Automation.Provider.IPropertyCmdletProvider" Collapsed="true">
+    <Position X="0.75" Y="14.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAEAAAAAAAACAAAAAAAAAAEAEAAAAQAAAAAAAAA=</HashCode>
+      <FileName>Automation\Provider\IPropertyCmdletProvider.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="System.Management.Automation.Provider.ISecurityDescriptorCmdletProvider" Collapsed="true">
+    <Position X="25.5" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAAAAAAAAAAAAABAAAAAAAQAAEAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\Provider\ISecurityDescriptorCmdletProvider.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="System.Management.Automation.CommandTypes" Collapsed="true">
+    <Position X="18.5" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABIAAAAAAAAAAAIAABAAAAEAAIAAAAAgIAA=</HashCode>
+      <FileName>Automation\CommandTypes.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="System.Management.Automation.ConfirmImpact" Collapsed="true">
+    <Position X="20.25" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAgAAAAAAAAAAAEEAAA=</HashCode>
+      <FileName>Automation\ConfirmImpact.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="System.Management.Automation.CopyContainers" Collapsed="true">
+    <Position X="23.75" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAgAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\CopyContainers.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="System.Management.Automation.ErrorCategory" Collapsed="true">
+    <Position X="25.5" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAiAAggAICAAAwAAEAIAADAARAAAgAIoBBgAEEwA=</HashCode>
+      <FileName>Automation\ErrorCategory.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="System.Management.Automation.ProgressRecordType" Collapsed="true">
+    <Position X="18.5" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAIAAAAAAAACAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\ProgressRecordType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="System.Management.Automation.PSCredentialTypes" Collapsed="true">
+    <Position X="22" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAYAAAAgAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\PSCredentialTypes.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="System.Management.Automation.PSCredentialUIOptions" Collapsed="true">
+    <Position X="23.75" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAYAAAAAAAQACAAAAAAAEAAAA=</HashCode>
+      <FileName>Automation\PSCredentialUIOptions.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="System.Management.Automation.PSMemberTypes" Collapsed="true">
+    <Position X="25.5" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAIAAAAAAAAgAAQAAABAAAAAAMAQBQACAEA=</HashCode>
+      <FileName>Automation\PSMemberTypes.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="System.Management.Automation.ReturnContainers" Collapsed="true">
+    <Position X="16.75" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>Automation\ReturnContainers.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="System.Management.Automation.ScopedItemOptions" Collapsed="true">
+    <Position X="18.5" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAEAAAAEAAAAAgAAAAIAAEAAAA=</HashCode>
+      <FileName>Automation\ScopedItemOptions.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="System.Management.Automation.ShouldProcessReason" Collapsed="true">
+    <Position X="20.25" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>Automation\ShouldProcessReason.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="System.Management.Automation.Host.BufferCellType" Collapsed="true">
+    <Position X="16.75" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAIAAAAAAAAAAEAAAAAAAAAAAAACAAA=</HashCode>
+      <FileName>Automation\Host\BufferCellType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="System.Management.Automation.Host.ControlKeyStates" Collapsed="true">
+    <Position X="22" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAIAAAAAAAAEAAAAABCAAAEgAAAAAgAABAA=</HashCode>
+      <FileName>Automation\Host\ControlKeyStates.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="System.Management.Automation.Host.ReadKeyOptions" Collapsed="true">
+    <Position X="27.25" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABQBAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Automation\Host\ReadKeyOptions.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="System.Management.Automation.Provider.ProviderCapabilities" Collapsed="true">
+    <Position X="20.25" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAAAAAAIACCAAAABAEAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>Automation\Provider\ProviderCapabilities.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="System.Management.Automation.Runspaces.PipelineResultTypes" Collapsed="true">
+    <Position X="27.25" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAAAAIAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>Automation\Runspaces\PipelineResultTypes.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="System.Management.Automation.Runspaces.PipelineState" Collapsed="true">
+    <Position X="16.75" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAIAAAIAAAAAAAAAAAAAAAAIABAAAAAAAAQ=</HashCode>
+      <FileName>Automation\Runspaces\PipelineState.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Tahoma" Size="8.25" />
+</ClassDiagram>

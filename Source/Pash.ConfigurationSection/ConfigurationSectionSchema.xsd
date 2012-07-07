@@ -1,0 +1,141 @@
+﻿<?xml version="1.0"?>
+<xs:schema xmlns:tns="http://pash.sourceforge.net/pash/configuration" elementFormDefault="qualified" targetNamespace="http://pash.sourceforge.net/pash/configuration" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="AliasElementCT">
+    <xs:sequence>
+    </xs:sequence>
+    <xs:attribute name="name" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The name.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="definition" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The definition.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="scope" use="optional" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The scope.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="VariableElementCT">
+    <xs:sequence>
+    </xs:sequence>
+    <xs:attribute name="name" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The name.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="type" use="optional" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The type.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="value" use="optional" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The value.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="scope" use="optional" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The scope.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:element name="defaultExecutionContext" type="tns:ExecutionContextConfigurationSectionCT" />
+  <xs:complexType name="ExecutionContextConfigurationSectionCT">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="psSnapins" type="tns:PSSnapinCollectionCT">
+        <xs:annotation>
+          <xs:documentation>The PSSnapins.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="functions" type="tns:FunctionsCollectionCT">
+        <xs:annotation>
+          <xs:documentation>The Functions.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="aliases" type="tns:AliasesCollectionCT">
+        <xs:annotation>
+          <xs:documentation>The Aliases.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="variables" type="tns:VariablesCollectionCT">
+        <xs:annotation>
+          <xs:documentation>The Variables.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="FunctionElementCT">
+    <xs:sequence>
+    </xs:sequence>
+    <xs:attribute name="name" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The name.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="type" use="optional" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The type.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="value" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The value.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="scope" use="optional" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The scope.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="FunctionsCollectionCT">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="function" type="tns:FunctionElementCT">
+        <xs:annotation>
+          <xs:documentation>The FunctionElement Configuration Element.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="AliasesCollectionCT">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="alias" type="tns:AliasElementCT">
+        <xs:annotation>
+          <xs:documentation>The AliasElement Configuration Element.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="VariablesCollectionCT">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="variable" type="tns:VariableElementCT">
+        <xs:annotation>
+          <xs:documentation>The VariableElement Configuration Element.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="PSSnapinCollectionCT">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="psSnapin" type="tns:PSSnapinElementCT">
+        <xs:annotation>
+          <xs:documentation>The PSSnapinElement Configuration Element.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="PSSnapinElementCT">
+    <xs:sequence>
+    </xs:sequence>
+    <xs:attribute name="type" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The type.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+</xs:schema>
+
