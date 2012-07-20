@@ -1,0 +1,26 @@
+;----------------------------------------------------------------------
+; Gold Parser engine.
+; See more details on http://www.devincook.com/goldparser/
+; 
+; Original code is written in VB by Devin Cook (GOLDParser@DevinCook.com)
+;
+; This translation is done by Vladimir Morozov (vmoroz@hotmail.com)
+; 
+; The translation is based on the other engine translations:
+; Delphi engine by Alexandre Rai (riccio@gmx.at)
+; C# engine by Marcus Klimstra (klimstra@home.nl)
+;----------------------------------------------------------------------
+
+;
+; This is list of resource strings for the GoldParser engine.
+;
+Grammar_WrongFileHeader=Wrong file header.
+Grammar_InvalidRecordType=Invalid record type.
+Grammar_NoEntry=No entry to read.
+Grammar_EmptyEntryExpected=Empty Entry Expected.
+Grammar_StringEntryExpected=String entry expected.
+Grammar_IntegerEntryExpected=Integer entry expected.
+Grammar_ByteEntryExpected=Byte entry expected.
+Grammar_BooleanEntryExpected=Boolean entry expected.
+Grammar_InvalidRecordHeader=Invalid record header.					
+
