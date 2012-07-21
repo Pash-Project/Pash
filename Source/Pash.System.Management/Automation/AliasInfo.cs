@@ -16,7 +16,7 @@ namespace System.Management.Automation
         public CommandInfo ReferencedCommand { get; private set; }
         public CommandInfo ResolvedCommand { get; private set; }
 
-        internal AliasInfo(string name, string definition, CommandManager cmdManager) 
+        internal AliasInfo(string name, string definition, CommandManager cmdManager)
             : this(name, definition, cmdManager, ScopedItemOptions.None)
         {
         }
@@ -24,7 +24,7 @@ namespace System.Management.Automation
         internal AliasInfo(string name, string definition, CommandManager cmdManager, ScopedItemOptions options)
             : base(name, CommandTypes.Alias)
         {
-            
+
             Options = options;
 
             SetDefinition(definition, cmdManager);

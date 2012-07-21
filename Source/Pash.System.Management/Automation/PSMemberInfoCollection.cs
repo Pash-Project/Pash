@@ -17,7 +17,7 @@ namespace System.Management.Automation
         public abstract ReadOnlyPSMemberInfoCollection<T> Match(string name);
         public abstract ReadOnlyPSMemberInfoCollection<T> Match(string name, PSMemberTypes memberTypes);
         public abstract void Remove(string name);
-        
+
         #region IEnumerable<T> Members
 
         public IEnumerator<T> GetEnumerator()

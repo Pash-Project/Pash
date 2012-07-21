@@ -9,7 +9,7 @@ namespace Microsoft.PowerShell.Commands
 
         public FunctionProviderDynamicParameters()
         {
-            
+
         }
 
         [Parameter]

@@ -15,12 +15,12 @@ namespace System.Management.Automation
             _sessionState = sessionState;
         }
 
-        public Collection<ProviderInfo> Get(string name) 
+        public Collection<ProviderInfo> Get(string name)
         {
             return _sessionState.GetProvidersByName(name);
         }
 
-        public IEnumerable<ProviderInfo> GetAll() 
+        public IEnumerable<ProviderInfo> GetAll()
         {
             return _sessionState.Providers;
         }

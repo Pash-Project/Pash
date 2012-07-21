@@ -6,7 +6,7 @@ namespace System.Management.Automation
     {
         protected PSInstaller()
         {
-            
+
         }
 
         public virtual void Install(IDictionary stateSaver)

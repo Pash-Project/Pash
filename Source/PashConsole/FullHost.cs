@@ -112,7 +112,7 @@ namespace Pash
 
             // Loop reading commands to execute until ShouldExit is set by
             // the user calling "exit".
-            while (! myHost.ShouldExit)
+            while (!myHost.ShouldExit)
             {
                 Prompt();
 
@@ -122,7 +122,7 @@ namespace Pash
                     continue;
 
                 // TODO: remove the cheat - control via script and ShouldExit
-                if (string.Compare(cmd.Trim(), "exit", true) ==  0)
+                if (string.Compare(cmd.Trim(), "exit", true) == 0)
                     break;
 
                 Execute(cmd);

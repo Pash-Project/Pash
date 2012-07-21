@@ -10,13 +10,13 @@ namespace System.Management.Automation.Runspaces
             Add(new Command(command));
         }
 
-        public void AddScript(string scriptContents) 
-        { 
+        public void AddScript(string scriptContents)
+        {
             Add(new Command(scriptContents, true));
         }
 
-        public void AddScript(string scriptContents, bool useLocalScope) 
-        { 
+        public void AddScript(string scriptContents, bool useLocalScope)
+        {
             Add(new Command(scriptContents, true, useLocalScope));
         }
 

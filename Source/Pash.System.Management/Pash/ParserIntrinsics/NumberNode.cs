@@ -25,7 +25,7 @@ namespace Pash.ParserIntrinsics
 
                 if (Text.StartsWith("0x"))
                     _value = Int32.Parse(Text.Substring(2), NumberStyles.HexNumber);
-                else 
+                else
                     _value = Int32.Parse(Text, NumberStyles.AllowHexSpecifier);
             }
 

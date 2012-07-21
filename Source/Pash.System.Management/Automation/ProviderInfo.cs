@@ -72,7 +72,7 @@ namespace System.Management.Automation
         {
             get
             {
-                if (! string.IsNullOrEmpty(PSSnapInName))
+                if (!string.IsNullOrEmpty(PSSnapInName))
                 {
                     return string.Format(@"{0}\{1}", PSSnapInName, Name);
                 }
@@ -88,7 +88,7 @@ namespace System.Management.Automation
             {
                 objProvider = Activator.CreateInstance(ImplementingType);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 outException = ex;
             }
@@ -96,7 +96,7 @@ namespace System.Management.Automation
             {
                 if (outException != null)
                 {
-                    throw new ProviderNotFoundException(Name, SessionStateCategory.CmdletProvider, "ProviderCtorException", outException.Message );
+                    throw new ProviderNotFoundException(Name, SessionStateCategory.CmdletProvider, "ProviderCtorException", outException.Message);
                 }
                 else
                 {
@@ -115,8 +115,8 @@ namespace System.Management.Automation
                 object[] customAttributes = type.GetCustomAttributes(typeof(CmdletProviderAttribute), false);
                 if ((customAttributes != null) && (customAttributes.Length == 1))
                 {
-                   CmdletProviderAttribute attribute = (CmdletProviderAttribute)customAttributes[0];
-                   return attribute.ProviderCapabilities;
+                    CmdletProviderAttribute attribute = (CmdletProviderAttribute)customAttributes[0];
+                    return attribute.ProviderCapabilities;
                 }
             }
             catch
@@ -134,7 +134,7 @@ namespace System.Management.Automation
 
         //internal bool IsMatch(WildcardPattern namePattern, PSSnapinQualifiedName psSnapinQualifiedName)
         //{
-            
+
         //}
     }
 }

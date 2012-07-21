@@ -40,15 +40,15 @@ namespace Microsoft.PowerShell.Commands
         [Parameter(ValueFromPipelineByPropertyName = true, ParameterSetName = "CmdletSet")]
         public string[] Verb { get; set; }
 
-        protected override void EndProcessing() 
+        protected override void EndProcessing()
         {
-            foreach(CommandInfo cmdInfo in ((LocalRunspace)LocalRunspace.DefaultRunspace).CommandManager.FindCommands("*"))
+            foreach (CommandInfo cmdInfo in ((LocalRunspace)LocalRunspace.DefaultRunspace).CommandManager.FindCommands("*"))
             {
                 WriteObject(cmdInfo);
             }
         }
 
-        protected override void ProcessRecord() 
+        protected override void ProcessRecord()
         {
             // TODO: apply wild cards
         }

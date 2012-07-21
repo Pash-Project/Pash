@@ -19,7 +19,7 @@ namespace System.Management.Automation
         //internal ProviderIntrinsics(SessionStateInternal sessionState);
 
         private InternalCommand _cmdlet;
-        
+
         internal ProviderIntrinsics(Cmdlet cmdlet)
         {
             if (cmdlet == null)

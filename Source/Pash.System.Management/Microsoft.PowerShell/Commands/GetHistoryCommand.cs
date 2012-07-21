@@ -14,7 +14,7 @@ namespace Microsoft.PowerShell.Commands
 
         public GetHistoryCommand()
         {
-            
+
         }
 
         protected override void ProcessRecord()

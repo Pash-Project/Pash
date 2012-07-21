@@ -34,11 +34,11 @@ namespace Microsoft.PowerShell.Commands
             // MUST: implement the InputObject binding in the pipe
             if ((InputObject == null) || (InputObject == AutomationNull.Value))
                 return;
-            
+
             string fullName;
-            
+
             // TODO: deal with Static
-            
+
             if (InputObject.TypeNames.Count != 0)
             {
                 fullName = this.InputObject.TypeNames[0];
@@ -48,7 +48,7 @@ namespace Microsoft.PowerShell.Commands
                 fullName = "<null>";
             }
 
-            if (! _membersCollection.Contains(fullName))
+            if (!_membersCollection.Contains(fullName))
             {
                 _membersCollection.Add(fullName, "");
 
@@ -58,11 +58,11 @@ namespace Microsoft.PowerShell.Commands
 
                     // TODO: deal with Static members
                     infos = InputObject.Members.Match(name, this.MemberType);
-                    
+
                     List<MemberDefinition> members = new List<MemberDefinition>();
                     foreach (PSMemberInfo info in infos)
                     {
-                        members.Add( new MemberDefinition(fullName, info.Name, info.MemberType, info.ToString()) );
+                        members.Add(new MemberDefinition(fullName, info.Name, info.MemberType, info.ToString()));
                     }
 
                     members.Sort((def1, def2) =>

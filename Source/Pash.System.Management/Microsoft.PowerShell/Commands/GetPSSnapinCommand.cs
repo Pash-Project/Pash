@@ -13,7 +13,7 @@ namespace Microsoft.PowerShell.Commands
 
         public GetPSSnapinCommand()
         {
-            
+
         }
 
         protected override void BeginProcessing()

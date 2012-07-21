@@ -64,9 +64,9 @@ namespace System.Management.Automation
 
         public virtual PSObject Copy() { throw new NotImplementedException(); }
 
-        public override bool Equals(object obj) 
+        public override bool Equals(object obj)
         {
-            return ImmediateBaseObject.Equals(obj); 
+            return ImmediateBaseObject.Equals(obj);
         }
 
         public override int GetHashCode()

@@ -10,15 +10,18 @@ namespace System.Management.Automation
         {
         }
 
-        public ItemNotFoundException(string message) : base(message)
+        public ItemNotFoundException(string message)
+            : base(message)
         {
         }
 
-        protected ItemNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context)
+        protected ItemNotFoundException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
 
-        public ItemNotFoundException(string message, Exception innerException) : base(message, innerException)
+        public ItemNotFoundException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
     }

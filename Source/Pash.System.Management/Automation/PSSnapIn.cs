@@ -6,7 +6,7 @@ namespace System.Management.Automation
     {
         protected PSSnapIn()
         {
-            
+
         }
 
         public virtual string[] Formats { get { return null; } }

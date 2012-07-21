@@ -31,7 +31,7 @@ namespace Pash.ParserIntrinsics
         {
             ExecutionContext nestedContext = context.CreateNestedContext();
 
-            if (! (context.CurrentRunspace is LocalRunspace))
+            if (!(context.CurrentRunspace is LocalRunspace))
                 throw new InvalidOperationException("Invalid context");
 
             // MUST: fix this with the commandRuntime

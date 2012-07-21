@@ -4,7 +4,7 @@ namespace Microsoft.PowerShell.Commands
     {
         public FileSystemContentWriterDynamicParameters()
         {
-            
+
         }
     }
 }

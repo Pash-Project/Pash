@@ -32,7 +32,7 @@ namespace Pash.ParserIntrinsics
                     pipeline.Insert(0, objLeft as ASTNode);
                 }
             }
-            
+
             if (pipeline == null)
             {
                 pipeline = new PipelineNode(theParser);
@@ -79,7 +79,7 @@ namespace Pash.ParserIntrinsics
                 ASTNode node = Pipeline[i];
                 sb.Append(node.ToString());
 
-                if (i+1 != Pipeline.Count)
+                if (i + 1 != Pipeline.Count)
                     sb.Append(" | ");
             }
             return sb.ToString();

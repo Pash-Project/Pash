@@ -14,12 +14,12 @@ namespace System.Management.Automation.Runspaces
 
         public Command(string command)
             : this(command, false, false)
-        { 
+        {
         }
 
-        public Command(string command, bool isScript) 
+        public Command(string command, bool isScript)
             : this(command, isScript, false)
-        { 
+        {
         }
 
         public Command(string command, bool isScript, bool useLocalScope)
@@ -37,7 +37,7 @@ namespace System.Management.Automation.Runspaces
             MergeMyResult = myResult;
             MergeToResult = toResult;
         }
-        
+
         public override string ToString()
         {
             return CommandText;

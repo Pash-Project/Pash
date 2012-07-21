@@ -15,7 +15,7 @@ namespace Microsoft.PowerShell.Commands
 
         public RemovePSSnapinCommand()
         {
-            
+
         }
 
         protected override void ProcessRecord()

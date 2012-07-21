@@ -35,10 +35,10 @@ namespace System.Management.Automation
             ParameterSets = GetParameterSetInfo(implementingType);
         }
 
-        public override string Definition 
-        { 
-            get 
-            { 
+        public override string Definition
+        {
+            get
+            {
                 StringBuilder str = new StringBuilder();
                 foreach (CommandParameterSetInfo pSet in ParameterSets)
                 {
@@ -46,7 +46,7 @@ namespace System.Management.Automation
                 }
 
                 return str.ToString();
-            } 
+            }
         }
 
         // internals
@@ -95,7 +95,7 @@ namespace System.Management.Automation
                 {
                     if (attr is ParameterAttribute)
                     {
-                        paramAttr = (ParameterAttribute) attr;
+                        paramAttr = (ParameterAttribute)attr;
                         break;
                     }
                 }
@@ -123,11 +123,11 @@ namespace System.Management.Automation
 
             // TODO: find the name of the default param set
             string strDefaultParameterSetName = ParameterAttribute.AllParameterSets;
-            object[] cmdLetAttrs = cmdletType.GetCustomAttributes(typeof (CmdletAttribute), false);
+            object[] cmdLetAttrs = cmdletType.GetCustomAttributes(typeof(CmdletAttribute), false);
             if (cmdLetAttrs.Length > 0)
                 strDefaultParameterSetName = ((CmdletAttribute)cmdLetAttrs[0]).DefaultParameterSetName ?? strDefaultParameterSetName;
 
-            foreach(string paramSetName in paramSets.Keys)
+            foreach (string paramSetName in paramSets.Keys)
             {
                 bool bIsDefaultParamSet = paramSetName == strDefaultParameterSetName;
 

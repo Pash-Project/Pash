@@ -10,7 +10,8 @@ namespace System.Management.Automation
         public override string ToString() { return Definition; }
 
         // internals
-        internal ScriptInfo(string name, ScriptBlock script) : base(name, CommandTypes.Script)
+        internal ScriptInfo(string name, ScriptBlock script)
+            : base(name, CommandTypes.Script)
         {
             ScriptBlock = script;
         }

@@ -41,7 +41,7 @@ namespace Microsoft.PowerShell.Commands
             }
             try
             {
-                SessionState.SessionStateGlobal.NewVariable(variable, (bool) this.Force);
+                SessionState.SessionStateGlobal.NewVariable(variable, (bool)this.Force);
             }
             catch (Exception ex)
             {

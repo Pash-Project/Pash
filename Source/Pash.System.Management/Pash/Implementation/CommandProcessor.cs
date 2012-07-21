@@ -14,7 +14,8 @@ namespace System.Management.Automation
         private CmdletInfo _cmdletInfo;
         private bool _beganProcessing;
 
-        public CommandProcessor(CmdletInfo cmdletInfo) : base(cmdletInfo)
+        public CommandProcessor(CmdletInfo cmdletInfo)
+            : base(cmdletInfo)
         {
             _cmdletInfo = cmdletInfo;
             _beganProcessing = false;
@@ -64,7 +65,7 @@ namespace System.Management.Automation
             if (Parameters.Count > 0)
             {
                 // bind by position location
-                for (int i = 0; i < Parameters.Count; i++ )
+                for (int i = 0; i < Parameters.Count; i++)
                 {
                     CommandParameterInfo paramInfo = null;
 
@@ -84,7 +85,7 @@ namespace System.Management.Automation
                                 PSObject[] arr = new PSObject[] { PSObject.AsPSObject(Parameters[i].Value) };
                                 pi.SetValue(Command, arr, null);
                             }
-                            else if(pi.PropertyType == typeof(String[]))
+                            else if (pi.PropertyType == typeof(String[]))
                             {
                                 String[] arr = new String[] { Parameters[i].Value.ToString() };
                                 pi.SetValue(Command, arr, null);

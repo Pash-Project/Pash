@@ -11,9 +11,9 @@ namespace System.Management.Automation
         protected SessionStateException(SerializationInfo info, StreamingContext context) { throw new NotImplementedException(); }
         public SessionStateException(string message, Exception innerException) { throw new NotImplementedException(); }
         internal SessionStateException(string itemName, SessionStateCategory sessionStateCategory, string errorIdAndResourceId, ErrorCategory errorCategory, params object[] messageArgs)
-            { throw new NotImplementedException(); }
+        { throw new NotImplementedException(); }
         private static string BuildMessage(string itemName, string resourceId, params object[] messageArgs)
-            { throw new NotImplementedException(); }
+        { throw new NotImplementedException(); }
 
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -26,6 +26,6 @@ namespace System.Management.Automation
         public SessionStateCategory SessionStateCategory { get { throw new NotImplementedException(); } }
     }
 
- 
+
 
 }

@@ -18,7 +18,7 @@ namespace Microsoft.Commands.Management
                 return "This PSSnapIn contains general management cmdlets used to manage Windows components.";
             }
         }
- 
+
         public override string DescriptionResource { get { throw new NotImplementedException(); } }
 
         public override string Name

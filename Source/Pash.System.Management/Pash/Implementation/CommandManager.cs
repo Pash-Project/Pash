@@ -26,7 +26,8 @@ namespace Pash.Implementation
         internal Collection<SnapinProviderPair> _providers;
         private ExecutionContext _context;
 
-        public CommandManager() : this(null)
+        public CommandManager()
+            : this(null)
         {
         }
 
@@ -272,9 +273,9 @@ namespace Pash.Implementation
 
                 foreach (Type type in assembly.GetTypes())
                 {
-                    if (type.IsSubclassOf(typeof (Cmdlet)))
+                    if (type.IsSubclassOf(typeof(Cmdlet)))
                     {
-                        foreach (CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof (CmdletAttribute), true))
+                        foreach (CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof(CmdletAttribute), true))
                         {
                             CmdletInfo cmdletInfo =
                                 new CmdletInfo(cmdletAttribute.ToString(), type, null, snapinInfo, _context);
@@ -287,7 +288,8 @@ namespace Pash.Implementation
                     {
                         foreach (CmdletProviderAttribute providerAttr in type.GetCustomAttributes(typeof(CmdletProviderAttribute), true))
                         {
-                            providers.Add(new SnapinProviderPair() {
+                            providers.Add(new SnapinProviderPair()
+                            {
                                 snapinInfo = snapinInfo,
                                 providerType = type,
                                 providerAttr = providerAttr
@@ -297,7 +299,7 @@ namespace Pash.Implementation
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Trace.WriteLine(ex.ToString());
             }
@@ -305,6 +307,6 @@ namespace Pash.Implementation
             return collection;
         }
     }
- 
+
 
 }

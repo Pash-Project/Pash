@@ -11,7 +11,8 @@ namespace Pash.ParserIntrinsics
     {
         private ASTNode nodeValue;
 
-        public ValueOfNode(Parser parser) : base(parser)
+        public ValueOfNode(Parser parser)
+            : base(parser)
         {
             nodeValue = Node(parser, 1);
         }

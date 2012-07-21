@@ -56,7 +56,7 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void EndProcessing()
         {
-            foreach(string name in Name)
+            foreach (string name in Name)
             {
                 foreach (object value in _values)
                 {

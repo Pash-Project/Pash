@@ -48,7 +48,7 @@ namespace System.Management.Automation
         internal PSMemberSet(string name, PSObject obj)
             : this(name)
         {
-            
+
         }
 
         public override PSMemberInfo Copy()

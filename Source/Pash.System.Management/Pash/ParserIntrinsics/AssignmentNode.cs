@@ -33,7 +33,7 @@ namespace Pash.ParserIntrinsics
             {
                 VariableNode varNode = (VariableNode)lValue;
 
-                if (! (context.CurrentRunspace is LocalRunspace))
+                if (!(context.CurrentRunspace is LocalRunspace))
                     throw new InvalidOperationException("Invalid context");
 
                 // MUST: fix this with the commandRuntime

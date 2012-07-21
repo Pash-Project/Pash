@@ -6,7 +6,7 @@ namespace System.Management.Automation
     {
         protected PSSnapInInstaller()
         {
-            
+
         }
 
         public abstract string Description { get; }

@@ -26,19 +26,19 @@ namespace Pash.ParserIntrinsics
         {
             if ((lValue is NumberNode) && (rValue is NumberNode))
             {
-                int lNum = (int)((NumberNode) lValue).GetValue(context);
-                int rNum = (int)((NumberNode) rValue).GetValue(context);
+                int lNum = (int)((NumberNode)lValue).GetValue(context);
+                int rNum = (int)((NumberNode)rValue).GetValue(context);
 
                 if (lNum <= rNum)
                 {
-                    for(; lNum <= rNum; lNum++)
+                    for (; lNum <= rNum; lNum++)
                     {
                         commandRuntime.WriteObject(lNum);
                     }
                 }
                 else
                 {
-                    for(;lNum >= rNum; lNum--)
+                    for (; lNum >= rNum; lNum--)
                     {
                         commandRuntime.WriteObject(lNum);
                     }

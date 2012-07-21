@@ -7,7 +7,7 @@ namespace System.Management.Automation
     {
         protected ValidateEnumeratedArgumentsAttribute()
         {
-            
+
         }
 
         protected sealed override void Validate(object arguments, EngineIntrinsics engineIntrinsics)

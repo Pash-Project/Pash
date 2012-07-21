@@ -59,7 +59,7 @@ namespace Pash.Implementation
                 Collection<ProviderInfo> collection = new Collection<ProviderInfo>();
                 foreach (List<ProviderInfo> list in _providers.Values)
                 {
-                    foreach(ProviderInfo info in list)
+                    foreach (ProviderInfo info in list)
                     {
                         collection.Add(info);
                     }
@@ -211,7 +211,7 @@ namespace Pash.Implementation
                 // Traverse all the available drives and choose the "Fixed" one
                 foreach (PSDriveInfo drive in drives)
                 {
-                    if (! drive.RemovableDrive)
+                    if (!drive.RemovableDrive)
                     {
                         _currentDrive = drive;
                         break;
@@ -259,7 +259,7 @@ namespace Pash.Implementation
             // TODO: deal with scopes
 
             RemoveVariable(variable);
-        
+
             _variables.Add(variable.Name, variable);
 
             return variable;
@@ -271,7 +271,7 @@ namespace Pash.Implementation
 
             if (variable != null)
                 RemoveVariable(variable);
-            
+
             variable = new PSVariable(name, value);
 
             _variables.Add(variable.Name, variable);
@@ -341,7 +341,7 @@ namespace Pash.Implementation
         #region DriveManagementIntrinsics
         internal PSDriveInfo GetDrive(string driveName, string scope)
         {
-            if (! _drives.ContainsKey(driveName))
+            if (!_drives.ContainsKey(driveName))
                 return null;
 
             return _drives[driveName];
@@ -446,14 +446,14 @@ namespace Pash.Implementation
         internal IDictionary GetVariables()
         {
             Dictionary<string, PSVariable> dictionary = new Dictionary<string, PSVariable>(StringComparer.OrdinalIgnoreCase);
-            foreach (DictionaryEntry entry in _variables )
+            foreach (DictionaryEntry entry in _variables)
             {
                 if (dictionary.ContainsKey((string)entry.Key))
                 {
                     continue;
                 }
                 PSVariable variable = (PSVariable)entry.Value;
-                if (! variable.IsPrivate)
+                if (!variable.IsPrivate)
                 {
                     dictionary.Add((string)entry.Key, (PSVariable)entry.Value);
                 }
@@ -604,7 +604,7 @@ namespace Pash.Implementation
             _currentDrive.CurrentLocation = path;
 
             _providersCurrentDrive[CurrentDrive.Provider] = CurrentDrive;
-            
+
             SetVariable("PWD", CurrentLocation);
             return CurrentLocation;
 

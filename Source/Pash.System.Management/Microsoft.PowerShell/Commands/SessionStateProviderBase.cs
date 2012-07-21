@@ -73,7 +73,7 @@ namespace Microsoft.PowerShell.Commands
         {
             if (item is DictionaryEntry)
             {
-                return ((DictionaryEntry) item).Value;
+                return ((DictionaryEntry)item).Value;
             }
             return item;
         }

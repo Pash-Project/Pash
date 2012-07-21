@@ -78,7 +78,7 @@ namespace Microsoft.PowerShell.Commands
                 {
                     process = Process.GetProcessById(id);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WriteError(new ErrorRecord(ex, "", ErrorCategory.InvalidOperation, id));
                     return foundProcesses;
@@ -155,7 +155,7 @@ namespace Microsoft.PowerShell.Commands
             {
                 return process.ProcessName;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.ToString());
                 return "";
@@ -185,6 +185,6 @@ namespace Microsoft.PowerShell.Commands
             {
                 System.Diagnostics.Debug.WriteLine(ex.ToString());
             }
-        } 
+        }
     }
 }

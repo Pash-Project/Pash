@@ -11,8 +11,8 @@ namespace System.Management.Automation
         protected abstract void Validate(object arguments, EngineIntrinsics engineIntrinsics);
 
         // internals
-        internal void InternalValidate(object o, EngineIntrinsics engineIntrinsics) 
-        { 
+        internal void InternalValidate(object o, EngineIntrinsics engineIntrinsics)
+        {
             Validate(o, engineIntrinsics);
         }
     }

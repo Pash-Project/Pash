@@ -34,7 +34,7 @@ namespace Pash.Implementation
         public Array Execute(ExecutionContext context)
         {
             PSObject psObjectCurrent = context.inputStreamReader.Read();
-            Collection<PSObject> dataCollection = new Collection<PSObject>() { psObjectCurrent} ;
+            Collection<PSObject> dataCollection = new Collection<PSObject>() { psObjectCurrent };
 
             do
             {
@@ -71,7 +71,7 @@ namespace Pash.Implementation
 
             object[] dataResult = new object[dataCollection.Count];
             int index = 0;
-            foreach(PSObject obj in dataCollection)
+            foreach (PSObject obj in dataCollection)
                 dataResult[index++] = obj;
 
             return dataResult;

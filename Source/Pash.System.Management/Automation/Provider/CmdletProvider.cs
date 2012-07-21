@@ -128,7 +128,7 @@ namespace System.Management.Automation.Provider
                     parentPath = provider.GetParentPath(path, PSDriveInfo.Root, ProviderRuntime);
                 }
 
-                if (! string.IsNullOrEmpty(parentPath))
+                if (!string.IsNullOrEmpty(parentPath))
                 {
                     parentPath = PathIntrinsics.GetFullProviderPath(ProviderInfo, parentPath);
                 }

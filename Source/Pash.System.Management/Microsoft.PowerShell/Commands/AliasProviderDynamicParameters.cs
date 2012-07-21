@@ -9,7 +9,7 @@ namespace Microsoft.PowerShell.Commands
 
         public AliasProviderDynamicParameters()
         {
-            
+
         }
 
         [Parameter]
@@ -26,6 +26,6 @@ namespace Microsoft.PowerShell.Commands
             }
         }
 
-        internal bool OptionsSet { get { return _optionsSet;  } }
+        internal bool OptionsSet { get { return _optionsSet; } }
     }
 }

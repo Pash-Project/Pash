@@ -7,7 +7,7 @@ namespace System.Management.Automation
     {
         public ValidateNotNullOrEmptyAttribute() { }
 
-        protected override void Validate(object arguments, EngineIntrinsics engineIntrinsics) 
+        protected override void Validate(object arguments, EngineIntrinsics engineIntrinsics)
         {
             // TODO: implement argument validation
         }

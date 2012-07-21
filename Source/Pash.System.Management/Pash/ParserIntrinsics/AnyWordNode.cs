@@ -21,12 +21,12 @@ namespace Pash.ParserIntrinsics
 
         internal override object GetValue(ExecutionContext context)
         {
-            if (! _bExecuted)
+            if (!_bExecuted)
             {
-                if (! (context.CurrentRunspace is LocalRunspace))
+                if (!(context.CurrentRunspace is LocalRunspace))
                     throw new InvalidOperationException(string.Format("Command \"{0}\" was not found.", Text));
 
-                CommandManager cmdMgr = ((LocalRunspace) context.CurrentRunspace).CommandManager;
+                CommandManager cmdMgr = ((LocalRunspace)context.CurrentRunspace).CommandManager;
 
                 CommandInfo cmdInfo = cmdMgr.FindCommand(Text);
 

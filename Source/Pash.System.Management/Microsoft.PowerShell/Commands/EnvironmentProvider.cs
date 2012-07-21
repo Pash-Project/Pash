@@ -60,7 +60,7 @@ namespace Microsoft.PowerShell.Commands
             {
                 if (value is DictionaryEntry)
                 {
-                    value = ((DictionaryEntry) value).Value;
+                    value = ((DictionaryEntry)value).Value;
                 }
                 string str = value as string;
                 if (str == null)

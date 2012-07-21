@@ -4,7 +4,7 @@ using System.Management.Automation.Internal;
 using System.Resources;
 using System.Collections;
 using System.Threading;
-using ExecutionContext=Pash.Implementation.ExecutionContext;
+using ExecutionContext = Pash.Implementation.ExecutionContext;
 
 namespace System.Management.Automation
 {
@@ -52,10 +52,10 @@ namespace System.Management.Automation
             yield return GetResults();
         }
 
-        public IEnumerable<T> Invoke<T>() 
+        public IEnumerable<T> Invoke<T>()
         {
             // TODO: implement Invoke<T>
-            throw new NotImplementedException(); 
+            throw new NotImplementedException();
         }
 
         protected virtual void ProcessRecord()
@@ -160,9 +160,9 @@ namespace System.Management.Automation
             }
             CommandRuntime.WriteError(errorRecord);
         }
-        
+
         public void WriteObject(object sendToPipeline)
-        { 
+        {
             if (CommandRuntime == null)
             {
                 throw new NotImplementedException("WriteObject");
@@ -205,8 +205,8 @@ namespace System.Management.Automation
             }
             CommandRuntime.WriteVerbose(text);
         }
-        
-        public void WriteWarning(string text) 
+
+        public void WriteWarning(string text)
         {
             if (CommandRuntime == null)
             {

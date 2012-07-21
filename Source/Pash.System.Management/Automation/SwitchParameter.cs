@@ -11,17 +11,17 @@ namespace System.Management.Automation
 
         public static bool operator !=(bool first, SwitchParameter second)
         {
-            return ! (first == second);
+            return !(first == second);
         }
 
         public static bool operator !=(SwitchParameter first, bool second)
         {
-            return  ! first.Equals(second);
+            return !first.Equals(second);
         }
 
         public static bool operator !=(SwitchParameter first, SwitchParameter second)
         {
-            return ! first.Equals(second);
+            return !first.Equals(second);
         }
 
         public static bool operator ==(bool first, SwitchParameter second)
@@ -65,7 +65,7 @@ namespace System.Management.Automation
 
         public override bool Equals(object obj)
         {
-            return IsPresent == (bool) obj;
+            return IsPresent == (bool)obj;
         }
 
         public override int GetHashCode()

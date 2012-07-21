@@ -14,7 +14,7 @@ namespace System.Management.Automation
         }
 
         public PathInfo CurrentFileSystemLocation { get; private set; }
-        public PathInfo CurrentLocation { get { return _sessionState.CurrentLocation;  } }
+        public PathInfo CurrentLocation { get { return _sessionState.CurrentLocation; } }
 
         public string Combine(string parent, string child)
         {
@@ -173,12 +173,12 @@ namespace System.Management.Automation
             {
                 return false;
             }
-            
+
             if (path.StartsWith("."))
             {
                 return false;
             }
-            
+
             int index = path.IndexOf(":", StringComparison.CurrentCulture);
 
             if (index > 0)
@@ -202,7 +202,7 @@ namespace System.Management.Automation
 
             if (index > 0)
             {
-                index ++;
+                index++;
                 return path.Substring(index, path.Length - index);
             }
 
@@ -233,7 +233,7 @@ namespace System.Management.Automation
                 }
             }
 
-            if (! hasProviderName)
+            if (!hasProviderName)
             {
                 fullPath = string.Format("{0}::{1}", provider.FullName, path);
             }

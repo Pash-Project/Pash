@@ -90,10 +90,10 @@ namespace Pash.ParserIntrinsics
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            for (int i=0; i<Params.Count; i++)
+            for (int i = 0; i < Params.Count; i++)
             {
                 sb.Append(Params[i]);
-                if (i+1 != Params.Count)
+                if (i + 1 != Params.Count)
                     sb.Append(' ');
             }
             return sb.ToString();

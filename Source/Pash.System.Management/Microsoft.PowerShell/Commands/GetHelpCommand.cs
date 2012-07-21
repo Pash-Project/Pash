@@ -44,7 +44,7 @@ namespace Microsoft.PowerShell.Commands
 
         public GetHelpCommand()
         {
-            
+
         }
 
         protected override void ProcessRecord()

@@ -70,7 +70,7 @@ namespace Pash.Implementation
             // TODO: create a new pipeline and replace the current one with it
             if (pipeline is LocalPipeline)
             {
-                ((LocalPipeline) pipeline).RerouteExecutionContext(this);
+                ((LocalPipeline)pipeline).RerouteExecutionContext(this);
             }
 
         }

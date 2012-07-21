@@ -5,7 +5,7 @@ namespace System.Management.Automation
     {
         public ValidateNotNullAttribute()
         {
-            
+
         }
 
         protected override void Validate(object arguments, EngineIntrinsics engineIntrinsics)

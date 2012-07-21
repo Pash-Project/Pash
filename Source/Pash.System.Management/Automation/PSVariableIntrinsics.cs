@@ -12,17 +12,17 @@ namespace System.Management.Automation
             _sessionState = sessionState;
         }
 
-        public PSVariable Get(string name) 
+        public PSVariable Get(string name)
         {
             return _sessionState.GetVariable(name);
         }
 
-        public object GetValue(string name) 
+        public object GetValue(string name)
         {
             return _sessionState.GetVariableValue(name);
         }
 
-        public object GetValue(string name, object defaultValue) 
+        public object GetValue(string name, object defaultValue)
         {
             return _sessionState.GetVariableValue(name, defaultValue);
         }

@@ -68,7 +68,7 @@ namespace Microsoft.PowerShell.Commands
                 {
                     PSVariable var = new PSVariable(name, variable.Value, variable.Options, variable.Attributes);
                     var.Description = variable.Description;
-                    variable = var  ;
+                    variable = var;
                 }
             }
             else

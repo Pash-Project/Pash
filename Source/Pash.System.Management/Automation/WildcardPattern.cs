@@ -28,7 +28,7 @@ namespace System.Management.Automation
             }
 
             // TODO: deal with '[' & ']'
-            return pattern.IndexOfAny(new char[] {'?', '*'}) != -1;
+            return pattern.IndexOfAny(new char[] { '?', '*' }) != -1;
         }
 
         public static string Escape(string pattern) { throw new NotImplementedException(); }

@@ -70,9 +70,9 @@ namespace Pash.Implementation
         #region LowLevel UI interface
         public override PSHostRawUserInterface RawUI
         {
-            get 
-            { 
-                return new LocalHostRawUserInterface(); 
+            get
+            {
+                return new LocalHostRawUserInterface();
                 // TODO: why is it soo slow with the default Raw UI?
                 //return null;
             }
@@ -109,7 +109,7 @@ namespace Pash.Implementation
 
             // Just ignore the colors...
             Console.Write(value);
-            
+
             // Restore colors
             Console.ForegroundColor = foreColor;
             Console.BackgroundColor = backColor;

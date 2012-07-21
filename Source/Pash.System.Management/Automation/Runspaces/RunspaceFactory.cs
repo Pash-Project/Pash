@@ -7,7 +7,7 @@ namespace System.Management.Automation.Runspaces
     {
         public static RunspaceConfiguration DefaultRunspaceConfiguration
         {
-            get { return new LocalRunspaceConfiguration();  }
+            get { return new LocalRunspaceConfiguration(); }
         }
 
         public static Runspace CreateRunspace()
@@ -15,7 +15,7 @@ namespace System.Management.Automation.Runspaces
             return CreateRunspace(DefaultRunspaceConfiguration);
         }
 
-        public static Runspace CreateRunspace(PSHost host) 
+        public static Runspace CreateRunspace(PSHost host)
         {
             return CreateRunspace(host, DefaultRunspaceConfiguration);
         }

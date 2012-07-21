@@ -17,7 +17,7 @@ namespace Microsoft.PowerShell.Commands
             if ((providerNames == null) || (providerNames.Length == 0))
             {
                 // TODO: make sure to find the drive names via patterns
-                providerNames = new string[] {""};
+                providerNames = new string[] { "" };
             }
             foreach (string str in providerNames)
             {

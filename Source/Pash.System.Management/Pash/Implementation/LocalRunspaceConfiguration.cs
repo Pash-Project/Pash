@@ -4,6 +4,6 @@ namespace Pash.Implementation
 {
     public class LocalRunspaceConfiguration : RunspaceConfiguration
     {
-        
+
     }
 }

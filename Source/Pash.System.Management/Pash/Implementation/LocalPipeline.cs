@@ -10,7 +10,7 @@ namespace Pash.Implementation
 {
     internal class LocalPipeline : Pipeline
     {
-        private ObjectStream _inputStream; 
+        private ObjectStream _inputStream;
         private ObjectStream _outputStream;
         private ObjectStream _errorStream;
         private ObjectStreamWriter _inputPipelineWriter;
@@ -31,7 +31,7 @@ namespace Pash.Implementation
             _errorPipelineReader = new ObjectPipelineReader(_errorStream);
             _pipelineStateInfo = new PipelineStateInfo(PipelineState.NotStarted);
 
-            if (! string.IsNullOrEmpty(command))
+            if (!string.IsNullOrEmpty(command))
                 Commands.Add(command);
         }
 
@@ -42,9 +42,9 @@ namespace Pash.Implementation
 
         public override PipelineReader<object> Error
         {
-            get 
-            { 
-                return _errorPipelineReader; 
+            get
+            {
+                return _errorPipelineReader;
             }
         }
 
@@ -60,16 +60,16 @@ namespace Pash.Implementation
 
         public override PipelineReader<PSObject> Output
         {
-            get 
-            { 
-                return _outputPipelineReader; 
+            get
+            {
+                return _outputPipelineReader;
             }
         }
 
         public override PipelineStateInfo PipelineStateInfo
         {
-            get 
-            { 
+            get
+            {
                 return _pipelineStateInfo;
             }
         }
@@ -89,9 +89,9 @@ namespace Pash.Implementation
 
         public override Runspace Runspace
         {
-            get 
-            { 
-                return _runspace; 
+            get
+            {
+                return _runspace;
             }
         }
 
@@ -136,7 +136,7 @@ namespace Pash.Implementation
                 processor.Execute(context);
                 SetPipelineState(PipelineState.Completed);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 SetPipelineState(PipelineState.Failed, ex);
 

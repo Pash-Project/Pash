@@ -5,7 +5,7 @@ namespace System.Management.Automation.Runspaces
 {
     public abstract class RunspaceConfiguration
     {
-        protected RunspaceConfiguration() 
+        protected RunspaceConfiguration()
         {
             // TODO: associate the RunspaceConfiguration with the config file
             Scripts = new RunspaceConfigurationEntryCollection<ScriptConfigurationEntry>();

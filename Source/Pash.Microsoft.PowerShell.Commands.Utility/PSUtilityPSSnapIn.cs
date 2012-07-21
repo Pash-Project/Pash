@@ -19,7 +19,7 @@ namespace Microsoft.PowerShell
             }
         }
 
-        public override string DescriptionResource { get { throw  new NotImplementedException(); } }
+        public override string DescriptionResource { get { throw new NotImplementedException(); } }
 
         public override string Name
         {

@@ -10,6 +10,6 @@ namespace System.Management.Automation
         protected ProviderNotFoundException(SerializationInfo info, StreamingContext context) { throw new NotImplementedException(); }
         public ProviderNotFoundException(string message, Exception innerException) { throw new NotImplementedException(); }
         internal ProviderNotFoundException(string itemName, SessionStateCategory sessionStateCategory, string errorIdAndResourceId, params object[] messageArgs)
-            { throw new NotImplementedException(); }
+        { throw new NotImplementedException(); }
     }
 }

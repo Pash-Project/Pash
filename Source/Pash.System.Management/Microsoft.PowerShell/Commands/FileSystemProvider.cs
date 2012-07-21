@@ -64,7 +64,7 @@ namespace Microsoft.PowerShell.Commands
             {
                 directories = directory.GetDirectories();
             }
-            
+
             // Get all the location-related items
             list.AddRange(directory.GetDirectories());
             list.AddRange(directory.GetFiles());
@@ -118,7 +118,7 @@ namespace Microsoft.PowerShell.Commands
         {
             throw new NotImplementedException();
         }
-        
+
         protected override void GetItem(string path)
         {
             bool isContainer = false;
@@ -131,7 +131,7 @@ namespace Microsoft.PowerShell.Commands
             string parentPath = base.GetParentPath(path, root);
 
             // TODO: deal with UNC
-            if (! path.StartsWith("\\\\")) // UNC?
+            if (!path.StartsWith("\\\\")) // UNC?
             {
                 parentPath = MakeSlashedPath(parentPath);
             }
@@ -150,7 +150,7 @@ namespace Microsoft.PowerShell.Commands
         }
 
         protected override bool HasChildItems(string path) { throw new NotImplementedException(); }
-        
+
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
             Collection<PSDriveInfo> collection = new Collection<PSDriveInfo>();
@@ -238,7 +238,7 @@ namespace Microsoft.PowerShell.Commands
                 {
                     return (ItemExists(drive.Root) && IsItemContainer(drive.Root)) ? drive : null;
                 }
-                
+
                 return drive;
             }
             catch

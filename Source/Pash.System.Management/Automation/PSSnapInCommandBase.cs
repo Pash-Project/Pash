@@ -8,7 +8,7 @@ namespace Microsoft.PowerShell.Commands
     {
         protected PSSnapInCommandBase()
         {
-            
+
         }
 
         #region IDisposable Members

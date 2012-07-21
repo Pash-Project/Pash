@@ -10,14 +10,14 @@
 
 namespace Pash.Configuration
 {
-    
-    
+
+
     /// <summary>
     /// The AliasElement Configuration Element.
     /// </summary>
     public partial class AliasElement : global::System.Configuration.ConfigurationElement
     {
-        
+
         #region IsReadOnly override
         /// <summary>
         /// Gets a value indicating whether the element is read-only.
@@ -28,21 +28,21 @@ namespace Pash.Configuration
             return false;
         }
         #endregion
-        
+
         #region name Property
         /// <summary>
         /// The XML name of the <see cref="name"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string namePropertyName = "name";
-        
+
         /// <summary>
         /// Gets the name.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         [global::System.ComponentModel.DescriptionAttribute("The name.")]
         [global::System.ComponentModel.ReadOnlyAttribute(true)]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.AliasElement.namePropertyName, IsRequired=true, IsKey=true, IsDefaultCollection=false)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.AliasElement.namePropertyName, IsRequired = true, IsKey = true, IsDefaultCollection = false)]
         public virtual string name
         {
             get
@@ -51,20 +51,20 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region definition Property
         /// <summary>
         /// The XML name of the <see cref="definition"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string definitionPropertyName = "definition";
-        
+
         /// <summary>
         /// Gets or sets the definition.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         [global::System.ComponentModel.DescriptionAttribute("The definition.")]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.AliasElement.definitionPropertyName, IsRequired=true, IsKey=false, IsDefaultCollection=false)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.AliasElement.definitionPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
         public virtual string definition
         {
             get
@@ -77,20 +77,20 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region scope Property
         /// <summary>
         /// The XML name of the <see cref="scope"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string scopePropertyName = "scope";
-        
+
         /// <summary>
         /// Gets or sets the scope.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         [global::System.ComponentModel.DescriptionAttribute("The scope.")]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.AliasElement.scopePropertyName, IsRequired=false, IsKey=false, IsDefaultCollection=false, DefaultValue="global")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.AliasElement.scopePropertyName, IsRequired = false, IsKey = false, IsDefaultCollection = false, DefaultValue = "global")]
         public virtual string scope
         {
             get
@@ -107,14 +107,14 @@ namespace Pash.Configuration
 }
 namespace Pash.Configuration
 {
-    
-    
+
+
     /// <summary>
     /// The VariableElement Configuration Element.
     /// </summary>
     public partial class VariableElement : global::System.Configuration.ConfigurationElement
     {
-        
+
         #region IsReadOnly override
         /// <summary>
         /// Gets a value indicating whether the element is read-only.
@@ -125,21 +125,21 @@ namespace Pash.Configuration
             return false;
         }
         #endregion
-        
+
         #region name Property
         /// <summary>
         /// The XML name of the <see cref="name"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string namePropertyName = "name";
-        
+
         /// <summary>
         /// Gets the name.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         [global::System.ComponentModel.DescriptionAttribute("The name.")]
         [global::System.ComponentModel.ReadOnlyAttribute(true)]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.VariableElement.namePropertyName, IsRequired=true, IsKey=true, IsDefaultCollection=false)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.VariableElement.namePropertyName, IsRequired = true, IsKey = true, IsDefaultCollection = false)]
         public virtual string name
         {
             get
@@ -148,20 +148,20 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region type Property
         /// <summary>
         /// The XML name of the <see cref="type"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string typePropertyName = "type";
-        
+
         /// <summary>
         /// Gets or sets the type.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         [global::System.ComponentModel.DescriptionAttribute("The type.")]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.VariableElement.typePropertyName, IsRequired=false, IsKey=false, IsDefaultCollection=false, DefaultValue="System.String")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.VariableElement.typePropertyName, IsRequired = false, IsKey = false, IsDefaultCollection = false, DefaultValue = "System.String")]
         public virtual string type
         {
             get
@@ -174,20 +174,20 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region value Property
         /// <summary>
         /// The XML name of the <see cref="value"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string valuePropertyName = "value";
-        
+
         /// <summary>
         /// Gets or sets the value.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         [global::System.ComponentModel.DescriptionAttribute("The value.")]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.VariableElement.valuePropertyName, IsRequired=false, IsKey=false, IsDefaultCollection=false, DefaultValue=null)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.VariableElement.valuePropertyName, IsRequired = false, IsKey = false, IsDefaultCollection = false, DefaultValue = null)]
         public virtual string value
         {
             get
@@ -200,21 +200,21 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region scope Property
         /// <summary>
         /// The XML name of the <see cref="scope"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string scopePropertyName = "scope";
-        
+
         /// <summary>
         /// Gets the scope.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         [global::System.ComponentModel.DescriptionAttribute("The scope.")]
         [global::System.ComponentModel.ReadOnlyAttribute(true)]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.VariableElement.scopePropertyName, IsRequired=false, IsKey=false, IsDefaultCollection=false, DefaultValue="global")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.VariableElement.scopePropertyName, IsRequired = false, IsKey = false, IsDefaultCollection = false, DefaultValue = "global")]
         public virtual string scope
         {
             get
@@ -227,21 +227,21 @@ namespace Pash.Configuration
 }
 namespace Pash.Configuration
 {
-    
-    
+
+
     /// <summary>
     /// The ExecutionContextConfigurationSection Configuration Section.
     /// </summary>
     public partial class ExecutionContextConfigurationSection : global::System.Configuration.ConfigurationSection
     {
-        
+
         #region Singleton Instance
         /// <summary>
         /// The XML name of the ExecutionContextConfigurationSection Configuration Section.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string ExecutionContextConfigurationSectionSectionName = "defaultExecutionContext";
-        
+
         /// <summary>
         /// Gets the ExecutionContextConfigurationSection instance.
         /// </summary>
@@ -254,14 +254,14 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region Xmlns Property
         /// <summary>
         /// The XML name of the <see cref="Xmlns"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string XmlnsPropertyName = "xmlns";
-        
+
         /// <summary>
         /// Gets the XML namespace of this Configuration Section.
         /// </summary>
@@ -270,7 +270,7 @@ namespace Pash.Configuration
         /// the parser doesn't throw an exception because it encounters the unknown "xmlns" attribute.
         /// </remarks>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.ExecutionContextConfigurationSection.XmlnsPropertyName, IsRequired=false, IsKey=false, IsDefaultCollection=false)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.ExecutionContextConfigurationSection.XmlnsPropertyName, IsRequired = false, IsKey = false, IsDefaultCollection = false)]
         public string Xmlns
         {
             get
@@ -279,7 +279,7 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region IsReadOnly override
         /// <summary>
         /// Gets a value indicating whether the element is read-only.
@@ -290,20 +290,20 @@ namespace Pash.Configuration
             return false;
         }
         #endregion
-        
+
         #region PSSnapins Property
         /// <summary>
         /// The XML name of the <see cref="PSSnapins"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string PSSnapinsPropertyName = "psSnapins";
-        
+
         /// <summary>
         /// Gets or sets the PSSnapins.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         [global::System.ComponentModel.DescriptionAttribute("The PSSnapins.")]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.ExecutionContextConfigurationSection.PSSnapinsPropertyName, IsRequired=false, IsKey=false, IsDefaultCollection=false)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.ExecutionContextConfigurationSection.PSSnapinsPropertyName, IsRequired = false, IsKey = false, IsDefaultCollection = false)]
         public virtual global::Pash.Configuration.PSSnapinCollection PSSnapins
         {
             get
@@ -316,20 +316,20 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region Functions Property
         /// <summary>
         /// The XML name of the <see cref="Functions"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string FunctionsPropertyName = "functions";
-        
+
         /// <summary>
         /// Gets or sets the Functions.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         [global::System.ComponentModel.DescriptionAttribute("The Functions.")]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.ExecutionContextConfigurationSection.FunctionsPropertyName, IsRequired=false, IsKey=false, IsDefaultCollection=false)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.ExecutionContextConfigurationSection.FunctionsPropertyName, IsRequired = false, IsKey = false, IsDefaultCollection = false)]
         public virtual global::Pash.Configuration.FunctionsCollection Functions
         {
             get
@@ -342,20 +342,20 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region Aliases Property
         /// <summary>
         /// The XML name of the <see cref="Aliases"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string AliasesPropertyName = "aliases";
-        
+
         /// <summary>
         /// Gets or sets the Aliases.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         [global::System.ComponentModel.DescriptionAttribute("The Aliases.")]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.ExecutionContextConfigurationSection.AliasesPropertyName, IsRequired=false, IsKey=false, IsDefaultCollection=false)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.ExecutionContextConfigurationSection.AliasesPropertyName, IsRequired = false, IsKey = false, IsDefaultCollection = false)]
         public virtual global::Pash.Configuration.AliasesCollection Aliases
         {
             get
@@ -368,20 +368,20 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region Variables Property
         /// <summary>
         /// The XML name of the <see cref="Variables"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string VariablesPropertyName = "variables";
-        
+
         /// <summary>
         /// Gets or sets the Variables.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         [global::System.ComponentModel.DescriptionAttribute("The Variables.")]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.ExecutionContextConfigurationSection.VariablesPropertyName, IsRequired=false, IsKey=false, IsDefaultCollection=false)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.ExecutionContextConfigurationSection.VariablesPropertyName, IsRequired = false, IsKey = false, IsDefaultCollection = false)]
         public virtual global::Pash.Configuration.VariablesCollection Variables
         {
             get
@@ -398,14 +398,14 @@ namespace Pash.Configuration
 }
 namespace Pash.Configuration
 {
-    
-    
+
+
     /// <summary>
     /// The FunctionElement Configuration Element.
     /// </summary>
     public partial class FunctionElement : global::System.Configuration.ConfigurationElement
     {
-        
+
         #region IsReadOnly override
         /// <summary>
         /// Gets a value indicating whether the element is read-only.
@@ -416,21 +416,21 @@ namespace Pash.Configuration
             return false;
         }
         #endregion
-        
+
         #region name Property
         /// <summary>
         /// The XML name of the <see cref="name"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string namePropertyName = "name";
-        
+
         /// <summary>
         /// Gets the name.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         [global::System.ComponentModel.DescriptionAttribute("The name.")]
         [global::System.ComponentModel.ReadOnlyAttribute(true)]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.FunctionElement.namePropertyName, IsRequired=true, IsKey=true, IsDefaultCollection=false)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.FunctionElement.namePropertyName, IsRequired = true, IsKey = true, IsDefaultCollection = false)]
         public virtual string name
         {
             get
@@ -439,21 +439,21 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region type Property
         /// <summary>
         /// The XML name of the <see cref="type"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string typePropertyName = "type";
-        
+
         /// <summary>
         /// Gets the type.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         [global::System.ComponentModel.DescriptionAttribute("The type.")]
         [global::System.ComponentModel.ReadOnlyAttribute(true)]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.FunctionElement.typePropertyName, IsRequired=false, IsKey=false, IsDefaultCollection=false, DefaultValue="inline")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.FunctionElement.typePropertyName, IsRequired = false, IsKey = false, IsDefaultCollection = false, DefaultValue = "inline")]
         public virtual string type
         {
             get
@@ -462,20 +462,20 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region value Property
         /// <summary>
         /// The XML name of the <see cref="value"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string valuePropertyName = "value";
-        
+
         /// <summary>
         /// Gets or sets the value.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         [global::System.ComponentModel.DescriptionAttribute("The value.")]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.FunctionElement.valuePropertyName, IsRequired=true, IsKey=false, IsDefaultCollection=false)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.FunctionElement.valuePropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
         public virtual string value
         {
             get
@@ -488,21 +488,21 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region scope Property
         /// <summary>
         /// The XML name of the <see cref="scope"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string scopePropertyName = "scope";
-        
+
         /// <summary>
         /// Gets the scope.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         [global::System.ComponentModel.DescriptionAttribute("The scope.")]
         [global::System.ComponentModel.ReadOnlyAttribute(true)]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.FunctionElement.scopePropertyName, IsRequired=false, IsKey=false, IsDefaultCollection=false, DefaultValue="global")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.FunctionElement.scopePropertyName, IsRequired = false, IsKey = false, IsDefaultCollection = false, DefaultValue = "global")]
         public virtual string scope
         {
             get
@@ -515,15 +515,15 @@ namespace Pash.Configuration
 }
 namespace Pash.Configuration
 {
-    
-    
+
+
     /// <summary>
     /// A collection of FunctionElement instances.
     /// </summary>
-    [global::System.Configuration.ConfigurationCollectionAttribute(typeof(global::Pash.Configuration.FunctionElement), CollectionType=global::System.Configuration.ConfigurationElementCollectionType.BasicMap, AddItemName=global::Pash.Configuration.FunctionsCollection.FunctionElementPropertyName)]
+    [global::System.Configuration.ConfigurationCollectionAttribute(typeof(global::Pash.Configuration.FunctionElement), CollectionType = global::System.Configuration.ConfigurationElementCollectionType.BasicMap, AddItemName = global::Pash.Configuration.FunctionsCollection.FunctionElementPropertyName)]
     public partial class FunctionsCollection : global::System.Configuration.ConfigurationElementCollection
     {
-        
+
         #region Constants
         /// <summary>
         /// The XML name of the individual <see cref="global::Pash.Configuration.FunctionElement"/> instances in this collection.
@@ -531,7 +531,7 @@ namespace Pash.Configuration
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string FunctionElementPropertyName = "function";
         #endregion
-        
+
         #region Overrides
         /// <summary>
         /// Gets the type of the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
@@ -545,7 +545,7 @@ namespace Pash.Configuration
                 return global::System.Configuration.ConfigurationElementCollectionType.BasicMap;
             }
         }
-        
+
         /// <summary>
         /// Gets the name used to identify this collection of elements
         /// </summary>
@@ -557,7 +557,7 @@ namespace Pash.Configuration
                 return global::Pash.Configuration.FunctionsCollection.FunctionElementPropertyName;
             }
         }
-        
+
         /// <summary>
         /// Indicates whether the specified <see cref="global::System.Configuration.ConfigurationElement"/> exists in the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
         /// </summary>
@@ -570,7 +570,7 @@ namespace Pash.Configuration
         {
             return (elementName == global::Pash.Configuration.FunctionsCollection.FunctionElementPropertyName);
         }
-        
+
         /// <summary>
         /// Gets the element key for the specified configuration element.
         /// </summary>
@@ -583,7 +583,7 @@ namespace Pash.Configuration
         {
             return ((global::Pash.Configuration.FunctionElement)(element)).name;
         }
-        
+
         /// <summary>
         /// Creates a new <see cref="global::Pash.Configuration.FunctionElement"/>.
         /// </summary>
@@ -596,7 +596,7 @@ namespace Pash.Configuration
             return new global::Pash.Configuration.FunctionElement();
         }
         #endregion
-        
+
         #region Indexer
         /// <summary>
         /// Gets the <see cref="global::Pash.Configuration.FunctionElement"/> at the specified index.
@@ -610,7 +610,7 @@ namespace Pash.Configuration
                 return ((global::Pash.Configuration.FunctionElement)(base.BaseGet(index)));
             }
         }
-        
+
         /// <summary>
         /// Gets the <see cref="global::Pash.Configuration.FunctionElement"/> with the specified key.
         /// </summary>
@@ -624,7 +624,7 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region Add
         /// <summary>
         /// Adds the specified <see cref="global::Pash.Configuration.FunctionElement"/> to the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
@@ -636,7 +636,7 @@ namespace Pash.Configuration
             base.BaseAdd(function);
         }
         #endregion
-        
+
         #region Remove
         /// <summary>
         /// Removes the specified <see cref="global::Pash.Configuration.FunctionElement"/> from the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
@@ -648,7 +648,7 @@ namespace Pash.Configuration
             base.BaseRemove(this.GetElementKey(function));
         }
         #endregion
-        
+
         #region IsReadOnly override
         /// <summary>
         /// Gets a value indicating whether the element is read-only.
@@ -663,15 +663,15 @@ namespace Pash.Configuration
 }
 namespace Pash.Configuration
 {
-    
-    
+
+
     /// <summary>
     /// A collection of AliasElement instances.
     /// </summary>
-    [global::System.Configuration.ConfigurationCollectionAttribute(typeof(global::Pash.Configuration.AliasElement), CollectionType=global::System.Configuration.ConfigurationElementCollectionType.BasicMap, AddItemName=global::Pash.Configuration.AliasesCollection.AliasElementPropertyName)]
+    [global::System.Configuration.ConfigurationCollectionAttribute(typeof(global::Pash.Configuration.AliasElement), CollectionType = global::System.Configuration.ConfigurationElementCollectionType.BasicMap, AddItemName = global::Pash.Configuration.AliasesCollection.AliasElementPropertyName)]
     public partial class AliasesCollection : global::System.Configuration.ConfigurationElementCollection
     {
-        
+
         #region Constants
         /// <summary>
         /// The XML name of the individual <see cref="global::Pash.Configuration.AliasElement"/> instances in this collection.
@@ -679,7 +679,7 @@ namespace Pash.Configuration
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string AliasElementPropertyName = "alias";
         #endregion
-        
+
         #region Overrides
         /// <summary>
         /// Gets the type of the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
@@ -693,7 +693,7 @@ namespace Pash.Configuration
                 return global::System.Configuration.ConfigurationElementCollectionType.BasicMap;
             }
         }
-        
+
         /// <summary>
         /// Gets the name used to identify this collection of elements
         /// </summary>
@@ -705,7 +705,7 @@ namespace Pash.Configuration
                 return global::Pash.Configuration.AliasesCollection.AliasElementPropertyName;
             }
         }
-        
+
         /// <summary>
         /// Indicates whether the specified <see cref="global::System.Configuration.ConfigurationElement"/> exists in the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
         /// </summary>
@@ -718,7 +718,7 @@ namespace Pash.Configuration
         {
             return (elementName == global::Pash.Configuration.AliasesCollection.AliasElementPropertyName);
         }
-        
+
         /// <summary>
         /// Gets the element key for the specified configuration element.
         /// </summary>
@@ -731,7 +731,7 @@ namespace Pash.Configuration
         {
             return ((global::Pash.Configuration.AliasElement)(element)).name;
         }
-        
+
         /// <summary>
         /// Creates a new <see cref="global::Pash.Configuration.AliasElement"/>.
         /// </summary>
@@ -744,7 +744,7 @@ namespace Pash.Configuration
             return new global::Pash.Configuration.AliasElement();
         }
         #endregion
-        
+
         #region Indexer
         /// <summary>
         /// Gets the <see cref="global::Pash.Configuration.AliasElement"/> at the specified index.
@@ -758,7 +758,7 @@ namespace Pash.Configuration
                 return ((global::Pash.Configuration.AliasElement)(base.BaseGet(index)));
             }
         }
-        
+
         /// <summary>
         /// Gets the <see cref="global::Pash.Configuration.AliasElement"/> with the specified key.
         /// </summary>
@@ -772,7 +772,7 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region Add
         /// <summary>
         /// Adds the specified <see cref="global::Pash.Configuration.AliasElement"/> to the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
@@ -784,7 +784,7 @@ namespace Pash.Configuration
             base.BaseAdd(alias);
         }
         #endregion
-        
+
         #region Remove
         /// <summary>
         /// Removes the specified <see cref="global::Pash.Configuration.AliasElement"/> from the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
@@ -796,7 +796,7 @@ namespace Pash.Configuration
             base.BaseRemove(this.GetElementKey(alias));
         }
         #endregion
-        
+
         #region IsReadOnly override
         /// <summary>
         /// Gets a value indicating whether the element is read-only.
@@ -811,15 +811,15 @@ namespace Pash.Configuration
 }
 namespace Pash.Configuration
 {
-    
-    
+
+
     /// <summary>
     /// A collection of VariableElement instances.
     /// </summary>
-    [global::System.Configuration.ConfigurationCollectionAttribute(typeof(global::Pash.Configuration.VariableElement), CollectionType=global::System.Configuration.ConfigurationElementCollectionType.BasicMap, AddItemName=global::Pash.Configuration.VariablesCollection.VariableElementPropertyName)]
+    [global::System.Configuration.ConfigurationCollectionAttribute(typeof(global::Pash.Configuration.VariableElement), CollectionType = global::System.Configuration.ConfigurationElementCollectionType.BasicMap, AddItemName = global::Pash.Configuration.VariablesCollection.VariableElementPropertyName)]
     public partial class VariablesCollection : global::System.Configuration.ConfigurationElementCollection
     {
-        
+
         #region Constants
         /// <summary>
         /// The XML name of the individual <see cref="global::Pash.Configuration.VariableElement"/> instances in this collection.
@@ -827,7 +827,7 @@ namespace Pash.Configuration
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string VariableElementPropertyName = "variable";
         #endregion
-        
+
         #region Overrides
         /// <summary>
         /// Gets the type of the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
@@ -841,7 +841,7 @@ namespace Pash.Configuration
                 return global::System.Configuration.ConfigurationElementCollectionType.BasicMap;
             }
         }
-        
+
         /// <summary>
         /// Gets the name used to identify this collection of elements
         /// </summary>
@@ -853,7 +853,7 @@ namespace Pash.Configuration
                 return global::Pash.Configuration.VariablesCollection.VariableElementPropertyName;
             }
         }
-        
+
         /// <summary>
         /// Indicates whether the specified <see cref="global::System.Configuration.ConfigurationElement"/> exists in the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
         /// </summary>
@@ -866,7 +866,7 @@ namespace Pash.Configuration
         {
             return (elementName == global::Pash.Configuration.VariablesCollection.VariableElementPropertyName);
         }
-        
+
         /// <summary>
         /// Gets the element key for the specified configuration element.
         /// </summary>
@@ -879,7 +879,7 @@ namespace Pash.Configuration
         {
             return ((global::Pash.Configuration.VariableElement)(element)).name;
         }
-        
+
         /// <summary>
         /// Creates a new <see cref="global::Pash.Configuration.VariableElement"/>.
         /// </summary>
@@ -892,7 +892,7 @@ namespace Pash.Configuration
             return new global::Pash.Configuration.VariableElement();
         }
         #endregion
-        
+
         #region Indexer
         /// <summary>
         /// Gets the <see cref="global::Pash.Configuration.VariableElement"/> at the specified index.
@@ -906,7 +906,7 @@ namespace Pash.Configuration
                 return ((global::Pash.Configuration.VariableElement)(base.BaseGet(index)));
             }
         }
-        
+
         /// <summary>
         /// Gets the <see cref="global::Pash.Configuration.VariableElement"/> with the specified key.
         /// </summary>
@@ -920,7 +920,7 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region Add
         /// <summary>
         /// Adds the specified <see cref="global::Pash.Configuration.VariableElement"/> to the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
@@ -932,7 +932,7 @@ namespace Pash.Configuration
             base.BaseAdd(variable);
         }
         #endregion
-        
+
         #region Remove
         /// <summary>
         /// Removes the specified <see cref="global::Pash.Configuration.VariableElement"/> from the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
@@ -944,7 +944,7 @@ namespace Pash.Configuration
             base.BaseRemove(this.GetElementKey(variable));
         }
         #endregion
-        
+
         #region IsReadOnly override
         /// <summary>
         /// Gets a value indicating whether the element is read-only.
@@ -959,15 +959,15 @@ namespace Pash.Configuration
 }
 namespace Pash.Configuration
 {
-    
-    
+
+
     /// <summary>
     /// A collection of PSSnapinElement instances.
     /// </summary>
-    [global::System.Configuration.ConfigurationCollectionAttribute(typeof(global::Pash.Configuration.PSSnapinElement), CollectionType=global::System.Configuration.ConfigurationElementCollectionType.BasicMapAlternate, AddItemName=global::Pash.Configuration.PSSnapinCollection.PSSnapinElementPropertyName)]
+    [global::System.Configuration.ConfigurationCollectionAttribute(typeof(global::Pash.Configuration.PSSnapinElement), CollectionType = global::System.Configuration.ConfigurationElementCollectionType.BasicMapAlternate, AddItemName = global::Pash.Configuration.PSSnapinCollection.PSSnapinElementPropertyName)]
     public partial class PSSnapinCollection : global::System.Configuration.ConfigurationElementCollection
     {
-        
+
         #region Constants
         /// <summary>
         /// The XML name of the individual <see cref="global::Pash.Configuration.PSSnapinElement"/> instances in this collection.
@@ -975,7 +975,7 @@ namespace Pash.Configuration
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string PSSnapinElementPropertyName = "psSnapin";
         #endregion
-        
+
         #region Overrides
         /// <summary>
         /// Gets the type of the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
@@ -989,7 +989,7 @@ namespace Pash.Configuration
                 return global::System.Configuration.ConfigurationElementCollectionType.BasicMapAlternate;
             }
         }
-        
+
         /// <summary>
         /// Gets the name used to identify this collection of elements
         /// </summary>
@@ -1001,7 +1001,7 @@ namespace Pash.Configuration
                 return global::Pash.Configuration.PSSnapinCollection.PSSnapinElementPropertyName;
             }
         }
-        
+
         /// <summary>
         /// Indicates whether the specified <see cref="global::System.Configuration.ConfigurationElement"/> exists in the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
         /// </summary>
@@ -1014,7 +1014,7 @@ namespace Pash.Configuration
         {
             return (elementName == global::Pash.Configuration.PSSnapinCollection.PSSnapinElementPropertyName);
         }
-        
+
         /// <summary>
         /// Gets the element key for the specified configuration element.
         /// </summary>
@@ -1027,7 +1027,7 @@ namespace Pash.Configuration
         {
             return ((global::Pash.Configuration.PSSnapinElement)(element)).type;
         }
-        
+
         /// <summary>
         /// Creates a new <see cref="global::Pash.Configuration.PSSnapinElement"/>.
         /// </summary>
@@ -1040,7 +1040,7 @@ namespace Pash.Configuration
             return new global::Pash.Configuration.PSSnapinElement();
         }
         #endregion
-        
+
         #region Indexer
         /// <summary>
         /// Gets the <see cref="global::Pash.Configuration.PSSnapinElement"/> at the specified index.
@@ -1054,7 +1054,7 @@ namespace Pash.Configuration
                 return ((global::Pash.Configuration.PSSnapinElement)(base.BaseGet(index)));
             }
         }
-        
+
         /// <summary>
         /// Gets the <see cref="global::Pash.Configuration.PSSnapinElement"/> with the specified key.
         /// </summary>
@@ -1068,7 +1068,7 @@ namespace Pash.Configuration
             }
         }
         #endregion
-        
+
         #region Add
         /// <summary>
         /// Adds the specified <see cref="global::Pash.Configuration.PSSnapinElement"/> to the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
@@ -1080,7 +1080,7 @@ namespace Pash.Configuration
             base.BaseAdd(psSnapin);
         }
         #endregion
-        
+
         #region Remove
         /// <summary>
         /// Removes the specified <see cref="global::Pash.Configuration.PSSnapinElement"/> from the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
@@ -1092,7 +1092,7 @@ namespace Pash.Configuration
             base.BaseRemove(this.GetElementKey(psSnapin));
         }
         #endregion
-        
+
         #region IsReadOnly override
         /// <summary>
         /// Gets a value indicating whether the element is read-only.
@@ -1107,14 +1107,14 @@ namespace Pash.Configuration
 }
 namespace Pash.Configuration
 {
-    
-    
+
+
     /// <summary>
     /// The PSSnapinElement Configuration Element.
     /// </summary>
     public partial class PSSnapinElement : global::System.Configuration.ConfigurationElement
     {
-        
+
         #region IsReadOnly override
         /// <summary>
         /// Gets a value indicating whether the element is read-only.
@@ -1125,20 +1125,20 @@ namespace Pash.Configuration
             return false;
         }
         #endregion
-        
+
         #region type Property
         /// <summary>
         /// The XML name of the <see cref="type"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         internal const string typePropertyName = "type";
-        
+
         /// <summary>
         /// Gets or sets the type.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.0.5")]
         [global::System.ComponentModel.DescriptionAttribute("The type.")]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.PSSnapinElement.typePropertyName, IsRequired=true, IsKey=true, IsDefaultCollection=false)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::Pash.Configuration.PSSnapinElement.typePropertyName, IsRequired = true, IsKey = true, IsDefaultCollection = false)]
         public virtual string type
         {
             get

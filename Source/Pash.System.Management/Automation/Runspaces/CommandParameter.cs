@@ -8,7 +8,7 @@ namespace System.Management.Automation.Runspaces
         {
             Name = name;
         }
-        public CommandParameter(string name, object value) 
+        public CommandParameter(string name, object value)
         {
             Name = name;
             Value = value;

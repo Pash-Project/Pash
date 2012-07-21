@@ -35,16 +35,16 @@ namespace System.Management.Automation.Internal
             }
         }
 
-        internal InternalCommand() {}
+        internal InternalCommand() { }
 
-        internal virtual void DoBeginProcessing() {}
+        internal virtual void DoBeginProcessing() { }
 
-        internal virtual void DoEndProcessing() {}
+        internal virtual void DoEndProcessing() { }
 
-        internal virtual void DoProcessRecord() {}
+        internal virtual void DoProcessRecord() { }
 
-        internal virtual void DoStopProcessing() {}
+        internal virtual void DoStopProcessing() { }
 
-        internal void ThrowIfStopping() {}
+        internal void ThrowIfStopping() { }
     }
 }

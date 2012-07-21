@@ -6,7 +6,7 @@ namespace System.Management.Automation
     {
         static PSNoteProperty()
         {
-            
+
         }
 
         public PSNoteProperty(string name, object value)
@@ -34,7 +34,7 @@ namespace System.Management.Automation
                 _value = value;
             }
         }
-        
+
         public override bool IsGettable
         {
             get

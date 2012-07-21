@@ -60,7 +60,7 @@ namespace Pash.Implementation
             if (count > _objectsStream.Count)
                 count = _objectsStream.Count;
 
-            for(int i=0; i<count; i++)
+            for (int i = 0; i < count; i++)
             {
                 object obj = _objectsStream[i];
                 c.Add(obj);

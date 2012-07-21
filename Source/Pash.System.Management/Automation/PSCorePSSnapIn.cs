@@ -61,6 +61,6 @@ namespace System.Management.Automation
         public override string VendorResource { get { throw new NotImplementedException(); } }
     }
 
- 
+
 
 }
