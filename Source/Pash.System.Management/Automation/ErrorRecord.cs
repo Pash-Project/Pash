@@ -28,7 +28,6 @@ namespace System.Management.Automation
             TargetObject = errorRecord.TargetObject;
         }
 
-
         // public ErrorCategoryInfo CategoryInfo { get; }
         // public ErrorDetails ErrorDetails { get; set; }
         public Exception Exception { get; internal set; }

@@ -18,6 +18,4 @@ namespace System.Management.Automation
         // internal SetValueException(string errorId, Exception innerException, string baseName, string resourceId, params object[] arguments);
     }
 
-
-
 }

@@ -124,7 +124,6 @@ namespace System.Management.Automation
             return _sessionState.SetLocation(path, providerRuntime);
         }
 
-
         #region Path Operations
         // TODO: make a common class that works with a path
 
@@ -158,7 +157,6 @@ namespace System.Management.Automation
             return path.Substring(0, iDelimiter);
         }
         #endregion
-
 
         internal static bool IsAbsolutePath(string path, out string driveName)
         {

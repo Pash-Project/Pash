@@ -40,7 +40,6 @@ namespace Pash.Implementation
             set;
         }
 
-
         public override ConsoleColor ForegroundColor
         {
             get { return Console.ForegroundColor; }

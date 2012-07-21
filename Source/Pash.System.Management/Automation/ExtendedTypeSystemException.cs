@@ -50,6 +50,4 @@ namespace System.Management.Automation
         { throw new NotImplementedException(); }
     }
 
-
-
 }

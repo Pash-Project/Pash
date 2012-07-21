@@ -480,7 +480,6 @@ namespace Pash.Implementation
             throw new NotImplementedException();
         }
 
-
         internal void NewVariable(PSVariable variable, bool force)
         {
             throw new NotImplementedException();
@@ -536,8 +535,6 @@ namespace Pash.Implementation
 
             return GetProviderInstance(drive.Provider.Name);
         }
-
-
 
         private bool ItemExists(CmdletProvider provider, string path, ProviderRuntime providerRuntime)
         {
@@ -607,7 +604,6 @@ namespace Pash.Implementation
 
             SetVariable("PWD", CurrentLocation);
             return CurrentLocation;
-
 
             PSDriveInfo drive = CurrentDrive;
 

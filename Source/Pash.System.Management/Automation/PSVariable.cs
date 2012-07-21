@@ -50,7 +50,6 @@ namespace System.Management.Automation
             }
         }
 
-
         public virtual bool IsValidValue(object value)
         {
             throw new NotImplementedException();

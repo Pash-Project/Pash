@@ -13,5 +13,4 @@ namespace System.Management.Automation
         public virtual string[] Types { get { return null; } }
     }
 
-
 }

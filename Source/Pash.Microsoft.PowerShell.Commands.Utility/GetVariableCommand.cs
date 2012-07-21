@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands

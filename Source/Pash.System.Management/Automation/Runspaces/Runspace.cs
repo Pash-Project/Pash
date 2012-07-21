@@ -49,7 +49,6 @@ namespace System.Management.Automation.Runspaces
             // TODO: implement dispose pattern
         }
 
-
         #endregion
     }
 }

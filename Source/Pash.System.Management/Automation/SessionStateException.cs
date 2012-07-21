@@ -26,6 +26,4 @@ namespace System.Management.Automation
         public SessionStateCategory SessionStateCategory { get { throw new NotImplementedException(); } }
     }
 
-
-
 }

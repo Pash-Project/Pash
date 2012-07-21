@@ -42,5 +42,4 @@ namespace System.Management.Automation
         //internal void SetOptions(ScopedItemOptions newOptions, bool force);
     }
 
-
 }
