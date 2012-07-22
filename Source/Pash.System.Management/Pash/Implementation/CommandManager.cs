@@ -110,7 +110,7 @@ namespace Pash.Implementation
                         // TODO: cache aliases
                         foreach (AliasElement alias in configSection.Aliases)
                         {
-                            AddAlias(alias.name, alias.definition);
+                            NewAlias(alias.name, alias.definition);
                         }
                     }
                     // fill variables into the execution scope
@@ -126,9 +126,17 @@ namespace Pash.Implementation
             }
         }
 
-        public void 
-            AddAlias(string name, string definition)
+        public void SetAlias(string name, string definition)
         {
+            if (this._aliases.ContainsKey(name))
+                this._aliases[name] = new AliasInfo(name, definition, this);
+            else
+                NewAlias(name, definition);
+        }
+
+        public void NewAlias(string name, string definition)
+        {
+            if (this._aliases.ContainsKey(name)) throw new Exception("duplicate alias");
             AliasInfo aliasInfo = new AliasInfo(name, definition, this);
 
             _aliases.Add(aliasInfo.Name, aliasInfo);

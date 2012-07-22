@@ -490,7 +490,12 @@ namespace Pash.Implementation
 
         internal void SetAlias(string name, string value)
         {
-            this.CommandManager.AddAlias(name, value);
+            this.CommandManager.SetAlias(name, value);
+        }
+
+        internal void NewAlias(string name, string value)
+        {
+            this.CommandManager.NewAlias(name, value);
         }
 
         internal void NewVariable(PSVariable variable, bool force)
