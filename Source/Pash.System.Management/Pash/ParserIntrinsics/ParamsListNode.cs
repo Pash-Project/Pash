@@ -11,7 +11,7 @@ namespace Pash.ParserIntrinsics
 {
     internal class ParamsListNode : NonTerminalNode
     {
-        public StringCollection Params { get; private set; }
+        public IList<string> Params { get; private set; }
 
         public static ParamsListNode GetParamsList(Parser theParser)
         {
@@ -69,7 +69,7 @@ namespace Pash.ParserIntrinsics
         private ParamsListNode(Parser theParser)
             : base(theParser)
         {
-            Params = new StringCollection();
+            Params = new List<string>();
         }
 
         private void AddParamFromParser(Parser theParser, int index)
@@ -89,16 +89,8 @@ namespace Pash.ParserIntrinsics
 
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < Params.Count; i++)
-            {
-                sb.Append(Params[i]);
-                if (i + 1 != Params.Count)
-                    sb.Append(' ');
-            }
-            return sb.ToString();
+            return string.Join(" ", Params);
         }
-
         internal override void Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             throw new NotImplementedException();

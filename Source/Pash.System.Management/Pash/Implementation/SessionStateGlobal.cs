@@ -480,6 +480,11 @@ namespace Pash.Implementation
             throw new NotImplementedException();
         }
 
+        internal void SetAlias(string name, string value)
+        {
+            throw new NotImplementedException();
+        }
+
         internal void NewVariable(PSVariable variable, bool force)
         {
             throw new NotImplementedException();
