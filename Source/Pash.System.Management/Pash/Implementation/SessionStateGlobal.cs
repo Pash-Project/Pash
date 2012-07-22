@@ -99,8 +99,8 @@ namespace Pash.Implementation
                 //AddProvider
             }*/
 
-            CommandManager cmdMgr = ((LocalRunspace)_executionContext.CurrentRunspace).CommandManager;
-            foreach (var providerTypePair in cmdMgr._providers)
+            CommandManager commandManager = ((LocalRunspace)_executionContext.CurrentRunspace).CommandManager;
+            foreach (var providerTypePair in commandManager._providers)
             {
                 ProviderInfo providerInfo = new ProviderInfo(new SessionState(this), providerTypePair.providerType, providerTypePair.providerAttr.ProviderName, string.Empty, providerTypePair.snapinInfo);
                 CmdletProvider provider = AddProvider(providerInfo);
