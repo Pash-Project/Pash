@@ -99,7 +99,7 @@ namespace Pash.Implementation
                 //AddProvider
             }*/
 
-            CommandManager commandManager = ((LocalRunspace)_executionContext.CurrentRunspace).CommandManager;
+            CommandManager commandManager = this.CommandManager;
             foreach (var providerTypePair in commandManager._providers)
             {
                 ProviderInfo providerInfo = new ProviderInfo(new SessionState(this), providerTypePair.providerType, providerTypePair.providerAttr.ProviderName, string.Empty, providerTypePair.snapinInfo);
@@ -114,6 +114,14 @@ namespace Pash.Implementation
                 }
                 List<CmdletProvider> instanceList = _providerInstances[providerInfo.Name];
                 instanceList.Add(provider);
+            }
+        }
+
+        CommandManager CommandManager
+        {
+            get
+            {
+                return ((LocalRunspace)_executionContext.CurrentRunspace).CommandManager;
             }
         }
 
@@ -482,7 +490,7 @@ namespace Pash.Implementation
 
         internal void SetAlias(string name, string value)
         {
-            throw new NotImplementedException();
+            this.CommandManager.AddAlias(name, value);
         }
 
         internal void NewVariable(PSVariable variable, bool force)

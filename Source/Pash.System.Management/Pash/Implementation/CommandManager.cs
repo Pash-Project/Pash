@@ -110,10 +110,7 @@ namespace Pash.Implementation
                         // TODO: cache aliases
                         foreach (AliasElement alias in configSection.Aliases)
                         {
-                            AliasInfo aliasInfo = new AliasInfo(alias.name, alias.definition, this);
-
-                            if (aliasInfo != null)
-                                _aliases.Add(aliasInfo.Name, aliasInfo);
+                            AddAlias(alias.name, alias.definition);
                         }
                     }
                     // fill variables into the execution scope
@@ -127,6 +124,14 @@ namespace Pash.Implementation
                     }
                 }
             }
+        }
+
+        public void 
+            AddAlias(string name, string definition)
+        {
+            AliasInfo aliasInfo = new AliasInfo(name, definition, this);
+
+            _aliases.Add(aliasInfo.Name, aliasInfo);
         }
 
         private void LoadScripts()
