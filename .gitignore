@@ -10,3 +10,6 @@ obj/
 #Resource Caches
 _ReSharper.*
 *.sln.cache
+
+#Mono parser cache files
+*.pidb
