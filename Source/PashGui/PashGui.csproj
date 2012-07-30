@@ -76,6 +76,14 @@
       <Project>{C5E303EC-5684-4C95-B0EC-2593E6662403}</Project>
       <Name>Pash.System.Management</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Pash.Microsoft.Commands.Management\Pash.Microsoft.Commands.Management.csproj">
+      <Project>{91225A72-A021-4B7D-BA56-5E1B7AC02F03}</Project>
+      <Name>Pash.Microsoft.Commands.Management</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Pash.Microsoft.PowerShell.Commands.Utility\Pash.Microsoft.PowerShell.Commands.Utility.csproj">
+      <Project>{0E1D573C-C57D-4A83-A739-3A38E719D87E}</Project>
+      <Name>Pash.Microsoft.PowerShell.Commands.Utility</Name>
+    </ProjectReference>
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
@@ -87,4 +95,7 @@
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
 </Project>
