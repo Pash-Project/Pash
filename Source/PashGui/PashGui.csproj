@@ -68,6 +68,23 @@
     <Compile Include="Main.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="ConsoleView.cs" />
+    <Compile Include="Host.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\Pash.System.Management\Pash.System.Management.csproj">
+      <Project>{C5E303EC-5684-4C95-B0EC-2593E6662403}</Project>
+      <Name>Pash.System.Management</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties>
+        <Policies>
+          <TextStylePolicy FileWidth="120" TabWidth="4" inheritsSet="Mono" inheritsScope="text/plain" scope="text/x-csharp" />
+          <CSharpFormattingPolicy IndentSwitchBody="True" AnonymousMethodBraceStyle="NextLine" StatementBraceStyle="NextLine" PlaceElseOnNewLine="True" PlaceCatchOnNewLine="True" PlaceFinallyOnNewLine="True" inheritsSet="Mono" inheritsScope="text/x-csharp" scope="text/x-csharp" />
+        </Policies>
+      </Properties>
+    </MonoDevelop>
+  </ProjectExtensions>
 </Project>
