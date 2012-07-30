@@ -19,36 +19,41 @@ namespace Pash.ParserIntrinsics
             _results = new Collection<PSObject>();
         }
 
+        class CommandNotFoundException : InvalidOperationException
+        {
+            public CommandNotFoundException(string command)
+                : base(string.Format("Command \"{0}\" was not found.", command))
+            {
+
+            }
+        }
+
         internal override object GetValue(ExecutionContext context)
         {
             if (!_bExecuted)
             {
                 if (!(context.CurrentRunspace is LocalRunspace))
-                    throw new InvalidOperationException(string.Format("Command \"{0}\" was not found.", Text));
+                    throw new CommandNotFoundException(Text);
 
                 CommandManager cmdMgr = ((LocalRunspace)context.CurrentRunspace).CommandManager;
 
                 CommandInfo cmdInfo = cmdMgr.FindCommand(Text);
 
                 if (cmdInfo == null)
-                    throw new InvalidOperationException(string.Format("Command \"{0}\" was not found.", Text));
+                    throw new CommandNotFoundException(Text);
 
                 // MUST: fix this with the commandRuntime
                 Pipeline pipeline = context.CurrentRunspace.CreateNestedPipeline();
 
                 // Fill the pipeline with input data
                 pipeline.Input.Write(context.inputStreamReader);
-                context.PushPipeline(pipeline);
 
+                context.PushPipeline(pipeline);
                 try
                 {
                     // TODO: implement command invoke
                     pipeline.Commands.Add(Text);
                     _results = pipeline.Invoke();
-                }
-                catch (Exception)
-                {
-                    throw;
                 }
                 finally
                 {
