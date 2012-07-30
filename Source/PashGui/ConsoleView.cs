@@ -33,6 +33,7 @@ using Gtk;
 
 namespace MonoDevelop.Components
 {
+	[System.ComponentModel.ToolboxItem(true)]
 	public class ConsoleView: ScrolledWindow
 	{
 		string scriptLines = "";
