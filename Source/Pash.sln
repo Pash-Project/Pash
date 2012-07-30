@@ -45,7 +45,7 @@ Global
 		{C5E303EC-5684-4C95-B0EC-2593E6662403}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = Pash.Microsoft.Commands.Management\Pash.Microsoft.Commands.Management.csproj
+		StartupItem = PashGui\PashGui.csproj
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
