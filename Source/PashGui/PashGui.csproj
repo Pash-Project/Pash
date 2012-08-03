@@ -32,27 +32,21 @@
     <Reference Include="System" />
     <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <SpecificVersion>False</SpecificVersion>
-      <Package>gtk-sharp-2.0</Package>
     </Reference>
     <Reference Include="gdk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <SpecificVersion>False</SpecificVersion>
-      <Package>gtk-sharp-2.0</Package>
     </Reference>
     <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <SpecificVersion>False</SpecificVersion>
-      <Package>glib-sharp-2.0</Package>
     </Reference>
     <Reference Include="glade-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <SpecificVersion>False</SpecificVersion>
-      <Package>glade-sharp-2.0</Package>
     </Reference>
     <Reference Include="pango-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <SpecificVersion>False</SpecificVersion>
-      <Package>gtk-sharp-2.0</Package>
     </Reference>
     <Reference Include="atk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <SpecificVersion>False</SpecificVersion>
-      <Package>gtk-sharp-2.0</Package>
     </Reference>
     <Reference Include="Mono.Posix" />
   </ItemGroup>
@@ -72,10 +66,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\Pash.System.Management\Pash.System.Management.csproj">
-      <Project>{C5E303EC-5684-4C95-B0EC-2593E6662403}</Project>
-      <Name>Pash.System.Management</Name>
-    </ProjectReference>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Pash.Microsoft.Commands.Management\Pash.Microsoft.Commands.Management.csproj">
       <Project>{91225A72-A021-4B7D-BA56-5E1B7AC02F03}</Project>
       <Name>Pash.Microsoft.Commands.Management</Name>
@@ -84,18 +77,9 @@
       <Project>{0E1D573C-C57D-4A83-A739-3A38E719D87E}</Project>
       <Name>Pash.Microsoft.PowerShell.Commands.Utility</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ProjectExtensions>
-    <MonoDevelop>
-      <Properties>
-        <Policies>
-          <TextStylePolicy FileWidth="120" TabWidth="4" inheritsSet="Mono" inheritsScope="text/plain" scope="text/x-csharp" />
-          <CSharpFormattingPolicy IndentSwitchBody="True" AnonymousMethodBraceStyle="NextLine" StatementBraceStyle="NextLine" PlaceElseOnNewLine="True" PlaceCatchOnNewLine="True" PlaceFinallyOnNewLine="True" inheritsSet="Mono" inheritsScope="text/x-csharp" scope="text/x-csharp" />
-        </Policies>
-      </Properties>
-    </MonoDevelop>
-  </ProjectExtensions>
-  <ItemGroup>
-    <None Include="App.config" />
+    <ProjectReference Include="..\Pash.System.Management\Pash.System.Management.csproj">
+      <Project>{C5E303EC-5684-4C95-B0EC-2593E6662403}</Project>
+      <Name>Pash.System.Management</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

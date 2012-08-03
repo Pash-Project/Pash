@@ -18,7 +18,6 @@
         <property name="MemberName" />
         <property name="CanFocus">True</property>
         <property name="ShadowType">In</property>
-        <signal name="ConsoleInput" handler="OnConsoleview1ConsoleInput" />
       </widget>
     </child>
   </widget>
