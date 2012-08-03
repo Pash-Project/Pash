@@ -21,7 +21,7 @@ namespace Microsoft.PowerShell.Commands
             if (InputObject.ImmediateBaseObject == null)
                 return;
 
-            Console.WriteLine(InputObject.ToString());
+            this.Host.UI.WriteLine(InputObject.ToString());
         }
     }
 }
