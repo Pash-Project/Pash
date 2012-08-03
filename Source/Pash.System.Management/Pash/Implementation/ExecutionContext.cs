@@ -46,6 +46,7 @@ namespace Pash.Implementation
             context.outputStreamWriter = outputStreamWriter;
             context.errorStreamWriter = errorStreamWriter;
             context.CurrentRunspace = CurrentRunspace;
+            context.LocalHost = this.LocalHost;
 
             // TODO: copy (not reference) all the variables to allow nested context
 
