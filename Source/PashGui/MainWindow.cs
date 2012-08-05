@@ -14,13 +14,13 @@ public partial class MainWindow: Gtk.Window
     {
         Build();
 
-        ExecutePrompt();
         this.consoleview1.ConsoleInput += this.OnConsoleview1ConsoleInput;
 
         this.host = new Host(this.consoleview1);
         this.runspace = RunspaceFactory.CreateRunspace(this.host);
         this.runspace.Open();
 
+        ExecutePrompt();
     }
 
     protected void OnDeleteEvent(object sender, DeleteEventArgs a)
@@ -45,19 +45,20 @@ public partial class MainWindow: Gtk.Window
 
             currentPipeline.Invoke();
         }
-
-        ExecutePrompt();
     }
 
     void ExecutePrompt()
     {
+        this.consoleview1.PromptString = "PASH> ";
         this.consoleview1.Prompt(false);
     }
+
     protected void OnConsoleview1ConsoleInput(object sender, MonoDevelop.Components.ConsoleInputEventArgs e)
     {
         string command = e.Text;
 
         Execute(command);
+        ExecutePrompt();
     }
 
 }
