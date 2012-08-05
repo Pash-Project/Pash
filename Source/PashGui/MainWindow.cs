@@ -14,7 +14,7 @@ public partial class MainWindow: Gtk.Window
     {
         Build();
 
-        this.consoleview1.Prompt(false);
+        ExecutePrompt();
         this.consoleview1.ConsoleInput += this.OnConsoleview1ConsoleInput;
 
         this.host = new Host(this.consoleview1);
@@ -46,9 +46,13 @@ public partial class MainWindow: Gtk.Window
             currentPipeline.Invoke();
         }
 
-        this.consoleview1.Prompt(false);
+        ExecutePrompt();
     }
 
+    void ExecutePrompt()
+    {
+        this.consoleview1.Prompt(false);
+    }
     protected void OnConsoleview1ConsoleInput(object sender, MonoDevelop.Components.ConsoleInputEventArgs e)
     {
         string command = e.Text;
