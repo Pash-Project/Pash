@@ -13,6 +13,8 @@ public partial class MainWindow: Gtk.Window
     public MainWindow(): base (Gtk.WindowType.Toplevel)
     {
         Build();
+
+        this.consoleview1.Prompt(false);
         this.consoleview1.ConsoleInput += this.OnConsoleview1ConsoleInput;
 
         this.host = new Host(this.consoleview1);

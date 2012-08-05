@@ -65,7 +65,6 @@ namespace MonoDevelop.Components
 			TextTag tag = new TextTag ("Freezer");
 			tag.Editable = false;
 			Buffer.TagTable.Add (tag);
-			Prompt (false);
 		}
 		
 		public void SetFont (Pango.FontDescription font)
