@@ -43,6 +43,8 @@ public partial class MainWindow: Gtk.Window
 
             currentPipeline.Invoke();
         }
+
+        this.consoleview1.Prompt(true);
     }
 
     protected void OnConsoleview1ConsoleInput(object sender, MonoDevelop.Components.ConsoleInputEventArgs e)
