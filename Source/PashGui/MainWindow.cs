@@ -30,7 +30,7 @@ public partial class MainWindow: Gtk.Window
 
     void ExecuteCommand(string command)
     {
-        using (Pipeline currentPipeline = BuildExecutePipeline(command))
+        using (Pipeline currentPipeline = BuildExecutePipeline(command, true))
         {
             currentPipeline.Invoke();
         }
@@ -50,19 +50,21 @@ public partial class MainWindow: Gtk.Window
         ExecutePrompt();
     }
 
-    public Pipeline BuildExecutePipeline(string command)
+    public Pipeline BuildExecutePipeline(string command, bool resultsToOutDefault)
     {
         Pipeline currentPipeline = this.runspace.CreatePipeline();
 
         currentPipeline.Commands.Add(command);
 
-        // Now add the default outputter to the end of the pipe and indicate
-        // that it should handle both output and errors from the previous
-        // commands. This will result in the output being written using the PSHost
-        // and PSHostUserInterface classes instead of returning objects to the hosting
-        // application.
-        currentPipeline.Commands.Add("out-default");
-        currentPipeline.Commands [0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
+        if (resultsToOutDefault)
+        {
+            // Now add the default outputter to the end of the pipe and indicate
+            // that it should handle both output and errors from the previous
+            // commands. This will result in the output being written using the PSHost
+            // and PSHostUserInterface classes instead of returning objects to the hosting
+            // application.
+            currentPipeline.Commands.Add("out-default");
+        }
 
         return currentPipeline;
     }
@@ -83,14 +85,25 @@ namespace Tests
         }
 
         [Test]
-        public void BuildExecutePipelineTest()
+        public void BuildExecutePipelineTrueTest()
         {
-            using (Pipeline pipeline = new MainWindow().BuildExecutePipeline("get-childitem"))
+            using (Pipeline pipeline = new MainWindow().BuildExecutePipeline("get-childitem", true))
             {
                 Assert.AreEqual(2, pipeline.Commands.Count);
 
                 StringAssert.AreEqualIgnoringCase("get-childitem", pipeline.Commands [0].CommandText);
                 StringAssert.AreEqualIgnoringCase("out-default", pipeline.Commands [1].CommandText);
+            }
+        }
+
+        [Test]
+        public void BuildExecutePipelineFalseTest()
+        {
+            using (Pipeline pipeline = new MainWindow().BuildExecutePipeline("prompt", false))
+            {
+                Assert.AreEqual(1, pipeline.Commands.Count);
+
+                StringAssert.AreEqualIgnoringCase("prompt", pipeline.Commands [0].CommandText);
             }
         }
     }
