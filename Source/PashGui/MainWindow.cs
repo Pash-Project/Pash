@@ -79,18 +79,18 @@ namespace Tests
         [Test]
         public void ATest()
         {
-            var window = new MainWindow();
+            new MainWindow();
         }
 
         [Test]
         public void BuildExecutePipelineTest()
         {
-            var window = new MainWindow();
-            Pipeline pipeline = window.BuildExecutePipeline("get-childitem");
-
-            Assert.AreEqual(2, pipeline.Commands.Count);
-            Assert.AreNotEqual("get-childitem", pipeline.Commands [0]);
-            Assert.AreNotEqual("out-default", pipeline.Commands [1]);
+            using (Pipeline pipeline = new MainWindow().BuildExecutePipeline("get-childitem"))
+            {
+                Assert.AreEqual(2, pipeline.Commands.Count);
+                Assert.AreNotEqual("get-childitem", pipeline.Commands [0]);
+                Assert.AreNotEqual("out-default", pipeline.Commands [1]);
+            }
         }
     }
 }
