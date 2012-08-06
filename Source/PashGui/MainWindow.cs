@@ -88,8 +88,9 @@ namespace Tests
             using (Pipeline pipeline = new MainWindow().BuildExecutePipeline("get-childitem"))
             {
                 Assert.AreEqual(2, pipeline.Commands.Count);
-                Assert.AreNotEqual("get-childitem", pipeline.Commands [0]);
-                Assert.AreNotEqual("out-default", pipeline.Commands [1]);
+
+                StringAssert.AreEqualIgnoringCase("get-childitem", pipeline.Commands [0].CommandText);
+                StringAssert.AreEqualIgnoringCase("out-default", pipeline.Commands [1].CommandText);
             }
         }
     }
