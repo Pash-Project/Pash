@@ -8,7 +8,6 @@ public partial class MainWindow: Gtk.Window
 {
     readonly private Runspace runspace;
     readonly private Host host;
-    private Pipeline currentPipeline;
 
     public MainWindow(): base (Gtk.WindowType.Toplevel)
     {
@@ -31,6 +30,7 @@ public partial class MainWindow: Gtk.Window
 
     void ExecuteCommand(string command)
     {
+        Pipeline currentPipeline;
         using (currentPipeline = this.runspace.CreatePipeline())
         {
             currentPipeline.Commands.Add(command);
