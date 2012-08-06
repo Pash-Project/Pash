@@ -6,8 +6,10 @@ using PashGui;
 
 public partial class MainWindow: Gtk.Window
 {
-    readonly private Runspace runspace;
+    readonly Model Model;
     readonly private Host host;
+
+    Runspace runspace { get { return this.Model.runspace; } }
 
     public MainWindow(): base (Gtk.WindowType.Toplevel)
     {
@@ -16,7 +18,9 @@ public partial class MainWindow: Gtk.Window
         this.consoleview1.ConsoleInput += this.OnConsoleview1ConsoleInput;
 
         this.host = new Host(this.consoleview1);
-        this.runspace = RunspaceFactory.CreateRunspace(this.host);
+        Runspace runspace = RunspaceFactory.CreateRunspace(host);
+        this.Model = new Model(runspace);
+
         this.runspace.Open();
 
         ExecutePrompt();

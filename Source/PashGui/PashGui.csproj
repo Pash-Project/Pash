@@ -66,6 +66,7 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="ConsoleView.cs" />
     <Compile Include="Host.cs" />
+    <Compile Include="Model.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
