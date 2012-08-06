@@ -30,18 +30,8 @@ public partial class MainWindow: Gtk.Window
 
     void ExecuteCommand(string command)
     {
-        using (Pipeline currentPipeline = this.runspace.CreatePipeline())
+        using (Pipeline currentPipeline = BuildExecutePipeline(command))
         {
-            currentPipeline.Commands.Add(command);
-
-            // Now add the default outputter to the end of the pipe and indicate
-            // that it should handle both output and errors from the previous
-            // commands. This will result in the output being written using the PSHost
-            // and PSHostUserInterface classes instead of returning objects to the hosting
-            // application.
-            currentPipeline.Commands.Add("out-default");
-            currentPipeline.Commands [0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
-
             currentPipeline.Invoke();
         }
     }
@@ -60,9 +50,21 @@ public partial class MainWindow: Gtk.Window
         ExecutePrompt();
     }
 
-    public Pipeline BuildExecutePipeline(string getchilditem)
+    public Pipeline BuildExecutePipeline(string command)
     {
-        throw new NotImplementedException();
+        Pipeline currentPipeline = this.runspace.CreatePipeline();
+
+        currentPipeline.Commands.Add(command);
+
+        // Now add the default outputter to the end of the pipe and indicate
+        // that it should handle both output and errors from the previous
+        // commands. This will result in the output being written using the PSHost
+        // and PSHostUserInterface classes instead of returning objects to the hosting
+        // application.
+        currentPipeline.Commands.Add("out-default");
+        currentPipeline.Commands [0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
+
+        return currentPipeline;
     }
 
 }
@@ -80,5 +82,15 @@ namespace Tests
             var window = new MainWindow();
         }
 
+        [Test]
+        public void BuildExecutePipelineTest()
+        {
+            var window = new MainWindow();
+            Pipeline pipeline = window.BuildExecutePipeline("get-childitem");
+
+            Assert.AreEqual(2, pipeline.Commands.Count);
+            Assert.AreNotEqual("get-childitem", pipeline.Commands [0]);
+            Assert.AreNotEqual("out-default", pipeline.Commands [1]);
+        }
     }
 }
