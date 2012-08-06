@@ -46,7 +46,6 @@ public partial class MainWindow: Gtk.Window
         }
     }
 
-
     void ExecutePrompt()
     {
         this.consoleview1.PromptString = "PASH> ";
@@ -61,4 +60,25 @@ public partial class MainWindow: Gtk.Window
         ExecutePrompt();
     }
 
+    public Pipeline BuildExecutePipeline(string getchilditem)
+    {
+        throw new NotImplementedException();
+    }
+
+}
+
+namespace Tests
+{
+    using NUnit.Framework;
+
+    [TestFixture]
+    public class MainWindowTests
+    {
+        [Test]
+        public void ATest()
+        {
+            var window = new MainWindow();
+        }
+
+    }
 }
