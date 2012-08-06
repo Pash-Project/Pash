@@ -29,7 +29,7 @@ public partial class MainWindow: Gtk.Window
         a.RetVal = true;
     }
 
-    void Execute(string command)
+    void ExecuteCommand(string command)
     {
         using (currentPipeline = this.runspace.CreatePipeline())
         {
@@ -57,7 +57,7 @@ public partial class MainWindow: Gtk.Window
     {
         string command = e.Text;
 
-        Execute(command);
+        ExecuteCommand(command);
         ExecutePrompt();
     }
 
