@@ -16,8 +16,7 @@ public partial class MainWindow: Gtk.Window
 
         this.consoleview1.ConsoleInput += this.OnConsoleview1ConsoleInput;
 
-        Host host = new Host(this.consoleview1);
-        Runspace runspace = RunspaceFactory.CreateRunspace(host);
+        Runspace runspace = RunspaceFactory.CreateRunspace(new Host(this.consoleview1));
         this.Model = new Model(runspace);
 
         this.runspace.Open();
