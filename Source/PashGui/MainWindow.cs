@@ -30,8 +30,7 @@ public partial class MainWindow: Gtk.Window
 
     void ExecuteCommand(string command)
     {
-        Pipeline currentPipeline;
-        using (currentPipeline = this.runspace.CreatePipeline())
+        using (Pipeline currentPipeline = this.runspace.CreatePipeline())
         {
             currentPipeline.Commands.Add(command);
 
@@ -46,6 +45,7 @@ public partial class MainWindow: Gtk.Window
             currentPipeline.Invoke();
         }
     }
+
 
     void ExecutePrompt()
     {
