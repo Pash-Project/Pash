@@ -30,11 +30,25 @@ namespace PashGui
 
             return currentPipeline;
         }
+
+        public string ExecutePrompt()
+        {
+            using (var pipeline = BuildExecutePipeline("prompt", false))
+            {
+                var result = string.Join("", pipeline.Invoke());
+                if (!string.IsNullOrEmpty(result))
+                {
+                    return result;
+                }
+            }
+
+            return "PASH> ";
+        }
     }
 
     namespace Tests
     {
-    using NUnit.Framework;
+        using NUnit.Framework;
 
         [TestFixture]
         public class ModelTests

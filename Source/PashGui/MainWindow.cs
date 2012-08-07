@@ -40,16 +40,7 @@ public partial class MainWindow: Gtk.Window
 
     void ExecutePrompt()
     {
-        this.consoleview1.PromptString = "PASH> ";
-
-        using (var pipeline = this.Model.BuildExecutePipeline("prompt", false))
-        {
-            var result = string.Join("", pipeline.Invoke());
-            if (!string.IsNullOrEmpty(result))
-            {
-                this.consoleview1.PromptString = result;
-            }
-        }
+        this.consoleview1.PromptString = this.Model.ExecutePrompt();
 
         this.consoleview1.Prompt(false);
     }
@@ -61,5 +52,4 @@ public partial class MainWindow: Gtk.Window
         ExecuteCommand(command);
         ExecutePrompt();
     }
-
 }
