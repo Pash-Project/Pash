@@ -60,8 +60,33 @@ namespace MonoDevelop.Components
             TextTag tag = new TextTag("Freezer");
             tag.Editable = false;
             Buffer.TagTable.Add(tag);
+
+            InitializeKeyPressHandlers();
         }
-        
+
+        void InitializeKeyPressHandlers()
+        {
+            Func<Gdk.EventKey, bool> _ignore = (Gdk.EventKey _ev) => {
+                return false; };
+
+            handlers = new Dictionary<Gdk.Key, Func<Gdk.EventKey, bool>>
+            {
+                { Gdk.Key.Up, Up },
+                { Gdk.Key.Down, Down },
+                { Gdk.Key.Left, Left },
+                { Gdk.Key.Home, Home },
+                { Gdk.Key.Return, Return },
+
+                { Gdk.Key.period,  _ignore},
+                { Gdk.Key.Page_Up, _ignore},
+                { Gdk.Key.Page_Down, _ignore },
+
+                { Gdk.Key.space, Space },
+            };
+        }
+
+        Dictionary<Gdk.Key, Func<Gdk.EventKey, bool>> handlers;
+
         public void SetFont(Pango.FontDescription font)
         {
             textView.ModifyFont(font);
@@ -215,22 +240,6 @@ namespace MonoDevelop.Components
                 Buffer.MoveMark(Buffer.SelectionBound, InputLineEnd);
                 Buffer.MoveMark(Buffer.InsertMark, InputLineEnd);
             }
-
-            Func<Gdk.EventKey, bool> _ignore = (Gdk.EventKey _ev) => { return false; };
-            var handlers = new Dictionary<Gdk.Key, Func<Gdk.EventKey, bool>>
-            {
-                { Gdk.Key.Up, Up },
-                { Gdk.Key.Down, Down },
-                { Gdk.Key.Left, Left },
-                { Gdk.Key.Home, Home },
-                { Gdk.Key.Return, Return },
-
-                { Gdk.Key.period,  _ignore},
-                { Gdk.Key.Page_Up, _ignore},
-                { Gdk.Key.Page_Down, _ignore },
-
-                { Gdk.Key.space, Space },
-            };
 
             if (handlers.ContainsKey(ev.Key))
                 return handlers [ev.Key](ev);
