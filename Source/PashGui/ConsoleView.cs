@@ -216,7 +216,7 @@ namespace MonoDevelop.Components
                 Buffer.MoveMark(Buffer.InsertMark, InputLineEnd);
             }
 
-            Func<Gdk.EventKey, bool> ignore = (Gdk.EventKey _ev) => { return false; };
+            Func<Gdk.EventKey, bool> _ignore = (Gdk.EventKey _ev) => { return false; };
             var handlers = new Dictionary<Gdk.Key, Func<Gdk.EventKey, bool>>
             {
                 { Gdk.Key.Up, Up },
@@ -225,9 +225,9 @@ namespace MonoDevelop.Components
                 { Gdk.Key.Home, Home },
                 { Gdk.Key.Return, Return },
 
-                { Gdk.Key.period,  ignore},
-                { Gdk.Key.Page_Up, ignore},
-                { Gdk.Key.Page_Down, ignore },
+                { Gdk.Key.period,  _ignore},
+                { Gdk.Key.Page_Up, _ignore},
+                { Gdk.Key.Page_Down, _ignore },
 
                 { Gdk.Key.space, Space },
             };
