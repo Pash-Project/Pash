@@ -76,7 +76,131 @@ namespace MonoDevelop.Components
         {
             args.RetVal = ProcessKeyPressEvent(args.Event);
         }
-        
+
+        bool Up(Gdk.EventKey ev)
+        {
+            if (!inBlock && commandHistoryPast.Count > 0)
+            {
+                if (commandHistoryFuture.Count == 0)
+                    commandHistoryFuture.Push(InputLine);
+                else
+                {
+                    if (commandHistoryPast.Count == 1)
+                        return true;
+                    commandHistoryFuture.Push(commandHistoryPast.Pop());
+                }
+                InputLine = commandHistoryPast.Peek();
+            }
+            return true;
+        }
+
+        bool Down(Gdk.EventKey ev)
+        {
+            if (!inBlock && commandHistoryFuture.Count > 0)
+            {
+                if (commandHistoryFuture.Count == 1)
+                    InputLine = commandHistoryFuture.Pop();
+                else
+                {
+                    commandHistoryPast.Push(commandHistoryFuture.Pop());
+                    InputLine = commandHistoryPast.Peek();
+                }
+            }
+            return true;
+        }
+
+        bool Left(Gdk.EventKey ev)
+        {
+            // Keep our cursor inside the prompt area
+            return Cursor.Compare(InputLineBegin) <= 0;
+        }
+
+        bool Home(Gdk.EventKey ev)
+        {
+            Buffer.MoveMark(Buffer.InsertMark, InputLineBegin);
+            // Move the selection mark too, if shift isn't held
+            if ((ev.State & Gdk.ModifierType.ShiftMask) == ev.State)
+                Buffer.MoveMark(Buffer.SelectionBound, InputLineBegin);
+            return true;
+        }
+
+        void Return_InBlock()
+        {
+            if (InputLine == "")
+            {
+                ProcessInput(blockText);
+                blockText = "";
+                inBlock = false;
+            }
+            else
+            {
+                blockText += "\n" + InputLine;
+                string whiteSpace = null;
+                if (auto_indent)
+                {
+                    System.Text.RegularExpressions.Regex r = new System.Text.RegularExpressions.Regex(@"^(\s+).*");
+                    whiteSpace = r.Replace(InputLine, "$1");
+                    if (InputLine.EndsWith(BlockStart))
+                        whiteSpace += "\t";
+                }
+                Prompt(true, true);
+                if (auto_indent)
+                    InputLine += whiteSpace;
+            }
+        }
+
+        void Return_NotInBlock()
+        {
+            // Special case for start of new code block
+            if (!string.IsNullOrEmpty(BlockStart) && InputLine.Trim().EndsWith(BlockStart))
+            {
+                inBlock = true;
+                blockText = InputLine;
+                Prompt(true, true);
+                if (auto_indent)
+                    InputLine += "\t";
+                return;
+            }
+            // Bookkeeping
+            if (InputLine != "")
+            {
+                // Everything but the last item (which was input),
+                //in the future stack needs to get put back into the
+                // past stack
+                while (commandHistoryFuture.Count > 1)
+                    commandHistoryPast.Push(commandHistoryFuture.Pop());
+                // Clear the pesky junk input line
+                commandHistoryFuture.Clear();
+                // Record our input line
+                commandHistoryPast.Push(InputLine);
+                if (scriptLines == "")
+                    scriptLines += InputLine;
+                else
+                    scriptLines += "\n" + InputLine;
+                ProcessInput(InputLine);
+            }
+        }
+
+        bool Return(Gdk.EventKey ev)
+        {
+            if (inBlock)
+            {
+                Return_InBlock();
+            }
+            else
+            {
+                Return_NotInBlock();
+            }
+            return true;
+        }
+
+        bool Space(Gdk.EventKey ev)
+        {
+//          if (ev.State == Gdk.ModifierType.ControlMask && ev.Key == Gdk.Key.space)
+//              TriggerCodeCompletion ();
+            return false;
+        }
+
         bool ProcessKeyPressEvent(Gdk.EventKey ev)
         {
             // Short circuit to avoid getting moved back to the input line
@@ -91,129 +215,26 @@ namespace MonoDevelop.Components
                 Buffer.MoveMark(Buffer.SelectionBound, InputLineEnd);
                 Buffer.MoveMark(Buffer.InsertMark, InputLineEnd);
             }
-            
-//          if (ev.State == Gdk.ModifierType.ControlMask && ev.Key == Gdk.Key.space)
-//              TriggerCodeCompletion ();
-    
-            if (ev.Key == Gdk.Key.Return)
+
+            Func<Gdk.EventKey, bool> ignore = (Gdk.EventKey _ev) => { return false; };
+            var handlers = new Dictionary<Gdk.Key, Func<Gdk.EventKey, bool>>
             {
-                if (inBlock)
-                {
-                    if (InputLine == "")
-                    {
-                        ProcessInput(blockText);
-                        blockText = "";
-                        inBlock = false;
-                    }
-                    else
-                    {
-                        blockText += "\n" + InputLine;
-                        string whiteSpace = null;
-                        if (auto_indent)
-                        {
-                            System.Text.RegularExpressions.Regex r = new System.Text.RegularExpressions.Regex(@"^(\s+).*");
-                            whiteSpace = r.Replace(InputLine, "$1");
-                            if (InputLine.EndsWith(BlockStart))
-                                whiteSpace += "\t";
-                        }
-                        Prompt(true, true);
-                        if (auto_indent)
-                            InputLine += whiteSpace;
-                    }
-                }
-                else
-                {
-                    // Special case for start of new code block
-                    if (!string.IsNullOrEmpty(BlockStart) && InputLine.Trim().EndsWith(BlockStart))
-                    {
-                        inBlock = true;
-                        blockText = InputLine;
-                        Prompt(true, true);
-                        if (auto_indent)
-                            InputLine += "\t";
-                        return true;
-                    }
-                    // Bookkeeping
-                    if (InputLine != "")
-                    {
-                        // Everything but the last item (which was input),
-                        //in the future stack needs to get put back into the
-                        // past stack
-                        while (commandHistoryFuture.Count > 1)
-                            commandHistoryPast.Push(commandHistoryFuture.Pop());
-                        // Clear the pesky junk input line
-                        commandHistoryFuture.Clear();
-    
-                        // Record our input line
-                        commandHistoryPast.Push(InputLine);
-                        if (scriptLines == "")
-                            scriptLines += InputLine;
-                        else
-                            scriptLines += "\n" + InputLine;
-                    
-                        ProcessInput(InputLine);
-                    }
-                }
-                return true;
-            }
-    
-            // The next two cases handle command history    
-            else if (ev.Key == Gdk.Key.Up)
-            {
-                if (!inBlock && commandHistoryPast.Count > 0)
-                {
-                    if (commandHistoryFuture.Count == 0)
-                        commandHistoryFuture.Push(InputLine);
-                    else
-                    {
-                        if (commandHistoryPast.Count == 1)
-                            return true;
-                        commandHistoryFuture.Push(commandHistoryPast.Pop());
-                    }
-                    InputLine = commandHistoryPast.Peek();
-                }
-                return true;
-            }
-            else if (ev.Key == Gdk.Key.Down)
-            {
-                if (!inBlock && commandHistoryFuture.Count > 0)
-                {
-                    if (commandHistoryFuture.Count == 1)
-                        InputLine = commandHistoryFuture.Pop();
-                    else
-                    {
-                        commandHistoryPast.Push(commandHistoryFuture.Pop());
-                        InputLine = commandHistoryPast.Peek();
-                    }
-                }
-                return true;
-            }
-            else if (ev.Key == Gdk.Key.Left)
-            {
-                // Keep our cursor inside the prompt area
-                if (Cursor.Compare(InputLineBegin) <= 0)
-                    return true;
-            }
-            else if (ev.Key == Gdk.Key.Home)
-            {
-                Buffer.MoveMark(Buffer.InsertMark, InputLineBegin);
-                // Move the selection mark too, if shift isn't held
-                if ((ev.State & Gdk.ModifierType.ShiftMask) == ev.State)
-                    Buffer.MoveMark(Buffer.SelectionBound, InputLineBegin);
-                return true;
-            }
-            else if (ev.Key == Gdk.Key.period)
-            {
-                return false;
-            }
-    
-            // Short circuit to avoid getting moved back to the input line
-            // when paging up and down in the shell output
-            else if (ev.Key == Gdk.Key.Page_Up || ev.Key == Gdk.Key.Page_Down)
-            {
-                return false;
-            }
-            
+                { Gdk.Key.Up, Up },
+                { Gdk.Key.Down, Down },
+                { Gdk.Key.Left, Left },
+                { Gdk.Key.Home, Home },
+                { Gdk.Key.Return, Return },
+
+                { Gdk.Key.period,  ignore},
+                { Gdk.Key.Page_Up, ignore},
+                { Gdk.Key.Page_Down, ignore },
+
+                { Gdk.Key.space, Space },
+            };
+
+            if (handlers.ContainsKey(ev.Key))
+                return handlers [ev.Key](ev);
+
             return false;
         }
         
