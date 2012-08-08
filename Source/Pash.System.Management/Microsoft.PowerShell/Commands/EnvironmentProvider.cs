@@ -19,10 +19,7 @@ namespace Microsoft.PowerShell.Commands
 
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
-            PSDriveInfo item = new PSDriveInfo("Env", ProviderInfo, string.Empty, string.Empty, null);
-            Collection<PSDriveInfo> collection = new Collection<PSDriveInfo>();
-            collection.Add(item);
-            return collection;
+            return new Collection<PSDriveInfo> { new PSDriveInfo("Env", base.ProviderInfo) };
         }
 
         internal override object GetSessionStateItem(string name)

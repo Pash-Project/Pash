@@ -17,10 +17,7 @@ namespace Microsoft.PowerShell.Commands
 
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
-            PSDriveInfo item = new PSDriveInfo("Function", base.ProviderInfo, string.Empty, string.Empty, null);
-            Collection<PSDriveInfo> collection = new Collection<PSDriveInfo>();
-            collection.Add(item);
-            return collection;
+            return new Collection<PSDriveInfo> { new PSDriveInfo("Function", base.ProviderInfo) };
         }
 
         protected override object NewItemDynamicParameters(string path, string type, object newItemValue)

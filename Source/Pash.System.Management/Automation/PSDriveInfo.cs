@@ -22,7 +22,7 @@ namespace System.Management.Automation
             CurrentLocation = driveInfo.CurrentLocation;
         }
 
-        public PSDriveInfo(string name, ProviderInfo provider, string root, string description, PSCredential credential)
+        public PSDriveInfo(string name, ProviderInfo provider, string root = string.Empty, string description = string.Empty, PSCredential credential = null)
         {
             Name = name;
             Provider = provider;
