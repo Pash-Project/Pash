@@ -17,12 +17,8 @@ namespace System.Management.Automation
         internal bool RemovableDrive { get; set; }
 
         protected PSDriveInfo(PSDriveInfo driveInfo)
+            : this (driveInfo.Name, driveInfo.Provider, driveInfo.Root, driveInfo.Description, driveInfo.Credential)
         {
-            Name = driveInfo.Name;
-            Provider = driveInfo.Provider;
-            Root = driveInfo.Root;
-            Description = driveInfo.Description;
-            Credential = driveInfo.Credential;
             CurrentLocation = driveInfo.CurrentLocation;
         }
 
