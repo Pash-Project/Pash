@@ -22,12 +22,12 @@ namespace System.Management.Automation
             CurrentLocation = driveInfo.CurrentLocation;
         }
 
-        public PSDriveInfo(string name, ProviderInfo provider, string root = string.Empty, string description = string.Empty, PSCredential credential = null)
+        public PSDriveInfo(string name, ProviderInfo provider, string root = null, string description = null, PSCredential credential = null)
         {
             Name = name;
             Provider = provider;
-            Root = root;
-            Description = description;
+            Root = root ?? string.Empty;
+            Description = description ?? string.Empty;
             Credential = credential;
             CurrentLocation = string.Empty;
         }
