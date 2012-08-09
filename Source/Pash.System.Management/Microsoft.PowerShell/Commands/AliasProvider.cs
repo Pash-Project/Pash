@@ -13,10 +13,6 @@ namespace Microsoft.PowerShell.Commands
     {
         public const string ProviderName = "Alias";
 
-        public AliasProvider()
-        {
-        }
-
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
             return new Collection<PSDriveInfo> { new PSDriveInfo("Alias", base.ProviderInfo) };

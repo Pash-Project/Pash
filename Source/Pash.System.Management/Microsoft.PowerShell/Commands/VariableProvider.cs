@@ -13,10 +13,6 @@ namespace Microsoft.PowerShell.Commands
     {
         public const string ProviderName = "Variable";
 
-        public VariableProvider()
-        {
-        }
-
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
             return new Collection<PSDriveInfo> { new PSDriveInfo("Variable", base.ProviderInfo) };

@@ -13,10 +13,6 @@ namespace Microsoft.PowerShell.Commands
     {
         public const string ProviderName = "Environment";
 
-        public EnvironmentProvider()
-        {
-        }
-
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
             return new Collection<PSDriveInfo> { new PSDriveInfo("Env", base.ProviderInfo) };
