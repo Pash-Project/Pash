@@ -36,7 +36,7 @@ using GoldParser;
 
 namespace Morozov.Parsing
 {
-		
+        
     [Serializable()]
     public class SymbolException : System.Exception
     {
@@ -95,165 +95,165 @@ namespace Morozov.Parsing
         // this class will construct a parser without having to process
         //  the CGT tables with each creation.  It must be initialized
         //  before you can call CreateParser()
-	public sealed class ParserFactory
-	{
-		static Grammar m_grammar;
-		static bool _init;
-		
-		private ParserFactory()
-		{
-		}
-		
-		private static BinaryReader GetResourceReader(string resourceName)
-		{  
-			Assembly assembly = Assembly.GetExecutingAssembly();   
-			Stream stream = assembly.GetManifestResourceStream(resourceName);
-			return new BinaryReader(stream);
-		}
-		
-		public static void InitializeFactoryFromFile(string FullCGTFilePath)
-		{
-			if (!_init)
-			{
-			   BinaryReader reader = new BinaryReader(new FileStream(FullCGTFilePath,FileMode.Open));
-			   m_grammar = new Grammar( reader );
-			   _init = true;
-			}
-		}
-		
-		public static void InitializeFactoryFromResource(string resourceName)
-		{
-			if (!_init)
-			{
-				BinaryReader reader = GetResourceReader(resourceName);
-				m_grammar = new Grammar( reader );
-				_init = true;
-			}
-		}
-		
-		public static Parser CreateParser(TextReader reader)
-		{
-		   if (_init)
-		   {
-				return new Parser(reader, m_grammar);
-		   }
-		   throw new Exception("You must first Initialize the Factory before creating a parser!");
-		}
-	}
+    public sealed class ParserFactory
+    {
+        static Grammar m_grammar;
+        static bool _init;
         
-	public abstract class ASTNode
-	{
-		public abstract bool IsTerminal
-		{
-			get;
-		}
-	}
-	
-	/// <summary>
-	/// Derive this class for Terminal AST Nodes
-	/// </summary>
-	public class TerminalNode : ASTNode
-	{
-		private Symbol m_symbol;
-		private string m_text;
-		private int m_lineNumber;
-		private int m_linePosition;
+        private ParserFactory()
+        {
+        }
+        
+        private static BinaryReader GetResourceReader(string resourceName)
+        {  
+            Assembly assembly = Assembly.GetExecutingAssembly();   
+            Stream stream = assembly.GetManifestResourceStream(resourceName);
+            return new BinaryReader(stream);
+        }
+        
+        public static void InitializeFactoryFromFile(string FullCGTFilePath)
+        {
+            if (!_init)
+            {
+               BinaryReader reader = new BinaryReader(new FileStream(FullCGTFilePath,FileMode.Open));
+               m_grammar = new Grammar( reader );
+               _init = true;
+            }
+        }
+        
+        public static void InitializeFactoryFromResource(string resourceName)
+        {
+            if (!_init)
+            {
+                BinaryReader reader = GetResourceReader(resourceName);
+                m_grammar = new Grammar( reader );
+                _init = true;
+            }
+        }
+        
+        public static Parser CreateParser(TextReader reader)
+        {
+           if (_init)
+           {
+                return new Parser(reader, m_grammar);
+           }
+           throw new Exception("You must first Initialize the Factory before creating a parser!");
+        }
+    }
+        
+    public abstract class ASTNode
+    {
+        public abstract bool IsTerminal
+        {
+            get;
+        }
+    }
+    
+    /// <summary>
+    /// Derive this class for Terminal AST Nodes
+    /// </summary>
+    public class TerminalNode : ASTNode
+    {
+        private Symbol m_symbol;
+        private string m_text;
+        private int m_lineNumber;
+        private int m_linePosition;
 
-		public TerminalNode(Parser theParser)
-		{
-			m_symbol = theParser.TokenSymbol;
-			m_text = theParser.TokenSymbol.ToString();
-			m_lineNumber = theParser.LineNumber;
-			m_linePosition = theParser.LinePosition;
-		}
+        public TerminalNode(Parser theParser)
+        {
+            m_symbol = theParser.TokenSymbol;
+            m_text = theParser.TokenSymbol.ToString();
+            m_lineNumber = theParser.LineNumber;
+            m_linePosition = theParser.LinePosition;
+        }
 
-		public override bool IsTerminal
-		{
-			get
-			{
-				return true;
-			}
-		}
-		
-		public Symbol Symbol
-		{
-			get { return m_symbol; }
-		}
+        public override bool IsTerminal
+        {
+            get
+            {
+                return true;
+            }
+        }
+        
+        public Symbol Symbol
+        {
+            get { return m_symbol; }
+        }
 
-		public string Text
-		{
-			get { return m_text; }
-		}
+        public string Text
+        {
+            get { return m_text; }
+        }
 
-		public override string ToString()
-		{
-			return m_text;
-		}
+        public override string ToString()
+        {
+            return m_text;
+        }
 
-		public int LineNumber 
-		{
-			get { return m_lineNumber; }
-		}
+        public int LineNumber 
+        {
+            get { return m_lineNumber; }
+        }
 
-		public int LinePosition
-		{
-			get { return m_linePosition; }
-		}
-	}
-	
-	/// <summary>
-	/// Derive this class for NonTerminal AST Nodes
-	/// </summary>
-	public class NonTerminalNode : ASTNode
-	{
-		private int m_reductionNumber;
-		private Rule m_rule;
-		private ArrayList m_array = new ArrayList();
+        public int LinePosition
+        {
+            get { return m_linePosition; }
+        }
+    }
+    
+    /// <summary>
+    /// Derive this class for NonTerminal AST Nodes
+    /// </summary>
+    public class NonTerminalNode : ASTNode
+    {
+        private int m_reductionNumber;
+        private Rule m_rule;
+        private ArrayList m_array = new ArrayList();
 
-		public NonTerminalNode(Parser theParser)
-		{
-			m_rule = theParser.ReductionRule;
-		}
-		
-		public override bool IsTerminal
-		{
-			get
-			{
-				return false;
-			}
-		}
+        public NonTerminalNode(Parser theParser)
+        {
+            m_rule = theParser.ReductionRule;
+        }
+        
+        public override bool IsTerminal
+        {
+            get
+            {
+                return false;
+            }
+        }
 
-		public int ReductionNumber 
-		{
-			get { return m_reductionNumber; }
-			set { m_reductionNumber = value; }
-		}
+        public int ReductionNumber 
+        {
+            get { return m_reductionNumber; }
+            set { m_reductionNumber = value; }
+        }
 
-		public int Count 
-		{
-			get { return m_array.Count; }
-		}
+        public int Count 
+        {
+            get { return m_array.Count; }
+        }
 
-		public ASTNode this[int index]
-		{
-			get { return m_array[index] as ASTNode; }
-		}
+        public ASTNode this[int index]
+        {
+            get { return m_array[index] as ASTNode; }
+        }
 
-		public void AppendChildNode(ASTNode node)
-		{
-			if (node == null)
-			{
-				return ; 
-			}
-			m_array.Add(node);
-		}
+        public void AppendChildNode(ASTNode node)
+        {
+            if (node == null)
+            {
+                return ; 
+            }
+            m_array.Add(node);
+        }
 
-		public Rule Rule
-		{
-			get { return m_rule; }
-		}
+        public Rule Rule
+        {
+            get { return m_rule; }
+        }
 
-	}
+    }
 
     public class MyParser
     {
@@ -366,17 +366,17 @@ namespace Morozov.Parsing
     public class MyParserContext
     {
 
-		// instance fields
+        // instance fields
         private Parser m_parser;
-		
+        
         private TextReader m_inputReader;
-		
+        
 
-		
-		// constructor
+        
+        // constructor
         public MyParserContext(Parser prser)
         {
-            m_parser = prser;	
+            m_parser = prser;    
         }
        
 
@@ -415,7 +415,7 @@ namespace Morozov.Parsing
 
 ##END-RULES
                 default:
-					throw new RuleException("Unknown rule: Does your CGT Match your Code Revision?");
+                    throw new RuleException("Unknown rule: Does your CGT Match your Code Revision?");
             }
             
         }
