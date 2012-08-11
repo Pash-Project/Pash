@@ -1,5 +1,5 @@
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C# Express 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoldParser", "GoldParser.csproj", "{1A1A5AE9-7981-471C-9CC7-F7465E675A32}"
 EndProject
 Global
