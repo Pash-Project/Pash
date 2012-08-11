@@ -80,7 +80,7 @@ namespace Morozov.Parsing
     {
 ##SYMBOLS
 ##DELIMITER ','
-        %ID.Padded% = %Value.Padded%%Delimiter% // %Description%
+        %ID% = %Value%%Delimiter% // %Description%
 ##END-SYMBOLS
     };
 
@@ -88,7 +88,7 @@ namespace Morozov.Parsing
     {
 ##RULES
 ##DELIMITER ','
-        %ID.Padded% = %Value.Padded%%Delimiter% // %Description%
+        %ID% = %Value%%Delimiter% // %Description%
 ##END-RULES
     };
 
