@@ -31,15 +31,15 @@ namespace Pash.ParserIntrinsics
     class SymbolConstants
     {
 ##SYMBOL-TABLE
-        static SymbolConstants[] All = new SymbolConstants[%Count%];
+        static List<SymbolConstants> All = new List<SymbolConstants>(%Count%);
 ##END-SYMBOL-TABLE
         
         public readonly string Description;
         public readonly SymbolType SymbolType;
         
         SymbolConstants(
-            int index,
             string description,
+            int index,
             SymbolType symbolType
         ) 
         {
@@ -57,12 +57,7 @@ namespace Pash.ParserIntrinsics
         
 ##SYMBOLS
 ##DELIMITER ','
-        public static readonly SymbolConstants %ID% = new SymbolConstants (
-            %Index%,
-            "%Description%",
-            (SymbolType) %Kind%
-        );
-
+        public static readonly SymbolConstants %ID% = new SymbolConstants ("%Description%", %Index%, (SymbolType) %Kind%);
 ##END-SYMBOLS
     };
 }

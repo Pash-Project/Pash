@@ -14,14 +14,14 @@ namespace Pash.ParserIntrinsics
 {
     class SymbolConstants
     {
-        static SymbolConstants[] All = new SymbolConstants[47];
+        static List<SymbolConstants> All = new List<SymbolConstants>(47);
         
         public readonly string Description;
         public readonly SymbolType SymbolType;
         
         SymbolConstants(
-            int index,
             string description,
+            int index,
             SymbolType symbolType
         ) 
         {
@@ -37,287 +37,52 @@ namespace Pash.ParserIntrinsics
             return this.Description;
         }
         
-        public static readonly SymbolConstants Symbol_Eof = new SymbolConstants (
-            0,
-            "(EOF)",
-            (SymbolType) 3
-        );
-
-        public static readonly SymbolConstants Symbol_Error = new SymbolConstants (
-            1,
-            "(Error)",
-            (SymbolType) 7
-        );
-
-        public static readonly SymbolConstants Symbol_Comment = new SymbolConstants (
-            2,
-            "Comment",
-            (SymbolType) 2
-        );
-
-        public static readonly SymbolConstants Symbol_Whitespace = new SymbolConstants (
-            3,
-            "Whitespace",
-            (SymbolType) 2
-        );
-
-        public static readonly SymbolConstants Symbol_Num = new SymbolConstants (
-            4,
-            "'#'",
-            (SymbolType) 6
-        );
-
-        public static readonly SymbolConstants Symbol_Timesdiv = new SymbolConstants (
-            5,
-            "'*/'",
-            (SymbolType) 5
-        );
-
-        public static readonly SymbolConstants Symbol_Divtimes = new SymbolConstants (
-            6,
-            "'/*'",
-            (SymbolType) 4
-        );
-
-        public static readonly SymbolConstants Symbol_Dollarlparan = new SymbolConstants (
-            7,
-            "'$('",
-            (SymbolType) 1
-        );
-
-        public static readonly SymbolConstants Symbol_Lparan = new SymbolConstants (
-            8,
-            "'('",
-            (SymbolType) 1
-        );
-
-        public static readonly SymbolConstants Symbol_Rparan = new SymbolConstants (
-            9,
-            "')'",
-            (SymbolType) 1
-        );
-
-        public static readonly SymbolConstants Symbol_Additionoperatortoken = new SymbolConstants (
-            10,
-            "AdditionOperatorToken",
-            (SymbolType) 1
-        );
-
-        public static readonly SymbolConstants Symbol_Anywordtoken = new SymbolConstants (
-            11,
-            "AnyWordToken",
-            (SymbolType) 1
-        );
-
-        public static readonly SymbolConstants Symbol_Assignmentoperatortoken = new SymbolConstants (
-            12,
-            "AssignmentOperatorToken",
-            (SymbolType) 1
-        );
-
-        public static readonly SymbolConstants Symbol_Commatoken = new SymbolConstants (
-            13,
-            "CommaToken",
-            (SymbolType) 1
-        );
-
-        public static readonly SymbolConstants Symbol_Commenttoken = new SymbolConstants (
-            14,
-            "CommentToken",
-            (SymbolType) 1
-        );
-
-        public static readonly SymbolConstants Symbol_Execcall = new SymbolConstants (
-            15,
-            "ExecCall",
-            (SymbolType) 1
-        );
-
-        public static readonly SymbolConstants Symbol_Newline = new SymbolConstants (
-            16,
-            "NewLine",
-            (SymbolType) 1
-        );
-
-        public static readonly SymbolConstants Symbol_Numbertoken = new SymbolConstants (
-            17,
-            "NumberToken",
-            (SymbolType) 1
-        );
-
-        public static readonly SymbolConstants Symbol_Parametertoken = new SymbolConstants (
-            18,
-            "ParameterToken",
-            (SymbolType) 1
-        );
-
-        public static readonly SymbolConstants Symbol_Rangeoperatortoken = new SymbolConstants (
-            19,
-            "RangeOperatorToken",
-            (SymbolType) 1
-        );
-
-        public static readonly SymbolConstants Symbol_Stringtoken = new SymbolConstants (
-            20,
-            "StringToken",
-            (SymbolType) 1
-        );
-
-        public static readonly SymbolConstants Symbol_Variabletoken = new SymbolConstants (
-            21,
-            "VariableToken",
-            (SymbolType) 1
-        );
-
-        public static readonly SymbolConstants Symbol_Pipe = new SymbolConstants (
-            22,
-            "'|'",
-            (SymbolType) 1
-        );
-
-        public static readonly SymbolConstants Symbol_Addexpressionrule = new SymbolConstants (
-            23,
-            "<addExpressionRule>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Arrayliteralrule = new SymbolConstants (
-            24,
-            "<arrayLiteralRule>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Assignmentstatementrule = new SymbolConstants (
-            25,
-            "<assignmentStatementRule>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Bitwiseexpressionrule = new SymbolConstants (
-            26,
-            "<bitwiseExpressionRule>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Cmdletcall = new SymbolConstants (
-            27,
-            "<cmdletCall>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Cmdletname = new SymbolConstants (
-            28,
-            "<cmdletName>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Cmletparamslist = new SymbolConstants (
-            29,
-            "<cmletParamsList>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Comparisonexpressionrule = new SymbolConstants (
-            30,
-            "<comparisonExpressionRule>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Expressionrule = new SymbolConstants (
-            31,
-            "<expressionRule>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Formatexpressionrule = new SymbolConstants (
-            32,
-            "<formatExpressionRule>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Logicalexpressionrule = new SymbolConstants (
-            33,
-            "<logicalExpressionRule>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Lvalue = new SymbolConstants (
-            34,
-            "<lvalue>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Lvalueexpression = new SymbolConstants (
-            35,
-            "<lvalueExpression>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Multiplyexpressionrule = new SymbolConstants (
-            36,
-            "<multiplyExpressionRule>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Parameterargumenttoken = new SymbolConstants (
-            37,
-            "<ParameterArgumentToken>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Pipelinerule = new SymbolConstants (
-            38,
-            "<pipelineRule>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Postfixoperatorrule = new SymbolConstants (
-            39,
-            "<postfixOperatorRule>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Propertyorarrayreferencerule = new SymbolConstants (
-            40,
-            "<propertyOrArrayReferenceRule>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Rangeexpressionrule = new SymbolConstants (
-            41,
-            "<rangeExpressionRule>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Simplelvalue = new SymbolConstants (
-            42,
-            "<simpleLvalue>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Statementlistrule = new SymbolConstants (
-            43,
-            "<statementListRule>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Statementrule = new SymbolConstants (
-            44,
-            "<statementRule>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Statementseparatortoken = new SymbolConstants (
-            45,
-            "<statementSeparatorToken>",
-            (SymbolType) 0
-        );
-
-        public static readonly SymbolConstants Symbol_Valuerule = new SymbolConstants (
-            46,
-            "<valueRule>",
-            (SymbolType) 0
-        );
-
+        public static readonly SymbolConstants Symbol_Eof = new SymbolConstants ("(EOF)", 0, (SymbolType) 3);
+        public static readonly SymbolConstants Symbol_Error = new SymbolConstants ("(Error)", 1, (SymbolType) 7);
+        public static readonly SymbolConstants Symbol_Comment = new SymbolConstants ("Comment", 2, (SymbolType) 2);
+        public static readonly SymbolConstants Symbol_Whitespace = new SymbolConstants ("Whitespace", 3, (SymbolType) 2);
+        public static readonly SymbolConstants Symbol_Num = new SymbolConstants ("'#'", 4, (SymbolType) 6);
+        public static readonly SymbolConstants Symbol_Timesdiv = new SymbolConstants ("'*/'", 5, (SymbolType) 5);
+        public static readonly SymbolConstants Symbol_Divtimes = new SymbolConstants ("'/*'", 6, (SymbolType) 4);
+        public static readonly SymbolConstants Symbol_Dollarlparan = new SymbolConstants ("'$('", 7, (SymbolType) 1);
+        public static readonly SymbolConstants Symbol_Lparan = new SymbolConstants ("'('", 8, (SymbolType) 1);
+        public static readonly SymbolConstants Symbol_Rparan = new SymbolConstants ("')'", 9, (SymbolType) 1);
+        public static readonly SymbolConstants Symbol_Additionoperatortoken = new SymbolConstants ("AdditionOperatorToken", 10, (SymbolType) 1);
+        public static readonly SymbolConstants Symbol_Anywordtoken = new SymbolConstants ("AnyWordToken", 11, (SymbolType) 1);
+        public static readonly SymbolConstants Symbol_Assignmentoperatortoken = new SymbolConstants ("AssignmentOperatorToken", 12, (SymbolType) 1);
+        public static readonly SymbolConstants Symbol_Commatoken = new SymbolConstants ("CommaToken", 13, (SymbolType) 1);
+        public static readonly SymbolConstants Symbol_Commenttoken = new SymbolConstants ("CommentToken", 14, (SymbolType) 1);
+        public static readonly SymbolConstants Symbol_Execcall = new SymbolConstants ("ExecCall", 15, (SymbolType) 1);
+        public static readonly SymbolConstants Symbol_Newline = new SymbolConstants ("NewLine", 16, (SymbolType) 1);
+        public static readonly SymbolConstants Symbol_Numbertoken = new SymbolConstants ("NumberToken", 17, (SymbolType) 1);
+        public static readonly SymbolConstants Symbol_Parametertoken = new SymbolConstants ("ParameterToken", 18, (SymbolType) 1);
+        public static readonly SymbolConstants Symbol_Rangeoperatortoken = new SymbolConstants ("RangeOperatorToken", 19, (SymbolType) 1);
+        public static readonly SymbolConstants Symbol_Stringtoken = new SymbolConstants ("StringToken", 20, (SymbolType) 1);
+        public static readonly SymbolConstants Symbol_Variabletoken = new SymbolConstants ("VariableToken", 21, (SymbolType) 1);
+        public static readonly SymbolConstants Symbol_Pipe = new SymbolConstants ("'|'", 22, (SymbolType) 1);
+        public static readonly SymbolConstants Symbol_Addexpressionrule = new SymbolConstants ("<addExpressionRule>", 23, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Arrayliteralrule = new SymbolConstants ("<arrayLiteralRule>", 24, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Assignmentstatementrule = new SymbolConstants ("<assignmentStatementRule>", 25, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Bitwiseexpressionrule = new SymbolConstants ("<bitwiseExpressionRule>", 26, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Cmdletcall = new SymbolConstants ("<cmdletCall>", 27, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Cmdletname = new SymbolConstants ("<cmdletName>", 28, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Cmletparamslist = new SymbolConstants ("<cmletParamsList>", 29, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Comparisonexpressionrule = new SymbolConstants ("<comparisonExpressionRule>", 30, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Expressionrule = new SymbolConstants ("<expressionRule>", 31, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Formatexpressionrule = new SymbolConstants ("<formatExpressionRule>", 32, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Logicalexpressionrule = new SymbolConstants ("<logicalExpressionRule>", 33, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Lvalue = new SymbolConstants ("<lvalue>", 34, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Lvalueexpression = new SymbolConstants ("<lvalueExpression>", 35, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Multiplyexpressionrule = new SymbolConstants ("<multiplyExpressionRule>", 36, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Parameterargumenttoken = new SymbolConstants ("<ParameterArgumentToken>", 37, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Pipelinerule = new SymbolConstants ("<pipelineRule>", 38, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Postfixoperatorrule = new SymbolConstants ("<postfixOperatorRule>", 39, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Propertyorarrayreferencerule = new SymbolConstants ("<propertyOrArrayReferenceRule>", 40, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Rangeexpressionrule = new SymbolConstants ("<rangeExpressionRule>", 41, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Simplelvalue = new SymbolConstants ("<simpleLvalue>", 42, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Statementlistrule = new SymbolConstants ("<statementListRule>", 43, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Statementrule = new SymbolConstants ("<statementRule>", 44, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Statementseparatortoken = new SymbolConstants ("<statementSeparatorToken>", 45, (SymbolType) 0);
+        public static readonly SymbolConstants Symbol_Valuerule = new SymbolConstants ("<valueRule>", 46, (SymbolType) 0);
     };
 }
