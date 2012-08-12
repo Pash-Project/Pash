@@ -53,25 +53,26 @@ namespace Pash.ParserIntrinsics
             switch (m_parser.ReductionRule.Index)
             {
 ##RULES
-                // %Description%
-                case %Index%:
-                    CreateRule_%ID%(m_parser, ref node);
+                // %ID%:
+                //      %Description%
+                case %Index%: 
+                    CreateNodeFor%ID%(m_parser, ref node);
                     return node;
 
 ##END-RULES
                 default:
                     throw new RuleException("Unknown rule: Does your CGT Match your Code Revision?");
             }
-
         }
+
         
         #region CreateASTNode Dispatch hooks
 ##RULES
         // %Description%
-        partial void CreateRule_%ID%(Parser parser, ref ASTNode node);
+        partial void CreateNodeFor%ID%(Parser parser, ref ASTNode node);
 ##END-RULES
         #endregion
 
-    }
 
+    }
 }
