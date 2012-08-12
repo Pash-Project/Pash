@@ -260,6 +260,10 @@
     <None Include="Pash\ParserIntrinsics\PashGrammar.grm">
     </None>
     <None Include="System.Management.cd" />
+    <None Include="Pash\ParserIntrinsics\generate-parser.cmd" />
+    <None Include="Pash\ParserIntrinsics\PashParserContext.pgt" />
+    <None Include="Pash\ParserIntrinsics\RuleConstants.pgt" />
+    <None Include="Pash\ParserIntrinsics\SymbolConstants.pgt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pash.ConfigurationSection\Pash.ConfigurationSection.csproj">
