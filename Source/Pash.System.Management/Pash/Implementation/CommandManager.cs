@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Management.Automation.Provider;
 using System.Reflection;
 using System.Management.Automation.Runspaces;
@@ -236,18 +237,20 @@ namespace Pash.Implementation
         {
             // TODO: find the CommandInfo from CommandManager
 
-            if (_cmdLets.ContainsKey(command))
+            List<CmdletInfo> cmdletsList;
+            if (_cmdLets.TryGetValue(command, out cmdletsList))
             {
-                var cmdletsList = _cmdLets[command];
                 if (cmdletsList.Count > 0)
                     return cmdletsList[0];
             }
 
-            if (_scripts.ContainsKey(command))
-                return _scripts[command];
+            ScriptInfo scriptInfo;
+            if (_scripts.TryGetValue(command, out scriptInfo))
+                return scriptInfo;
 
-            if (_aliases.ContainsKey(command))
-                return _aliases[command];
+            AliasInfo aliasInfo;
+            if (_aliases.TryGetValue(command, out aliasInfo))
+                return aliasInfo;
 
             // TODO: search functions (in a context?)
 
