@@ -4,12 +4,7 @@
 //
 ///////////////////////////////////////////////////////////////////
 
-
 using System;
-using System.Reflection;
-using System.IO;
-using System.Text;
-using System.Runtime.Serialization;
 using System.Collections.Generic;
 
 using GoldParser;
