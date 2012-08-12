@@ -119,7 +119,7 @@ CommentToken = '#'{Printable}+
 ! <statementListRule> = <statementRule> [ <statementSeparatorToken> <statementRule> ]*
 
 <statementSeparatorToken> ::= NewLine <statementSeparatorToken>
-                            | 
+                            | <>
 
 <statementListRule> ::= <statementRule>
                       | <statementRule> <statementSeparatorToken> <statementListRule>
