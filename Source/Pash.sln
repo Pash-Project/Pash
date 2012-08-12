@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pash.ConfigurationSection", "Pash.ConfigurationSection\Pash.ConfigurationSection.csproj", "{F597CB0B-E83B-4052-A6FA-35D61B5F341D}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pash.Microsoft.Commands.Management", "Pash.Microsoft.Commands.Management\Pash.Microsoft.Commands.Management.csproj", "{91225A72-A021-4B7D-BA56-5E1B7AC02F03}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pash.Microsoft.PowerShell.Commands.Utility", "Pash.Microsoft.PowerShell.Commands.Utility\Pash.Microsoft.PowerShell.Commands.Utility.csproj", "{0E1D573C-C57D-4A83-A739-3A38E719D87E}"
@@ -12,6 +14,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pash.ConfigurationSection", "Pash.ConfigurationSection\Pash.ConfigurationSection.csproj", "{629394D3-F7AC-4C27-8A39-1D52C801E8A5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PashGui", "PashGui\PashGui.csproj", "{A7B03D7C-D239-4352-ACB8-5C7563F1D551}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pash.Configuration", "Pash.Configuration\Pash.Configuration.csproj", "{F125870F-2B9E-49A8-82FE-6B67A766AA1F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,6 +22,13 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F597CB0B-E83B-4052-A6FA-35D61B5F341D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F597CB0B-E83B-4052-A6FA-35D61B5F341D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F597CB0B-E83B-4052-A6FA-35D61B5F341D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91225A72-A021-4B7D-BA56-5E1B7AC02F03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91225A72-A021-4B7D-BA56-5E1B7AC02F03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91225A72-A021-4B7D-BA56-5E1B7AC02F03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91225A72-A021-4B7D-BA56-5E1B7AC02F03}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0E1D573C-C57D-4A83-A739-3A38E719D87E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0E1D573C-C57D-4A83-A739-3A38E719D87E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E1D573C-C57D-4A83-A739-3A38E719D87E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -76,6 +86,10 @@ Global
 		$3.inheritsSet = VisualStudio
 		$3.inheritsScope = text/plain
 		$3.scope = text/plain
+		{F125870F-2B9E-49A8-82FE-6B67A766AA1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F125870F-2B9E-49A8-82FE-6B67A766AA1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F125870F-2B9E-49A8-82FE-6B67A766AA1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F125870F-2B9E-49A8-82FE-6B67A766AA1F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
