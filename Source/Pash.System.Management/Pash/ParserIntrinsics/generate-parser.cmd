@@ -8,14 +8,11 @@ set PATH=%PATH%;..\..\..\..\GoldBuilder
 GOLDBuild.exe -verbose PashGrammar.grm PashGrammar.cgt
 IF ERRORLEVEL 1 GOTO :EOF
 
-GOLDProg.exe PashGrammar.cgt PashParser.pgt PashParser.Generated.cs
-IF ERRORLEVEL 1 GOTO :EOF
-
 GOLDProg.exe PashGrammar.cgt PashParserContext.pgt PashParserContext.Generated.cs
 IF ERRORLEVEL 1 GOTO :EOF
 
-GOLDProg.exe PashGrammar.cgt ParserTemplate.pgt RuleConstants.Generated.cs
+GOLDProg.exe PashGrammar.cgt RuleConstants.pgt RuleConstants.Generated.cs
 IF ERRORLEVEL 1 GOTO :EOF
 
-GOLDProg.exe PashGrammar.cgt ParserTemplate.pgt SymbolConstants.Generated.cs
+GOLDProg.exe PashGrammar.cgt SymbolConstants.pgt SymbolConstants.Generated.cs
 IF ERRORLEVEL 1 GOTO :EOF
