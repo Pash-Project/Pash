@@ -20,14 +20,6 @@ namespace Pash.ParserIntrinsics
                 Rule = theParser.ReductionRule;
         }
 
-        public override bool IsTerminal
-        {
-            get
-            {
-                return false;
-            }
-        }
-
         public int Count
         {
             get { return m_array.Count; }

@@ -7,9 +7,14 @@ namespace Pash.ParserIntrinsics
 {
     public abstract partial class ASTNode
     {
-        public abstract bool IsTerminal
+        public bool IsTerminal
         {
-            get;
+            get
+            {
+                if (this is TerminalNode) return true;
+                if (this is NonTerminalNode) return false;
+                throw new Exception("Don't derive directly from ASTNode");
+            }
         }
 
         protected object Token(Parser theParser, int index)

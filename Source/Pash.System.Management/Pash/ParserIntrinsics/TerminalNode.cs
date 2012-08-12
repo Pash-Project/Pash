@@ -14,7 +14,6 @@ namespace Pash.ParserIntrinsics
         public string Text { get; protected set; }
         public int LineNumber { get; private set; }
         public int LinePosition { get; private set; }
-        public override bool IsTerminal { get { return true; } }
 
         public TerminalNode(Parser theParser)
         {
