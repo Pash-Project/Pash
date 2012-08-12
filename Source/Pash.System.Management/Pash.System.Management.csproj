@@ -246,6 +246,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Pash\ParserIntrinsics\SymbolException.cs" />
     <Compile Include="Pash\ParserIntrinsics\RuleException.cs" />
+    <Compile Include="Pash\ParserIntrinsics\ParserFactory.cs" />
+    <Compile Include="Pash\ParserIntrinsics\ASTNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\TerminalNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\NonTerminalNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Pash\ParserIntrinsics\PashGrammar.cgt">
