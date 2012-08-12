@@ -27,6 +27,8 @@ using GoldParser;
 
 namespace Pash.ParserIntrinsics
 {
+    using Nodes;
+    
     public partial class PashParserContext
     {
         private readonly Parser m_parser;

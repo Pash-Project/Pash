@@ -8,6 +8,8 @@ using Pash.ParserIntrinsics;
 
 namespace Pash.ParserIntrinsics
 {
+    using Nodes;
+
     public partial class PashParserContext
     {
         // <pipelineRule> ::= <cmdletCall> | <pipelineRule>

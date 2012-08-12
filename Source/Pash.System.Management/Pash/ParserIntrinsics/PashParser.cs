@@ -11,6 +11,8 @@ using Pash.Implementation;
 
 namespace Pash.ParserIntrinsics
 {
+    using Nodes;
+
     public class PashParser
     {
         #region Static Initialization

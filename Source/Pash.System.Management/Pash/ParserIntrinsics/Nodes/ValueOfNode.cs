@@ -5,7 +5,7 @@ using System.Management.Automation.Runspaces;
 using GoldParser;
 using Pash.Implementation;
 
-namespace Pash.ParserIntrinsics
+namespace Pash.ParserIntrinsics.Nodes
 {
     internal class ValueOfNode : NonTerminalNode
     {

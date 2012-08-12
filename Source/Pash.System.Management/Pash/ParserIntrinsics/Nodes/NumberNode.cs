@@ -6,7 +6,7 @@ using GoldParser;
 using Pash.Implementation;
 using System.Globalization;
 
-namespace Pash.ParserIntrinsics
+namespace Pash.ParserIntrinsics.Nodes
 {
     internal class NumberNode : TerminalNode
     {

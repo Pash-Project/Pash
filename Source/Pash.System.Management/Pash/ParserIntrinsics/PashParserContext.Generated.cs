@@ -28,9 +28,9 @@ namespace Pash.ParserIntrinsics
                 return null;
         }
 
-        public ASTNode CreateASTNode()
+        public Nodes.ASTNode CreateASTNode()
         {
-            ASTNode node = null;
+            Nodes.ASTNode node = null;
             
             switch (m_parser.ReductionRule.Index)
             {
@@ -260,95 +260,95 @@ namespace Pash.ParserIntrinsics
 
         }
         
-        #region CreateASTNode Dispatch hooks
+        #region CreateNodes.ASTNode Dispatch hooks
         // <statementSeparatorToken> ::= NewLine <statementSeparatorToken>
-        partial void CreateRule_Rule_Statementseparatortoken_Newline(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Statementseparatortoken_Newline(Parser parser, ref Nodes.ASTNode node);
         // <statementSeparatorToken> ::= 
-        partial void CreateRule_Rule_Statementseparatortoken(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Statementseparatortoken(Parser parser, ref Nodes.ASTNode node);
         // <statementListRule> ::= <statementRule>
-        partial void CreateRule_Rule_Statementlistrule(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Statementlistrule(Parser parser, ref Nodes.ASTNode node);
         // <statementListRule> ::= <statementRule> <statementSeparatorToken> <statementListRule>
-        partial void CreateRule_Rule_Statementlistrule2(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Statementlistrule2(Parser parser, ref Nodes.ASTNode node);
         // <statementRule> ::= <pipelineRule>
-        partial void CreateRule_Rule_Statementrule(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Statementrule(Parser parser, ref Nodes.ASTNode node);
         // <statementRule> ::= CommentToken
-        partial void CreateRule_Rule_Statementrule_Commenttoken(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Statementrule_Commenttoken(Parser parser, ref Nodes.ASTNode node);
         // <pipelineRule> ::= <cmdletCall>
-        partial void CreateRule_Rule_Pipelinerule(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Pipelinerule(Parser parser, ref Nodes.ASTNode node);
         // <pipelineRule> ::= <cmdletCall> '|' <pipelineRule>
-        partial void CreateRule_Rule_Pipelinerule_Pipe(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Pipelinerule_Pipe(Parser parser, ref Nodes.ASTNode node);
         // <pipelineRule> ::= <assignmentStatementRule>
-        partial void CreateRule_Rule_Pipelinerule2(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Pipelinerule2(Parser parser, ref Nodes.ASTNode node);
         // <pipelineRule> ::= <assignmentStatementRule> '|' <pipelineRule>
-        partial void CreateRule_Rule_Pipelinerule_Pipe2(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Pipelinerule_Pipe2(Parser parser, ref Nodes.ASTNode node);
         // <assignmentStatementRule> ::= <lvalueExpression> AssignmentOperatorToken <pipelineRule>
-        partial void CreateRule_Rule_Assignmentstatementrule_Assignmentoperatortoken(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Assignmentstatementrule_Assignmentoperatortoken(Parser parser, ref Nodes.ASTNode node);
         // <lvalueExpression> ::= <lvalue>
-        partial void CreateRule_Rule_Lvalueexpression(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Lvalueexpression(Parser parser, ref Nodes.ASTNode node);
         // <lvalue> ::= <simpleLvalue>
-        partial void CreateRule_Rule_Lvalue(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Lvalue(Parser parser, ref Nodes.ASTNode node);
         // <simpleLvalue> ::= VariableToken
-        partial void CreateRule_Rule_Simplelvalue_Variabletoken(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Simplelvalue_Variabletoken(Parser parser, ref Nodes.ASTNode node);
         // <ParameterArgumentToken> ::= <valueRule>
-        partial void CreateRule_Rule_Parameterargumenttoken(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Parameterargumenttoken(Parser parser, ref Nodes.ASTNode node);
         // <ParameterArgumentToken> ::= AnyWordToken
-        partial void CreateRule_Rule_Parameterargumenttoken_Anywordtoken(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Parameterargumenttoken_Anywordtoken(Parser parser, ref Nodes.ASTNode node);
         // <ParameterArgumentToken> ::= ParameterToken
-        partial void CreateRule_Rule_Parameterargumenttoken_Parametertoken(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Parameterargumenttoken_Parametertoken(Parser parser, ref Nodes.ASTNode node);
         // <cmletParamsList> ::= <ParameterArgumentToken> <cmletParamsList>
-        partial void CreateRule_Rule_Cmletparamslist(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Cmletparamslist(Parser parser, ref Nodes.ASTNode node);
         // <cmletParamsList> ::= <ParameterArgumentToken>
-        partial void CreateRule_Rule_Cmletparamslist2(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Cmletparamslist2(Parser parser, ref Nodes.ASTNode node);
         // <cmdletName> ::= AnyWordToken
-        partial void CreateRule_Rule_Cmdletname_Anywordtoken(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Cmdletname_Anywordtoken(Parser parser, ref Nodes.ASTNode node);
         // <cmdletCall> ::= ExecCall <cmdletName> <cmletParamsList>
-        partial void CreateRule_Rule_Cmdletcall_Execcall(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Cmdletcall_Execcall(Parser parser, ref Nodes.ASTNode node);
         // <cmdletCall> ::= ExecCall <cmdletName>
-        partial void CreateRule_Rule_Cmdletcall_Execcall2(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Cmdletcall_Execcall2(Parser parser, ref Nodes.ASTNode node);
         // <cmdletCall> ::= <cmdletName> <cmletParamsList>
-        partial void CreateRule_Rule_Cmdletcall(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Cmdletcall(Parser parser, ref Nodes.ASTNode node);
         // <cmdletCall> ::= <cmdletName>
-        partial void CreateRule_Rule_Cmdletcall2(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Cmdletcall2(Parser parser, ref Nodes.ASTNode node);
         // <cmdletCall> ::= <expressionRule>
-        partial void CreateRule_Rule_Cmdletcall3(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Cmdletcall3(Parser parser, ref Nodes.ASTNode node);
         // <expressionRule> ::= <logicalExpressionRule>
-        partial void CreateRule_Rule_Expressionrule(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Expressionrule(Parser parser, ref Nodes.ASTNode node);
         // <logicalExpressionRule> ::= <bitwiseExpressionRule>
-        partial void CreateRule_Rule_Logicalexpressionrule(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Logicalexpressionrule(Parser parser, ref Nodes.ASTNode node);
         // <bitwiseExpressionRule> ::= <comparisonExpressionRule>
-        partial void CreateRule_Rule_Bitwiseexpressionrule(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Bitwiseexpressionrule(Parser parser, ref Nodes.ASTNode node);
         // <comparisonExpressionRule> ::= <addExpressionRule>
-        partial void CreateRule_Rule_Comparisonexpressionrule(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Comparisonexpressionrule(Parser parser, ref Nodes.ASTNode node);
         // <addExpressionRule> ::= <multiplyExpressionRule>
-        partial void CreateRule_Rule_Addexpressionrule(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Addexpressionrule(Parser parser, ref Nodes.ASTNode node);
         // <addExpressionRule> ::= <multiplyExpressionRule> AdditionOperatorToken <addExpressionRule>
-        partial void CreateRule_Rule_Addexpressionrule_Additionoperatortoken(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Addexpressionrule_Additionoperatortoken(Parser parser, ref Nodes.ASTNode node);
         // <multiplyExpressionRule> ::= <formatExpressionRule>
-        partial void CreateRule_Rule_Multiplyexpressionrule(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Multiplyexpressionrule(Parser parser, ref Nodes.ASTNode node);
         // <formatExpressionRule> ::= <rangeExpressionRule>
-        partial void CreateRule_Rule_Formatexpressionrule(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Formatexpressionrule(Parser parser, ref Nodes.ASTNode node);
         // <rangeExpressionRule> ::= <arrayLiteralRule>
-        partial void CreateRule_Rule_Rangeexpressionrule(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Rangeexpressionrule(Parser parser, ref Nodes.ASTNode node);
         // <rangeExpressionRule> ::= <arrayLiteralRule> RangeOperatorToken <rangeExpressionRule>
-        partial void CreateRule_Rule_Rangeexpressionrule_Rangeoperatortoken(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Rangeexpressionrule_Rangeoperatortoken(Parser parser, ref Nodes.ASTNode node);
         // <arrayLiteralRule> ::= <postfixOperatorRule>
-        partial void CreateRule_Rule_Arrayliteralrule(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Arrayliteralrule(Parser parser, ref Nodes.ASTNode node);
         // <arrayLiteralRule> ::= <postfixOperatorRule> CommaToken <arrayLiteralRule>
-        partial void CreateRule_Rule_Arrayliteralrule_Commatoken(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Arrayliteralrule_Commatoken(Parser parser, ref Nodes.ASTNode node);
         // <postfixOperatorRule> ::= <propertyOrArrayReferenceRule>
-        partial void CreateRule_Rule_Postfixoperatorrule(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Postfixoperatorrule(Parser parser, ref Nodes.ASTNode node);
         // <propertyOrArrayReferenceRule> ::= <valueRule>
-        partial void CreateRule_Rule_Propertyorarrayreferencerule(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Propertyorarrayreferencerule(Parser parser, ref Nodes.ASTNode node);
         // <valueRule> ::= StringToken
-        partial void CreateRule_Rule_Valuerule_Stringtoken(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Valuerule_Stringtoken(Parser parser, ref Nodes.ASTNode node);
         // <valueRule> ::= VariableToken
-        partial void CreateRule_Rule_Valuerule_Variabletoken(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Valuerule_Variabletoken(Parser parser, ref Nodes.ASTNode node);
         // <valueRule> ::= NumberToken
-        partial void CreateRule_Rule_Valuerule_Numbertoken(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Valuerule_Numbertoken(Parser parser, ref Nodes.ASTNode node);
         // <valueRule> ::= '$(' <statementRule> ')'
-        partial void CreateRule_Rule_Valuerule_Dollarlparan_Rparan(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Valuerule_Dollarlparan_Rparan(Parser parser, ref Nodes.ASTNode node);
         // <valueRule> ::= '(' <assignmentStatementRule> ')'
-        partial void CreateRule_Rule_Valuerule_Lparan_Rparan(Parser parser, ref ASTNode node);
+        partial void CreateRule_Rule_Valuerule_Lparan_Rparan(Parser parser, ref Nodes.ASTNode node);
         #endregion
 
     }

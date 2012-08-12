@@ -3,7 +3,7 @@ using GoldParser;
 using Pash.Implementation;
 using System.Management.Automation;
 
-namespace Pash.ParserIntrinsics
+namespace Pash.ParserIntrinsics.Nodes
 {
     /// <summary>
     /// Derive this class for Terminal AST Nodes

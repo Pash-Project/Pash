@@ -2,7 +2,7 @@ using System;
 using GoldParser;
 using System.Collections.Generic;
 
-namespace Pash.ParserIntrinsics
+namespace Pash.ParserIntrinsics.Nodes
 {
     /// <summary>
     /// Derive this class for NonTerminal AST Nodes

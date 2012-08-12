@@ -6,7 +6,7 @@ using System.Text;
 using GoldParser;
 using Pash.Implementation;
 
-namespace Pash.ParserIntrinsics
+namespace Pash.ParserIntrinsics.Nodes
 {
     internal class CmdletNode : NonTerminalNode
     {

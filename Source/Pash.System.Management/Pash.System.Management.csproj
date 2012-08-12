@@ -229,30 +229,30 @@
     <Compile Include="Pash\Implementation\ObjectStreamWriter.cs" />
     <Compile Include="Pash\Implementation\PipelineProcessor.cs" />
     <Compile Include="Pash\Implementation\ScriptProcessor.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AdditionExpressionNode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AnyWordNode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\ArrayNode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AssignmentNode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\CmdletNode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\NumberNode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\ParamsListNode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\PipelineNode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\RangeNode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\StringNode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\ValueOfNode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\VariableNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Pash\ParserIntrinsics\SymbolException.cs" />
     <Compile Include="Pash\ParserIntrinsics\RuleException.cs" />
     <Compile Include="Pash\ParserIntrinsics\ParserFactory.cs" />
-    <Compile Include="Pash\ParserIntrinsics\ASTNode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\TerminalNode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\NonTerminalNode.cs" />
     <Compile Include="Pash\ParserIntrinsics\PashParserContext.Generated.cs" />
     <Compile Include="Pash\ParserIntrinsics\SymbolConstants.Generated.cs" />
     <Compile Include="Pash\ParserIntrinsics\RuleConstants.Generated.cs" />
     <Compile Include="Pash\ParserIntrinsics\PashParser.cs" />
     <Compile Include="Pash\ParserIntrinsics\PashParserContext.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\AdditionExpressionNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\AnyWordNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\ArrayNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\AssignmentNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\ASTNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\CmdletNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\NonTerminalNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\NumberNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\ParamsListNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\PipelineNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\RangeNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\StringNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\TerminalNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\ValueOfNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\VariableNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Pash\ParserIntrinsics\PashGrammar.cgt">
@@ -279,4 +279,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Folder Include="Pash\ParserIntrinsics\Nodes\" />
+  </ItemGroup>
 </Project>

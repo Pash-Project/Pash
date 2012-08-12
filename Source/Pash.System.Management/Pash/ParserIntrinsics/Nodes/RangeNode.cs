@@ -3,7 +3,7 @@ using System.Management.Automation;
 using GoldParser;
 using Pash.Implementation;
 
-namespace Pash.ParserIntrinsics
+namespace Pash.ParserIntrinsics.Nodes
 {
     public class RangeNode : NonTerminalNode
     {

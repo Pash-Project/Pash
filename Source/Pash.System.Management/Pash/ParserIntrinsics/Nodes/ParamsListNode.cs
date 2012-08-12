@@ -7,7 +7,7 @@ using System.Collections.Specialized;
 using GoldParser;
 using Pash.Implementation;
 
-namespace Pash.ParserIntrinsics
+namespace Pash.ParserIntrinsics.Nodes
 {
     internal class ParamsListNode : NonTerminalNode
     {
