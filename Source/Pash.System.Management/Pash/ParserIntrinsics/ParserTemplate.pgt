@@ -30,7 +30,7 @@ using System.Reflection;
 using System.IO;
 using System.Text;
 using System.Runtime.Serialization;
-using System.Collections;
+using System.Collections.Generic;
 
 using GoldParser;
 
@@ -154,50 +154,24 @@ namespace Pash.ParserIntrinsics
     /// </summary>
     public class TerminalNode : ASTNode
     {
-        private Symbol m_symbol;
-        private string m_text;
-        private int m_lineNumber;
-        private int m_linePosition;
+        public Symbol Symbol { get; private set; }
+        public string Text { get; protected set; }
+        public int LineNumber { get; private set; }
+        public int LinePosition { get; private set; }
 
         public TerminalNode(Parser theParser)
         {
-            m_symbol = theParser.TokenSymbol;
-            m_text = theParser.TokenSymbol.ToString();
-            m_lineNumber = theParser.LineNumber;
-            m_linePosition = theParser.LinePosition;
+            Symbol = theParser.TokenSymbol;
+            Text = theParser.TokenSymbol.ToString();
+            LineNumber = theParser.LineNumber;
+            LinePosition = theParser.LinePosition;
         }
 
-        public override bool IsTerminal
-        {
-            get
-            {
-                return true;
-            }
-        }
-
-        public Symbol Symbol
-        {
-            get { return m_symbol; }
-        }
-
-        public string Text
-        {
-            get { return m_text; }
-        }
+        public override bool IsTerminal { get { return true; } }
 
         public override string ToString()
         {
-            return m_text;
-        }
-
-        public int LineNumber
-        {
-            get { return m_lineNumber; }
-        }
-
-        public int LinePosition
-        {
-            get { return m_linePosition; }
+            return Text;
         }
     }
 
@@ -206,14 +180,8 @@ namespace Pash.ParserIntrinsics
     /// </summary>
     public class NonTerminalNode : ASTNode
     {
-        private int m_reductionNumber;
-        private Rule m_rule;
-        private ArrayList m_array = new ArrayList();
-
-        public NonTerminalNode(Parser theParser)
-        {
-            m_rule = theParser.ReductionRule;
-        }
+        public Rule Rule { get; private set; }
+        public int ReductionNumber { get; set; }
 
         public override bool IsTerminal
         {
@@ -222,11 +190,11 @@ namespace Pash.ParserIntrinsics
                 return false;
             }
         }
+        private List<ASTNode> m_array = new List<ASTNode>();
 
-        public int ReductionNumber
+        public NonTerminalNode(Parser theParser)
         {
-            get { return m_reductionNumber; }
-            set { m_reductionNumber = value; }
+            m_rule = theParser.ReductionRule;
         }
 
         public int Count
@@ -236,7 +204,7 @@ namespace Pash.ParserIntrinsics
 
         public ASTNode this[int index]
         {
-            get { return m_array[index] as ASTNode; }
+            get { return m_array[index]; }
         }
 
         public void AppendChildNode(ASTNode node)
@@ -247,17 +215,11 @@ namespace Pash.ParserIntrinsics
             }
             m_array.Add(node);
         }
-
-        public Rule Rule
-        {
-            get { return m_rule; }
-        }
-
     }
 
-    public class MyParser
+    public class PashParser
     {
-        MyParserContext m_context;
+        PashParserContext m_context;
         ASTNode m_AST;
         string m_errorString;
         Parser m_parser;
@@ -311,7 +273,7 @@ namespace Pash.ParserIntrinsics
         {
             m_parser = ParserFactory.CreateParser(sourceReader);
             m_parser.TrimReductions = true;
-            m_context = new MyParserContext(m_parser);
+            m_context = new PashParserContext(m_parser);
 
             while (true)
             {
@@ -363,7 +325,7 @@ namespace Pash.ParserIntrinsics
 
     }
 
-    public class MyParserContext
+    public class PashParserContext
     {
 
         // instance fields
@@ -374,7 +336,7 @@ namespace Pash.ParserIntrinsics
 
 
         // constructor
-        public MyParserContext(Parser prser)
+        public PashParserContext(Parser prser)
         {
             m_parser = prser;
         }
