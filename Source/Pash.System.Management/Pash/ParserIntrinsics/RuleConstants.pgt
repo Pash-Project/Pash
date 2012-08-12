@@ -32,11 +32,31 @@ using GoldParser;
 
 namespace Pash.ParserIntrinsics
 {
-    enum RuleConstants : int
+    class RuleConstants
     {
+        public static readonly List<RuleConstants> All = new List<RuleConstants>();
+        
+        readonly public string Description;
+        readonly public int Index;
+        readonly public int NonTerminalIndex;
+        
+        RuleConstants(string description, int index, int nonTerminalIndex)
+        {
+            this.Description = description;
+            this.Index = index;
+            this.NonTerminalIndex = nonTerminalIndex;
+            
+            All.Add(this);
+        }
+        
+        public override string ToString()
+        {
+            return this.Description;
+        }
+        
 ##RULES
 ##DELIMITER ','
-        %ID% = %Value%%Delimiter% // %Description%
+        public static readonly RuleConstants %ID.Padded% = new RuleConstants ("%Description%", %Index%, %NonterminalIndex%);
 ##END-RULES
     };
 }

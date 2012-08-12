@@ -32,7 +32,7 @@ using GoldParser;
 
 namespace Pash.ParserIntrinsics
 {
-    public class PashParserContext
+    public partial class PashParserContext
     {
 
         // instance fields
@@ -43,44 +43,30 @@ namespace Pash.ParserIntrinsics
 
 
         // constructor
-        public PashParserContext(Parser prser)
+        public PashParserContext(Parser parser)
         {
-            m_parser = prser;
+            m_parser = parser;
         }
 
-
-        private string GetTokenText()
+        public string GetTokenText()
         {
-            // delete any of these that are non-terminals.
-
-            switch (m_parser.TokenSymbol.Index)
-            {
-
-##SYMBOLS
-                case (int)SymbolConstants.%ID% :
-                //%Description%
-                //Token Kind: %Kind%
-                //todo: uncomment the next line if it's a terminal token ( if Token Kind = 1 )
-                // return m_parser.TokenString;
+            if (m_parser.TokenSymbol.SymbolType == SymbolType.Terminal) 
+                return m_parser.TokenString;
+            else
                 return null;
-
-##END-SYMBOLS
-                default:
-                    throw new SymbolException("You don't want the text of a non-terminal symbol");
-
-            }
-
         }
 
         public ASTNode CreateASTNode()
         {
+            ASTNode node = null;
+            
             switch (m_parser.ReductionRule.Index)
             {
 ##RULES
-                case (int)RuleConstants.%ID% :
-                //%Description%
-                //todo: Perhaps create an object in the AST.
-                return null;
+                // %Description%
+                case %Index%:
+                    CreateRule_%ID%(m_parser, ref node);
+                    return node;
 
 ##END-RULES
                 default:
@@ -88,6 +74,13 @@ namespace Pash.ParserIntrinsics
             }
 
         }
+        
+        #region CreateASTNode Dispatch hooks
+##RULES
+        // %Description%
+        partial void CreateRule_%ID%(Parser parser, ref ASTNode node);
+##END-RULES
+        #endregion
 
     }
 
