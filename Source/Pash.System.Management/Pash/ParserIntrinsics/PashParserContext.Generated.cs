@@ -13,15 +13,8 @@ namespace Pash.ParserIntrinsics
 {
     public partial class PashParserContext
     {
+        private readonly Parser m_parser;
 
-        // instance fields
-        private Parser m_parser;
-
-        private TextReader m_inputReader;
-
-
-
-        // constructor
         public PashParserContext(Parser parser)
         {
             m_parser = parser;
