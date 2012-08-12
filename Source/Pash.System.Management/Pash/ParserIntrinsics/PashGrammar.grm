@@ -7,6 +7,18 @@
 "Start Symbol"    = <statementListRule>
 
 ! Grammar was taken from the Appendix C: Windows PowerShell in Action book (http://www.manning.com/payette/)
+! Quotes from that source are commented like this:
+!!!!     PowerShell is parsed using an augmented recursive descent parser. The
+!!!! augmentations are needed to deal with some of the complexities in
+!!!! tokenizing the PowerShell language. This topic is discussed in more
+!!!! detail in chapter 2.
+!!!!     The complete parser is composed of a set of parsing rules and tokenizing rules. These parsing and tokenization rules are what we're covering in this appendix. These rules can be separated into five layers:
+!!!! 
+!!!!     1 Statement list: the rules for parsing a basic statement list and a statement block.
+!!!!     2 Statements: various kinds of statements in the language.
+!!!!     3 Expressions
+!!!!     4 Values
+!!!!     5 Tokenizer rules
 
 !===============================
 ! Character sets
