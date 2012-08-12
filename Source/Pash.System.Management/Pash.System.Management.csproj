@@ -244,6 +244,8 @@
     <Compile Include="Pash\ParserIntrinsics\ValueOfNode.cs" />
     <Compile Include="Pash\ParserIntrinsics\VariableNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Pash\ParserIntrinsics\SymbolException.cs" />
+    <Compile Include="Pash\ParserIntrinsics\RuleException.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Pash\ParserIntrinsics\PashGrammar.cgt">
