@@ -5,8 +5,8 @@
 
 set PATH=%PATH%;..\..\..\..\GoldBuilder
 
-GOLDBuild.exe -verbose PashGrammar.grm PashGrammar.cgt
-IF ERRORLEVEL 1 GOTO :EOF
+:: GOLDBuild.exe -verbose PashGrammar.grm PashGrammar.cgt
+:: IF ERRORLEVEL 1 GOTO :EOF
 
 GOLDProg.exe PashGrammar.cgt PashParserContext.pgt PashParserContext.Generated.cs
 IF ERRORLEVEL 1 GOTO :EOF
