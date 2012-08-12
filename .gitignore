@@ -13,3 +13,6 @@ _ReSharper.*
 
 #Mono parser cache files
 *.pidb
+
+# GoldParser generator log, and possibly others
+*.log
