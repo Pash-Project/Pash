@@ -40,269 +40,271 @@ namespace Pash.ParserIntrinsics
                 //      <statementSeparatorToken> ::= NewLine <statementSeparatorToken>
                 case 0: 
                     CreateNodeForRule_Statementseparatortoken_Newline(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Statementseparatortoken:
                 //      <statementSeparatorToken> ::= 
                 case 1: 
                     CreateNodeForRule_Statementseparatortoken(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Statementlistrule:
                 //      <statementListRule> ::= <statementRule>
                 case 2: 
                     CreateNodeForRule_Statementlistrule(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Statementlistrule2:
                 //      <statementListRule> ::= <statementRule> <statementSeparatorToken> <statementListRule>
                 case 3: 
                     CreateNodeForRule_Statementlistrule2(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Statementrule:
                 //      <statementRule> ::= <pipelineRule>
                 case 4: 
                     CreateNodeForRule_Statementrule(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Statementrule_Commenttoken:
                 //      <statementRule> ::= CommentToken
                 case 5: 
                     CreateNodeForRule_Statementrule_Commenttoken(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Pipelinerule:
                 //      <pipelineRule> ::= <cmdletCall>
                 case 6: 
                     CreateNodeForRule_Pipelinerule(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Pipelinerule_Pipe:
                 //      <pipelineRule> ::= <cmdletCall> '|' <pipelineRule>
                 case 7: 
                     CreateNodeForRule_Pipelinerule_Pipe(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Pipelinerule2:
                 //      <pipelineRule> ::= <assignmentStatementRule>
                 case 8: 
                     CreateNodeForRule_Pipelinerule2(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Pipelinerule_Pipe2:
                 //      <pipelineRule> ::= <assignmentStatementRule> '|' <pipelineRule>
                 case 9: 
                     CreateNodeForRule_Pipelinerule_Pipe2(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Assignmentstatementrule_Assignmentoperatortoken:
                 //      <assignmentStatementRule> ::= <lvalueExpression> AssignmentOperatorToken <pipelineRule>
                 case 10: 
                     CreateNodeForRule_Assignmentstatementrule_Assignmentoperatortoken(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Lvalueexpression:
                 //      <lvalueExpression> ::= <lvalue>
                 case 11: 
                     CreateNodeForRule_Lvalueexpression(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Lvalue:
                 //      <lvalue> ::= <simpleLvalue>
                 case 12: 
                     CreateNodeForRule_Lvalue(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Simplelvalue_Variabletoken:
                 //      <simpleLvalue> ::= VariableToken
                 case 13: 
                     CreateNodeForRule_Simplelvalue_Variabletoken(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Parameterargumenttoken:
                 //      <ParameterArgumentToken> ::= <valueRule>
                 case 14: 
                     CreateNodeForRule_Parameterargumenttoken(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Parameterargumenttoken_Anywordtoken:
                 //      <ParameterArgumentToken> ::= AnyWordToken
                 case 15: 
                     CreateNodeForRule_Parameterargumenttoken_Anywordtoken(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Parameterargumenttoken_Parametertoken:
                 //      <ParameterArgumentToken> ::= ParameterToken
                 case 16: 
                     CreateNodeForRule_Parameterargumenttoken_Parametertoken(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Cmletparamslist:
                 //      <cmletParamsList> ::= <ParameterArgumentToken> <cmletParamsList>
                 case 17: 
                     CreateNodeForRule_Cmletparamslist(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Cmletparamslist2:
                 //      <cmletParamsList> ::= <ParameterArgumentToken>
                 case 18: 
                     CreateNodeForRule_Cmletparamslist2(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Cmdletname_Anywordtoken:
                 //      <cmdletName> ::= AnyWordToken
                 case 19: 
                     CreateNodeForRule_Cmdletname_Anywordtoken(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Cmdletcall_Execcall:
                 //      <cmdletCall> ::= ExecCall <cmdletName> <cmletParamsList>
                 case 20: 
                     CreateNodeForRule_Cmdletcall_Execcall(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Cmdletcall_Execcall2:
                 //      <cmdletCall> ::= ExecCall <cmdletName>
                 case 21: 
                     CreateNodeForRule_Cmdletcall_Execcall2(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Cmdletcall:
                 //      <cmdletCall> ::= <cmdletName> <cmletParamsList>
                 case 22: 
                     CreateNodeForRule_Cmdletcall(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Cmdletcall2:
                 //      <cmdletCall> ::= <cmdletName>
                 case 23: 
                     CreateNodeForRule_Cmdletcall2(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Cmdletcall3:
                 //      <cmdletCall> ::= <expressionRule>
                 case 24: 
                     CreateNodeForRule_Cmdletcall3(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Expressionrule:
                 //      <expressionRule> ::= <logicalExpressionRule>
                 case 25: 
                     CreateNodeForRule_Expressionrule(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Logicalexpressionrule:
                 //      <logicalExpressionRule> ::= <bitwiseExpressionRule>
                 case 26: 
                     CreateNodeForRule_Logicalexpressionrule(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Bitwiseexpressionrule:
                 //      <bitwiseExpressionRule> ::= <comparisonExpressionRule>
                 case 27: 
                     CreateNodeForRule_Bitwiseexpressionrule(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Comparisonexpressionrule:
                 //      <comparisonExpressionRule> ::= <addExpressionRule>
                 case 28: 
                     CreateNodeForRule_Comparisonexpressionrule(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Addexpressionrule:
                 //      <addExpressionRule> ::= <multiplyExpressionRule>
                 case 29: 
                     CreateNodeForRule_Addexpressionrule(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Addexpressionrule_Additionoperatortoken:
                 //      <addExpressionRule> ::= <multiplyExpressionRule> AdditionOperatorToken <addExpressionRule>
                 case 30: 
                     CreateNodeForRule_Addexpressionrule_Additionoperatortoken(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Multiplyexpressionrule:
                 //      <multiplyExpressionRule> ::= <formatExpressionRule>
                 case 31: 
                     CreateNodeForRule_Multiplyexpressionrule(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Formatexpressionrule:
                 //      <formatExpressionRule> ::= <rangeExpressionRule>
                 case 32: 
                     CreateNodeForRule_Formatexpressionrule(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Rangeexpressionrule:
                 //      <rangeExpressionRule> ::= <arrayLiteralRule>
                 case 33: 
                     CreateNodeForRule_Rangeexpressionrule(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Rangeexpressionrule_Rangeoperatortoken:
                 //      <rangeExpressionRule> ::= <arrayLiteralRule> RangeOperatorToken <rangeExpressionRule>
                 case 34: 
                     CreateNodeForRule_Rangeexpressionrule_Rangeoperatortoken(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Arrayliteralrule:
                 //      <arrayLiteralRule> ::= <postfixOperatorRule>
                 case 35: 
                     CreateNodeForRule_Arrayliteralrule(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Arrayliteralrule_Commatoken:
                 //      <arrayLiteralRule> ::= <postfixOperatorRule> CommaToken <arrayLiteralRule>
                 case 36: 
                     CreateNodeForRule_Arrayliteralrule_Commatoken(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Postfixoperatorrule:
                 //      <postfixOperatorRule> ::= <propertyOrArrayReferenceRule>
                 case 37: 
                     CreateNodeForRule_Postfixoperatorrule(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Propertyorarrayreferencerule:
                 //      <propertyOrArrayReferenceRule> ::= <valueRule>
                 case 38: 
                     CreateNodeForRule_Propertyorarrayreferencerule(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Valuerule_Stringtoken:
                 //      <valueRule> ::= StringToken
                 case 39: 
                     CreateNodeForRule_Valuerule_Stringtoken(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Valuerule_Variabletoken:
                 //      <valueRule> ::= VariableToken
                 case 40: 
                     CreateNodeForRule_Valuerule_Variabletoken(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Valuerule_Numbertoken:
                 //      <valueRule> ::= NumberToken
                 case 41: 
                     CreateNodeForRule_Valuerule_Numbertoken(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Valuerule_Dollarlparan_Rparan:
                 //      <valueRule> ::= '$(' <statementRule> ')'
                 case 42: 
                     CreateNodeForRule_Valuerule_Dollarlparan_Rparan(m_parser, ref node);
-                    return node;
+                    break;
 
                 // Rule_Valuerule_Lparan_Rparan:
                 //      <valueRule> ::= '(' <assignmentStatementRule> ')'
                 case 43: 
                     CreateNodeForRule_Valuerule_Lparan_Rparan(m_parser, ref node);
-                    return node;
+                    break;
 
                 default:
                     throw new RuleException("Unknown rule: Does your CGT Match your Code Revision?");
             }
+            
+            return node;
         }
 
         

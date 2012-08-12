@@ -57,12 +57,14 @@ namespace Pash.ParserIntrinsics
                 //      %Description%
                 case %Index%: 
                     CreateNodeFor%ID%(m_parser, ref node);
-                    return node;
+                    break;
 
 ##END-RULES
                 default:
                     throw new RuleException("Unknown rule: Does your CGT Match your Code Revision?");
             }
+            
+            return node;
         }
 
         
