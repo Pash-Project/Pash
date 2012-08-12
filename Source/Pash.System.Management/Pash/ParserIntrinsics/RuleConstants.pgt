@@ -30,16 +30,16 @@ namespace Pash.ParserIntrinsics
     class RuleConstants
     {
 ##RULE-TABLE
-        public static RuleConstants[] All = new RuleConstants[%Count%];
+        public static List<RuleConstants> All = new List<RuleConstants>(%Count%);
 ##END-RULE-TABLE
 
-        readonly public string Description;
         readonly public int NonTerminalIndex;
+        readonly public string Description;
         
-        RuleConstants(string description, int index, int nonTerminalIndex)
+        RuleConstants(int index, int nonTerminalIndex, string description)
         {
-            this.Description = description;
             this.NonTerminalIndex = nonTerminalIndex;
+            this.Description = description;
             
             if (All[index] != null) throw new Exception ("No 2 rules should have the same index");
             All[index] = this;
@@ -52,7 +52,7 @@ namespace Pash.ParserIntrinsics
         
 ##RULES
 ##DELIMITER ','
-        public static readonly RuleConstants %ID.Padded% = new RuleConstants ("%Description%", %Index%, %NonterminalIndex%);
+        public static readonly RuleConstants %ID.Padded% = new RuleConstants (%Index%, %NonterminalIndex%, "%Description%");
 ##END-RULES
     };
 }

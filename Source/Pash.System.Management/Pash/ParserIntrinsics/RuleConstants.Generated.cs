@@ -13,15 +13,15 @@ namespace Pash.ParserIntrinsics
 {
     class RuleConstants
     {
-        public static RuleConstants[] All = new RuleConstants[44];
+        public static List<RuleConstants> All = new List<RuleConstants>(44);
 
-        readonly public string Description;
         readonly public int NonTerminalIndex;
+        readonly public string Description;
         
-        RuleConstants(string description, int index, int nonTerminalIndex)
+        RuleConstants(int index, int nonTerminalIndex, string description)
         {
-            this.Description = description;
             this.NonTerminalIndex = nonTerminalIndex;
+            this.Description = description;
             
             if (All[index] != null) throw new Exception ("No 2 rules should have the same index");
             All[index] = this;
@@ -32,49 +32,49 @@ namespace Pash.ParserIntrinsics
             return this.Description;
         }
         
-        public static readonly RuleConstants Rule_Statementseparatortoken_Newline                 = new RuleConstants ("<statementSeparatorToken> ::= NewLine <statementSeparatorToken>", 0, 45);
-        public static readonly RuleConstants Rule_Statementseparatortoken                         = new RuleConstants ("<statementSeparatorToken> ::= ", 1, 45);
-        public static readonly RuleConstants Rule_Statementlistrule                               = new RuleConstants ("<statementListRule> ::= <statementRule>", 2, 43);
-        public static readonly RuleConstants Rule_Statementlistrule2                              = new RuleConstants ("<statementListRule> ::= <statementRule> <statementSeparatorToken> <statementListRule>", 3, 43);
-        public static readonly RuleConstants Rule_Statementrule                                   = new RuleConstants ("<statementRule> ::= <pipelineRule>", 4, 44);
-        public static readonly RuleConstants Rule_Statementrule_Commenttoken                      = new RuleConstants ("<statementRule> ::= CommentToken", 5, 44);
-        public static readonly RuleConstants Rule_Pipelinerule                                    = new RuleConstants ("<pipelineRule> ::= <cmdletCall>", 6, 38);
-        public static readonly RuleConstants Rule_Pipelinerule_Pipe                               = new RuleConstants ("<pipelineRule> ::= <cmdletCall> '|' <pipelineRule>", 7, 38);
-        public static readonly RuleConstants Rule_Pipelinerule2                                   = new RuleConstants ("<pipelineRule> ::= <assignmentStatementRule>", 8, 38);
-        public static readonly RuleConstants Rule_Pipelinerule_Pipe2                              = new RuleConstants ("<pipelineRule> ::= <assignmentStatementRule> '|' <pipelineRule>", 9, 38);
-        public static readonly RuleConstants Rule_Assignmentstatementrule_Assignmentoperatortoken = new RuleConstants ("<assignmentStatementRule> ::= <lvalueExpression> AssignmentOperatorToken <pipelineRule>", 10, 25);
-        public static readonly RuleConstants Rule_Lvalueexpression                                = new RuleConstants ("<lvalueExpression> ::= <lvalue>", 11, 35);
-        public static readonly RuleConstants Rule_Lvalue                                          = new RuleConstants ("<lvalue> ::= <simpleLvalue>", 12, 34);
-        public static readonly RuleConstants Rule_Simplelvalue_Variabletoken                      = new RuleConstants ("<simpleLvalue> ::= VariableToken", 13, 42);
-        public static readonly RuleConstants Rule_Parameterargumenttoken                          = new RuleConstants ("<ParameterArgumentToken> ::= <valueRule>", 14, 37);
-        public static readonly RuleConstants Rule_Parameterargumenttoken_Anywordtoken             = new RuleConstants ("<ParameterArgumentToken> ::= AnyWordToken", 15, 37);
-        public static readonly RuleConstants Rule_Parameterargumenttoken_Parametertoken           = new RuleConstants ("<ParameterArgumentToken> ::= ParameterToken", 16, 37);
-        public static readonly RuleConstants Rule_Cmletparamslist                                 = new RuleConstants ("<cmletParamsList> ::= <ParameterArgumentToken> <cmletParamsList>", 17, 29);
-        public static readonly RuleConstants Rule_Cmletparamslist2                                = new RuleConstants ("<cmletParamsList> ::= <ParameterArgumentToken>", 18, 29);
-        public static readonly RuleConstants Rule_Cmdletname_Anywordtoken                         = new RuleConstants ("<cmdletName> ::= AnyWordToken", 19, 28);
-        public static readonly RuleConstants Rule_Cmdletcall_Execcall                             = new RuleConstants ("<cmdletCall> ::= ExecCall <cmdletName> <cmletParamsList>", 20, 27);
-        public static readonly RuleConstants Rule_Cmdletcall_Execcall2                            = new RuleConstants ("<cmdletCall> ::= ExecCall <cmdletName>", 21, 27);
-        public static readonly RuleConstants Rule_Cmdletcall                                      = new RuleConstants ("<cmdletCall> ::= <cmdletName> <cmletParamsList>", 22, 27);
-        public static readonly RuleConstants Rule_Cmdletcall2                                     = new RuleConstants ("<cmdletCall> ::= <cmdletName>", 23, 27);
-        public static readonly RuleConstants Rule_Cmdletcall3                                     = new RuleConstants ("<cmdletCall> ::= <expressionRule>", 24, 27);
-        public static readonly RuleConstants Rule_Expressionrule                                  = new RuleConstants ("<expressionRule> ::= <logicalExpressionRule>", 25, 31);
-        public static readonly RuleConstants Rule_Logicalexpressionrule                           = new RuleConstants ("<logicalExpressionRule> ::= <bitwiseExpressionRule>", 26, 33);
-        public static readonly RuleConstants Rule_Bitwiseexpressionrule                           = new RuleConstants ("<bitwiseExpressionRule> ::= <comparisonExpressionRule>", 27, 26);
-        public static readonly RuleConstants Rule_Comparisonexpressionrule                        = new RuleConstants ("<comparisonExpressionRule> ::= <addExpressionRule>", 28, 30);
-        public static readonly RuleConstants Rule_Addexpressionrule                               = new RuleConstants ("<addExpressionRule> ::= <multiplyExpressionRule>", 29, 23);
-        public static readonly RuleConstants Rule_Addexpressionrule_Additionoperatortoken         = new RuleConstants ("<addExpressionRule> ::= <multiplyExpressionRule> AdditionOperatorToken <addExpressionRule>", 30, 23);
-        public static readonly RuleConstants Rule_Multiplyexpressionrule                          = new RuleConstants ("<multiplyExpressionRule> ::= <formatExpressionRule>", 31, 36);
-        public static readonly RuleConstants Rule_Formatexpressionrule                            = new RuleConstants ("<formatExpressionRule> ::= <rangeExpressionRule>", 32, 32);
-        public static readonly RuleConstants Rule_Rangeexpressionrule                             = new RuleConstants ("<rangeExpressionRule> ::= <arrayLiteralRule>", 33, 41);
-        public static readonly RuleConstants Rule_Rangeexpressionrule_Rangeoperatortoken          = new RuleConstants ("<rangeExpressionRule> ::= <arrayLiteralRule> RangeOperatorToken <rangeExpressionRule>", 34, 41);
-        public static readonly RuleConstants Rule_Arrayliteralrule                                = new RuleConstants ("<arrayLiteralRule> ::= <postfixOperatorRule>", 35, 24);
-        public static readonly RuleConstants Rule_Arrayliteralrule_Commatoken                     = new RuleConstants ("<arrayLiteralRule> ::= <postfixOperatorRule> CommaToken <arrayLiteralRule>", 36, 24);
-        public static readonly RuleConstants Rule_Postfixoperatorrule                             = new RuleConstants ("<postfixOperatorRule> ::= <propertyOrArrayReferenceRule>", 37, 39);
-        public static readonly RuleConstants Rule_Propertyorarrayreferencerule                    = new RuleConstants ("<propertyOrArrayReferenceRule> ::= <valueRule>", 38, 40);
-        public static readonly RuleConstants Rule_Valuerule_Stringtoken                           = new RuleConstants ("<valueRule> ::= StringToken", 39, 46);
-        public static readonly RuleConstants Rule_Valuerule_Variabletoken                         = new RuleConstants ("<valueRule> ::= VariableToken", 40, 46);
-        public static readonly RuleConstants Rule_Valuerule_Numbertoken                           = new RuleConstants ("<valueRule> ::= NumberToken", 41, 46);
-        public static readonly RuleConstants Rule_Valuerule_Dollarlparan_Rparan                   = new RuleConstants ("<valueRule> ::= '$(' <statementRule> ')'", 42, 46);
-        public static readonly RuleConstants Rule_Valuerule_Lparan_Rparan                         = new RuleConstants ("<valueRule> ::= '(' <assignmentStatementRule> ')'", 43, 46);
+        public static readonly RuleConstants Rule_Statementseparatortoken_Newline                 = new RuleConstants (0, 45, "<statementSeparatorToken> ::= NewLine <statementSeparatorToken>");
+        public static readonly RuleConstants Rule_Statementseparatortoken                         = new RuleConstants (1, 45, "<statementSeparatorToken> ::= ");
+        public static readonly RuleConstants Rule_Statementlistrule                               = new RuleConstants (2, 43, "<statementListRule> ::= <statementRule>");
+        public static readonly RuleConstants Rule_Statementlistrule2                              = new RuleConstants (3, 43, "<statementListRule> ::= <statementRule> <statementSeparatorToken> <statementListRule>");
+        public static readonly RuleConstants Rule_Statementrule                                   = new RuleConstants (4, 44, "<statementRule> ::= <pipelineRule>");
+        public static readonly RuleConstants Rule_Statementrule_Commenttoken                      = new RuleConstants (5, 44, "<statementRule> ::= CommentToken");
+        public static readonly RuleConstants Rule_Pipelinerule                                    = new RuleConstants (6, 38, "<pipelineRule> ::= <cmdletCall>");
+        public static readonly RuleConstants Rule_Pipelinerule_Pipe                               = new RuleConstants (7, 38, "<pipelineRule> ::= <cmdletCall> '|' <pipelineRule>");
+        public static readonly RuleConstants Rule_Pipelinerule2                                   = new RuleConstants (8, 38, "<pipelineRule> ::= <assignmentStatementRule>");
+        public static readonly RuleConstants Rule_Pipelinerule_Pipe2                              = new RuleConstants (9, 38, "<pipelineRule> ::= <assignmentStatementRule> '|' <pipelineRule>");
+        public static readonly RuleConstants Rule_Assignmentstatementrule_Assignmentoperatortoken = new RuleConstants (10, 25, "<assignmentStatementRule> ::= <lvalueExpression> AssignmentOperatorToken <pipelineRule>");
+        public static readonly RuleConstants Rule_Lvalueexpression                                = new RuleConstants (11, 35, "<lvalueExpression> ::= <lvalue>");
+        public static readonly RuleConstants Rule_Lvalue                                          = new RuleConstants (12, 34, "<lvalue> ::= <simpleLvalue>");
+        public static readonly RuleConstants Rule_Simplelvalue_Variabletoken                      = new RuleConstants (13, 42, "<simpleLvalue> ::= VariableToken");
+        public static readonly RuleConstants Rule_Parameterargumenttoken                          = new RuleConstants (14, 37, "<ParameterArgumentToken> ::= <valueRule>");
+        public static readonly RuleConstants Rule_Parameterargumenttoken_Anywordtoken             = new RuleConstants (15, 37, "<ParameterArgumentToken> ::= AnyWordToken");
+        public static readonly RuleConstants Rule_Parameterargumenttoken_Parametertoken           = new RuleConstants (16, 37, "<ParameterArgumentToken> ::= ParameterToken");
+        public static readonly RuleConstants Rule_Cmletparamslist                                 = new RuleConstants (17, 29, "<cmletParamsList> ::= <ParameterArgumentToken> <cmletParamsList>");
+        public static readonly RuleConstants Rule_Cmletparamslist2                                = new RuleConstants (18, 29, "<cmletParamsList> ::= <ParameterArgumentToken>");
+        public static readonly RuleConstants Rule_Cmdletname_Anywordtoken                         = new RuleConstants (19, 28, "<cmdletName> ::= AnyWordToken");
+        public static readonly RuleConstants Rule_Cmdletcall_Execcall                             = new RuleConstants (20, 27, "<cmdletCall> ::= ExecCall <cmdletName> <cmletParamsList>");
+        public static readonly RuleConstants Rule_Cmdletcall_Execcall2                            = new RuleConstants (21, 27, "<cmdletCall> ::= ExecCall <cmdletName>");
+        public static readonly RuleConstants Rule_Cmdletcall                                      = new RuleConstants (22, 27, "<cmdletCall> ::= <cmdletName> <cmletParamsList>");
+        public static readonly RuleConstants Rule_Cmdletcall2                                     = new RuleConstants (23, 27, "<cmdletCall> ::= <cmdletName>");
+        public static readonly RuleConstants Rule_Cmdletcall3                                     = new RuleConstants (24, 27, "<cmdletCall> ::= <expressionRule>");
+        public static readonly RuleConstants Rule_Expressionrule                                  = new RuleConstants (25, 31, "<expressionRule> ::= <logicalExpressionRule>");
+        public static readonly RuleConstants Rule_Logicalexpressionrule                           = new RuleConstants (26, 33, "<logicalExpressionRule> ::= <bitwiseExpressionRule>");
+        public static readonly RuleConstants Rule_Bitwiseexpressionrule                           = new RuleConstants (27, 26, "<bitwiseExpressionRule> ::= <comparisonExpressionRule>");
+        public static readonly RuleConstants Rule_Comparisonexpressionrule                        = new RuleConstants (28, 30, "<comparisonExpressionRule> ::= <addExpressionRule>");
+        public static readonly RuleConstants Rule_Addexpressionrule                               = new RuleConstants (29, 23, "<addExpressionRule> ::= <multiplyExpressionRule>");
+        public static readonly RuleConstants Rule_Addexpressionrule_Additionoperatortoken         = new RuleConstants (30, 23, "<addExpressionRule> ::= <multiplyExpressionRule> AdditionOperatorToken <addExpressionRule>");
+        public static readonly RuleConstants Rule_Multiplyexpressionrule                          = new RuleConstants (31, 36, "<multiplyExpressionRule> ::= <formatExpressionRule>");
+        public static readonly RuleConstants Rule_Formatexpressionrule                            = new RuleConstants (32, 32, "<formatExpressionRule> ::= <rangeExpressionRule>");
+        public static readonly RuleConstants Rule_Rangeexpressionrule                             = new RuleConstants (33, 41, "<rangeExpressionRule> ::= <arrayLiteralRule>");
+        public static readonly RuleConstants Rule_Rangeexpressionrule_Rangeoperatortoken          = new RuleConstants (34, 41, "<rangeExpressionRule> ::= <arrayLiteralRule> RangeOperatorToken <rangeExpressionRule>");
+        public static readonly RuleConstants Rule_Arrayliteralrule                                = new RuleConstants (35, 24, "<arrayLiteralRule> ::= <postfixOperatorRule>");
+        public static readonly RuleConstants Rule_Arrayliteralrule_Commatoken                     = new RuleConstants (36, 24, "<arrayLiteralRule> ::= <postfixOperatorRule> CommaToken <arrayLiteralRule>");
+        public static readonly RuleConstants Rule_Postfixoperatorrule                             = new RuleConstants (37, 39, "<postfixOperatorRule> ::= <propertyOrArrayReferenceRule>");
+        public static readonly RuleConstants Rule_Propertyorarrayreferencerule                    = new RuleConstants (38, 40, "<propertyOrArrayReferenceRule> ::= <valueRule>");
+        public static readonly RuleConstants Rule_Valuerule_Stringtoken                           = new RuleConstants (39, 46, "<valueRule> ::= StringToken");
+        public static readonly RuleConstants Rule_Valuerule_Variabletoken                         = new RuleConstants (40, 46, "<valueRule> ::= VariableToken");
+        public static readonly RuleConstants Rule_Valuerule_Numbertoken                           = new RuleConstants (41, 46, "<valueRule> ::= NumberToken");
+        public static readonly RuleConstants Rule_Valuerule_Dollarlparan_Rparan                   = new RuleConstants (42, 46, "<valueRule> ::= '$(' <statementRule> ')'");
+        public static readonly RuleConstants Rule_Valuerule_Lparan_Rparan                         = new RuleConstants (43, 46, "<valueRule> ::= '(' <assignmentStatementRule> ')'");
     };
 }
