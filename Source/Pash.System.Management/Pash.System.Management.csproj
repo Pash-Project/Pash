@@ -236,7 +236,6 @@
     <Compile Include="Pash\ParserIntrinsics\CmdletNode.cs" />
     <Compile Include="Pash\ParserIntrinsics\NumberNode.cs" />
     <Compile Include="Pash\ParserIntrinsics\ParamsListNode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\PashParser.cs" />
     <Compile Include="Pash\ParserIntrinsics\PashParserImplementation.cs" />
     <Compile Include="Pash\ParserIntrinsics\PipelineNode.cs" />
     <Compile Include="Pash\ParserIntrinsics\RangeNode.cs" />
@@ -250,6 +249,10 @@
     <Compile Include="Pash\ParserIntrinsics\ASTNode.cs" />
     <Compile Include="Pash\ParserIntrinsics\TerminalNode.cs" />
     <Compile Include="Pash\ParserIntrinsics\NonTerminalNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\PashParserContext.Generated.cs" />
+    <Compile Include="Pash\ParserIntrinsics\SymbolConstants.Generated.cs" />
+    <Compile Include="Pash\ParserIntrinsics\RuleConstants.Generated.cs" />
+    <Compile Include="Pash\ParserIntrinsics\PashParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Pash\ParserIntrinsics\PashGrammar.cgt">
