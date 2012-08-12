@@ -30,9 +30,10 @@ namespace Pash.ParserIntrinsics
 {
     class SymbolConstants
     {
-        public static List<SymbolConstants> All = new List<SymbolConstants>();
+##SYMBOL-TABLE
+        static SymbolConstants[] All = new SymbolConstants[%Count%];
+##END-SYMBOL-TABLE
         
-        public readonly int Index;
         public readonly string Description;
         public readonly SymbolType SymbolType;
         
@@ -42,13 +43,13 @@ namespace Pash.ParserIntrinsics
             SymbolType symbolType
         ) 
         {
-            this.Index = index;
             this.Description = description;
             this.SymbolType = symbolType;
             
-            All.Add(this);
+            if (All[index] != null) throw new Exception ("No 2 symbols should have the same index");
+            All[index] = this;
         }
-        
+
         public override string ToString()
         {
             return this.Description;
@@ -56,7 +57,7 @@ namespace Pash.ParserIntrinsics
         
 ##SYMBOLS
 ##DELIMITER ','
-        readonly public SymbolConstants %ID% = new SymbolConstants (
+        public static readonly SymbolConstants %ID% = new SymbolConstants (
             %Index%,
             "%Description%",
             (SymbolType) %Kind%

@@ -13,19 +13,18 @@ namespace Pash.ParserIntrinsics
 {
     class RuleConstants
     {
-        public static readonly List<RuleConstants> All = new List<RuleConstants>();
-        
+        public static RuleConstants[] All = new RuleConstants[44];
+
         readonly public string Description;
-        readonly public int Index;
         readonly public int NonTerminalIndex;
         
         RuleConstants(string description, int index, int nonTerminalIndex)
         {
             this.Description = description;
-            this.Index = index;
             this.NonTerminalIndex = nonTerminalIndex;
             
-            All.Add(this);
+            if (All[index] != null) throw new Exception ("No 2 rules should have the same index");
+            All[index] = this;
         }
         
         public override string ToString()
