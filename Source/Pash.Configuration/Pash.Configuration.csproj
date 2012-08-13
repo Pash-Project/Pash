@@ -1,16 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.20723</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{629394D3-F7AC-4C27-8A39-1D52C801E8A5}</ProjectGuid>
+    <ProjectGuid>{F125870F-2B9E-49A8-82FE-6B67A766AA1F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Pash.ConfigurationSection</RootNamespace>
-    <AssemblyName>Pash.ConfigurationSection</AssemblyName>
+    <RootNamespace>Pash.Configuration</RootNamespace>
+    <AssemblyName>Pash.Configuration</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,37 +33,20 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfigurationSection.csd.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ConfigurationSection.csd</DependentUpon>
-    </Compile>
+    <Compile Include="AliasElement.cs" />
+    <Compile Include="ExecutionContextConfigurationSection.cs" />
+    <Compile Include="FunctionElement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ConfigurationSection.csd">
-      <Generator>CsdFileGenerator</Generator>
-      <LastGenOutput>ConfigurationSection.csd.cs</LastGenOutput>
-    </None>
-    <None Include="ConfigurationSection.csd.config">
-      <DependentUpon>ConfigurationSection.csd</DependentUpon>
-    </None>
-    <None Include="ConfigurationSection.csd.diagram">
-      <DependentUpon>ConfigurationSection.csd</DependentUpon>
-    </None>
-    <None Include="ConfigurationSection.csd.xsd">
-      <DependentUpon>ConfigurationSection.csd</DependentUpon>
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-    <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
+    <Compile Include="PSSnapinElement.cs" />
+    <Compile Include="VariableElement.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

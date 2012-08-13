@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -265,12 +265,6 @@
     <None Include="Pash\ParserIntrinsics\RuleConstants.pgt" />
     <None Include="Pash\ParserIntrinsics\SymbolConstants.pgt" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Pash.ConfigurationSection\Pash.ConfigurationSection.csproj">
-      <Project>{629394D3-F7AC-4C27-8A39-1D52C801E8A5}</Project>
-      <Name>Pash.ConfigurationSection</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -280,6 +274,9 @@
   </Target>
   -->
   <ItemGroup>
-    <Folder Include="Pash\ParserIntrinsics\Nodes\" />
+    <ProjectReference Include="..\Pash.Configuration\Pash.Configuration.csproj">
+      <Project>{F125870F-2B9E-49A8-82FE-6B67A766AA1F}</Project>
+      <Name>Pash.Configuration</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
