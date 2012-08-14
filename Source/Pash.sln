@@ -15,16 +15,25 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pash.Configuration", "Pash.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "010.Irony.2010", "Irony\010.Irony.2010.csproj", "{D81F5C91-D7DB-46E5-BC99-49488FB6814C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParserTests", "ParserTests\ParserTests.csproj", "{7FDF583D-C91A-4284-B0A4-E25C96BBB828}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+		Default|Any CPU = Default|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{0E1D573C-C57D-4A83-A739-3A38E719D87E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0E1D573C-C57D-4A83-A739-3A38E719D87E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E1D573C-C57D-4A83-A739-3A38E719D87E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E1D573C-C57D-4A83-A739-3A38E719D87E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FDF583D-C91A-4284-B0A4-E25C96BBB828}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FDF583D-C91A-4284-B0A4-E25C96BBB828}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FDF583D-C91A-4284-B0A4-E25C96BBB828}.Default|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FDF583D-C91A-4284-B0A4-E25C96BBB828}.Default|Any CPU.Build.0 = Debug|Any CPU
+		{7FDF583D-C91A-4284-B0A4-E25C96BBB828}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FDF583D-C91A-4284-B0A4-E25C96BBB828}.Release|Any CPU.Build.0 = Release|Any CPU
 		{91225A72-A021-4B7D-BA56-5E1B7AC02F03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{91225A72-A021-4B7D-BA56-5E1B7AC02F03}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91225A72-A021-4B7D-BA56-5E1B7AC02F03}.Release|Any CPU.ActiveCfg = Release|Any CPU
