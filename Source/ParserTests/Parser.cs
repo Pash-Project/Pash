@@ -1,21 +1,21 @@
 using System;
 using NUnit.Framework;
+using Irony.Parsing;
 
-namespace ParserTest
+namespace ParserTests
 {
     [TestFixture]
-    public class Parser
+    public class ParserTests
     {
         [Test]
-        public void PassTest()
+        public void CreateParserTest()
         {
+            var grammar = new PowerShellGrammar();
         }
+    }
 
-        [Test]
-        public void FailTest()
-        {
-            throw new Exception();
-        }
+    class PowerShellGrammar : Grammar
+    {
     }
 }
 
