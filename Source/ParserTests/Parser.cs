@@ -11,6 +11,7 @@ namespace ParserTests
         public void CreateParserTest()
         {
             var grammar = new PowerShellGrammar();
+            Assert.IsNotNull(grammar);
         }
 
         [Test]
