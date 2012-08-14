@@ -26,7 +26,7 @@ namespace ParserTests
     abstract class CaseInsensitiveGrammar : Grammar
     {
         public CaseInsensitiveGrammar()
-            : base(true)
+            : base(true) // case insensitive flag
         {
         }
     }
