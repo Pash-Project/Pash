@@ -12,10 +12,22 @@ namespace ParserTests
         {
             var grammar = new PowerShellGrammar();
         }
+
+        [Test]
+        public void CaseInsenstiveParserTest()
+        {
+            var grammar = new PowerShellGrammar();
+
+            Assert.IsTrue(grammar.CaseSensitive);
+        }
     }
 
     class PowerShellGrammar : Grammar
     {
+        public PowerShellGrammar()
+            : base(true)
+        {
+        }
     }
 }
 
