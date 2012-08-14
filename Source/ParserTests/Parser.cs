@@ -22,10 +22,17 @@ namespace ParserTests
         }
     }
 
-    class PowerShellGrammar : Grammar
+    abstract class CaseInsensitiveGrammar : Grammar
+    {
+        public CaseInsensitiveGrammar()
+            : base(true)
+        {
+        }
+    }
+
+    class PowerShellGrammar : CaseInsensitiveGrammar
     {
         public PowerShellGrammar()
-            : base(true)
         {
         }
     }
