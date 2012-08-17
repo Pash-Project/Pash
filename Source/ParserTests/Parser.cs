@@ -17,8 +17,6 @@ namespace ParserTests
     class PowerShellGrammar : CaseInsensitiveGrammar
     {
         #region B.1 Lexical grammar
-        ////        input:
-        ////            input-elements_opt   signature-block_opt
         ////        input-elements:
         ////            input-element
         ////            input-elements   input-element
@@ -26,6 +24,13 @@ namespace ParserTests
         ////            whitespace
         ////            comment
         ////            token
+        const string input_elements = "(" + whitespace + ") | (" + token + ")";
+
+        ////        input:
+        ////            input-elements_opt   signature-block_opt
+        // TODO: signature block
+        const string input = "(" + input_elements + ")?";
+
         ////        signature-block:
         ////            signature-begin   signature   signature-end
         ////        signature-begin:
