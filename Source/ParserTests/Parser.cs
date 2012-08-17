@@ -110,6 +110,8 @@ namespace ParserTests
             ////            string-literal
             ////            type-literal
             ////            operator-or-punctuator
+            // TODO: rest of them
+            const string token = "(" + command + ")";
             #endregion
             #region B.1.5 Keywords
             ////        keyword:  one of
@@ -577,6 +579,7 @@ namespace ParserTests
             ////        command:
             ////            command-name   command-elements_opt
             ////            command-invocation-operator   command-module_opt  command-name-expr   command-elements_opt
+            const string command 
             ////        command-invocation-operator:  one of
             ////            &	.
             ////        command-module:
