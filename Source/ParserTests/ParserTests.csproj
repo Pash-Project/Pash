@@ -38,6 +38,7 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="CaseInsensitiveGrammar.cs" />
+    <Compile Include="StringExtensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
