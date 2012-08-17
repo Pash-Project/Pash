@@ -16,376 +16,379 @@ namespace ParserTests
 
     class PowerShellGrammar : CaseInsensitiveGrammar
     {
-        #region B.1 Lexical grammar
-        ////        input-elements:
-        ////            input-element
-        ////            input-elements   input-element
-        ////        input-element:
-        ////            whitespace
-        ////            comment
-        ////            token
-        const string input_elements = "(" + whitespace + ") | (" + token + ")";
+        static class LexicalPatterns
+        {
+            #region B.1 Lexical grammar
+            ////        input-elements:
+            ////            input-element
+            ////            input-elements   input-element
+            ////        input-element:
+            ////            whitespace
+            ////            comment
+            ////            token
+            const string input_elements = "(" + whitespace + ") | (" + token + ")";
 
-        ////        input:
-        ////            input-elements_opt   signature-block_opt
-        // TODO: signature block
-        const string input = "(" + input_elements + ")?";
+            ////        input:
+            ////            input-elements_opt   signature-block_opt
+            // TODO: signature block
+            const string input = "(" + input_elements + ")?";
 
-        ////        signature-block:
-        ////            signature-begin   signature   signature-end
-        ////        signature-begin:
-        ////            new-line-character   # SIG # Begin signature block   new-line-character
-        ////        signature:
-        ////            base64 encoded signature blob in multiple single-line-comments
-        ////        signature-end:
-        ////            new-line-character   # SIG # End signature block   new-line-character
-        #region B.1.1 Line terminators
-        ////        new-line-character:
-        ////            Carriage return character (U+000D)
-        ////            Line feed character (U+000A)
-        ////            Carriage return character (U+000D) followed by line feed character (U+000A)
-        ////        new-lines:
-        ////            new-line-character
-        ////            new-lines   new-line-character
-        #endregion
-        #region B.1.2 Comments
-        ////        comment:
-        ////            single-line-comment
-        ////            requires-comment
-        ////            delimited-comment
-        ////        single-line-comment:
-        ////            #   input-characters_opt
-        ////        input-characters:
-        ////            input-character
-        ////            input-characters   input-character
-        ////        input-character:
-        ////            Any Unicode character except a new-line-character
-        ////        requires-comment:
-        ////            #requires   whitespace   command-arguments
-        ////        dash:
-        ////            - (U+002D)
-        ////            EnDash character (U+2013)
-        ////            EmDash character (U+2014)
-        ////            Horizontal bar character (U+2015)
-        ////        dashdash:
-        ////            dash   dash
-        ////        delimited-comment:
-        ////            <#   delimited-comment-text_opt   hashes   >
-        ////        delimited-comment-text:
-        ////            delimited-comment-section
-        ////            delimited-comment-text   delimited-comment-section
-        ////        delimited-comment-section:
-        ////            >
-        ////            hashes_opt   not-greater-than-or-hash
-        ////        hashes:
-        ////            #
-        ////            hashes   #
-        ////        not-greater-than-or-hash:
-        ////            Any Unicode character except > or #
-        #endregion
-        #region B.1.3 White space
-        ////        whitespace:
-        ////            Any character with Unicode class Zs, Zl, or Zp
-        ////            Horizontal tab character (U+0009)
-        ////            Vertical tab character (U+000B)
-        ////            Form feed character (U+000C)
-        ////            `   (The backtick character U+0060) followed by new-line-character
-        #endregion
-        #region B.1.4 Tokens
-        ////        token:
-        ////            keyword
-        ////            variable
-        ////            command
-        ////            command-parameter
-        ////            command-argument-token
-        ////            integer-literal
-        ////            real-literal
-        ////            string-literal
-        ////            type-literal
-        ////            operator-or-punctuator
-        #endregion
-        #region B.1.5 Keywords
-        ////        keyword:  one of
-        ////            begin				break			catch			class
-        ////            continue			data			define		do
-        ////            dynamicparam	else			elseif		end
-        ////            exit				filter		finally		for
-        ////            foreach			from			function		if
-        ////            in					param			process		return
-        ////            switch			throw			trap			try
-        ////            until				using			var			while
-        #endregion
-        #region B.1.6 Variables
-        ////        variable:
-        ////            $$
-        ////            $?
-        ////            $^
-        ////            $   variable-scope_opt  variable-characters
-        ////            @   variable-scope_opt   variable-characters
-        ////            braced-variable
-        ////        braced-variable:
-        ////            ${   variable-scope_opt   braced-variable-characters   }
-        ////        variable-scope:
-        ////        global:
-        ////        local:
-        ////        private:
-        ////        script:
-        ////            variable-namespace
-        ////        variable-namespace:
-        ////        variable-characters   :
-        ////        variable-characters:
-        ////            variable-character
-        ////            variable-characters   variable-character
-        ////        variable-character:
-        ////            A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nd
-        ////            _   (The underscore character U+005F)
-        ////            ?
-        ////        braced-variable-characters:
-        ////            braced-variable-character
-        ////            braced-variable-characters   braced-variable-character
-        ////        braced-variable-character:
-        ////            Any Unicode character except
-        ////                    }   (The closing curly brace character U+007D)
-        ////                    `   (The backtick character U+0060)
-        ////            escaped-character
-        ////        escaped-character:
-        ////            `   (The backtick character U+0060) followed by any Unicode character
-        #endregion
-        #region B.1.7 Commands
-        ////        generic-token:
-        ////            generic-token-parts
-        ////        generic-token-parts:
-        ////            generic-token-part
-        ////            generic-token-parts   generic-token-part
-        ////        generic-token-part:
-        ////            expandable-string-literal
-        ////            verbatim-here-string-literal
-        ////            variable
-        ////            generic-token-char
-        ////        generic-token-char:
-        ////            Any Unicode character except
-        ////                    {		}		(		)		;		,		|		&		$
-        ////                    `   (The backtick character U+0060)
-        ////                    double-quote-character
-        ////                    single-quote-character
-        ////                    whitespace
-        ////                    new-line-character
-        ////            escaped-character
-        ////        generic-token-with-subexpr-start:
-        ////            generic-token-parts   $(
-        ////        command-parameter:
-        ////            dash   first-parameter-char   parameter-chars   colon_opt
-        ////        first-parameter-char:
-        ////            A Unicode character of classes Lu, Ll, Lt, Lm, or Lo
-        ////            _   (The underscore character U+005F)
-        ////            ?
-        ////        parameter-chars:
-        ////            parameter-char
-        ////            parameter-chars   parameter-char
-        ////        parameter-char:
-        ////            Any Unicode character except
-        ////                {	}	(	)	;	,	|	&	.	[
-        ////                colon
-        ////                whitespace
-        ////                new-line-character
-        ////        colon:
-        ////        :   (The colon character U+003A)
-        #endregion
-        #region B.1.8 Literals
-        ////        literal:
-        ////            integer-literal
-        ////            real-literal
-        ////            string-literal
-        ////            Integer Literals
-        ////        integer-literal:
-        ////            decimal-integer-literal
-        ////            hexadecimal-integer-literal
-        ////        decimal-integer-literal:
-        ////            decimal-digits   numeric-type-suffix_opt   numeric-multiplier_opt
-        ////        decimal-digits:
-        ////            decimal-digit
-        ////            decimal-digit   decimal-digits
-        ////        decimal-digit:   one of
-        ////            0   1   2   3   4   5   6   7   8   9
-        ////        numeric-type-suffix:
-        ////            long-type-suffix
-        ////            decimal-type-suffix
-        ////        hexadecimal-integer-literal:
-        ////            0x   hexadecimal-digits   long-type-suffix_opt   numeric-multiplier_opt
-        ////        hexadecimal-digits:
-        ////            hexadecimal-digit
-        ////            hexadecimal-digit   decimal-digits
-        ////        hexadecimal-digit:   one of
-        ////            0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
-        ////        long-type-suffix:
-        ////            l
-        ////        numeric-multiplier:   one of
-        ////            kb   mb   gb   tb   pb
-        ////            Real Literals
-        ////        real-literal:
-        ////            decimal-digits   .   decimal-digits   exponent-part_opt   decimal-type-suffix_opt   numeric-multiplier_opt
-        ////            .   decimal-digits   exponent-part_opt   decimal-type-suffix_opt   numeric-multiplier_opt
-        ////            decimal-digits   exponent-part  decimal-type-suffix_opt   numeric-multiplier_opt
-        ////        exponent-part:
-        ////            e   sign_opt   decimal-digits
-        ////        sign:   one of
-        ////            +
-        ////            dash
-        ////        decimal-type-suffix:
-        ////            d
-        ////            String Literals
-        ////        string-literal:
-        ////            expandable-string-literal
-        ////            expandable-here-string-literal
-        ////            verbatim-string-literal
-        ////            verbatim-here-string-literal
-        ////        expandable-string-literal:
-        ////            double-quote-character   expandable-string-characters_opt   dollars_opt   double-quote-character
-        ////        double-quote-character:
-        ////            "   (U+0022)
-        ////            Left double quotation mark (U+201C)
-        ////            Right double quotation mark (U+201D)
-        ////            Double low-9 quotation mark (U+201E)
-        ////        expandable-string-characters:
-        ////            expandable-string-part
-        ////            expandable-string-characters   expandable-string-part
-        ////        expandable-string-part:
-        ////            Any Unicode character except
-        ////                    $
-        ////                    double-quote-character
-        ////                    `   (The backtick character U+0060)
-        ////            braced-variable
-        ////            $   Any Unicode character except
-        ////                    (
-        ////                    {
-        ////                    double-quote-character
-        ////                    `   (The backtick character U+0060)
-        ////            $   escaped-character
-        ////            escaped-character
-        ////            double-quote-character   double-quote-character
-        ////        dollars:
-        ////            $
-        ////            dollars   $
-        ////        expandable-here-string-literal:
-        ////            @   double-quote-character   whitespace_opt   new-line-character
-        ////                    expandable-here-string-characters_opt   new-line-character   double-quote-character   @
-        ////        expandable-here-string-characters:
-        ////            expandable-here-string-part
-        ////            expandable-here-string-characters   expandable-here-string-part
-        ////        expandable-here-string-part:
-        ////            Any Unicode character except
-        ////                    $
-        ////                    new-line-character
-        ////            braced-variable
-        ////            $   Any Unicode character except
-        ////                    (
-        ////                    new-line-character
-        ////            $   new-line-character   Any Unicode character except double-quote-char
-        ////            $   new-line-character   double-quote-char   Any Unicode character except @
-        ////            new-line-character   Any Unicode character except double-quote-char
-        ////            new-line-character   double-quote-char   Any Unicode character except @
-        ////        expandable-string-with-subexpr-start:
-        ////            double-quote-character   expandable-string-chars_opt   $(
-        ////        expandable-string-with-subexpr-end:
-        ////            double-quote-char
-        ////        expandable-here-string-with-subexpr-start:
-        ////            @   double-quote-character   whitespace_opt   new-line-character
-        ////                    expandable-here-string-chars_opt   $(
-        ////        expandable-here-string-with-subexpr-end:
-        ////            new-line-character   double-quote-character   @
-        ////        verbatim-string-literal:
-        ////            single-quote-character   verbatim-string-characters_opt   single-quote-char
-        ////        single-quote-character:
-        ////            '   (U+0027)
-        ////            Left single quotation mark (U+2018)
-        ////            Right single quotation mark (U+2019)
-        ////            Single low-9 quotation mark (U+201A)
-        ////            Single high-reversed-9 quotation mark (U+201B)
-        ////        verbatim-string-characters:
-        ////            verbatim-string-part
-        ////            verbatim-string-characters   verbatim-string-part
-        ////        verbatim-string-part:
-        ////            Any Unicode character except single-quote-character
-        ////            single-quote-character   single-quote-character
-        ////        verbatim-here-string-literal:
-        ////            @   single-quote-character   whitespace_opt   new-line-character
-        ////                    verbatim-here-string-characters_opt   new-line-character   single-quote-character   @
-        ////        verbatim-here-string-characters:
-        ////            verbatim-here-string-part
-        ////            verbatim-here-string-characters   verbatim-here-string-part
-        ////        verbatim-here-string-part:
-        ////            Any Unicode character except new-line-character
-        ////            new-line-character   Any Unicode character except single-quote-character
-        ////            new-line-character   single-quote-character   Any Unicode character except @
-        #endregion
-        #region B.1.9 Simple Names
-        ////        simple-name:
-        ////            simple-name-first-char   simple-name-chars
-        ////        simple-name-first-char:
-        ////            A Unicode character of classes Lu, Ll, Lt, Lm, or Lo
-        ////            _   (The underscore character U+005F)
-        ////        simple-name-chars:
-        ////            simple-name-char
-        ////            simple-name-chars   simple-name-char
-        ////        simple-name-char:
-        ////            A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nd
-        ////            _   (The underscore character U+005F)
-        #endregion
-        #region B.1.10 Type Names
-        ////        type-name:
-        ////            type-identifier
-        ////            type-name   .   type-identifier
-        ////        type-identifier:
-        ////            type-characters
-        ////        type-characters:
-        ////            type-character
-        ////            type-characters   type-character
-        ////        type-character:
-        ////            A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nd
-        ////            _   (The underscore character U+005F)
-        ////        array-type-name:
-        ////            type-name   [
-        ////        generic-type-name:
-        ////            type-name   [
-        #endregion
-        #region B.1.11 Operators and punctuators
-        ////        operator-or-punctuator:  one of
-        ////            {		}		[		]		(		)		@(		@{		$(		;
-        ////        &&		||		&		|		,		++		..		::		.
-        ////            !		*		/		%		+		2>&1	1>&2
-        ////            dash					dash   dash
-        ////            dash   and				dash   band				dash   bnot
-        ////            dash   bor				dash   bxor				dash   not
-        ////            dash   or				dash   xor
-        ////            assignment-operator 
-        ////            file-redirection-operator
-        ////            comparison-operator
-        ////            format-operator
-        ////        assignment-operator:  one of
-        ////            =		dash   =			+=		*=		/=		%=
-        ////        file-redirection-operator:  one of
-        ////            >>		>		<		2>>		2>
-        ////        comparison-operator:  one of
-        ////            dash   as					dash   ccontains				dash   ceq
-        ////            dash   cge					dash   cgt						dash   cle
-        ////            dash   clike				dash   clt						dash   cmatch
-        ////            dash   cne					dash   cnotcontains			dash   cnotlike
-        ////            dash   cnotmatch			dash   contains				dash   creplace
-        ////            dash   csplit				dash   eq						dash   ge
-        ////            dash   gt					dash   icontains				dash   ieq
-        ////            dash   ige					dash   igt						dash   ile
-        ////            dash   ilike				dash   ilt						dash   imatch
-        ////            dash   ine					dash   inotcontains			dash   inotlike
-        ////            dash   inotmatch			dash   ireplace				dash   is
-        ////            dash   isnot				dash   isplit					dash   join
-        ////            dash   le					dash   like						dash   lt
-        ////            dash   match				dash   ne						dash   notcontains
-        ////            dash   notlike				dash   notmatch				dash   replace
-        ////            dash   split
-        ////        format-operator:
-        ////            dash   f
-        #endregion
-        #endregion
+            ////        signature-block:
+            ////            signature-begin   signature   signature-end
+            ////        signature-begin:
+            ////            new-line-character   # SIG # Begin signature block   new-line-character
+            ////        signature:
+            ////            base64 encoded signature blob in multiple single-line-comments
+            ////        signature-end:
+            ////            new-line-character   # SIG # End signature block   new-line-character
+            #region B.1.1 Line terminators
+            ////        new-line-character:
+            ////            Carriage return character (U+000D)
+            ////            Line feed character (U+000A)
+            ////            Carriage return character (U+000D) followed by line feed character (U+000A)
+            ////        new-lines:
+            ////            new-line-character
+            ////            new-lines   new-line-character
+            #endregion
+            #region B.1.2 Comments
+            ////        comment:
+            ////            single-line-comment
+            ////            requires-comment
+            ////            delimited-comment
+            ////        single-line-comment:
+            ////            #   input-characters_opt
+            ////        input-characters:
+            ////            input-character
+            ////            input-characters   input-character
+            ////        input-character:
+            ////            Any Unicode character except a new-line-character
+            ////        requires-comment:
+            ////            #requires   whitespace   command-arguments
+            ////        dash:
+            ////            - (U+002D)
+            ////            EnDash character (U+2013)
+            ////            EmDash character (U+2014)
+            ////            Horizontal bar character (U+2015)
+            ////        dashdash:
+            ////            dash   dash
+            ////        delimited-comment:
+            ////            <#   delimited-comment-text_opt   hashes   >
+            ////        delimited-comment-text:
+            ////            delimited-comment-section
+            ////            delimited-comment-text   delimited-comment-section
+            ////        delimited-comment-section:
+            ////            >
+            ////            hashes_opt   not-greater-than-or-hash
+            ////        hashes:
+            ////            #
+            ////            hashes   #
+            ////        not-greater-than-or-hash:
+            ////            Any Unicode character except > or #
+            #endregion
+            #region B.1.3 White space
+            ////        whitespace:
+            ////            Any character with Unicode class Zs, Zl, or Zp
+            ////            Horizontal tab character (U+0009)
+            ////            Vertical tab character (U+000B)
+            ////            Form feed character (U+000C)
+            ////            `   (The backtick character U+0060) followed by new-line-character
+            #endregion
+            #region B.1.4 Tokens
+            ////        token:
+            ////            keyword
+            ////            variable
+            ////            command
+            ////            command-parameter
+            ////            command-argument-token
+            ////            integer-literal
+            ////            real-literal
+            ////            string-literal
+            ////            type-literal
+            ////            operator-or-punctuator
+            #endregion
+            #region B.1.5 Keywords
+            ////        keyword:  one of
+            ////            begin				break			catch			class
+            ////            continue			data			define		do
+            ////            dynamicparam	else			elseif		end
+            ////            exit				filter		finally		for
+            ////            foreach			from			function		if
+            ////            in					param			process		return
+            ////            switch			throw			trap			try
+            ////            until				using			var			while
+            #endregion
+            #region B.1.6 Variables
+            ////        variable:
+            ////            $$
+            ////            $?
+            ////            $^
+            ////            $   variable-scope_opt  variable-characters
+            ////            @   variable-scope_opt   variable-characters
+            ////            braced-variable
+            ////        braced-variable:
+            ////            ${   variable-scope_opt   braced-variable-characters   }
+            ////        variable-scope:
+            ////        global:
+            ////        local:
+            ////        private:
+            ////        script:
+            ////            variable-namespace
+            ////        variable-namespace:
+            ////        variable-characters   :
+            ////        variable-characters:
+            ////            variable-character
+            ////            variable-characters   variable-character
+            ////        variable-character:
+            ////            A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nd
+            ////            _   (The underscore character U+005F)
+            ////            ?
+            ////        braced-variable-characters:
+            ////            braced-variable-character
+            ////            braced-variable-characters   braced-variable-character
+            ////        braced-variable-character:
+            ////            Any Unicode character except
+            ////                    }   (The closing curly brace character U+007D)
+            ////                    `   (The backtick character U+0060)
+            ////            escaped-character
+            ////        escaped-character:
+            ////            `   (The backtick character U+0060) followed by any Unicode character
+            #endregion
+            #region B.1.7 Commands
+            ////        generic-token:
+            ////            generic-token-parts
+            ////        generic-token-parts:
+            ////            generic-token-part
+            ////            generic-token-parts   generic-token-part
+            ////        generic-token-part:
+            ////            expandable-string-literal
+            ////            verbatim-here-string-literal
+            ////            variable
+            ////            generic-token-char
+            ////        generic-token-char:
+            ////            Any Unicode character except
+            ////                    {		}		(		)		;		,		|		&		$
+            ////                    `   (The backtick character U+0060)
+            ////                    double-quote-character
+            ////                    single-quote-character
+            ////                    whitespace
+            ////                    new-line-character
+            ////            escaped-character
+            ////        generic-token-with-subexpr-start:
+            ////            generic-token-parts   $(
+            ////        command-parameter:
+            ////            dash   first-parameter-char   parameter-chars   colon_opt
+            ////        first-parameter-char:
+            ////            A Unicode character of classes Lu, Ll, Lt, Lm, or Lo
+            ////            _   (The underscore character U+005F)
+            ////            ?
+            ////        parameter-chars:
+            ////            parameter-char
+            ////            parameter-chars   parameter-char
+            ////        parameter-char:
+            ////            Any Unicode character except
+            ////                {	}	(	)	;	,	|	&	.	[
+            ////                colon
+            ////                whitespace
+            ////                new-line-character
+            ////        colon:
+            ////        :   (The colon character U+003A)
+            #endregion
+            #region B.1.8 Literals
+            ////        literal:
+            ////            integer-literal
+            ////            real-literal
+            ////            string-literal
+            ////            Integer Literals
+            ////        integer-literal:
+            ////            decimal-integer-literal
+            ////            hexadecimal-integer-literal
+            ////        decimal-integer-literal:
+            ////            decimal-digits   numeric-type-suffix_opt   numeric-multiplier_opt
+            ////        decimal-digits:
+            ////            decimal-digit
+            ////            decimal-digit   decimal-digits
+            ////        decimal-digit:   one of
+            ////            0   1   2   3   4   5   6   7   8   9
+            ////        numeric-type-suffix:
+            ////            long-type-suffix
+            ////            decimal-type-suffix
+            ////        hexadecimal-integer-literal:
+            ////            0x   hexadecimal-digits   long-type-suffix_opt   numeric-multiplier_opt
+            ////        hexadecimal-digits:
+            ////            hexadecimal-digit
+            ////            hexadecimal-digit   decimal-digits
+            ////        hexadecimal-digit:   one of
+            ////            0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
+            ////        long-type-suffix:
+            ////            l
+            ////        numeric-multiplier:   one of
+            ////            kb   mb   gb   tb   pb
+            ////            Real Literals
+            ////        real-literal:
+            ////            decimal-digits   .   decimal-digits   exponent-part_opt   decimal-type-suffix_opt   numeric-multiplier_opt
+            ////            .   decimal-digits   exponent-part_opt   decimal-type-suffix_opt   numeric-multiplier_opt
+            ////            decimal-digits   exponent-part  decimal-type-suffix_opt   numeric-multiplier_opt
+            ////        exponent-part:
+            ////            e   sign_opt   decimal-digits
+            ////        sign:   one of
+            ////            +
+            ////            dash
+            ////        decimal-type-suffix:
+            ////            d
+            ////            String Literals
+            ////        string-literal:
+            ////            expandable-string-literal
+            ////            expandable-here-string-literal
+            ////            verbatim-string-literal
+            ////            verbatim-here-string-literal
+            ////        expandable-string-literal:
+            ////            double-quote-character   expandable-string-characters_opt   dollars_opt   double-quote-character
+            ////        double-quote-character:
+            ////            "   (U+0022)
+            ////            Left double quotation mark (U+201C)
+            ////            Right double quotation mark (U+201D)
+            ////            Double low-9 quotation mark (U+201E)
+            ////        expandable-string-characters:
+            ////            expandable-string-part
+            ////            expandable-string-characters   expandable-string-part
+            ////        expandable-string-part:
+            ////            Any Unicode character except
+            ////                    $
+            ////                    double-quote-character
+            ////                    `   (The backtick character U+0060)
+            ////            braced-variable
+            ////            $   Any Unicode character except
+            ////                    (
+            ////                    {
+            ////                    double-quote-character
+            ////                    `   (The backtick character U+0060)
+            ////            $   escaped-character
+            ////            escaped-character
+            ////            double-quote-character   double-quote-character
+            ////        dollars:
+            ////            $
+            ////            dollars   $
+            ////        expandable-here-string-literal:
+            ////            @   double-quote-character   whitespace_opt   new-line-character
+            ////                    expandable-here-string-characters_opt   new-line-character   double-quote-character   @
+            ////        expandable-here-string-characters:
+            ////            expandable-here-string-part
+            ////            expandable-here-string-characters   expandable-here-string-part
+            ////        expandable-here-string-part:
+            ////            Any Unicode character except
+            ////                    $
+            ////                    new-line-character
+            ////            braced-variable
+            ////            $   Any Unicode character except
+            ////                    (
+            ////                    new-line-character
+            ////            $   new-line-character   Any Unicode character except double-quote-char
+            ////            $   new-line-character   double-quote-char   Any Unicode character except @
+            ////            new-line-character   Any Unicode character except double-quote-char
+            ////            new-line-character   double-quote-char   Any Unicode character except @
+            ////        expandable-string-with-subexpr-start:
+            ////            double-quote-character   expandable-string-chars_opt   $(
+            ////        expandable-string-with-subexpr-end:
+            ////            double-quote-char
+            ////        expandable-here-string-with-subexpr-start:
+            ////            @   double-quote-character   whitespace_opt   new-line-character
+            ////                    expandable-here-string-chars_opt   $(
+            ////        expandable-here-string-with-subexpr-end:
+            ////            new-line-character   double-quote-character   @
+            ////        verbatim-string-literal:
+            ////            single-quote-character   verbatim-string-characters_opt   single-quote-char
+            ////        single-quote-character:
+            ////            '   (U+0027)
+            ////            Left single quotation mark (U+2018)
+            ////            Right single quotation mark (U+2019)
+            ////            Single low-9 quotation mark (U+201A)
+            ////            Single high-reversed-9 quotation mark (U+201B)
+            ////        verbatim-string-characters:
+            ////            verbatim-string-part
+            ////            verbatim-string-characters   verbatim-string-part
+            ////        verbatim-string-part:
+            ////            Any Unicode character except single-quote-character
+            ////            single-quote-character   single-quote-character
+            ////        verbatim-here-string-literal:
+            ////            @   single-quote-character   whitespace_opt   new-line-character
+            ////                    verbatim-here-string-characters_opt   new-line-character   single-quote-character   @
+            ////        verbatim-here-string-characters:
+            ////            verbatim-here-string-part
+            ////            verbatim-here-string-characters   verbatim-here-string-part
+            ////        verbatim-here-string-part:
+            ////            Any Unicode character except new-line-character
+            ////            new-line-character   Any Unicode character except single-quote-character
+            ////            new-line-character   single-quote-character   Any Unicode character except @
+            #endregion
+            #region B.1.9 Simple Names
+            ////        simple-name:
+            ////            simple-name-first-char   simple-name-chars
+            ////        simple-name-first-char:
+            ////            A Unicode character of classes Lu, Ll, Lt, Lm, or Lo
+            ////            _   (The underscore character U+005F)
+            ////        simple-name-chars:
+            ////            simple-name-char
+            ////            simple-name-chars   simple-name-char
+            ////        simple-name-char:
+            ////            A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nd
+            ////            _   (The underscore character U+005F)
+            #endregion
+            #region B.1.10 Type Names
+            ////        type-name:
+            ////            type-identifier
+            ////            type-name   .   type-identifier
+            ////        type-identifier:
+            ////            type-characters
+            ////        type-characters:
+            ////            type-character
+            ////            type-characters   type-character
+            ////        type-character:
+            ////            A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nd
+            ////            _   (The underscore character U+005F)
+            ////        array-type-name:
+            ////            type-name   [
+            ////        generic-type-name:
+            ////            type-name   [
+            #endregion
+            #region B.1.11 Operators and punctuators
+            ////        operator-or-punctuator:  one of
+            ////            {		}		[		]		(		)		@(		@{		$(		;
+            ////        &&		||		&		|		,		++		..		::		.
+            ////            !		*		/		%		+		2>&1	1>&2
+            ////            dash					dash   dash
+            ////            dash   and				dash   band				dash   bnot
+            ////            dash   bor				dash   bxor				dash   not
+            ////            dash   or				dash   xor
+            ////            assignment-operator 
+            ////            file-redirection-operator
+            ////            comparison-operator
+            ////            format-operator
+            ////        assignment-operator:  one of
+            ////            =		dash   =			+=		*=		/=		%=
+            ////        file-redirection-operator:  one of
+            ////            >>		>		<		2>>		2>
+            ////        comparison-operator:  one of
+            ////            dash   as					dash   ccontains				dash   ceq
+            ////            dash   cge					dash   cgt						dash   cle
+            ////            dash   clike				dash   clt						dash   cmatch
+            ////            dash   cne					dash   cnotcontains			dash   cnotlike
+            ////            dash   cnotmatch			dash   contains				dash   creplace
+            ////            dash   csplit				dash   eq						dash   ge
+            ////            dash   gt					dash   icontains				dash   ieq
+            ////            dash   ige					dash   igt						dash   ile
+            ////            dash   ilike				dash   ilt						dash   imatch
+            ////            dash   ine					dash   inotcontains			dash   inotlike
+            ////            dash   inotmatch			dash   ireplace				dash   is
+            ////            dash   isnot				dash   isplit					dash   join
+            ////            dash   le					dash   like						dash   lt
+            ////            dash   match				dash   ne						dash   notcontains
+            ////            dash   notlike				dash   notmatch				dash   replace
+            ////            dash   split
+            ////        format-operator:
+            ////            dash   f
+            #endregion
+            #endregion
+        }
 
         public PowerShellGrammar()
         {
