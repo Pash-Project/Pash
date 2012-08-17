@@ -46,9 +46,13 @@ namespace ParserTests
             ////            Carriage return character (U+000D)
             ////            Line feed character (U+000A)
             ////            Carriage return character (U+000D) followed by line feed character (U+000A)
+            const string new_line_character = "(\u000D)|(\u000A)|(\u000D)(\u000A)";
+
             ////        new-lines:
             ////            new-line-character
             ////            new-lines   new-line-character
+            const string new_lines = "(" + new_line_character + ")+";
+
             #endregion
             #region B.1.2 Comments
             ////        comment:
