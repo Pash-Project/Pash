@@ -96,6 +96,7 @@ namespace ParserTests
             ////            Vertical tab character (U+000B)
             ////            Form feed character (U+000C)
             ////            `   (The backtick character U+0060) followed by new-line-character
+            const string whitespace = "(\\p{Zs})|(\\p{Zl})|(\\p{Zp})(\u0009)|(\u000B)|(\u000C)|(\u0060" + new_line_character + ")";
             #endregion
             #region B.1.4 Tokens
             ////        token:
