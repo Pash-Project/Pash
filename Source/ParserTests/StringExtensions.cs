@@ -8,6 +8,7 @@ namespace StringExtensions
 {
     static class _
     {
+        #region Format
         //
         // Summary:
         //     Replaces one or more format items in a specified string with the string representation
@@ -115,6 +116,12 @@ namespace StringExtensions
         public static string FormatString(this string format, object arg0, object arg1, object arg2)
         {
             return string.Format(format, arg0, arg1, arg2);
+        }
+        #endregion
+
+        public static string JoinString<T>(this IEnumerable<T> values, string separator)
+        {
+            return string.Join(separator, values);
         }
     }
 }
