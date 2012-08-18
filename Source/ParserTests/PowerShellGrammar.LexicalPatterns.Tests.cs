@@ -27,5 +27,17 @@ namespace ParserTests
         {
             Assert.IsFalse(Regex.IsMatch("'", PowerShellGrammar.LexicalPatterns.generic_token_char));
         }
+
+        [Test]
+        public void GenericToken_Match()
+        {
+            Assert.IsTrue(Regex.IsMatch("foo", "^" + PowerShellGrammar.LexicalPatterns.generic_token + "$"));
+        }
+
+        [Test]
+        public void GenericToken_DoubleToken_NotMatch()
+        {
+            Assert.IsFalse(Regex.IsMatch("foo foo", "^" + PowerShellGrammar.LexicalPatterns.generic_token + "$"));
+        }
     }
 }
