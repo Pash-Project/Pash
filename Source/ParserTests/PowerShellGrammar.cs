@@ -16,8 +16,12 @@ namespace ParserTests
 
     partial class PowerShellGrammar : CaseInsensitiveGrammar
     {
+        public readonly NonTerminal interactive_input;
+
         public PowerShellGrammar()
         {
+            InitializeNonTerminals();
+
             #region B.2 Syntactic grammar
             #region B.2.1 Basic concepts
             ////        script_file:
@@ -425,6 +429,14 @@ namespace ParserTests
             ////            new_lines_opt   simple_name   =   new_lines_opt   expression
             #endregion
             #endregion
+        }
+
+        void InitializeNonTerminals()
+        {
+            foreach (var field in this.GetType().GetFields().Where(f => f.FieldType == typeof(NonTerminal)))
+            {
+                field.SetValue(this, new NonTerminal(field.Name));
+            }
         }
     }
 }
