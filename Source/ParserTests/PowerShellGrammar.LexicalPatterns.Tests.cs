@@ -11,19 +11,19 @@ namespace ParserTests
     class PowerShellGrammarLexicalPatternsTests
     {
         [Test]
-        public void LetterAsTokenCharTest()
+        public void LetterAsTokenChar()
         {
             Assert.IsTrue(Regex.IsMatch("x", PowerShellGrammar.LexicalPatterns.generic_token_char));
         }
 
         [Test]
-        public void DigitAsTokenCharTest()
+        public void DigitAsTokenChar()
         {
             Assert.IsTrue(Regex.IsMatch("1", PowerShellGrammar.LexicalPatterns.generic_token_char));
         }
 
         [Test]
-        public void SingleQuoteIsNotTokenCharTest()
+        public void SingleQuoteIsNotTokenChar()
         {
             Assert.IsFalse(Regex.IsMatch("'", PowerShellGrammar.LexicalPatterns.generic_token_char));
         }
