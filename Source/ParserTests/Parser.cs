@@ -191,7 +191,7 @@ namespace ParserTests
             ////                    whitespace
             ////                    new_line_character
             ////TODO:            escaped_character
-            const string generic_token_char = "(!(" + Regex.Escape("{}();,|&$") + "\u0060" + double_quote_character + single_quote_character + whitespace + new_line_character + "));
+            const string generic_token_char = "(!(" + Regex.Escape("{}();,|&$") + "\u0060" + double_quote_character + single_quote_character + whitespace + new_line_character + "))";
 
             ////        generic_token_with_subexpr_start:
             ////            generic_token_parts   $(
