@@ -191,7 +191,7 @@ namespace ParserTests
             ////                    whitespace
             ////                    new_line_character
             ////TODO:            escaped_character
-            const string generic_token_char = "(!(" + Regex.Escape("{}();,|&$") + "\u0060" + double_quote_character + single_quote_character + whitespace + new_line_character + "))";
+            const string generic_token_char = "(!(" + @"\{\}\(\)\;\,\|\&\$" + "\u0060" + double_quote_character + single_quote_character + whitespace + new_line_character + "))";
 
             ////        generic_token_with_subexpr_start:
             ////            generic_token_parts   $(
@@ -269,6 +269,7 @@ namespace ParserTests
             ////            Left double quotation mark (U+201C)
             ////            Right double quotation mark (U+201D)
             ////            Double low_9 quotation mark (U+201E)
+            const string double_quote_character = "\u0022|\u201C|\u201D|\u201E";
             ////        expandable_string_characters:
             ////            expandable_string_part
             ////            expandable_string_characters   expandable_string_part
@@ -324,6 +325,7 @@ namespace ParserTests
             ////            Right single quotation mark (U+2019)
             ////            Single low_9 quotation mark (U+201A)
             ////            Single high_reversed_9 quotation mark (U+201B)
+            const string single_quote_character = "\u0027|\u2018|\u2019|\u201A";
             ////        verbatim_string_characters:
             ////            verbatim_string_part
             ////            verbatim_string_characters   verbatim_string_part
@@ -593,7 +595,6 @@ namespace ParserTests
             ////        command:
             ////            command_name   command_elements_opt
             ////            command_invocation_operator   command_module_opt  command_name_expr   command_elements_opt
-            const string command 
             ////        command_invocation_operator:  one of
             ////            &	.
             ////        command_module:
