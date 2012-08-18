@@ -585,6 +585,7 @@ namespace ParserTests
         {
             foreach (var field in this.GetType().GetFields().Where(f => f.FieldType == typeof(NonTerminal)))
             {
+                if (field.GetValue(this) != null) throw new Exception("don't pre-init fields - let us take care of that for you.");
                 field.SetValue(this, new NonTerminal(field.Name));
             }
         }
