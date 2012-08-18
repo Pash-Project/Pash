@@ -16,13 +16,157 @@ namespace ParserTests
 
     partial class PowerShellGrammar : CaseInsensitiveGrammar
     {
+
+        #region B.2 Syntactic grammar
+
+        #region B.2.1 Basic concepts
+        public readonly NonTerminal script_file;
+        public readonly NonTerminal module_file;
         public readonly NonTerminal interactive_input;
+        public readonly NonTerminal data_file;
+        #endregion
+
+        #region B.2.2 Statements
+        public readonly NonTerminal script_block;
+        public readonly NonTerminal param_block;
+        public readonly NonTerminal parameter_list;
+        public readonly NonTerminal script_parameter;
+        public readonly NonTerminal script_parameter_default;
+        public readonly NonTerminal script_block_body;
+        public readonly NonTerminal named_block_list;
+        public readonly NonTerminal named_block;
+        public readonly NonTerminal block_name;
+        public readonly NonTerminal statement_block;
+        public readonly NonTerminal statement_list;
+        public readonly NonTerminal statement;
+        public readonly NonTerminal statement_terminator;
+        public readonly NonTerminal statement_terminators;
+        public readonly NonTerminal if_statement;
+        public readonly NonTerminal elseif_clauses;
+        public readonly NonTerminal elseif_clause;
+        public readonly NonTerminal else_clause;
+        public readonly NonTerminal labeled_statement;
+        public readonly NonTerminal switch_statement;
+        public readonly NonTerminal switch_parameters;
+        public readonly NonTerminal switch_parameter;
+        public readonly NonTerminal switch_condition;
+        public readonly NonTerminal switch_filename;
+        public readonly NonTerminal switch_body;
+        public readonly NonTerminal switch_clauses;
+        public readonly NonTerminal switch_clause;
+        public readonly NonTerminal switch_clause_condition;
+        public readonly NonTerminal foreach_statement;
+        public readonly NonTerminal for_statement;
+        public readonly NonTerminal for_initializer;
+        public readonly NonTerminal for_condition;
+        public readonly NonTerminal for_iterator;
+        public readonly NonTerminal while_statement;
+        public readonly NonTerminal do_statement;
+        public readonly NonTerminal while_condition;
+        public readonly NonTerminal function_statement;
+        public readonly NonTerminal function_name;
+        public readonly NonTerminal function_parameter_declaration;
+        public readonly NonTerminal flow_control_statement;
+        public readonly NonTerminal label_expression;
+        public readonly NonTerminal trap_statement;
+        public readonly NonTerminal try_statement;
+        public readonly NonTerminal catch_clauses;
+        public readonly NonTerminal catch_clause;
+        public readonly NonTerminal catch_type_list;
+        public readonly NonTerminal finally_clause;
+        public readonly NonTerminal data_statement;
+        public readonly NonTerminal data_name;
+        public readonly NonTerminal data_commands_allowed;
+        public readonly NonTerminal data_commands_list;
+        public readonly NonTerminal data_command;
+        public readonly NonTerminal pipeline;
+        public readonly NonTerminal assignment_expression;
+        public readonly NonTerminal pipeline_tail;
+        public readonly NonTerminal command;
+        public readonly NonTerminal command_invocation_operator;
+        public readonly NonTerminal command_module;
+        public readonly NonTerminal command_name;
+        public readonly NonTerminal generic_token_with_subexpr;
+        public readonly NonTerminal command_name_expr;
+        public readonly NonTerminal command_elements;
+        public readonly NonTerminal command_element;
+        public readonly NonTerminal command_argument;
+        public readonly NonTerminal redirections;
+        public readonly NonTerminal redirection;
+        public readonly NonTerminal redirected_file_name;
+        #endregion
+
+        #region B.2.3 Expressions
+        public readonly NonTerminal expression;
+        public readonly NonTerminal logical_expression;
+        public readonly NonTerminal bitwise_expression;
+        public readonly NonTerminal comparison_expression;
+        public readonly NonTerminal additive_expression;
+        public readonly NonTerminal multiplicative_expression;
+        public readonly NonTerminal format_expression;
+        public readonly NonTerminal range_expression;
+        public readonly NonTerminal array_literal_expression;
+        public readonly NonTerminal unary_expression;
+        public readonly NonTerminal expression_with_unary_operator;
+        public readonly NonTerminal pre_increment_expression;
+        public readonly NonTerminal pre_decrement_expression;
+        public readonly NonTerminal cast_expression;
+        public readonly NonTerminal primary_expression;
+        public readonly NonTerminal value;
+        public readonly NonTerminal parenthesized_expression;
+        public readonly NonTerminal sub_expression;
+        public readonly NonTerminal array_expression;
+        public readonly NonTerminal script_block_expression;
+        public readonly NonTerminal hash_literal_expression;
+        public readonly NonTerminal hash_literal_body;
+        public readonly NonTerminal hash_entry;
+        public readonly NonTerminal key_expression;
+        public readonly NonTerminal post_increment_expression;
+        public readonly NonTerminal post_decrement_expression;
+        public readonly NonTerminal member_access;
+        public readonly NonTerminal primary_expression;
+        public readonly NonTerminal element_access;
+        public readonly NonTerminal invocation_expression;
+        public readonly NonTerminal primary_expression;
+        public readonly NonTerminal argument_list;
+        public readonly NonTerminal argument_expression_list;
+        public readonly NonTerminal argument_expression;
+        public readonly NonTerminal logical_argument_expression;
+        public readonly NonTerminal bitwise_argument_expression;
+        public readonly NonTerminal comparison_argument_expression;
+        public readonly NonTerminal additive_argument_expression;
+        public readonly NonTerminal multiplicative_argument_expression;
+        public readonly NonTerminal format_argument_expression;
+        public readonly NonTerminal range_argument_expression;
+        public readonly NonTerminal member_name;
+        public readonly NonTerminal string_literal_with_subexpression;
+        public readonly NonTerminal expandable_string_literal_with_subexpr;
+        public readonly NonTerminal expandable_string_with_subexpr_characters;
+        public readonly NonTerminal expandable_string_with_subexpr_part;
+        public readonly NonTerminal expandable_here_string_with_subexpr_characters;
+        public readonly NonTerminal expandable_here_string_with_subexpr_part;
+        public readonly NonTerminal type_literal;
+        public readonly NonTerminal type_spec;
+        public readonly NonTerminal dimension;
+        public readonly NonTerminal generic_type_arguments;
+        #endregion
+
+        #region B.2.4 Attributes
+        public readonly NonTerminal attribute_list;
+        public readonly NonTerminal attribute;
+        public readonly NonTerminal attribute_name;
+        public readonly NonTerminal attribute_arguments;
+        public readonly NonTerminal attribute_argument;
+        #endregion
+        #endregion
 
         public PowerShellGrammar()
         {
             InitializeNonTerminals();
 
+
             #region B.2 Syntactic grammar
+
             #region B.2.1 Basic concepts
             ////        script_file:
             ////            script_block
@@ -33,6 +177,7 @@ namespace ParserTests
             ////        data_file:
             ////            statement_list
             #endregion
+
             #region B.2.2 Statements
             ////        script_block:
             ////            param_block_opt   statement_terminators_opt    script_block_body_opt
@@ -235,6 +380,7 @@ namespace ParserTests
             ////            command_argument
             ////            primary_expression
             #endregion
+
             #region B.2.3 Expressions
             ////        expression:
             ////            logical_expression
@@ -412,6 +558,7 @@ namespace ParserTests
             ////            type_spec
             ////            generic_type_arguments   ,   type_spec
             #endregion
+
             #region B.2.4 Attributes
             ////        attribute_list:
             ////            attribute
