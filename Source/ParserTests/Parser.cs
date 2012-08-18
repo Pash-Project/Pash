@@ -11,7 +11,7 @@ namespace ParserTests
     ////////
     // PowerShell Language Grammar, as presented in the PowerShell Language Specification[1], Appendix B.
     //
-    // [1]: http://www.microsoft.com/en-us/download/details.aspx?id=9706
+    // [1]: http://www.microsoft.com/en_us/download/details.aspx?id=9706
     ///////
 
     class PowerShellGrammar : CaseInsensitiveGrammar
@@ -19,74 +19,74 @@ namespace ParserTests
         static class LexicalPatterns
         {
             #region B.1 Lexical grammar
-            ////        input-elements:
-            ////            input-element
-            ////            input-elements   input-element
-            ////        input-element:
+            ////        input_elements:
+            ////            input_element
+            ////            input_elements   input_element
+            ////        input_element:
             ////            whitespace
             ////            comment
             ////            token
             const string input_elements = "(" + whitespace + ") | (" + token + ")";
 
             ////        input:
-            ////            input-elements_opt   signature-block_opt
+            ////            input_elements_opt   signature_block_opt
             // TODO: signature block
             const string input = "(" + input_elements + ")?";
 
-            ////        signature-block:
-            ////            signature-begin   signature   signature-end
-            ////        signature-begin:
-            ////            new-line-character   # SIG # Begin signature block   new-line-character
+            ////        signature_block:
+            ////            signature_begin   signature   signature_end
+            ////        signature_begin:
+            ////            new_line_character   # SIG # Begin signature block   new_line_character
             ////        signature:
-            ////            base64 encoded signature blob in multiple single-line-comments
-            ////        signature-end:
-            ////            new-line-character   # SIG # End signature block   new-line-character
+            ////            base64 encoded signature blob in multiple single_line_comments
+            ////        signature_end:
+            ////            new_line_character   # SIG # End signature block   new_line_character
             #region B.1.1 Line terminators
-            ////        new-line-character:
+            ////        new_line_character:
             ////            Carriage return character (U+000D)
             ////            Line feed character (U+000A)
             ////            Carriage return character (U+000D) followed by line feed character (U+000A)
             const string new_line_character = "(\u000D)|(\u000A)|(\u000D)(\u000A)";
 
-            ////        new-lines:
-            ////            new-line-character
-            ////            new-lines   new-line-character
+            ////        new_lines:
+            ////            new_line_character
+            ////            new_lines   new_line_character
             const string new_lines = "(" + new_line_character + ")+";
 
             #endregion
             #region B.1.2 Comments
             ////        comment:
-            ////            single-line-comment
-            ////            requires-comment
-            ////            delimited-comment
-            ////        single-line-comment:
-            ////            #   input-characters_opt
-            ////        input-characters:
-            ////            input-character
-            ////            input-characters   input-character
-            ////        input-character:
-            ////            Any Unicode character except a new-line-character
-            ////        requires-comment:
-            ////            #requires   whitespace   command-arguments
+            ////            single_line_comment
+            ////            requires_comment
+            ////            delimited_comment
+            ////        single_line_comment:
+            ////            #   input_characters_opt
+            ////        input_characters:
+            ////            input_character
+            ////            input_characters   input_character
+            ////        input_character:
+            ////            Any Unicode character except a new_line_character
+            ////        requires_comment:
+            ////            #requires   whitespace   command_arguments
             ////        dash:
-            ////            - (U+002D)
+            ////            _ (U+002D)
             ////            EnDash character (U+2013)
             ////            EmDash character (U+2014)
             ////            Horizontal bar character (U+2015)
             ////        dashdash:
             ////            dash   dash
-            ////        delimited-comment:
-            ////            <#   delimited-comment-text_opt   hashes   >
-            ////        delimited-comment-text:
-            ////            delimited-comment-section
-            ////            delimited-comment-text   delimited-comment-section
-            ////        delimited-comment-section:
+            ////        delimited_comment:
+            ////            <#   delimited_comment_text_opt   hashes   >
+            ////        delimited_comment_text:
+            ////            delimited_comment_section
+            ////            delimited_comment_text   delimited_comment_section
+            ////        delimited_comment_section:
             ////            >
-            ////            hashes_opt   not-greater-than-or-hash
+            ////            hashes_opt   not_greater_than_or_hash
             ////        hashes:
             ////            #
             ////            hashes   #
-            ////        not-greater-than-or-hash:
+            ////        not_greater_than_or_hash:
             ////            Any Unicode character except > or #
             #endregion
             #region B.1.3 White space
@@ -95,7 +95,7 @@ namespace ParserTests
             ////            Horizontal tab character (U+0009)
             ////            Vertical tab character (U+000B)
             ////            Form feed character (U+000C)
-            ////            `   (The backtick character U+0060) followed by new-line-character
+            ////            `   (The backtick character U+0060) followed by new_line_character
             const string whitespace = "(\\p{Zs})|(\\p{Zl})|(\\p{Zp})(\u0009)|(\u000B)|(\u000C)|(\u0060" + new_line_character + ")";
             #endregion
             #region B.1.4 Tokens
@@ -103,13 +103,13 @@ namespace ParserTests
             ////            keyword
             ////            variable
             ////            command
-            ////            command-parameter
-            ////            command-argument-token
-            ////            integer-literal
-            ////            real-literal
-            ////            string-literal
-            ////            type-literal
-            ////            operator-or-punctuator
+            ////            command_parameter
+            ////            command_argument_token
+            ////            integer_literal
+            ////            real_literal
+            ////            string_literal
+            ////            type_literal
+            ////            operator_or_punctuator
             // TODO: rest of them
             const string token = "(" + command + ")";
             #endregion
@@ -129,236 +129,250 @@ namespace ParserTests
             ////            $$
             ////            $?
             ////            $^
-            ////            $   variable-scope_opt  variable-characters
-            ////            @   variable-scope_opt   variable-characters
-            ////            braced-variable
-            ////        braced-variable:
-            ////            ${   variable-scope_opt   braced-variable-characters   }
-            ////        variable-scope:
+            ////            $   variable_scope_opt  variable_characters
+            ////            @   variable_scope_opt   variable_characters
+            ////            braced_variable
+            ////        braced_variable:
+            ////            ${   variable_scope_opt   braced_variable_characters   }
+            ////        variable_scope:
             ////        global:
             ////        local:
             ////        private:
             ////        script:
-            ////            variable-namespace
-            ////        variable-namespace:
-            ////        variable-characters   :
-            ////        variable-characters:
-            ////            variable-character
-            ////            variable-characters   variable-character
-            ////        variable-character:
+            ////            variable_namespace
+            ////        variable_namespace:
+            ////        variable_characters   :
+            ////        variable_characters:
+            ////            variable_character
+            ////            variable_characters   variable_character
+            ////        variable_character:
             ////            A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nd
             ////            _   (The underscore character U+005F)
             ////            ?
-            ////        braced-variable-characters:
-            ////            braced-variable-character
-            ////            braced-variable-characters   braced-variable-character
-            ////        braced-variable-character:
+            ////        braced_variable_characters:
+            ////            braced_variable_character
+            ////            braced_variable_characters   braced_variable_character
+            ////        braced_variable_character:
             ////            Any Unicode character except
             ////                    }   (The closing curly brace character U+007D)
             ////                    `   (The backtick character U+0060)
-            ////            escaped-character
-            ////        escaped-character:
+            ////            escaped_character
+            ////        escaped_character:
             ////            `   (The backtick character U+0060) followed by any Unicode character
             #endregion
             #region B.1.7 Commands
-            ////        generic-token:
-            ////            generic-token-parts
-            ////        generic-token-parts:
-            ////            generic-token-part
-            ////            generic-token-parts   generic-token-part
-            ////        generic-token-part:
-            ////            expandable-string-literal
-            ////            verbatim-here-string-literal
+            // this is not in the spec; maybe it's an error, or maybe I'm misunderstanding the spec.
+            const string command = generic_token;
+            
+
+            ////        generic_token:
+            ////            generic_token_parts
+            const string generic_token = "(" + generic_token_parts + ")";
+
+            ////        generic_token_parts:
+            ////            generic_token_part
+            ////            generic_token_parts   generic_token_part
+            const string generic_token_parts = "(" + generic_token_part + ")+";
+
+            ////        generic_token_part:
+            ////            expandable_string_literal
+            ////            verbatim_here_string_literal
             ////            variable
-            ////            generic-token-char
-            ////        generic-token-char:
+            ////            generic_token_char
+            // TODO: more
+            const string generic_token_part = "(" + generic_token_char + ")";
+
+            ////        generic_token_char:
             ////            Any Unicode character except
             ////                    {		}		(		)		;		,		|		&		$
             ////                    `   (The backtick character U+0060)
-            ////                    double-quote-character
-            ////                    single-quote-character
+            ////                    double_quote_character
+            ////                    single_quote_character
             ////                    whitespace
-            ////                    new-line-character
-            ////            escaped-character
-            ////        generic-token-with-subexpr-start:
-            ////            generic-token-parts   $(
-            ////        command-parameter:
-            ////            dash   first-parameter-char   parameter-chars   colon_opt
-            ////        first-parameter-char:
+            ////                    new_line_character
+            ////TODO:            escaped_character
+            const string generic_token_char = "(!(" + Regex.Escape("{}();,|&$") + "\u0060" + double_quote_character + single_quote_character + whitespace + new_line_character + "));
+
+            ////        generic_token_with_subexpr_start:
+            ////            generic_token_parts   $(
+            ////        command_parameter:
+            ////            dash   first_parameter_char   parameter_chars   colon_opt
+            ////        first_parameter_char:
             ////            A Unicode character of classes Lu, Ll, Lt, Lm, or Lo
             ////            _   (The underscore character U+005F)
             ////            ?
-            ////        parameter-chars:
-            ////            parameter-char
-            ////            parameter-chars   parameter-char
-            ////        parameter-char:
+            ////        parameter_chars:
+            ////            parameter_char
+            ////            parameter_chars   parameter_char
+            ////        parameter_char:
             ////            Any Unicode character except
             ////                {	}	(	)	;	,	|	&	.	[
             ////                colon
             ////                whitespace
-            ////                new-line-character
+            ////                new_line_character
             ////        colon:
-            ////        :   (The colon character U+003A)
+            ////            :   (The colon character U+003A)
+            const string colon = "\u003A";
             #endregion
             #region B.1.8 Literals
             ////        literal:
-            ////            integer-literal
-            ////            real-literal
-            ////            string-literal
+            ////            integer_literal
+            ////            real_literal
+            ////            string_literal
             ////            Integer Literals
-            ////        integer-literal:
-            ////            decimal-integer-literal
-            ////            hexadecimal-integer-literal
-            ////        decimal-integer-literal:
-            ////            decimal-digits   numeric-type-suffix_opt   numeric-multiplier_opt
-            ////        decimal-digits:
-            ////            decimal-digit
-            ////            decimal-digit   decimal-digits
-            ////        decimal-digit:   one of
+            ////        integer_literal:
+            ////            decimal_integer_literal
+            ////            hexadecimal_integer_literal
+            ////        decimal_integer_literal:
+            ////            decimal_digits   numeric_type_suffix_opt   numeric_multiplier_opt
+            ////        decimal_digits:
+            ////            decimal_digit
+            ////            decimal_digit   decimal_digits
+            ////        decimal_digit:   one of
             ////            0   1   2   3   4   5   6   7   8   9
-            ////        numeric-type-suffix:
-            ////            long-type-suffix
-            ////            decimal-type-suffix
-            ////        hexadecimal-integer-literal:
-            ////            0x   hexadecimal-digits   long-type-suffix_opt   numeric-multiplier_opt
-            ////        hexadecimal-digits:
-            ////            hexadecimal-digit
-            ////            hexadecimal-digit   decimal-digits
-            ////        hexadecimal-digit:   one of
+            ////        numeric_type_suffix:
+            ////            long_type_suffix
+            ////            decimal_type_suffix
+            ////        hexadecimal_integer_literal:
+            ////            0x   hexadecimal_digits   long_type_suffix_opt   numeric_multiplier_opt
+            ////        hexadecimal_digits:
+            ////            hexadecimal_digit
+            ////            hexadecimal_digit   decimal_digits
+            ////        hexadecimal_digit:   one of
             ////            0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
-            ////        long-type-suffix:
+            ////        long_type_suffix:
             ////            l
-            ////        numeric-multiplier:   one of
+            ////        numeric_multiplier:   one of
             ////            kb   mb   gb   tb   pb
             ////            Real Literals
-            ////        real-literal:
-            ////            decimal-digits   .   decimal-digits   exponent-part_opt   decimal-type-suffix_opt   numeric-multiplier_opt
-            ////            .   decimal-digits   exponent-part_opt   decimal-type-suffix_opt   numeric-multiplier_opt
-            ////            decimal-digits   exponent-part  decimal-type-suffix_opt   numeric-multiplier_opt
-            ////        exponent-part:
-            ////            e   sign_opt   decimal-digits
+            ////        real_literal:
+            ////            decimal_digits   .   decimal_digits   exponent_part_opt   decimal_type_suffix_opt   numeric_multiplier_opt
+            ////            .   decimal_digits   exponent_part_opt   decimal_type_suffix_opt   numeric_multiplier_opt
+            ////            decimal_digits   exponent_part  decimal_type_suffix_opt   numeric_multiplier_opt
+            ////        exponent_part:
+            ////            e   sign_opt   decimal_digits
             ////        sign:   one of
             ////            +
             ////            dash
-            ////        decimal-type-suffix:
+            ////        decimal_type_suffix:
             ////            d
             ////            String Literals
-            ////        string-literal:
-            ////            expandable-string-literal
-            ////            expandable-here-string-literal
-            ////            verbatim-string-literal
-            ////            verbatim-here-string-literal
-            ////        expandable-string-literal:
-            ////            double-quote-character   expandable-string-characters_opt   dollars_opt   double-quote-character
-            ////        double-quote-character:
+            ////        string_literal:
+            ////            expandable_string_literal
+            ////            expandable_here_string_literal
+            ////            verbatim_string_literal
+            ////            verbatim_here_string_literal
+            ////        expandable_string_literal:
+            ////            double_quote_character   expandable_string_characters_opt   dollars_opt   double_quote_character
+            ////        double_quote_character:
             ////            "   (U+0022)
             ////            Left double quotation mark (U+201C)
             ////            Right double quotation mark (U+201D)
-            ////            Double low-9 quotation mark (U+201E)
-            ////        expandable-string-characters:
-            ////            expandable-string-part
-            ////            expandable-string-characters   expandable-string-part
-            ////        expandable-string-part:
+            ////            Double low_9 quotation mark (U+201E)
+            ////        expandable_string_characters:
+            ////            expandable_string_part
+            ////            expandable_string_characters   expandable_string_part
+            ////        expandable_string_part:
             ////            Any Unicode character except
             ////                    $
-            ////                    double-quote-character
+            ////                    double_quote_character
             ////                    `   (The backtick character U+0060)
-            ////            braced-variable
+            ////            braced_variable
             ////            $   Any Unicode character except
             ////                    (
             ////                    {
-            ////                    double-quote-character
+            ////                    double_quote_character
             ////                    `   (The backtick character U+0060)
-            ////            $   escaped-character
-            ////            escaped-character
-            ////            double-quote-character   double-quote-character
+            ////            $   escaped_character
+            ////            escaped_character
+            ////            double_quote_character   double_quote_character
             ////        dollars:
             ////            $
             ////            dollars   $
-            ////        expandable-here-string-literal:
-            ////            @   double-quote-character   whitespace_opt   new-line-character
-            ////                    expandable-here-string-characters_opt   new-line-character   double-quote-character   @
-            ////        expandable-here-string-characters:
-            ////            expandable-here-string-part
-            ////            expandable-here-string-characters   expandable-here-string-part
-            ////        expandable-here-string-part:
+            ////        expandable_here_string_literal:
+            ////            @   double_quote_character   whitespace_opt   new_line_character
+            ////                    expandable_here_string_characters_opt   new_line_character   double_quote_character   @
+            ////        expandable_here_string_characters:
+            ////            expandable_here_string_part
+            ////            expandable_here_string_characters   expandable_here_string_part
+            ////        expandable_here_string_part:
             ////            Any Unicode character except
             ////                    $
-            ////                    new-line-character
-            ////            braced-variable
+            ////                    new_line_character
+            ////            braced_variable
             ////            $   Any Unicode character except
             ////                    (
-            ////                    new-line-character
-            ////            $   new-line-character   Any Unicode character except double-quote-char
-            ////            $   new-line-character   double-quote-char   Any Unicode character except @
-            ////            new-line-character   Any Unicode character except double-quote-char
-            ////            new-line-character   double-quote-char   Any Unicode character except @
-            ////        expandable-string-with-subexpr-start:
-            ////            double-quote-character   expandable-string-chars_opt   $(
-            ////        expandable-string-with-subexpr-end:
-            ////            double-quote-char
-            ////        expandable-here-string-with-subexpr-start:
-            ////            @   double-quote-character   whitespace_opt   new-line-character
-            ////                    expandable-here-string-chars_opt   $(
-            ////        expandable-here-string-with-subexpr-end:
-            ////            new-line-character   double-quote-character   @
-            ////        verbatim-string-literal:
-            ////            single-quote-character   verbatim-string-characters_opt   single-quote-char
-            ////        single-quote-character:
+            ////                    new_line_character
+            ////            $   new_line_character   Any Unicode character except double_quote_char
+            ////            $   new_line_character   double_quote_char   Any Unicode character except @
+            ////            new_line_character   Any Unicode character except double_quote_char
+            ////            new_line_character   double_quote_char   Any Unicode character except @
+            ////        expandable_string_with_subexpr_start:
+            ////            double_quote_character   expandable_string_chars_opt   $(
+            ////        expandable_string_with_subexpr_end:
+            ////            double_quote_char
+            ////        expandable_here_string_with_subexpr_start:
+            ////            @   double_quote_character   whitespace_opt   new_line_character
+            ////                    expandable_here_string_chars_opt   $(
+            ////        expandable_here_string_with_subexpr_end:
+            ////            new_line_character   double_quote_character   @
+            ////        verbatim_string_literal:
+            ////            single_quote_character   verbatim_string_characters_opt   single_quote_char
+            ////        single_quote_character:
             ////            '   (U+0027)
             ////            Left single quotation mark (U+2018)
             ////            Right single quotation mark (U+2019)
-            ////            Single low-9 quotation mark (U+201A)
-            ////            Single high-reversed-9 quotation mark (U+201B)
-            ////        verbatim-string-characters:
-            ////            verbatim-string-part
-            ////            verbatim-string-characters   verbatim-string-part
-            ////        verbatim-string-part:
-            ////            Any Unicode character except single-quote-character
-            ////            single-quote-character   single-quote-character
-            ////        verbatim-here-string-literal:
-            ////            @   single-quote-character   whitespace_opt   new-line-character
-            ////                    verbatim-here-string-characters_opt   new-line-character   single-quote-character   @
-            ////        verbatim-here-string-characters:
-            ////            verbatim-here-string-part
-            ////            verbatim-here-string-characters   verbatim-here-string-part
-            ////        verbatim-here-string-part:
-            ////            Any Unicode character except new-line-character
-            ////            new-line-character   Any Unicode character except single-quote-character
-            ////            new-line-character   single-quote-character   Any Unicode character except @
+            ////            Single low_9 quotation mark (U+201A)
+            ////            Single high_reversed_9 quotation mark (U+201B)
+            ////        verbatim_string_characters:
+            ////            verbatim_string_part
+            ////            verbatim_string_characters   verbatim_string_part
+            ////        verbatim_string_part:
+            ////            Any Unicode character except single_quote_character
+            ////            single_quote_character   single_quote_character
+            ////        verbatim_here_string_literal:
+            ////            @   single_quote_character   whitespace_opt   new_line_character
+            ////                    verbatim_here_string_characters_opt   new_line_character   single_quote_character   @
+            ////        verbatim_here_string_characters:
+            ////            verbatim_here_string_part
+            ////            verbatim_here_string_characters   verbatim_here_string_part
+            ////        verbatim_here_string_part:
+            ////            Any Unicode character except new_line_character
+            ////            new_line_character   Any Unicode character except single_quote_character
+            ////            new_line_character   single_quote_character   Any Unicode character except @
             #endregion
             #region B.1.9 Simple Names
-            ////        simple-name:
-            ////            simple-name-first-char   simple-name-chars
-            ////        simple-name-first-char:
+            ////        simple_name:
+            ////            simple_name_first_char   simple_name_chars
+            ////        simple_name_first_char:
             ////            A Unicode character of classes Lu, Ll, Lt, Lm, or Lo
             ////            _   (The underscore character U+005F)
-            ////        simple-name-chars:
-            ////            simple-name-char
-            ////            simple-name-chars   simple-name-char
-            ////        simple-name-char:
+            ////        simple_name_chars:
+            ////            simple_name_char
+            ////            simple_name_chars   simple_name_char
+            ////        simple_name_char:
             ////            A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nd
             ////            _   (The underscore character U+005F)
             #endregion
             #region B.1.10 Type Names
-            ////        type-name:
-            ////            type-identifier
-            ////            type-name   .   type-identifier
-            ////        type-identifier:
-            ////            type-characters
-            ////        type-characters:
-            ////            type-character
-            ////            type-characters   type-character
-            ////        type-character:
+            ////        type_name:
+            ////            type_identifier
+            ////            type_name   .   type_identifier
+            ////        type_identifier:
+            ////            type_characters
+            ////        type_characters:
+            ////            type_character
+            ////            type_characters   type_character
+            ////        type_character:
             ////            A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nd
             ////            _   (The underscore character U+005F)
-            ////        array-type-name:
-            ////            type-name   [
-            ////        generic-type-name:
-            ////            type-name   [
+            ////        array_type_name:
+            ////            type_name   [
+            ////        generic_type_name:
+            ////            type_name   [
             #endregion
             #region B.1.11 Operators and punctuators
-            ////        operator-or-punctuator:  one of
+            ////        operator_or_punctuator:  one of
             ////            {		}		[		]		(		)		@(		@{		$(		;
             ////        &&		||		&		|		,		++		..		::		.
             ////            !		*		/		%		+		2>&1	1>&2
@@ -366,15 +380,15 @@ namespace ParserTests
             ////            dash   and				dash   band				dash   bnot
             ////            dash   bor				dash   bxor				dash   not
             ////            dash   or				dash   xor
-            ////            assignment-operator 
-            ////            file-redirection-operator
-            ////            comparison-operator
-            ////            format-operator
-            ////        assignment-operator:  one of
+            ////            assignment_operator 
+            ////            file_redirection_operator
+            ////            comparison_operator
+            ////            format_operator
+            ////        assignment_operator:  one of
             ////            =		dash   =			+=		*=		/=		%=
-            ////        file-redirection-operator:  one of
+            ////        file_redirection_operator:  one of
             ////            >>		>		<		2>>		2>
-            ////        comparison-operator:  one of
+            ////        comparison_operator:  one of
             ////            dash   as					dash   ccontains				dash   ceq
             ////            dash   cge					dash   cgt						dash   cle
             ////            dash   clike				dash   clt						dash   cmatch
@@ -391,7 +405,7 @@ namespace ParserTests
             ////            dash   match				dash   ne						dash   notcontains
             ////            dash   notlike				dash   notmatch				dash   replace
             ////            dash   split
-            ////        format-operator:
+            ////        format_operator:
             ////            dash   f
             #endregion
             #endregion
@@ -401,410 +415,410 @@ namespace ParserTests
         {
             #region B.2 Syntactic grammar
             #region B.2.1 Basic concepts
-            ////        script-file:
-            ////            script-block
-            ////        module-file:
-            ////            script-block
-            ////        interactive-input:
-            ////            script-block
-            ////        data-file:
-            ////            statement-list
+            ////        script_file:
+            ////            script_block
+            ////        module_file:
+            ////            script_block
+            ////        interactive_input:
+            ////            script_block
+            ////        data_file:
+            ////            statement_list
             #endregion
             #region B.2.2 Statements
-            ////        script-block:
-            ////            param-block_opt   statement-terminators_opt    script-block-body_opt
-            ////        param-block:
-            ////            new-lines_opt   attribute-list_opt   new-lines_opt   param   new-lines_opt
-            ////                    (   parameter-list_opt   new-lines_opt   )
-            ////        parameter-list:
-            ////            script-parameter
-            ////            parameter-list   new-lines_opt   ,   script-parameter
-            ////        script-parameter:
-            ////            new-lines_opt   attribute-list_opt   new-lines_opt   variable   script-parameter-default_opt
-            ////        script-parameter-default:
-            ////            new-lines_opt   =   new-lines_opt   expression
-            ////        script-block-body:
-            ////            named-block-list
-            ////            statement-list
-            ////        named-block-list:
-            ////            named-block
-            ////            named-block-list   named-block
-            ////        named-block:
-            ////            block-name   statement-block   statement-terminators_opt
-            ////        block-name:  one of
+            ////        script_block:
+            ////            param_block_opt   statement_terminators_opt    script_block_body_opt
+            ////        param_block:
+            ////            new_lines_opt   attribute_list_opt   new_lines_opt   param   new_lines_opt
+            ////                    (   parameter_list_opt   new_lines_opt   )
+            ////        parameter_list:
+            ////            script_parameter
+            ////            parameter_list   new_lines_opt   ,   script_parameter
+            ////        script_parameter:
+            ////            new_lines_opt   attribute_list_opt   new_lines_opt   variable   script_parameter_default_opt
+            ////        script_parameter_default:
+            ////            new_lines_opt   =   new_lines_opt   expression
+            ////        script_block_body:
+            ////            named_block_list
+            ////            statement_list
+            ////        named_block_list:
+            ////            named_block
+            ////            named_block_list   named_block
+            ////        named_block:
+            ////            block_name   statement_block   statement_terminators_opt
+            ////        block_name:  one of
             ////            dynamicparam   begin   process   end
-            ////        statement-block:
-            ////            new-lines_opt   {   statement-list_opt   new-lines_opt   }
-            ////        statement-list:
+            ////        statement_block:
+            ////            new_lines_opt   {   statement_list_opt   new_lines_opt   }
+            ////        statement_list:
             ////            statement
-            ////            statement-list   statement
+            ////            statement_list   statement
             ////        statement:
-            ////            if-statement
-            ////            label_opt   labeled-statement
-            ////            function-statement
-            ////            flow-control-statement   statement-terminator
-            ////            trap-statement
-            ////            try-statement
-            ////            data-statement
-            ////            pipeline   statement-terminator
-            ////        statement-terminator:
+            ////            if_statement
+            ////            label_opt   labeled_statement
+            ////            function_statement
+            ////            flow_control_statement   statement_terminator
+            ////            trap_statement
+            ////            try_statement
+            ////            data_statement
+            ////            pipeline   statement_terminator
+            ////        statement_terminator:
             ////            ;
-            ////            new-line-character
-            ////        statement-terminators:
-            ////            statement-terminator
-            ////            statement-terminators   statement-terminator
-            ////        if-statement:
-            ////            if   new-lines_opt   (   new-lines_opt   pipeline   new-lines_opt   )   statement-block
-            ////                     elseif-clauses_opt   else-clause_opt
-            ////        elseif-clauses:
-            ////            elseif-clause
-            ////            elseif-clauses   elseif-clause
-            ////        elseif-clause:
-            ////            new-lines_opt   elseif   new-lines_opt   (   new-lines_opt   pipeline   new-lines_opt   )   statement-block
-            ////        else-clause:
-            ////            new-lines_opt   else   statement-block
-            ////        labeled-statement:
-            ////            switch-statement
-            ////            foreach-statement
-            ////            for-statement
-            ////            while-statement
-            ////            do-statement
-            ////        switch-statement:
-            ////            switch   new-lines_opt   switch-parameters_opt   switch-condition   switch-body
-            ////        switch-parameters:
-            ////            switch-parameter
-            ////            switch-parameters   switch-parameter
-            ////        switch-parameter:
-            ////            -regex
-            ////            -wildcard
-            ////            -exact
-            ////            -casesensitive
-            ////        switch-condition:
-            ////            (   new-lines_opt   pipeline   new-lines_opt   )
-            ////            -file   new-lines_opt   switch-filename
-            ////        switch-filename:
-            ////            command-argument
-            ////            primary-expression
-            ////        switch-body:
-            ////            new-lines_opt   {   new-lines_opt   switch-clauses   }
-            ////        switch-clauses:
-            ////            switch-clause
-            ////            switch-clauses   switch-clause
-            ////        switch-clause:
-            ////            switch-clause-condition   statement-block   statement-terimators_opt
-            ////        switch-clause-condition:
-            ////            command-argument
-            ////            primary-expression
-            ////        foreach-statement:
-            ////            foreach   new-lines_opt   (   new-lines_opt   variable   new-lines_opt   in   new-lines_opt   pipeline
-            ////                    new-lines_opt   )   statement-block
-            ////        for-statement:
-            ////            for   new-lines_opt   (
-            ////                    new-lines_opt   for-initializer_opt   statement-terminator
-            ////                    new-lines_opt   for-condition_opt   statement-terminator
-            ////                    new-lines_opt   for-iterator_opt
-            ////                    new-lines_opt   )   statement-block
-            ////            for   new-lines_opt   (
-            ////                    new-lines_opt   for-initializer_opt   statement-terminator
-            ////                    new-lines_opt   for-condition_opt
-            ////                    new-lines_opt   )   statement-block
-            ////            for   new-lines_opt   (
-            ////                    new-lines_opt   for-initializer_opt
-            ////                    new-lines_opt   )   statement-block
-            ////        for-initializer:
+            ////            new_line_character
+            ////        statement_terminators:
+            ////            statement_terminator
+            ////            statement_terminators   statement_terminator
+            ////        if_statement:
+            ////            if   new_lines_opt   (   new_lines_opt   pipeline   new_lines_opt   )   statement_block
+            ////                     elseif_clauses_opt   else_clause_opt
+            ////        elseif_clauses:
+            ////            elseif_clause
+            ////            elseif_clauses   elseif_clause
+            ////        elseif_clause:
+            ////            new_lines_opt   elseif   new_lines_opt   (   new_lines_opt   pipeline   new_lines_opt   )   statement_block
+            ////        else_clause:
+            ////            new_lines_opt   else   statement_block
+            ////        labeled_statement:
+            ////            switch_statement
+            ////            foreach_statement
+            ////            for_statement
+            ////            while_statement
+            ////            do_statement
+            ////        switch_statement:
+            ////            switch   new_lines_opt   switch_parameters_opt   switch_condition   switch_body
+            ////        switch_parameters:
+            ////            switch_parameter
+            ////            switch_parameters   switch_parameter
+            ////        switch_parameter:
+            ////            _regex
+            ////            _wildcard
+            ////            _exact
+            ////            _casesensitive
+            ////        switch_condition:
+            ////            (   new_lines_opt   pipeline   new_lines_opt   )
+            ////            _file   new_lines_opt   switch_filename
+            ////        switch_filename:
+            ////            command_argument
+            ////            primary_expression
+            ////        switch_body:
+            ////            new_lines_opt   {   new_lines_opt   switch_clauses   }
+            ////        switch_clauses:
+            ////            switch_clause
+            ////            switch_clauses   switch_clause
+            ////        switch_clause:
+            ////            switch_clause_condition   statement_block   statement_terimators_opt
+            ////        switch_clause_condition:
+            ////            command_argument
+            ////            primary_expression
+            ////        foreach_statement:
+            ////            foreach   new_lines_opt   (   new_lines_opt   variable   new_lines_opt   in   new_lines_opt   pipeline
+            ////                    new_lines_opt   )   statement_block
+            ////        for_statement:
+            ////            for   new_lines_opt   (
+            ////                    new_lines_opt   for_initializer_opt   statement_terminator
+            ////                    new_lines_opt   for_condition_opt   statement_terminator
+            ////                    new_lines_opt   for_iterator_opt
+            ////                    new_lines_opt   )   statement_block
+            ////            for   new_lines_opt   (
+            ////                    new_lines_opt   for_initializer_opt   statement_terminator
+            ////                    new_lines_opt   for_condition_opt
+            ////                    new_lines_opt   )   statement_block
+            ////            for   new_lines_opt   (
+            ////                    new_lines_opt   for_initializer_opt
+            ////                    new_lines_opt   )   statement_block
+            ////        for_initializer:
             ////            pipeline
-            ////        for-condition:
+            ////        for_condition:
             ////            pipeline
-            ////        for-iterator:
+            ////        for_iterator:
             ////            pipeline
-            ////        while-statement:
-            ////            while   new-lines_opt   (   new-lines_opt   while-condition   new-lines_opt   )   statement-block
-            ////        do-statement:
-            ////            do   statement-block  new-lines_opt   while   new-lines_opt   (   while-condition   new-lines_opt   )
-            ////            do   statement-block   new-lines_opt   until   new-lines_opt   (   while-condition   new-lines_opt   )
-            ////        while-condition:
-            ////            new-lines_opt   pipeline
-            ////        function-statement:
-            ////            function   new-lines_opt   function-name   function-parameter-declaration_opt   {   script-block   }
-            ////            filter   new-lines_opt   function-name   function-parameter-declaration_opt   {   script-block   }
-            ////        function-name:
-            ////            command-argument
-            ////        function-parameter-declaration:
-            ////            new-lines_opt   (   parameter-list   new-lines_opt   )
-            ////        flow-control-statement:
-            ////            break   label-expression_opt
-            ////            continue   label-expression_opt
+            ////        while_statement:
+            ////            while   new_lines_opt   (   new_lines_opt   while_condition   new_lines_opt   )   statement_block
+            ////        do_statement:
+            ////            do   statement_block  new_lines_opt   while   new_lines_opt   (   while_condition   new_lines_opt   )
+            ////            do   statement_block   new_lines_opt   until   new_lines_opt   (   while_condition   new_lines_opt   )
+            ////        while_condition:
+            ////            new_lines_opt   pipeline
+            ////        function_statement:
+            ////            function   new_lines_opt   function_name   function_parameter_declaration_opt   {   script_block   }
+            ////            filter   new_lines_opt   function_name   function_parameter_declaration_opt   {   script_block   }
+            ////        function_name:
+            ////            command_argument
+            ////        function_parameter_declaration:
+            ////            new_lines_opt   (   parameter_list   new_lines_opt   )
+            ////        flow_control_statement:
+            ////            break   label_expression_opt
+            ////            continue   label_expression_opt
             ////            throw    pipeline_opt
             ////            return   pipeline_opt
             ////            exit   pipeline_opt
-            ////        label-expression:
-            ////            simple-name
-            ////            unary-expression
-            ////        trap-statement:
-            ////            trap  new-lines_opt   type-literal_opt   new-lines_opt   statement-block
-            ////        try-statement:
-            ////            try   statement-block   catch-clauses
-            ////            try   statement-block   finally-clause
-            ////            try   statement-block   catch-clauses   finally-clause
-            ////        catch-clauses:
-            ////            catch-clause
-            ////            catch-clauses   catch-clause
-            ////        catch-clause:
-            ////            new-lines_opt   catch   catch-type-list_opt   statement-block
-            ////        catch-type-list:
-            ////            new-lines_opt   type-literal
-            ////            catch-type-list   new-lines_opt   ,   new-lines_opt   type-literal
-            ////        finally-clause:
-            ////            new-lines_opt   finally   statement-block
-            ////        data-statement:
-            ////            data    new-lines_opt   data-name   data-commands-allowed_opt   statement-block
-            ////        data-name:
-            ////            simple-name
-            ////        data-commands-allowed:
-            ////            new-lines_opt   -supportedcommand   data-commands-list
-            ////        data-commands-list:
-            ////            new-lines_opt   data-command
-            ////            data-commands-list   ,   new-lines_opt   data-command
-            ////        data-command:
-            ////            command-name-expr
+            ////        label_expression:
+            ////            simple_name
+            ////            unary_expression
+            ////        trap_statement:
+            ////            trap  new_lines_opt   type_literal_opt   new_lines_opt   statement_block
+            ////        try_statement:
+            ////            try   statement_block   catch_clauses
+            ////            try   statement_block   finally_clause
+            ////            try   statement_block   catch_clauses   finally_clause
+            ////        catch_clauses:
+            ////            catch_clause
+            ////            catch_clauses   catch_clause
+            ////        catch_clause:
+            ////            new_lines_opt   catch   catch_type_list_opt   statement_block
+            ////        catch_type_list:
+            ////            new_lines_opt   type_literal
+            ////            catch_type_list   new_lines_opt   ,   new_lines_opt   type_literal
+            ////        finally_clause:
+            ////            new_lines_opt   finally   statement_block
+            ////        data_statement:
+            ////            data    new_lines_opt   data_name   data_commands_allowed_opt   statement_block
+            ////        data_name:
+            ////            simple_name
+            ////        data_commands_allowed:
+            ////            new_lines_opt   _supportedcommand   data_commands_list
+            ////        data_commands_list:
+            ////            new_lines_opt   data_command
+            ////            data_commands_list   ,   new_lines_opt   data_command
+            ////        data_command:
+            ////            command_name_expr
             ////        pipeline:
-            ////            assignment-expression
-            ////            expression   redirections_opt  pipeline-tail_opt
-            ////            command   pipeline-tail_opt
-            ////        assignment-expression:
-            ////            expression   assignment-operator   statement
-            ////        pipeline-tail:
-            ////            |   new-lines_opt   command
-            ////            |   new-lines_opt   command   pipeline-tail
+            ////            assignment_expression
+            ////            expression   redirections_opt  pipeline_tail_opt
+            ////            command   pipeline_tail_opt
+            ////        assignment_expression:
+            ////            expression   assignment_operator   statement
+            ////        pipeline_tail:
+            ////            |   new_lines_opt   command
+            ////            |   new_lines_opt   command   pipeline_tail
             ////        command:
-            ////            command-name   command-elements_opt
-            ////            command-invocation-operator   command-module_opt  command-name-expr   command-elements_opt
+            ////            command_name   command_elements_opt
+            ////            command_invocation_operator   command_module_opt  command_name_expr   command_elements_opt
             const string command 
-            ////        command-invocation-operator:  one of
+            ////        command_invocation_operator:  one of
             ////            &	.
-            ////        command-module:
-            ////            primary-expression
-            ////        command-name:
-            ////            generic-token
-            ////            generic-token-with-subexpr
-            ////        generic-token-with-subexpr:
-            ////            No whitespace is allowed between ) and command-name.
-            ////            generic-token-with-subexpr-start   statement-list_opt   )   command-name
-            ////        command-name-expr:
-            ////            command-name
-            ////            primary-expression
-            ////        command-elements:
-            ////            command-element
-            ////            command-elements   command-element
-            ////        command-element:
-            ////            command-parameter
-            ////            command-argument
+            ////        command_module:
+            ////            primary_expression
+            ////        command_name:
+            ////            generic_token
+            ////            generic_token_with_subexpr
+            ////        generic_token_with_subexpr:
+            ////            No whitespace is allowed between ) and command_name.
+            ////            generic_token_with_subexpr_start   statement_list_opt   )   command_name
+            ////        command_name_expr:
+            ////            command_name
+            ////            primary_expression
+            ////        command_elements:
+            ////            command_element
+            ////            command_elements   command_element
+            ////        command_element:
+            ////            command_parameter
+            ////            command_argument
             ////            redirection
-            ////        command-argument:
-            ////            command-name-expr
+            ////        command_argument:
+            ////            command_name_expr
             ////        redirections:
             ////            redirection
             ////            redirections   redirection
             ////        redirection:
             ////            2>&1
             ////            1>&2
-            ////            file-redirection-operator   redirected-file-name
-            ////        redirected-file-name:
-            ////            command-argument
-            ////            primary-expression
+            ////            file_redirection_operator   redirected_file_name
+            ////        redirected_file_name:
+            ////            command_argument
+            ////            primary_expression
             #endregion
             #region B.2.3 Expressions
             ////        expression:
-            ////            logical-expression
-            ////        logical-expression:
-            ////            bitwise-expression
-            ////            logical-expression   -and   new-lines_opt   bitwise-expression
-            ////            logical-expression   -or   new-lines_opt   bitwise-expression
-            ////            logical-expression   -xor   new-lines_opt   bitwise-expression
-            ////        bitwise-expression:
-            ////            comparison-expression
-            ////            bitwise-expression   -band   new-lines_opt   comparison-expression
-            ////            bitwise-expression   -bor   new-lines_opt   comparison-expression
-            ////            bitwise-expression   -bxor   new-lines_opt   comparison-expression
-            ////        comparison-expression:
-            ////            additive-expression
-            ////            comparison-expression   comparison-operator   new-lines_opt   additive-expression
-            ////        additive-expression:
-            ////            multiplicative-expression
-            ////            additive-expression   +   new-lines_opt   multiplicative-expression
-            ////            additive-expression   dash   new-lines_opt   multiplicative-expression
-            ////        multiplicative-expression:
-            ////            format-expression
-            ////            multiplicative-expression   *   new-lines_opt   format-expression
-            ////            multiplicative-expression   /   new-lines_opt   format-expression
-            ////            multiplicative-expression   %   new-lines_opt   format-expression
-            ////        format-expression:
-            ////            range-expression
-            ////            format-expression   format-operator    new-lines_opt   range-expression
-            ////        range-expression:
-            ////            array-literal-expression
-            ////            range-expression   ..   new-lines_opt   array-literal-expression
-            ////        array-literal-expression:
-            ////            unary-expression
-            ////            unary-expression   ,    new-lines_opt   array-literal-expression
-            ////        unary-expression:
-            ////            primary-expression
-            ////            expression-with-unary-operator
-            ////        expression-with-unary-operator:
-            ////            ,   new-lines_opt   unary-expression
-            ////            -not   new-lines_opt   unary-expression
-            ////            !   new-lines_opt   unary-expression
-            ////            -bnot   new-lines_opt   unary-expression
-            ////            +   new-lines_opt   unary-expression
-            ////            dash   new-lines_opt   unary-expression
-            ////            pre-increment-expression
-            ////            pre-decrement-expression
-            ////            cast-expression
-            ////            -split   new-lines_opt   unary-expression
-            ////            -join   new-lines_opt   unary-expression
-            ////        pre-increment-expression:
-            ////            ++   new-lines_opt   unary-expression
-            ////        pre-decrement-expression:
-            ////            dashdash   new-lines_opt   unary-expression
-            ////        cast-expression:
-            ////            type-literal   unary-expression
-            ////        primary-expression:
+            ////            logical_expression
+            ////        logical_expression:
+            ////            bitwise_expression
+            ////            logical_expression   _and   new_lines_opt   bitwise_expression
+            ////            logical_expression   _or   new_lines_opt   bitwise_expression
+            ////            logical_expression   _xor   new_lines_opt   bitwise_expression
+            ////        bitwise_expression:
+            ////            comparison_expression
+            ////            bitwise_expression   _band   new_lines_opt   comparison_expression
+            ////            bitwise_expression   _bor   new_lines_opt   comparison_expression
+            ////            bitwise_expression   _bxor   new_lines_opt   comparison_expression
+            ////        comparison_expression:
+            ////            additive_expression
+            ////            comparison_expression   comparison_operator   new_lines_opt   additive_expression
+            ////        additive_expression:
+            ////            multiplicative_expression
+            ////            additive_expression   +   new_lines_opt   multiplicative_expression
+            ////            additive_expression   dash   new_lines_opt   multiplicative_expression
+            ////        multiplicative_expression:
+            ////            format_expression
+            ////            multiplicative_expression   *   new_lines_opt   format_expression
+            ////            multiplicative_expression   /   new_lines_opt   format_expression
+            ////            multiplicative_expression   %   new_lines_opt   format_expression
+            ////        format_expression:
+            ////            range_expression
+            ////            format_expression   format_operator    new_lines_opt   range_expression
+            ////        range_expression:
+            ////            array_literal_expression
+            ////            range_expression   ..   new_lines_opt   array_literal_expression
+            ////        array_literal_expression:
+            ////            unary_expression
+            ////            unary_expression   ,    new_lines_opt   array_literal_expression
+            ////        unary_expression:
+            ////            primary_expression
+            ////            expression_with_unary_operator
+            ////        expression_with_unary_operator:
+            ////            ,   new_lines_opt   unary_expression
+            ////            _not   new_lines_opt   unary_expression
+            ////            !   new_lines_opt   unary_expression
+            ////            _bnot   new_lines_opt   unary_expression
+            ////            +   new_lines_opt   unary_expression
+            ////            dash   new_lines_opt   unary_expression
+            ////            pre_increment_expression
+            ////            pre_decrement_expression
+            ////            cast_expression
+            ////            _split   new_lines_opt   unary_expression
+            ////            _join   new_lines_opt   unary_expression
+            ////        pre_increment_expression:
+            ////            ++   new_lines_opt   unary_expression
+            ////        pre_decrement_expression:
+            ////            dashdash   new_lines_opt   unary_expression
+            ////        cast_expression:
+            ////            type_literal   unary_expression
+            ////        primary_expression:
             ////            value
-            ////            member-access
-            ////            element-access
-            ////            invocation-expression
-            ////            post-increment-expression
-            ////            post-decrement-expression
+            ////            member_access
+            ////            element_access
+            ////            invocation_expression
+            ////            post_increment_expression
+            ////            post_decrement_expression
             ////        value:
-            ////            parenthesized-expression
-            ////            sub-expression
-            ////            array-expression
-            ////            script-block-expression
-            ////            hash-literal-expression
+            ////            parenthesized_expression
+            ////            sub_expression
+            ////            array_expression
+            ////            script_block_expression
+            ////            hash_literal_expression
             ////            literal
-            ////            type-literal
+            ////            type_literal
             ////            variable
-            ////        parenthesized-expression:
-            ////            (   new-lines_opt   pipeline   new-lines_opt   )
-            ////        sub-expression:
-            ////            $(   new-lines_opt   statement-list_opt   new-lines_opt   )
-            ////        array-expression:
-            ////            @(   new-lines_opt   statement-list_opt   new-lines_opt   )
-            ////        script-block-expression:
-            ////            {   new-lines_opt   script-block   new-lines_opt   }
-            ////        hash-literal-expression:
-            ////            @{   new-lines_opt   hash-literal-body_opt   new-lines_opt   }
-            ////        hash-literal-body:
-            ////            hash-entry
-            ////            hash-literal-body   statement-terminators   hash-entry
-            ////        hash-entry:
-            ////            key-expression   =   new-lines_opt   statement
-            ////        key-expression:
-            ////            simple-name
-            ////            unary-expression
-            ////        post-increment-expression:
-            ////            primary-expression   ++
-            ////        post-decrement-expression:
-            ////            primary-expression   dashdash
-            ////        member-access: Note no whitespace is allowed between terms in these productions.
-            ////            primary-expression   .   member-name
-            ////        primary-expression   ::   member-name
-            ////        element-access: Note no whitespace is allowed between primary-expression and [.
-            ////            primary-expression   [  new-lines_opt   expression   new-lines_opt   ]
-            ////        invocation-expression: Note no whitespace is allowed between terms in these productions.
-            ////            primary-expression   .   member-name   argument-list
-            ////        primary-expression   ::   member-name   argument-list
-            ////        argument-list:
-            ////            (   argument-expression-list_opt   new-lines_opt   )
-            ////        argument-expression-list:
-            ////            argument-expression
-            ////            argument-expression   new-lines_opt   ,   argument-expression-list
-            ////        argument-expression:
-            ////            new-lines_opt   logical-argument-expression
-            ////        logical-argument-expression:
-            ////            bitwise-argument-expression
-            ////            logical-argument-expression   -and   new-lines_opt   bitwise-argument-expression
-            ////            logical-argument-expression   -or   new-lines_opt   bitwise-argument-expression
-            ////            logical-argument-expression   -xor   new-lines_opt   bitwise-argument-expression
-            ////        bitwise-argument-expression:
-            ////            comparison-argument-expression
-            ////            bitwise-argument-expression   -band   new-lines_opt   comparison-argument-expression
-            ////            bitwise-argument-expression   -bor   new-lines_opt   comparison-argument-expression
-            ////            bitwise-argument-expression   -bxor   new-lines_opt   comparison-argument-expression
-            ////        comparison-argument-expression:
-            ////            additive-argument-expression
-            ////            comparison-argument-expression   comparison-operator
-            ////                        new-lines_opt   additive-argument-expression
-            ////        additive-argument-expression:
-            ////            multiplicative-argument-expression
-            ////            additive-argument-expression   +   new-lines_opt   multiplicative-argument-expression
-            ////            additive-argument-expression   dash   new-lines_opt   multiplicative-argument-expression
-            ////        multiplicative-argument-expression:
-            ////            format-argument-expression
-            ////            multiplicative-argument-expression   *   new-lines_opt   format-argument-expression
-            ////            multiplicative-argument-expression   /   new-lines_opt   format-argument-expression
-            ////            multiplicative-argument-expression   %   new-lines_opt   format-argument-expression
-            ////        format-argument-expression:
-            ////            range-argument-expression
-            ////            format-argument-expression   format-operator   new-lines_opt   range-argument-expression
-            ////        range-argument-expression:
-            ////            unary-expression
-            ////            range-expression   ..   new-lines_opt   unary-expression
-            ////        member-name:
-            ////            simple -name
-            ////            string-literal
-            ////            string-literal-with-subexpression
-            ////            expression-with-unary-operator
+            ////        parenthesized_expression:
+            ////            (   new_lines_opt   pipeline   new_lines_opt   )
+            ////        sub_expression:
+            ////            $(   new_lines_opt   statement_list_opt   new_lines_opt   )
+            ////        array_expression:
+            ////            @(   new_lines_opt   statement_list_opt   new_lines_opt   )
+            ////        script_block_expression:
+            ////            {   new_lines_opt   script_block   new_lines_opt   }
+            ////        hash_literal_expression:
+            ////            @{   new_lines_opt   hash_literal_body_opt   new_lines_opt   }
+            ////        hash_literal_body:
+            ////            hash_entry
+            ////            hash_literal_body   statement_terminators   hash_entry
+            ////        hash_entry:
+            ////            key_expression   =   new_lines_opt   statement
+            ////        key_expression:
+            ////            simple_name
+            ////            unary_expression
+            ////        post_increment_expression:
+            ////            primary_expression   ++
+            ////        post_decrement_expression:
+            ////            primary_expression   dashdash
+            ////        member_access: Note no whitespace is allowed between terms in these productions.
+            ////            primary_expression   .   member_name
+            ////        primary_expression   ::   member_name
+            ////        element_access: Note no whitespace is allowed between primary_expression and [.
+            ////            primary_expression   [  new_lines_opt   expression   new_lines_opt   ]
+            ////        invocation_expression: Note no whitespace is allowed between terms in these productions.
+            ////            primary_expression   .   member_name   argument_list
+            ////        primary_expression   ::   member_name   argument_list
+            ////        argument_list:
+            ////            (   argument_expression_list_opt   new_lines_opt   )
+            ////        argument_expression_list:
+            ////            argument_expression
+            ////            argument_expression   new_lines_opt   ,   argument_expression_list
+            ////        argument_expression:
+            ////            new_lines_opt   logical_argument_expression
+            ////        logical_argument_expression:
+            ////            bitwise_argument_expression
+            ////            logical_argument_expression   _and   new_lines_opt   bitwise_argument_expression
+            ////            logical_argument_expression   _or   new_lines_opt   bitwise_argument_expression
+            ////            logical_argument_expression   _xor   new_lines_opt   bitwise_argument_expression
+            ////        bitwise_argument_expression:
+            ////            comparison_argument_expression
+            ////            bitwise_argument_expression   _band   new_lines_opt   comparison_argument_expression
+            ////            bitwise_argument_expression   _bor   new_lines_opt   comparison_argument_expression
+            ////            bitwise_argument_expression   _bxor   new_lines_opt   comparison_argument_expression
+            ////        comparison_argument_expression:
+            ////            additive_argument_expression
+            ////            comparison_argument_expression   comparison_operator
+            ////                        new_lines_opt   additive_argument_expression
+            ////        additive_argument_expression:
+            ////            multiplicative_argument_expression
+            ////            additive_argument_expression   +   new_lines_opt   multiplicative_argument_expression
+            ////            additive_argument_expression   dash   new_lines_opt   multiplicative_argument_expression
+            ////        multiplicative_argument_expression:
+            ////            format_argument_expression
+            ////            multiplicative_argument_expression   *   new_lines_opt   format_argument_expression
+            ////            multiplicative_argument_expression   /   new_lines_opt   format_argument_expression
+            ////            multiplicative_argument_expression   %   new_lines_opt   format_argument_expression
+            ////        format_argument_expression:
+            ////            range_argument_expression
+            ////            format_argument_expression   format_operator   new_lines_opt   range_argument_expression
+            ////        range_argument_expression:
+            ////            unary_expression
+            ////            range_expression   ..   new_lines_opt   unary_expression
+            ////        member_name:
+            ////            simple _name
+            ////            string_literal
+            ////            string_literal_with_subexpression
+            ////            expression_with_unary_operator
             ////            value
-            ////        string-literal-with-subexpression:
-            ////            expandable-string-literal-with-subexpr
-            ////            expandable-here-string-literal-with-subexpr
-            ////        expandable-string-literal-with-subexpr:
-            ////            expandable-string-with-subexpr-start   statement-list_opt   )
-            ////                    expandable-string-with-subexpr-characters   expandable-string-with-subexpr-end
-            ////            expandable-here-string-with-subexpr-start   statement-list_opt   )
-            ////                    expandable-here-string-with-subexpr-characters
-            ////                    expandable-here-string-with-subexpr-end
-            ////        expandable-string-with-subexpr-characters:
-            ////            expandable-string-with-subexpr-part
-            ////            expandable-string-with-subexpr-characters   expandable-string-with-subexpr-part
-            ////        expandable-string-with-subexpr-part:
-            ////            sub-expression
-            ////            expandable-string-part
-            ////        expandable-here-string-with-subexpr-characters:
-            ////            expandable-here-string-with-subexpr-part
-            ////            expandable-here-string-with-subexpr-characters   expandable-here-string-with-subexpr-part
-            ////        expandable-here-string-with-subexpr-part:
-            ////            sub-expression
-            ////            expandable-here-string-part
-            ////        type-literal:
-            ////            [    type-spec   ]
-            ////        type-spec:
-            ////            array-type-name    dimension_opt   ]
-            ////            generic-type-name   generic-type-arguments   ]
-            ////            type-name
+            ////        string_literal_with_subexpression:
+            ////            expandable_string_literal_with_subexpr
+            ////            expandable_here_string_literal_with_subexpr
+            ////        expandable_string_literal_with_subexpr:
+            ////            expandable_string_with_subexpr_start   statement_list_opt   )
+            ////                    expandable_string_with_subexpr_characters   expandable_string_with_subexpr_end
+            ////            expandable_here_string_with_subexpr_start   statement_list_opt   )
+            ////                    expandable_here_string_with_subexpr_characters
+            ////                    expandable_here_string_with_subexpr_end
+            ////        expandable_string_with_subexpr_characters:
+            ////            expandable_string_with_subexpr_part
+            ////            expandable_string_with_subexpr_characters   expandable_string_with_subexpr_part
+            ////        expandable_string_with_subexpr_part:
+            ////            sub_expression
+            ////            expandable_string_part
+            ////        expandable_here_string_with_subexpr_characters:
+            ////            expandable_here_string_with_subexpr_part
+            ////            expandable_here_string_with_subexpr_characters   expandable_here_string_with_subexpr_part
+            ////        expandable_here_string_with_subexpr_part:
+            ////            sub_expression
+            ////            expandable_here_string_part
+            ////        type_literal:
+            ////            [    type_spec   ]
+            ////        type_spec:
+            ////            array_type_name    dimension_opt   ]
+            ////            generic_type_name   generic_type_arguments   ]
+            ////            type_name
             ////        dimension:
             ////            ,
             ////            dimension   ,
-            ////        generic-type-arguments:
-            ////            type-spec
-            ////            generic-type-arguments   ,   type-spec
+            ////        generic_type_arguments:
+            ////            type_spec
+            ////            generic_type_arguments   ,   type_spec
             #endregion
             #region B.2.4 Attributes
-            ////        attribute-list:
+            ////        attribute_list:
             ////            attribute
-            ////            attribute-list   new-lines_opt   attribute
+            ////            attribute_list   new_lines_opt   attribute
             ////        attribute:
-            ////            [   attribute-name   (   attribute-arguments   new-lines_opt   )  new-lines_opt   ]
-            ////            type-literal
-            ////        attribute-name:
-            ////            type-spec
-            ////        attribute-arguments:
-            ////            attribute-argument
-            ////            attribute-argument   new-lines_opt   ,   attribute-arguments
-            ////        attribute-argument:
-            ////            new-lines_opt   expression
-            ////            new-lines_opt   simple-name   =   new-lines_opt   expression
+            ////            [   attribute_name   (   attribute_arguments   new_lines_opt   )  new_lines_opt   ]
+            ////            type_literal
+            ////        attribute_name:
+            ////            type_spec
+            ////        attribute_arguments:
+            ////            attribute_argument
+            ////            attribute_argument   new_lines_opt   ,   attribute_arguments
+            ////        attribute_argument:
+            ////            new_lines_opt   expression
+            ////            new_lines_opt   simple_name   =   new_lines_opt   expression
             #endregion
             #endregion
         }
