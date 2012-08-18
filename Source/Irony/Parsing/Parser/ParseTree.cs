@@ -129,12 +129,14 @@ namespace Irony.Parsing {
       Status = ParseTreeStatus.Parsing;
     }
 
-    public bool HasErrors() {
-      if (ParserMessages.Count == 0) return false;
-      foreach (var err in ParserMessages)
-        if (err.Level == ErrorLevel.Error) return true;
-      return false; 
-    }//method
+    public bool HasErrors {
+      get {
+        if (ParserMessages.Count == 0) return false;
+        foreach (var err in ParserMessages)
+          if (err.Level == ErrorLevel.Error) return true;
+        return false;
+      }
+    }//property
 
   }//class
 

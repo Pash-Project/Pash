@@ -75,7 +75,7 @@ namespace Irony.Parsing {
       ParseAll();
       //Set Parse status
       var parseTree = Context.CurrentParseTree;
-      bool hasErrors = parseTree.HasErrors();
+      bool hasErrors = parseTree.HasErrors;
       if (hasErrors)
         parseTree.Status = ParseTreeStatus.Error;
       else if (Context.Status == ParserStatus.AcceptedPartial)
