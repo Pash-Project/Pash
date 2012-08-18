@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="CaseInsensitiveGrammar.cs" />
+    <Compile Include="PowerShellGrammar.LexicalPatterns.Tests.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="PowerShellGrammar.cs" />
     <Compile Include="PowerShellGrammar.LexicalPatterns.cs" />

@@ -16,7 +16,7 @@ namespace ParserTests
 
     partial class PowerShellGrammar
     {
-        static class LexicalPatterns
+        public static class LexicalPatterns
         {
             #region B.1 Lexical grammar
             ////        input_elements:
@@ -26,12 +26,12 @@ namespace ParserTests
             ////            whitespace
             ////            comment
             ////            token
-            const string input_elements = "(" + whitespace + ") | (" + token + ")";
+            public const string input_elements = "(" + whitespace + ") | (" + token + ")";
 
             ////        input:
             ////            input_elements_opt   signature_block_opt
             // TODO: signature block
-            const string input = "(" + input_elements + ")?";
+            public const string input = "(" + input_elements + ")?";
 
             ////        signature_block:
             ////            signature_begin   signature   signature_end
@@ -46,12 +46,13 @@ namespace ParserTests
             ////            Carriage return character (U+000D)
             ////            Line feed character (U+000A)
             ////            Carriage return character (U+000D) followed by line feed character (U+000A)
-            const string new_line_character = "(\u000D)|(\u000A)|(\u000D)(\u000A)";
+            public const string new_line_character = "(\u000D)|(\u000A)|(\u000D)(\u000A)";
+            public const string new_line_character_ = "\u000D\u000A";
 
             ////        new_lines:
             ////            new_line_character
             ////            new_lines   new_line_character
-            const string new_lines = "(" + new_line_character + ")+";
+            public const string new_lines = "(" + new_line_character + ")+";
 
             #endregion
             #region B.1.2 Comments
@@ -96,7 +97,9 @@ namespace ParserTests
             ////            Vertical tab character (U+000B)
             ////            Form feed character (U+000C)
             ////            `   (The backtick character U+0060) followed by new_line_character
-            const string whitespace = "(\\p{Zs})|(\\p{Zl})|(\\p{Zp})(\u0009)|(\u000B)|(\u000C)|(\u0060" + new_line_character + ")";
+            // TODO: line continuation
+            public const string whitespace_ = "\\p{Zs}\\p{Zl}\\p{Zp}\u0009\u000B\u000C";
+            public const string whitespace = "[" + whitespace_ + "]";
             #endregion
             #region B.1.4 Tokens
             ////        token:
@@ -111,7 +114,7 @@ namespace ParserTests
             ////            type_literal
             ////            operator_or_punctuator
             // TODO: rest of them
-            const string token = "(" + command + ")";
+            public const string token = command;
             #endregion
             #region B.1.5 Keywords
             ////        keyword:  one of
@@ -162,17 +165,17 @@ namespace ParserTests
             #endregion
             #region B.1.7 Commands
             // this is not in the spec; maybe it's an error, or maybe I'm misunderstanding the spec.
-            const string command = generic_token;
+            public const string command = generic_token;
             
 
             ////        generic_token:
             ////            generic_token_parts
-            const string generic_token = "(" + generic_token_parts + ")";
+            public const string generic_token = generic_token_parts;
 
             ////        generic_token_parts:
             ////            generic_token_part
             ////            generic_token_parts   generic_token_part
-            const string generic_token_parts = "(" + generic_token_part + ")+";
+            public const string generic_token_parts = "(" + generic_token_part + ")+";
 
             ////        generic_token_part:
             ////            expandable_string_literal
@@ -180,7 +183,7 @@ namespace ParserTests
             ////            variable
             ////            generic_token_char
             // TODO: more
-            const string generic_token_part = "(" + generic_token_char + ")";
+            public const string generic_token_part = generic_token_char;
 
             ////        generic_token_char:
             ////            Any Unicode character except
@@ -191,7 +194,7 @@ namespace ParserTests
             ////                    whitespace
             ////                    new_line_character
             ////TODO:            escaped_character
-            const string generic_token_char = "(!(" + @"\{\}\(\)\;\,\|\&\$" + "\u0060" + double_quote_character + single_quote_character + whitespace + new_line_character + "))";
+            public const string generic_token_char = "([^" + @"\{\}\(\)\;\,\|\&\$" + "\u0060" + double_quote_character_ + single_quote_character_ + whitespace_ + new_line_character_ + "])";
 
             ////        generic_token_with_subexpr_start:
             ////            generic_token_parts   $(
@@ -212,7 +215,7 @@ namespace ParserTests
             ////                new_line_character
             ////        colon:
             ////            :   (The colon character U+003A)
-            const string colon = "\u003A";
+            public const string colon = "\u003A";
             #endregion
             #region B.1.8 Literals
             ////        literal:
@@ -269,7 +272,8 @@ namespace ParserTests
             ////            Left double quotation mark (U+201C)
             ////            Right double quotation mark (U+201D)
             ////            Double low_9 quotation mark (U+201E)
-            const string double_quote_character = "\u0022|\u201C|\u201D|\u201E";
+            public const string double_quote_character = "\u0022|\u201C|\u201D|\u201E";
+            public const string double_quote_character_ = "\u0022\u201C\u201D\u201E";
             ////        expandable_string_characters:
             ////            expandable_string_part
             ////            expandable_string_characters   expandable_string_part
@@ -325,7 +329,8 @@ namespace ParserTests
             ////            Right single quotation mark (U+2019)
             ////            Single low_9 quotation mark (U+201A)
             ////            Single high_reversed_9 quotation mark (U+201B)
-            const string single_quote_character = "\u0027|\u2018|\u2019|\u201A";
+            public const string single_quote_character = "\u0027|\u2018|\u2019|\u201A";
+            public const string single_quote_character_ = "\u0027\u2018\u2019\u201A";
             ////        verbatim_string_characters:
             ////            verbatim_string_part
             ////            verbatim_string_characters   verbatim_string_part
