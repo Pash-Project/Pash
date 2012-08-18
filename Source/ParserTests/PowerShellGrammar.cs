@@ -124,10 +124,8 @@ namespace ParserTests
         public readonly NonTerminal post_increment_expression;
         public readonly NonTerminal post_decrement_expression;
         public readonly NonTerminal member_access;
-        public readonly NonTerminal primary_expression;
         public readonly NonTerminal element_access;
         public readonly NonTerminal invocation_expression;
-        public readonly NonTerminal primary_expression;
         public readonly NonTerminal argument_list;
         public readonly NonTerminal argument_expression_list;
         public readonly NonTerminal argument_expression;
