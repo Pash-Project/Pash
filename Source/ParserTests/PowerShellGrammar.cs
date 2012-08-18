@@ -162,7 +162,12 @@ namespace ParserTests
         {
             InitializeNonTerminals();
 
+            // delegate to a new method, so we don't accidentally overwrite a readonly field.
+            InitializeProductionRules();
+        }
 
+        public void InitializeProductionRules()
+        {
             #region B.2 Syntactic grammar
 
             #region B.2.1 Basic concepts
