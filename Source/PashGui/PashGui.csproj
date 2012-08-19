@@ -88,4 +88,7 @@
       <Link>App.config</Link>
     </None>
   </ItemGroup>
+  <PropertyGroup>
+    <PostBuildEvent>"$(ProgramFiles)\NUnit 2.6.1\bin\nunit-console.exe" $(TargetPath) /nologo</PostBuildEvent>
+  </PropertyGroup>
 </Project>
