@@ -158,14 +158,45 @@ namespace ParserTests
         #endregion
         #endregion
 
-        public PowerShellGrammar()
+        public class ScriptFile : PowerShellGrammar
+        {
+            public ScriptFile()
+            {
+                Root = this.script_file;
+            }
+        }
+
+        public class ModuleFile : PowerShellGrammar
+        {
+            public ModuleFile()
+            {
+                Root = this.module_file;
+            }
+        }
+
+        public class InteractiveInput : PowerShellGrammar
+        {
+            public InteractiveInput()
+            {
+                Root = this.interactive_input;
+            }
+        }
+
+        public class DataFile : PowerShellGrammar
+        {
+            public DataFile()
+            {
+                Root = this.data_file;
+            }
+        }
+
+        PowerShellGrammar()
         {
             InitializeNonTerminals();
 
             // delegate to a new method, so we don't accidentally overwrite a readonly field.
             InitializeProductionRules();
 
-            Root = interactive_input;
         }
 
         public void InitializeProductionRules()
