@@ -37,11 +37,11 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="CaseInsensitiveGrammar.cs" />
-    <Compile Include="PowerShellGrammar.LexicalPatterns.Tests.cs" />
+    <Compile Include="PowerShellGrammar.TerminalsTests.cs" />
     <Compile Include="PowerShellGrammar.Tests.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="PowerShellGrammar.cs" />
-    <Compile Include="PowerShellGrammar.LexicalPatterns.cs" />
+    <Compile Include="PowerShellGrammar.Terminals.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

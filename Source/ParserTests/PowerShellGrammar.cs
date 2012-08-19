@@ -410,7 +410,7 @@ namespace ParserTests
             ////            generic_token
             ////            generic_token_with_subexpr
             // TODO: more
-            command_name.Rule = new RegexBasedTerminal(LexicalPatterns.generic_token);
+            command_name.Rule = Terminals.generic_token;
 
             ////        generic_token_with_subexpr:
             ////            No whitespace is allowed between ) and command_name.
