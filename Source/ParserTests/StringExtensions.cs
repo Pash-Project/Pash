@@ -119,6 +119,8 @@ namespace StringExtensions
         }
         #endregion
 
+        // technically this doesn't extend `string`, but it's about a static method on that class, so I'm putting 
+        // it here.
         public static string JoinString<T>(this IEnumerable<T> values, string separator)
         {
             return string.Join(separator, values);
