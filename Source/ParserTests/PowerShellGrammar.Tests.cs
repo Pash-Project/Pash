@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using Irony.Parsing;
+using StringExtensions;
 
 namespace ParserTests
 {
@@ -26,6 +28,18 @@ namespace ParserTests
             var grammar = new PowerShellGrammar();
             Assert.IsNotNull(grammar.interactive_input);
             Assert.AreEqual("interactive_input", grammar.interactive_input.Name);
+        }
+
+        [Test]
+        public void ParseCommandTest()
+        {
+            var grammar = new PowerShellGrammar();
+            var parser = new Parser(grammar);
+
+            var parseTree = parser.Parse("Get-ChildItem");
+
+            Assert.IsNotNull(parseTree);
+            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
         }
     }
 }

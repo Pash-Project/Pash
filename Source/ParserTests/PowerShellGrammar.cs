@@ -164,6 +164,8 @@ namespace ParserTests
 
             // delegate to a new method, so we don't accidentally overwrite a readonly field.
             InitializeProductionRules();
+
+            Root = interactive_input;
         }
 
         public void InitializeProductionRules()
@@ -177,6 +179,8 @@ namespace ParserTests
             ////            script_block
             ////        interactive_input:
             ////            script_block
+            interactive_input.Rule = script_block;
+
             ////        data_file:
             ////            statement_list
             #endregion
@@ -184,6 +188,9 @@ namespace ParserTests
             #region B.2.2 Statements
             ////        script_block:
             ////            param_block_opt   statement_terminators_opt    script_block_body_opt
+            // TODO: more
+            script_block.Rule = script_block_body;
+
             ////        param_block:
             ////            new_lines_opt   attribute_list_opt   new_lines_opt   param   new_lines_opt
             ////                    (   parameter_list_opt   new_lines_opt   )
@@ -197,6 +204,9 @@ namespace ParserTests
             ////        script_block_body:
             ////            named_block_list
             ////            statement_list
+            // TODO: more
+            script_block_body.Rule = statement_list;
+
             ////        named_block_list:
             ////            named_block
             ////            named_block_list   named_block
@@ -209,6 +219,8 @@ namespace ParserTests
             ////        statement_list:
             ////            statement
             ////            statement_list   statement
+            statement_list.Rule = MakePlusRule(statement_list, statement);
+
             ////        statement:
             ////            if_statement
             ////            label_opt   labeled_statement
@@ -218,6 +230,9 @@ namespace ParserTests
             ////            try_statement
             ////            data_statement
             ////            pipeline   statement_terminator
+            // TODO: more
+            statement.Rule = pipeline;
+
             ////        statement_terminator:
             ////            ;
             ////            new_line_character
@@ -342,6 +357,9 @@ namespace ParserTests
             ////            assignment_expression
             ////            expression   redirections_opt  pipeline_tail_opt
             ////            command   pipeline_tail_opt
+            // TODO: more
+            pipeline.Rule = command;
+
             ////        assignment_expression:
             ////            expression   assignment_operator   statement
             ////        pipeline_tail:
@@ -350,6 +368,9 @@ namespace ParserTests
             ////        command:
             ////            command_name   command_elements_opt
             ////            command_invocation_operator   command_module_opt  command_name_expr   command_elements_opt
+            // TODO: more
+            command.Rule = command_name;
+
             ////        command_invocation_operator:  one of
             ////            &	.
             ////        command_module:
@@ -357,6 +378,9 @@ namespace ParserTests
             ////        command_name:
             ////            generic_token
             ////            generic_token_with_subexpr
+            // TODO: more
+            command_name.Rule = new RegexBasedTerminal(LexicalPatterns.generic_token);
+
             ////        generic_token_with_subexpr:
             ////            No whitespace is allowed between ) and command_name.
             ////            generic_token_with_subexpr_start   statement_list_opt   )   command_name
