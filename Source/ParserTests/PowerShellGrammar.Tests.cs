@@ -30,16 +30,52 @@ namespace ParserTests
             Assert.AreEqual("interactive_input", grammar.interactive_input.Name);
         }
 
-        [Test]
-        public void ParseCommandTest()
+        [TestFixture]
+        class ParseSimpleCommandTest
         {
-            var grammar = new PowerShellGrammar.InteractiveInput();
-            var parser = new Parser(grammar);
+            ParseTree parseTree;
+            PowerShellGrammar grammar;
 
-            var parseTree = parser.Parse("Get-ChildItem");
+            public ParseSimpleCommandTest()
+            {
+                grammar = new PowerShellGrammar.InteractiveInput();
+                var parser = new Parser(grammar);
 
-            Assert.IsNotNull(parseTree);
-            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
+                parseTree = parser.Parse("Get-ChildItem");
+            }
+
+            [Test]
+            public void SuccessfulParseTest()
+            {
+                Assert.IsNotNull(parseTree);
+                Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
+            }
+
+            [Test]
+            public void CorrectNonTerminalsTest()
+            {
+                var expected = new[] { 
+                    grammar.interactive_input,
+                    grammar.script_block,
+                    grammar.script_block_body,
+                    grammar.statement_list,
+                    grammar.statement,
+                    grammar.pipeline,
+                    grammar.command,
+                    grammar.command_name,
+                };
+
+                var node = parseTree.Root;
+
+                foreach (var rule in expected)
+                {
+                    Assert.AreEqual(rule, node.Term);
+                    Assert.AreEqual(1, node.ChildNodes.Count, node.ToString());
+                    node = node.ChildNodes.Single();
+                }
+
+                Assert.AreEqual(0, node.ChildNodes.Count, node.ToString());
+            }
         }
     }
 }
