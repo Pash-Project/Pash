@@ -389,7 +389,7 @@ namespace ParserTests
             ////            expression   redirections_opt  pipeline_tail_opt
             ////            command   pipeline_tail_opt
             // TODO: more
-            pipeline.Rule = command;
+            pipeline.Rule = expression | command;
 
             ////        assignment_expression:
             ////            expression   assignment_operator   statement
@@ -442,40 +442,68 @@ namespace ParserTests
             #region B.2.3 Expressions
             ////        expression:
             ////            logical_expression
+            expression.Rule = logical_expression;
+
             ////        logical_expression:
             ////            bitwise_expression
             ////            logical_expression   _and   new_lines_opt   bitwise_expression
             ////            logical_expression   _or   new_lines_opt   bitwise_expression
             ////            logical_expression   _xor   new_lines_opt   bitwise_expression
+            // TODO: more
+            logical_expression.Rule = bitwise_expression;
+
             ////        bitwise_expression:
             ////            comparison_expression
             ////            bitwise_expression   _band   new_lines_opt   comparison_expression
             ////            bitwise_expression   _bor   new_lines_opt   comparison_expression
             ////            bitwise_expression   _bxor   new_lines_opt   comparison_expression
+            // TODO: more
+            bitwise_expression.Rule = comparison_expression;
+
             ////        comparison_expression:
             ////            additive_expression
             ////            comparison_expression   comparison_operator   new_lines_opt   additive_expression
+            // TODO: more
+            comparison_expression.Rule = additive_expression;
+
             ////        additive_expression:
             ////            multiplicative_expression
             ////            additive_expression   +   new_lines_opt   multiplicative_expression
             ////            additive_expression   dash   new_lines_opt   multiplicative_expression
+            // TODO: more
+            additive_expression.Rule =
+                multiplicative_expression |
+                (additive_expression + "+" + (Terminals.new_lines | Empty) + multiplicative_expression);
+
             ////        multiplicative_expression:
             ////            format_expression
             ////            multiplicative_expression   *   new_lines_opt   format_expression
             ////            multiplicative_expression   /   new_lines_opt   format_expression
             ////            multiplicative_expression   %   new_lines_opt   format_expression
+            // TODO: more
+            multiplicative_expression.Rule = format_expression;
+
             ////        format_expression:
             ////            range_expression
             ////            format_expression   format_operator    new_lines_opt   range_expression
+            // TODO: more
+            format_expression.Rule = array_literal_expression;
+
             ////        range_expression:
             ////            array_literal_expression
             ////            range_expression   ..   new_lines_opt   array_literal_expression
             ////        array_literal_expression:
             ////            unary_expression
             ////            unary_expression   ,    new_lines_opt   array_literal_expression
+            // TODO: more
+            array_literal_expression.Rule = unary_expression;
+
             ////        unary_expression:
             ////            primary_expression
             ////            expression_with_unary_operator
+            // TODO: more
+            unary_expression.Rule = primary_expression;
+
             ////        expression_with_unary_operator:
             ////            ,   new_lines_opt   unary_expression
             ////            _not   new_lines_opt   unary_expression
@@ -501,6 +529,9 @@ namespace ParserTests
             ////            invocation_expression
             ////            post_increment_expression
             ////            post_decrement_expression
+            // TODO: more
+            primary_expression.Rule = value;
+
             ////        value:
             ////            parenthesized_expression
             ////            sub_expression
@@ -510,6 +541,8 @@ namespace ParserTests
             ////            literal
             ////            type_literal
             ////            variable
+            value.Rule = Terminals.literal;
+
             ////        parenthesized_expression:
             ////            (   new_lines_opt   pipeline   new_lines_opt   )
             ////        sub_expression:

@@ -77,5 +77,39 @@ namespace ParserTests
                 Assert.AreEqual(0, node.ChildNodes.Count, node.ToString());
             }
         }
+
+        [Test]
+        public void TrivialPromptExpressionsTest()
+        {
+            var grammar = new PowerShellGrammar.InteractiveInput();
+
+            var parser = new Parser(grammar);
+            var parseTree = parser.Parse("\"PS>\"");
+
+            Assert.IsNotNull(parseTree);
+            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
+
+            var expected = new[] {
+                    grammar.interactive_input,
+                    grammar.script_block,
+                    grammar.script_block_body,
+                    grammar.statement_list,
+                    grammar.statement,
+                    grammar.pipeline,
+                    grammar.command,
+                    grammar.command_name
+                };
+
+            var node = parseTree.Root;
+
+            foreach (var rule in expected)
+            {
+                Assert.AreEqual(rule, node.Term);
+                Assert.AreEqual(1, node.ChildNodes.Count, node.ToString());
+                node = node.ChildNodes.Single();
+            }
+
+            Assert.AreEqual(0, node.ChildNodes.Count, node.ToString());
+        }
     }
 }

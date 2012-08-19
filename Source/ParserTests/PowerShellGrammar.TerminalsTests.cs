@@ -46,6 +46,18 @@ namespace ParserTests
             Assert.IsNotNull(PowerShellGrammar.Terminals.input_elements);
             Assert.AreEqual("input_elements", PowerShellGrammar.Terminals.input_elements.Name);
         }
+
+        [Test, Ignore]
+        public void TokenizeSimplePromptTest()
+        {
+            Assert.True(Regex.IsMatch("\"PS> \" + (Get-Location)", "^" + PowerShellGrammar.Terminals.input_elements.Pattern + "$"));
+        }
+
+        [Test]
+        public void TokenizeStringTest()
+        {
+            StringAssert.IsMatch("^" + PowerShellGrammar.Terminals.string_literal.Pattern + "$", "\"PS> \"");
+        }
     }
 }
 

@@ -47,12 +47,15 @@ namespace ParserTests
             ////        input_elements:
             ////            input_element
             ////            input_elements   input_element
+            public static readonly RegexBasedTerminal input_elements;
+            const string input_elements_pattern = "(" + input_element_pattern + ")+";
+
             ////        input_element:
             ////            whitespace
             ////            comment
             ////            token
-            public static readonly RegexBasedTerminal input_elements;
-            const string input_elements_pattern = "(" + whitespace_pattern + ") | (" + token_pattern + ")";
+            public static readonly RegexBasedTerminal input_element;
+            const string input_element_pattern = "(" + whitespace_pattern + ") | (" + token_pattern + ")";
 
             ////        input:
             ////            input_elements_opt   signature_block_opt
@@ -149,7 +152,7 @@ namespace ParserTests
             ////            operator_or_punctuator
             // TODO: rest of them
             public static readonly RegexBasedTerminal token;
-            const string token_pattern = command_pattern;
+            const string token_pattern = "(" + command_pattern + ")|(" + string_literal_pattern + ")";
             #endregion
 
             #region B.1.5 Keywords
@@ -225,7 +228,7 @@ namespace ParserTests
             ////            generic_token_char
             // TODO: more
             public static readonly RegexBasedTerminal generic_token_part;
-            const string generic_token_part_pattern = generic_token_char_pattern;
+            const string generic_token_part_pattern = "(" + generic_token_char_pattern + "|" + expandable_string_literal_pattern + ")";
 
             ////        generic_token_char:
             ////            Any Unicode character except
@@ -267,7 +270,10 @@ namespace ParserTests
             ////            integer_literal
             ////            real_literal
             ////            string_literal
-            ////            Integer Literals
+            public static readonly RegexBasedTerminal literal;
+            const string literal_pattern = string_literal_pattern;
+
+            #region Integer Literals
             ////        integer_literal:
             ////            decimal_integer_literal
             ////            hexadecimal_integer_literal
@@ -292,7 +298,9 @@ namespace ParserTests
             ////            l
             ////        numeric_multiplier:   one of
             ////            kb   mb   gb   tb   pb
-            ////            Real Literals
+            #endregion
+
+            #region Real Literals
             ////        real_literal:
             ////            decimal_digits   .   decimal_digits   exponent_part_opt   decimal_type_suffix_opt   numeric_multiplier_opt
             ////            .   decimal_digits   exponent_part_opt   decimal_type_suffix_opt   numeric_multiplier_opt
@@ -304,14 +312,21 @@ namespace ParserTests
             ////            dash
             ////        decimal_type_suffix:
             ////            d
-            ////            String Literals
+            #endregion
+
+            #region String Literals
             ////        string_literal:
             ////            expandable_string_literal
             ////            expandable_here_string_literal
             ////            verbatim_string_literal
             ////            verbatim_here_string_literal
+            public static readonly RegexBasedTerminal string_literal;
+            const string string_literal_pattern = expandable_string_literal_pattern;
+
             ////        expandable_string_literal:
             ////            double_quote_character   expandable_string_characters_opt   dollars_opt   double_quote_character
+            public static readonly RegexBasedTerminal expandable_string_literal;
+            const string expandable_string_literal_pattern = double_quote_character_pattern + "(" + expandable_string_characters_pattern + ")?(" + dollars_pattern + ")?" + double_quote_character_pattern;
 
             ////        double_quote_character:
             ////            "   (U+0022)
@@ -321,9 +336,13 @@ namespace ParserTests
             public static readonly RegexBasedTerminal double_quote_character;
             const string double_quote_character_pattern = "[" + double_quote_character_ + "]";
             const string double_quote_character_ = "\u0022\u201C\u201D\u201E";
+
             ////        expandable_string_characters:
             ////            expandable_string_part
             ////            expandable_string_characters   expandable_string_part
+            public static readonly RegexBasedTerminal expandable_string_characters;
+            const string expandable_string_characters_pattern = "(" + expandable_string_part_pattern + ")+";
+
             ////        expandable_string_part:
             ////            Any Unicode character except
             ////                    $
@@ -338,9 +357,16 @@ namespace ParserTests
             ////            $   escaped_character
             ////            escaped_character
             ////            double_quote_character   double_quote_character
+            // TODO: more
+            public static readonly RegexBasedTerminal expandable_string_part;
+            const string expandable_string_part_pattern = "[^\\$" + double_quote_character_ + "\u0060" + "]";
+
             ////        dollars:
             ////            $
             ////            dollars   $
+            public static readonly RegexBasedTerminal dollars;
+            const string dollars_pattern = "\\$+";
+
             ////        expandable_here_string_literal:
             ////            @   double_quote_character   whitespace_opt   new_line_character
             ////                    expandable_here_string_characters_opt   new_line_character   double_quote_character   @
@@ -395,6 +421,7 @@ namespace ParserTests
             ////            Any Unicode character except new_line_character
             ////            new_line_character   Any Unicode character except single_quote_character
             ////            new_line_character   single_quote_character   Any Unicode character except @
+            #endregion
             #endregion
 
             #region B.1.9 Simple Names
