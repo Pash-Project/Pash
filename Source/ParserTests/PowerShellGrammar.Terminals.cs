@@ -68,6 +68,7 @@ namespace ParserTests
             ////            base64 encoded signature blob in multiple single_line_comments
             ////        signature_end:
             ////            new_line_character   # SIG # End signature block   new_line_character
+
             #region B.1.1 Line terminators
             ////        new_line_character:
             ////            Carriage return character (U+000D)
@@ -84,6 +85,7 @@ namespace ParserTests
             const string new_lines_pattern = "(" + new_line_character_pattern + ")+";
 
             #endregion
+
             #region B.1.2 Comments
             ////        comment:
             ////            single_line_comment
@@ -119,6 +121,7 @@ namespace ParserTests
             ////        not_greater_than_or_hash:
             ////            Any Unicode character except > or #
             #endregion
+
             #region B.1.3 White space
             ////        whitespace:
             ////            Any character with Unicode class Zs, Zl, or Zp
@@ -131,6 +134,7 @@ namespace ParserTests
             public static readonly RegexBasedTerminal whitespace;
             const string whitespace_pattern = "[" + whitespace_ + "]";
             #endregion
+
             #region B.1.4 Tokens
             ////        token:
             ////            keyword
@@ -147,6 +151,7 @@ namespace ParserTests
             public static readonly RegexBasedTerminal token;
             const string token_pattern = command_pattern;
             #endregion
+
             #region B.1.5 Keywords
             ////        keyword:  one of
             ////            begin				break			catch			class
@@ -158,6 +163,7 @@ namespace ParserTests
             ////            switch			throw			trap			try
             ////            until				using			var			while
             #endregion
+
             #region B.1.6 Variables
             ////        variable:
             ////            $$
@@ -194,6 +200,7 @@ namespace ParserTests
             ////        escaped_character:
             ////            `   (The backtick character U+0060) followed by any Unicode character
             #endregion
+
             #region B.1.7 Commands
             // this is not in the spec; maybe it's an error, or maybe I'm misunderstanding the spec.
             public static readonly RegexBasedTerminal command;
@@ -254,6 +261,7 @@ namespace ParserTests
             public static readonly RegexBasedTerminal colon;
             const string colon_pattern = "\u003A";
             #endregion
+
             #region B.1.8 Literals
             ////        literal:
             ////            integer_literal
@@ -304,6 +312,7 @@ namespace ParserTests
             ////            verbatim_here_string_literal
             ////        expandable_string_literal:
             ////            double_quote_character   expandable_string_characters_opt   dollars_opt   double_quote_character
+
             ////        double_quote_character:
             ////            "   (U+0022)
             ////            Left double quotation mark (U+201C)
@@ -387,6 +396,7 @@ namespace ParserTests
             ////            new_line_character   Any Unicode character except single_quote_character
             ////            new_line_character   single_quote_character   Any Unicode character except @
             #endregion
+
             #region B.1.9 Simple Names
             ////        simple_name:
             ////            simple_name_first_char   simple_name_chars
@@ -400,6 +410,7 @@ namespace ParserTests
             ////            A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nd
             ////            _   (The underscore character U+005F)
             #endregion
+
             #region B.1.10 Type Names
             ////        type_name:
             ////            type_identifier
@@ -417,6 +428,7 @@ namespace ParserTests
             ////        generic_type_name:
             ////            type_name   [
             #endregion
+
             #region B.1.11 Operators and punctuators
             ////        operator_or_punctuator:  one of
             ////            {		}		[		]		(		)		@(		@{		$(		;
