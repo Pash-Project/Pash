@@ -114,6 +114,9 @@ namespace Irony.Parsing {
 
     #region Parser Action execution
     private void ExecuteNextAction() {
+
+      if (Context == null) throw new NullReferenceException("Context");
+      if (Context.CurrentParserState == null) throw new NullReferenceException("Context.CurrentParserState");
       //Read input only if DefaultReduceAction is null - in this case the state does not contain ExpectedSet,
       // so parser cannot assist scanner when it needs to select terminal and therefore can fail
       if (Context.CurrentParserInput == null && Context.CurrentParserState.DefaultAction == null)
