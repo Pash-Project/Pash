@@ -62,8 +62,8 @@ namespace ParserTests
             ////            Line feed character (U+000A)
             ////            Carriage return character (U+000D) followed by line feed character (U+000A)
             public static readonly RegexBasedTerminal new_line_character;
-            const string new_line_character_pattern = "(\u000D)|(\u000A)|(\u000D)(\u000A)";
-            const string new_line_character_ = "\u000D\u000A";
+            const string new_line_character_pattern = @"(\u000D)|(\u000A)|(\u000D)(\u000A)";
+            const string new_line_character_ = @"\u000D\u000A";
 
             ////        new_lines:
             ////            new_line_character
@@ -117,7 +117,7 @@ namespace ParserTests
             ////            Form feed character (U+000C)
             ////            `   (The backtick character U+0060) followed by new_line_character
             // TODO: line continuation
-            const string whitespace_ = "\\p{Zs}\\p{Zl}\\p{Zp}\u0009\u000B\u000C";
+            const string whitespace_ = @"\p{Zs}\p{Zl}\p{Zp}\u0009\u000B\u000C";
             public static readonly RegexBasedTerminal whitespace;
             const string whitespace_pattern = "[" + whitespace_ + "]";
             #endregion
@@ -209,7 +209,7 @@ namespace ParserTests
             ////            generic_token_char
             // TODO: more
             public static readonly RegexBasedTerminal generic_token_part;
-            const string generic_token_part_pattern = "(" + generic_token_char_pattern + "|" + expandable_string_literal_pattern + ")";
+            const string generic_token_part_pattern = generic_token_char_pattern;
 
             ////        generic_token_char:
             ////            Any Unicode character except
@@ -221,7 +221,7 @@ namespace ParserTests
             ////                    new_line_character
             ////TODO:            escaped_character
             public static readonly RegexBasedTerminal generic_token_char;
-            const string generic_token_char_pattern = "[^" + @"\{\}\(\)\;\,\|\&\$" + "\u0060" + double_quote_character_ + single_quote_character_ + whitespace_ + new_line_character_ + "]";
+            const string generic_token_char_pattern = "[^" + @"\{\}\(\)\;\,\|\&\$\u0060" + double_quote_character_ + single_quote_character_ + whitespace_ + new_line_character_ + "]";
 
             ////        generic_token_with_subexpr_start:
             ////            generic_token_parts   $(
@@ -243,7 +243,7 @@ namespace ParserTests
             ////        colon:
             ////            :   (The colon character U+003A)
             public static readonly RegexBasedTerminal colon;
-            const string colon_pattern = "\u003A";
+            const string colon_pattern = @"\u003A";
             #endregion
 
             #region B.1.8 Literals
@@ -316,7 +316,7 @@ namespace ParserTests
             ////            Double low_9 quotation mark (U+201E)
             public static readonly RegexBasedTerminal double_quote_character;
             const string double_quote_character_pattern = "[" + double_quote_character_ + "]";
-            const string double_quote_character_ = "\u0022\u201C\u201D\u201E";
+            const string double_quote_character_ = @"\u0022\u201C\u201D\u201E";
 
             ////        expandable_string_characters:
             ////            expandable_string_part
@@ -340,13 +340,13 @@ namespace ParserTests
             ////            double_quote_character   double_quote_character
             // TODO: more
             public static readonly RegexBasedTerminal expandable_string_part;
-            const string expandable_string_part_pattern = "[^\\$" + double_quote_character_ + "\u0060" + "]";
+            const string expandable_string_part_pattern = @"[^\$" + double_quote_character_ + @"\u0060]";
 
             ////        dollars:
             ////            $
             ////            dollars   $
             public static readonly RegexBasedTerminal dollars;
-            const string dollars_pattern = "\\$+";
+            const string dollars_pattern = @"\$+";
 
             ////        expandable_here_string_literal:
             ////            @   double_quote_character   whitespace_opt   new_line_character
@@ -385,7 +385,7 @@ namespace ParserTests
             ////            Single high_reversed_9 quotation mark (U+201B)
             public static readonly RegexBasedTerminal single_quote_character;
             const string single_quote_character_pattern = "[" + single_quote_character_ + "]";
-            const string single_quote_character_ = "\u0027\u2018\u2019\u201A";
+            const string single_quote_character_ = @"\u0027\u2018\u2019\u201A";
             ////        verbatim_string_characters:
             ////            verbatim_string_part
             ////            verbatim_string_characters   verbatim_string_part
