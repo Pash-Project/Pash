@@ -43,7 +43,7 @@ namespace ParserTests
         [Test]
         public void GenericToken_String_NotMatch()
         {
-            StringAssert.DoesNotMatch("^" + PowerShellGrammar.Terminals.generic_token.Pattern + "$", "\"PS>");
+            StringAssert.DoesNotMatch("^" + PowerShellGrammar.Terminals.generic_token.Pattern + "$", "\"PS> \"");
         }
 
         // Simply ensure that the reflection used to initialize these fields actually worked
