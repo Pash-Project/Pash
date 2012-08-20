@@ -186,11 +186,6 @@ namespace ParserTests
             #endregion
 
             #region B.1.7 Commands
-            // this is not in the spec; maybe it's an error, or maybe I'm misunderstanding the spec.
-            public static readonly RegexBasedTerminal command;
-            const string command_pattern = generic_token_pattern;
-
-
             ////        generic_token:
             ////            generic_token_parts
             public static readonly RegexBasedTerminal generic_token;
