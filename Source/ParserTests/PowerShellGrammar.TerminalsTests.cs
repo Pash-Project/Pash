@@ -40,6 +40,12 @@ namespace ParserTests
             Assert.IsFalse(Regex.IsMatch("foo foo", "^" + PowerShellGrammar.Terminals.generic_token.Pattern + "$"));
         }
 
+        [Test]
+        public void GenericToken_String_NotMatch()
+        {
+            StringAssert.DoesNotMatch("^" + PowerShellGrammar.Terminals.generic_token.Pattern + "$", "\"PS> ");
+        }
+
         // Simply ensure that the reflection used to initialize these fields actually worked
         [Test]
         public void RegexInitTest()
