@@ -40,17 +40,12 @@ namespace ParserTests
             Assert.IsFalse(Regex.IsMatch("foo foo", "^" + PowerShellGrammar.Terminals.generic_token.Pattern + "$"));
         }
 
+        // Simply ensure that the reflection used to initialize these fields actually worked
         [Test]
         public void RegexInitTest()
         {
-            Assert.IsNotNull(PowerShellGrammar.Terminals.input_elements);
-            Assert.AreEqual("input_elements", PowerShellGrammar.Terminals.input_elements.Name);
-        }
-
-        [Test, Ignore]
-        public void TokenizeSimplePromptTest()
-        {
-            Assert.True(Regex.IsMatch("\"PS> \" + (Get-Location)", "^" + PowerShellGrammar.Terminals.input_elements.Pattern + "$"));
+            Assert.IsNotNull(PowerShellGrammar.Terminals.new_lines);
+            Assert.AreEqual("new_lines", PowerShellGrammar.Terminals.new_lines.Name);
         }
 
         [Test]

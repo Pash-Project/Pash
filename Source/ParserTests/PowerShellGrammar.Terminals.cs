@@ -35,34 +35,18 @@ namespace ParserTests
                 {
                     x.field.SetValue(null, x.regexBasedTerminal);
                 }
-
-                // because reflection is a little risky, let's double check
-                if (input_elements == null) throw new Exception();
-                if (input_elements.Name != "input_elements") throw new Exception();
-                if (input_elements.Pattern != input_elements_pattern) throw new Exception();
             }
-
 
             #region B.1 Lexical grammar
             ////        input_elements:
             ////            input_element
             ////            input_elements   input_element
-            public static readonly RegexBasedTerminal input_elements;
-            const string input_elements_pattern = "(" + input_element_pattern + ")+";
-
             ////        input_element:
             ////            whitespace
             ////            comment
             ////            token
-            public static readonly RegexBasedTerminal input_element;
-            const string input_element_pattern = "(" + whitespace_pattern + ") | (" + token_pattern + ")";
-
             ////        input:
             ////            input_elements_opt   signature_block_opt
-            // TODO: signature block
-            public static readonly RegexBasedTerminal input;
-            const string input_pattern = "(" + input_elements_pattern + ")?";
-
             ////        signature_block:
             ////            signature_begin   signature   signature_end
             ////        signature_begin:
@@ -150,9 +134,6 @@ namespace ParserTests
             ////            string_literal
             ////            type_literal
             ////            operator_or_punctuator
-            // TODO: rest of them
-            public static readonly RegexBasedTerminal token;
-            const string token_pattern = "(" + command_pattern + ")|(" + string_literal_pattern + ")";
             #endregion
 
             #region B.1.5 Keywords
