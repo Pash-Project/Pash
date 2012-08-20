@@ -41,7 +41,7 @@ namespace ParserTests
                 grammar = new PowerShellGrammar.InteractiveInput();
                 var parser = new Parser(grammar);
 
-                parseTree = parser.Parse("Get-ChildItem");
+                parseTree = parser.Parse("Get-ChildItem\n");
             }
 
             [Test]
@@ -75,7 +75,7 @@ namespace ParserTests
             var grammar = new PowerShellGrammar.InteractiveInput();
 
             var parser = new Parser(grammar);
-            var parseTree = parser.Parse("\"PS>\"");
+            var parseTree = parser.Parse("\"PS> \"\n");
 
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
@@ -87,12 +87,21 @@ namespace ParserTests
                     grammar.statement_list,
                     grammar.statement,
                     grammar.pipeline,
-                    grammar.command,
-                    grammar.command_name
+                    grammar.expression,
+                    grammar.logical_expression,
+                    grammar.bitwise_expression,
+                    grammar.comparison_expression,
+                    grammar.additive_expression,
+                    grammar.multiplicative_expression,
+                    grammar.format_expression,
+                    grammar.array_literal_expression,
+                    grammar.unary_expression,
+                    grammar.primary_expression,
+                    grammar.value
                 }, parseTree.Root);
 
             Assert.AreEqual(0, node.ChildNodes.Count, node.ToString());
-            Assert.AreEqual(PowerShellGrammar.Terminals.generic_token, node.Term);
+            Assert.AreEqual(PowerShellGrammar.Terminals.literal, node.Term);
         }
 
         static ParseTreeNode VerifyParseTreeSingles(NonTerminal[] expected, ParseTreeNode node)
@@ -120,6 +129,35 @@ namespace ParserTests
             }
 
             return stringBuilder.ToString();
+        }
+
+        [Test]
+        public void DefaultPromptExpressionsTest()
+        {
+            var grammar = new PowerShellGrammar.InteractiveInput();
+
+            var parser = new Parser(grammar);
+            var parseTree = parser.Parse("\"PS> \" + (Get-Location)\n");
+
+            Assert.IsNotNull(parseTree);
+            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
+
+            var expected = new[] {
+                    grammar.interactive_input,
+                    grammar.script_block,
+                    grammar.script_block_body,
+                    grammar.statement_list,
+                    grammar.statement,
+                    grammar.pipeline,
+                    grammar.expression,
+                    grammar.logical_expression,
+                    grammar.bitwise_expression,
+                    grammar.comparison_expression,
+                };
+
+            var node = VerifyParseTreeSingles(expected, parseTree.Root);
+
+            Assert.AreEqual(4, node.ChildNodes.Count, node.ToString());
         }
     }
 }

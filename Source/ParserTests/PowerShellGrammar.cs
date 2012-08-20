@@ -250,7 +250,22 @@ namespace ParserTests
             ////        statement_list:
             ////            statement
             ////            statement_list   statement
-            statement_list.Rule = MakePlusRule(statement_list, statement);
+            
+            // HACK: The spec says you don't have to have a statement_terminator between all statements. For example, 
+            // this is supposed to be OK:
+            //
+            //          if ($true) {} "Hello"       # no terminator between 'if' statement and '"Hello"' expression
+            //
+            // however, the spec does say you have to have a terminator after every pipeline, which would make this
+            // illegal:
+            //
+            //          { Get-ChildItem }           # should be OK
+            //
+            // as a temporary workaround, I am requiring the statement_terminator between all statements, until we
+            // find a fix.
+            //
+            // TODO: Fix above hack.
+            statement_list.Rule = MakePlusRule(statement_list, statement_terminator, statement);
 
             ////        statement:
             ////            if_statement
@@ -267,6 +282,8 @@ namespace ParserTests
             ////        statement_terminator:
             ////            ;
             ////            new_line_character
+            statement_terminator.Rule = ToTerm(";") | Terminals.new_line_character;
+
             ////        statement_terminators:
             ////            statement_terminator
             ////            statement_terminators   statement_terminator
@@ -541,10 +558,12 @@ namespace ParserTests
             ////            literal
             ////            type_literal
             ////            variable
-            value.Rule = Terminals.literal;
+            value.Rule = parenthesized_expression | Terminals.literal;
 
             ////        parenthesized_expression:
             ////            (   new_lines_opt   pipeline   new_lines_opt   )
+            parenthesized_expression.Rule = ToTerm("(") + (Terminals.new_lines | Empty) + pipeline + (Terminals.new_lines | Empty) + ")";
+
             ////        sub_expression:
             ////            $(   new_lines_opt   statement_list_opt   new_lines_opt   )
             ////        array_expression:
