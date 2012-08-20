@@ -5,28 +5,26 @@ using System.Text;
 
 namespace Irony.Parsing {
 
-  [Flags]
-  public enum LanguageFlags {
-    None = 0,
+  public struct LanguageFlags {
+    public bool None;
 
     //Compilation options
     //Be careful - use this flag ONLY if you use NewLine terminal in grammar explicitly!
     // - it happens only in line-based languages like Basic.
-    NewLineBeforeEOF = 0x01,
+    public bool NewLineBeforeEOF;
     //Emit LineStart token
-    EmitLineStartToken = 0x02,
-    DisableScannerParserLink = 0x04, //in grammars that define TokenFilters (like Python) this flag should be set
-    CreateAst = 0x08, //create AST nodes 
+    public bool EmitLineStartToken;
+    public bool DisableScannerParserLink; //in grammars that define TokenFilters (like Python) this flag should be set
+    public bool CreateAst; //create AST nodes 
 
     //Runtime
-    SupportsCommandLine = 0x0200,
-    TailRecursive = 0x0400, //Tail-recursive language - Scheme is one example
-    SupportsBigInt = 0x01000,
-    SupportsComplex = 0x02000,
-    SupportsRational = 0x04000,
+    public bool SupportsCommandLine;
+    public bool TailRecursive; //Tail-recursive language - Scheme is one example
+    public bool SupportsBigInt;
+    public bool SupportsComplex;
+    public bool SupportsRational;
 
-    //Default value
-    Default = None,
+    public static LanguageFlags Default { get { return new LanguageFlags(); } }
   }
 
   //Operator associativity types

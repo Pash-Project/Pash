@@ -83,7 +83,7 @@ namespace Irony.Parsing {
       else
         parseTree.Status = ParseTreeStatus.Parsed;
       //Build AST if no errors and AST flag is set
-      bool createAst = _grammar.LanguageFlags.IsSet(LanguageFlags.CreateAst);
+      bool createAst = _grammar.LanguageFlags.CreateAst;
       if (createAst && !hasErrors)
         Language.Grammar.BuildAst(Language, parseTree);
       //Done; record the time
@@ -175,7 +175,7 @@ namespace Irony.Parsing {
       if (currState.Actions.TryGetValue(currInput.Term, out action))
         return action;
       //If input is EOF and NewLineBeforeEof flag is set, try using NewLine to find action
-      if (currInput.Term == _grammar.Eof && _grammar.LanguageFlags.IsSet(LanguageFlags.NewLineBeforeEOF) &&
+      if (currInput.Term == _grammar.Eof && _grammar.LanguageFlags.NewLineBeforeEOF &&
           currState.Actions.TryGetValue(_grammar.NewLine, out action)) {
         //There's no action for EOF but there's action for NewLine. Let's add newLine token as input, just in case
         // action code wants to check input - it should see NewLine.

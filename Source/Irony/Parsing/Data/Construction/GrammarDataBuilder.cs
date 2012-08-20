@@ -239,7 +239,7 @@ namespace Irony.Parsing.Construction {
 
     #region Grammar Validation
     private void ValidateGrammar() {
-      var createAst = _grammar.LanguageFlags.IsSet(LanguageFlags.CreateAst); 
+      var createAst = _grammar.LanguageFlags.CreateAst; 
       var invalidTransSet = new NonTerminalSet();
       foreach(var nt in _grammarData.NonTerminals) {
         if(nt.Flags.IsSet(TermFlags.IsTransient)) {

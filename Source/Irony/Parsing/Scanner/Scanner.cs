@@ -143,7 +143,7 @@ namespace Irony.Parsing {
     }
 
     private bool NeedLineStartToken(SourceLocation forLocation) {
-      return _grammar.LanguageFlags.IsSet(LanguageFlags.EmitLineStartToken) && 
+      return _grammar.LanguageFlags.EmitLineStartToken && 
           forLocation.Line > Context.PreviousLineStart.Line;
     }
 
@@ -201,7 +201,7 @@ namespace Irony.Parsing {
         termsForCurrentChar = Data.NoPrefixTerminals; 
       //if we are recovering, previewing or there's no parser state, then return list as is
       if(Context.Status == ParserStatus.Recovering || Context.Status == ParserStatus.Previewing
-          || Context.CurrentParserState == null || _grammar.LanguageFlags.IsSet(LanguageFlags.DisableScannerParserLink)
+          || Context.CurrentParserState == null || _grammar.LanguageFlags.DisableScannerParserLink
           || Context.Mode == ParseMode.VsLineScan) {
         Context.CurrentTerminals.AddRange(termsForCurrentChar);
         return; 

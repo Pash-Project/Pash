@@ -501,7 +501,7 @@ namespace Irony.Parsing {
 
     #region AST construction
     public virtual void BuildAst(LanguageData language, ParseTree parseTree) {
-      if (!LanguageFlags.IsSet(LanguageFlags.CreateAst))
+      if (!LanguageFlags.CreateAst)
         return;
       var astContext = new AstContext(language);
       var astBuilder = new AstBuilder(astContext);

@@ -9,9 +9,6 @@ namespace Irony.Parsing {
     public static bool IsSet(this TermFlags flags, TermFlags flag) {
       return (flags & flag) != 0;
     }
-    public static bool IsSet(this LanguageFlags flags, LanguageFlags flag) {
-      return (flags & flag) != 0;
-    }
     public static bool IsSet(this ParseOptions options, ParseOptions option) {
       return (options & option) != 0;
     }

@@ -36,7 +36,7 @@ namespace Irony.Parsing {
     public CodeOutlineFilter(GrammarData grammarData, OutlineOptions options, KeyTerm continuationTerminal) {
       _grammarData = grammarData;
       _grammar = grammarData.Grammar;
-      _grammar.LanguageFlags |= LanguageFlags.EmitLineStartToken;
+      _grammar.LanguageFlags.EmitLineStartToken = true;
       Options = options;
       ContinuationTerminal = continuationTerminal;
       if (ContinuationTerminal != null)
