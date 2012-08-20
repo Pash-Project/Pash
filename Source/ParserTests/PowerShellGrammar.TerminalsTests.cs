@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using System.Text.RegularExpressions;
+using Pash.ParserIntrinsics;
 
 namespace ParserTests
 {

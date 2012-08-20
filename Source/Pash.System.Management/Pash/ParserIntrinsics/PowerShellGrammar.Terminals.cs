@@ -8,7 +8,7 @@ using System.Text;
 using System.Reflection;
 using System.Diagnostics;
 
-namespace ParserTests
+namespace Pash.ParserIntrinsics
 {
     ////////
     // PowerShell Language Lexical Grammar, as presented in the PowerShell Language Specification[1], Appendix B.1

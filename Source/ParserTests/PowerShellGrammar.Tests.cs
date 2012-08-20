@@ -5,6 +5,7 @@ using System.Text;
 using NUnit.Framework;
 using Irony.Parsing;
 using StringExtensions;
+using Pash.ParserIntrinsics;
 
 namespace ParserTests
 {

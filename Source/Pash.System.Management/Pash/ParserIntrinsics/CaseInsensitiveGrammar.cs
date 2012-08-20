@@ -1,9 +1,9 @@
 using System;
 using Irony.Parsing;
 
-namespace ParserTests
+namespace Pash.ParserIntrinsics
 {
-    abstract class CaseInsensitiveGrammar : Grammar
+    public abstract class CaseInsensitiveGrammar : Grammar
     {
         public CaseInsensitiveGrammar()
             : base(true) // case insensitive flag

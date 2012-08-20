@@ -4,15 +4,18 @@ using System.Text;
 using Pash.Implementation;
 using System.Management.Automation;
 using Pash.ParserIntrinsics;
+using Irony.Parsing;
+using StringExtensions;
 
 namespace Pash.Implementation
 {
     internal class ScriptProcessor : CommandProcessorBase
     {
         private static object SyncRoot = new object();
-        private static PashParser _parser;
+        private static Parser _parser;
+        private static PowerShellGrammar _grammar;
 
-        private PashParser Parser
+        private Parser Parser
         {
             [System.Diagnostics.DebuggerStepThrough]
             get
@@ -23,7 +26,8 @@ namespace Pash.Implementation
                     {
                         if (_parser == null)
                         {
-                            _parser = PashParser.Initialize();
+                            _grammar = new PowerShellGrammar.InteractiveInput();
+                            _parser = new Parser(_grammar);
                         }
                     }
                 }
@@ -61,17 +65,16 @@ namespace Pash.Implementation
                 return;
             }
 
-            Parser.Parse(CommandInfo.Definition);
+            var results = Parser.Parse(CommandInfo.Definition);
 
-            if (Parser.ErrorString != null)
+            if (results.HasErrors)
             {
                 // TODO: implement a parsing exception
-                throw new Exception(Parser.ErrorString);
+                throw new Exception(results.ParserMessages.JoinString("\n"));
             }
 
             // TODO: if a tree is empty?
-            if (Parser.SyntaxTree == null)
-                return;
+            if (results.Root == null) throw new Exception();
 
             ExecutionContext context = ExecutionContext.Clone();
             //PipelineCommandRuntime runtime = (PipelineCommandRuntime) CommandRuntime;

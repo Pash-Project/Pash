@@ -6,7 +6,7 @@ using Irony.Parsing;
 using System.Text.RegularExpressions;
 using System.Text;
 
-namespace ParserTests
+namespace Pash.ParserIntrinsics
 {
     ////////
     // PowerShell Language Syntactic Grammar, as presented in the PowerShell Language Specification[1], Appendix B.2
@@ -14,7 +14,7 @@ namespace ParserTests
     // [1]: http://www.microsoft.com/en_us/download/details.aspx?id=9706
     ///////
 
-    partial class PowerShellGrammar : CaseInsensitiveGrammar
+    public partial class PowerShellGrammar : CaseInsensitiveGrammar
     {
 
         #region B.2 Syntactic grammar
