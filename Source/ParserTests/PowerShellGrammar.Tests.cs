@@ -95,16 +95,31 @@ namespace ParserTests
             Assert.AreEqual(PowerShellGrammar.Terminals.generic_token, node.Term);
         }
 
-         static ParseTreeNode VerifyParseTreeSingles(NonTerminal[] expected, ParseTreeNode node)
+        static ParseTreeNode VerifyParseTreeSingles(NonTerminal[] expected, ParseTreeNode node)
         {
             foreach (var rule in expected)
             {
                 Assert.AreEqual(rule, node.Term);
-                Assert.AreEqual(1, node.ChildNodes.Count, "wrong child count on " + node.ToString() + "\n\t" + node.ChildNodes.JoinString("\n\t"));
+                Assert.AreEqual(1, node.ChildNodes.Count, "wrong child count.\n" + FormatNodes(node));
                 node = node.ChildNodes.Single();
             }
 
             return node;
+        }
+
+        static string FormatNodes(ParseTreeNode node, int indent = 1)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+
+            stringBuilder.Append(new string('\t', indent));
+            stringBuilder.AppendLine(node.ToString());
+
+            foreach (var childNode in node.ChildNodes)
+            {
+                stringBuilder.Append(FormatNodes(childNode, indent + 1));
+            }
+
+            return stringBuilder.ToString();
         }
     }
 }
