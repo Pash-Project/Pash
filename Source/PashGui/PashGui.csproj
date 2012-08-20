@@ -68,9 +68,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Pash.Microsoft.Commands.Management\Pash.Microsoft.Commands.Management.csproj">
       <Project>{91225A72-A021-4B7D-BA56-5E1B7AC02F03}</Project>
       <Name>Pash.Microsoft.Commands.Management</Name>
@@ -87,4 +84,9 @@
   <PropertyGroup>
     <PostBuildEvent>"$(ProgramFiles)\NUnit 2.6.1\bin\nunit-console.exe" $(TargetPath) /nologo</PostBuildEvent>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\PashConsole\App.config">
+      <Link>App.config</Link>
+    </None>
+  </ItemGroup>
 </Project>
