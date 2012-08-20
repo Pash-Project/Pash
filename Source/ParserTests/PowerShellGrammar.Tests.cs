@@ -54,7 +54,7 @@ namespace ParserTests
             [Test]
             public void CorrectNonTerminalsTest()
             {
-                var expected = new[] { 
+                var node = VerifyParseTreeSingles(new[] { 
                     grammar.interactive_input,
                     grammar.script_block,
                     grammar.script_block_body,
@@ -63,16 +63,7 @@ namespace ParserTests
                     grammar.pipeline,
                     grammar.command,
                     grammar.command_name,
-                };
-
-                var node = parseTree.Root;
-
-                foreach (var rule in expected)
-                {
-                    Assert.AreEqual(rule, node.Term);
-                    Assert.AreEqual(1, node.ChildNodes.Count, node.ToString());
-                    node = node.ChildNodes.Single();
-                }
+                }, parseTree.Root);
 
                 Assert.AreEqual(0, node.ChildNodes.Count, node.ToString());
             }
@@ -89,7 +80,7 @@ namespace ParserTests
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
 
-            var expected = new[] {
+            var node = VerifyParseTreeSingles(new[] {
                     grammar.interactive_input,
                     grammar.script_block,
                     grammar.script_block_body,
@@ -98,18 +89,22 @@ namespace ParserTests
                     grammar.pipeline,
                     grammar.command,
                     grammar.command_name
-                };
+                }, parseTree.Root);
 
-            var node = parseTree.Root;
+            Assert.AreEqual(0, node.ChildNodes.Count, node.ToString());
+            Assert.AreEqual(PowerShellGrammar.Terminals.generic_token, node.Term);
+        }
 
+         static ParseTreeNode VerifyParseTreeSingles(NonTerminal[] expected, ParseTreeNode node)
+        {
             foreach (var rule in expected)
             {
                 Assert.AreEqual(rule, node.Term);
-                Assert.AreEqual(1, node.ChildNodes.Count, node.ToString());
+                Assert.AreEqual(1, node.ChildNodes.Count, "wrong child count on " + node.ToString() + "\n\t" + node.ChildNodes.JoinString("\n\t"));
                 node = node.ChildNodes.Single();
             }
 
-            Assert.AreEqual(0, node.ChildNodes.Count, node.ToString());
+            return node;
         }
     }
 }
