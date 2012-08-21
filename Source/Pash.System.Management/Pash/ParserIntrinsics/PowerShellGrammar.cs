@@ -197,6 +197,7 @@ namespace Pash.ParserIntrinsics
             // delegate to a new method, so we don't accidentally overwrite a readonly field.
             InitializeProductionRules();
 
+            LanguageFlags.CreateAst = true;
         }
 
         public void InitializeProductionRules()
@@ -693,7 +694,9 @@ namespace Pash.ParserIntrinsics
             foreach (var field in this.GetType().GetFields().Where(f => f.FieldType == typeof(NonTerminal)))
             {
                 if (field.GetValue(this) != null) throw new Exception("don't pre-init fields - let us take care of that for you.");
-                field.SetValue(this, new NonTerminal(field.Name));
+                var nonTerminal = new NonTerminal(field.Name);
+                nonTerminal.SetFlag(TermFlags.NoAstNode);
+                field.SetValue(this, nonTerminal);
             }
         }
     }

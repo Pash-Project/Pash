@@ -28,12 +28,13 @@ namespace Pash.ParserIntrinsics
                         let patternFieldName = field.Name + "_pattern"
                         let patternFieldInfo = typeof(PowerShellGrammar.Terminals).GetField(patternFieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
                         let pattern = (string)patternFieldInfo.GetValue(null)
-                        let regexBasedTerminal = new RegexBasedTerminal(field.Name, pattern)
-                        select new { field, regexBasedTerminal };
+                        select new { field, pattern };
 
                 foreach (var x in q)
                 {
-                    x.field.SetValue(null, x.regexBasedTerminal);
+                    var regexBasedTerminal = new RegexBasedTerminal(x.field.Name, x.pattern);
+                    regexBasedTerminal.Flags |= TermFlags.NoAstNode;
+                    x.field.SetValue(null, regexBasedTerminal);
                 }
             }
 
