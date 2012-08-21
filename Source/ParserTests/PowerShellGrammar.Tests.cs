@@ -55,7 +55,7 @@ namespace ParserTests
             [Test]
             public void CorrectNonTerminalsTest()
             {
-                var node = VerifyParseTreeSingles(new[] { 
+                var node = VerifyParseTreeSingles(parseTree.Root,
                     grammar.interactive_input,
                     grammar.script_block,
                     grammar.script_block_body,
@@ -63,8 +63,8 @@ namespace ParserTests
                     grammar.statement,
                     grammar.pipeline,
                     grammar.command,
-                    grammar.command_name,
-                }, parseTree.Root);
+                    grammar.command_name
+                );
 
                 Assert.AreEqual(0, node.ChildNodes.Count, node.ToString());
             }
@@ -81,31 +81,31 @@ namespace ParserTests
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
 
-            var node = VerifyParseTreeSingles(new[] {
-                    grammar.interactive_input,
-                    grammar.script_block,
-                    grammar.script_block_body,
-                    grammar.statement_list,
-                    grammar.statement,
-                    grammar.pipeline,
-                    grammar.expression,
-                    grammar.logical_expression,
-                    grammar.bitwise_expression,
-                    grammar.comparison_expression,
-                    grammar.additive_expression,
-                    grammar.multiplicative_expression,
-                    grammar.format_expression,
-                    grammar.array_literal_expression,
-                    grammar.unary_expression,
-                    grammar.primary_expression,
-                    grammar.value
-                }, parseTree.Root);
+            var node = VerifyParseTreeSingles(parseTree.Root,
+                grammar.interactive_input,
+                grammar.script_block,
+                grammar.script_block_body,
+                grammar.statement_list,
+                grammar.statement,
+                grammar.pipeline,
+                grammar.expression,
+                grammar.logical_expression,
+                grammar.bitwise_expression,
+                grammar.comparison_expression,
+                grammar.additive_expression,
+                grammar.multiplicative_expression,
+                grammar.format_expression,
+                grammar.array_literal_expression,
+                grammar.unary_expression,
+                grammar.primary_expression,
+                grammar.value
+            );
 
             Assert.AreEqual(0, node.ChildNodes.Count, node.ToString());
             Assert.AreEqual(PowerShellGrammar.Terminals.literal, node.Term);
         }
 
-        static ParseTreeNode VerifyParseTreeSingles(NonTerminal[] expected, ParseTreeNode node)
+        static ParseTreeNode VerifyParseTreeSingles(ParseTreeNode node, params NonTerminal[] expected)
         {
             foreach (var rule in expected)
             {
@@ -143,20 +143,18 @@ namespace ParserTests
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
 
-            var expected = new[] {
-                    grammar.interactive_input,
-                    grammar.script_block,
-                    grammar.script_block_body,
-                    grammar.statement_list,
-                    grammar.statement,
-                    grammar.pipeline,
-                    grammar.expression,
-                    grammar.logical_expression,
-                    grammar.bitwise_expression,
-                    grammar.comparison_expression,
-                };
-
-            var node = VerifyParseTreeSingles(expected, parseTree.Root);
+            var node = VerifyParseTreeSingles(parseTree.Root,
+                grammar.interactive_input,
+                grammar.script_block,
+                grammar.script_block_body,
+                grammar.statement_list,
+                grammar.statement,
+                grammar.pipeline,
+                grammar.expression,
+                grammar.logical_expression,
+                grammar.bitwise_expression,
+                grammar.comparison_expression
+            );
 
             Assert.AreEqual(3, node.ChildNodes.Count, node.ToString());
         }
