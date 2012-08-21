@@ -77,7 +77,7 @@ namespace Irony.Parsing {
       this.CaseSensitive = caseSensitive;
       bool ignoreCase =  !this.CaseSensitive;
       var stringComparer = StringComparer.Create(System.Globalization.CultureInfo.InvariantCulture, ignoreCase);
-      KeyTerms = new KeywordTerminalTable(stringComparer);
+      KeywordTerminals = new KeywordTerminalTable(stringComparer);
       //Initialize console attributes
       ConsoleTitle = Resources.MsgDefaultConsoleTitle;
       ConsoleGreeting = string.Format(Resources.MsgDefaultConsoleGreeting, this.GetType().Name);
@@ -461,14 +461,14 @@ namespace Irony.Parsing {
     #endregion
 
     #region KeyTerms (keywords + special symbols)
-    public KeywordTerminalTable KeyTerms;
+    public KeywordTerminalTable KeywordTerminals;
 
     public KeywordTerminal ToTerminal(string text) {
       return ToTerm(text, text);
     }
     public KeywordTerminal ToTerm(string text, string name) {
       KeywordTerminal term;
-      if (KeyTerms.TryGetValue(text, out term)) {
+      if (KeywordTerminals.TryGetValue(text, out term)) {
         //update name if it was specified now and not before
         if (string.IsNullOrEmpty(term.Name) && !string.IsNullOrEmpty(name))
           term.Name = name;
@@ -479,7 +479,7 @@ namespace Irony.Parsing {
         text = text.ToLower(CultureInfo.InvariantCulture);
       string.Intern(text); 
       term = new KeywordTerminal(text, name);
-      KeyTerms[text] = term;
+      KeywordTerminals[text] = term;
       return term; 
     }
 

@@ -149,8 +149,8 @@ namespace Irony.Parsing {
       //First try as keyterm/key symbol; for example if token text = "while", then first try it as a keyword "while";
       // if this does not work, try as an identifier that happens to match a keyword but is in fact identifier
       Token inputToken = currInput.Token;
-      if (inputToken != null && inputToken.KeyTerm != null) {
-        var keyTerm = inputToken.KeyTerm;
+      if (inputToken != null && inputToken.KeywordTerminal != null) {
+        var keyTerm = inputToken.KeywordTerminal;
         if (currState.Actions.TryGetValue(keyTerm, out action)) {
           #region comments
           // Ok, we found match as a key term (keyword or special symbol)

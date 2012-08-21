@@ -249,13 +249,13 @@ namespace Irony.Parsing {
       //Find what brace we expect
       var nextClosingBrace = string.Empty;
       if (OpenBraces.Count > 0) {
-        var lastOpenBraceTerm = OpenBraces.Peek().KeyTerm;
+        var lastOpenBraceTerm = OpenBraces.Peek().KeywordTerminal;
         var nextClosingBraceTerm = lastOpenBraceTerm.IsPairFor as KeywordTerminal;
         if (nextClosingBraceTerm != null) 
           nextClosingBrace = nextClosingBraceTerm.Text; 
       }
       //Now check all closing braces in result set, and leave only nextClosingBrace
-      foreach (var term in Language.Grammar.KeyTerms.Values) {
+      foreach (var term in Language.Grammar.KeywordTerminals.Values) {
         if (term.Flags.IsSet(TermFlags.IsCloseBrace)) {
           var brace = term.Text; 
           if (result.Contains(brace) && brace != nextClosingBrace)

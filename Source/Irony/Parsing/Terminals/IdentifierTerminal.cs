@@ -140,8 +140,8 @@ namespace Irony.Parsing {
     }
     private void CheckReservedWord(Token token) {
       KeywordTerminal keyTerm;
-      if (Grammar.KeyTerms.TryGetValue(token.Text, out keyTerm)) {
-        token.KeyTerm = keyTerm;
+      if (Grammar.KeywordTerminals.TryGetValue(token.Text, out keyTerm)) {
+        token.KeywordTerminal = keyTerm;
         //if it is reserved word, then overwrite terminal
         if (keyTerm.Flags.IsSet(TermFlags.IsReservedWord))
           token.SetTerminal(keyTerm); 

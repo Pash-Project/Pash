@@ -35,7 +35,7 @@ namespace Irony.Parsing {
   //Tokens are produced by scanner and fed to parser, optionally passing through Token filters in between. 
   public class Token  {
     public Terminal Terminal {get; private set;} 
-    public KeywordTerminal KeyTerm;
+    public KeywordTerminal KeywordTerminal;
     public readonly SourceLocation Location; 
     public readonly string Text;
     
@@ -50,7 +50,7 @@ namespace Irony.Parsing {
 
     public Token(Terminal term, SourceLocation location, string text, object value)  {
       SetTerminal(term);
-      this.KeyTerm = term as KeywordTerminal;
+      this.KeywordTerminal = term as KeywordTerminal;
       Location = location;
       Text = text;
       Value = value; 
