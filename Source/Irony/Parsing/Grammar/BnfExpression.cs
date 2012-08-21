@@ -54,7 +54,7 @@ namespace Irony.Parsing {
 
     #region Implicit cast operators
     public static implicit operator BnfExpression(string symbol) {
-      return new BnfExpression(Grammar.CurrentGrammar.ToTerm(symbol));
+      return new BnfExpression(Grammar.CurrentGrammar.ToTerminal(symbol));
     }
     //It seems better to define one method instead of the following two, with parameter of type BnfTerm -
     // but that's not possible - it would be a conversion from base type of BnfExpression itself, which

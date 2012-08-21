@@ -283,7 +283,7 @@ namespace Pash.ParserIntrinsics
             ////        statement_terminator:
             ////            ;
             ////            new_line_character
-            statement_terminator.Rule = ToTerm(";") | Terminals.new_line_character;
+            statement_terminator.Rule = ToTerminal(";") | Terminals.new_line_character;
 
             ////        statement_terminators:
             ////            statement_terminator
@@ -563,7 +563,7 @@ namespace Pash.ParserIntrinsics
 
             ////        parenthesized_expression:
             ////            (   new_lines_opt   pipeline   new_lines_opt   )
-            parenthesized_expression.Rule = ToTerm("(") + (Terminals.new_lines | Empty) + pipeline + (Terminals.new_lines | Empty) + ")";
+            parenthesized_expression.Rule = ToTerminal("(") + (Terminals.new_lines | Empty) + pipeline + (Terminals.new_lines | Empty) + ")";
 
             ////        sub_expression:
             ////            $(   new_lines_opt   statement_list_opt   new_lines_opt   )

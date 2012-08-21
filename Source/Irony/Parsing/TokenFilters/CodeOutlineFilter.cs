@@ -15,7 +15,7 @@ namespace Irony.Parsing {
   public class CodeOutlineFilter : TokenFilter {
 
     public readonly OutlineOptions Options;
-    public readonly KeyTerm ContinuationTerminal; //Terminal
+    public readonly KeywordTerminal ContinuationTerminal; //Terminal
 
     GrammarData _grammarData; 
     Grammar _grammar;
@@ -33,7 +33,7 @@ namespace Irony.Parsing {
     bool _doubleEof;
 
     #region constructor
-    public CodeOutlineFilter(GrammarData grammarData, OutlineOptions options, KeyTerm continuationTerminal) {
+    public CodeOutlineFilter(GrammarData grammarData, OutlineOptions options, KeywordTerminal continuationTerminal) {
       _grammarData = grammarData;
       _grammar = grammarData.Grammar;
       _grammar.LanguageFlags.EmitLineStartToken = true;

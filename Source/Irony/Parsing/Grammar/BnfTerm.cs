@@ -181,10 +181,10 @@ namespace Irony.Parsing {
       return Op_Plus(term1, term2);
     }
     public static BnfExpression operator +(BnfTerm term1, string symbol2) {
-      return Op_Plus(term1, Grammar.CurrentGrammar.ToTerm(symbol2));
+      return Op_Plus(term1, Grammar.CurrentGrammar.ToTerminal(symbol2));
     }
     public static BnfExpression operator +( string symbol1, BnfTerm term2) {
-      return Op_Plus(Grammar.CurrentGrammar.ToTerm(symbol1), term2);
+      return Op_Plus(Grammar.CurrentGrammar.ToTerminal(symbol1), term2);
     }
 
     //Alternative 
@@ -192,10 +192,10 @@ namespace Irony.Parsing {
       return Op_Pipe(term1, term2);
     }
     public static BnfExpression operator |(BnfTerm term1, string symbol2) {
-      return Op_Pipe(term1, Grammar.CurrentGrammar.ToTerm(symbol2));
+      return Op_Pipe(term1, Grammar.CurrentGrammar.ToTerminal(symbol2));
     }
     public static BnfExpression operator |(string symbol1, BnfTerm term2) {
-      return Op_Pipe(Grammar.CurrentGrammar.ToTerm(symbol1), term2);
+      return Op_Pipe(Grammar.CurrentGrammar.ToTerminal(symbol1), term2);
     }
 
     //BNF operations implementation -----------------------

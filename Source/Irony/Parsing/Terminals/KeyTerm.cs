@@ -16,15 +16,14 @@ using System.Text;
 
 namespace Irony.Parsing {
 
-  public class KeyTermTable : Dictionary<string, KeyTerm> {
-    public KeyTermTable(StringComparer comparer) : base(100, comparer) {}
+  public class KeywordTerminalTable : Dictionary<string, KeywordTerminal> {
+    public KeywordTerminalTable(StringComparer comparer) : base(100, comparer) {}
   }
-  public class KeyTermList : List<KeyTerm> { }
+  public class KeywordTerminalList : List<KeywordTerminal> { }
 
-  //Keyterm is a keyword or a special symbol used in grammar rules, for example: begin, end, while, =, *, etc.
-  // So "key" comes from the Keyword. 
-  public class KeyTerm : Terminal {
-    public KeyTerm(string text, string name)  : base(name) {
+  //A keyword or a special symbol used in grammar rules, for example: begin, end, while, =, *, etc.
+  public class KeywordTerminal : Terminal {
+    public KeywordTerminal(string text, string name)  : base(name) {
       Text = text;
       base.ErrorAlias = name;
       this.Flags |= TermFlags.NoAstNode;

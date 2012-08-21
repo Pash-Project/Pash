@@ -44,11 +44,11 @@ namespace Irony.Parsing {
     public override void Init(GrammarData grammarData) {
       base.Init(grammarData);
       // convert strings to terminals, if needed
-      _firstTerminal = _firstTerminal ?? Grammar.ToTerm(_firstString);
+      _firstTerminal = _firstTerminal ?? Grammar.ToTerminal(_firstString);
       if (_beforeStrings.Count > 0) {
         //SL pukes here, it does not support co/contravariance in full, we have to do it long way
         foreach (var s in _beforeStrings)
-          _beforeTerminals.Add(Grammar.ToTerm(s));
+          _beforeTerminals.Add(Grammar.ToTerminal(s));
       }
       //Build description
       var beforeTerms = string.Join(" ", _beforeTerminals.Select(t => t.Name));

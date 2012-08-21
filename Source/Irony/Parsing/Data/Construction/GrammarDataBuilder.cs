@@ -123,7 +123,7 @@ namespace Irony.Parsing.Construction {
       }
       //Mark keywords - any "word" symbol directly mentioned in the grammar
       foreach (var term in _grammarData.Terminals) {
-        var symTerm = term as KeyTerm;
+        var symTerm = term as KeywordTerminal;
         if (symTerm == null) continue;
         if (!string.IsNullOrEmpty(symTerm.Text) && char.IsLetter(symTerm.Text[0]))
           symTerm.SetFlag(TermFlags.IsKeyword); 

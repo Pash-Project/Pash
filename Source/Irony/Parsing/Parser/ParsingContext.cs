@@ -250,7 +250,7 @@ namespace Irony.Parsing {
       var nextClosingBrace = string.Empty;
       if (OpenBraces.Count > 0) {
         var lastOpenBraceTerm = OpenBraces.Peek().KeyTerm;
-        var nextClosingBraceTerm = lastOpenBraceTerm.IsPairFor as KeyTerm;
+        var nextClosingBraceTerm = lastOpenBraceTerm.IsPairFor as KeywordTerminal;
         if (nextClosingBraceTerm != null) 
           nextClosingBrace = nextClosingBraceTerm.Text; 
       }

@@ -139,7 +139,7 @@ namespace Irony.Parsing {
       return token; 
     }
     private void CheckReservedWord(Token token) {
-      KeyTerm keyTerm;
+      KeywordTerminal keyTerm;
       if (Grammar.KeyTerms.TryGetValue(token.Text, out keyTerm)) {
         token.KeyTerm = keyTerm;
         //if it is reserved word, then overwrite terminal
