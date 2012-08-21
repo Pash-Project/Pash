@@ -80,7 +80,7 @@ namespace Pash.Implementation
             //PipelineCommandRuntime runtime = (PipelineCommandRuntime) CommandRuntime;
             //context.outputStreamWriter = new ObjectStreamWriter(runtime.outputResults);
 
-            Parser.SyntaxTree.Execute(context, CommandRuntime);
+            //Parser.SyntaxTree.Execute(context, CommandRuntime);
         }
 
         internal override void Complete()
