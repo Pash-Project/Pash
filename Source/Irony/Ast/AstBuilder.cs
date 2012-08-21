@@ -93,6 +93,7 @@ namespace Irony.Ast {
         // IAstNodeInit.Init() method on node object. But we do call AstNodeCreated custom event on term.
       } else {
         //Invoke the default creator compiled when we verified the data
+        if (config.DefaultNodeCreator == null) throw new Exception(string.Format("No AST node creator for '{0}'",parseNode.ToString()));
         parseNode.AstNode = config.DefaultNodeCreator();
         //Initialize node
         var iInit = parseNode.AstNode as IAstNodeInit;
