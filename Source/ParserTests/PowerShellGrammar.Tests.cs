@@ -158,7 +158,7 @@ namespace ParserTests
 
             var node = VerifyParseTreeSingles(expected, parseTree.Root);
 
-            Assert.AreEqual(4, node.ChildNodes.Count, node.ToString());
+            Assert.AreEqual(3, node.ChildNodes.Count, node.ToString());
         }
     }
 }
