@@ -156,7 +156,62 @@ namespace ParserTests
                 grammar.comparison_expression
             );
 
+            Assert.AreEqual(grammar.additive_expression, node.Term);
             Assert.AreEqual(3, node.ChildNodes.Count, node.ToString());
+
+            var leftNode = node.ChildNodes[0];
+            var operatorNode = node.ChildNodes[1];
+            var rightNode = node.ChildNodes[2];
+
+            {
+                var leftLiteral = VerifyParseTreeSingles(leftNode,
+                    grammar.additive_expression,
+                    grammar.multiplicative_expression,
+                    grammar.format_expression,
+                    grammar.array_literal_expression,
+                    grammar.unary_expression,
+                    grammar.primary_expression,
+                    grammar.value
+                );
+
+                Assert.AreEqual(PowerShellGrammar.Terminals.literal, leftLiteral.Term);
+            }
+
+            {
+                KeywordTerminal keywordTerminal = (KeywordTerminal)operatorNode.Term;
+                Assert.AreEqual("+", keywordTerminal.Text);
+            }
+
+            {
+                var nodeX = VerifyParseTreeSingles(rightNode,
+                    grammar.multiplicative_expression,
+                    grammar.format_expression,
+                    grammar.array_literal_expression,
+                    grammar.unary_expression,
+                    grammar.primary_expression,
+                    grammar.value
+                );
+
+                Assert.AreEqual(grammar.parenthesized_expression, nodeX.Term);
+                Assert.AreEqual(3, nodeX.ChildNodes.Count);
+
+                KeywordTerminal leftParenTerminal = (KeywordTerminal)nodeX.ChildNodes[0].Term;
+                Assert.AreEqual("(", leftParenTerminal.Text);
+
+                KeywordTerminal rightParenTerminal = (KeywordTerminal)nodeX.ChildNodes[2].Term;
+                Assert.AreEqual(")", rightParenTerminal.Text);
+
+                var pipelineNode = nodeX.ChildNodes[1];
+
+                var command_name_token = VerifyParseTreeSingles(pipelineNode,
+                    grammar.pipeline,
+                    grammar.command,
+                    grammar.command_name
+                );
+
+                Assert.AreEqual(PowerShellGrammar.Terminals.generic_token, command_name_token.Term);
+                Assert.AreEqual("Get-Location", command_name_token.FindTokenAndGetText());
+            }
         }
     }
 }
