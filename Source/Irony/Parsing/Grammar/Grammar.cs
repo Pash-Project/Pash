@@ -464,9 +464,9 @@ namespace Irony.Parsing {
     public KeywordTerminalTable KeywordTerminals;
 
     public KeywordTerminal ToTerminal(string text) {
-      return ToTerm(text, text);
+      return ToTerminal(text, text);
     }
-    public KeywordTerminal ToTerm(string text, string name) {
+    public KeywordTerminal ToTerminal(string text, string name) {
       KeywordTerminal term;
       if (KeywordTerminals.TryGetValue(text, out term)) {
         //update name if it was specified now and not before
