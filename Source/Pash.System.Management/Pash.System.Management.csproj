@@ -226,10 +226,31 @@
     <Compile Include="Pash\Implementation\ObjectStreamWriter.cs" />
     <Compile Include="Pash\Implementation\PipelineProcessor.cs" />
     <Compile Include="Pash\Implementation\ScriptProcessor.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\array_literal_expression_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\bitwise_expression_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammar.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\command_name_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\command_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\comparison_expression_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\expression_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\format_expression_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\interactive_input_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\logical_expression_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\multiplicative_expression_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\ASTNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\parenthesized_expression_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\pipeline_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.cs" />
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.Terminals.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\primary_expression_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\script_block_body_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\script_block_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\statement_list_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\statement_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\statement_terminator_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\StringExtensions.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\unary_expression_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\value_node.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
