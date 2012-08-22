@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Reflection;
 using System.Diagnostics;
+using Pash.ParserIntrinsics.Nodes;
 
 namespace Pash.ParserIntrinsics
 {
@@ -36,6 +37,11 @@ namespace Pash.ParserIntrinsics
                     regexBasedTerminal.Flags |= TermFlags.NoAstNode;
                     x.field.SetValue(null, regexBasedTerminal);
                 }
+
+                // TODO: find a more clever way than writing this here,
+                // especially if we can skip the bit fiddling.
+                literal.Flags &= ~(TermFlags.NoAstNode);
+                literal.AstConfig.NodeType = typeof(literal_node);
             }
 
             #region B.1 Lexical grammar

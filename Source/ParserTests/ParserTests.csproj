@@ -35,10 +35,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Pash.System.Management\Pash\ParserIntrinsics\StringExtensions.cs">
-      <Link>StringExtensions.cs</Link>
-    </Compile>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Ast.Tests.cs" />
     <Compile Include="PowerShellGrammar.TerminalsTests.cs" />
     <Compile Include="PowerShellGrammar.Tests.cs" />
   </ItemGroup>
