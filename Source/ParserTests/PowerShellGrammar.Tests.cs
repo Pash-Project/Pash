@@ -42,7 +42,7 @@ namespace ParserTests
                 grammar = new PowerShellGrammar.InteractiveInput();
                 var parser = new Parser(grammar);
 
-                parseTree = parser.Parse("Get-ChildItem\n");
+                parseTree = parser.Parse("Get-ChildItem");
             }
 
             [Test]
@@ -76,7 +76,7 @@ namespace ParserTests
             var grammar = new PowerShellGrammar.InteractiveInput();
 
             var parser = new Parser(grammar);
-            var parseTree = parser.Parse("\"PS> \"\n");
+            var parseTree = parser.Parse("\"PS> \"");
 
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
@@ -138,7 +138,7 @@ namespace ParserTests
             var grammar = new PowerShellGrammar.InteractiveInput();
 
             var parser = new Parser(grammar);
-            var parseTree = parser.Parse("\"PS> \" + (Get-Location)\n");
+            var parseTree = parser.Parse("\"PS> \" + (Get-Location)");
 
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
