@@ -100,9 +100,11 @@ namespace Irony.Ast {
 
     //Contributed by William Horner (wmh)
     private AstNodeCreator CompileDefaultNodeCreator(Type nodeType) {
-      ConstructorInfo constr = nodeType.GetConstructor(Type.EmptyTypes);
+      ConstructorInfo constr = nodeType.GetConstructor(new[] { typeof(AstContext), typeof(ParseTreeNode) });
       DynamicMethod method = new DynamicMethod("CreateAstNode", nodeType, new[] { typeof(AstContext), typeof(ParseTreeNode)} );
       ILGenerator il = method.GetILGenerator();
+      il.Emit(OpCodes.Ldarg_0);
+      il.Emit(OpCodes.Ldarg_1);
       il.Emit(OpCodes.Newobj, constr);
       il.Emit(OpCodes.Ret);
       var result  = (AstNodeCreator) method.CreateDelegate(typeof(AstNodeCreator));
