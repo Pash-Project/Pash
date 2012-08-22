@@ -9,17 +9,9 @@ namespace Pash.ParserIntrinsics.Nodes
 {
     public class script_block_body_node : _node
     {
-public script_block_body_node(AstContext astContext, ParseTreeNode parseTreeNode) : base(astContext, parseTreeNode) { 
-}
-
-        internal override void Execute(Implementation.ExecutionContext context, System.Management.Automation.ICommandRuntime commandRuntime)
+        public script_block_body_node(AstContext astContext, ParseTreeNode parseTreeNode)
+            : base(astContext, parseTreeNode)
         {
-            throw new NotImplementedException();
-        }
-
-        internal override object GetValue(Implementation.ExecutionContext context)
-        {
-            throw new NotImplementedException();
         }
     }
 }

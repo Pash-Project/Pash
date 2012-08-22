@@ -11,18 +11,37 @@ namespace Pash.ParserIntrinsics.Nodes
     // TODO: make it an interface, or add a field and remove this comment.
     public abstract class _node
     {
-        public readonly AstContext AstContext;
-        public readonly ParseTreeNode ParseTreeNode;
+        protected readonly AstContext astContext;
+        protected readonly ParseTreeNode parseTreeNode;
 
         public _node(AstContext astContext, ParseTreeNode parseTreeNode)
         {
-            this.AstContext = astContext;
-            this.ParseTreeNode = parseTreeNode;
+            this.astContext = astContext;
+            this.parseTreeNode = parseTreeNode;
         }
 
-        internal abstract void Execute(ExecutionContext context, ICommandRuntime commandRuntime);
+        // by default, forward to the child node, if there is exactly 1. This makes sense
+        // for nodes that don't have a semantic impact. Somewhere, though, you have to override
+        // and implement! 
+        //
+        // Rules with more than one child must override.
+        internal virtual void Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        {
+            if (this.parseTreeNode.ChildNodes.Count == 1)
+            {
+                ((_node)this.parseTreeNode.ChildNodes.Single().AstNode).Execute(context, commandRuntime);
+            }
+            else throw new NotImplementedException();
+        }
 
-        internal abstract object GetValue(ExecutionContext context);
+        internal virtual object GetValue(ExecutionContext context)
+        {
+            if (this.parseTreeNode.ChildNodes.Count == 1)
+            {
+                return ((_node)this.parseTreeNode.ChildNodes.Single().AstNode).GetValue(context);
+            }
+            else throw new NotImplementedException();
+        }
     }
 }
 

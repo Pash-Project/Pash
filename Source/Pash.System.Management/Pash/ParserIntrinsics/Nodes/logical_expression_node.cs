@@ -13,15 +13,5 @@ namespace Pash.ParserIntrinsics.Nodes
             : base(astContext, parseTreeNode)
         {
         }
-
-        internal override void Execute(Implementation.ExecutionContext context, System.Management.Automation.ICommandRuntime commandRuntime)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override object GetValue(Implementation.ExecutionContext context)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
