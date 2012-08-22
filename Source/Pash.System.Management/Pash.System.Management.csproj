@@ -235,6 +235,7 @@
     <Compile Include="Pash\ParserIntrinsics\Nodes\comparison_expression_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\expression_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\format_expression_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\generic_token_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\interactive_input_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\literal_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\logical_expression_node.cs" />

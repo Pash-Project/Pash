@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-
+using StringExtensions;
 using System.Management.Automation;
 using Pash.Implementation;
 using Irony.Ast;
@@ -41,10 +41,14 @@ namespace Pash.ParserIntrinsics.Nodes
         {
             if (this.parseTreeNode.ChildNodes.Count == 1)
             {
-                return ((_node)this.parseTreeNode.ChildNodes.Single().AstNode).GetValue(context);
+                var childNode = this.parseTreeNode.ChildNodes.Single();
+                if (childNode.AstNode == null)
+                {
+                    throw new NotImplementedException("AST not implemented for '{0}'. Parent node '{1}' should implement `GetValue()`".FormatString(childNode, this));
+                }
+                return ((_node)childNode.AstNode).GetValue(context);
             }
             else throw new NotImplementedException();
         }
     }
 }
-

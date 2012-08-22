@@ -42,6 +42,8 @@ namespace Pash.ParserIntrinsics
                 // especially if we can skip the bit fiddling.
                 literal.Flags &= ~(TermFlags.NoAstNode);
                 literal.AstConfig.NodeType = typeof(literal_node);
+                generic_token.Flags &= ~(TermFlags.NoAstNode);
+                generic_token.AstConfig.NodeType = typeof(generic_token_node);
             }
 
             #region B.1 Lexical grammar

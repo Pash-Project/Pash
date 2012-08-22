@@ -46,5 +46,22 @@ namespace ParserTests
             Assert.IsInstanceOf<string>(result);
             Assert.AreEqual("xy", result);
         }
+
+        [Test]
+        public void ParenthesizedExpression()
+        {
+            var grammar = new PowerShellGrammar.InteractiveInput();
+
+            var parser = new Parser(grammar);
+            var parseTree = parser.Parse("(Get-Location)");
+
+            Assert.IsNotNull(parseTree);
+            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
+
+            //var result = ((_node)parseTree.Root.AstNode).GetValue(null);
+
+            //Assert.IsInstanceOf<string>(result);
+            //Assert.AreEqual(@"C:\", result);
+        }
     }
 }
