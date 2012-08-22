@@ -237,7 +237,7 @@
     <Compile Include="Pash\ParserIntrinsics\Nodes\interactive_input_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\logical_expression_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\multiplicative_expression_node.cs" />
-    <Compile Include="Pash\ParserIntrinsics\Nodes\ASTNode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\parenthesized_expression_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\pipeline_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.cs" />
