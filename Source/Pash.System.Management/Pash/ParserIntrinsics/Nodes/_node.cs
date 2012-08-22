@@ -5,6 +5,7 @@ using System.Management.Automation;
 using Pash.Implementation;
 using Irony.Ast;
 using Irony.Parsing;
+using System.Diagnostics;
 
 namespace Pash.ParserIntrinsics.Nodes
 {
@@ -25,6 +26,7 @@ namespace Pash.ParserIntrinsics.Nodes
         // and implement! 
         //
         // Rules with more than one child must override.
+        [DebuggerStepThrough]
         internal virtual void Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             if (this.parseTreeNode.ChildNodes.Count == 1)
@@ -34,6 +36,7 @@ namespace Pash.ParserIntrinsics.Nodes
             else throw new NotImplementedException();
         }
 
+        [DebuggerStepThrough]
         internal virtual object GetValue(ExecutionContext context)
         {
             if (this.parseTreeNode.ChildNodes.Count == 1)
