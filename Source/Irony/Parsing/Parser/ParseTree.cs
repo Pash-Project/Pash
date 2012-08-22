@@ -22,8 +22,6 @@ namespace Irony.Parsing {
     The parse tree is converted into abstract syntax tree (AST) which contains custom nodes. The conversion might 
     happen on-the-fly: as parser creates the parse tree nodes it can create the AST nodes and puts them into AstNode field. 
     Alternatively it might happen as a separate step, after completing the parse tree. 
-    AST node might optinally implement IAstNodeInit interface, so Irony parser can initialize the node providing it
-    with all relevant information. 
     The ParseTreeNode also works as a stack element in the parser stack, so it has the State property to carry 
     the pushed parser state while it is in the stack. 
   */
