@@ -14,7 +14,7 @@ namespace ParserTests
     class AstTests
     {
         [Test]
-        public void VerbaitmStringLiteralExpressionTest()
+        public void VerbatimStringLiteralExpression()
         {
             var grammar = new PowerShellGrammar.InteractiveInput();
 
@@ -28,6 +28,23 @@ namespace ParserTests
 
             Assert.IsInstanceOf<string>(result);
             Assert.AreEqual("PS> ", result);
+        }
+
+        [Test]
+        public void AdditiveExpression_Add()
+        {
+            var grammar = new PowerShellGrammar.InteractiveInput();
+
+            var parser = new Parser(grammar);
+            var parseTree = parser.Parse("'x' + 'y'");
+
+            Assert.IsNotNull(parseTree);
+            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
+
+            var result = ((_node)parseTree.Root.AstNode).GetValue(null);
+
+            Assert.IsInstanceOf<string>(result);
+            Assert.AreEqual("xy", result);
         }
     }
 }
