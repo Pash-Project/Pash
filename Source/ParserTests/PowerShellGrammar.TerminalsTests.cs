@@ -47,6 +47,22 @@ namespace ParserTests
             StringAssert.DoesNotMatch("^" + PowerShellGrammar.Terminals.generic_token.Pattern + "$", "\"PS> \"");
         }
 
+        [Test]
+        public void VerbatimStringMatch()
+        {
+            var matches = Regex.Match("'PS> '", PowerShellGrammar.Terminals.literal.Pattern);
+            Assert.True(matches.Success);
+            Assert.AreEqual(0, matches.Groups[PowerShellGrammar.Terminals.literal.Name].Index);
+            // For any node of Terminal X, you should be able to get `matches.Groups[X]`, which is the whole matched text
+            //
+            // Not normally useful, since you can do `term.text`, but it fits in to the next assert.
+            Assert.AreEqual("'PS> '", matches.Groups[PowerShellGrammar.Terminals.literal.Name].Value);
+            // How to get the useful value out a terminal. Consider that there are 4 different accepted single-quote
+            // characters that could demarcate a string literal, and we really don't care which one you used - 
+            // we just want the contents.
+            Assert.AreEqual("PS> ", matches.Groups[PowerShellGrammar.Terminals.verbatim_string_characters.Name].Value);
+        }
+
         // Simply ensure that the reflection used to initialize these fields actually worked
         [Test]
         public void RegexInitTest()
