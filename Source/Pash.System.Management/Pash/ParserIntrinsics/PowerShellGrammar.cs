@@ -506,6 +506,7 @@ namespace Pash.ParserIntrinsics
             additive_expression.Rule =
                 multiplicative_expression |
                 (additive_expression + "+" + (Terminals.new_lines | Empty) + multiplicative_expression);
+            additive_expression.AstConfig.NodeType = typeof(additive_expression_node);
 
             ////        multiplicative_expression:
             ////            format_expression
@@ -717,7 +718,6 @@ namespace Pash.ParserIntrinsics
             {
                 if (field.GetValue(this) != null) throw new Exception("don't pre-init fields - let us take care of that for you.");
                 var nonTerminal = new NonTerminal(field.Name);
-                nonTerminal.SetFlag(TermFlags.NoAstNode);
                 field.SetValue(this, nonTerminal);
             }
         }

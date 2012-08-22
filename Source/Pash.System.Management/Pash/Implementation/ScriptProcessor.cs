@@ -6,6 +6,7 @@ using System.Management.Automation;
 using Pash.ParserIntrinsics;
 using Irony.Parsing;
 using StringExtensions;
+using Pash.ParserIntrinsics.Nodes;
 
 namespace Pash.Implementation
 {
@@ -80,7 +81,7 @@ namespace Pash.Implementation
             //PipelineCommandRuntime runtime = (PipelineCommandRuntime) CommandRuntime;
             //context.outputStreamWriter = new ObjectStreamWriter(runtime.outputResults);
 
-            //Parser.SyntaxTree.Execute(context, CommandRuntime);
+            ((_node)results.Root.AstNode).Execute(context, CommandRuntime);
         }
 
         internal override void Complete()

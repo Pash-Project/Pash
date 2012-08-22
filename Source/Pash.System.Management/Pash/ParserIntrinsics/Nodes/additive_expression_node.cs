@@ -7,9 +7,9 @@ using Irony.Parsing;
 
 namespace Pash.ParserIntrinsics.Nodes
 {
-    public class primary_expression_node : _node
+    public class additive_expression_node : _node
     {
-        public primary_expression_node(AstContext astContext, ParseTreeNode parseTreeNode)
+        public additive_expression_node(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
         }

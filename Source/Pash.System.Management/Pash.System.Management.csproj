@@ -226,6 +226,7 @@
     <Compile Include="Pash\Implementation\ObjectStreamWriter.cs" />
     <Compile Include="Pash\Implementation\PipelineProcessor.cs" />
     <Compile Include="Pash\Implementation\ScriptProcessor.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\additive_expression_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\array_literal_expression_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\bitwise_expression_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammar.cs" />
