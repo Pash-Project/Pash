@@ -298,7 +298,7 @@ namespace Pash.ParserIntrinsics
             ////            verbatim_string_literal
             ////            verbatim_here_string_literal
             public static readonly RegexBasedTerminal string_literal = null; // Initialized by reflection.
-            const string string_literal_pattern = expandable_string_literal_pattern;
+            const string string_literal_pattern = "(" + expandable_string_literal_pattern + ")|(" + verbatim_string_literal_pattern + ")";
 
             ////        expandable_string_literal:
             ////            double_quote_character   expandable_string_characters_opt   dollars_opt   double_quote_character
@@ -372,7 +372,10 @@ namespace Pash.ParserIntrinsics
             ////        expandable_here_string_with_subexpr_end:
             ////            new_line_character   double_quote_character   @
             ////        verbatim_string_literal:
-            ////            single_quote_character   verbatim_string_characters_opt   single_quote_char
+            ////            single_quote_character   verbatim_string_characters_opt   single_quote_char [sic]
+            public static readonly RegexBasedTerminal verbatim_string_literal = null; // Initialized by reflection
+            const string verbatim_string_literal_pattern = single_quote_character_pattern + "(" + verbatim_string_characters_pattern + ")?" + single_quote_character_pattern;
+
             ////        single_quote_character:
             ////            '   (U+0027)
             ////            Left single quotation mark (U+2018)
@@ -382,12 +385,19 @@ namespace Pash.ParserIntrinsics
             public static readonly RegexBasedTerminal single_quote_character = null; // Initialized by reflection.
             const string single_quote_character_pattern = "[" + single_quote_character_ + "]";
             const string single_quote_character_ = @"\u0027\u2018\u2019\u201A";
+
             ////        verbatim_string_characters:
             ////            verbatim_string_part
             ////            verbatim_string_characters   verbatim_string_part
+            public static readonly RegexBasedTerminal verbatim_string_characters = null; // Initialized by reflection.
+            const string verbatim_string_characters_pattern = "(" + verbatim_string_part_pattern + ")+";
+
             ////        verbatim_string_part:
             ////            Any Unicode character except single_quote_character
             ////            single_quote_character   single_quote_character
+            public static readonly RegexBasedTerminal verbatim_string_part = null; // Initialized by reflection
+            const string verbatim_string_part_pattern = "([^" + single_quote_character_ + "])|(" + single_quote_character_ + single_quote_character_ + ")";
+
             ////        verbatim_here_string_literal:
             ////            @   single_quote_character   whitespace_opt   new_line_character
             ////                    verbatim_here_string_characters_opt   new_line_character   single_quote_character   @

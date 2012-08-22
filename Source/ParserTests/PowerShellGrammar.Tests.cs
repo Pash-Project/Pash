@@ -132,13 +132,15 @@ namespace ParserTests
             return stringBuilder.ToString();
         }
 
+        // the default prompt expression from app.config, slightly simplified just to
+        // make the test easier to write.
         [Test]
         public void DefaultPromptExpressionsTest()
         {
             var grammar = new PowerShellGrammar.InteractiveInput();
 
             var parser = new Parser(grammar);
-            var parseTree = parser.Parse("\"PS> \" + (Get-Location)");
+            var parseTree = parser.Parse("'PS> ' + (Get-Location)");
 
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
