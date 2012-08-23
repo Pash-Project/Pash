@@ -31,6 +31,62 @@ namespace ParserTests
             Assert.AreEqual("interactive_input", grammar.interactive_input.Name);
         }
 
+        // Separate tests for each level of reported grammar error, so it's easy to diagnose our current
+        // status, and to mark [Ignore] to our level of tolerance.
+        [TestFixture]
+        public class GrammarErrorLevelTests
+        {
+            [Test]
+            public void LanguageErrorLevelPerfect()
+            {
+                var grammar = new PowerShellGrammar.InteractiveInput();
+                var languageData = new LanguageData(grammar);
+                Assert.AreEqual(languageData.ErrorLevel, GrammarErrorLevel.NoError);
+            }
+
+            [Test]
+            public void LanguageErrorLevelNoInfos()
+            {
+                var grammar = new PowerShellGrammar.InteractiveInput();
+                var languageData = new LanguageData(grammar);
+                Assert.Less(languageData.ErrorLevel, GrammarErrorLevel.Info);
+            }
+
+            [Test]
+            public void LanguageErrorLevelNoWarnings()
+            {
+                var grammar = new PowerShellGrammar.InteractiveInput();
+                var languageData = new LanguageData(grammar);
+                Assert.Less(languageData.ErrorLevel, GrammarErrorLevel.Warning);
+            }
+
+            [Test]
+            public void LanguageErrorLevelNoConflicts()
+            {
+                var grammar = new PowerShellGrammar.InteractiveInput();
+                var languageData = new LanguageData(grammar);
+                Assert.Less(languageData.ErrorLevel, GrammarErrorLevel.Conflict);
+            }
+
+
+            [Test]
+            public void LanguageErrorLevelNoErrors()
+            {
+                var grammar = new PowerShellGrammar.InteractiveInput();
+                var languageData = new LanguageData(grammar);
+                Assert.Less(languageData.ErrorLevel, GrammarErrorLevel.Error);
+            }
+
+
+            [Test]
+            public void LanguageErrorLevelNoInternalErrors()
+            {
+                var grammar = new PowerShellGrammar.InteractiveInput();
+                var languageData = new LanguageData(grammar);
+                Assert.Less(languageData.ErrorLevel, GrammarErrorLevel.InternalError);
+            }
+        }
+
         [TestFixture]
         class ParseSimpleCommandTest
         {
