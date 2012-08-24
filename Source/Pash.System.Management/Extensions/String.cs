@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Security;
 
-namespace StringExtensions
+namespace Extensions.String
 {
     static class _
     {

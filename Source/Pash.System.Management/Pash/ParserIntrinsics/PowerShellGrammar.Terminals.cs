@@ -8,6 +8,7 @@ using System.Text;
 using System.Reflection;
 using System.Diagnostics;
 using Pash.ParserIntrinsics.Nodes;
+using Extensions.Reflection;
 
 namespace Pash.ParserIntrinsics
 {
@@ -23,27 +24,34 @@ namespace Pash.ParserIntrinsics
         {
             static Terminals()
             {
-                // this might be an excessive use of query comprehension syntax
                 var q = from field in typeof(PowerShellGrammar.Terminals).GetFields()
                         where field.FieldType == typeof(RegexBasedTerminal)
-                        let patternFieldName = field.Name + "_pattern"
-                        let patternFieldInfo = typeof(PowerShellGrammar.Terminals).GetField(patternFieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
-                        let pattern = (string)patternFieldInfo.GetValue(null)
-                        select new { field, pattern };
+                        select field;
 
-                foreach (var x in q)
+                foreach (var field in q)
                 {
-                    var regexBasedTerminal = new RegexBasedTerminal(x.field.Name, x.pattern);
-                    regexBasedTerminal.Flags |= TermFlags.NoAstNode;
-                    x.field.SetValue(null, regexBasedTerminal);
+                    var patternFieldInfo = typeof(PowerShellGrammar.Terminals).GetField(
+                        field.Name + "_pattern",
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static
+                        );
+                    var pattern = patternFieldInfo.GetValue<string>(null);
+                    var regexBasedTerminal = new RegexBasedTerminal(field.Name, pattern);
+
+                    var nodeType = Assembly.GetCallingAssembly().GetType("Pash.ParserIntrinsics.Nodes." + field.Name + "_node");
+                    if (nodeType == null)
+                    {
+                        regexBasedTerminal.Flags |= TermFlags.NoAstNode;
+                    }
+                    else
+                    {
+                        regexBasedTerminal.AstConfig.NodeType = nodeType;
+                    }
+
+                    field.SetValue(null, regexBasedTerminal);
                 }
 
-                // TODO: find a more clever way than writing this here,
-                // especially if we can skip the bit fiddling.
-                literal.Flags &= ~(TermFlags.NoAstNode);
-                literal.AstConfig.NodeType = typeof(literal_node);
-                generic_token.Flags &= ~(TermFlags.NoAstNode);
-                generic_token.AstConfig.NodeType = typeof(generic_token_node);
+                // I'd rather that any other token be selected over `generic_token`, since it's, you know, generic.
+                generic_token.Priority = -1;
             }
 
             #region B.1 Lexical grammar
@@ -251,34 +259,45 @@ namespace Pash.ParserIntrinsics
             #endregion
 
             #region B.1.8 Literals
-            ////        literal:
-            ////            integer_literal
-            ////            real_literal
-            ////            string_literal
-            public static readonly RegexBasedTerminal literal = null; // Initialized by reflection.
-            const string literal_pattern = "(?<literal>" + string_literal_pattern + ")";
 
             #region Integer Literals
-            ////        integer_literal:
-            ////            decimal_integer_literal
-            ////            hexadecimal_integer_literal
             ////        decimal_integer_literal:
             ////            decimal_digits   numeric_type_suffix_opt   numeric_multiplier_opt
+            // TODO: more
+            public static readonly RegexBasedTerminal decimal_integer_literal = null; // Initialized by reflection
+            const string decimal_integer_literal_pattern = "(?<decimal_integer_literal>" + decimal_digits_pattern + ")";
+
             ////        decimal_digits:
             ////            decimal_digit
             ////            decimal_digit   decimal_digits
+            public static readonly RegexBasedTerminal decimal_digits = null; // Initialized by reflection
+            const string decimal_digits_pattern = "(?<decimal_digits>" + "(" + decimal_digit_pattern + ")+" + ")";
+
             ////        decimal_digit:   one of
             ////            0   1   2   3   4   5   6   7   8   9
+            public static readonly RegexBasedTerminal decimal_digit = null; // Initialized by reflection
+            const string decimal_digit_pattern = "(?<decimal_digit>" + "[0123456789]" + ")";
+
             ////        numeric_type_suffix:
             ////            long_type_suffix
             ////            decimal_type_suffix
             ////        hexadecimal_integer_literal:
             ////            0x   hexadecimal_digits   long_type_suffix_opt   numeric_multiplier_opt
+            // TODO: more
+            public static readonly RegexBasedTerminal hexadecimal_integer_literal = null; // Initialized by reflection
+            const string hexadecimal_integer_literal_pattern = "(?<hexadecimal_integer_literal>" + "0x" + hexadecimal_digits_pattern + ")";
+
             ////        hexadecimal_digits:
             ////            hexadecimal_digit
             ////            hexadecimal_digit   decimal_digits
+            public static readonly RegexBasedTerminal hexadecimal_digits = null; // Initialized by reflection
+            const string hexadecimal_digits_pattern = "(?<hexadecimal_digits>" + "(" + hexadecimal_digit_pattern + ")+" + ")";
+
             ////        hexadecimal_digit:   one of
             ////            0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
+            public static readonly RegexBasedTerminal hexadecimal_digit = null; // Initialized by reflection
+            const string hexadecimal_digit_pattern = "(?<hexadecimal_digit>" + "[0-9a-f]" + ")";
+
             ////        long_type_suffix:
             ////            l
             ////        numeric_multiplier:   one of
@@ -300,13 +319,6 @@ namespace Pash.ParserIntrinsics
             #endregion
 
             #region String Literals
-            ////        string_literal:
-            ////            expandable_string_literal
-            ////            expandable_here_string_literal
-            ////            verbatim_string_literal
-            ////            verbatim_here_string_literal
-            public static readonly RegexBasedTerminal string_literal = null; // Initialized by reflection.
-            const string string_literal_pattern = "(?<string_literal>" + "(" + expandable_string_literal_pattern + ")|(" + verbatim_string_literal_pattern + ")" + ")";
 
             ////        expandable_string_literal:
             ////            double_quote_character   expandable_string_characters_opt   dollars_opt   double_quote_character

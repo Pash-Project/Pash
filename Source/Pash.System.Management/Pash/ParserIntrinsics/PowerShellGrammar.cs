@@ -159,6 +159,15 @@ namespace Pash.ParserIntrinsics
         #endregion
         #endregion
 
+        #region B.1 Lexical grammar
+        #region B.1.8 Literals
+        public readonly NonTerminal literal = null; // Initialized by reflection
+        public readonly NonTerminal integer_literal = null; // Initialized by reflection
+        public readonly NonTerminal real_literal = null; // Initialized by reflection
+        public readonly NonTerminal string_literal = null; // Initialized by reflection
+        #endregion
+        #endregion
+
         public class ScriptFile : PowerShellGrammar
         {
             public ScriptFile()
@@ -203,6 +212,34 @@ namespace Pash.ParserIntrinsics
 
         public void InitializeProductionRules()
         {
+
+            #region B.1 Lexical grammar
+            // this was presented as part of the lexical grammar, but I'd rather see this as production rules than 
+            // as regex patterns.
+
+            #region B.1.8 Literals
+            ////        literal:
+            ////            integer_literal
+            ////            real_literal
+            ////            string_literal
+            // TODO: add real_literal 
+            literal.Rule = integer_literal | string_literal;
+
+            ////        integer_literal:
+            ////            decimal_integer_literal
+            ////            hexadecimal_integer_literal
+            integer_literal.Rule = Terminals.decimal_integer_literal | Terminals.hexadecimal_integer_literal;
+
+            ////        string_literal:
+            ////            expandable_string_literal
+            ////            expandable_here_string_literal
+            ////            verbatim_string_literal
+            ////            verbatim_here_string_literal
+            string_literal.Rule = Terminals.expandable_string_literal | Terminals.verbatim_string_literal;
+            #endregion
+            #endregion
+
+
             #region B.2 Syntactic grammar
 
             #region B.2.1 Basic concepts
@@ -213,7 +250,6 @@ namespace Pash.ParserIntrinsics
             ////        interactive_input:
             ////            script_block
             interactive_input.Rule = script_block;
-            interactive_input.AstConfig.NodeType = typeof(interactive_input_node);
 
             ////        data_file:
             ////            statement_list
@@ -224,7 +260,6 @@ namespace Pash.ParserIntrinsics
             ////            param_block_opt   statement_terminators_opt    script_block_body_opt
             // TODO: more
             script_block.Rule = script_block_body;
-            script_block.AstConfig.NodeType = typeof(script_block_node);
 
             ////        param_block:
             ////            new_lines_opt   attribute_list_opt   new_lines_opt   param   new_lines_opt
@@ -241,7 +276,6 @@ namespace Pash.ParserIntrinsics
             ////            statement_list
             // TODO: more
             script_block_body.Rule = statement_list;
-            script_block_body.AstConfig.NodeType = typeof(script_block_body_node);
 
             ////        named_block_list:
             ////            named_block
@@ -271,7 +305,6 @@ namespace Pash.ParserIntrinsics
             //
             // TODO: Fix above hack.
             statement_list.Rule = MakePlusRule(statement_list, statement_terminator, statement);
-            statement_list.AstConfig.NodeType = typeof(statement_list_node);
 
             ////        statement:
             ////            if_statement
@@ -284,13 +317,11 @@ namespace Pash.ParserIntrinsics
             ////            pipeline   statement_terminator
             // TODO: more
             statement.Rule = pipeline;
-            statement.AstConfig.NodeType = typeof(statement_node);
 
             ////        statement_terminator:
             ////            ;
             ////            new_line_character
             statement_terminator.Rule = ToTerminal(";") | Terminals.new_line_character;
-            statement_terminator.AstConfig.NodeType = typeof(statement_terminator_node);
 
             ////        statement_terminators:
             ////            statement_terminator
@@ -415,7 +446,6 @@ namespace Pash.ParserIntrinsics
             ////            command   pipeline_tail_opt
             // TODO: more
             pipeline.Rule = expression | command;
-            pipeline.AstConfig.NodeType = typeof(pipeline_node);
 
             ////        assignment_expression:
             ////            expression   assignment_operator   statement
@@ -427,7 +457,6 @@ namespace Pash.ParserIntrinsics
             ////            command_invocation_operator   command_module_opt  command_name_expr   command_elements_opt
             // TODO: more
             command.Rule = command_name;
-            command.AstConfig.NodeType = typeof(command_node);
 
             ////        command_invocation_operator:  one of
             ////            &	.
@@ -471,7 +500,6 @@ namespace Pash.ParserIntrinsics
             ////        expression:
             ////            logical_expression
             expression.Rule = logical_expression;
-            expression.AstConfig.NodeType = typeof(expression_node);
 
             ////        logical_expression:
             ////            bitwise_expression
@@ -480,7 +508,6 @@ namespace Pash.ParserIntrinsics
             ////            logical_expression   _xor   new_lines_opt   bitwise_expression
             // TODO: more
             logical_expression.Rule = bitwise_expression;
-            logical_expression.AstConfig.NodeType = typeof(logical_expression_node);
 
             ////        bitwise_expression:
             ////            comparison_expression
@@ -489,14 +516,12 @@ namespace Pash.ParserIntrinsics
             ////            bitwise_expression   _bxor   new_lines_opt   comparison_expression
             // TODO: more
             bitwise_expression.Rule = comparison_expression;
-            bitwise_expression.AstConfig.NodeType = typeof(bitwise_expression_node);
 
             ////        comparison_expression:
             ////            additive_expression
             ////            comparison_expression   comparison_operator   new_lines_opt   additive_expression
             // TODO: more
             comparison_expression.Rule = additive_expression;
-            comparison_expression.AstConfig.NodeType = typeof(comparison_expression_node);
 
             ////        additive_expression:
             ////            multiplicative_expression
@@ -515,14 +540,12 @@ namespace Pash.ParserIntrinsics
             ////            multiplicative_expression   %   new_lines_opt   format_expression
             // TODO: more
             multiplicative_expression.Rule = format_expression;
-            multiplicative_expression.AstConfig.NodeType = typeof(multiplicative_expression_node);
 
             ////        format_expression:
             ////            range_expression
             ////            format_expression   format_operator    new_lines_opt   range_expression
             // TODO: more
             format_expression.Rule = array_literal_expression;
-            format_expression.AstConfig.NodeType = typeof(format_expression_node);
 
             ////        range_expression:
             ////            array_literal_expression
@@ -532,14 +555,12 @@ namespace Pash.ParserIntrinsics
             ////            unary_expression   ,    new_lines_opt   array_literal_expression
             // TODO: more
             array_literal_expression.Rule = unary_expression;
-            array_literal_expression.AstConfig.NodeType = typeof(array_literal_expression_node);
 
             ////        unary_expression:
             ////            primary_expression
             ////            expression_with_unary_operator
             // TODO: more
             unary_expression.Rule = primary_expression;
-            unary_expression.AstConfig.NodeType = typeof(unary_expression_node);
 
             ////        expression_with_unary_operator:
             ////            ,   new_lines_opt   unary_expression
@@ -568,7 +589,6 @@ namespace Pash.ParserIntrinsics
             ////            post_decrement_expression
             // TODO: more
             primary_expression.Rule = value;
-            primary_expression.AstConfig.NodeType = typeof(primary_expression_node);
 
             ////        value:
             ////            parenthesized_expression
@@ -580,8 +600,7 @@ namespace Pash.ParserIntrinsics
             ////            type_literal
             ////            variable
             // TODO: more
-            value.Rule = parenthesized_expression | Terminals.literal;
-            value.AstConfig.NodeType = typeof(value_node);
+            value.Rule = parenthesized_expression | literal;
 
             ////        parenthesized_expression:
             ////            (   new_lines_opt   pipeline   new_lines_opt   )
@@ -718,6 +737,7 @@ namespace Pash.ParserIntrinsics
             {
                 if (field.GetValue(this) != null) throw new Exception("don't pre-init fields - let us take care of that for you.");
                 var nonTerminal = new NonTerminal(field.Name);
+                nonTerminal.AstConfig.NodeType = typeof(_node); // default; many will be overridden.
                 field.SetValue(this, nonTerminal);
             }
         }

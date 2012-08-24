@@ -13,12 +13,12 @@ namespace Pash.ParserIntrinsics.Nodes
 {
     public class parenthesized_expression_node : _node
     {
-        readonly pipeline_node pipelineNode;
+        readonly _node pipelineNode;
 
         public parenthesized_expression_node(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
-            pipelineNode = (pipeline_node)parseTreeNode.ChildNodes[1].AstNode;
+            pipelineNode = (_node)parseTreeNode.ChildNodes[1].AstNode;
         }
 
         internal override object GetValue(ExecutionContext context)

@@ -5,7 +5,7 @@ using Pash.Implementation;
 using System.Management.Automation;
 using Pash.ParserIntrinsics;
 using Irony.Parsing;
-using StringExtensions;
+using Extensions.String;
 using Pash.ParserIntrinsics.Nodes;
 
 namespace Pash.Implementation

@@ -6,7 +6,7 @@ namespace Pash.ParserIntrinsics
     public abstract class CaseInsensitiveGrammar : Grammar
     {
         public CaseInsensitiveGrammar()
-            : base(true) // case insensitive flag
+            : base(false) // case insensitive flag
         {
         }
     }

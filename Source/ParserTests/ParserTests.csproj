@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Ast.Tests.cs" />
+    <Compile Include="CaseInsensitiveGrammarTests.cs" />
     <Compile Include="PowerShellGrammar.TerminalsTests.cs" />
     <Compile Include="PowerShellGrammar.Tests.cs" />
   </ItemGroup>

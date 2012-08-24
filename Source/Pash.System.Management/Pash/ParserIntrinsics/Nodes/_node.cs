@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using StringExtensions;
+using Extensions.String;
 using System.Management.Automation;
 using Pash.Implementation;
 using Irony.Ast;
@@ -10,7 +10,7 @@ using System.Diagnostics;
 namespace Pash.ParserIntrinsics.Nodes
 {
     // TODO: make it an interface, or add a field and remove this comment.
-    public abstract class _node
+    public class _node
     {
         protected readonly AstContext astContext;
         protected readonly ParseTreeNode parseTreeNode;

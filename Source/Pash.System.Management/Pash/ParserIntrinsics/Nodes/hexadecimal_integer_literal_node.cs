@@ -11,9 +11,9 @@ using System.Diagnostics;
 
 namespace Pash.ParserIntrinsics.Nodes
 {
-    public class literal_node : _node
+    public class hexadecimal_integer_literal_node : _node
     {
-        public literal_node(AstContext astContext, ParseTreeNode parseTreeNode)
+        public hexadecimal_integer_literal_node(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
         }
@@ -27,12 +27,9 @@ namespace Pash.ParserIntrinsics.Nodes
 
         internal override object GetValue(ExecutionContext context)
         {
-            var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), PowerShellGrammar.Terminals.literal.Pattern);
+            string text = parseTreeNode.FindTokenAndGetText();
 
-            Debug.Assert(matches.Success);
-
-            // TODO: throw if a NYI type of literal
-            return matches.Groups[PowerShellGrammar.Terminals.verbatim_string_characters.Name].Value;
+            return Convert.ToInt32(text, 16);
         }
     }
 }
