@@ -23,7 +23,7 @@ namespace Pash.ParserIntrinsics.Nodes
             {
                 leftOperandNode = (_node)parseTreeNode.ChildNodes[0].AstNode;
                 KeywordTerminal keywordTerminal = (KeywordTerminal)parseTreeNode.ChildNodes[1].Term;
-                // if you hit this exception, it's probaly subtraction ("dash")
+                // if you hit this exception, it's probably subtraction ("dash")
                 if (keywordTerminal.Text != "+") throw new NotImplementedException();
                 rightOperandNode = (_node)parseTreeNode.ChildNodes[2].AstNode;
             }
