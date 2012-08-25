@@ -101,11 +101,13 @@ namespace ParserTests
             Assert.IsInstanceOf<int[]>(result, "Result is '{0}'", result);
             CollectionAssert.AreEqual(new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, (IEnumerable)result);
 
+            CollectionAssert.AreEqual(new[] { 3, 2, 1 }, (IEnumerable)ExecuteInput("3..1"));
+
             ////    -500..-495          # descending range -500..-495
-            //TODO: CollectionAssert.AreEqual(new[] { -500, -499, -498, -497, -496, -495 }, (IEnumerable)ExecuteInput("-500..-495"));
+            CollectionAssert.AreEqual(new[] { -500, -499, -498, -497, -496, -495 }, (IEnumerable)ExecuteInput("-500..-495"));
 
             ////     16..16             # seqeunce of 1
-            //TODO: CollectionAssert.AreEqual(new[] { 16 }, (IEnumerable)ExecuteInput("-500..-495"));
+            CollectionAssert.AreEqual(new[] { 16 }, (IEnumerable)ExecuteInput("16..16"));
 
             ////     
             ////     $x = 1.5

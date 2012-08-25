@@ -164,6 +164,7 @@
     <Compile Include="Automation\VerbsCommon.cs" />
     <Compile Include="Automation\WildcardOptions.cs" />
     <Compile Include="Automation\WildcardPattern.cs" />
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\Reflection.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AddPSSnapinCommand.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AliasProviderDynamicParameters.cs" />

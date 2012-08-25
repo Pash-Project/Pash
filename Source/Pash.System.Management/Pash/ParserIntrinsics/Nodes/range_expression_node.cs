@@ -49,12 +49,28 @@ namespace Pash.ParserIntrinsics.Nodes
             ////
             //// A range-expression creates an unconstrained 1-dimensional array whose elements are the values of 
             //// the int sequence specified by the range bounds. The values designated by the operands are converted 
-            //// to int, if necessary (§6.4). The operand designating the lower value after conversion is the lower 
-            //// bound, while the operand designating the higher value after conversion is the upper bound. Both 
-            //// bounds may be the same, in which case, the resulting array has length 1. If the left operand 
-            //// designates the lower bound, the sequence is in ascending order. If the left operand designates the 
-            //// upper bound, the sequence is in descending order.
-            ////
+            //// to int, if necessary (§6.4). 
+            var leftOperandValue = (int)startRangeExpressionNode.Execute(context, commandRuntime);
+            var rightOperandValue = (int)endRangeExpressionNode.Execute(context, commandRuntime);
+
+
+            //// The operand designating the lower value after conversion is the lower 
+            //// bound, while the operand designating the higher value after conversion is the upper bound. 
+            if (leftOperandValue < rightOperandValue)
+            {
+                return Extensions.Enumerable._.Generate(leftOperandValue, i => i + 1, rightOperandValue).ToArray();
+            }
+
+            //// Both bounds may be the same, in which case, the resulting array has length 1. 
+            if (leftOperandValue == rightOperandValue) return new[] { leftOperandValue };
+
+            //// If the left operand designates the lower bound, the sequence is in ascending order. If the left 
+            //// operand designates the upper bound, the sequence is in descending order.
+            if (rightOperandValue < leftOperandValue)
+            {
+                return Extensions.Enumerable._.Generate(leftOperandValue, i => i - 1, rightOperandValue).ToArray();
+            }
+
             //// [Note: Conceptually, this operator is a shortcut for the corresponding binary comma operator 
             //// sequence. For example, the range 5..8 can also be generated using 5,6,7,8. However, if an ascending 
             //// or descending sequence is needed without having an array, an implementation may avoid generating an 
@@ -62,10 +78,7 @@ namespace Pash.ParserIntrinsics.Nodes
             ////
             //// A range-expression can be used to specify an array slice (§9.9).
 
-            var startRangeValue = (int)startRangeExpressionNode.Execute(context, commandRuntime);
-            var endRangeValue = (int)endRangeExpressionNode.Execute(context, commandRuntime);
-
-            return Enumerable.Range(startRangeValue, endRangeValue).ToArray();
+            throw new Exception("unreachable");
         }
     }
 }
