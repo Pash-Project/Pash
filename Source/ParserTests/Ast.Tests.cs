@@ -118,7 +118,7 @@ namespace ParserTests
             ////    "0xf".."0xa"        # descending range 15..10           
         }
 
-        [Test]
+        [Test, Ignore]
         public void UnaryMinusTest()
         {
             ////    7.2.5 Unary minus
@@ -128,6 +128,28 @@ namespace ParserTests
             ////    -$true         # type int, value -1
             ////    -123L          # type long, value -123
             ////    -0.12340D      # type decimal, value -0.12340
+        }
+
+
+        [Test]
+        public void ArrayLiteralTest()
+        {
+            var result = ExecuteInput("1,3,3");
+
+            CollectionAssert.AllItemsAreInstancesOfType((IEnumerable)result, typeof(int));
+            CollectionAssert.AreEqual(new[] { 1, 3, 3 }, (IEnumerable)result);
+        }
+
+        [Test, Ignore("bug")]
+        public void JaggedArrayTest()
+        {
+            var result = (object[])ExecuteInput("$x = 1,2; 3,$x");
+
+            Assert.AreEqual(2, result.Length);
+            Assert.IsInstanceOf<int>(result[0]);
+
+            Assert.IsInstanceOf<int[]>(result[1]);
+            CollectionAssert.AreEqual(new[] { 1, 2 }, (IEnumerable)result[1]);
         }
 
         static object ExecuteInput(string s)

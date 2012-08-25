@@ -38,7 +38,7 @@ namespace Pash.ParserIntrinsics.Nodes
 
             KeywordTerminal keywordTerminal = (KeywordTerminal)parseTreeNode.ChildNodes[1].Term;
             if (keywordTerminal.Text != "..") throw new NotImplementedException();
-            var endRangeExpressionNode = (_node)parseTreeNode.ChildNodes[2].AstNode;
+            var endRangeExpressionNode = (array_literal_expression_node)parseTreeNode.ChildNodes[2].AstNode;
 
             return Execute(context, commandRuntime, startRangeExpressionNode, endRangeExpressionNode);
         }

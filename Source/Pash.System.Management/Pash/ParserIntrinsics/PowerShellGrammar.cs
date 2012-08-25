@@ -565,7 +565,7 @@ namespace Pash.ParserIntrinsics
             ////            unary_expression
             ////            unary_expression   ,    new_lines_opt   array_literal_expression
             // TODO: more
-            array_literal_expression.Rule = unary_expression;
+            array_literal_expression.Rule = unary_expression | (unary_expression + "," + (Terminals.new_lines | Empty) + array_literal_expression);
 
             ////        unary_expression:
             ////            primary_expression
