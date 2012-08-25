@@ -122,8 +122,6 @@ namespace ParserTests
         public void UnaryMinusTest()
         {
             ////    7.2.5 Unary minus
-            //TODO: CollectionAssert.AreEqual(new[] { -500, -499, -498, -497, -496, -495 }, (IEnumerable)ExecuteInput("-500..-495"));
-
             // TODO:
             ////    Examples:
             ////    
