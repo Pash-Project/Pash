@@ -7,6 +7,7 @@ using Irony.Parsing;
 using Extensions.String;
 using Pash.ParserIntrinsics;
 using Pash.ParserIntrinsics.Nodes;
+using System.Collections;
 
 namespace ParserTests
 {
@@ -16,15 +17,7 @@ namespace ParserTests
         [Test]
         public void VerbatimStringLiteralExpression()
         {
-            var grammar = new PowerShellGrammar.InteractiveInput();
-
-            var parser = new Parser(grammar);
-            var parseTree = parser.Parse("'PS> '");
-
-            Assert.IsNotNull(parseTree);
-            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
-
-            var result = ((_node)parseTree.Root.AstNode).Execute(null, null);
+            var result = ExecuteInput("'PS> '");
 
             Assert.IsInstanceOf<string>(result);
             Assert.AreEqual("PS> ", result);
@@ -33,15 +26,7 @@ namespace ParserTests
         [Test]
         public void AdditiveExpression_Add()
         {
-            var grammar = new PowerShellGrammar.InteractiveInput();
-
-            var parser = new Parser(grammar);
-            var parseTree = parser.Parse("'x' + 'y'");
-
-            Assert.IsNotNull(parseTree);
-            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
-
-            var result = ((_node)parseTree.Root.AstNode).Execute(null, null);
+            var result = ExecuteInput("'x' + 'y'");
 
             Assert.IsInstanceOf<string>(result);
             Assert.AreEqual("xy", result);
@@ -70,13 +55,7 @@ namespace ParserTests
         {
             var grammar = new PowerShellGrammar.InteractiveInput();
 
-            var parser = new Parser(grammar);
-            var parseTree = parser.Parse("7");
-
-            Assert.IsNotNull(parseTree);
-            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
-
-            var result = ((_node)parseTree.Root.AstNode).Execute(null, null);
+            var result = ExecuteInput("7");
 
             Assert.IsInstanceOf<int>(result, "Result is '{0}'", result);
             Assert.AreEqual(7, result);
@@ -85,15 +64,7 @@ namespace ParserTests
         [Test]
         public void HexIntegerTest()
         {
-            var grammar = new PowerShellGrammar.InteractiveInput();
-
-            var parser = new Parser(grammar);
-            var parseTree = parser.Parse("0xA");
-
-            Assert.IsNotNull(parseTree);
-            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
-
-            var result = ((_node)parseTree.Root.AstNode).Execute(null, null);
+            var result = ExecuteInput("0xA");
 
             Assert.IsInstanceOf<int>(result, "Result is '{0}'", result);
             Assert.AreEqual(10, result);
@@ -102,18 +73,51 @@ namespace ParserTests
         [Test]
         public void AdditionTest()
         {
+            var result = ExecuteInput("7 + 0xA");
+
+            Assert.IsInstanceOf<int>(result, "Result is '{0}'", result);
+            Assert.AreEqual(17, result);
+        }
+
+        [Test]
+        public void ArrayRangeTest()
+        {
+            //// 7.4 Range operator
+            //// Examples:
+            //// 
+            ////     1..10              # ascending range 1..10
+            var result = ExecuteInput("1..10");
+            Assert.IsInstanceOf<int[]>(result, "Result is '{0}'", result);
+            CollectionAssert.AreEqual(new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, (IEnumerable)result);
+
+            ////    -500..-495          # descending range -500..-495
+            //TODO: CollectionAssert.AreEqual(new[] { -500, -499, -498, -497, -496, -495 }, (IEnumerable)NewMethod("-500..-495"));
+
+            ////     16..16             # seqeunce of 1
+            //TODO: CollectionAssert.AreEqual(new[] { 16 }, (IEnumerable)NewMethod("-500..-495"));
+
+            ////     
+            ////     $x = 1.5
+            ////     $x..5.40D          # ascending range 2..5
+            ////     
+            ////     $true..3           # ascending range 1..3
+            ////     -2..$null          # ascending range -2..0
+            ////    "0xf".."0xa"        # descending range 15..10           
+
+
+        }
+
+        static object ExecuteInput(string s)
+        {
             var grammar = new PowerShellGrammar.InteractiveInput();
 
             var parser = new Parser(grammar);
-            var parseTree = parser.Parse("7 + 0xA");
+            var parseTree = parser.Parse(s);
 
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
 
-            var result = ((_node)parseTree.Root.AstNode).Execute(null, null);
-
-            Assert.IsInstanceOf<int>(result, "Result is '{0}'", result);
-            Assert.AreEqual(17, result);
+            return ((_node)parseTree.Root.AstNode).Execute(null, null);
         }
     }
 }
