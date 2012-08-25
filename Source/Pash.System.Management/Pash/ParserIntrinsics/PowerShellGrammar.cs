@@ -553,11 +553,14 @@ namespace Pash.ParserIntrinsics
             ////            range_expression
             ////            format_expression   format_operator    new_lines_opt   range_expression
             // TODO: more
-            format_expression.Rule = array_literal_expression;
+            format_expression.Rule = range_expression;
 
             ////        range_expression:
             ////            array_literal_expression
             ////            range_expression   ..   new_lines_opt   array_literal_expression
+            // TODO: more
+            range_expression.Rule = array_literal_expression | (range_expression + ".." + (Terminals.new_lines | Empty) + array_literal_expression);
+
             ////        array_literal_expression:
             ////            unary_expression
             ////            unary_expression   ,    new_lines_opt   array_literal_expression
