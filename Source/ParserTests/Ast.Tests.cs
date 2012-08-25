@@ -62,6 +62,17 @@ namespace ParserTests
         }
 
         [Test]
+        public void NegativeIntegerTest()
+        {
+            var grammar = new PowerShellGrammar.InteractiveInput();
+
+            var result = ExecuteInput("-7");
+
+            Assert.IsInstanceOf<int>(result, "Result is '{0}'", result);
+            Assert.AreEqual(-7, result);
+        }
+
+        [Test]
         public void HexIntegerTest()
         {
             var result = ExecuteInput("0xA");
@@ -91,10 +102,10 @@ namespace ParserTests
             CollectionAssert.AreEqual(new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, (IEnumerable)result);
 
             ////    -500..-495          # descending range -500..-495
-            //TODO: CollectionAssert.AreEqual(new[] { -500, -499, -498, -497, -496, -495 }, (IEnumerable)NewMethod("-500..-495"));
+            //TODO: CollectionAssert.AreEqual(new[] { -500, -499, -498, -497, -496, -495 }, (IEnumerable)ExecuteInput("-500..-495"));
 
             ////     16..16             # seqeunce of 1
-            //TODO: CollectionAssert.AreEqual(new[] { 16 }, (IEnumerable)NewMethod("-500..-495"));
+            //TODO: CollectionAssert.AreEqual(new[] { 16 }, (IEnumerable)ExecuteInput("-500..-495"));
 
             ////     
             ////     $x = 1.5
@@ -103,8 +114,20 @@ namespace ParserTests
             ////     $true..3           # ascending range 1..3
             ////     -2..$null          # ascending range -2..0
             ////    "0xf".."0xa"        # descending range 15..10           
+        }
 
+        [Test]
+        public void UnaryMinusTest()
+        {
+            ////    7.2.5 Unary minus
+            //TODO: CollectionAssert.AreEqual(new[] { -500, -499, -498, -497, -496, -495 }, (IEnumerable)ExecuteInput("-500..-495"));
 
+            // TODO:
+            ////    Examples:
+            ////    
+            ////    -$true         # type int, value -1
+            ////    -123L          # type long, value -123
+            ////    -0.12340D      # type decimal, value -0.12340
         }
 
         static object ExecuteInput(string s)

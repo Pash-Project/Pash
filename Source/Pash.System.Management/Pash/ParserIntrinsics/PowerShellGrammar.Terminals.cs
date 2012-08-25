@@ -105,10 +105,13 @@ namespace Pash.ParserIntrinsics
             ////        requires_comment:
             ////            #requires   whitespace   command_arguments
             ////        dash:
-            ////            _ (U+002D)
+            ////            - (U+002D)
             ////            EnDash character (U+2013)
             ////            EmDash character (U+2014)
             ////            Horizontal bar character (U+2015)
+            public static readonly RegexBasedTerminal dash = null; // Initialized by reflection
+            const string dash_pattern = "(?<dash>" + @"[\u002D\u2013\u2014\u2015]" + ")";
+
             ////        dashdash:
             ////            dash   dash
             ////        delimited_comment:
