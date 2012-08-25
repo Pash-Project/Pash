@@ -6,6 +6,8 @@ using Irony.Ast;
 using Irony.Parsing;
 using System.Diagnostics;
 using System.Reflection;
+using Pash.Implementation;
+using System.Management.Automation;
 
 namespace Pash.ParserIntrinsics.Nodes
 {
@@ -33,25 +35,19 @@ namespace Pash.ParserIntrinsics.Nodes
             }
         }
 
-        internal override void Execute(Implementation.ExecutionContext context, System.Management.Automation.ICommandRuntime commandRuntime)
-        {
-            // TODO: sum the values in both pipelines
-            // TODO: if there are more than one value in the left - just copy left results and then the right results to the resulting pipe
-            // TODO: if there is only one value on the left - convert the value on the right to the type of the left and then Sum
-
-            commandRuntime.WriteObject(GetValue(context));
-        }
-
-        internal override object GetValue(Implementation.ExecutionContext context)
+        // TODO: sum the values in both pipelines
+        // TODO: if there are more than one value in the left - just copy left results and then the right results to the resulting pipe
+        // TODO: if there is only one value on the left - convert the value on the right to the type of the left and then Sum
+        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             // if only 1 child node, then the default (base) implementation will forward to that child
-            if (parseTreeNode.ChildNodes.Count==1)
+            if (parseTreeNode.ChildNodes.Count == 1)
             {
-                return base.GetValue(context);
+                return base.Execute(context, commandRuntime);
             }
 
-            var leftValue = leftOperandNode.GetValue(context);
-            var rightValue = rightOperandNode.GetValue(context);
+            var leftValue = leftOperandNode.Execute(context, commandRuntime);
+            var rightValue = rightOperandNode.Execute(context, commandRuntime);
 
             // TODO: need to generalize this via MethodInfo (somewhere in the compiler libraries via LanguageBasics)
             // usualy operators defined as: "public static int operator +", but in the MSIL are translated to op_Add

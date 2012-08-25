@@ -229,7 +229,8 @@
     <Compile Include="Pash\Implementation\ScriptProcessor.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\additive_expression_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammar.cs" />
-    <Compile Include="Pash\ParserIntrinsics\Nodes\command_name_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\command_elements_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\command_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\hexadecimal_integer_literal_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\decimal_integer_literal_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\generic_token_node.cs" />

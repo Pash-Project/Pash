@@ -21,36 +21,21 @@ namespace Pash.ParserIntrinsics.Nodes
             pipelineNode = (_node)parseTreeNode.ChildNodes[1].AstNode;
         }
 
-        internal override object GetValue(ExecutionContext context)
+        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             Pipeline pipeline = context.CurrentRunspace.CreateNestedPipeline();
             context.PushPipeline(pipeline);
-            Collection<PSObject> results = pipelineNode.GetValue(context) as Collection<PSObject>;
+            Collection<PSObject> results = pipelineNode.Execute(context, commandRuntime) as Collection<PSObject>;
             context.PopPipeline();
 
             if (results.Count == 0)
                 return null;
 
             if (results.Count == 1)
-                return results[0];
+                return results.Single();
 
             // TODO: make sure that the array.ToString calls the ToString on each PSObject
-
-            PSObject[] array = new PSObject[results.Count];
-            int index = 0;
-            foreach (PSObject psObject in results)
-            {
-                array[index++] = psObject;
-            }
-
-            return array;
-        }
-
-        internal override void Execute(ExecutionContext context, ICommandRuntime commandRuntime)
-        {
-            context.outputStreamWriter.Write(GetValue(context));
-
-            // TODO: extract the value to the pipeline
+            return results.ToArray();
         }
     }
 }

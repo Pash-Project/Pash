@@ -24,7 +24,7 @@ namespace ParserTests
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
 
-            var result = ((_node)parseTree.Root.AstNode).GetValue(null);
+            var result = ((_node)parseTree.Root.AstNode).Execute(null, null);
 
             Assert.IsInstanceOf<string>(result);
             Assert.AreEqual("PS> ", result);
@@ -41,7 +41,7 @@ namespace ParserTests
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
 
-            var result = ((_node)parseTree.Root.AstNode).GetValue(null);
+            var result = ((_node)parseTree.Root.AstNode).Execute(null, null);
 
             Assert.IsInstanceOf<string>(result);
             Assert.AreEqual("xy", result);
@@ -76,7 +76,7 @@ namespace ParserTests
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
 
-            var result = ((_node)parseTree.Root.AstNode).GetValue(null);
+            var result = ((_node)parseTree.Root.AstNode).Execute(null, null);
 
             Assert.IsInstanceOf<int>(result, "Result is '{0}'", result);
             Assert.AreEqual(7, result);
@@ -93,7 +93,7 @@ namespace ParserTests
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
 
-            var result = ((_node)parseTree.Root.AstNode).GetValue(null);
+            var result = ((_node)parseTree.Root.AstNode).Execute(null, null);
 
             Assert.IsInstanceOf<int>(result, "Result is '{0}'", result);
             Assert.AreEqual(10, result);
@@ -110,7 +110,7 @@ namespace ParserTests
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
 
-            var result = ((_node)parseTree.Root.AstNode).GetValue(null);
+            var result = ((_node)parseTree.Root.AstNode).Execute(null, null);
 
             Assert.IsInstanceOf<int>(result, "Result is '{0}'", result);
             Assert.AreEqual(17, result);

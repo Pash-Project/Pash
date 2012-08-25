@@ -6,6 +6,7 @@ using Pash.Implementation;
 using Irony.Ast;
 using Irony.Parsing;
 using System.Diagnostics;
+using System.Collections.ObjectModel;
 
 namespace Pash.ParserIntrinsics.Nodes
 {
@@ -27,26 +28,18 @@ namespace Pash.ParserIntrinsics.Nodes
         //
         // Rules with more than one child must override.
         [DebuggerStepThrough]
-        internal virtual void Execute(ExecutionContext context, ICommandRuntime commandRuntime)
-        {
-            if (this.parseTreeNode.ChildNodes.Count == 1)
-            {
-                ((_node)this.parseTreeNode.ChildNodes.Single().AstNode).Execute(context, commandRuntime);
-            }
-            else throw new NotImplementedException();
-        }
-
-        [DebuggerStepThrough]
-        internal virtual object GetValue(ExecutionContext context)
+        internal virtual object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             if (this.parseTreeNode.ChildNodes.Count == 1)
             {
                 var childNode = this.parseTreeNode.ChildNodes.Single();
+
                 if (childNode.AstNode == null)
                 {
-                    throw new NotImplementedException("AST not implemented for '{0}'. Parent node '{1}' should implement `GetValue()`".FormatString(childNode, this));
+                    throw new NotImplementedException("AST not implemented for '{0}'. Parent node '{1}' should implement `Execute()`".FormatString(childNode, this));
                 }
-                return ((_node)childNode.AstNode).GetValue(context);
+
+                return ((_node)this.parseTreeNode.ChildNodes.Single().AstNode).Execute(context, commandRuntime);
             }
             else throw new NotImplementedException();
         }

@@ -79,14 +79,14 @@ namespace Pash.ParserIntrinsics
             ////            Line feed character (U+000A)
             ////            Carriage return character (U+000D) followed by line feed character (U+000A)
             public static readonly RegexBasedTerminal new_line_character = null; // Initialized by reflection.
-            const string new_line_character_pattern = "(?<new_line_character>" + @"(\u000D)|(\u000A)|(\u000D)(\u000A)" + ")";
+            const string new_line_character_pattern = "(?<new_line_character>" + @"\u000D|\u000A|\u000D\u000A" + ")";
             const string new_line_character_ = @"\u000D\u000A";
 
             ////        new_lines:
             ////            new_line_character
             ////            new_lines   new_line_character
             public static readonly RegexBasedTerminal new_lines = null; // Initialized by reflection.
-            const string new_lines_pattern = "(?<new_lines>" + "(" + new_line_character_pattern + ")+" + ")";
+            const string new_lines_pattern = "(?<new_lines>" + new_line_character_pattern + "+" + ")";
 
             #endregion
 
@@ -212,7 +212,7 @@ namespace Pash.ParserIntrinsics
             ////            generic_token_part
             ////            generic_token_parts   generic_token_part
             public static readonly RegexBasedTerminal generic_token_parts = null; // Initialized by reflection.
-            const string generic_token_parts_pattern = "(?<generic_token_parts>" + "(" + generic_token_part_pattern + ")+" + ")";
+            const string generic_token_parts_pattern = "(?<generic_token_parts>" + generic_token_part_pattern + "+" + ")";
 
             ////        generic_token_part:
             ////            expandable_string_literal
@@ -271,7 +271,7 @@ namespace Pash.ParserIntrinsics
             ////            decimal_digit
             ////            decimal_digit   decimal_digits
             public static readonly RegexBasedTerminal decimal_digits = null; // Initialized by reflection
-            const string decimal_digits_pattern = "(?<decimal_digits>" + "(" + decimal_digit_pattern + ")+" + ")";
+            const string decimal_digits_pattern = "(?<decimal_digits>" + decimal_digit_pattern + "+" + ")";
 
             ////        decimal_digit:   one of
             ////            0   1   2   3   4   5   6   7   8   9
@@ -291,7 +291,7 @@ namespace Pash.ParserIntrinsics
             ////            hexadecimal_digit
             ////            hexadecimal_digit   decimal_digits
             public static readonly RegexBasedTerminal hexadecimal_digits = null; // Initialized by reflection
-            const string hexadecimal_digits_pattern = "(?<hexadecimal_digits>" + "(" + hexadecimal_digit_pattern + ")+" + ")";
+            const string hexadecimal_digits_pattern = "(?<hexadecimal_digits>" + hexadecimal_digit_pattern + "+" + ")";
 
             ////        hexadecimal_digit:   one of
             ////            0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
@@ -323,7 +323,7 @@ namespace Pash.ParserIntrinsics
             ////        expandable_string_literal:
             ////            double_quote_character   expandable_string_characters_opt   dollars_opt   double_quote_character
             public static readonly RegexBasedTerminal expandable_string_literal = null; // Initialized by reflection.
-            const string expandable_string_literal_pattern = "(?<expandable_string_literal>" + double_quote_character_pattern + "(" + expandable_string_characters_pattern + ")?(" + dollars_pattern + ")?" + double_quote_character_pattern + ")";
+            const string expandable_string_literal_pattern = "(?<expandable_string_literal>" + double_quote_character_pattern + expandable_string_characters_pattern + "?" + dollars_pattern + "?" + double_quote_character_pattern + ")";
 
             ////        double_quote_character:
             ////            "   (U+0022)
@@ -338,7 +338,7 @@ namespace Pash.ParserIntrinsics
             ////            expandable_string_part
             ////            expandable_string_characters   expandable_string_part
             public static readonly RegexBasedTerminal expandable_string_characters = null; // Initialized by reflection.
-            const string expandable_string_characters_pattern = "(?<expandable_string_characters>" + "(" + expandable_string_part_pattern + ")+" + ")";
+            const string expandable_string_characters_pattern = "(?<expandable_string_characters>" + expandable_string_part_pattern + "+" + ")";
 
             ////        expandable_string_part:
             ////            Any Unicode character except
@@ -394,7 +394,7 @@ namespace Pash.ParserIntrinsics
             ////        verbatim_string_literal:
             ////            single_quote_character   verbatim_string_characters_opt   single_quote_char [sic]
             public static readonly RegexBasedTerminal verbatim_string_literal = null; // Initialized by reflection
-            const string verbatim_string_literal_pattern = "(?<verbatim_string_literal>" + single_quote_character_pattern + "(" + verbatim_string_characters_pattern + ")?" + single_quote_character_pattern + ")";
+            const string verbatim_string_literal_pattern = "(?<verbatim_string_literal>" + single_quote_character_pattern + verbatim_string_characters_pattern + "?" + single_quote_character_pattern + ")";
 
             ////        single_quote_character:
             ////            '   (U+0027)
@@ -410,13 +410,13 @@ namespace Pash.ParserIntrinsics
             ////            verbatim_string_part
             ////            verbatim_string_characters   verbatim_string_part
             public static readonly RegexBasedTerminal verbatim_string_characters = null; // Initialized by reflection.
-            const string verbatim_string_characters_pattern = "(?<verbatim_string_characters>" + "(" + verbatim_string_part_pattern + ")+" + ")";
+            const string verbatim_string_characters_pattern = "(?<verbatim_string_characters>" + verbatim_string_part_pattern + "+" + ")";
 
             ////        verbatim_string_part:
             ////            Any Unicode character except single_quote_character
             ////            single_quote_character   single_quote_character
             public static readonly RegexBasedTerminal verbatim_string_part = null; // Initialized by reflection
-            const string verbatim_string_part_pattern = "(?<verbatim_string_part>" + "([^" + single_quote_character_ + "])|(" + single_quote_character_ + single_quote_character_ + ")" + ")";
+            const string verbatim_string_part_pattern = "(?<verbatim_string_part>" + "[^" + single_quote_character_ + "]|" + single_quote_character_ + single_quote_character_ + ")";
 
             ////        verbatim_here_string_literal:
             ////            @   single_quote_character   whitespace_opt   new_line_character

@@ -8,21 +8,25 @@ using Pash.Implementation;
 using System.Management.Automation;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
-using System.Collections.ObjectModel;
+using System.Management.Automation.Runspaces;
 
 namespace Pash.ParserIntrinsics.Nodes
 {
-    public class verbatim_string_literal_node : _node
+    public class command_elements_node : _node
     {
-        public verbatim_string_literal_node(AstContext astContext, ParseTreeNode parseTreeNode)
+        public command_elements_node(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
         }
 
         internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
-            var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), PowerShellGrammar.Terminals.verbatim_string_literal.Pattern);
-            return matches.Groups[PowerShellGrammar.Terminals.verbatim_string_characters.Name].Value;
+            return parseTreeNode.ChildNodes
+                .Select(node => node.AstNode)
+                .Cast<_node>()
+                .Select(astNode => astNode.Execute(context, commandRuntime))
+                .Select(o => new CommandParameter(null, o))
+                ;
         }
     }
 }

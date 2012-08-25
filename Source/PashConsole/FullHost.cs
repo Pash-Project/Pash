@@ -135,70 +135,8 @@ namespace Pash
 
         internal void Prompt()
         {
-            StringBuilder sb = new StringBuilder();
-            try
-            {
-                Collection<PSObject> output = InvokeHelper("prompt", null);
-
-                foreach (PSObject thing in output)
-                {
-                    sb.Append(thing.ToString());
-                }
-            }
-            catch (RuntimeException rte)
-            {
-                // An exception occurred that we want to display ...
-                // We have to run another pipeline, and pass in the error record.
-                // The runtime will bind the input to the $input variable
-                ExecuteHelper("write-host \"ERROR: Your prompt function crashed!\n\" -fore darkyellow", null);
-                ExecuteHelper("write-host ($input | out-string) -fore darkyellow", rte.ErrorRecord);
-                sb.Append("\n> ");
-            }
-            finally
-            {
-                myHost.UI.Write(ConsoleColor.DarkGreen, ConsoleColor.Black, sb.ToString());
-            }
-        }
-
-        public Collection<PSObject> InvokeHelper(string cmd, object input)
-        {
-            Collection<PSObject> output = new Collection<PSObject>();
-
-            // Ignore empty command lines.
-            if (String.IsNullOrEmpty(cmd))
-                return null;
-
-            // Create the pipeline object and make it available
-            // to the ctrl-C handle through the currentPipeline instance
-            // variable.
-
-            currentPipeline = myRunSpace.CreatePipeline(cmd, false);
-
-            // Create a pipeline for this execution. Place the result in the currentPipeline
-            // instance variable so that it is available to be stopped.
-            try
-            {
-                // If there was any input specified, pass it in, and execute the pipeline.
-                if (input != null)
-                {
-                    output = currentPipeline.Invoke(new object[] { input });
-                }
-                else
-                {
-                    output = currentPipeline.Invoke();
-                }
-
-            }
-
-            finally
-            {
-                // Dispose of the pipeline line and set it to null, locked because currentPipeline
-                // may be accessed by the ctrl-C handler.
-                currentPipeline.Dispose();
-                currentPipeline = null;
-            }
-
-            return output;
+            // This should be "prompt | write-host -nonewline", but that doesn't work yet.
+            Execute("prompt");
         }
 
         void ExecuteHelper(string cmd, object input)
