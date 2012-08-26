@@ -233,6 +233,8 @@
     <Compile Include="Pash\ParserIntrinsics\Nodes\command_elements_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\command_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\array_literal_expression_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\assignment_expression_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\variable_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\expression_with_unary_operator_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\range_expression_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\hexadecimal_integer_literal_node.cs" />

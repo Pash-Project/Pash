@@ -22,6 +22,8 @@ namespace Pash.ParserIntrinsics.Nodes
             this.parseTreeNode = parseTreeNode;
         }
 
+        public string Text { get { return parseTreeNode.Token.Text; } }
+
         // by default, forward to the child node, if there is exactly 1. This makes sense
         // for nodes that don't have a semantic impact. Somewhere, though, you have to override
         // and implement! 

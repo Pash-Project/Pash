@@ -176,8 +176,38 @@ namespace Pash.ParserIntrinsics
             ////            $   variable_scope_opt  variable_characters
             ////            @   variable_scope_opt   variable_characters
             ////            braced_variable
+            // TODO: variable_scope_opt
+            public static readonly RegexBasedTerminal variable = null; // Initialized by reflection
+            const string variable_pattern = "(?<variable>" +
+                _dollar_dollar_pattern + "|" +
+                _dollar_question_pattern + "|" +
+                _dollar_hat_pattern + "|" +
+                _ordinary_variable_pattern + "|" +
+                _splatted_variable_pattern + "|" +
+                braced_variable_pattern +
+                ")";
+
+            // Not part of the original grammar, but helpful in making sense of the parse tree.
+            public static readonly RegexBasedTerminal _dollar_dollar = null; // Initialized by reflection
+            const string _dollar_dollar_pattern = "(?<_dollar_dollar>" + @"\$\$" + ")";
+
+            public static readonly RegexBasedTerminal _dollar_question = null; // Initialized by reflection
+            const string _dollar_question_pattern = "(?<_dollar_question>" + @"\$\?" + ")";
+
+            public static readonly RegexBasedTerminal _dollar_hat = null; // Initialized by reflection
+            const string _dollar_hat_pattern = "(?<_dollar_hat>" + @"\$\^" + ")";
+
+            public static readonly RegexBasedTerminal _ordinary_variable = null; // Initialized by reflection
+            const string _ordinary_variable_pattern = "(?<_ordinary_variable>" + @"\$" + variable_characters_pattern + ")";
+
+            public static readonly RegexBasedTerminal _splatted_variable = null; // Initialized by reflection
+            const string _splatted_variable_pattern = "(?<_splatted_variable>" + @"\@" + variable_characters_pattern + ")";
+
             ////        braced_variable:
             ////            ${   variable_scope_opt   braced_variable_characters   }
+            public static readonly RegexBasedTerminal braced_variable = null; // Initialized by reflection
+            const string braced_variable_pattern = "(?<braced_variable>" + @"\$\{" + braced_variable_characters_pattern + @"\}" + ")";
+
             ////        variable_scope:
             ////        global:
             ////        local:
@@ -185,24 +215,39 @@ namespace Pash.ParserIntrinsics
             ////        script:
             ////            variable_namespace
             ////        variable_namespace:
-            ////        variable_characters   :
+            ////            variable_characters   :
             ////        variable_characters:
             ////            variable_character
             ////            variable_characters   variable_character
+            public static readonly RegexBasedTerminal variable_characters = null; // Initialized by reflection
+            const string variable_characters_pattern = "(?<variable_characters>" + variable_character_pattern + "+" + ")";
+
             ////        variable_character:
             ////            A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nd
             ////            _   (The underscore character U+005F)
             ////            ?
+            public static readonly RegexBasedTerminal variable_character = null; // Initialized by reflection
+            const string variable_character_pattern = "(?<variable_character>" + @"\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nd}|\u005F|\?" + ")";
+
             ////        braced_variable_characters:
             ////            braced_variable_character
             ////            braced_variable_characters   braced_variable_character
+            public static readonly RegexBasedTerminal braced_variable_characters = null; // Initialized by reflection
+            const string braced_variable_characters_pattern = "(?<braced_variable_characters>" + braced_variable_character_pattern + "+" + ")";
+
             ////        braced_variable_character:
             ////            Any Unicode character except
             ////                    }   (The closing curly brace character U+007D)
             ////                    `   (The backtick character U+0060)
             ////            escaped_character
+            public static readonly RegexBasedTerminal braced_variable_character = null; // Initialized by reflection
+            const string braced_variable_character_pattern = "(?<braced_variable_character>" + @"[^\u007D\0060]|" + escaped_character_pattern + ")";
+
             ////        escaped_character:
             ////            `   (The backtick character U+0060) followed by any Unicode character
+            public static readonly RegexBasedTerminal escaped_character = null; // Initialized by reflection
+            const string escaped_character_pattern = "(?<escaped_character>" + @"\u0060." + ")";
+
             #endregion
 
             #region B.1.7 Commands
@@ -481,6 +526,9 @@ namespace Pash.ParserIntrinsics
             ////            format_operator
             ////        assignment_operator:  one of
             ////            =		dash   =			+=		*=		/=		%=
+            public static readonly RegexBasedTerminal assignment_operator = null; // Initialized by reflection
+            const string assignment_operator_pattern = "(?<assignment_operator>" + @"(\=)|(" + dash_pattern + @"\=)|(\+\=)|(\*\=)|(\/\=)|(\%\=)" + ")";
+
             ////        file_redirection_operator:  one of
             ////            >>		>		<		2>>		2>
             ////        comparison_operator:  one of

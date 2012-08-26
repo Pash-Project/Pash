@@ -446,10 +446,12 @@ namespace Pash.ParserIntrinsics
             ////            expression   redirections_opt  pipeline_tail_opt
             ////            command   pipeline_tail_opt
             // TODO: more
-            pipeline.Rule = expression | command;
+            pipeline.Rule = assignment_expression | expression | command;
 
             ////        assignment_expression:
             ////            expression   assignment_operator   statement
+            assignment_expression.Rule = expression + Terminals.assignment_operator + statement;
+
             ////        pipeline_tail:
             ////            |   new_lines_opt   command
             ////            |   new_lines_opt   command   pipeline_tail
@@ -612,7 +614,7 @@ namespace Pash.ParserIntrinsics
             ////            type_literal
             ////            variable
             // TODO: more
-            value.Rule = parenthesized_expression | literal;
+            value.Rule = parenthesized_expression | literal | Terminals.variable;
 
             ////        parenthesized_expression:
             ////            (   new_lines_opt   pipeline   new_lines_opt   )

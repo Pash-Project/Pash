@@ -343,6 +343,7 @@ namespace ParserTests
                 grammar.pipeline
             );
 
+            Assert.AreEqual(grammar.command, commandNode.Term);
             Assert.AreEqual(2, commandNode.ChildNodes.Count, commandNode.ToString());
             Assert.AreEqual(grammar.command_name, commandNode.ChildNodes[0].Term);
 
@@ -357,6 +358,33 @@ namespace ParserTests
                 );
 
             Assert.AreEqual(PowerShellGrammar.Terminals.generic_token, node.Term);
+        }
+
+        [Test]
+        public void VariableTest()
+        {
+            var grammar = new PowerShellGrammar.InteractiveInput();
+
+            var parser = new Parser(grammar);
+            var parseTree = parser.Parse(@"$x = 'y'");
+
+            Assert.IsNotNull(parseTree);
+            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
+
+            var assignementNode = VerifyParseTreeSingles(parseTree.Root,
+                grammar.interactive_input,
+                grammar.script_block,
+                grammar.script_block_body,
+                grammar.statement_list,
+                grammar.statement,
+                grammar.pipeline
+                );
+
+            Assert.AreEqual(grammar.assignment_expression, assignementNode.Term);
+            Assert.AreEqual(3, assignementNode.ChildNodes.Count, assignementNode.ToString());
+            Assert.AreEqual(grammar.expression, assignementNode.ChildNodes[0].Term);
+            Assert.AreEqual(PowerShellGrammar.Terminals.assignment_operator, assignementNode.ChildNodes[1].Term);
+            Assert.AreEqual(grammar.statement, assignementNode.ChildNodes[2].Term);
         }
     }
 }
