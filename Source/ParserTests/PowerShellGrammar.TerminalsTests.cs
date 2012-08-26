@@ -5,7 +5,7 @@ using System.Text;
 using NUnit.Framework;
 using System.Text.RegularExpressions;
 using Pash.ParserIntrinsics;
-using Pash.ParserIntrinsics.Nodes;
+using Pash.ParserIntrinsics.AstNodes;
 using Irony.Parsing;
 
 namespace ParserTests
@@ -120,7 +120,7 @@ namespace ParserTests
         [Test]
         public void generic_token_AstConfig_Test()
         {
-            Assert.AreEqual(typeof(generic_token_node), PowerShellGrammar.Terminals.generic_token.AstConfig.NodeType);
+            Assert.AreEqual(typeof(generic_token_astnode), PowerShellGrammar.Terminals.generic_token.AstConfig.NodeType);
             Assert.IsFalse((PowerShellGrammar.Terminals.generic_token.Flags & TermFlags.NoAstNode) != 0);
         }
 

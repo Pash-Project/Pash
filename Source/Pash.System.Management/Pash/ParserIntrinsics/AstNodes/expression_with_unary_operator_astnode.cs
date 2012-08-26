@@ -10,11 +10,11 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
 
-namespace Pash.ParserIntrinsics.Nodes
+namespace Pash.ParserIntrinsics.AstNodes
 {
-    public class expression_with_unary_operator_node : _node
+    public class expression_with_unary_operator_astnode : _astnode
     {
-        public expression_with_unary_operator_node(AstContext astContext, ParseTreeNode parseTreeNode)
+        public expression_with_unary_operator_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
         }
@@ -44,7 +44,7 @@ namespace Pash.ParserIntrinsics.Nodes
             ////            dash   new_lines_opt   unary_expression
             if (parseTreeNode.ChildNodes.Count == 2)
             {
-                var rightValue = (int)((_node)parseTreeNode.ChildNodes[1].AstNode).Execute(context, commandRuntime);
+                var rightValue = (int)((_astnode)parseTreeNode.ChildNodes[1].AstNode).Execute(context, commandRuntime);
                 return 0 - rightValue;
             }
 

@@ -12,11 +12,11 @@ using System.Collections.ObjectModel;
 using Extensions.String;
 using System.Management.Automation.Runspaces;
 
-namespace Pash.ParserIntrinsics.Nodes
+namespace Pash.ParserIntrinsics.AstNodes
 {
-    public class variable_node : _node
+    public class variable_astnode : _astnode
     {
-        public variable_node(AstContext astContext, ParseTreeNode parseTreeNode)
+        public variable_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
         }

@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Reflection;
 using System.Diagnostics;
-using Pash.ParserIntrinsics.Nodes;
+using Pash.ParserIntrinsics.AstNodes;
 using Extensions.Reflection;
 
 namespace Pash.ParserIntrinsics
@@ -37,7 +37,7 @@ namespace Pash.ParserIntrinsics
                     var pattern = patternFieldInfo.GetValue<string>(null);
                     var regexBasedTerminal = new RegexBasedTerminal(field.Name, pattern);
 
-                    var nodeType = Assembly.GetCallingAssembly().GetType("Pash.ParserIntrinsics.Nodes." + field.Name + "_node");
+                    var nodeType = Assembly.GetCallingAssembly().GetType("Pash.ParserIntrinsics.AstNodes." + field.Name + "_astnode");
                     if (nodeType == null)
                     {
                         regexBasedTerminal.Flags |= TermFlags.NoAstNode;

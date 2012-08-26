@@ -9,23 +9,23 @@ using System.Reflection;
 using Pash.Implementation;
 using System.Management.Automation;
 
-namespace Pash.ParserIntrinsics.Nodes
+namespace Pash.ParserIntrinsics.AstNodes
 {
-    public class additive_expression_node : _node
+    public class additive_expression_astnode : _astnode
     {
-        readonly _node leftOperandNode;
-        readonly _node rightOperandNode;
+        readonly _astnode leftOperandAstNode;
+        readonly _astnode rightOperandAstNode;
 
-        public additive_expression_node(AstContext astContext, ParseTreeNode parseTreeNode)
+        public additive_expression_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
             if (parseTreeNode.ChildNodes.Count == 3)
             {
-                leftOperandNode = (_node)parseTreeNode.ChildNodes[0].AstNode;
+                leftOperandAstNode = (_astnode)parseTreeNode.ChildNodes[0].AstNode;
                 KeywordTerminal keywordTerminal = (KeywordTerminal)parseTreeNode.ChildNodes[1].Term;
                 // if you hit this exception, it's probably subtraction ("dash")
                 if (keywordTerminal.Text != "+") throw new NotImplementedException();
-                rightOperandNode = (_node)parseTreeNode.ChildNodes[2].AstNode;
+                rightOperandAstNode = (_astnode)parseTreeNode.ChildNodes[2].AstNode;
             }
             else if (parseTreeNode.ChildNodes.Count == 1)
             {
@@ -46,8 +46,8 @@ namespace Pash.ParserIntrinsics.Nodes
                 return base.Execute(context, commandRuntime);
             }
 
-            var leftValue = leftOperandNode.Execute(context, commandRuntime);
-            var rightValue = rightOperandNode.Execute(context, commandRuntime);
+            var leftValue = leftOperandAstNode.Execute(context, commandRuntime);
+            var rightValue = rightOperandAstNode.Execute(context, commandRuntime);
 
             // TODO: need to generalize this via MethodInfo (somewhere in the compiler libraries via LanguageBasics)
             // usualy operators defined as: "public static int operator +", but in the MSIL are translated to op_Add

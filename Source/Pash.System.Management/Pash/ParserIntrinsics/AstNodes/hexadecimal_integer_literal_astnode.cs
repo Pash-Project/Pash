@@ -10,18 +10,18 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
 
-namespace Pash.ParserIntrinsics.Nodes
+namespace Pash.ParserIntrinsics.AstNodes
 {
-    public class generic_token_node : _node
+    public class hexadecimal_integer_literal_astnode : _astnode
     {
-        public generic_token_node(AstContext astContext, ParseTreeNode parseTreeNode)
+        public hexadecimal_integer_literal_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
         }
 
         internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
-            return Text;
+            return Convert.ToInt32(Text, 16);
         }
     }
 }

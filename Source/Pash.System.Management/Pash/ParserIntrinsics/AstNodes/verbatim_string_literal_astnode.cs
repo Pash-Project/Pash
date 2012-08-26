@@ -10,18 +10,19 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
 
-namespace Pash.ParserIntrinsics.Nodes
+namespace Pash.ParserIntrinsics.AstNodes
 {
-    public class decimal_integer_literal_node : _node
+    public class verbatim_string_literal_astnode : _astnode
     {
-        public decimal_integer_literal_node(AstContext astContext, ParseTreeNode parseTreeNode)
+        public verbatim_string_literal_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
         }
 
         internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
-            return Convert.ToInt32(Text, 10);
+            var matches = Regex.Match(Text, PowerShellGrammar.Terminals.verbatim_string_literal.Pattern);
+            return matches.Groups[PowerShellGrammar.Terminals.verbatim_string_characters.Name].Value;
         }
     }
 }

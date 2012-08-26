@@ -10,11 +10,11 @@ using Pash.Implementation;
 using System.Management.Automation;
 using Extensions.String;
 
-namespace Pash.ParserIntrinsics.Nodes
+namespace Pash.ParserIntrinsics.AstNodes
 {
-    public class range_expression_node : _node
+    public class range_expression_astnode : _astnode
     {
-        public range_expression_node(AstContext astContext, ParseTreeNode parseTreeNode)
+        public range_expression_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
         }
@@ -34,19 +34,19 @@ namespace Pash.ParserIntrinsics.Nodes
             if (parseTreeNode.ChildNodes.Count != 3)
                 throw new Exception("unexpected child node count {0}".FormatString(parseTreeNode.ChildNodes.Count));
 
-            var startRangeExpressionNode = (_node)parseTreeNode.ChildNodes[0].AstNode;
+            var startRangeExpressionAstNode = (_astnode)parseTreeNode.ChildNodes[0].AstNode;
 
             KeywordTerminal keywordTerminal = (KeywordTerminal)parseTreeNode.ChildNodes[1].Term;
             if (keywordTerminal.Text != "..") throw new NotImplementedException();
-            var endRangeExpressionNode = (array_literal_expression_node)parseTreeNode.ChildNodes[2].AstNode;
+            var endRangeExpressionAstNode = (array_literal_expression_astnode)parseTreeNode.ChildNodes[2].AstNode;
 
-            return Execute(context, commandRuntime, startRangeExpressionNode, endRangeExpressionNode)
+            return Execute(context, commandRuntime, startRangeExpressionAstNode, endRangeExpressionAstNode)
                 .Select(i=>new PSObject(i))
                 .ToArray()
                 ;
         }
 
-        private static IEnumerable<int> Execute(ExecutionContext context, ICommandRuntime commandRuntime, _node startRangeExpressionNode, _node endRangeExpressionNode)
+        private static IEnumerable<int> Execute(ExecutionContext context, ICommandRuntime commandRuntime, _astnode startRangeExpressionNode, _astnode endRangeExpressionNode)
         {
             //// Description:
             ////

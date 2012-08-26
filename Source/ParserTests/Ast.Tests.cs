@@ -6,7 +6,7 @@ using NUnit.Framework;
 using Irony.Parsing;
 using Extensions.String;
 using Pash.ParserIntrinsics;
-using Pash.ParserIntrinsics.Nodes;
+using Pash.ParserIntrinsics.AstNodes;
 using System.Collections;
 using System.Management.Automation;
 
@@ -45,7 +45,7 @@ namespace ParserTests
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
 
             // TODO: Find a better example of executing a cmdlet in parens, with a reliable output
-            //var result = ((_node)parseTree.Root.AstNode).GetValue(null);
+            //var result = ((_astnode)parseTree.Root.AstNode).GetValue(null);
 
             //Assert.IsInstanceOf<string>(result);
             //Assert.AreEqual(@"C:\", result);
@@ -162,7 +162,7 @@ namespace ParserTests
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
 
-            return ((_node)parseTree.Root.AstNode).Execute(null, null);
+            return ((_astnode)parseTree.Root.AstNode).Execute(null, null);
         }
     }
 }

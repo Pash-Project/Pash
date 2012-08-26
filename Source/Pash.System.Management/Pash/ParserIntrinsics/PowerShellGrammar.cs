@@ -5,7 +5,7 @@ using System.Linq;
 using Irony.Parsing;
 using System.Text.RegularExpressions;
 using System.Text;
-using Pash.ParserIntrinsics.Nodes;
+using Pash.ParserIntrinsics.AstNodes;
 using System.Reflection;
 
 namespace Pash.ParserIntrinsics
@@ -752,10 +752,10 @@ namespace Pash.ParserIntrinsics
 
                 var nonTerminal = new NonTerminal(field.Name);
 
-                var nodeType = Assembly.GetCallingAssembly().GetType("Pash.ParserIntrinsics.Nodes." + field.Name + "_node");
+                var nodeType = Assembly.GetCallingAssembly().GetType("Pash.ParserIntrinsics.AstNodes." + field.Name + "_astnode");
                 if (nodeType == null)
                 {
-                    nonTerminal.AstConfig.NodeType = typeof(_node); // default that delegates to children
+                    nonTerminal.AstConfig.NodeType = typeof(_astnode); // default that delegates to children
                 }
                 else
                 {

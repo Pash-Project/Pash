@@ -10,19 +10,18 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
 
-namespace Pash.ParserIntrinsics.Nodes
+namespace Pash.ParserIntrinsics.AstNodes
 {
-    public class verbatim_string_literal_node : _node
+    public class generic_token_astnode : _astnode
     {
-        public verbatim_string_literal_node(AstContext astContext, ParseTreeNode parseTreeNode)
+        public generic_token_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
         }
 
         internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
-            var matches = Regex.Match(Text, PowerShellGrammar.Terminals.verbatim_string_literal.Pattern);
-            return matches.Groups[PowerShellGrammar.Terminals.verbatim_string_characters.Name].Value;
+            return Text;
         }
     }
 }

@@ -9,23 +9,23 @@ using System.Management.Automation.Runspaces;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
 
-namespace Pash.ParserIntrinsics.Nodes
+namespace Pash.ParserIntrinsics.AstNodes
 {
-    public class parenthesized_expression_node : _node
+    public class parenthesized_expression_astnode : _astnode
     {
-        readonly _node pipelineNode;
+        readonly _astnode pipelineAstNode;
 
-        public parenthesized_expression_node(AstContext astContext, ParseTreeNode parseTreeNode)
+        public parenthesized_expression_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
-            pipelineNode = (_node)parseTreeNode.ChildNodes[1].AstNode;
+            pipelineAstNode = (_astnode)parseTreeNode.ChildNodes[1].AstNode;
         }
 
         internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             Pipeline pipeline = context.CurrentRunspace.CreateNestedPipeline();
             context.PushPipeline(pipeline);
-            Collection<PSObject> results = pipelineNode.Execute(context, commandRuntime) as Collection<PSObject>;
+            Collection<PSObject> results = pipelineAstNode.Execute(context, commandRuntime) as Collection<PSObject>;
             context.PopPipeline();
 
             if (results.Count == 0)

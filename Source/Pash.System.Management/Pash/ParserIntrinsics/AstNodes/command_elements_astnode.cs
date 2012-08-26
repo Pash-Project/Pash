@@ -10,11 +10,11 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Management.Automation.Runspaces;
 
-namespace Pash.ParserIntrinsics.Nodes
+namespace Pash.ParserIntrinsics.AstNodes
 {
-    public class command_elements_node : _node
+    public class command_elements_astnode : _astnode
     {
-        public command_elements_node(AstContext astContext, ParseTreeNode parseTreeNode)
+        public command_elements_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
         }
@@ -23,7 +23,7 @@ namespace Pash.ParserIntrinsics.Nodes
         {
             return parseTreeNode.ChildNodes
                 .Select(node => node.AstNode)
-                .Cast<_node>()
+                .Cast<_astnode>()
                 .Select(astNode => astNode.Execute(context, commandRuntime))
                 .Select(o => new CommandParameter(null, o))
                 ;

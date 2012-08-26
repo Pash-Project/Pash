@@ -9,13 +9,13 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Collections.ObjectModel;
 
-namespace Pash.ParserIntrinsics.Nodes
+namespace Pash.ParserIntrinsics.AstNodes
 {
-    public class command_node : _node
+    public class command_astnode : _astnode
     {
         private Collection<PSObject> _results;
 
-        public command_node(AstContext astContext, ParseTreeNode parseTreeNode)
+        public command_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
         }
@@ -31,8 +31,8 @@ namespace Pash.ParserIntrinsics.Nodes
             IEnumerable<CommandParameter> parameters = new CommandParameter[] { };
             if (parseTreeNode.ChildNodes.Count == 2)
             {
-                var commandElementsNode = (command_elements_node)parseTreeNode.ChildNodes[1].AstNode;
-                parameters = (IEnumerable<CommandParameter>)commandElementsNode.Execute(context, commandRuntime);
+                var commandElementsAstNode = (command_elements_astnode)parseTreeNode.ChildNodes[1].AstNode;
+                parameters = (IEnumerable<CommandParameter>)commandElementsAstNode.Execute(context, commandRuntime);
             }
 
             // MUST: fix this with the commandRuntime

@@ -12,11 +12,11 @@ using Extensions.String;
 using System.Collections;
 using System.Management.Automation.Runspaces;
 
-namespace Pash.ParserIntrinsics.Nodes
+namespace Pash.ParserIntrinsics.AstNodes
 {
-    public class assignment_expression_node : _node
+    public class assignment_expression_astnode : _astnode
     {
-        public assignment_expression_node(AstContext astContext, ParseTreeNode parseTreeNode)
+        public assignment_expression_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
         }
@@ -33,7 +33,7 @@ namespace Pash.ParserIntrinsics.Nodes
 
             var assignmentOperatorNode = parseTreeNode.ChildNodes[1];
 
-            var rightStatementAstNode = (_node)parseTreeNode.ChildNodes[2].AstNode;
+            var rightStatementAstNode = (_astnode)parseTreeNode.ChildNodes[2].AstNode;
             var statementValue = rightStatementAstNode.Execute(context, commandRuntime);
 
             ////        assignment_operator:  one of
@@ -58,7 +58,7 @@ namespace Pash.ParserIntrinsics.Nodes
             // TODO: find a way to get rid of this hard-coded string
             while (node != null & node.Term.Name != "variable") node = node.ChildNodes.Single();
 
-            return variable_node.GetVariableName(node.Token.Text);
+            return variable_astnode.GetVariableName(node.Token.Text);
         }
 
         private void SetVariable(ExecutionContext context, ICommandRuntime commandRuntime, string variableName, object statementValue)
@@ -91,7 +91,7 @@ namespace Pash.ParserIntrinsics.Nodes
             }
         }
 
-        static IEnumerable<object> Execute(ExecutionContext context, ICommandRuntime commandRuntime, _node firstItemAstNode, _node remainingItemsAstNode)
+        static IEnumerable<object> Execute(ExecutionContext context, ICommandRuntime commandRuntime, _astnode firstItemAstNode, _astnode remainingItemsAstNode)
         {
             ////  7.11 Assignment operators
             ////      Syntax:

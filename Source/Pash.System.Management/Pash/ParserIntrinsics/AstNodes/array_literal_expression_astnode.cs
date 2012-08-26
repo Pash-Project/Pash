@@ -11,11 +11,11 @@ using System.Management.Automation;
 using Extensions.String;
 using System.Collections;
 
-namespace Pash.ParserIntrinsics.Nodes
+namespace Pash.ParserIntrinsics.AstNodes
 {
-    public class array_literal_expression_node : _node
+    public class array_literal_expression_astnode : _astnode
     {
-        public array_literal_expression_node(AstContext astContext, ParseTreeNode parseTreeNode)
+        public array_literal_expression_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
         }
@@ -35,11 +35,11 @@ namespace Pash.ParserIntrinsics.Nodes
             if (parseTreeNode.ChildNodes.Count != 3)
                 throw new Exception("unexpected child node count {0}".FormatString(parseTreeNode.ChildNodes.Count));
 
-            var firstItemAstNode = (_node)parseTreeNode.ChildNodes[0].AstNode;
+            var firstItemAstNode = (_astnode)parseTreeNode.ChildNodes[0].AstNode;
 
             KeywordTerminal keywordTerminal = (KeywordTerminal)parseTreeNode.ChildNodes[1].Term;
             if (keywordTerminal.Text != ",") throw new NotImplementedException();
-            var remainingItemsAstNode = (_node)parseTreeNode.ChildNodes[2].AstNode;
+            var remainingItemsAstNode = (_astnode)parseTreeNode.ChildNodes[2].AstNode;
 
             return Execute(context, commandRuntime, firstItemAstNode, remainingItemsAstNode)
                 .Select(i => new PSObject(i))
@@ -48,7 +48,7 @@ namespace Pash.ParserIntrinsics.Nodes
         }
 
         // PERF: This is O(n^2), as we build up the array right-to-left. That would only matter for very large arrays.
-        static IEnumerable<object> Execute(ExecutionContext context, ICommandRuntime commandRuntime, _node firstItemAstNode, _node remainingItemsAstNode)
+        static IEnumerable<object> Execute(ExecutionContext context, ICommandRuntime commandRuntime, _astnode firstItemAstNode, _astnode remainingItemsAstNode)
         {
             //// 7.3 Binary comma operator
             ////

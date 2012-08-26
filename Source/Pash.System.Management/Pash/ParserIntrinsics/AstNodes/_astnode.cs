@@ -8,15 +8,15 @@ using Irony.Parsing;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
 
-namespace Pash.ParserIntrinsics.Nodes
+namespace Pash.ParserIntrinsics.AstNodes
 {
     // TODO: make it an interface, or add a field and remove this comment.
-    public class _node
+    public class _astnode
     {
         protected readonly AstContext astContext;
         protected readonly ParseTreeNode parseTreeNode;
 
-        public _node(AstContext astContext, ParseTreeNode parseTreeNode)
+        public _astnode(AstContext astContext, ParseTreeNode parseTreeNode)
         {
             this.astContext = astContext;
             this.parseTreeNode = parseTreeNode;
@@ -41,7 +41,7 @@ namespace Pash.ParserIntrinsics.Nodes
                     throw new NotImplementedException("AST not implemented for '{0}'. Parent node '{1}' should implement `Execute()`".FormatString(childNode, this));
                 }
 
-                return ((_node)this.parseTreeNode.ChildNodes.Single().AstNode).Execute(context, commandRuntime);
+                return ((_astnode)this.parseTreeNode.ChildNodes.Single().AstNode).Execute(context, commandRuntime);
             }
             else throw new NotImplementedException("AST not implemented for '{0}', because it has {1} children.. Implement `Execute()`".FormatString(this.parseTreeNode, this.parseTreeNode.ChildNodes.Count));
         }
