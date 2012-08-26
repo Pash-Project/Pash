@@ -8,6 +8,7 @@ using Extensions.String;
 using Pash.ParserIntrinsics;
 using Pash.ParserIntrinsics.Nodes;
 using System.Collections;
+using System.Management.Automation;
 
 namespace ParserTests
 {
@@ -97,17 +98,21 @@ namespace ParserTests
             //// Examples:
             //// 
             ////     1..10              # ascending range 1..10
-            var result = ExecuteInput("1..10");
-            Assert.IsInstanceOf<int[]>(result, "Result is '{0}'", result);
-            CollectionAssert.AreEqual(new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, (IEnumerable)result);
+            {
+                var result = ((PSObject[])ExecuteInput("1..10"))
+                    .Select(o => o.BaseObject);
+                Assert.AreEqual(1, result.First());
+                Assert.AreEqual(10, result.Last());
+                Assert.AreEqual(2, result.Skip(1).First());
+            }
 
-            CollectionAssert.AreEqual(new[] { 3, 2, 1 }, (IEnumerable)ExecuteInput("3..1"));
+            CollectionAssert.AreEqual(new[] { 3, 2, 1 }, ((PSObject[])ExecuteInput("3..1")).Select(o => o.BaseObject));
 
             ////    -500..-495          # descending range -500..-495
-            CollectionAssert.AreEqual(new[] { -500, -499, -498, -497, -496, -495 }, (IEnumerable)ExecuteInput("-500..-495"));
+            CollectionAssert.AreEqual(new[] { -500, -499, -498, -497, -496, -495 }, ((PSObject[])ExecuteInput("-500..-495")).Select(o => o.BaseObject));
 
             ////     16..16             # seqeunce of 1
-            CollectionAssert.AreEqual(new[] { 16 }, (IEnumerable)ExecuteInput("16..16"));
+            CollectionAssert.AreEqual(new[] { 16 }, ((PSObject[])ExecuteInput("16..16")).Select(o => o.BaseObject));
 
             ////     
             ////     $x = 1.5
@@ -134,22 +139,17 @@ namespace ParserTests
         [Test]
         public void ArrayLiteralTest()
         {
-            var result = ExecuteInput("1,3,3");
+            var result = ((PSObject[])ExecuteInput("1,3,3")).Select(o => o.BaseObject);
 
-            CollectionAssert.AllItemsAreInstancesOfType((IEnumerable)result, typeof(int));
-            CollectionAssert.AreEqual(new[] { 1, 3, 3 }, (IEnumerable)result);
+            CollectionAssert.AreEqual(new[] { 1, 3, 3 }, result);
         }
 
         [Test, Ignore("bug")]
         public void JaggedArrayTest()
         {
-            var result = (object[])ExecuteInput("$x = 1,2; 3,$x");
+            var result = ((PSObject[])ExecuteInput("$x = 1,2; 3,$x")).Select(o => o.BaseObject);
 
-            Assert.AreEqual(2, result.Length);
-            Assert.IsInstanceOf<int>(result[0]);
-
-            Assert.IsInstanceOf<int[]>(result[1]);
-            CollectionAssert.AreEqual(new[] { 1, 2 }, (IEnumerable)result[1]);
+            Assert.AreEqual(2, result.Count());
         }
 
         static object ExecuteInput(string s)

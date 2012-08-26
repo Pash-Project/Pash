@@ -40,10 +40,13 @@ namespace Pash.ParserIntrinsics.Nodes
             if (keywordTerminal.Text != "..") throw new NotImplementedException();
             var endRangeExpressionNode = (array_literal_expression_node)parseTreeNode.ChildNodes[2].AstNode;
 
-            return Execute(context, commandRuntime, startRangeExpressionNode, endRangeExpressionNode);
+            return Execute(context, commandRuntime, startRangeExpressionNode, endRangeExpressionNode)
+                .Select(i=>new PSObject(i))
+                .ToArray()
+                ;
         }
 
-        private static int[] Execute(ExecutionContext context, ICommandRuntime commandRuntime, _node startRangeExpressionNode, _node endRangeExpressionNode)
+        private static IEnumerable<int> Execute(ExecutionContext context, ICommandRuntime commandRuntime, _node startRangeExpressionNode, _node endRangeExpressionNode)
         {
             //// Description:
             ////
@@ -58,7 +61,7 @@ namespace Pash.ParserIntrinsics.Nodes
             //// bound, while the operand designating the higher value after conversion is the upper bound. 
             if (leftOperandValue < rightOperandValue)
             {
-                return Extensions.Enumerable._.Generate(leftOperandValue, i => i + 1, rightOperandValue).ToArray();
+                return Extensions.Enumerable._.Generate(leftOperandValue, i => i + 1, rightOperandValue);
             }
 
             //// Both bounds may be the same, in which case, the resulting array has length 1. 
@@ -68,7 +71,7 @@ namespace Pash.ParserIntrinsics.Nodes
             //// operand designates the upper bound, the sequence is in descending order.
             if (rightOperandValue < leftOperandValue)
             {
-                return Extensions.Enumerable._.Generate(leftOperandValue, i => i - 1, rightOperandValue).ToArray();
+                return Extensions.Enumerable._.Generate(leftOperandValue, i => i - 1, rightOperandValue);
             }
 
             //// [Note: Conceptually, this operator is a shortcut for the corresponding binary comma operator 

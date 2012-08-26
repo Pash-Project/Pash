@@ -41,11 +41,14 @@ namespace Pash.ParserIntrinsics.Nodes
             if (keywordTerminal.Text != ",") throw new NotImplementedException();
             var remainingItemsAstNode = (_node)parseTreeNode.ChildNodes[2].AstNode;
 
-            return Execute(context, commandRuntime, firstItemAstNode, remainingItemsAstNode);
+            return Execute(context, commandRuntime, firstItemAstNode, remainingItemsAstNode)
+                .Select(i => new PSObject(i))
+                .ToArray()
+                ;
         }
 
         // PERF: This is O(n^2), as we build up the array right-to-left. That would only matter for very large arrays.
-        private static object[] Execute(ExecutionContext context, ICommandRuntime commandRuntime, _node firstItemAstNode, _node remainingItemsAstNode)
+        static IEnumerable<object> Execute(ExecutionContext context, ICommandRuntime commandRuntime, _node firstItemAstNode, _node remainingItemsAstNode)
         {
             //// 7.3 Binary comma operator
             ////
@@ -55,8 +58,8 @@ namespace Pash.ParserIntrinsics.Nodes
             ////
             var leftOperandValue = firstItemAstNode.Execute(context, commandRuntime);
             var rightOperandValue = remainingItemsAstNode.Execute(context, commandRuntime);
-            
-            var newList = new List<object>(){leftOperandValue};
+
+            var newList = new List<object>() { leftOperandValue };
 
             if (rightOperandValue is object[])
             {
