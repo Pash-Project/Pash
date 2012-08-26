@@ -21,7 +21,7 @@ namespace Pash.ParserIntrinsics.Nodes
 
         internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
-            var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), PowerShellGrammar.Terminals.verbatim_string_literal.Pattern);
+            var matches = Regex.Match(Text, PowerShellGrammar.Terminals.verbatim_string_literal.Pattern);
             return matches.Groups[PowerShellGrammar.Terminals.verbatim_string_characters.Name].Value;
         }
     }

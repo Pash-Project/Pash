@@ -21,7 +21,7 @@ namespace Pash.ParserIntrinsics.Nodes
 
         internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
-            return parseTreeNode.FindTokenAndGetText();
+            return Text;
         }
     }
 }
