@@ -4,6 +4,8 @@ using System.Management.Automation.Runspaces;
 using Pash.Implementation;
 using System.Management.Automation.Host;
 using System.Diagnostics;
+using System.Collections.ObjectModel;
+using System.Management.Automation;
 
 namespace TestHost
 {
@@ -18,18 +20,21 @@ namespace TestHost
 
         private static void VerifyExpression<T>(T Expected, string Expression)
         {
+            Debug.Assert(object.Equals((T)Execute(Expression).Single().ImmediateBaseObject, Expected));
+        }
+
+        private static Collection<PSObject> Execute(string statement)
+        {
             var myHost = new TestHost();
             var myRunSpace = RunspaceFactory.CreateRunspace(myHost);
             myRunSpace.Open();
 
             using (var currentPipeline = myRunSpace.CreatePipeline())
             {
-                currentPipeline.Commands.Add(Expression);
-                var result = currentPipeline.Invoke();
-                Debug.Assert(object.Equals((T)result.Single().ImmediateBaseObject, Expected));
+                currentPipeline.Commands.Add(statement);
+                return currentPipeline.Invoke();
             }
         }
-
     }
 
     class TestHost : PSHost
