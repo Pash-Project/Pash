@@ -13,6 +13,7 @@ namespace TestHost
         {
             VerifyExpression("xxx", "'xxx'");
             VerifyExpression("xxx1", "'xxx' + 1");
+            VerifyExpression(3, "1 + 2");
         }
 
         private static void VerifyExpression<T>(T Expected, string Expression)
