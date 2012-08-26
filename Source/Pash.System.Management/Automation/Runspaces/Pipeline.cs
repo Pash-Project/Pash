@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
+using System.Diagnostics;
 
 namespace System.Management.Automation.Runspaces
 {
@@ -21,10 +22,13 @@ namespace System.Management.Automation.Runspaces
 
         public abstract Pipeline Copy();
         protected virtual void Dispose(bool disposing) { throw new NotImplementedException(); }
+
+        [DebuggerStepThrough]
         public Collection<PSObject> Invoke()
         {
             return Invoke(new object[] { });
         }
+
         public abstract Collection<PSObject> Invoke(IEnumerable input);
         public abstract void InvokeAsync();
         public abstract void Stop();
