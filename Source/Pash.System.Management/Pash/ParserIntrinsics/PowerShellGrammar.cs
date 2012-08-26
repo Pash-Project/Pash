@@ -553,35 +553,39 @@ namespace Pash.ParserIntrinsics
             ////            range_expression
             ////            format_expression   format_operator    new_lines_opt   range_expression
             // TODO: more
-            format_expression.Rule = array_literal_expression;
+            format_expression.Rule = range_expression;
 
             ////        range_expression:
             ////            array_literal_expression
             ////            range_expression   ..   new_lines_opt   array_literal_expression
+            // TODO: more
+            range_expression.Rule = array_literal_expression | (range_expression + ".." + (Terminals.new_lines | Empty) + array_literal_expression);
+
             ////        array_literal_expression:
             ////            unary_expression
             ////            unary_expression   ,    new_lines_opt   array_literal_expression
             // TODO: more
-            array_literal_expression.Rule = unary_expression;
+            array_literal_expression.Rule = unary_expression | (unary_expression + "," + (Terminals.new_lines | Empty) + array_literal_expression);
 
             ////        unary_expression:
             ////            primary_expression
             ////            expression_with_unary_operator
-            // TODO: more
-            unary_expression.Rule = primary_expression;
+            unary_expression.Rule = primary_expression | expression_with_unary_operator;
 
             ////        expression_with_unary_operator:
             ////            ,   new_lines_opt   unary_expression
-            ////            _not   new_lines_opt   unary_expression
+            ////            -not   new_lines_opt   unary_expression
             ////            !   new_lines_opt   unary_expression
-            ////            _bnot   new_lines_opt   unary_expression
+            ////            -bnot   new_lines_opt   unary_expression
             ////            +   new_lines_opt   unary_expression
             ////            dash   new_lines_opt   unary_expression
             ////            pre_increment_expression
             ////            pre_decrement_expression
             ////            cast_expression
-            ////            _split   new_lines_opt   unary_expression
-            ////            _join   new_lines_opt   unary_expression
+            ////            -split   new_lines_opt   unary_expression
+            ////            -join   new_lines_opt   unary_expression
+            expression_with_unary_operator.Rule = Terminals.dash + (Terminals.new_lines | Empty) + unary_expression;
+
             ////        pre_increment_expression:
             ////            ++   new_lines_opt   unary_expression
             ////        pre_decrement_expression:

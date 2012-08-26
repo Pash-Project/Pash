@@ -164,6 +164,7 @@
     <Compile Include="Automation\VerbsCommon.cs" />
     <Compile Include="Automation\WildcardOptions.cs" />
     <Compile Include="Automation\WildcardPattern.cs" />
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\Reflection.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AddPSSnapinCommand.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AliasProviderDynamicParameters.cs" />
@@ -231,6 +232,9 @@
     <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammar.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\command_elements_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\command_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\array_literal_expression_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\expression_with_unary_operator_node.cs" />
+    <Compile Include="Pash\ParserIntrinsics\Nodes\range_expression_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\hexadecimal_integer_literal_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\decimal_integer_literal_node.cs" />
     <Compile Include="Pash\ParserIntrinsics\Nodes\generic_token_node.cs" />

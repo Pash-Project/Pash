@@ -41,7 +41,7 @@ namespace Pash.ParserIntrinsics.Nodes
 
                 return ((_node)this.parseTreeNode.ChildNodes.Single().AstNode).Execute(context, commandRuntime);
             }
-            else throw new NotImplementedException();
+            else throw new NotImplementedException("AST not implemented for '{0}', because it has {1} children.. Implement `Execute()`".FormatString(this.parseTreeNode, this.parseTreeNode.ChildNodes.Count));
         }
     }
 }
