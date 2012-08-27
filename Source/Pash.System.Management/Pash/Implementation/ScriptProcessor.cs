@@ -81,7 +81,7 @@ namespace Pash.Implementation
             //PipelineCommandRuntime runtime = (PipelineCommandRuntime) CommandRuntime;
             //context.outputStreamWriter = new ObjectStreamWriter(runtime.outputResults);
 
-            CommandRuntime.WriteObject(((_astnode)results.Root.AstNode).Execute(context, CommandRuntime));
+            CommandRuntime.WriteObject(((_astnode)results.Root.AstNode).Execute(context, CommandRuntime), true);
         }
 
         internal override void Complete()
