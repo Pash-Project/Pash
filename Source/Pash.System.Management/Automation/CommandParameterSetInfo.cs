@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -25,24 +26,12 @@ namespace System.Management.Automation
 
         internal CommandParameterInfo GetParameterByPosition(int position)
         {
-            foreach (CommandParameterInfo parameter in Parameters)
-            {
-                if (parameter.Position == position)
-                    return parameter;
-            }
-
-            return null;
+            return Parameters.SingleOrDefault(parameter => parameter.Position == position);
         }
 
         internal CommandParameterInfo GetParameterByName(string name)
         {
-            foreach (CommandParameterInfo parameter in Parameters)
-            {
-                if (string.Equals(parameter.Name, name, StringComparison.CurrentCultureIgnoreCase))
-                    return parameter;
-            }
-
-            return null;
+            return Parameters.SingleOrDefault(parameter => string.Equals(parameter.Name, name, StringComparison.CurrentCultureIgnoreCase));
         }
     }
 }
