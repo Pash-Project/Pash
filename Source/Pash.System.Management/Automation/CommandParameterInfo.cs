@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions.String;
 using System.Collections.ObjectModel;
 
 namespace System.Management.Automation
@@ -31,6 +32,11 @@ namespace System.Management.Automation
             IsMandatory = paramAttr.Mandatory;
 
             // TODO: fill in aliases
+        }
+
+        public override string ToString()
+        {
+            return "{0} <{1}>".FormatString(Name, ParameterType);
         }
     }
 }
