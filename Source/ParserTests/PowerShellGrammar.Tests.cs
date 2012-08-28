@@ -138,11 +138,7 @@ namespace ParserTests
         {
             var grammar = new PowerShellGrammar.InteractiveInput();
 
-            var parser = new Parser(grammar);
-            var parseTree = parser.Parse("\"PS> \"");
-
-            Assert.IsNotNull(parseTree);
-            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
+            var parseTree = Parse(grammar, "\"PS> \"");
 
             var node = VerifyParseTreeSingles(parseTree.Root,
                 grammar.interactive_input,
@@ -205,11 +201,7 @@ namespace ParserTests
         {
             var grammar = new PowerShellGrammar.InteractiveInput();
 
-            var parser = new Parser(grammar);
-            var parseTree = parser.Parse("'PS> ' + (Get-Location)");
-
-            Assert.IsNotNull(parseTree);
-            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
+            var parseTree = Parse(grammar, "'PS> ' + (Get-Location)");
 
             var node = VerifyParseTreeSingles(parseTree.Root,
                 grammar.interactive_input,
@@ -291,11 +283,7 @@ namespace ParserTests
         {
             var grammar = new PowerShellGrammar.InteractiveInput();
 
-            var parser = new Parser(grammar);
-            var parseTree = parser.Parse("1");
-
-            Assert.IsNotNull(parseTree);
-            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
+            var parseTree = Parse(grammar, "1");
 
             var node = VerifyParseTreeSingles(parseTree.Root,
                 grammar.interactive_input,
@@ -328,11 +316,7 @@ namespace ParserTests
         {
             var grammar = new PowerShellGrammar.InteractiveInput();
 
-            var parser = new Parser(grammar);
-            var parseTree = parser.Parse(@"Set-Location C:\Windows");
-
-            Assert.IsNotNull(parseTree);
-            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
+            var parseTree = Parse(grammar, @"Set-Location C:\Windows");
 
             var commandNode = VerifyParseTreeSingles(parseTree.Root,
                 grammar.interactive_input,
@@ -360,16 +344,22 @@ namespace ParserTests
             Assert.AreEqual(PowerShellGrammar.Terminals.generic_token, node.Term);
         }
 
+        private static ParseTree Parse(PowerShellGrammar.InteractiveInput grammar, string text)
+        {
+            var parser = new Parser(grammar);
+            var parseTree = parser.Parse(text);
+
+            Assert.IsNotNull(parseTree);
+            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
+            return parseTree;
+        }
+
         [Test]
         public void VariableTest()
         {
             var grammar = new PowerShellGrammar.InteractiveInput();
 
-            var parser = new Parser(grammar);
-            var parseTree = parser.Parse(@"$x = 'y'");
-
-            Assert.IsNotNull(parseTree);
-            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
+            var parseTree = Parse(grammar, @"$x = 'y'");
 
             var assignementNode = VerifyParseTreeSingles(parseTree.Root,
                 grammar.interactive_input,
@@ -393,8 +383,7 @@ namespace ParserTests
             
             var grammar = new PowerShellGrammar.InteractiveInput();
 
-            var parser = new Parser(grammar);
-            var parseTree = parser.Parse("prompt | write-host -nonewline");
+            var parseTree = Parse(grammar, "prompt | write-host -nonewline");
 
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
