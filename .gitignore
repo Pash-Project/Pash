@@ -16,3 +16,6 @@ _ReSharper.*
 
 # GoldParser generator log, and possibly others
 *.log
+
+# NUnit
+test-results/
