@@ -38,8 +38,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             // MUST: fix this with the commandRuntime
             Pipeline pipeline = context.CurrentRunspace.CreateNestedPipeline();
 
-            // TODO: Fill the pipeline with input data?
-            //pipeline.Input.Write(context.inputStreamReader);
+            pipeline.Input.Write(context.inputStreamReader.ReadToEnd(), true);
 
             context.PushPipeline(pipeline);
 

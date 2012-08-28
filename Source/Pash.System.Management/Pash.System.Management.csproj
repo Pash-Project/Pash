@@ -229,6 +229,7 @@
     <Compile Include="Pash\Implementation\PipelineProcessor.cs" />
     <Compile Include="Pash\Implementation\ScriptProcessor.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\additive_expression_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\pipeline_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammar.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\command_elements_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\command_astnode.cs" />

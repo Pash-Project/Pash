@@ -445,8 +445,8 @@ namespace Pash.ParserIntrinsics
             ////            assignment_expression
             ////            expression   redirections_opt  pipeline_tail_opt
             ////            command   pipeline_tail_opt
-            // TODO: more
-            pipeline.Rule = assignment_expression | expression | command;
+            // TODO: redirections_opt
+            pipeline.Rule = assignment_expression | expression + (pipeline_tail | Empty) | command + (pipeline_tail | Empty);
 
             ////        assignment_expression:
             ////            expression   assignment_operator   statement
@@ -455,6 +455,12 @@ namespace Pash.ParserIntrinsics
             ////        pipeline_tail:
             ////            |   new_lines_opt   command
             ////            |   new_lines_opt   command   pipeline_tail
+            {
+                var pipeTerminal = ToTerminal("|");
+                pipeTerminal.SetFlag(TermFlags.NoAstNode | TermFlags.IsTransient);
+                pipeline_tail.Rule = pipeTerminal + (Terminals.new_lines | Empty) + command + (pipeline_tail | Empty);
+            }
+
             ////        command:
             ////            command_name   command_elements_opt
             ////            command_invocation_operator   command_module_opt  command_name_expr   command_elements_opt
