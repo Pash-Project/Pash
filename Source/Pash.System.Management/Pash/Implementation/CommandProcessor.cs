@@ -112,6 +112,11 @@ namespace System.Management.Automation
                 propertyInfo.SetValue(Command, value.ToString(), null);
             }
 
+            else if (propertyInfo.PropertyType == typeof(PSObject))
+            {
+                propertyInfo.SetValue(Command, PSObject.AsPSObject(value), null);
+            }
+
             else
             {
                 propertyInfo.SetValue(Command, value, null);
