@@ -10,7 +10,11 @@ namespace System.Management.Automation
     {
         public const string AllParameterSets = "__AllParameterSets";
 
-        public ParameterAttribute() { }
+        public ParameterAttribute()
+        {
+            // -1 means it's not set.
+            Position = -1;
+        }
 
         public string HelpMessage { get; set; }
         public string HelpMessageBaseName { get; set; }
