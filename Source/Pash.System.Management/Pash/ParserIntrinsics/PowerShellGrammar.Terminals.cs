@@ -287,23 +287,40 @@ namespace Pash.ParserIntrinsics
             ////            generic_token_parts   $(
             ////        command_parameter:
             ////            dash   first_parameter_char   parameter_chars   colon_opt
+            public static readonly RegexBasedTerminal command_parameter = null; // Initialized by reflection
+            const string command_parameter_pattern = "(?<command_parameter>" + dash_pattern + _parameter_name_pattern + colon_pattern + "?" + ")";
+
+            public static readonly RegexBasedTerminal _parameter_name = null; // Initialized by reflection
+            const string _parameter_name_pattern = "(?<_parameter_name>" + first_parameter_char_pattern + parameter_chars_pattern + ")";
+
+
             ////        first_parameter_char:
             ////            A Unicode character of classes Lu, Ll, Lt, Lm, or Lo
             ////            _   (The underscore character U+005F)
             ////            ?
+            public static readonly RegexBasedTerminal first_parameter_char = null; // Initialized by reflection
+            const string first_parameter_char_pattern = "(?<first_parameter_char>" + @"[\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\u005F\?]" + ")";
+
             ////        parameter_chars:
             ////            parameter_char
             ////            parameter_chars   parameter_char
+            public static readonly RegexBasedTerminal parameter_chars = null; // Initialized by reflection
+            const string parameter_chars_pattern = "(?<parameter_chars>" + parameter_char_pattern + "+" + ")";
+
             ////        parameter_char:
             ////            Any Unicode character except
             ////                {	}	(	)	;	,	|	&	.	[
             ////                colon
             ////                whitespace
             ////                new_line_character
+            public static readonly RegexBasedTerminal parameter_char = null; // Initialized by reflection
+            const string parameter_char_pattern = "(?<parameter_char>" + @"[^\{\}\(\)\;\,\|\&\.\[" + colon_ + whitespace_ + new_line_character_ + "]" + ")";
+
             ////        colon:
             ////            :   (The colon character U+003A)
             public static readonly RegexBasedTerminal colon = null; // Initialized by reflection.
-            const string colon_pattern = "(?<colon>" + @"\u003A" + ")";
+            const string colon_pattern = "(?<colon>" + colon_ + ")";
+            const string colon_ = @"\u003A";
             #endregion
 
             #region B.1.8 Literals

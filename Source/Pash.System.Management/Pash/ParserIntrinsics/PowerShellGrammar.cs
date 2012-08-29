@@ -495,7 +495,7 @@ namespace Pash.ParserIntrinsics
             ////            command_argument
             ////            redirection
             // TODO: more
-            command_element.Rule = command_argument;
+            command_element.Rule = Terminals.command_parameter | command_argument;
 
             ////        command_argument:
             ////            command_name_expr
