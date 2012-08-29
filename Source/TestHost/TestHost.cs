@@ -8,6 +8,8 @@ namespace TestHost
 {
     class TestHost : PSHost
     {
+        readonly PSHostUserInterface _ui = new TestHostUserInterface();
+
         public override System.Globalization.CultureInfo CurrentCulture
         {
             get { throw new NotImplementedException(); }
@@ -30,7 +32,10 @@ namespace TestHost
 
         public override PSHostUserInterface UI
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                return this._ui;
+            }
         }
 
         public override Version Version

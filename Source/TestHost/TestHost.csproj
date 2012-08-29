@@ -47,12 +47,26 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestHost.cs" />
+    <Compile Include="TestHostUserInterface.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Pash.Microsoft.Commands.Management\Pash.Microsoft.Commands.Management.csproj">
+      <Project>{91225A72-A021-4B7D-BA56-5E1B7AC02F03}</Project>
+      <Name>Pash.Microsoft.Commands.Management</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Pash.Microsoft.PowerShell.Commands.Utility\Pash.Microsoft.PowerShell.Commands.Utility.csproj">
+      <Project>{0E1D573C-C57D-4A83-A739-3A38E719D87E}</Project>
+      <Name>Pash.Microsoft.PowerShell.Commands.Utility</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Pash.System.Management\Pash.System.Management.csproj">
       <Project>{C5E303EC-5684-4C95-B0EC-2593E6662403}</Project>
       <Name>Pash.System.Management</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\PashConsole\App.config">
+      <Link>App.config</Link>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

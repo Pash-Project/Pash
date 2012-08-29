@@ -36,6 +36,12 @@ namespace TestHost
             Assert.AreEqual("xxx", Execute("'xxx'").Single().ImmediateBaseObject);
         }
 
+        [Test]
+        public void WriteOutputString()
+        {
+            Assert.AreEqual("xxx", Execute("Write-Output 'xxx'").Single().ImmediateBaseObject);
+        }
+
         private static Collection<PSObject> Execute(string statement)
         {
             var myHost = new TestHost();
