@@ -6,6 +6,7 @@ using System.Management.Automation.Host;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
+using NUnit.Framework;
 
 namespace TestHost
 {
@@ -13,14 +14,26 @@ namespace TestHost
     {
         static void Main(string[] args)
         {
-            VerifyExpression("xxx", "'xxx'");
-            VerifyExpression("xxx1", "'xxx' + 1");
-            VerifyExpression(3, "1 + 2");
+            // I'd like to see this run NUnit, so we can debug these tests easilly.
+            throw new NotImplementedException();
         }
 
-        private static void VerifyExpression<T>(T Expected, string Expression)
+        [Test]
+        public void AddIntegers()
         {
-            Debug.Assert(object.Equals((T)Execute(Expression).Single().ImmediateBaseObject, Expected));
+            Assert.AreEqual(3, Execute("1 + 2").Single().ImmediateBaseObject);
+        }
+
+        [Test]
+        public void ConcatStringInteger()
+        {
+            Assert.AreEqual("xxx1", Execute("'xxx' + 1").Single().ImmediateBaseObject);
+        }
+
+        [Test]
+        public void VerbatimString()
+        {
+            Assert.AreEqual("xxx", Execute("'xxx'").Single().ImmediateBaseObject);
         }
 
         private static Collection<PSObject> Execute(string statement)
