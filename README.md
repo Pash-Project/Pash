@@ -10,6 +10,8 @@ Pash was created by Igor Moochnick and published at http://pash.sourceforge.net/
 
 In 2012, Jay Bazuzi started exploring the project to see what potential it held.
 
+2012-08: Replace GOLDParser with Irony.
+
 Media
 -----
 

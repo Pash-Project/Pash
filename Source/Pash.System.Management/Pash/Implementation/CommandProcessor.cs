@@ -55,9 +55,7 @@ namespace System.Management.Automation
                 {
                     if (paramInfo.ValueFromPipeline)
                     {
-                        // TODO: extract this into a method
-                        PropertyInfo pi = Command.GetType().GetProperty(paramInfo.Name, paramInfo.ParameterType);
-                        pi.SetValue(Command, obj, null);
+                        BindArgument(paramInfo.Name, obj, paramInfo.ParameterType);
                     }
                 }
             }
@@ -77,23 +75,7 @@ namespace System.Management.Automation
 
                         if (paramInfo != null)
                         {
-                            // TODO: extract this into a method
-                            PropertyInfo pi = Command.GetType().GetProperty(paramInfo.Name, paramInfo.ParameterType);
-                            // TODO: make this generic
-                            if (pi.PropertyType == typeof(PSObject[]))
-                            {
-                                PSObject[] arr = new PSObject[] { PSObject.AsPSObject(Parameters[i].Value) };
-                                pi.SetValue(Command, arr, null);
-                            }
-                            else if (pi.PropertyType == typeof(String[]))
-                            {
-                                String[] arr = new String[] { Parameters[i].Value.ToString() };
-                                pi.SetValue(Command, arr, null);
-                            }
-                            else
-                            {
-                                pi.SetValue(Command, Parameters[i].Value, null);
-                            }
+                            BindArgument(paramInfo.Name, parameter.Value, paramInfo.ParameterType);
                         }
                     }
                     else
@@ -102,12 +84,42 @@ namespace System.Management.Automation
 
                         if (paramInfo != null)
                         {
-                            // TODO: extract this into a method
-                            PropertyInfo pi = Command.GetType().GetProperty(paramInfo.Name, paramInfo.ParameterType);
-                            pi.SetValue(Command, Parameters[i].Value, null);
+                            BindArgument(paramInfo.Name, parameter.Value, paramInfo.ParameterType);
                         }
                     }
                 }
+            }
+        }
+
+        private void BindArgument(string name, object value, Type type)
+        {
+            // TODO: extract this into a method
+            PropertyInfo propertyInfo = Command.GetType().GetProperty(name, type);
+
+            // TODO: make this generic
+            if (propertyInfo.PropertyType == typeof(PSObject[]))
+            {
+                propertyInfo.SetValue(Command, new[] { PSObject.AsPSObject(value) }, null);
+            }
+
+            else if (propertyInfo.PropertyType == typeof(String[]))
+            {
+                propertyInfo.SetValue(Command, new[] { value.ToString() }, null);
+            }
+
+            else if (propertyInfo.PropertyType == typeof(String))
+            {
+                propertyInfo.SetValue(Command, value.ToString(), null);
+            }
+
+            else if (propertyInfo.PropertyType == typeof(PSObject))
+            {
+                propertyInfo.SetValue(Command, PSObject.AsPSObject(value), null);
+            }
+
+            else
+            {
+                propertyInfo.SetValue(Command, value, null);
             }
         }
 

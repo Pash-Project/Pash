@@ -96,25 +96,20 @@ namespace System.Management.Automation
 
         public void WriteObject(object sendToPipeline, bool enumerateCollection)
         {
-            if (!enumerateCollection)
-            {
-                outputResults.Write(PSObject.AsPSObject(sendToPipeline));
-            }
-            else
+            if (enumerateCollection && !(sendToPipeline is string))
             {
                 IEnumerator enumerator = GetEnumerator(sendToPipeline);
                 if (enumerator != null)
                 {
-                    while (enumerator.MoveNext())
+                    while ((enumerator.MoveNext()))
                     {
-                        outputResults.Write(PSObject.AsPSObject(enumerator.Current));
+                        WriteObject(enumerator.Current);
                     }
-                }
-                else
-                {
-                    outputResults.Write(PSObject.AsPSObject(sendToPipeline));
+                    return;
                 }
             }
+
+            WriteObject(sendToPipeline);
         }
 
         public void WriteProgress(ProgressRecord progressRecord)

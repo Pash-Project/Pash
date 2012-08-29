@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection;
@@ -139,24 +140,12 @@ namespace System.Management.Automation
 
         internal CommandParameterSetInfo GetParameterSetByName(string strParamSetName)
         {
-            foreach (CommandParameterSetInfo paramSetInfo in ParameterSets)
-            {
-                if (string.Compare(strParamSetName, paramSetInfo.Name, true) == 0)
-                    return paramSetInfo;
-            }
-
-            return null;
+            return ParameterSets.SingleOrDefault(paramSetInfo => string.Compare(strParamSetName, paramSetInfo.Name, true) == 0);
         }
 
         internal CommandParameterSetInfo GetDefaultParameterSet()
         {
-            foreach (CommandParameterSetInfo paramSetInfo in ParameterSets)
-            {
-                if (paramSetInfo.IsDefault)
-                    return paramSetInfo;
-            }
-
-            return null;
+            return ParameterSets.SingleOrDefault(paramSetInfo => paramSetInfo.IsDefault);
         }
     }
 }

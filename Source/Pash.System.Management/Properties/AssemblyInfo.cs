@@ -35,6 +35,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Pash.System.Automation.Tests")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Microsoft.Commands.Management")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Microsoft.PowerShell.Commands.Utility")]
+[assembly: InternalsVisibleTo("Pash.System.Automation.Tests")]
+[assembly: InternalsVisibleTo("Microsoft.Commands.Management")]
+[assembly: InternalsVisibleTo("Microsoft.PowerShell.Commands.Utility")]
+[assembly: InternalsVisibleTo("ParserTests")]
