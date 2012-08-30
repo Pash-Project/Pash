@@ -31,7 +31,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             IEnumerable<CommandParameter> parameters = new CommandParameter[] { };
             if (parseTreeNode.ChildNodes.Count == 2)
             {
-                var commandElementsAstNode = (command_elements_astnode)parseTreeNode.ChildNodes[1].AstNode;
+                var commandElementsAstNode = ChildAstNodes.Skip(1).First().As<command_elements_astnode>();
                 parameters = (IEnumerable<CommandParameter>)commandElementsAstNode.Execute(context, commandRuntime);
             }
 

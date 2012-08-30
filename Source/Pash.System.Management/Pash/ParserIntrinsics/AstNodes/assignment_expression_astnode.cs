@@ -33,7 +33,7 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             var assignmentOperatorNode = parseTreeNode.ChildNodes[1];
 
-            var rightStatementAstNode = (_astnode)parseTreeNode.ChildNodes[2].AstNode;
+            var rightStatementAstNode = ChildAstNodes.Skip(2).First();
             var statementValue = rightStatementAstNode.Execute(context, commandRuntime);
 
             ////        assignment_operator:  one of

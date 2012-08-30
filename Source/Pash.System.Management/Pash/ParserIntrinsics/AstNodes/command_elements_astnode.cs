@@ -21,9 +21,7 @@ namespace Pash.ParserIntrinsics.AstNodes
 
         internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
-            return parseTreeNode.ChildNodes
-                .Select(node => node.AstNode)
-                .Cast<_astnode>()
+            return ChildAstNodes
                 .Select(astNode => astNode.Execute(context, commandRuntime))
                 .Select(o => new CommandParameter(null, o))
                 ;

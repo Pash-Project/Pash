@@ -21,11 +21,11 @@ namespace Pash.ParserIntrinsics.AstNodes
         {
             if (parseTreeNode.ChildNodes.Count == 3)
             {
-                leftOperandAstNode = (_astnode)parseTreeNode.ChildNodes[0].AstNode;
+                leftOperandAstNode = ChildAstNodes.First();
                 KeywordTerminal keywordTerminal = (KeywordTerminal)parseTreeNode.ChildNodes[1].Term;
                 // if you hit this exception, it's probably subtraction ("dash")
                 if (keywordTerminal.Text != "+") throw new NotImplementedException();
-                rightOperandAstNode = (_astnode)parseTreeNode.ChildNodes[2].AstNode;
+                rightOperandAstNode = ChildAstNodes.Skip(2).First();
             }
             else if (parseTreeNode.ChildNodes.Count == 1)
             {

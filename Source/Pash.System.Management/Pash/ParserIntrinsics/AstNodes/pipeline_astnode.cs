@@ -22,7 +22,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         {
             if (this.parseTreeNode.ChildNodes.Count == 1)
             {
-                return ((_astnode)this.parseTreeNode.ChildNodes.Single().AstNode).Execute(context, commandRuntime);
+                return base.Execute(context, commandRuntime);
             }
 
             if (this.parseTreeNode.ChildNodes.Count == 2)
@@ -34,13 +34,13 @@ namespace Pash.ParserIntrinsics.AstNodes
 
                 PipelineCommandRuntime subRuntime = new PipelineCommandRuntime(((PipelineCommandRuntime)commandRuntime).pipelineProcessor);
 
-                var results = ((_astnode)this.parseTreeNode.ChildNodes[0].AstNode).Execute(subContext, subRuntime);
+                var results = ChildAstNodes.First().Execute(subContext, subRuntime);
 
                 subContext = context.CreateNestedContext();
                 subContext.inputStreamReader = new PSObjectPipelineReader(new[] { results });
 
                 subRuntime = new PipelineCommandRuntime(((PipelineCommandRuntime)commandRuntime).pipelineProcessor);
-                return ((_astnode)this.parseTreeNode.ChildNodes[1].AstNode).Execute(subContext, subRuntime);
+                return ChildAstNodes.Skip(1).First().Execute(subContext, subRuntime);
             }
 
             throw new NotImplementedException();

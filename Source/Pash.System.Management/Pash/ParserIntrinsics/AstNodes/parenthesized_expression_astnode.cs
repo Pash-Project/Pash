@@ -18,7 +18,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         public parenthesized_expression_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
-            pipelineAstNode = (_astnode)parseTreeNode.ChildNodes[1].AstNode;
+            pipelineAstNode = ChildAstNodes.Skip(1).First();
         }
 
         internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)

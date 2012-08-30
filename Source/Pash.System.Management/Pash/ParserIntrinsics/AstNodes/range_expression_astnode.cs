@@ -34,11 +34,11 @@ namespace Pash.ParserIntrinsics.AstNodes
             if (parseTreeNode.ChildNodes.Count != 3)
                 throw new Exception("unexpected child node count {0}".FormatString(parseTreeNode.ChildNodes.Count));
 
-            var startRangeExpressionAstNode = (_astnode)parseTreeNode.ChildNodes[0].AstNode;
+            var startRangeExpressionAstNode = ChildAstNodes.First();
 
             KeywordTerminal keywordTerminal = (KeywordTerminal)parseTreeNode.ChildNodes[1].Term;
             if (keywordTerminal.Text != "..") throw new NotImplementedException();
-            var endRangeExpressionAstNode = (array_literal_expression_astnode)parseTreeNode.ChildNodes[2].AstNode;
+            var endRangeExpressionAstNode = ChildAstNodes.Skip(2).First().As<array_literal_expression_astnode>();
 
             return Execute(context, commandRuntime, startRangeExpressionAstNode, endRangeExpressionAstNode)
                 .Select(i=>new PSObject(i))

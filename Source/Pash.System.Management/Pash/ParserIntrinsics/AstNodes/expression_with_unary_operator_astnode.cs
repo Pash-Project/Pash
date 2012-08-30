@@ -44,7 +44,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             ////            dash   new_lines_opt   unary_expression
             if (parseTreeNode.ChildNodes.Count == 2)
             {
-                var rightValue = (int)((_astnode)parseTreeNode.ChildNodes[1].AstNode).Execute(context, commandRuntime);
+                var rightValue = (int)ChildAstNodes.Skip(1).First().Execute(context, commandRuntime);
                 return 0 - rightValue;
             }
 
