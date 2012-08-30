@@ -45,12 +45,14 @@ namespace TestHost
 
         public override void Write(string value)
         {
-            throw new NotImplementedException();
+            Log.Append(value);
         }
+
+        public StringBuilder Log = new StringBuilder();
 
         public override void Write(ConsoleColor foregroundColor, ConsoleColor backgroundColor, string value)
         {
-            throw new NotImplementedException();
+            Log.Append(value);
         }
 
         public override void WriteDebugLine(string message)
@@ -65,7 +67,7 @@ namespace TestHost
 
         public override void WriteLine(string value)
         {
-            throw new NotImplementedException();
+            this.Log.AppendLine(value);
         }
 
         public override void WriteProgress(long sourceId, System.Management.Automation.ProgressRecord record)

@@ -10,6 +10,12 @@ namespace TestHost
     {
         readonly PSHostUserInterface _ui = new TestHostUserInterface();
 
+        public TestHost(TestHostUserInterface ui)
+        {
+            // TODO: Complete member initialization
+            this._ui = ui;
+        }
+
         public override System.Globalization.CultureInfo CurrentCulture
         {
             get { throw new NotImplementedException(); }

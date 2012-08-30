@@ -21,38 +21,49 @@ namespace TestHost
         [Test]
         public void AddIntegers()
         {
-            Assert.AreEqual(3, Execute("1 + 2").Single().ImmediateBaseObject);
+            Assert.AreEqual("3\r\n", Execute("1 + 2"));
         }
 
         [Test]
         public void ConcatStringInteger()
         {
-            Assert.AreEqual("xxx1", Execute("'xxx' + 1").Single().ImmediateBaseObject);
+            Assert.AreEqual("xxx1\r\n", Execute("'xxx' + 1"));
         }
 
         [Test]
         public void VerbatimString()
         {
-            Assert.AreEqual("xxx", Execute("'xxx'").Single().ImmediateBaseObject);
+            Assert.AreEqual("xxx\r\n", Execute("'xxx'"));
         }
 
         [Test]
         public void WriteOutputString()
         {
-            Assert.AreEqual("xxx", Execute("Write-Output 'xxx'").Single().ImmediateBaseObject);
+            Assert.AreEqual("xxx\r\n", Execute("Write-Output 'xxx'"));
         }
 
-        private static Collection<PSObject> Execute(string statement)
+        [Test]
+        public void WriteHost()
         {
-            var myHost = new TestHost();
-            var myRunSpace = RunspaceFactory.CreateRunspace(myHost);
+            Assert.AreEqual("xxx\r\n", Execute("Write-Host 'xxx'"));
+        }
+
+        string Execute(string statement)
+        {
+            TestHostUserInterface ui = new TestHostUserInterface();
+
+            TestHost host = new TestHost(ui);
+            var myRunSpace = RunspaceFactory.CreateRunspace(host);
             myRunSpace.Open();
 
             using (var currentPipeline = myRunSpace.CreatePipeline())
             {
                 currentPipeline.Commands.Add(statement);
-                return currentPipeline.Invoke();
+                currentPipeline.Commands.Add("Out-Def");
+                currentPipeline.Invoke();
             }
+
+            return ui.Log.ToString();
         }
     }
 }
