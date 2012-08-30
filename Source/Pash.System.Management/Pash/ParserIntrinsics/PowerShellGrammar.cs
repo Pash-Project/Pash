@@ -294,12 +294,12 @@ namespace Pash.ParserIntrinsics
             // HACK: The spec says you don't have to have a statement_terminator between all statements. For example, 
             // this is supposed to be OK:
             //
-            //          if ($true) {} "Hello"       # no terminator between 'if' statement and '"Hello"' expression
+            //          PS> if ($true) {} "Hello"       # no terminator between 'if' statement and '"Hello"' expression
             //
             // however, the spec does say you have to have a terminator after every pipeline, which would make this
             // illegal:
             //
-            //          { Get-ChildItem }           # should be OK
+            //          PS> { Get-ChildItem }           # should be OK
             //
             // as a temporary workaround, I am requiring the statement_terminator between all statements, until we
             // find a fix.
