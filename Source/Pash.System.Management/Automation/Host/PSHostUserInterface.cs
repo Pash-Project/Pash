@@ -22,9 +22,20 @@ namespace System.Management.Automation.Host
         public abstract void Write(ConsoleColor foregroundColor, ConsoleColor backgroundColor, string value);
         public abstract void WriteDebugLine(string message);
         public abstract void WriteErrorLine(string value);
-        public virtual void WriteLine() { }
+
+        public virtual void WriteLine()
+        {
+            Write(Environment.NewLine);
+        }
+
         public abstract void WriteLine(string value);
-        public virtual void WriteLine(ConsoleColor foregroundColor, ConsoleColor backgroundColor, string value) { }
+
+        public virtual void WriteLine(ConsoleColor foregroundColor, ConsoleColor backgroundColor, string value)
+        {
+            Write(foregroundColor, backgroundColor, value);
+            WriteLine();
+        }
+
         public abstract void WriteProgress(long sourceId, ProgressRecord record);
         public abstract void WriteVerboseLine(string message);
         public abstract void WriteWarningLine(string message);
