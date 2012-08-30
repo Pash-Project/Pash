@@ -31,6 +31,8 @@ namespace Pash.ParserIntrinsics.AstNodes
             }
         }
 
+        public T As<T>() where T : _astnode { return (T)this; }
+
         public string Text { get { return parseTreeNode.Token.Text; } }
 
         // by default, forward to the child node, if there is exactly 1. This makes sense
@@ -41,9 +43,9 @@ namespace Pash.ParserIntrinsics.AstNodes
         [DebuggerStepThrough]
         internal virtual object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
-            if (this.parseTreeNode.ChildNodes.Count == 1)
+            if (ChildAstNodes.Count() == 1)
             {
-                var childAstNode = this.ChildAstNodes.Single();
+                var childAstNode = ChildAstNodes.Single();
 
                 if (childAstNode == null)
                 {
