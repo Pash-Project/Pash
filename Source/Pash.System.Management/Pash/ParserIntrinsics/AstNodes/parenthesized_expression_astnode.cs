@@ -23,6 +23,9 @@ namespace Pash.ParserIntrinsics.AstNodes
 
         internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
+            ////        parenthesized_expression:
+            ////            (   new_lines_opt   pipeline   new_lines_opt   )
+
             Pipeline pipeline = context.CurrentRunspace.CreateNestedPipeline();
             context.PushPipeline(pipeline);
             Collection<PSObject> results = pipelineAstNode.Execute(context, commandRuntime) as Collection<PSObject>;

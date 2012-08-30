@@ -21,6 +21,9 @@ namespace Pash.ParserIntrinsics.AstNodes
 
         internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
+            ////        hexadecimal_integer_literal:
+            ////            0x   hexadecimal_digits   long_type_suffix_opt   numeric_multiplier_opt
+
             return Convert.ToInt32(Text, 16);
         }
     }

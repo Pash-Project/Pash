@@ -21,6 +21,29 @@ namespace Pash.ParserIntrinsics.AstNodes
 
         internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
+            ////        generic_token:
+            ////            generic_token_parts
+            ////
+            ////        generic_token_parts:
+            ////            generic_token_part
+            ////            generic_token_parts   generic_token_part
+            ////
+            ////        generic_token_part:
+            ////            expandable_string_literal
+            ////            verbatim_here_string_literal
+            ////            variable
+            ////            generic_token_char
+            ////
+            ////        generic_token_char:
+            ////            Any Unicode character except
+            ////                    {		}		(		)		;		,		|		&		$
+            ////                    `   (The backtick character U+0060)
+            ////                    double_quote_character
+            ////                    single_quote_character
+            ////                    whitespace
+            ////                    new_line_character
+            ////            escaped_character
+
             return Text;
         }
     }

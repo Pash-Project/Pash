@@ -22,6 +22,10 @@ namespace Pash.ParserIntrinsics.AstNodes
 
         internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
+            ////        command:
+            ////            command_name   command_elements_opt
+            ////            command_invocation_operator   command_module_opt  command_name_expr   command_elements_opt
+
             var commandText = parseTreeNode.ChildNodes[0].FindTokenAndGetText();
             CommandInfo commandInfo = ((LocalRunspace)context.CurrentRunspace).CommandManager.FindCommand(commandText);
 

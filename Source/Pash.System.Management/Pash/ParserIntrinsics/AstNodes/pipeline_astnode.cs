@@ -20,6 +20,11 @@ namespace Pash.ParserIntrinsics.AstNodes
 
         internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
+            ////        pipeline:
+            ////            assignment_expression
+            ////            expression   redirections_opt  pipeline_tail_opt
+            ////            command   pipeline_tail_opt
+
             if (this.parseTreeNode.ChildNodes.Count == 1)
             {
                 return base.Execute(context, commandRuntime);

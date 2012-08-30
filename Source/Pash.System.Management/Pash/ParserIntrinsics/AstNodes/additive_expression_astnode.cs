@@ -40,6 +40,11 @@ namespace Pash.ParserIntrinsics.AstNodes
         // TODO: if there is only one value on the left - convert the value on the right to the type of the left and then Sum
         internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
+            ////        additive_expression:
+            ////            multiplicative_expression
+            ////            additive_expression   +   new_lines_opt   multiplicative_expression
+            ////            additive_expression   dash   new_lines_opt   multiplicative_expression
+
             // if only 1 child node, then the default (base) implementation will forward to that child
             if (parseTreeNode.ChildNodes.Count == 1)
             {

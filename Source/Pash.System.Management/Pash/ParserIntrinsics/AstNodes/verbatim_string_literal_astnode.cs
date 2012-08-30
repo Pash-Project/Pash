@@ -21,6 +21,9 @@ namespace Pash.ParserIntrinsics.AstNodes
 
         internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
+            ////        verbatim_string_literal:
+            ////            single_quote_character   verbatim_string_characters_opt   single_quote_char [sic]
+
             var matches = Regex.Match(Text, PowerShellGrammar.Terminals.verbatim_string_literal.Pattern);
             return matches.Groups[PowerShellGrammar.Terminals.verbatim_string_characters.Name].Value;
         }
