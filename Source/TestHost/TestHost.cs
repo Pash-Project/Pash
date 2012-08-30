@@ -3,12 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Management.Automation.Host;
+using System.Management.Automation.Runspaces;
 
 namespace TestHost
 {
     class TestHost : PSHost
     {
         readonly PSHostUserInterface _ui = new TestHostUserInterface();
+
+        public static string Execute(string statement)
+        {
+            TestHostUserInterface ui = new TestHostUserInterface();
+
+            TestHost host = new TestHost(ui);
+            var myRunSpace = RunspaceFactory.CreateRunspace(host);
+            myRunSpace.Open();
+
+            using (var currentPipeline = myRunSpace.CreatePipeline())
+            {
+                currentPipeline.Commands.Add(statement);
+                currentPipeline.Commands.Add("Out-Default");
+                currentPipeline.Invoke();
+            }
+
+            return ui.Log.ToString();
+        }
+
 
         public TestHost(TestHostUserInterface ui)
         {
