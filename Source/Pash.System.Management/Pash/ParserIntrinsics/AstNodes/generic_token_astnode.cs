@@ -14,12 +14,10 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class generic_token_astnode : _astnode
     {
+        public readonly string Text;
+
         public generic_token_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
-        {
-        }
-
-        internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        generic_token:
             ////            generic_token_parts
@@ -44,7 +42,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             ////                    new_line_character
             ////            escaped_character
 
-            return Text;
+            this.Text = base.Text;
         }
     }
 }

@@ -19,23 +19,23 @@ namespace Pash.ParserIntrinsics.AstNodes
         {
             ////        script_block:
             ////            param_block_opt   statement_terminators_opt    script_block_body_opt
-            if (this.ChildAstNodes.Any())
+            if (this.parseTreeNode.ChildNodes.Any())
             {
                 int i = 0;
 
-                if (ChildAstNodes[i] is script_block_body_astnode)
+                if (this.parseTreeNode.ChildNodes[i].Term == Grammar.script_block_body)
                 {
-                    this.ScriptBlockBody = (script_block_body_astnode)ChildAstNodes[i];
+                    this.ScriptBlockBody = ChildAstNodes[i].As<script_block_body_astnode>();
                     i++;
                 }
 
-                Debug.Assert(i > ChildAstNodes.Count);
+                Debug.Assert(i == ChildAstNodes.Count, i.ToString());
             }
         }
 
         internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
-            throw new NotImplementedException();
+            return this.ScriptBlockBody.Execute(context, commandRuntime);
         }
     }
 }

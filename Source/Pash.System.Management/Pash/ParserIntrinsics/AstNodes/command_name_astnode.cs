@@ -11,14 +11,22 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class command_name_astnode : _astnode
     {
+        public readonly string Name;
+
         public command_name_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
-        }
+            ////        command_name:
+            ////            generic_token
+            ////            generic_token_with_subexpr
 
-        internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
-        {
-            throw new NotImplementedException();
+            if (this.parseTreeNode.ChildNodes.Single().Term == PowerShellGrammar.Terminals.generic_token)
+            {
+                this.Name = this.parseTreeNode.ChildNodes.Single().FindTokenAndGetText();
+            }
+
+            else throw new NotImplementedException(this.ToString());
+
         }
     }
 }

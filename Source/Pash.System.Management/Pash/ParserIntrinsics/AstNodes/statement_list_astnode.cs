@@ -11,11 +11,16 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class statement_list_astnode : _astnode
     {
-        public IEnumerable<statement_astnode> Statements;
+        public readonly IEnumerable<statement_astnode> Statements;
 
         public statement_list_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
+            ////        statement_list:
+            ////            statement
+            ////            statement_list   statement
+
+            Statements = this.ChildAstNodes.Cast<statement_astnode>();
         }
 
         internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)

@@ -25,8 +25,11 @@ namespace Pash.ParserIntrinsics.AstNodes
             ChildAstNodes = new ReadOnlyCollection<_astnode>(this.parseTreeNode.ChildNodes.Select(childNode => childNode.AstNode).Cast<_astnode>().ToList());
         }
 
-        public readonly ReadOnlyCollection<_astnode> ChildAstNodes;
+        public PowerShellGrammar Grammar { get { return (PowerShellGrammar)this.astContext.Language.Grammar; } }
 
+        public ReadOnlyCollection<_astnode> ChildAstNodes;
+
+        [DebuggerStepThrough]
         public T As<T>() where T : _astnode { return (T)this; }
 
         public string Text { get { return parseTreeNode.Token.Text; } }

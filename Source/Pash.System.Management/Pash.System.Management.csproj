@@ -228,10 +228,16 @@
     <Compile Include="Pash\Implementation\ObjectStreamWriter.cs" />
     <Compile Include="Pash\Implementation\PipelineProcessor.cs" />
     <Compile Include="Pash\Implementation\ScriptProcessor.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\generic_token_astnode.cs">
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_astnode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_name_astnode.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Pash\ParserIntrinsics\AstNodes\interactive_input_astnode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\pipeline_astnode.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Pash\ParserIntrinsics\AstNodes\script_block_astnode.cs">

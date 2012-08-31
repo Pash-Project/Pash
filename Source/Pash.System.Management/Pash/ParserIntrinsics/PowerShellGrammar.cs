@@ -323,6 +323,7 @@ namespace Pash.ParserIntrinsics
             ////            ;
             ////            new_line_character
             statement_terminator.Rule = ToTerminal(";") | Terminals.new_line_character;
+            MarkTransient(statement_terminator);
 
             ////        statement_terminators:
             ////            statement_terminator
