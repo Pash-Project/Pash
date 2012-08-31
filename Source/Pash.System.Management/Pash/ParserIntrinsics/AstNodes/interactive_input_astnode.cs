@@ -11,17 +11,14 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class interactive_input_astnode : _astnode
     {
+        public readonly script_block_astnode ScriptBlock;
+
         public interactive_input_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
-        }
-
-        internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
-        {
             ////        interactive_input:
             ////            script_block
-            this.ChildAstNodes.Single().As<script_block_astnode>().Execute(context, commandRuntime);
+            this.ScriptBlock = (script_block_astnode)this.ChildAstNodes.Single();
         }
-
     }
 }

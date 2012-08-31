@@ -1,11 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using System.Management.Automation;
-using System.Text;
 using Irony.Ast;
 using Irony.Parsing;
 using Pash.Implementation;
+using System.Diagnostics;
 
 namespace Pash.ParserIntrinsics.AstNodes
 {
@@ -14,11 +14,6 @@ namespace Pash.ParserIntrinsics.AstNodes
         public param_block_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
-        }
-
-        internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -11,6 +11,8 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class statement_list_astnode : _astnode
     {
+        public IEnumerable<statement_astnode> Statements;
+
         public statement_list_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {

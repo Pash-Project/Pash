@@ -27,7 +27,7 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.parseTreeNode.ChildNodes.Count == 1)
             {
-                return base.Execute_old(context, commandRuntime);
+                return this.ChildAstNodes.Single().(context, commandRuntime);
             }
 
             if (this.parseTreeNode.ChildNodes.Count == 2)

@@ -21,15 +21,11 @@ namespace Pash.ParserIntrinsics.AstNodes
         {
             this.astContext = astContext;
             this.parseTreeNode = parseTreeNode;
+
+            ChildAstNodes = new ReadOnlyCollection<_astnode>(this.parseTreeNode.ChildNodes.Select(childNode => childNode.AstNode).Cast<_astnode>().ToList());
         }
 
-        public IEnumerable<_astnode> ChildAstNodes
-        {
-            get
-            {
-                return this.parseTreeNode.ChildNodes.Select(childNode => childNode.AstNode).Cast<_astnode>();
-            }
-        }
+        public readonly ReadOnlyCollection<_astnode> ChildAstNodes;
 
         public T As<T>() where T : _astnode { return (T)this; }
 
