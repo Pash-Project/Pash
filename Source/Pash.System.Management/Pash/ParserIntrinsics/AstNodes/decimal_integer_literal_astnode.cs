@@ -19,7 +19,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         {
         }
 
-        internal override object Execute_old(ExecutionContext context, ICommandRuntime commandRuntime)
+        internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        decimal_integer_literal:
             ////            decimal_digits   numeric_type_suffix_opt   numeric_multiplier_opt

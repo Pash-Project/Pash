@@ -66,22 +66,24 @@ namespace Pash.Implementation
                 return;
             }
 
-            var results = Parser.Parse(CommandInfo.Definition);
+            var parseTree = Parser.Parse(CommandInfo.Definition);
 
-            if (results.HasErrors)
+            if (parseTree.HasErrors)
             {
                 // TODO: implement a parsing exception
-                throw new Exception(results.ParserMessages.JoinString("\n"));
+                throw new Exception(parseTree.ParserMessages.JoinString("\n"));
             }
 
             // TODO: if a tree is empty?
-            if (results.Root == null) throw new Exception();
+            if (parseTree.Root == null) throw new Exception();
 
             ExecutionContext context = ExecutionContext.Clone();
             //PipelineCommandRuntime runtime = (PipelineCommandRuntime) CommandRuntime;
             //context.outputStreamWriter = new ObjectStreamWriter(runtime.outputResults);
 
-            CommandRuntime.WriteObject(((_astnode)results.Root.AstNode).Execute_old(context, CommandRuntime), true);
+            var results = ((_astnode)parseTree.Root.AstNode).As<interactive_input_astnode>().Execute(context, CommandRuntime);
+
+            CommandRuntime.WriteObject(results, true);
         }
 
         internal override void Complete()

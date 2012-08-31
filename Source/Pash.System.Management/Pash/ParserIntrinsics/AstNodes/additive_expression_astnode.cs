@@ -38,7 +38,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         // TODO: sum the values in both pipelines
         // TODO: if there are more than one value in the left - just copy left results and then the right results to the resulting pipe
         // TODO: if there is only one value on the left - convert the value on the right to the type of the left and then Sum
-        internal override object Execute_old(ExecutionContext context, ICommandRuntime commandRuntime)
+        internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        additive_expression:
             ////            multiplicative_expression

@@ -21,7 +21,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             pipelineAstNode = ChildAstNodes.Skip(1).First();
         }
 
-        internal override object Execute_old(ExecutionContext context, ICommandRuntime commandRuntime)
+        internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        parenthesized_expression:
             ////            (   new_lines_opt   pipeline   new_lines_opt   )
