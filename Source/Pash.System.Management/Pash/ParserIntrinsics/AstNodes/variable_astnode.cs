@@ -21,7 +21,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         {
         }
 
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        internal override object Execute_old(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        variable:
             ////            $$

@@ -20,7 +20,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         {
         }
 
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        internal override object Execute_old(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        command:
             ////            command_name   command_elements_opt
@@ -36,7 +36,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             if (parseTreeNode.ChildNodes.Count == 2)
             {
                 var commandElementsAstNode = ChildAstNodes.Skip(1).First().As<command_elements_astnode>();
-                parameters = (IEnumerable<CommandParameter>)commandElementsAstNode.Execute(context, commandRuntime);
+                parameters = (IEnumerable<CommandParameter>)commandElementsAstNode.Execute_old(context, commandRuntime);
             }
 
             // MUST: fix this with the commandRuntime

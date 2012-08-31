@@ -19,7 +19,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         {
         }
 
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        internal override object Execute_old(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        verbatim_string_literal:
             ////            single_quote_character   verbatim_string_characters_opt   single_quote_char [sic]

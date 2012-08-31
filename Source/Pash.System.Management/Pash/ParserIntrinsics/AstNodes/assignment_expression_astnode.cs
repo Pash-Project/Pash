@@ -21,7 +21,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         {
         }
 
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        internal override object Execute_old(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        assignment_expression:
             ////            expression   assignment_operator   statement
@@ -34,7 +34,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             var assignmentOperatorNode = parseTreeNode.ChildNodes[1];
 
             var rightStatementAstNode = ChildAstNodes.Skip(2).First();
-            var statementValue = rightStatementAstNode.Execute(context, commandRuntime);
+            var statementValue = rightStatementAstNode.Execute_old(context, commandRuntime);
 
             ////        assignment_operator:  one of
             ////            =		dash   =			+=		*=		/=		%=

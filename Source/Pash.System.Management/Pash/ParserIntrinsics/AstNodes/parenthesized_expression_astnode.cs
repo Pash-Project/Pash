@@ -21,14 +21,14 @@ namespace Pash.ParserIntrinsics.AstNodes
             pipelineAstNode = ChildAstNodes.Skip(1).First();
         }
 
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        internal override object Execute_old(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        parenthesized_expression:
             ////            (   new_lines_opt   pipeline   new_lines_opt   )
 
             Pipeline pipeline = context.CurrentRunspace.CreateNestedPipeline();
             context.PushPipeline(pipeline);
-            Collection<PSObject> results = pipelineAstNode.Execute(context, commandRuntime) as Collection<PSObject>;
+            Collection<PSObject> results = pipelineAstNode.Execute_old(context, commandRuntime) as Collection<PSObject>;
             context.PopPipeline();
 
             if (results.Count == 0)

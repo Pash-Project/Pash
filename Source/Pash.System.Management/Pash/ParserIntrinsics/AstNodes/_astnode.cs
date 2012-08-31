@@ -41,7 +41,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         //
         // Rules with more than one child must override.
         [DebuggerStepThrough]
-        internal virtual object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        internal virtual object Execute_old(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             if (ChildAstNodes.Count() == 1)
             {
@@ -52,7 +52,7 @@ namespace Pash.ParserIntrinsics.AstNodes
                     throw new NotImplementedException("AST not implemented for '{0}'. Parent node '{1}' should implement `Execute()`".FormatString(this.parseTreeNode.ChildNodes.Single(), this));
                 }
 
-                return childAstNode.Execute(context, commandRuntime);
+                return childAstNode.Execute_old(context, commandRuntime);
             }
             else throw new NotImplementedException("AST not implemented for '{0}', because it has {1} children.. Implement `Execute()`".FormatString(this.parseTreeNode, this.parseTreeNode.ChildNodes.Count));
         }

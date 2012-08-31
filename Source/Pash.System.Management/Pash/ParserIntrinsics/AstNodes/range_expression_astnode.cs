@@ -19,7 +19,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         {
         }
 
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        internal override object Execute_old(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        range_expression:
             ////            array_literal_expression
@@ -28,7 +28,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             // if only 1 child node, then the default (base) implementation will forward to that child
             if (parseTreeNode.ChildNodes.Count == 1)
             {
-                return base.Execute(context, commandRuntime);
+                return base.Execute_old(context, commandRuntime);
             }
 
             if (parseTreeNode.ChildNodes.Count != 3)
@@ -53,8 +53,8 @@ namespace Pash.ParserIntrinsics.AstNodes
             //// A range-expression creates an unconstrained 1-dimensional array whose elements are the values of 
             //// the int sequence specified by the range bounds. The values designated by the operands are converted 
             //// to int, if necessary (§6.4). 
-            var leftOperandValue = (int)startRangeExpressionNode.Execute(context, commandRuntime);
-            var rightOperandValue = (int)endRangeExpressionNode.Execute(context, commandRuntime);
+            var leftOperandValue = (int)startRangeExpressionNode.Execute_old(context, commandRuntime);
+            var rightOperandValue = (int)endRangeExpressionNode.Execute_old(context, commandRuntime);
 
 
             //// The operand designating the lower value after conversion is the lower 

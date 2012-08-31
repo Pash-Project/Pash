@@ -18,7 +18,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         {
         }
 
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        internal override object Execute_old(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        pipeline:
             ////            assignment_expression
@@ -27,7 +27,7 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.parseTreeNode.ChildNodes.Count == 1)
             {
-                return base.Execute(context, commandRuntime);
+                return base.Execute_old(context, commandRuntime);
             }
 
             if (this.parseTreeNode.ChildNodes.Count == 2)
@@ -39,13 +39,13 @@ namespace Pash.ParserIntrinsics.AstNodes
 
                 PipelineCommandRuntime subRuntime = new PipelineCommandRuntime(((PipelineCommandRuntime)commandRuntime).pipelineProcessor);
 
-                var results = ChildAstNodes.First().Execute(subContext, subRuntime);
+                var results = ChildAstNodes.First().Execute_old(subContext, subRuntime);
 
                 subContext = context.CreateNestedContext();
                 subContext.inputStreamReader = new PSObjectPipelineReader(new[] { results });
 
                 subRuntime = new PipelineCommandRuntime(((PipelineCommandRuntime)commandRuntime).pipelineProcessor);
-                return ChildAstNodes.Skip(1).First().Execute(subContext, subRuntime);
+                return ChildAstNodes.Skip(1).First().Execute_old(subContext, subRuntime);
             }
 
             throw new NotImplementedException();

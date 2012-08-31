@@ -38,7 +38,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         // TODO: sum the values in both pipelines
         // TODO: if there are more than one value in the left - just copy left results and then the right results to the resulting pipe
         // TODO: if there is only one value on the left - convert the value on the right to the type of the left and then Sum
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        internal override object Execute_old(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        additive_expression:
             ////            multiplicative_expression
@@ -48,11 +48,11 @@ namespace Pash.ParserIntrinsics.AstNodes
             // if only 1 child node, then the default (base) implementation will forward to that child
             if (parseTreeNode.ChildNodes.Count == 1)
             {
-                return base.Execute(context, commandRuntime);
+                return base.Execute_old(context, commandRuntime);
             }
 
-            var leftValue = leftOperandAstNode.Execute(context, commandRuntime);
-            var rightValue = rightOperandAstNode.Execute(context, commandRuntime);
+            var leftValue = leftOperandAstNode.Execute_old(context, commandRuntime);
+            var rightValue = rightOperandAstNode.Execute_old(context, commandRuntime);
 
             // TODO: need to generalize this via MethodInfo (somewhere in the compiler libraries via LanguageBasics)
             // usualy operators defined as: "public static int operator +", but in the MSIL are translated to op_Add

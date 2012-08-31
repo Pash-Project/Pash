@@ -20,7 +20,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         {
         }
 
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        internal override object Execute_old(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        array_literal_expression:
             ////            unary_expression
@@ -29,7 +29,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             // if only 1 child node, then the default (base) implementation will forward to that child
             if (parseTreeNode.ChildNodes.Count == 1)
             {
-                return base.Execute(context, commandRuntime);
+                return base.Execute_old(context, commandRuntime);
             }
 
             if (parseTreeNode.ChildNodes.Count != 3)
@@ -56,8 +56,8 @@ namespace Pash.ParserIntrinsics.AstNodes
             ////
             ////     The binary comma operator creates a 1-dimensional array whose elements are the values designated by its operands, in lexical order. The array has unconstrained type.
             ////
-            var leftOperandValue = firstItemAstNode.Execute(context, commandRuntime);
-            var rightOperandValue = remainingItemsAstNode.Execute(context, commandRuntime);
+            var leftOperandValue = firstItemAstNode.Execute_old(context, commandRuntime);
+            var rightOperandValue = remainingItemsAstNode.Execute_old(context, commandRuntime);
 
             var newList = new List<object>() { leftOperandValue };
 

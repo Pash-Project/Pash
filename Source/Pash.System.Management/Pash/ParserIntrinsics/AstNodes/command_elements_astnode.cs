@@ -19,7 +19,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         {
         }
 
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        internal override object Execute_old(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        command_elements:
             ////            command_element
@@ -37,7 +37,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             ////            dash   first_parameter_char   parameter_chars   colon_opt
 
             return ChildAstNodes
-                .Select(astNode => astNode.Execute(context, commandRuntime))
+                .Select(astNode => astNode.Execute_old(context, commandRuntime))
                 .Select(o => new CommandParameter(null, o))
                 ;
         }

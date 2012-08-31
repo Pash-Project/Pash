@@ -19,7 +19,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         {
         }
 
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        internal override object Execute_old(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////    7.2.5 Unary minus
             ////    Description:
@@ -44,7 +44,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             ////            dash   new_lines_opt   unary_expression
             if (parseTreeNode.ChildNodes.Count == 2)
             {
-                var rightValue = (int)ChildAstNodes.Skip(1).First().Execute(context, commandRuntime);
+                var rightValue = (int)ChildAstNodes.Skip(1).First().Execute_old(context, commandRuntime);
                 return 0 - rightValue;
             }
 
