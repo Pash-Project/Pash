@@ -14,6 +14,7 @@ namespace Pash.ParserIntrinsics.AstNodes
     public class pipeline_astnode : _astnode
     {
         public readonly command_astnode Command;
+        public readonly assignment_expression_astnode AssignmentExpression;
 
         public pipeline_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
@@ -23,12 +24,22 @@ namespace Pash.ParserIntrinsics.AstNodes
             ////            expression   redirections_opt  pipeline_tail_opt
             ////            command   pipeline_tail_opt
 
-            if (this.parseTreeNode.ChildNodes[0].Term == Grammar.command)
+            if (this.parseTreeNode.ChildNodes[0].Term == Grammar.assignment_expression)
+            {
+                this.AssignmentExpression = this.ChildAstNodes.Single().As<assignment_expression_astnode>();
+            }
+
+            else if (this.parseTreeNode.ChildNodes[0].Term == Grammar.expression)
+            {
+                throw new NotImplementedException(this.ToString());
+            }
+
+            else if (this.parseTreeNode.ChildNodes[0].Term == Grammar.command)
             {
                 this.Command = this.ChildAstNodes.Single().As<command_astnode>();
             }
 
-            else throw new NotImplementedException(this.ToString());
+            else throw new InvalidOperationException(this.ToString());
         }
 
         internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)

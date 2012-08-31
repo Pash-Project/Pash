@@ -16,12 +16,10 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class variable_astnode : _astnode
     {
+        public readonly string Name;
+
         public variable_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
-        {
-        }
-
-        internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        variable:
             ////            $$
@@ -31,12 +29,10 @@ namespace Pash.ParserIntrinsics.AstNodes
             ////            @   variable_scope_opt   variable_characters
             ////            braced_variable
 
-            string name = GetVariableName(Text);
-
-            return GetVariable(context, name);
+            this.Name = GetVariableName(Text);
         }
 
-        internal static string GetVariableName(string variableText)
+        static string GetVariableName(string variableText)
         {
             var matches = Regex.Match(variableText, PowerShellGrammar.Terminals.variable.Pattern);
 

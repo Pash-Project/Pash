@@ -228,6 +228,7 @@
     <Compile Include="Pash\Implementation\ObjectStreamWriter.cs" />
     <Compile Include="Pash\Implementation\PipelineProcessor.cs" />
     <Compile Include="Pash\Implementation\ScriptProcessor.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\assignment_expression_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\command_astnode.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -252,6 +253,7 @@
     <Compile Include="Pash\ParserIntrinsics\AstNodes\statement_list_astnode.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\variable_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammar.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.cs" />
