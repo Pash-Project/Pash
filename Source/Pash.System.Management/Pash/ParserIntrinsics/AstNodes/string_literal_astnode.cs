@@ -27,6 +27,11 @@ namespace Pash.ParserIntrinsics.AstNodes
                 this.Value = this.ChildAstNodes.Single().As<verbatim_string_literal_astnode>().Value;
             }
 
+            else if (this.parseTreeNode.ChildNodes.Single().Term == PowerShellGrammar.Terminals.expandable_string_literal)
+            {
+                this.Value = this.ChildAstNodes.Single().As<expandable_string_literal_astnode>().Value;
+            }
+
             else throw new NotImplementedException(this.ToString());
         }
     }
