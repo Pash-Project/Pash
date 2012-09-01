@@ -48,23 +48,27 @@ namespace Pash.ParserIntrinsics.AstNodes
 
         internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
+            object results;
+
             if (this.AssignmentExpression != null)
             {
                 this.AssignmentExpression.Execute(context, commandRuntime);
-                return null;
+                results = null;
             }
 
-            if (this.Expression != null)
+            else if (this.Expression != null)
             {
-                return this.Expression.Execute(context, commandRuntime);
+                results = this.Expression.Execute(context, commandRuntime);
             }
 
-            if (this.Command != null)
+            else if (this.Command != null)
             {
-                return this.Command.Execute(context, commandRuntime);
+                results = this.Command.Execute(context, commandRuntime);
             }
 
-            throw new InvalidOperationException(this.ToString());
+            else throw new InvalidOperationException(this.ToString());
+
+            return results;
         }
 
         //        ExecutionContext subContext = context.CreateNestedContext();
