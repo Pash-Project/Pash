@@ -58,35 +58,38 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             var command = new Command(Name);
 
-            for (int i = 0; i < this.CommandElements.Items.Count(); i++)
+            if (this.CommandElements != null)
             {
-                var commandElement = this.CommandElements.Items.ElementAt(i);
-
-                if (commandElement.Argument != null)
+                for (int i = 0; i < this.CommandElements.Items.Count(); i++)
                 {
-                    command.Parameters.Add(new CommandParameter(null, commandElement.Argument.CommandNameExpression.Execute(context, commandRuntime)));
-                }
+                    var commandElement = this.CommandElements.Items.ElementAt(i);
 
-                else if (commandElement.Parameter != null)
-                {
-                    string name = commandElement.Parameter.Name;
-                    object value;
-
-                    // TODO: '-Foo bar', where 'bar' is an argument to '-Foo', e.g. 'Get-ChildItem -Path C:\'
-                    if (commandElement.Parameter.Colon)
+                    if (commandElement.Argument != null)
                     {
-                        i++;
-                        if (i == this.CommandElements.Items.Count()) throw new Exception("Parameter '{0}' requires an argument.".FormatString(commandElement.Parameter.Name));
-
-                        value = this.CommandElements.Items.ElementAt(i);
-                    }
-                    else
-                    {
-                        // TODO: what if this is not a switch? Postpone this code until binding time.
-                        value = true;
+                        command.Parameters.Add(new CommandParameter(null, commandElement.Argument.CommandNameExpression.Execute(context, commandRuntime)));
                     }
 
-                    command.Parameters.Add(new CommandParameter(name, value));
+                    else if (commandElement.Parameter != null)
+                    {
+                        string name = commandElement.Parameter.Name;
+                        object value;
+
+                        // TODO: '-Foo bar', where 'bar' is an argument to '-Foo', e.g. 'Get-ChildItem -Path C:\'
+                        if (commandElement.Parameter.Colon)
+                        {
+                            i++;
+                            if (i == this.CommandElements.Items.Count()) throw new Exception("Parameter '{0}' requires an argument.".FormatString(commandElement.Parameter.Name));
+
+                            value = this.CommandElements.Items.ElementAt(i);
+                        }
+                        else
+                        {
+                            // TODO: what if this is not a switch? Postpone this code until binding time.
+                            value = true;
+                        }
+
+                        command.Parameters.Add(new CommandParameter(name, value));
+                    }
                 }
             }
 
