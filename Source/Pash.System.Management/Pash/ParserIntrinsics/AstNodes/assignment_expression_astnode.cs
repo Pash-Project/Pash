@@ -16,49 +16,39 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class assignment_expression_astnode : _astnode
     {
+        public readonly variable_astnode Variable;
+        public readonly string Operator;
+        public readonly statement_astnode Statement;
+
         public assignment_expression_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
-        }
-
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
-        {
             ////        assignment_expression:
             ////            expression   assignment_operator   statement
+            Debug.Assert(this.ChildAstNodes.Count == 3, this.ToString());
+            this.Variable = this.ChildAstNodes[0].Cast<variable_astnode>();
+            this.Operator = this.parseTreeNode.ChildNodes[1].FindTokenAndGetText();
+            this.Statement = this.ChildAstNodes[2].Cast<statement_astnode>();
+        }
 
-            if (parseTreeNode.ChildNodes.Count != 3)
-                throw new Exception("unexpected child node count {0}".FormatString(parseTreeNode.ChildNodes.Count));
-
-            string variableName = GetVariableName(parseTreeNode.ChildNodes[0]);
-
-            var assignmentOperatorNode = parseTreeNode.ChildNodes[1];
-
-            var rightStatementAstNode = (_astnode)parseTreeNode.ChildNodes[2].AstNode;
-            var statementValue = rightStatementAstNode.Execute(context, commandRuntime);
+        internal void Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        {
+            var statementValue = this.Statement.Execute(context, commandRuntime);
 
             ////        assignment_operator:  one of
             ////            =		dash   =			+=		*=		/=		%=
-            switch (assignmentOperatorNode.Token.Text)
+            switch (this.Operator)
             {
                 case "=":
-                    SetVariable(context, commandRuntime, variableName, statementValue);
+                    SetVariable(context, commandRuntime, this.Variable.Name, statementValue);
                     // TODO: return variable
-                    return null;
                     break;
 
                 default:
-                    throw new NotImplementedException(assignmentOperatorNode.Token.Text);
+                    throw new NotImplementedException(this.Operator);
             }
 
             throw new NotImplementedException();
-        }
-
-        private string GetVariableName(ParseTreeNode node)
-        {
-            // TODO: find a way to get rid of this hard-coded string
-            while (node != null & node.Term.Name != "variable") node = node.ChildNodes.Single();
-
-            return variable_astnode.GetVariableName(node.Token.Text);
         }
 
         private void SetVariable(ExecutionContext context, ICommandRuntime commandRuntime, string variableName, object statementValue)

@@ -13,19 +13,22 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class parenthesized_expression_astnode : _astnode
     {
-        readonly _astnode pipelineAstNode;
+        public readonly pipeline_astnode Pipeline;
 
         public parenthesized_expression_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
-            pipelineAstNode = (_astnode)parseTreeNode.ChildNodes[1].AstNode;
+            ////        parenthesized_expression:
+            ////            (   new_lines_opt   pipeline   new_lines_opt   )
+
+            this.Pipeline = this.ChildAstNodes[1].Cast<pipeline_astnode>();
         }
 
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             Pipeline pipeline = context.CurrentRunspace.CreateNestedPipeline();
             context.PushPipeline(pipeline);
-            Collection<PSObject> results = pipelineAstNode.Execute(context, commandRuntime) as Collection<PSObject>;
+            Collection<PSObject> results = this.Pipeline.Execute(context, commandRuntime) as Collection<PSObject>;
             context.PopPipeline();
 
             if (results.Count == 0)

@@ -372,7 +372,7 @@ namespace ParserTests
 
             Assert.AreEqual(grammar.assignment_expression, assignementNode.Term);
             Assert.AreEqual(3, assignementNode.ChildNodes.Count, assignementNode.ToString());
-            Assert.AreEqual(grammar.expression, assignementNode.ChildNodes[0].Term);
+            Assert.AreEqual(PowerShellGrammar.Terminals.variable, assignementNode.ChildNodes[0].Term);
             Assert.AreEqual(PowerShellGrammar.Terminals.assignment_operator, assignementNode.ChildNodes[1].Term);
             Assert.AreEqual(grammar.statement, assignementNode.ChildNodes[2].Term);
         }

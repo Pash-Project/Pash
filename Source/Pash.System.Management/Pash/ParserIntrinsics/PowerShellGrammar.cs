@@ -294,12 +294,12 @@ namespace Pash.ParserIntrinsics
             // HACK: The spec says you don't have to have a statement_terminator between all statements. For example, 
             // this is supposed to be OK:
             //
-            //          if ($true) {} "Hello"       # no terminator between 'if' statement and '"Hello"' expression
+            //          PS> if ($true) {} "Hello"       # no terminator between 'if' statement and '"Hello"' expression
             //
             // however, the spec does say you have to have a terminator after every pipeline, which would make this
             // illegal:
             //
-            //          { Get-ChildItem }           # should be OK
+            //          PS> { Get-ChildItem }           # should be OK
             //
             // as a temporary workaround, I am requiring the statement_terminator between all statements, until we
             // find a fix.
@@ -323,6 +323,7 @@ namespace Pash.ParserIntrinsics
             ////            ;
             ////            new_line_character
             statement_terminator.Rule = ToTerminal(";") | Terminals.new_line_character;
+            MarkTransient(statement_terminator);
 
             ////        statement_terminators:
             ////            statement_terminator
@@ -450,7 +451,10 @@ namespace Pash.ParserIntrinsics
 
             ////        assignment_expression:
             ////            expression   assignment_operator   statement
-            assignment_expression.Rule = expression + Terminals.assignment_operator + statement;
+            //
+            // I think the left side should be primary_expression. But as a hack for now, I'm jumping straight to 
+            // variable;
+            assignment_expression.Rule = /*expression*/Terminals.variable + Terminals.assignment_operator + statement;
 
             ////        pipeline_tail:
             ////            |   new_lines_opt   command
@@ -761,13 +765,12 @@ namespace Pash.ParserIntrinsics
                 var nodeType = Assembly.GetCallingAssembly().GetType("Pash.ParserIntrinsics.AstNodes." + field.Name + "_astnode");
                 if (nodeType == null)
                 {
-                    nonTerminal.AstConfig.NodeType = typeof(_astnode); // default that delegates to children
+                    nonTerminal.SetFlag(TermFlags.NoAstNode);
                 }
                 else
                 {
                     nonTerminal.AstConfig.NodeType = nodeType;
                 }
-
 
                 field.SetValue(this, nonTerminal);
             }

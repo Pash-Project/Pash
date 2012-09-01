@@ -14,15 +14,16 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class verbatim_string_literal_astnode : _astnode
     {
+        public readonly string Value;
+
         public verbatim_string_literal_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
-        }
+            ////        verbatim_string_literal:
+            ////            single_quote_character   verbatim_string_characters_opt   single_quote_char [sic]
 
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
-        {
             var matches = Regex.Match(Text, PowerShellGrammar.Terminals.verbatim_string_literal.Pattern);
-            return matches.Groups[PowerShellGrammar.Terminals.verbatim_string_characters.Name].Value;
+            this.Value = matches.Groups[PowerShellGrammar.Terminals.verbatim_string_characters.Name].Value;
         }
     }
 }

@@ -62,7 +62,7 @@ namespace TestHost
 
         public override void WriteErrorLine(string value)
         {
-            throw new NotImplementedException(value);
+            throw new Exception(value);
         }
 
         public override void WriteLine(string value)

@@ -14,14 +14,15 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class hexadecimal_integer_literal_astnode : _astnode
     {
+        public readonly int Value;
+
         public hexadecimal_integer_literal_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
-        }
+            ////        hexadecimal_integer_literal:
+            ////            0x   hexadecimal_digits   long_type_suffix_opt   numeric_multiplier_opt
 
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
-        {
-            return Convert.ToInt32(Text, 16);
+            this.Value = Convert.ToInt32(Text, 16);
         }
     }
 }

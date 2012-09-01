@@ -16,12 +16,10 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class variable_astnode : _astnode
     {
+        public readonly string Name;
+
         public variable_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
-        {
-        }
-
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        variable:
             ////            $$
@@ -31,12 +29,10 @@ namespace Pash.ParserIntrinsics.AstNodes
             ////            @   variable_scope_opt   variable_characters
             ////            braced_variable
 
-            string name = GetVariableName(Text);
-
-            return GetVariable(context, name);
+            this.Name = GetVariableName(Text);
         }
 
-        internal static string GetVariableName(string variableText)
+        static string GetVariableName(string variableText)
         {
             var matches = Regex.Match(variableText, PowerShellGrammar.Terminals.variable.Pattern);
 
@@ -67,7 +63,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             else throw new NotImplementedException(variableText);
         }
 
-        object GetVariable(ExecutionContext context, string name)
+        internal PSVariable GetVariable(ExecutionContext context)
         {
             // Should we do this instead?
             //context.GetVariable(name)
@@ -83,17 +79,21 @@ namespace Pash.ParserIntrinsics.AstNodes
             try
             {
                 Command cmd = new Command("Get-Variable");
-                cmd.Parameters.Add("Name", new string[] { name });
+                cmd.Parameters.Add("Name", new string[] { this.Name });
                 // TODO: implement command invoke
                 pipeline.Commands.Add(cmd);
 
-                return pipeline.Invoke().First();
+                return (PSVariable)pipeline.Invoke().First().ImmediateBaseObject;
             }
             finally
             {
                 context.PopPipeline();
             }
+        }
 
+        internal object Evaluate(ExecutionContext context, ICommandRuntime commandRuntime)
+        {
+            return GetVariable(context).Value;
         }
     }
 }

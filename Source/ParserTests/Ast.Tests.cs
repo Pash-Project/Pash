@@ -99,20 +99,19 @@ namespace ParserTests
             //// 
             ////     1..10              # ascending range 1..10
             {
-                var result = ((PSObject[])ExecuteInput("1..10"))
-                    .Select(o => o.BaseObject);
+                var result = (int[])ExecuteInput("1..10");
                 Assert.AreEqual(1, result.First());
                 Assert.AreEqual(10, result.Last());
                 Assert.AreEqual(2, result.Skip(1).First());
             }
 
-            CollectionAssert.AreEqual(new[] { 3, 2, 1 }, ((PSObject[])ExecuteInput("3..1")).Select(o => o.BaseObject));
+            CollectionAssert.AreEqual(new[] { 3, 2, 1 }, (int[])ExecuteInput("3..1"));
 
             ////    -500..-495          # descending range -500..-495
-            CollectionAssert.AreEqual(new[] { -500, -499, -498, -497, -496, -495 }, ((PSObject[])ExecuteInput("-500..-495")).Select(o => o.BaseObject));
+            CollectionAssert.AreEqual(new[] { -500, -499, -498, -497, -496, -495 }, (int[])ExecuteInput("-500..-495"));
 
             ////     16..16             # seqeunce of 1
-            CollectionAssert.AreEqual(new[] { 16 }, ((PSObject[])ExecuteInput("16..16")).Select(o => o.BaseObject));
+            CollectionAssert.AreEqual(new[] { 16 }, (int[])ExecuteInput("16..16"));
 
             ////     
             ////     $x = 1.5
@@ -139,15 +138,15 @@ namespace ParserTests
         [Test]
         public void ArrayLiteralTest()
         {
-            var result = ((PSObject[])ExecuteInput("1,3,3")).Select(o => o.BaseObject);
+            var result = (object[])ExecuteInput("1,3,3");
 
-            CollectionAssert.AreEqual(new[] { 1, 3, 3 }, result);
+            CollectionAssert.AreEqual(new object[] { 1, 3, 3 }, result);
         }
 
         [Test, Ignore("bug")]
         public void JaggedArrayTest()
         {
-            var result = ((PSObject[])ExecuteInput("$x = 1,2; 3,$x")).Select(o => o.BaseObject);
+            var result = (int[])ExecuteInput("$x = 1,2; 3,$x");
 
             Assert.AreEqual(2, result.Count());
         }
@@ -162,7 +161,9 @@ namespace ParserTests
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
 
-            return ((_astnode)parseTree.Root.AstNode).Execute(null, null);
+            var root = ((_astnode)parseTree.Root.AstNode).Cast<interactive_input_astnode>();
+
+            return root.ScriptBlock.Execute(null, null);
         }
     }
 }

@@ -14,19 +14,16 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class command_elements_astnode : _astnode
     {
+        public readonly IEnumerable<command_element_astnode> Items;
+
         public command_elements_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
-        }
+            ////        command_elements:
+            ////            command_element
+            ////            command_elements   command_element
 
-        internal override object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
-        {
-            return parseTreeNode.ChildNodes
-                .Select(node => node.AstNode)
-                .Cast<_astnode>()
-                .Select(astNode => astNode.Execute(context, commandRuntime))
-                .Select(o => new CommandParameter(null, o))
-                ;
+            this.Items = this.ChildAstNodes.Cast<command_element_astnode>();
         }
     }
 }

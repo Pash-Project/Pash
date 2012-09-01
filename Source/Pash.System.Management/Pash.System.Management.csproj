@@ -229,21 +229,66 @@
     <Compile Include="Pash\Implementation\PipelineProcessor.cs" />
     <Compile Include="Pash\Implementation\ScriptProcessor.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\additive_expression_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\pipeline_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammar.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_elements_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\array_literal_expression_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\assignment_expression_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\variable_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\expression_with_unary_operator_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\range_expression_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\hexadecimal_integer_literal_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\bitwise_expression_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_argument_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_astnode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_elements_astnode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_element_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_name_astnode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_name_expr_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\comparison_expression_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_parameter_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\expandable_string_literal_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\pipeline_tail_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\string_literal_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\decimal_integer_literal_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\generic_token_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\verbatim_string_literal_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\hexadecimal_integer_literal_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\integer_literal_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\expression_astnode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\expression_with_unary_operator_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\format_expression_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\interactive_input_astnode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\literal_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\logical_expression_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\multiplicative_expression_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\parenthesized_expression_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\pipeline_astnode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\primary_expression_astnode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\range_expression_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\script_block_astnode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\script_block_body_astnode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\statement_astnode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\statement_list_astnode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\unary_expression_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\value_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\variable_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\verbatim_string_literal_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammar.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.cs" />
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.Terminals.cs" />
     <Compile Include="Extensions\String.cs" />
