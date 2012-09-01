@@ -138,9 +138,9 @@ namespace ParserTests
         [Test]
         public void ArrayLiteralTest()
         {
-            var result = (int[])ExecuteInput("1,3,3");
+            var result = (object[])ExecuteInput("1,3,3");
 
-            CollectionAssert.AreEqual(new[] { 1, 3, 3 }, result);
+            CollectionAssert.AreEqual(new object[] { 1, 3, 3 }, result);
         }
 
         [Test, Ignore("bug")]
