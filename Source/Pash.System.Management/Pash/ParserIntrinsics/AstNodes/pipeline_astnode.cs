@@ -48,6 +48,8 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             else if (this.parseTreeNode.ChildNodes[0].Term == Grammar.command)
             {
+                this.Command = this.ChildAstNodes[0].Cast<command_astnode>();
+
                 if (this.parseTreeNode.ChildNodes.Count > 1)
                 {
                     if (this.parseTreeNode.ChildNodes.Count > 2)
@@ -57,8 +59,6 @@ namespace Pash.ParserIntrinsics.AstNodes
 
                     this.PipelineTail = this.ChildAstNodes[1].Cast<pipeline_tail_astnode>();
                 }
-
-                this.Command = this.ChildAstNodes.Single().Cast<command_astnode>();
             }
 
             else throw new InvalidOperationException(this.ToString());
@@ -77,11 +77,15 @@ namespace Pash.ParserIntrinsics.AstNodes
             else if (this.Expression != null)
             {
                 results = this.Expression.Execute(context, commandRuntime);
+
+                if (this.PipelineTail != null) throw new NotImplementedException(this.ToString());
             }
 
             else if (this.Command != null)
             {
                 results = this.Command.Execute(context, commandRuntime);
+
+                if (this.PipelineTail != null) throw new NotImplementedException(this.ToString());
             }
 
             else throw new InvalidOperationException(this.ToString());
