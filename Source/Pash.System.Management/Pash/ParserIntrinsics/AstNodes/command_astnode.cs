@@ -15,7 +15,7 @@ namespace Pash.ParserIntrinsics.AstNodes
     public class command_astnode : _astnode
     {
         public readonly string Name;
-        public readonly IEnumerable<command_element_astnode> CommandElements;
+        public readonly command_elements_astnode CommandElements;
 
         public command_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
@@ -28,7 +28,10 @@ namespace Pash.ParserIntrinsics.AstNodes
             {
                 this.Name = this.ChildAstNodes[0].As<command_name_astnode>().Name;
 
-                this.CommandElements = this.ChildAstNodes.Skip(1).Cast<command_element_astnode>();
+                if (this.parseTreeNode.ChildNodes.Count == 2)
+                {
+                    this.CommandElements = this.ChildAstNodes[1].As<command_elements_astnode>();
+                }
             }
 
             else throw new NotImplementedException(this.ToString());
@@ -53,12 +56,11 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             pipeline.Input.Write(context.inputStreamReader.ReadToEnd(), true);
 
-
             var command = new Command(Name);
 
-            for (int i = 0; i < this.CommandElements.Count(); i++)
+            for (int i = 0; i < this.CommandElements.Items.Count(); i++)
             {
-                var commandElement = this.CommandElements.ElementAt(i);
+                var commandElement = this.CommandElements.Items.ElementAt(i);
 
                 if (commandElement.Argument != null)
                 {
@@ -67,8 +69,24 @@ namespace Pash.ParserIntrinsics.AstNodes
 
                 else if (commandElement.Parameter != null)
                 {
-                    // TODO: '-Foo:bar' and '-Foo bar'
-                    command.Parameters.Add(new CommandParameter(commandElement.Parameter.Name, true));
+                    string name = commandElement.Parameter.Name;
+                    object value;
+
+                    // TODO: '-Foo bar', where 'bar' is an argument to '-Foo', e.g. 'Get-ChildItem -Path C:\'
+                    if (commandElement.Parameter.Colon)
+                    {
+                        i++;
+                        if (i == this.CommandElements.Items.Count()) throw new Exception("Parameter '{0}' requires an argument.".FormatString(commandElement.Parameter.Name));
+
+                        value = this.CommandElements.Items.ElementAt(i);
+                    }
+                    else
+                    {
+                        // TODO: what if this is not a switch? Postpone this code until binding time.
+                        value = true;
+                    }
+
+                    command.Parameters.Add(new CommandParameter(name, value));
                 }
             }
 

@@ -236,6 +236,9 @@
     <Compile Include="Pash\ParserIntrinsics\AstNodes\command_astnode.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_elements_astnode.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Pash\ParserIntrinsics\AstNodes\command_element_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\command_name_astnode.cs">
       <SubType>Code</SubType>
