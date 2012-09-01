@@ -33,6 +33,8 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             else if (this.parseTreeNode.ChildNodes[0].Term == Grammar.expression)
             {
+                this.Expression = this.ChildAstNodes.[0].Cast<expression_astnode>();
+
                 if (this.parseTreeNode.ChildNodes.Count > 1)
                 {
                     if (this.parseTreeNode.ChildNodes.Count > 2 || this.parseTreeNode.ChildNodes[1].Term != Grammar.pipeline_tail)
@@ -42,8 +44,6 @@ namespace Pash.ParserIntrinsics.AstNodes
 
                     this.PipelineTail = this.ChildAstNodes[1].Cast<pipeline_tail_astnode>();
                 }
-
-                this.Expression = this.ChildAstNodes.Single().Cast<expression_astnode>();
             }
 
             else if (this.parseTreeNode.ChildNodes[0].Term == Grammar.command)
@@ -66,44 +66,46 @@ namespace Pash.ParserIntrinsics.AstNodes
 
         internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
-            object results;
-
             if (this.AssignmentExpression != null)
             {
                 this.AssignmentExpression.Execute(context, commandRuntime);
-                results = null;
+                return null;
             }
 
-            else if (this.Expression != null)
+            object results;
+
+            ExecutionContext subContext = context.CreateNestedContext();
+            subContext.inputStreamReader = context.inputStreamReader;
+
+            PipelineCommandRuntime subRuntime = new PipelineCommandRuntime(((PipelineCommandRuntime)commandRuntime).pipelineProcessor);
+
+
+            if (this.Expression != null)
             {
                 results = this.Expression.Execute(context, commandRuntime);
 
-                if (this.PipelineTail != null) throw new NotImplementedException(this.ToString());
             }
 
             else if (this.Command != null)
             {
-                results = this.Command.Execute(context, commandRuntime);
-
-                if (this.PipelineTail != null) throw new NotImplementedException(this.ToString());
+                results = this.Command.Execute(subContext, subRuntime);
             }
 
             else throw new InvalidOperationException(this.ToString());
 
-            return results;
+            if (this.PipelineTail == null)
+            {
+                return results;
+            }
+            else
+            {
+                subContext = context.CreateNestedContext();
+                subContext.inputStreamReader = new PSObjectPipelineReader(new[] { results });
+
+                subRuntime = new PipelineCommandRuntime(((PipelineCommandRuntime)commandRuntime).pipelineProcessor);
+
+                return this.PipelineTail.Execute(subContext, subRuntime);
+            }
         }
-
-        //        ExecutionContext subContext = context.CreateNestedContext();
-        //        subContext.inputStreamReader = context.inputStreamReader;
-
-        //        PipelineCommandRuntime subRuntime = new PipelineCommandRuntime(((PipelineCommandRuntime)commandRuntime).pipelineProcessor);
-
-        //        var results = ChildAstNodes.First().Execute_old(subContext, subRuntime);
-
-        //        subContext = context.CreateNestedContext();
-        //        subContext.inputStreamReader = new PSObjectPipelineReader(new[] { results });
-
-        //        subRuntime = new PipelineCommandRuntime(((PipelineCommandRuntime)commandRuntime).pipelineProcessor);
-        //        return ChildAstNodes.Skip(1).First().Execute_old(subContext, subRuntime);
     }
 }

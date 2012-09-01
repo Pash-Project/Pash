@@ -12,7 +12,7 @@ namespace Pash.ParserIntrinsics.AstNodes
     public class pipeline_tail_astnode : _astnode
     {
         public readonly command_astnode Command;
-        public readonly pipeline_tail_astnode Pipeline;
+        public readonly pipeline_tail_astnode PipelineTail;
 
         public pipeline_tail_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
@@ -25,7 +25,7 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.ChildAstNodes.Count > 1)
             {
-                this.Pipeline = this.ChildAstNodes[2].Cast<pipeline_tail_astnode>();
+                this.PipelineTail = this.ChildAstNodes[2].Cast<pipeline_tail_astnode>();
             }
 
             if (this.ChildAstNodes.Count > 2) throw new InvalidOperationException(this.ToString());
@@ -33,7 +33,26 @@ namespace Pash.ParserIntrinsics.AstNodes
 
         internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
-            throw new NotImplementedException();
+            ExecutionContext subContext = context.CreateNestedContext();
+            subContext.inputStreamReader = context.inputStreamReader;
+
+            PipelineCommandRuntime subRuntime = new PipelineCommandRuntime(((PipelineCommandRuntime)commandRuntime).pipelineProcessor);
+
+            var results = this.Command.Execute(subContext, subRuntime);
+
+            if (this.PipelineTail == null)
+            {
+                return results;
+            }
+            else
+            {
+                subContext = context.CreateNestedContext();
+                subContext.inputStreamReader = new PSObjectPipelineReader(new[] { results });
+
+                subRuntime = new PipelineCommandRuntime(((PipelineCommandRuntime)commandRuntime).pipelineProcessor);
+
+                return this.PipelineTail.Execute(subContext, subRuntime);
+            }
         }
     }
 }
