@@ -63,7 +63,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             else throw new NotImplementedException(variableText);
         }
 
-        object GetVariable(ExecutionContext context, string name)
+        internal PSVariable GetVariable(ExecutionContext context)
         {
             // Should we do this instead?
             //context.GetVariable(name)
@@ -79,17 +79,21 @@ namespace Pash.ParserIntrinsics.AstNodes
             try
             {
                 Command cmd = new Command("Get-Variable");
-                cmd.Parameters.Add("Name", new string[] { name });
+                cmd.Parameters.Add("Name", new string[] { this.Name });
                 // TODO: implement command invoke
                 pipeline.Commands.Add(cmd);
 
-                return pipeline.Invoke().First();
+                return (PSVariable)pipeline.Invoke().First().ImmediateBaseObject;
             }
             finally
             {
                 context.PopPipeline();
             }
+        }
 
+        internal object Evaluate(ExecutionContext context, ICommandRuntime commandRuntime)
+        {
+            return GetVariable(context).Value;
         }
     }
 }

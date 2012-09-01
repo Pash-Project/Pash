@@ -13,8 +13,9 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class pipeline_astnode : _astnode
     {
-        public readonly command_astnode Command;
         public readonly assignment_expression_astnode AssignmentExpression;
+        public readonly expression_astnode Expression;
+        public readonly command_astnode Command;
 
         public pipeline_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
@@ -31,11 +32,14 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             else if (this.parseTreeNode.ChildNodes[0].Term == Grammar.expression)
             {
-                throw new NotImplementedException(this.ToString());
+                if (this.ChildAstNodes.Count > 1) throw new NotImplementedException(this.ToString());
+                this.Expression = this.ChildAstNodes.Single().As<expression_astnode>();
             }
 
             else if (this.parseTreeNode.ChildNodes[0].Term == Grammar.command)
             {
+                if (this.ChildAstNodes.Count > 1) throw new NotImplementedException(this.ToString());
+
                 this.Command = this.ChildAstNodes.Single().As<command_astnode>();
             }
 
@@ -44,12 +48,23 @@ namespace Pash.ParserIntrinsics.AstNodes
 
         internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
+            if (this.AssignmentExpression != null)
+            {
+                this.AssignmentExpression.Execute(context, commandRuntime);
+                return null;
+            }
+
+            if (this.Expression != null)
+            {
+                return this.Expression.Execute(context, commandRuntime);
+            }
+
             if (this.Command != null)
             {
                 return this.Command.Execute(context, commandRuntime);
             }
 
-            throw new NotImplementedException(this.ToString());
+            throw new InvalidOperationException(this.ToString());
         }
 
         //        ExecutionContext subContext = context.CreateNestedContext();

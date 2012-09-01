@@ -13,26 +13,38 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class additive_expression_astnode : _astnode
     {
-        readonly _astnode leftOperandAstNode;
-        readonly _astnode rightOperandAstNode;
+        public readonly multiplicative_expression_astnode MultiplyExpression;
+
+        public readonly additive_expression_astnode LeftOperand;
+        public readonly multiplicative_expression_astnode RightOperand;
+        public readonly string Operator;
 
         public additive_expression_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
+            ////        additive_expression:
+            ////            multiplicative_expression
+            ////            additive_expression   +   new_lines_opt   multiplicative_expression
+            ////            additive_expression   dash   new_lines_opt   multiplicative_expression
+
             if (parseTreeNode.ChildNodes.Count == 3)
             {
-                leftOperandAstNode = ChildAstNodes.First();
+                this.LeftOperand = this.ChildAstNodes[0].As<additive_expression_astnode>();
+
                 KeywordTerminal keywordTerminal = (KeywordTerminal)parseTreeNode.ChildNodes[1].Term;
                 // if you hit this exception, it's probably subtraction ("dash")
                 if (keywordTerminal.Text != "+") throw new NotImplementedException();
-                rightOperandAstNode = ChildAstNodes.Skip(2).First();
+                this.Operator = "+";
+
+                this.RightOperand = this.ChildAstNodes[2].As<multiplicative_expression_astnode>();
             }
+
             else if (parseTreeNode.ChildNodes.Count == 1)
             {
-                var childNode = parseTreeNode.ChildNodes.Single();
-                // TODO: find a way to get rid of this hard-coded string.
-                Debug.Assert(childNode.Term.Name == "multiplicative_expression");
+                MultiplyExpression = this.ChildAstNodes.Single().As<multiplicative_expression_astnode>();
             }
+
+            else throw new InvalidOperationException(this.ToString());
         }
 
         // TODO: sum the values in both pipelines
@@ -46,13 +58,13 @@ namespace Pash.ParserIntrinsics.AstNodes
             ////            additive_expression   dash   new_lines_opt   multiplicative_expression
 
             // if only 1 child node, then the default (base) implementation will forward to that child
-            if (parseTreeNode.ChildNodes.Count == 1)
+            if (this.MultiplyExpression != null)
             {
-                return base.Execute_old(context, commandRuntime);
+                return this.MultiplyExpression.Execute(context, commandRuntime);
             }
 
-            var leftValue = leftOperandAstNode.Execute_old(context, commandRuntime);
-            var rightValue = rightOperandAstNode.Execute_old(context, commandRuntime);
+            var leftValue = this.LeftOperand.Execute(context, commandRuntime);
+            var rightValue = this.RightOperand.Execute(context, commandRuntime);
 
             // TODO: need to generalize this via MethodInfo (somewhere in the compiler libraries via LanguageBasics)
             // usualy operators defined as: "public static int operator +", but in the MSIL are translated to op_Add

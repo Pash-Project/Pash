@@ -32,6 +32,11 @@ namespace Pash.ParserIntrinsics.AstNodes
         [DebuggerStepThrough]
         public T As<T>() where T : _astnode { return (T)this; }
 
-        public string Text { get { return parseTreeNode.Token.Text; } }
+        public string Text { get { return parseTreeNode.FindTokenAndGetText(); } }
+
+        public override string ToString()
+        {
+            return "'{0}' ({1})".FormatString(this.Text, this.GetType().Name);
+        }
     }
 }

@@ -236,7 +236,7 @@ namespace Pash.ParserIntrinsics
             ////            expandable_here_string_literal
             ////            verbatim_string_literal
             ////            verbatim_here_string_literal
-            string_literal.Rule = Terminals.expandable_string_literal | Terminals.verbatim_string_literal;
+            string_literal.Rule = Terminals.verbatim_string_literal;
             #endregion
             #endregion
 

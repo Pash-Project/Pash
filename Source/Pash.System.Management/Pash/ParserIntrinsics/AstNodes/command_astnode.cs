@@ -24,7 +24,7 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.parseTreeNode.ChildNodes[0].Term == Grammar.command_name)
             {
-                this.Name = this.ChildAstNodes.Single().As<command_name_astnode>().Name;
+                this.Name = this.ChildAstNodes[0].As<command_name_astnode>().Name;
             }
 
             else throw new NotImplementedException(this.ToString());

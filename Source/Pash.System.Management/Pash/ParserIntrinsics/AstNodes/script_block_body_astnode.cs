@@ -24,6 +24,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             {
                 this.Statements = this.ChildAstNodes.Single().As<statement_list_astnode>().Statements;
             }
+
             else throw new NotImplementedException(this.ToString());
         }
 

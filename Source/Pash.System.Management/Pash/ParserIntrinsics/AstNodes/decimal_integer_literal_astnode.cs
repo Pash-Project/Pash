@@ -14,16 +14,15 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class decimal_integer_literal_astnode : _astnode
     {
+        public readonly int Value;
+
         public decimal_integer_literal_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
         {
-        }
-
-        internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
-        {
             ////        decimal_integer_literal:
             ////            decimal_digits   numeric_type_suffix_opt   numeric_multiplier_opt
-            return Convert.ToInt32(Text, 10);
+
+            this.Value = Convert.ToInt32(Text, 10);
         }
     }
 }

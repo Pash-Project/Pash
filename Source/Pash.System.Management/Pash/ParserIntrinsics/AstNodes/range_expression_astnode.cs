@@ -14,47 +14,53 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class range_expression_astnode : _astnode
     {
+        public readonly array_literal_expression_astnode ArrayLiteral;
+
+        public readonly range_expression_astnode RangeStart;
+        public readonly array_literal_expression_astnode RangeEnd;
+
         public range_expression_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
-        {
-        }
-
-        internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        range_expression:
             ////            array_literal_expression
             ////            range_expression   ..   new_lines_opt   array_literal_expression
 
-            // if only 1 child node, then the default (base) implementation will forward to that child
-            if (parseTreeNode.ChildNodes.Count == 1)
+            if (this.ChildAstNodes.Count == 1)
             {
-                return base.Execute_old(context, commandRuntime);
+                this.ArrayLiteral = this.ChildAstNodes.Single().As<array_literal_expression_astnode>();
             }
 
-            if (parseTreeNode.ChildNodes.Count != 3)
-                throw new Exception("unexpected child node count {0}".FormatString(parseTreeNode.ChildNodes.Count));
+            else if (this.ChildAstNodes.Count == 3)
+            {
+                this.RangeStart = this.ChildAstNodes[0].As<range_expression_astnode>();
 
-            var startRangeExpressionAstNode = ChildAstNodes.First();
+                Debug.Assert(this.parseTreeNode.ChildNodes[1].FindTokenAndGetText() == "..", this.ToString());
 
-            KeywordTerminal keywordTerminal = (KeywordTerminal)parseTreeNode.ChildNodes[1].Term;
-            if (keywordTerminal.Text != "..") throw new NotImplementedException();
-            var endRangeExpressionAstNode = ChildAstNodes.Skip(2).First().As<array_literal_expression_astnode>();
+                this.RangeEnd = this.ChildAstNodes[2].As<array_literal_expression_astnode>();
+            }
 
-            return Execute(context, commandRuntime, startRangeExpressionAstNode, endRangeExpressionAstNode)
-                .Select(i=>new PSObject(i))
+            else throw new InvalidOperationException(this.ToString());
+        }
+
+        internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        {
+            if (this.ArrayLiteral != null) return this.ArrayLiteral.Execute(context, commandRuntime);
+
+            return Execute(context, commandRuntime, RangeStart, RangeEnd)
                 .ToArray()
                 ;
         }
 
-        private static IEnumerable<int> Execute(ExecutionContext context, ICommandRuntime commandRuntime, _astnode startRangeExpressionNode, _astnode endRangeExpressionNode)
+        private static IEnumerable<int> Execute(ExecutionContext context, ICommandRuntime commandRuntime, range_expression_astnode start, array_literal_expression_astnode end)
         {
             //// Description:
             ////
             //// A range-expression creates an unconstrained 1-dimensional array whose elements are the values of 
             //// the int sequence specified by the range bounds. The values designated by the operands are converted 
             //// to int, if necessary (§6.4). 
-            var leftOperandValue = (int)startRangeExpressionNode.Execute_old(context, commandRuntime);
-            var rightOperandValue = (int)endRangeExpressionNode.Execute_old(context, commandRuntime);
+            var leftOperandValue = (int)start.Execute(context, commandRuntime);
+            var rightOperandValue = (int)end.Execute(context, commandRuntime);
 
 
             //// The operand designating the lower value after conversion is the lower 

@@ -15,40 +15,47 @@ namespace Pash.ParserIntrinsics.AstNodes
 {
     public class array_literal_expression_astnode : _astnode
     {
+        public readonly unary_expression_astnode UnaryExpression;
+        public readonly array_literal_expression_astnode ArrayLiteralExpression;
+
         public array_literal_expression_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
-        {
-        }
-
-        internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
         {
             ////        array_literal_expression:
             ////            unary_expression
             ////            unary_expression   ,    new_lines_opt   array_literal_expression
+            this.UnaryExpression = this.ChildAstNodes.First().As<unary_expression_astnode>();
 
-            // if only 1 child node, then the default (base) implementation will forward to that child
-            if (parseTreeNode.ChildNodes.Count == 1)
+            if (this.ChildAstNodes.Count == 1)
             {
-                return base.Execute_old(context, commandRuntime);
+                // do nothing
             }
 
-            if (parseTreeNode.ChildNodes.Count != 3)
-                throw new Exception("unexpected child node count {0}".FormatString(parseTreeNode.ChildNodes.Count));
+            else if (this.ChildAstNodes.Count == 3)
+            {
+                Debug.Assert(this.parseTreeNode.ChildNodes[1].FindTokenAndGetText() == ",", this.ToString());
 
-            var firstItemAstNode = ChildAstNodes.First();
+                this.ArrayLiteralExpression = this.ChildAstNodes[2].As<array_literal_expression_astnode>();
+            }
 
-            KeywordTerminal keywordTerminal = (KeywordTerminal)parseTreeNode.ChildNodes[1].Term;
-            if (keywordTerminal.Text != ",") throw new NotImplementedException();
-            var remainingItemsAstNode = ChildAstNodes.Skip(2).First();
+            else throw new InvalidOperationException(this.ToString());
+        }
 
-            return Execute(context, commandRuntime, firstItemAstNode, remainingItemsAstNode)
+        internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)
+        {
+            if (this.ArrayLiteralExpression == null)
+            {
+                return this.UnaryExpression.Execute(context, commandRuntime);
+            }
+
+            return Execute(context, commandRuntime, UnaryExpression, ArrayLiteralExpression)
                 .Select(i => new PSObject(i))
                 .ToArray()
                 ;
         }
 
         // PERF: This is O(n^2), as we build up the array right-to-left. That would only matter for very large arrays.
-        static IEnumerable<object> Execute(ExecutionContext context, ICommandRuntime commandRuntime, _astnode firstItemAstNode, _astnode remainingItemsAstNode)
+        static IEnumerable<object> Execute(ExecutionContext context, ICommandRuntime commandRuntime, unary_expression_astnode firstItemAstNode, array_literal_expression_astnode remainingItemsAstNode)
         {
             //// 7.3 Binary comma operator
             ////
@@ -56,8 +63,8 @@ namespace Pash.ParserIntrinsics.AstNodes
             ////
             ////     The binary comma operator creates a 1-dimensional array whose elements are the values designated by its operands, in lexical order. The array has unconstrained type.
             ////
-            var leftOperandValue = firstItemAstNode.Execute_old(context, commandRuntime);
-            var rightOperandValue = remainingItemsAstNode.Execute_old(context, commandRuntime);
+            var leftOperandValue = firstItemAstNode.Execute(context, commandRuntime);
+            var rightOperandValue = remainingItemsAstNode.Execute(context, commandRuntime);
 
             var newList = new List<object>() { leftOperandValue };
 
