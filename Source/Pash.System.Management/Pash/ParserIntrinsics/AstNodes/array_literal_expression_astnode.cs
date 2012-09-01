@@ -49,7 +49,6 @@ namespace Pash.ParserIntrinsics.AstNodes
             }
 
             return Execute(context, commandRuntime, UnaryExpression, ArrayLiteralExpression)
-                .Select(i => new PSObject(i))
                 .ToArray()
                 ;
         }
