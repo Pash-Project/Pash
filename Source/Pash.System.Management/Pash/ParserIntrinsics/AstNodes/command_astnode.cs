@@ -26,11 +26,11 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.parseTreeNode.ChildNodes[0].Term == Grammar.command_name)
             {
-                this.Name = this.ChildAstNodes[0].As<command_name_astnode>().Name;
+                this.Name = this.ChildAstNodes[0].Cast<command_name_astnode>().Name;
 
                 if (this.parseTreeNode.ChildNodes.Count == 2)
                 {
-                    this.CommandElements = this.ChildAstNodes[1].As<command_elements_astnode>();
+                    this.CommandElements = this.ChildAstNodes[1].Cast<command_elements_astnode>();
                 }
             }
 

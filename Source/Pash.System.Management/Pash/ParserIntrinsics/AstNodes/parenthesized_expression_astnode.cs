@@ -21,7 +21,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             ////        parenthesized_expression:
             ////            (   new_lines_opt   pipeline   new_lines_opt   )
 
-            this.Pipeline = this.ChildAstNodes[1].As<pipeline_astnode>();
+            this.Pipeline = this.ChildAstNodes[1].Cast<pipeline_astnode>();
         }
 
         internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)

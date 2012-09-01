@@ -18,7 +18,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         {
             ////        interactive_input:
             ////            script_block
-            this.ScriptBlock = this.ChildAstNodes.Single().As<script_block_astnode>();
+            this.ScriptBlock = this.ChildAstNodes.Single().Cast<script_block_astnode>();
         }
     }
 }

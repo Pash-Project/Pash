@@ -161,7 +161,7 @@ namespace ParserTests
             Assert.IsNotNull(parseTree);
             Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
 
-            var root = ((_astnode)parseTree.Root.AstNode).As<interactive_input_astnode>();
+            var root = ((_astnode)parseTree.Root.AstNode).Cast<interactive_input_astnode>();
 
             return root.ScriptBlock.Execute(null, null);
         }

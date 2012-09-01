@@ -28,16 +28,16 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.ChildAstNodes.Count == 1)
             {
-                this.ArrayLiteral = this.ChildAstNodes.Single().As<array_literal_expression_astnode>();
+                this.ArrayLiteral = this.ChildAstNodes.Single().Cast<array_literal_expression_astnode>();
             }
 
             else if (this.ChildAstNodes.Count == 3)
             {
-                this.RangeStart = this.ChildAstNodes[0].As<range_expression_astnode>();
+                this.RangeStart = this.ChildAstNodes[0].Cast<range_expression_astnode>();
 
                 Debug.Assert(this.parseTreeNode.ChildNodes[1].FindTokenAndGetText() == "..", this.ToString());
 
-                this.RangeEnd = this.ChildAstNodes[2].As<array_literal_expression_astnode>();
+                this.RangeEnd = this.ChildAstNodes[2].Cast<array_literal_expression_astnode>();
             }
 
             else throw new InvalidOperationException(this.ToString());

@@ -37,7 +37,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             if (this.parseTreeNode.ChildNodes[0].Token.Terminal == PowerShellGrammar.Terminals.dash)
             {
                 Debug.Assert(this.parseTreeNode.ChildNodes.Count == 2, this.ToString());
-                NegativeExpression = this.ChildAstNodes[1].As<unary_expression_astnode>();
+                NegativeExpression = this.ChildAstNodes[1].Cast<unary_expression_astnode>();
             }
 
             else throw new NotImplementedException(this.ToString());

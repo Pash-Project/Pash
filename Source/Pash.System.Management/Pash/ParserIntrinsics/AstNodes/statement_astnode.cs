@@ -28,7 +28,7 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.parseTreeNode.ChildNodes[0].Term == Grammar.pipeline)
             {
-                this.Pipeline = this.ChildAstNodes.Single().As<pipeline_astnode>();
+                this.Pipeline = this.ChildAstNodes.Single().Cast<pipeline_astnode>();
             }
 
             else throw new NotImplementedException(this.ToString());

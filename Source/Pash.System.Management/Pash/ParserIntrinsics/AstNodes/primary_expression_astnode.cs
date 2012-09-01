@@ -26,7 +26,7 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.parseTreeNode.ChildNodes.Single().Term == Grammar.value)
             {
-                this.Value = this.ChildAstNodes.Single().As<value_astnode>();
+                this.Value = this.ChildAstNodes.Single().Cast<value_astnode>();
             }
 
             else throw new NotImplementedException(this.ToString());

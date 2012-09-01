@@ -23,12 +23,12 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.parseTreeNode.ChildNodes.Single().Term == Grammar.command_name)
             {
-                this.CommandName = this.ChildAstNodes.Single().As<command_name_astnode>();
+                this.CommandName = this.ChildAstNodes.Single().Cast<command_name_astnode>();
             }
 
             else if (this.parseTreeNode.ChildNodes.Single().Term == Grammar.primary_expression)
             {
-                this.PrimaryExpression = this.ChildAstNodes.Single().As<primary_expression_astnode>();
+                this.PrimaryExpression = this.ChildAstNodes.Single().Cast<primary_expression_astnode>();
             }
 
             else throw new NotImplementedException(this.ToString());

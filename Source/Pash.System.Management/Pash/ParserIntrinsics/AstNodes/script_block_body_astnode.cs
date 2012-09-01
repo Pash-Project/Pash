@@ -22,7 +22,7 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.parseTreeNode.ChildNodes.Single().Term == Grammar.statement_list)
             {
-                this.Statements = this.ChildAstNodes.Single().As<statement_list_astnode>().Statements;
+                this.Statements = this.ChildAstNodes.Single().Cast<statement_list_astnode>().Statements;
             }
 
             else throw new NotImplementedException(this.ToString());

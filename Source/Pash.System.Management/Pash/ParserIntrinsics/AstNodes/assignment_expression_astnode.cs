@@ -26,9 +26,9 @@ namespace Pash.ParserIntrinsics.AstNodes
             ////        assignment_expression:
             ////            expression   assignment_operator   statement
             Debug.Assert(this.ChildAstNodes.Count == 3, this.ToString());
-            this.Variable = this.ChildAstNodes[0].As<variable_astnode>();
+            this.Variable = this.ChildAstNodes[0].Cast<variable_astnode>();
             this.Operator = this.parseTreeNode.ChildNodes[1].FindTokenAndGetText();
-            this.Statement = this.ChildAstNodes[2].As<statement_astnode>();
+            this.Statement = this.ChildAstNodes[2].Cast<statement_astnode>();
         }
 
         internal void Execute(ExecutionContext context, ICommandRuntime commandRuntime)

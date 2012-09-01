@@ -29,7 +29,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         protected ReadOnlyCollection<_astnode> ChildAstNodes;
 
         [DebuggerStepThrough]
-        internal T As<T>() where T : _astnode { return (T)this; }
+        internal T Cast<T>() where T : _astnode { return (T)this; }
 
         protected string Text { get { return parseTreeNode.FindTokenAndGetText(); } }
 

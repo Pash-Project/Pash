@@ -30,17 +30,17 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.parseTreeNode.ChildNodes.Single().Term == Grammar.parenthesized_expression)
             {
-                this.ParenthesizedExpression = this.ChildAstNodes.Single().As<parenthesized_expression_astnode>();
+                this.ParenthesizedExpression = this.ChildAstNodes.Single().Cast<parenthesized_expression_astnode>();
             }
 
             else if (this.parseTreeNode.ChildNodes.Single().Term == Grammar.literal)
             {
-                this.Literal = this.ChildAstNodes.Single().As<literal_astnode>();
+                this.Literal = this.ChildAstNodes.Single().Cast<literal_astnode>();
             }
 
             else if (this.parseTreeNode.ChildNodes.Single().Term == PowerShellGrammar.Terminals.variable)
             {
-                this.Variable = this.ChildAstNodes.Single().As<variable_astnode>();
+                this.Variable = this.ChildAstNodes.Single().Cast<variable_astnode>();
             }
 
             else throw new NotImplementedException(this.ToString());

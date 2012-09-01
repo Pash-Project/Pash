@@ -25,12 +25,12 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.parseTreeNode.ChildNodes.Single().Term == Grammar.integer_literal)
             {
-                this.IntegerValue = this.ChildAstNodes.Single().As<integer_literal_astnode>().Value;
+                this.IntegerValue = this.ChildAstNodes.Single().Cast<integer_literal_astnode>().Value;
             }
 
             else if (this.parseTreeNode.ChildNodes.Single().Term == Grammar.string_literal)
             {
-                this.StringValue = this.ChildAstNodes.Single().As<string_literal_astnode>().Value;
+                this.StringValue = this.ChildAstNodes.Single().Cast<string_literal_astnode>().Value;
             }
 
             else throw new NotImplementedException(this.ToString());

@@ -29,19 +29,19 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (parseTreeNode.ChildNodes.Count == 3)
             {
-                this.LeftOperand = this.ChildAstNodes[0].As<additive_expression_astnode>();
+                this.LeftOperand = this.ChildAstNodes[0].Cast<additive_expression_astnode>();
 
                 KeywordTerminal keywordTerminal = (KeywordTerminal)parseTreeNode.ChildNodes[1].Term;
                 // if you hit this exception, it's probably subtraction ("dash")
                 if (keywordTerminal.Text != "+") throw new NotImplementedException();
                 this.Operator = "+";
 
-                this.RightOperand = this.ChildAstNodes[2].As<multiplicative_expression_astnode>();
+                this.RightOperand = this.ChildAstNodes[2].Cast<multiplicative_expression_astnode>();
             }
 
             else if (parseTreeNode.ChildNodes.Count == 1)
             {
-                MultiplyExpression = this.ChildAstNodes.Single().As<multiplicative_expression_astnode>();
+                MultiplyExpression = this.ChildAstNodes.Single().Cast<multiplicative_expression_astnode>();
             }
 
             else throw new InvalidOperationException(this.ToString());

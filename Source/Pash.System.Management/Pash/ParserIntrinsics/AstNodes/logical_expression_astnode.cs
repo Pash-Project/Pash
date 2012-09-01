@@ -24,7 +24,7 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.ChildAstNodes.Count == 1)
             {
-                this.BitwiseExpression = this.ChildAstNodes.Single().As<bitwise_expression_astnode>();
+                this.BitwiseExpression = this.ChildAstNodes.Single().Cast<bitwise_expression_astnode>();
             }
 
             else throw new NotImplementedException(this.ToString());

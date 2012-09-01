@@ -27,20 +27,20 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.parseTreeNode.ChildNodes[0].Term == Grammar.assignment_expression)
             {
-                this.AssignmentExpression = this.ChildAstNodes.Single().As<assignment_expression_astnode>();
+                this.AssignmentExpression = this.ChildAstNodes.Single().Cast<assignment_expression_astnode>();
             }
 
             else if (this.parseTreeNode.ChildNodes[0].Term == Grammar.expression)
             {
                 if (this.ChildAstNodes.Count > 1) throw new NotImplementedException(this.ToString());
-                this.Expression = this.ChildAstNodes.Single().As<expression_astnode>();
+                this.Expression = this.ChildAstNodes.Single().Cast<expression_astnode>();
             }
 
             else if (this.parseTreeNode.ChildNodes[0].Term == Grammar.command)
             {
                 if (this.ChildAstNodes.Count > 1) throw new NotImplementedException(this.ToString());
 
-                this.Command = this.ChildAstNodes.Single().As<command_astnode>();
+                this.Command = this.ChildAstNodes.Single().Cast<command_astnode>();
             }
 
             else throw new InvalidOperationException(this.ToString());

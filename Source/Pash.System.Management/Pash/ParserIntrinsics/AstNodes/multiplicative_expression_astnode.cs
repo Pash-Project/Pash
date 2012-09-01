@@ -24,7 +24,7 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.ChildAstNodes.Count == 1)
             {
-                this.FormatExpression = this.ChildAstNodes.Single().As<format_expression_astnode>();
+                this.FormatExpression = this.ChildAstNodes.Single().Cast<format_expression_astnode>();
             }
 
             else throw new NotImplementedException(this.ToString());

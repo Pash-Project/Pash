@@ -22,7 +22,7 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.parseTreeNode.ChildNodes.Single().Term == Grammar.command_name_expr)
             {
-                this.CommandNameExpression = this.ChildAstNodes.Single().As<command_name_expr_astnode>();
+                this.CommandNameExpression = this.ChildAstNodes.Single().Cast<command_name_expr_astnode>();
             }
         }
     }

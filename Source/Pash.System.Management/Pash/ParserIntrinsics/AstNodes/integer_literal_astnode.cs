@@ -23,12 +23,12 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.parseTreeNode.ChildNodes.Single().Term == PowerShellGrammar.Terminals.decimal_integer_literal)
             {
-                this.Value = this.ChildAstNodes.Single().As<decimal_integer_literal_astnode>().Value;
+                this.Value = this.ChildAstNodes.Single().Cast<decimal_integer_literal_astnode>().Value;
             }
 
             else if (this.parseTreeNode.ChildNodes.Single().Term == PowerShellGrammar.Terminals.hexadecimal_integer_literal)
             {
-                this.Value = this.ChildAstNodes.Single().As<hexadecimal_integer_literal_astnode>().Value;
+                this.Value = this.ChildAstNodes.Single().Cast<hexadecimal_integer_literal_astnode>().Value;
             }
 
             else throw new InvalidOperationException(this.ToString());

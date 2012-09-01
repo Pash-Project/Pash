@@ -22,7 +22,7 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.ChildAstNodes.Count == 1)
             {
-                this.AdditiveExpression = this.ChildAstNodes.Single().As<additive_expression_astnode>();
+                this.AdditiveExpression = this.ChildAstNodes.Single().Cast<additive_expression_astnode>();
             }
 
             else throw new NotImplementedException(this.ToString());

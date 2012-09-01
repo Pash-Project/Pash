@@ -81,7 +81,7 @@ namespace Pash.Implementation
             //PipelineCommandRuntime runtime = (PipelineCommandRuntime) CommandRuntime;
             //context.outputStreamWriter = new ObjectStreamWriter(runtime.outputResults);
 
-            var root = ((_astnode)parseTree.Root.AstNode).As<interactive_input_astnode>();
+            var root = ((_astnode)parseTree.Root.AstNode).Cast<interactive_input_astnode>();
 
             var results = root.ScriptBlock.Execute(context, CommandRuntime);
 

@@ -25,7 +25,7 @@ namespace Pash.ParserIntrinsics.AstNodes
 
                 if (this.parseTreeNode.ChildNodes[i].Term == Grammar.script_block_body)
                 {
-                    this.ScriptBlockBody = ChildAstNodes[i].As<script_block_body_astnode>();
+                    this.ScriptBlockBody = ChildAstNodes[i].Cast<script_block_body_astnode>();
                     i++;
                 }
 

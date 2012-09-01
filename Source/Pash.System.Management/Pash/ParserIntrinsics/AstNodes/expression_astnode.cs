@@ -18,7 +18,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         {
             ////        expression:
             ////            logical_expression
-            this.LogicalExpression = this.ChildAstNodes.Single().As<logical_expression_astnode>();
+            this.LogicalExpression = this.ChildAstNodes.Single().Cast<logical_expression_astnode>();
         }
 
         internal object Execute(ExecutionContext context, ICommandRuntime commandRuntime)

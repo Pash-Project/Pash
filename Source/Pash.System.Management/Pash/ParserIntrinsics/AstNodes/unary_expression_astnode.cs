@@ -22,12 +22,12 @@ namespace Pash.ParserIntrinsics.AstNodes
             ////            expression_with_unary_operator
             if (this.ChildAstNodes.Single() is primary_expression_astnode)
             {
-                this.PrimaryExpression = this.ChildAstNodes.Single().As<primary_expression_astnode>();
+                this.PrimaryExpression = this.ChildAstNodes.Single().Cast<primary_expression_astnode>();
             }
 
             else if (this.ChildAstNodes.Single() is expression_with_unary_operator_astnode)
             {
-                this.ExpressionWithUnaryOperator = this.ChildAstNodes.Single().As<expression_with_unary_operator_astnode>();
+                this.ExpressionWithUnaryOperator = this.ChildAstNodes.Single().Cast<expression_with_unary_operator_astnode>();
             }
 
             else throw new InvalidOperationException(this.ToString());

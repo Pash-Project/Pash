@@ -24,7 +24,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             ////        array_literal_expression:
             ////            unary_expression
             ////            unary_expression   ,    new_lines_opt   array_literal_expression
-            this.UnaryExpression = this.ChildAstNodes.First().As<unary_expression_astnode>();
+            this.UnaryExpression = this.ChildAstNodes.First().Cast<unary_expression_astnode>();
 
             if (this.ChildAstNodes.Count == 1)
             {
@@ -35,7 +35,7 @@ namespace Pash.ParserIntrinsics.AstNodes
             {
                 Debug.Assert(this.parseTreeNode.ChildNodes[1].FindTokenAndGetText() == ",", this.ToString());
 
-                this.ArrayLiteralExpression = this.ChildAstNodes[2].As<array_literal_expression_astnode>();
+                this.ArrayLiteralExpression = this.ChildAstNodes[2].Cast<array_literal_expression_astnode>();
             }
 
             else throw new InvalidOperationException(this.ToString());

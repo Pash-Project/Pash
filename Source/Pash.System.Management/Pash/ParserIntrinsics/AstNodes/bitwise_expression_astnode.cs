@@ -24,7 +24,7 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             if (this.ChildAstNodes.Count == 1)
             {
-                this.ComparisonExpression = this.ChildAstNodes.Single().As<comparison_expression_astnode>();
+                this.ComparisonExpression = this.ChildAstNodes.Single().Cast<comparison_expression_astnode>();
             }
 
             else throw new NotImplementedException(this.ToString());
