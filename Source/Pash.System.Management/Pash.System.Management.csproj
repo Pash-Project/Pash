@@ -247,6 +247,7 @@
     <Compile Include="Pash\ParserIntrinsics\AstNodes\comparison_expression_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\command_parameter_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\expandable_string_literal_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\pipeline_tail_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\string_literal_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\decimal_integer_literal_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\hexadecimal_integer_literal_astnode.cs" />
