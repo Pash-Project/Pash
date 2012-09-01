@@ -16,6 +16,7 @@ namespace Pash.ParserIntrinsics.AstNodes
         public readonly assignment_expression_astnode AssignmentExpression;
         public readonly expression_astnode Expression;
         public readonly command_astnode Command;
+        public readonly pipeline_tail_astnode PipelineTail;
 
         public pipeline_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
@@ -32,13 +33,30 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             else if (this.parseTreeNode.ChildNodes[0].Term == Grammar.expression)
             {
-                if (this.ChildAstNodes.Count > 1) throw new NotImplementedException(this.ToString());
+                if (this.parseTreeNode.ChildNodes.Count > 1)
+                {
+                    if (this.parseTreeNode.ChildNodes.Count > 2 || this.parseTreeNode.ChildNodes[1].Term != Grammar.pipeline_tail)
+                    {
+                        throw new NotImplementedException(this.ToString());
+                    }
+
+                    this.PipelineTail = this.ChildAstNodes[1].Cast<pipeline_tail_astnode>();
+                }
+
                 this.Expression = this.ChildAstNodes.Single().Cast<expression_astnode>();
             }
 
             else if (this.parseTreeNode.ChildNodes[0].Term == Grammar.command)
             {
-                if (this.ChildAstNodes.Count > 1) throw new NotImplementedException(this.ToString());
+                if (this.parseTreeNode.ChildNodes.Count > 1)
+                {
+                    if (this.parseTreeNode.ChildNodes.Count > 2)
+                    {
+                        throw new NotImplementedException(this.ToString());
+                    }
+
+                    this.PipelineTail = this.ChildAstNodes[1].Cast<pipeline_tail_astnode>();
+                }
 
                 this.Command = this.ChildAstNodes.Single().Cast<command_astnode>();
             }
