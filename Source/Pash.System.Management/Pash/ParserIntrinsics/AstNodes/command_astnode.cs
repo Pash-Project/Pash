@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Management.Automation;
+using System.Management.Automation.Runspaces;
 using System.Text;
+using Extensions.String;
 using Irony.Ast;
 using Irony.Parsing;
 using Pash.Implementation;
-using System.Management.Automation;
-using System.Management.Automation.Runspaces;
-using System.Collections.ObjectModel;
 
 namespace Pash.ParserIntrinsics.AstNodes
 {
     public class command_astnode : _astnode
     {
         public readonly string Name;
+        public readonly IEnumerable<command_element_astnode> CommandElements;
 
         public command_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
             : base(astContext, parseTreeNode)
@@ -25,6 +27,8 @@ namespace Pash.ParserIntrinsics.AstNodes
             if (this.parseTreeNode.ChildNodes[0].Term == Grammar.command_name)
             {
                 this.Name = this.ChildAstNodes[0].As<command_name_astnode>().Name;
+
+                this.CommandElements = this.ChildAstNodes.Skip(1).Cast<command_element_astnode>();
             }
 
             else throw new NotImplementedException(this.ToString());
@@ -49,16 +53,29 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             pipeline.Input.Write(context.inputStreamReader.ReadToEnd(), true);
 
-            context.PushPipeline(pipeline);
 
+            var command = new Command(Name);
+
+            for (int i = 0; i < this.CommandElements.Count(); i++)
+            {
+                var commandElement = this.CommandElements.ElementAt(i);
+
+                if (commandElement.Argument != null)
+                {
+                    command.Parameters.Add(new CommandParameter(null, commandElement.Argument.CommandNameExpression.Execute(context, commandRuntime)));
+                }
+
+                else if (commandElement.Parameter != null)
+                {
+                    // TODO: '-Foo:bar' and '-Foo bar'
+                    command.Parameters.Add(new CommandParameter(commandElement.Parameter.Name, true));
+                }
+            }
+
+            pipeline.Commands.Add(command);
+            context.PushPipeline(pipeline);
             try
             {
-                var command = new Command(Name);
-                //foreach (var parameter in parameters)
-                //{
-                //    command.Parameters.Add(parameter);
-                //}
-                pipeline.Commands.Add(command);
                 return pipeline.Invoke();
             }
             finally

@@ -26,7 +26,6 @@ namespace Pash.ParserIntrinsics.AstNodes
             }
 
             else throw new NotImplementedException(this.ToString());
-
         }
     }
 }

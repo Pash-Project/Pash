@@ -765,13 +765,12 @@ namespace Pash.ParserIntrinsics
                 var nodeType = Assembly.GetCallingAssembly().GetType("Pash.ParserIntrinsics.AstNodes." + field.Name + "_astnode");
                 if (nodeType == null)
                 {
-                    nonTerminal.AstConfig.NodeType = typeof(_astnode); // default that delegates to children
+                    nonTerminal.SetFlag(TermFlags.NoAstNode);
                 }
                 else
                 {
                     nonTerminal.AstConfig.NodeType = nodeType;
                 }
-
 
                 field.SetValue(this, nonTerminal);
             }

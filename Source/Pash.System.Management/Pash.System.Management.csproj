@@ -232,13 +232,17 @@
     <Compile Include="Pash\ParserIntrinsics\AstNodes\array_literal_expression_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\assignment_expression_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\bitwise_expression_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_argument_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\command_astnode.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_element_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\command_name_astnode.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_name_expr_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\comparison_expression_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_parameter_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\string_literal_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\decimal_integer_literal_astnode.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstNodes\hexadecimal_integer_literal_astnode.cs" />

@@ -11,8 +11,7 @@ using System.Collections.Generic;
 
 namespace Pash.ParserIntrinsics.AstNodes
 {
-    // TODO: make it an interface, or add a field and remove this comment.
-    public class _astnode
+    public abstract class _astnode
     {
         protected readonly AstContext astContext;
         protected readonly ParseTreeNode parseTreeNode;
@@ -25,14 +24,14 @@ namespace Pash.ParserIntrinsics.AstNodes
             ChildAstNodes = new ReadOnlyCollection<_astnode>(this.parseTreeNode.ChildNodes.Select(childNode => childNode.AstNode).Cast<_astnode>().ToList());
         }
 
-        public PowerShellGrammar Grammar { get { return (PowerShellGrammar)this.astContext.Language.Grammar; } }
+        protected PowerShellGrammar Grammar { get { return (PowerShellGrammar)this.astContext.Language.Grammar; } }
 
-        public ReadOnlyCollection<_astnode> ChildAstNodes;
+        protected ReadOnlyCollection<_astnode> ChildAstNodes;
 
         [DebuggerStepThrough]
-        public T As<T>() where T : _astnode { return (T)this; }
+        internal T As<T>() where T : _astnode { return (T)this; }
 
-        public string Text { get { return parseTreeNode.FindTokenAndGetText(); } }
+        protected string Text { get { return parseTreeNode.FindTokenAndGetText(); } }
 
         public override string ToString()
         {

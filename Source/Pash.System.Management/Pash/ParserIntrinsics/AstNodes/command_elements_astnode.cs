@@ -12,6 +12,7 @@ using System.Management.Automation.Runspaces;
 
 namespace Pash.ParserIntrinsics.AstNodes
 {
+    */ ------ dead code, fix or delete.
     public class command_elements_astnode : _astnode
     {
         public command_elements_astnode(AstContext astContext, ParseTreeNode parseTreeNode)
