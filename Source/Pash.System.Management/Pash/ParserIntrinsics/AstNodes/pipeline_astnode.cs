@@ -33,7 +33,7 @@ namespace Pash.ParserIntrinsics.AstNodes
 
             else if (this.parseTreeNode.ChildNodes[0].Term == Grammar.expression)
             {
-                this.Expression = this.ChildAstNodes.[0].Cast<expression_astnode>();
+                this.Expression = this.ChildAstNodes[0].Cast<expression_astnode>();
 
                 if (this.parseTreeNode.ChildNodes.Count > 1)
                 {
@@ -73,12 +73,21 @@ namespace Pash.ParserIntrinsics.AstNodes
             }
 
             object results;
+            ExecutionContext subContext;
+            ICommandRuntime subRuntime;
 
-            ExecutionContext subContext = context.CreateNestedContext();
-            subContext.inputStreamReader = context.inputStreamReader;
+            if (this.PipelineTail == null)
+            {
+                subContext = context;
+                subRuntime = commandRuntime;
+            }
+            else
+            {
+                subContext = context.CreateNestedContext();
+                subContext.inputStreamReader = context.inputStreamReader;
 
-            PipelineCommandRuntime subRuntime = new PipelineCommandRuntime(((PipelineCommandRuntime)commandRuntime).pipelineProcessor);
-
+                subRuntime = new PipelineCommandRuntime(((PipelineCommandRuntime)commandRuntime).pipelineProcessor);
+            }
 
             if (this.Expression != null)
             {
