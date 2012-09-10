@@ -1,412 +1,413 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
-using Irony.Parsing;
-using Extensions.String;
-using Pash.ParserIntrinsics;
+﻿//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Text;
+//using NUnit.Framework;
+//using Irony.Parsing;
+//using Extensions.String;
+//using Pash.ParserIntrinsics;
 
-namespace ParserTests
-{
-    [TestFixture]
-    class PowerShellGrammarTests
-    {
-        [Test]
-        public void CreateTest()
-        {
-            var grammar = new PowerShellGrammar.InteractiveInput();
-            // obviously I know it won't be null. That's mostly to 
-            // avoid the compiler warning.
-            Assert.IsNotNull(grammar);
-        }
+//namespace ParserTests
+//{
+//    [TestFixture]
+//    class PowerShellGrammarTests
+//    {
+//        [Test]
+//        public void CreateTest()
+//        {
+//            var grammar = new PowerShellGrammar.InteractiveInput();
+//            // obviously I know it won't be null. That's mostly to 
+//            // avoid the compiler warning.
+//            Assert.IsNotNull(grammar);
+//        }
 
-        [Test]
-        public void CaseInsensitiveTest()
-        {
-            var grammar = new PowerShellGrammar.InteractiveInput();
-            Assert.True(!grammar.CaseSensitive);
-        }
+//        [Test]
+//        public void CaseInsensitiveTest()
+//        {
+//            var grammar = new PowerShellGrammar.InteractiveInput();
+//            Assert.True(!grammar.CaseSensitive);
+//        }
 
-        [Test]
-        public void NonTerminalFieldsInitializedTest()
-        {
-            // created by reflection (to avoid missing one)
-            // but let's make sure the reflection works
-            var grammar = new PowerShellGrammar.InteractiveInput();
-            Assert.IsNotNull(grammar.interactive_input);
-            Assert.AreEqual("interactive_input", grammar.interactive_input.Name);
-        }
+//        [Test]
+//        public void NonTerminalFieldsInitializedTest()
+//        {
+//            // created by reflection (to avoid missing one)
+//            // but let's make sure the reflection works
+//            var grammar = new PowerShellGrammar.InteractiveInput();
+//            Assert.IsNotNull(grammar.interactive_input);
+//            Assert.AreEqual("interactive_input", grammar.interactive_input.Name);
+//        }
 
-        // Separate tests for each level of reported grammar error, so it's easy to diagnose our current
-        // status, and to mark [Ignore] to our level of tolerance.
-        [TestFixture]
-        public class GrammarErrorLevelTests
-        {
-            [Test]
-            public void LanguageErrorLevelPerfect()
-            {
-                var grammar = new PowerShellGrammar.InteractiveInput();
-                var languageData = new LanguageData(grammar);
-                Assert.AreEqual(languageData.ErrorLevel, GrammarErrorLevel.NoError, languageData.Errors.JoinString("\n"));
-            }
+//        // Separate tests for each level of reported grammar error, so it's easy to diagnose our current
+//        // status, and to mark [Ignore] to our level of tolerance.
+//        [TestFixture]
+//        public class GrammarErrorLevelTests
+//        {
+//            [Test]
+//            public void LanguageErrorLevelPerfect()
+//            {
+//                var grammar = new PowerShellGrammar.InteractiveInput();
+//                var languageData = new LanguageData(grammar);
+//                Assert.AreEqual(languageData.ErrorLevel, GrammarErrorLevel.NoError, languageData.Errors.JoinString("\n"));
+//            }
 
-            [Test]
-            public void LanguageErrorLevelNoInfos()
-            {
-                var grammar = new PowerShellGrammar.InteractiveInput();
-                var languageData = new LanguageData(grammar);
-                Assert.Less(languageData.ErrorLevel, GrammarErrorLevel.Info, languageData.Errors.JoinString("\n"));
-            }
+//            [Test]
+//            public void LanguageErrorLevelNoInfos()
+//            {
+//                var grammar = new PowerShellGrammar.InteractiveInput();
+//                var languageData = new LanguageData(grammar);
+//                Assert.Less(languageData.ErrorLevel, GrammarErrorLevel.Info, languageData.Errors.JoinString("\n"));
+//            }
 
-            [Test]
-            public void LanguageErrorLevelNoWarnings()
-            {
-                var grammar = new PowerShellGrammar.InteractiveInput();
-                var languageData = new LanguageData(grammar);
-                Assert.Less(languageData.ErrorLevel, GrammarErrorLevel.Warning, languageData.Errors.JoinString("\n"));
-            }
+//            [Test]
+//            public void LanguageErrorLevelNoWarnings()
+//            {
+//                var grammar = new PowerShellGrammar.InteractiveInput();
+//                var languageData = new LanguageData(grammar);
+//                Assert.Less(languageData.ErrorLevel, GrammarErrorLevel.Warning, languageData.Errors.JoinString("\n"));
+//            }
 
-            [Test]
-            public void LanguageErrorLevelNoConflicts()
-            {
-                var grammar = new PowerShellGrammar.InteractiveInput();
-                var languageData = new LanguageData(grammar);
-                Assert.Less(languageData.ErrorLevel, GrammarErrorLevel.Conflict, languageData.Errors.JoinString("\n"));
-            }
-
-
-            [Test]
-            public void LanguageErrorLevelNoErrors()
-            {
-                var grammar = new PowerShellGrammar.InteractiveInput();
-                var languageData = new LanguageData(grammar);
-                Assert.Less(languageData.ErrorLevel, GrammarErrorLevel.Error, languageData.Errors.JoinString("\n"));
-            }
+//            [Test]
+//            public void LanguageErrorLevelNoConflicts()
+//            {
+//                var grammar = new PowerShellGrammar.InteractiveInput();
+//                var languageData = new LanguageData(grammar);
+//                Assert.Less(languageData.ErrorLevel, GrammarErrorLevel.Conflict, languageData.Errors.JoinString("\n"));
+//            }
 
 
-            [Test]
-            public void LanguageErrorLevelNoInternalErrors()
-            {
-                var grammar = new PowerShellGrammar.InteractiveInput();
-                var languageData = new LanguageData(grammar);
-                Assert.Less(languageData.ErrorLevel, GrammarErrorLevel.InternalError, languageData.Errors.JoinString("\n"));
-            }
-        }
+//            [Test]
+//            public void LanguageErrorLevelNoErrors()
+//            {
+//                var grammar = new PowerShellGrammar.InteractiveInput();
+//                var languageData = new LanguageData(grammar);
+//                Assert.Less(languageData.ErrorLevel, GrammarErrorLevel.Error, languageData.Errors.JoinString("\n"));
+//            }
 
-        [TestFixture]
-        class ParseSimpleCommandTest
-        {
-            ParseTree parseTree;
-            PowerShellGrammar grammar;
 
-            public ParseSimpleCommandTest()
-            {
-                grammar = new PowerShellGrammar.InteractiveInput();
-                var parser = new Parser(grammar);
+//            [Test]
+//            public void LanguageErrorLevelNoInternalErrors()
+//            {
+//                var grammar = new PowerShellGrammar.InteractiveInput();
+//                var languageData = new LanguageData(grammar);
+//                Assert.Less(languageData.ErrorLevel, GrammarErrorLevel.InternalError, languageData.Errors.JoinString("\n"));
+//            }
+//        }
 
-                parseTree = parser.Parse("Get-ChildItem");
-            }
+//        [TestFixture]
+//        class ParseSimpleCommandTest
+//        {
+//            ParseTree parseTree;
+//            PowerShellGrammar grammar;
 
-            [Test]
-            public void SuccessfulParseTest()
-            {
-                Assert.IsNotNull(parseTree);
-                Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
-            }
+//            public ParseSimpleCommandTest()
+//            {
+//                grammar = new PowerShellGrammar.InteractiveInput();
+//                var parser = new Parser(grammar);
 
-            [Test]
-            public void CorrectNonTerminalsTest()
-            {
-                var node = VerifyParseTreeSingles(parseTree.Root,
-                    grammar.interactive_input,
-                    grammar.script_block,
-                    grammar.script_block_body,
-                    grammar.statement_list,
-                    grammar.statement,
-                    grammar.pipeline,
-                    grammar.command,
-                    grammar.command_name
-                );
+//                parseTree = parser.Parse("Get-ChildItem");
+//            }
 
-                Assert.AreEqual(0, node.ChildNodes.Count, node.ToString());
-            }
-        }
+//            [Test]
+//            public void SuccessfulParseTest()
+//            {
+//                Assert.IsNotNull(parseTree);
+//                Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
+//            }
 
-        [Test]
-        public void TrivialPromptExpressionsTest()
-        {
-            var grammar = new PowerShellGrammar.InteractiveInput();
+//            [Test]
+//            public void CorrectNonTerminalsTest()
+//            {
+//                var node = VerifyParseTreeSingles(parseTree.Root,
+//                    grammar.interactive_input,
+//                    grammar.script_block,
+//                    grammar.script_block_body,
+//                    grammar.statement_list,
+//                    grammar.statement,
+//                    grammar.pipeline,
+//                    grammar.command,
+//                    grammar.command_name
+//                );
 
-            var parseTree = Parse(grammar, "\"PS> \"");
+//                Assert.AreEqual(0, node.ChildNodes.Count, node.ToString());
+//            }
+//        }
 
-            var node = VerifyParseTreeSingles(parseTree.Root,
-                grammar.interactive_input,
-                grammar.script_block,
-                grammar.script_block_body,
-                grammar.statement_list,
-                grammar.statement,
-                grammar.pipeline,
-                grammar.expression,
-                grammar.logical_expression,
-                grammar.bitwise_expression,
-                grammar.comparison_expression,
-                grammar.additive_expression,
-                grammar.multiplicative_expression,
-                grammar.format_expression,
-                grammar.range_expression,
-                grammar.array_literal_expression,
-                grammar.unary_expression,
-                grammar.primary_expression,
-                grammar.value,
-                grammar.literal,
-                grammar.string_literal
-            );
+//        [Test]
+//        public void TrivialPromptExpressionsTest()
+//        {
+//            var grammar = new PowerShellGrammar.InteractiveInput();
 
-            Assert.AreEqual(0, node.ChildNodes.Count, node.ToString());
-            Assert.AreEqual(PowerShellGrammar.Terminals.expandable_string_literal, node.Term);
-        }
+//            var parseTree = Parse(grammar, "\"PS> \"");
 
-        static ParseTreeNode VerifyParseTreeSingles(ParseTreeNode node, params NonTerminal[] expected)
-        {
-            foreach (var rule in expected)
-            {
-                Assert.AreEqual(rule, node.Term);
-                Assert.AreEqual(1, node.ChildNodes.Count, "wrong child count.\n" + FormatNodes(node));
-                node = node.ChildNodes.Single();
-            }
+//            var node = VerifyParseTreeSingles(parseTree.Root,
+//                grammar.interactive_input,
+//                grammar.script_block,
+//                grammar.script_block_body,
+//                grammar.statement_list,
+//                grammar.statement,
+//                grammar.pipeline,
+//                grammar.expression,
+//                grammar.logical_expression,
+//                grammar.bitwise_expression,
+//                grammar.comparison_expression,
+//                grammar.additive_expression,
+//                grammar.multiplicative_expression,
+//                grammar.format_expression,
+//                grammar.range_expression,
+//                grammar.array_literal_expression,
+//                grammar.unary_expression,
+//                grammar.primary_expression,
+//                grammar.value,
+//                grammar.literal,
+//                grammar.string_literal
+//            );
 
-            return node;
-        }
+//            Assert.AreEqual(0, node.ChildNodes.Count, node.ToString());
+//            Assert.AreEqual(PowerShellGrammar.Terminals.expandable_string_literal, node.Term);
+//        }
 
-        static string FormatNodes(ParseTreeNode node, int indent = 1)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
+//        static ParseTreeNode VerifyParseTreeSingles(ParseTreeNode node, params NonTerminal[] expected)
+//        {
+//            foreach (var rule in expected)
+//            {
+//                Assert.AreEqual(rule, node.Term);
+//                Assert.AreEqual(1, node.ChildNodes.Count, "wrong child count.\n" + FormatNodes(node));
+//                node = node.ChildNodes.Single();
+//            }
 
-            stringBuilder.Append(new string('\t', indent));
-            stringBuilder.AppendLine(node.ToString());
+//            return node;
+//        }
 
-            foreach (var childNode in node.ChildNodes)
-            {
-                stringBuilder.Append(FormatNodes(childNode, indent + 1));
-            }
+//        static string FormatNodes(ParseTreeNode node, int indent = 1)
+//        {
+//            StringBuilder stringBuilder = new StringBuilder();
 
-            return stringBuilder.ToString();
-        }
+//            stringBuilder.Append(new string('\t', indent));
+//            stringBuilder.AppendLine(node.ToString());
 
-        // the default prompt expression from app.config, slightly simplified just to
-        // make the test easier to write.
-        [Test]
-        public void DefaultPromptExpressionsTest()
-        {
-            var grammar = new PowerShellGrammar.InteractiveInput();
+//            foreach (var childNode in node.ChildNodes)
+//            {
+//                stringBuilder.Append(FormatNodes(childNode, indent + 1));
+//            }
 
-            var parseTree = Parse(grammar, "'PS> ' + (Get-Location)");
+//            return stringBuilder.ToString();
+//        }
 
-            var node = VerifyParseTreeSingles(parseTree.Root,
-                grammar.interactive_input,
-                grammar.script_block,
-                grammar.script_block_body,
-                grammar.statement_list,
-                grammar.statement,
-                grammar.pipeline,
-                grammar.expression,
-                grammar.logical_expression,
-                grammar.bitwise_expression,
-                grammar.comparison_expression
-            );
+//        // the default prompt expression from app.config, slightly simplified just to
+//        // make the test easier to write.
+//        [Test]
+//        public void DefaultPromptExpressionsTest()
+//        {
+//            var grammar = new PowerShellGrammar.InteractiveInput();
 
-            Assert.AreEqual(grammar.additive_expression, node.Term);
-            Assert.AreEqual(3, node.ChildNodes.Count, node.ToString());
+//            var parseTree = Parse(grammar, "'PS> ' + (Get-Location)");
 
-            var leftNode = node.ChildNodes[0];
-            var operatorNode = node.ChildNodes[1];
-            var rightNode = node.ChildNodes[2];
+//            var node = VerifyParseTreeSingles(parseTree.Root,
+//                grammar.interactive_input,
+//                grammar.script_block,
+//                grammar.script_block_body,
+//                grammar.statement_list,
+//                grammar.statement,
+//                grammar.pipeline,
+//                grammar.expression,
+//                grammar.logical_expression,
+//                grammar.bitwise_expression,
+//                grammar.comparison_expression
+//            );
 
-            {
-                var leftLiteral = VerifyParseTreeSingles(leftNode,
-                    grammar.additive_expression,
-                    grammar.multiplicative_expression,
-                    grammar.format_expression,
-                    grammar.range_expression,
-                    grammar.array_literal_expression,
-                    grammar.unary_expression,
-                    grammar.primary_expression,
-                    grammar.value,
-                    grammar.literal,
-                    grammar.string_literal
-                );
+//            Assert.AreEqual(grammar.additive_expression, node.Term);
+//            Assert.AreEqual(3, node.ChildNodes.Count, node.ToString());
 
-                Assert.AreEqual(PowerShellGrammar.Terminals.verbatim_string_literal, leftLiteral.Term);
-            }
+//            var leftNode = node.ChildNodes[0];
+//            var operatorNode = node.ChildNodes[1];
+//            var rightNode = node.ChildNodes[2];
 
-            {
-                KeywordTerminal keywordTerminal = (KeywordTerminal)operatorNode.Term;
-                Assert.AreEqual("+", keywordTerminal.Text);
-            }
+//            {
+//                var leftLiteral = VerifyParseTreeSingles(leftNode,
+//                    grammar.additive_expression,
+//                    grammar.multiplicative_expression,
+//                    grammar.format_expression,
+//                    grammar.range_expression,
+//                    grammar.array_literal_expression,
+//                    grammar.unary_expression,
+//                    grammar.primary_expression,
+//                    grammar.value,
+//                    grammar.literal,
+//                    grammar.string_literal
+//                );
 
-            {
-                var nodeX = VerifyParseTreeSingles(rightNode,
-                    grammar.multiplicative_expression,
-                    grammar.format_expression,
-                    grammar.range_expression,
-                    grammar.array_literal_expression,
-                    grammar.unary_expression,
-                    grammar.primary_expression,
-                    grammar.value
-                );
+//                Assert.AreEqual(PowerShellGrammar.Terminals.verbatim_string_literal, leftLiteral.Term);
+//            }
 
-                Assert.AreEqual(grammar.parenthesized_expression, nodeX.Term);
-                Assert.AreEqual(3, nodeX.ChildNodes.Count);
+//            {
+//                KeywordTerminal keywordTerminal = (KeywordTerminal)operatorNode.Term;
+//                Assert.AreEqual("+", keywordTerminal.Text);
+//            }
 
-                KeywordTerminal leftParenTerminal = (KeywordTerminal)nodeX.ChildNodes[0].Term;
-                Assert.AreEqual("(", leftParenTerminal.Text);
+//            {
+//                var nodeX = VerifyParseTreeSingles(rightNode,
+//                    grammar.multiplicative_expression,
+//                    grammar.format_expression,
+//                    grammar.range_expression,
+//                    grammar.array_literal_expression,
+//                    grammar.unary_expression,
+//                    grammar.primary_expression,
+//                    grammar.value
+//                );
 
-                KeywordTerminal rightParenTerminal = (KeywordTerminal)nodeX.ChildNodes[2].Term;
-                Assert.AreEqual(")", rightParenTerminal.Text);
+//                Assert.AreEqual(grammar.parenthesized_expression, nodeX.Term);
+//                Assert.AreEqual(3, nodeX.ChildNodes.Count);
 
-                var pipelineNode = nodeX.ChildNodes[1];
+//                KeywordTerminal leftParenTerminal = (KeywordTerminal)nodeX.ChildNodes[0].Term;
+//                Assert.AreEqual("(", leftParenTerminal.Text);
 
-                var command_name_token = VerifyParseTreeSingles(pipelineNode,
-                    grammar.pipeline,
-                    grammar.command,
-                    grammar.command_name
-                );
+//                KeywordTerminal rightParenTerminal = (KeywordTerminal)nodeX.ChildNodes[2].Term;
+//                Assert.AreEqual(")", rightParenTerminal.Text);
 
-                Assert.AreEqual(PowerShellGrammar.Terminals.generic_token, command_name_token.Term);
-                Assert.AreEqual("Get-Location", command_name_token.FindTokenAndGetText());
-            }
-        }
+//                var pipelineNode = nodeX.ChildNodes[1];
 
-        [Test]
-        public void NumberOverCommandTest()
-        {
-            var grammar = new PowerShellGrammar.InteractiveInput();
+//                var command_name_token = VerifyParseTreeSingles(pipelineNode,
+//                    grammar.pipeline,
+//                    grammar.command,
+//                    grammar.command_name
+//                );
 
-            var parseTree = Parse(grammar, "1");
+//                Assert.AreEqual(PowerShellGrammar.Terminals.generic_token, command_name_token.Term);
+//                Assert.AreEqual("Get-Location", command_name_token.FindTokenAndGetText());
+//            }
+//        }
 
-            var node = VerifyParseTreeSingles(parseTree.Root,
-                grammar.interactive_input,
-                grammar.script_block,
-                grammar.script_block_body,
-                grammar.statement_list,
-                grammar.statement,
-                grammar.pipeline,
-                grammar.expression,
-                grammar.logical_expression,
-                grammar.bitwise_expression,
-                grammar.comparison_expression,
-                grammar.additive_expression,
-                grammar.multiplicative_expression,
-                grammar.format_expression,
-                grammar.range_expression,
-                grammar.array_literal_expression,
-                grammar.unary_expression,
-                grammar.primary_expression,
-                grammar.value,
-                grammar.literal,
-                grammar.integer_literal
-            );
+//        [Test]
+//        public void NumberOverCommandTest()
+//        {
+//            var grammar = new PowerShellGrammar.InteractiveInput();
 
-            Assert.AreEqual(PowerShellGrammar.Terminals.decimal_integer_literal, node.Term);
-        }
+//            var parseTree = Parse(grammar, "1");
 
-        [Test]
-        public void ParametersTest()
-        {
-            var grammar = new PowerShellGrammar.InteractiveInput();
+//            var node = VerifyParseTreeSingles(parseTree.Root,
+//                grammar.interactive_input,
+//                grammar.script_block,
+//                grammar.script_block_body,
+//                grammar.statement_list,
+//                grammar.statement,
+//                grammar.pipeline,
+//                grammar.expression,
+//                grammar.logical_expression,
+//                grammar.bitwise_expression,
+//                grammar.comparison_expression,
+//                grammar.additive_expression,
+//                grammar.multiplicative_expression,
+//                grammar.format_expression,
+//                grammar.range_expression,
+//                grammar.array_literal_expression,
+//                grammar.unary_expression,
+//                grammar.primary_expression,
+//                grammar.value,
+//                grammar.literal,
+//                grammar.integer_literal
+//            );
 
-            var parseTree = Parse(grammar, @"Set-Location C:\Windows");
+//            Assert.AreEqual(PowerShellGrammar.Terminals.decimal_integer_literal, node.Term);
+//        }
 
-            var commandNode = VerifyParseTreeSingles(parseTree.Root,
-                grammar.interactive_input,
-                grammar.script_block,
-                grammar.script_block_body,
-                grammar.statement_list,
-                grammar.statement,
-                grammar.pipeline
-            );
+//        [Test]
+//        public void ParametersTest()
+//        {
+//            var grammar = new PowerShellGrammar.InteractiveInput();
 
-            Assert.AreEqual(grammar.command, commandNode.Term);
-            Assert.AreEqual(2, commandNode.ChildNodes.Count, commandNode.ToString());
-            Assert.AreEqual(grammar.command_name, commandNode.ChildNodes[0].Term);
+//            var parseTree = Parse(grammar, @"Set-Location C:\Windows");
 
-            var parametersNode = commandNode.ChildNodes[1];
+//            var commandNode = VerifyParseTreeSingles(parseTree.Root,
+//                grammar.interactive_input,
+//                grammar.script_block,
+//                grammar.script_block_body,
+//                grammar.statement_list,
+//                grammar.statement,
+//                grammar.pipeline
+//            );
 
-            var node = VerifyParseTreeSingles(parametersNode,
-                grammar.command_elements,
-                grammar.command_element,
-                grammar.command_argument,
-                grammar.command_name_expr,
-                grammar.command_name
-                );
+//            Assert.AreEqual(grammar.command, commandNode.Term);
+//            Assert.AreEqual(2, commandNode.ChildNodes.Count, commandNode.ToString());
+//            Assert.AreEqual(grammar.command_name, commandNode.ChildNodes[0].Term);
 
-            Assert.AreEqual(PowerShellGrammar.Terminals.generic_token, node.Term);
-        }
+//            var parametersNode = commandNode.ChildNodes[1];
 
-        private static ParseTree Parse(PowerShellGrammar.InteractiveInput grammar, string text)
-        {
-            var parser = new Parser(grammar);
-            var parseTree = parser.Parse(text);
+//            var node = VerifyParseTreeSingles(parametersNode,
+//                grammar.command_elements,
+//                grammar.command_element,
+//                grammar.command_argument,
+//                grammar.command_name_expr,
+//                grammar.command_name
+//                );
 
-            Assert.IsNotNull(parseTree);
-            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
-            return parseTree;
-        }
+//            Assert.AreEqual(PowerShellGrammar.Terminals.generic_token, node.Term);
+//        }
 
-        [Test]
-        public void VariableTest()
-        {
-            var grammar = new PowerShellGrammar.InteractiveInput();
+//        private static ParseTree Parse(PowerShellGrammar grammar, string text)
+//        {
+//            PowerShellGrammar.ParseInteractiveInput(
+//            var parser = new Parser(grammar);
+//            var parseTree = parser.Parse(text);
 
-            var parseTree = Parse(grammar, @"$x = 'y'");
+//            Assert.IsNotNull(parseTree);
+//            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
+//            return parseTree;
+//        }
 
-            var assignementNode = VerifyParseTreeSingles(parseTree.Root,
-                grammar.interactive_input,
-                grammar.script_block,
-                grammar.script_block_body,
-                grammar.statement_list,
-                grammar.statement,
-                grammar.pipeline
-                );
+//        [Test]
+//        public void VariableTest()
+//        {
+//            var grammar = new PowerShellGrammar.InteractiveInput();
 
-            Assert.AreEqual(grammar.assignment_expression, assignementNode.Term);
-            Assert.AreEqual(3, assignementNode.ChildNodes.Count, assignementNode.ToString());
-            Assert.AreEqual(PowerShellGrammar.Terminals.variable, assignementNode.ChildNodes[0].Term);
-            Assert.AreEqual(PowerShellGrammar.Terminals.assignment_operator, assignementNode.ChildNodes[1].Term);
-            Assert.AreEqual(grammar.statement, assignementNode.ChildNodes[2].Term);
-        }
+//            var parseTree = Parse(grammar, @"$x = 'y'");
 
-        [Test]
-        public void PipelineTest()
-        {
+//            var assignementNode = VerifyParseTreeSingles(parseTree.Root,
+//                grammar.interactive_input,
+//                grammar.script_block,
+//                grammar.script_block_body,
+//                grammar.statement_list,
+//                grammar.statement,
+//                grammar.pipeline
+//                );
+
+//            Assert.AreEqual(grammar.assignment_expression, assignementNode.Term);
+//            Assert.AreEqual(3, assignementNode.ChildNodes.Count, assignementNode.ToString());
+//            Assert.AreEqual(PowerShellGrammar.Terminals.variable, assignementNode.ChildNodes[0].Term);
+//            Assert.AreEqual(PowerShellGrammar.Terminals.assignment_operator, assignementNode.ChildNodes[1].Term);
+//            Assert.AreEqual(grammar.statement, assignementNode.ChildNodes[2].Term);
+//        }
+
+//        [Test]
+//        public void PipelineTest()
+//        {
             
-            var grammar = new PowerShellGrammar.InteractiveInput();
+//            var grammar = new PowerShellGrammar.InteractiveInput();
 
-            var parseTree = Parse(grammar, "prompt | write-host -nonewline");
+//            var parseTree = Parse(grammar, "prompt | write-host -nonewline");
 
-            Assert.IsNotNull(parseTree);
-            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
+//            Assert.IsNotNull(parseTree);
+//            Assert.IsFalse(parseTree.HasErrors, parseTree.ParserMessages.JoinString("\n"));
 
-            var pipelineNode = VerifyParseTreeSingles(parseTree.Root,
-                grammar.interactive_input,
-                grammar.script_block,
-                grammar.script_block_body,
-                grammar.statement_list,
-                grammar.statement
-                );
+//            var pipelineNode = VerifyParseTreeSingles(parseTree.Root,
+//                grammar.interactive_input,
+//                grammar.script_block,
+//                grammar.script_block_body,
+//                grammar.statement_list,
+//                grammar.statement
+//                );
 
-            Assert.AreEqual(grammar.pipeline, pipelineNode.Term);
-            Assert.AreEqual(2, pipelineNode.ChildNodes.Count, pipelineNode.ToString());
+//            Assert.AreEqual(grammar.pipeline, pipelineNode.Term);
+//            Assert.AreEqual(2, pipelineNode.ChildNodes.Count, pipelineNode.ToString());
 
-            VerifyParseTreeSingles(pipelineNode.ChildNodes[0],
-                grammar.command,
-                grammar.command_name
-                );
+//            VerifyParseTreeSingles(pipelineNode.ChildNodes[0],
+//                grammar.command,
+//                grammar.command_name
+//                );
 
-            var pipelineTailNode = pipelineNode.ChildNodes[1];
-            Assert.AreEqual(grammar.pipeline_tail, pipelineTailNode.Term);
-            Assert.AreEqual(1, pipelineTailNode.ChildNodes.Count);
-        }
-    }
-}
+//            var pipelineTailNode = pipelineNode.ChildNodes[1];
+//            Assert.AreEqual(grammar.pipeline_tail, pipelineTailNode.Term);
+//            Assert.AreEqual(1, pipelineTailNode.ChildNodes.Count);
+//        }
+//    }
+//}

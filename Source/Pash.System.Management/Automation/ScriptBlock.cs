@@ -1,49 +1,36 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.ObjectModel;
-using Pash.Implementation;
+using System.Management.Automation.Language;
 
 namespace System.Management.Automation
 {
-    public class ScriptBlock
+    [Serializable]
+    public class ScriptBlock// : ISerializable
     {
-        private string _script;
-        private ExecutionContext _scope;
-
-        internal ScriptBlock(string script)
+        internal ScriptBlock(ScriptBlockAst scriptBlockAst)
         {
-            _script = script;
+            this.Ast = scriptBlockAst;
         }
 
-        internal ScriptBlock(ExecutionContext scope, string script)
-        {
-            _script = script;
-            _scope = scope;
-        }
+        //protected ScriptBlock(SerializationInfo info, StreamingContext context);
 
-        public bool IsFilter { get; set; }
+        public Ast Ast { get; private set; }
+        //public List<Attribute> Attributes { get; }
+        //public string File { get; }
+        //public bool IsFilter { get; set; }
+        //public PSModuleInfo Module { get; }
+        //public PSToken StartPosition { get; }
 
-        public Collection<PSObject> Invoke(params object[] args) { throw new NotImplementedException(); }
-        public object InvokeReturnAsIs(params object[] args) { throw new NotImplementedException(); }
-        public override string ToString() { return _script; }
-
-        // internals
-        //internal System.Delegate GetDelegate(System.Type delegateType);
-        //internal Collection<PSObject> Invoke(object dollarUnder, object input, params object[] args);
-        //internal object InvokeRaw(object dollarUnder, object input, params object[] args);
-        //internal object InvokeUsingCmdlet(System.Management.Automation.Cmdlet contextCmdlet, bool UseLocalScope, bool writeErrors, object dollarUnder, object input, object scriptThis, params object[] args);
-        //internal void InvokeWithPipe(bool UseLocalScope, bool writeErrors, object dollarUnder, object input, object scriptThis, System.Management.Automation.Internal.Pipe outputPipe, ref System.Collections.ArrayList resultList, params object[] args);
-        //internal ScriptBlock(ExecutionContext context, Token scriptBlockToken, ParseTreeNode begin, ParseTreeNode process, ParseTreeNode end);
-        //internal ScriptBlock(ExecutionContext context, Token scriptBlockToken, ParseTreeNode ptn);
-        //internal ScriptBlock(ExecutionContext context, ParseTreeNode begin, ParseTreeNode process, ParseTreeNode end);
-        //internal ScriptBlock(ExecutionContext context, ParseTreeNode ptn);
-        //internal ParameterMetadata ParameterMetadata { get; }
-        //internal RuntimeDefinedParameterDictionary RuntimeDefinedParameters { get; }
-        //internal ParameterDeclarationNode arguments;
-        //internal ParseTreeNode begin;
-        internal string DefiningFile;
-        //internal System.Management.Automation.ParseTreeNode end;
-        internal string FunctionName;
-        //internal System.Management.Automation.ParseTreeNode process;
+        //public void CheckRestrictedLanguage(IEnumerable<string> allowedCommands, IEnumerable<string> allowedVariables, bool allowEnvironmentVariables);
+        //public static ScriptBlock Create(string script);
+        //public ScriptBlock GetNewClosure();
+        //public virtual void GetObjectData(SerializationInfo info, StreamingContext context);
+        //public PowerShell GetPowerShell(params object[] args);
+        //public PowerShell GetPowerShell(Dictionary<string, object> variables, params object[] args);
+        //public PowerShell GetPowerShell(Dictionary<string, object> variables, out Dictionary<string, object> usingVariables, params object[] args);
+        //public SteppablePipeline GetSteppablePipeline();
+        //public SteppablePipeline GetSteppablePipeline(CommandOrigin commandOrigin);
+        //public Collection<PSObject> Invoke(params object[] args);
+        //public object InvokeReturnAsIs(params object[] args);
+        public override string ToString() { return this.Ast.ToString();}
     }
 }

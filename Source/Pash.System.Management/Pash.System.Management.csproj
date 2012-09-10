@@ -8,7 +8,7 @@
     <ProjectGuid>{C5E303EC-5684-4C95-B0EC-2593E6662403}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>System.Management.Automation</RootNamespace>
+    <RootNamespace>System.Management</RootNamespace>
     <AssemblyName>System.Management.Automation</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
@@ -86,6 +86,77 @@
     <Compile Include="Automation\Internal\ParsingBaseAttribute.cs" />
     <Compile Include="Automation\InvocationInfo.cs" />
     <Compile Include="Automation\ItemCmdletProviderIntrinsics.cs" />
+    <Compile Include="Automation\Language\ArrayExpressionAst.cs" />
+    <Compile Include="Automation\Language\ArrayLiteralAst.cs" />
+    <Compile Include="Automation\Language\AssignmentStatementAst.cs" />
+    <Compile Include="Automation\Language\Ast.cs" />
+    <Compile Include="Automation\Language\AstVisitAction.cs" />
+    <Compile Include="Automation\Language\AstVisitor.cs" />
+    <Compile Include="Automation\Language\AttributeAst.cs" />
+    <Compile Include="Automation\Language\AttributeBaseAst.cs" />
+    <Compile Include="Automation\Language\AttributedExpressionAst.cs" />
+    <Compile Include="Automation\Language\BreakStatementAst.cs" />
+    <Compile Include="Automation\Language\CatchClauseAst.cs" />
+    <Compile Include="Automation\Language\CommandAst.cs" />
+    <Compile Include="Automation\Language\CommandElementAst.cs" />
+    <Compile Include="Automation\Language\CommandExpressionAst.cs" />
+    <Compile Include="Automation\Language\CommandParameterAst.cs" />
+    <Compile Include="Automation\Language\ConstantExpressionAst.cs" />
+    <Compile Include="Automation\Language\ContinueStatementAst.cs" />
+    <Compile Include="Automation\Language\ConvertExpressionAst.cs" />
+    <Compile Include="Automation\Language\DataStatementAst.cs" />
+    <Compile Include="Automation\Language\DoUntilStatementAst.cs" />
+    <Compile Include="Automation\Language\DoWhileStatementAst.cs" />
+    <Compile Include="Automation\Language\ExitStatementAst.cs" />
+    <Compile Include="Automation\Language\ExpandableStringExpressionAst.cs" />
+    <Compile Include="Automation\Language\FileRedirectionAst.cs" />
+    <Compile Include="Automation\Language\ForEachFlags.cs" />
+    <Compile Include="Automation\Language\ForEachStatementAst.cs" />
+    <Compile Include="Automation\Language\ForStatementAst.cs" />
+    <Compile Include="Automation\Language\FunctionDefinitionAst.cs" />
+    <Compile Include="Automation\Language\HashtableAst.cs" />
+    <Compile Include="Automation\Language\ICustomAstVisitor.cs" />
+    <Compile Include="Automation\Language\IfStatementAst.cs" />
+    <Compile Include="Automation\Language\IndexExpressionAst.cs" />
+    <Compile Include="Automation\Language\InvokeMemberExpressionAst.cs" />
+    <Compile Include="Automation\Language\IScriptExtent.cs" />
+    <Compile Include="Automation\Language\IScriptPosition.cs" />
+    <Compile Include="Automation\Language\ITypeName.cs" />
+    <Compile Include="Automation\Language\LabeledStatementAst.cs" />
+    <Compile Include="Automation\Language\LoopStatementAst.cs" />
+    <Compile Include="Automation\Language\MemberExpressionAst.cs" />
+    <Compile Include="Automation\Language\MergingRedirectionAst.cs" />
+    <Compile Include="Automation\Language\NamedAttributeArgumentAst.cs" />
+    <Compile Include="Automation\Language\NamedBlockAst.cs" />
+    <Compile Include="Automation\Language\ParamBlockAst.cs" />
+    <Compile Include="Automation\Language\ParameterAst.cs" />
+    <Compile Include="Automation\Language\ParenExpressionAst.cs" />
+    <Compile Include="Automation\Language\RedirectionAst.cs" />
+    <Compile Include="Automation\Language\RedirectionStream.cs" />
+    <Compile Include="Automation\Language\ReturnStatementAst.cs" />
+    <Compile Include="Automation\Language\ScriptBlockAst.cs" />
+    <Compile Include="Automation\Language\ScriptBlockExpressionAst.cs" />
+    <Compile Include="Automation\Language\StatementAst.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Automation\Language\StatementBlockAst.cs" />
+    <Compile Include="Automation\Language\StringConstantExpressionAst.cs" />
+    <Compile Include="Automation\Language\StringConstantType.cs" />
+    <Compile Include="Automation\Language\SubExpressionAst.cs" />
+    <Compile Include="Automation\Language\SwitchFlags.cs" />
+    <Compile Include="Automation\Language\SwitchStatementAst.cs" />
+    <Compile Include="Automation\Language\ThrowStatementAst.cs" />
+    <Compile Include="Automation\Language\TokenFlags.cs" />
+    <Compile Include="Automation\Language\TokenKind.cs" />
+    <Compile Include="Automation\Language\TrapStatementAst.cs" />
+    <Compile Include="Automation\Language\TryStatementAst.cs" />
+    <Compile Include="Automation\Language\TypeConstraintAst.cs" />
+    <Compile Include="Automation\Language\TypeExpressionAst.cs" />
+    <Compile Include="Automation\Language\UnaryExpressionAst.cs" />
+    <Compile Include="Automation\Language\UsingExpressionAst.cs" />
+    <Compile Include="Automation\Language\VariableExpressionAst.cs" />
+    <Compile Include="Automation\Language\WhileStatementAst.cs" />
+    <Compile Include="Automation\VariablePath.cs" />
     <Compile Include="Automation\ParameterAttribute.cs" />
     <Compile Include="Automation\PathInfo.cs" />
     <Compile Include="Automation\PathInfoStack.cs" />
@@ -185,6 +256,7 @@
     <Compile Include="Pash\Implementation\CommandManager.cs" />
     <Compile Include="Pash\Implementation\CommandProcessor.cs" />
     <Compile Include="Pash\Implementation\CommandProcessorBase.cs" />
+    <Compile Include="Pash\Implementation\ExecutionVisitor.cs" />
     <Compile Include="Pash\Implementation\ProviderRuntime.cs" />
     <Compile Include="Pash\Implementation\SessionStateGlobal.cs" />
     <Compile Include="Pash\Implementation\PipelineCommandRuntime.cs" />
@@ -228,67 +300,13 @@
     <Compile Include="Pash\Implementation\ObjectStreamWriter.cs" />
     <Compile Include="Pash\Implementation\PipelineProcessor.cs" />
     <Compile Include="Pash\Implementation\ScriptProcessor.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\additive_expression_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\array_literal_expression_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\assignment_expression_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\bitwise_expression_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_argument_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_astnode.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_elements_astnode.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_element_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_name_astnode.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_name_expr_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\comparison_expression_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\command_parameter_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\expandable_string_literal_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\pipeline_tail_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\string_literal_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\decimal_integer_literal_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\hexadecimal_integer_literal_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\integer_literal_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\expression_astnode.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\expression_with_unary_operator_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\format_expression_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\interactive_input_astnode.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\literal_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\logical_expression_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\multiplicative_expression_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\parenthesized_expression_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\pipeline_astnode.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\primary_expression_astnode.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\range_expression_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\script_block_astnode.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\script_block_body_astnode.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\statement_astnode.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\statement_list_astnode.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\unary_expression_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\value_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\variable_astnode.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\verbatim_string_literal_astnode.cs" />
+    <Compile Include="Pash\ParserIntrinsics\AstBuilder.cs" />
+    <Compile Include="Pash\ParserIntrinsics\BinaryExpressionAst.cs" />
     <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammar.cs" />
-    <Compile Include="Pash\ParserIntrinsics\AstNodes\_astnode.cs" />
+    <Compile Include="Automation\Language\ExpressionAst.cs" />
+    <Compile Include="Automation\Language\PipelineBaseAst.cs" />
+    <Compile Include="Automation\Language\CommandBaseAst.cs" />
+    <Compile Include="Automation\Language\PipelineAst.cs" />
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.cs" />
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.Terminals.cs" />
     <Compile Include="Extensions\String.cs" />

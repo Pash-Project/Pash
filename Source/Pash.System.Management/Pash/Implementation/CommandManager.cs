@@ -8,6 +8,8 @@ using System.Management.Automation.Runspaces;
 using System.Management.Automation;
 using Pash.Implementation;
 using Pash.Configuration;
+using Pash.ParserIntrinsics;
+using Irony.Parsing;
 
 namespace Pash.Implementation
 {
@@ -94,7 +96,7 @@ namespace Pash.Implementation
                             switch (function.type)
                             {
                                 case "inline":
-                                    scriptInfo = new ScriptInfo(function.name, new ScriptBlock(context, function.value));
+                                    scriptInfo = new ScriptInfo(function.name, new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(function.value)));
                                     break;
 
                                 case "file":
@@ -149,7 +151,7 @@ namespace Pash.Implementation
             {
                 try
                 {
-                    _scripts.Add(entry.Name, new ScriptInfo(entry.Name, new ScriptBlock(_context, entry.Definition)));
+                    _scripts.Add(entry.Name, new ScriptInfo(entry.Name, new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(entry.Definition))));
                     continue;
                 }
                 catch
@@ -212,7 +214,7 @@ namespace Pash.Implementation
 
             // TODO: if the command wasn't found should we treat is as a Script?
             if (commandInfo == null)
-                commandInfo = new ScriptInfo("", new ScriptBlock(command.CommandText));
+                commandInfo = new ScriptInfo("", new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(command.CommandText)));
 
             if (commandInfo != null)
             {

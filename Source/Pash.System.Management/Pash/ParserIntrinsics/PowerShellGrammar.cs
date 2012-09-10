@@ -1,12 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-
-using Irony.Parsing;
-using System.Text.RegularExpressions;
-using System.Text;
-using Pash.ParserIntrinsics.AstNodes;
+using System.Management.Automation.Language;
 using System.Reflection;
+using Extensions.String;
+using Irony.Parsing;
 
 namespace Pash.ParserIntrinsics
 {
@@ -169,7 +166,7 @@ namespace Pash.ParserIntrinsics
         #endregion
         #endregion
 
-        public class ScriptFile : PowerShellGrammar
+        class ScriptFile : PowerShellGrammar
         {
             public ScriptFile()
             {
@@ -177,7 +174,7 @@ namespace Pash.ParserIntrinsics
             }
         }
 
-        public class ModuleFile : PowerShellGrammar
+        class ModuleFile : PowerShellGrammar
         {
             public ModuleFile()
             {
@@ -185,7 +182,7 @@ namespace Pash.ParserIntrinsics
             }
         }
 
-        public class InteractiveInput : PowerShellGrammar
+        class InteractiveInput : PowerShellGrammar
         {
             public InteractiveInput()
             {
@@ -193,7 +190,7 @@ namespace Pash.ParserIntrinsics
             }
         }
 
-        public class DataFile : PowerShellGrammar
+        class DataFile : PowerShellGrammar
         {
             public DataFile()
             {
@@ -207,9 +204,23 @@ namespace Pash.ParserIntrinsics
 
             // delegate to a new method, so we don't accidentally overwrite a readonly field.
             InitializeProductionRules();
-
-            LanguageFlags.CreateAst = true;
         }
+
+        public static ScriptBlockAst ParseInteractiveInput(string input)
+        {
+            var grammar = new InteractiveInput();
+            var parseTree = new Parser(grammar).Parse(input);
+
+            if (parseTree.HasErrors)
+            {
+                // TODO: implement a parsing exception
+                throw new Exception(parseTree.ParserMessages.JoinString("\n"));
+            }
+
+            return new AstBuilder(grammar).BuildInteractiveInputAst(parseTree.Root);
+        }
+
+
 
         public void InitializeProductionRules()
         {
@@ -459,11 +470,7 @@ namespace Pash.ParserIntrinsics
             ////        pipeline_tail:
             ////            |   new_lines_opt   command
             ////            |   new_lines_opt   command   pipeline_tail
-            {
-                var pipeTerminal = ToTerminal("|");
-                pipeTerminal.SetFlag(TermFlags.NoAstNode | TermFlags.IsTransient);
-                pipeline_tail.Rule = pipeTerminal + (Terminals.new_lines | Empty) + command + (pipeline_tail | Empty);
-            }
+            pipeline_tail.Rule = ToTerminal("|") + (Terminals.new_lines | Empty) + command + (pipeline_tail | Empty);
 
             ////        command:
             ////            command_name   command_elements_opt
@@ -761,16 +768,6 @@ namespace Pash.ParserIntrinsics
                 if (field.GetValue(this) != null) throw new Exception("don't pre-init fields - let us take care of that for you.");
 
                 var nonTerminal = new NonTerminal(field.Name);
-
-                var nodeType = Assembly.GetCallingAssembly().GetType("Pash.ParserIntrinsics.AstNodes." + field.Name + "_astnode");
-                if (nodeType == null)
-                {
-                    nonTerminal.SetFlag(TermFlags.NoAstNode);
-                }
-                else
-                {
-                    nonTerminal.AstConfig.NodeType = nodeType;
-                }
 
                 field.SetValue(this, nonTerminal);
             }

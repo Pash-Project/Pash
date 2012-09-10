@@ -5,7 +5,6 @@ using System.Text;
 using NUnit.Framework;
 using System.Text.RegularExpressions;
 using Pash.ParserIntrinsics;
-using Pash.ParserIntrinsics.AstNodes;
 using Irony.Parsing;
 
 namespace ParserTests

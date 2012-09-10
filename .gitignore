@@ -19,3 +19,5 @@ _ReSharper.*
 
 # NUnit
 test-results/
+*.VisualState.xml
+TestResult.xml

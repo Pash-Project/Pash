@@ -82,7 +82,8 @@
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>"$(ProgramFiles)\NUnit 2.6.1\bin\nunit-console.exe" $(TargetPath) /nologo</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\PashConsole\App.config">

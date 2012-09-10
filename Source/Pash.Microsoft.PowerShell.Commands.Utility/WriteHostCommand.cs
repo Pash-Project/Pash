@@ -21,14 +21,16 @@ namespace Microsoft.PowerShell.Commands.Utility
 
         protected override void ProcessRecord()
         {
-            if (Object == null) return;
-
             Action<ConsoleColor, ConsoleColor, string> writeAction;
 
             if (NoNewline) writeAction = Host.UI.Write;
             else writeAction = Host.UI.WriteLine;
 
-            if (Object is Enumerable)
+            if (Object == null)
+            {
+                writeAction(ForegroundColor, BackgroundColor, "");
+            }
+            else if (Object.BaseObject is Enumerable)
             {
                 throw new NotImplementedException();
             }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using Pash.Implementation;
@@ -6,37 +7,13 @@ using System.Management.Automation;
 using Pash.ParserIntrinsics;
 using Irony.Parsing;
 using Extensions.String;
-using Pash.ParserIntrinsics.AstNodes;
+using System.Management.Automation.Language;
+using System.Management.Pash.Implementation;
 
 namespace Pash.Implementation
 {
     internal class ScriptProcessor : CommandProcessorBase
     {
-        private static object SyncRoot = new object();
-        private static Parser _parser;
-        private static PowerShellGrammar _grammar;
-
-        private Parser Parser
-        {
-            [System.Diagnostics.DebuggerStepThrough]
-            get
-            {
-                if (_parser == null)
-                {
-                    lock (SyncRoot)
-                    {
-                        if (_parser == null)
-                        {
-                            _grammar = new PowerShellGrammar.InteractiveInput();
-                            _parser = new Parser(_grammar);
-                        }
-                    }
-                }
-
-                return _parser;
-            }
-        }
-
         public ScriptProcessor(ScriptInfo scriptInfo)
             : base(scriptInfo)
         {
@@ -56,36 +33,11 @@ namespace Pash.Implementation
 
         internal override void ProcessRecord()
         {
-            //Parser.Parse(this.CommandInfo.Definition, 
-
-            //PashParser parser = new PashParser(pFactory);
-
-            if (string.IsNullOrEmpty(CommandInfo.Definition))
-            {
-                // TODO: what is the behavior of Posh when the script is empty?
-                return;
-            }
-
-            var parseTree = Parser.Parse(CommandInfo.Definition);
-
-            if (parseTree.HasErrors)
-            {
-                // TODO: implement a parsing exception
-                throw new Exception(parseTree.ParserMessages.JoinString("\n"));
-            }
-
-            // TODO: if a tree is empty?
-            if (parseTree.Root == null) throw new Exception();
-
             ExecutionContext context = ExecutionContext.Clone();
-            //PipelineCommandRuntime runtime = (PipelineCommandRuntime) CommandRuntime;
-            //context.outputStreamWriter = new ObjectStreamWriter(runtime.outputResults);
 
-            var root = ((_astnode)parseTree.Root.AstNode).Cast<interactive_input_astnode>();
+            PipelineCommandRuntime pipelineCommandRuntime = (PipelineCommandRuntime)CommandRuntime;
 
-            var results = root.ScriptBlock.Execute(context, CommandRuntime);
-
-            CommandRuntime.WriteObject(results, true);
+            ((ScriptInfo)CommandInfo).ScriptBlock.Ast.Visit(new ExecutionVisitor(context, pipelineCommandRuntime));
         }
 
         internal override void Complete()
