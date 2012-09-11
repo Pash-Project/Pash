@@ -29,14 +29,15 @@ namespace Irony.Ast {
     }
   }
 
-  public delegate object AstNodeCreator(AstContext context, ParseTreeNode parseNode);
+  public delegate void AstNodeCreator(AstContext context, ParseTreeNode parseNode);
+  public delegate object DefaultAstNodeCreator();
 
   public class AstNodeConfig {
 
     public Type NodeType;
     public object Data; //config data passed to AstNode
     public AstNodeCreator NodeCreator; // a custom method for creating AST nodes
-    public AstNodeCreator DefaultNodeCreator; //default method for creating AST nodes; compiled dynamic method, wrapper around "new nodeType();"
+    public DefaultAstNodeCreator DefaultNodeCreator; //default method for creating AST nodes; compiled dynamic method, wrapper around "new nodeType();"
 
     // An optional map (selector, filter) of child AST nodes. This facility provides a way to adjust the "map" of child nodes in various languages to 
     // the structure of a standard AST nodes (that can be shared betweeen languages). 

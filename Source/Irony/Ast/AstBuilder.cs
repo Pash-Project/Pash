@@ -88,26 +88,29 @@ namespace Irony.Ast {
       //We know that either NodeCreator or DefaultNodeCreator is set; VerifyAstData create the DefaultNodeCreator
       var config = term.AstConfig;
       if (config.NodeCreator != null) {
-          parseNode.AstNode = config.NodeCreator(Context, parseNode);
+        config.NodeCreator(Context, parseNode);
+        // We assume that Node creator method creates node and initializes it, so parser does not need to call 
+        // IAstNodeInit.Init() method on node object. But we do call AstNodeCreated custom event on term.
       } else {
         //Invoke the default creator compiled when we verified the data
-        if (config.DefaultNodeCreator == null) throw new Exception(string.Format("No AST node creator for '{0}'",parseNode.ToString()));
-        parseNode.AstNode = config.DefaultNodeCreator(Context, parseNode);
+        parseNode.AstNode = config.DefaultNodeCreator();
+        //Initialize node
+        var iInit = parseNode.AstNode as IAstNodeInit;
+        if (iInit != null)
+          iInit.Init(Context, parseNode);
       }
       //Invoke the event on term
       term.OnAstNodeCreated(parseNode);
     }//method
 
     //Contributed by William Horner (wmh)
-    private AstNodeCreator CompileDefaultNodeCreator(Type nodeType) {
-      ConstructorInfo constr = nodeType.GetConstructor(new[] { typeof(AstContext), typeof(ParseTreeNode) });
-      DynamicMethod method = new DynamicMethod("CreateAstNode", nodeType, new[] { typeof(AstContext), typeof(ParseTreeNode)} );
+    private DefaultAstNodeCreator CompileDefaultNodeCreator(Type nodeType) {
+      ConstructorInfo constr = nodeType.GetConstructor(Type.EmptyTypes);
+      DynamicMethod method = new DynamicMethod("CreateAstNode", nodeType, Type.EmptyTypes);
       ILGenerator il = method.GetILGenerator();
-      il.Emit(OpCodes.Ldarg_0);
-      il.Emit(OpCodes.Ldarg_1);
       il.Emit(OpCodes.Newobj, constr);
       il.Emit(OpCodes.Ret);
-      var result  = (AstNodeCreator) method.CreateDelegate(typeof(AstNodeCreator));
+      var result  = (DefaultAstNodeCreator) method.CreateDelegate(typeof(DefaultAstNodeCreator));
       return result; 
     }
 

@@ -211,7 +211,7 @@ namespace Pash.ParserIntrinsics
             var grammar = new InteractiveInput();
             var parseTree = new Parser(grammar).Parse(input);
 
-            if (parseTree.HasErrors)
+            if (parseTree.HasErrors())
             {
                 // TODO: implement a parsing exception
                 throw new Exception(parseTree.ParserMessages.JoinString("\n"));
@@ -333,7 +333,7 @@ namespace Pash.ParserIntrinsics
             ////        statement_terminator:
             ////            ;
             ////            new_line_character
-            statement_terminator.Rule = ToTerminal(";") | Terminals.new_line_character;
+            statement_terminator.Rule = ToTerm(";") | Terminals.new_line_character;
             MarkTransient(statement_terminator);
 
             ////        statement_terminators:
@@ -470,7 +470,7 @@ namespace Pash.ParserIntrinsics
             ////        pipeline_tail:
             ////            |   new_lines_opt   command
             ////            |   new_lines_opt   command   pipeline_tail
-            pipeline_tail.Rule = ToTerminal("|") + (Terminals.new_lines | Empty) + command + (pipeline_tail | Empty);
+            pipeline_tail.Rule = ToTerm("|") + (Terminals.new_lines | Empty) + command + (pipeline_tail | Empty);
 
             ////        command:
             ////            command_name   command_elements_opt
@@ -635,7 +635,7 @@ namespace Pash.ParserIntrinsics
 
             ////        parenthesized_expression:
             ////            (   new_lines_opt   pipeline   new_lines_opt   )
-            parenthesized_expression.Rule = ToTerminal("(") + (Terminals.new_lines | Empty) + pipeline + (Terminals.new_lines | Empty) + ")";
+            parenthesized_expression.Rule = ToTerm("(") + (Terminals.new_lines | Empty) + pipeline + (Terminals.new_lines | Empty) + ")";
 
             ////        sub_expression:
             ////            $(   new_lines_opt   statement_list_opt   new_lines_opt   )

@@ -75,7 +75,7 @@ namespace Irony.Parsing {
       ParseAll();
       //Set Parse status
       var parseTree = Context.CurrentParseTree;
-      bool hasErrors = parseTree.HasErrors;
+      bool hasErrors = parseTree.HasErrors();
       if (hasErrors)
         parseTree.Status = ParseTreeStatus.Error;
       else if (Context.Status == ParserStatus.AcceptedPartial)
@@ -83,7 +83,7 @@ namespace Irony.Parsing {
       else
         parseTree.Status = ParseTreeStatus.Parsed;
       //Build AST if no errors and AST flag is set
-      bool createAst = _grammar.LanguageFlags.CreateAst;
+      bool createAst = _grammar.LanguageFlags.IsSet(LanguageFlags.CreateAst);
       if (createAst && !hasErrors)
         Language.Grammar.BuildAst(Language, parseTree);
       //Done; record the time
@@ -114,9 +114,6 @@ namespace Irony.Parsing {
 
     #region Parser Action execution
     private void ExecuteNextAction() {
-
-      if (Context == null) throw new NullReferenceException("Context");
-      if (Context.CurrentParserState == null) throw new NullReferenceException("Context.CurrentParserState");
       //Read input only if DefaultReduceAction is null - in this case the state does not contain ExpectedSet,
       // so parser cannot assist scanner when it needs to select terminal and therefore can fail
       if (Context.CurrentParserInput == null && Context.CurrentParserState.DefaultAction == null)
@@ -149,8 +146,8 @@ namespace Irony.Parsing {
       //First try as keyterm/key symbol; for example if token text = "while", then first try it as a keyword "while";
       // if this does not work, try as an identifier that happens to match a keyword but is in fact identifier
       Token inputToken = currInput.Token;
-      if (inputToken != null && inputToken.KeywordTerminal != null) {
-        var keyTerm = inputToken.KeywordTerminal;
+      if (inputToken != null && inputToken.KeyTerm != null) {
+        var keyTerm = inputToken.KeyTerm;
         if (currState.Actions.TryGetValue(keyTerm, out action)) {
           #region comments
           // Ok, we found match as a key term (keyword or special symbol)
@@ -175,7 +172,7 @@ namespace Irony.Parsing {
       if (currState.Actions.TryGetValue(currInput.Term, out action))
         return action;
       //If input is EOF and NewLineBeforeEof flag is set, try using NewLine to find action
-      if (currInput.Term == _grammar.Eof && _grammar.LanguageFlags.NewLineBeforeEOF &&
+      if (currInput.Term == _grammar.Eof && _grammar.LanguageFlags.IsSet(LanguageFlags.NewLineBeforeEOF) &&
           currState.Actions.TryGetValue(_grammar.NewLine, out action)) {
         //There's no action for EOF but there's action for NewLine. Let's add newLine token as input, just in case
         // action code wants to check input - it should see NewLine.

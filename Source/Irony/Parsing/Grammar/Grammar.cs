@@ -77,7 +77,7 @@ namespace Irony.Parsing {
       this.CaseSensitive = caseSensitive;
       bool ignoreCase =  !this.CaseSensitive;
       var stringComparer = StringComparer.Create(System.Globalization.CultureInfo.InvariantCulture, ignoreCase);
-      KeywordTerminals = new KeywordTerminalTable(stringComparer);
+      KeyTerms = new KeyTermTable(stringComparer);
       //Initialize console attributes
       ConsoleTitle = Resources.MsgDefaultConsoleTitle;
       ConsoleGreeting = string.Format(Resources.MsgDefaultConsoleGreeting, this.GetType().Name);
@@ -90,7 +90,7 @@ namespace Irony.Parsing {
     //Reserved words handling 
     public void MarkReservedWords(params string[] reservedWords) {
       foreach (var word in reservedWords) {
-        var wdTerm = ToTerminal(word);
+        var wdTerm = ToTerm(word);
         wdTerm.SetFlag(TermFlags.IsReservedWord);
       }
     }
@@ -103,7 +103,7 @@ namespace Irony.Parsing {
 
     public void RegisterOperators(int precedence, Associativity associativity, params string[] opSymbols) {
       foreach (string op in opSymbols) {
-        KeywordTerminal opSymbol = ToTerminal(op);
+        KeyTerm opSymbol = ToTerm(op);
         opSymbol.SetFlag(TermFlags.IsOperator);
         opSymbol.Precedence = precedence;
         opSymbol.Associativity = associativity;
@@ -122,8 +122,8 @@ namespace Irony.Parsing {
     }
 
     public void RegisterBracePair(string openBrace, string closeBrace) {
-      KeywordTerminal openS = ToTerminal(openBrace);
-      KeywordTerminal closeS = ToTerminal(closeBrace);
+      KeyTerm openS = ToTerm(openBrace);
+      KeyTerm closeS = ToTerm(closeBrace);
       openS.SetFlag(TermFlags.IsOpenBrace);
       openS.IsPairFor = closeS;
       closeS.SetFlag(TermFlags.IsCloseBrace);
@@ -132,7 +132,7 @@ namespace Irony.Parsing {
 
     public void MarkPunctuation(params string[] symbols) {
       foreach (string symbol in symbols) {
-        KeywordTerminal term = ToTerminal(symbol);
+        KeyTerm term = ToTerm(symbol);
         term.SetFlag(TermFlags.IsPunctuation|TermFlags.NoAstNode);
       }
     }
@@ -150,7 +150,7 @@ namespace Irony.Parsing {
     //MemberSelect are symbols invoking member list dropdowns in editor; for ex: . (dot), ::
     public void MarkMemberSelect(params string[] symbols) {
       foreach (var symbol in symbols)
-        ToTerminal(symbol).SetFlag(TermFlags.IsMemberSelect);
+        ToTerm(symbol).SetFlag(TermFlags.IsMemberSelect);
     }
     //Sets IsNotReported flag on terminals. As a result the terminal wouldn't appear in expected terminal list
     // in syntax error messages
@@ -160,7 +160,7 @@ namespace Irony.Parsing {
     }
     public void MarkNotReported(params string[] symbols) {
       foreach (var symbol in symbols)
-        ToTerminal(symbol).SetFlag(TermFlags.IsNotReported);
+        ToTerm(symbol).SetFlag(TermFlags.IsNotReported);
     }
 
     #endregion
@@ -402,7 +402,7 @@ namespace Irony.Parsing {
     private IEnumerable<Terminal> SymbolsToTerms(IEnumerable<string> symbols) {
       var termList = new TerminalList(); 
       foreach(var symbol in symbols)
-        termList.Add(ToTerminal(symbol));
+        termList.Add(ToTerm(symbol));
       return termList; 
     }
     #endregion
@@ -461,14 +461,14 @@ namespace Irony.Parsing {
     #endregion
 
     #region KeyTerms (keywords + special symbols)
-    public KeywordTerminalTable KeywordTerminals;
+    public KeyTermTable KeyTerms;
 
-    public KeywordTerminal ToTerminal(string text) {
-      return ToTerminal(text, text);
+    public KeyTerm ToTerm(string text) {
+      return ToTerm(text, text);
     }
-    public KeywordTerminal ToTerminal(string text, string name) {
-      KeywordTerminal term;
-      if (KeywordTerminals.TryGetValue(text, out term)) {
+    public KeyTerm ToTerm(string text, string name) {
+      KeyTerm term;
+      if (KeyTerms.TryGetValue(text, out term)) {
         //update name if it was specified now and not before
         if (string.IsNullOrEmpty(term.Name) && !string.IsNullOrEmpty(name))
           term.Name = name;
@@ -478,8 +478,8 @@ namespace Irony.Parsing {
       if (!CaseSensitive)
         text = text.ToLower(CultureInfo.InvariantCulture);
       string.Intern(text); 
-      term = new KeywordTerminal(text, name);
-      KeywordTerminals[text] = term;
+      term = new KeyTerm(text, name);
+      KeyTerms[text] = term;
       return term; 
     }
 
@@ -501,7 +501,7 @@ namespace Irony.Parsing {
 
     #region AST construction
     public virtual void BuildAst(LanguageData language, ParseTree parseTree) {
-      if (!LanguageFlags.CreateAst)
+      if (!LanguageFlags.IsSet(LanguageFlags.CreateAst))
         return;
       var astContext = new AstContext(language);
       var astBuilder = new AstBuilder(astContext);

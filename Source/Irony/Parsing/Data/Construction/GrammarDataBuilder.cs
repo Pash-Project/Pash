@@ -79,10 +79,8 @@ namespace Irony.Parsing.Construction {
         if (nt.Rule != null && !string.IsNullOrEmpty(nt.Rule.Name))
           nt.Name = nt.Rule.Name;
         else
-        {
           nt.Name = "Unnamed" + (_unnamedCount++);
           nt.SetFlag(TermFlags.NoAstNode | TermFlags.IsTransient);
-        }
       }
       if (nt.Rule == null)
         _language.Errors.AddAndThrow(GrammarErrorLevel.Error, null, Resources.ErrNtRuleIsNull, nt.Name);
@@ -123,7 +121,7 @@ namespace Irony.Parsing.Construction {
       }
       //Mark keywords - any "word" symbol directly mentioned in the grammar
       foreach (var term in _grammarData.Terminals) {
-        var symTerm = term as KeywordTerminal;
+        var symTerm = term as KeyTerm;
         if (symTerm == null) continue;
         if (!string.IsNullOrEmpty(symTerm.Text) && char.IsLetter(symTerm.Text[0]))
           symTerm.SetFlag(TermFlags.IsKeyword); 
@@ -242,7 +240,7 @@ namespace Irony.Parsing.Construction {
 
     #region Grammar Validation
     private void ValidateGrammar() {
-      var createAst = _grammar.LanguageFlags.CreateAst; 
+      var createAst = _grammar.LanguageFlags.IsSet(LanguageFlags.CreateAst); 
       var invalidTransSet = new NonTerminalSet();
       foreach(var nt in _grammarData.NonTerminals) {
         if(nt.Flags.IsSet(TermFlags.IsTransient)) {
