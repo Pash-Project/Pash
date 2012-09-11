@@ -25,7 +25,10 @@ namespace ParserTests
             [TestFixtureSetUp]
             public void Setup()
             {
-                this._commandExpressionAst = ParseInput("'PS> '").EndBlock.Statements[0].PipelineElements[0];
+                this._commandExpressionAst = ParseInput("'PS> '")
+                    .EndBlock
+                    .Statements[0]
+                    .PipelineElements[0];
 
                 this._stringConstantExpressionAst = (StringConstantExpressionAst)this._commandExpressionAst.Expression;
 
@@ -70,7 +73,11 @@ namespace ParserTests
             [TestFixtureSetUp]
             public void Setup()
             {
-                this._constantExpressionAst = ParseInput("1").EndBlock.Statements[0].PipelineElements[0].Expression;
+                this._constantExpressionAst = ParseInput("1")
+                    .EndBlock
+                    .Statements[0]
+                    .PipelineElements[0]
+                    .Expression;
             }
 
             [Test]
@@ -95,23 +102,36 @@ namespace ParserTests
         [Test]
         public void HexIntegerLiteralTest()
         {
-            ConstantExpressionAst constantExpressionAst = ParseInput("0xa").EndBlock.Statements[0].PipelineElements[0].Expression;
-            Assert.AreEqual(0xA, constantExpressionAst.Value);
+            int value = ParseInput("0xa")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression
+                .Value;
+            Assert.AreEqual(0xA, value);
         }
 
         [Test]
         public void ExpandableStringLiteralExpression()
         {
-            var statement = ParseInput("\"PS> \"").EndBlock.Statements[0];
-            Assert.NotNull(statement);
+            string value = ParseInput("\"PS> \"")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression
+                .Value;
 
-            //Assert.AreEqual("PS> ", result);
+            Assert.AreEqual("PS> ", value);
         }
 
         [Test]
         public void AdditiveExpression_AddStringInt()
         {
-            var expression = ParseInput("'x' + 1").EndBlock.Statements[0].PipelineElements[0].Expression;
+            var expression = ParseInput("'x' + 1")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression;
 
             ConstantExpressionAst leftValue = expression.Left;
             ConstantExpressionAst rightValue = expression.Right;
@@ -124,7 +144,11 @@ namespace ParserTests
         [Test]
         public void AdditiveExpression_AddStrings()
         {
-            var expression = ParseInput("'x' + 'y'").EndBlock.Statements[0].PipelineElements[0].Expression;
+            var expression = ParseInput("'x' + 'y'")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression;
 
             ConstantExpressionAst leftValue = expression.Left;
             ConstantExpressionAst rightValue = expression.Right;
@@ -134,155 +158,91 @@ namespace ParserTests
             Assert.AreEqual("y", rightValue.Value);
         }
 
-        //    [Test]
-        //    public void ParenthesizedExpression()
-        //    {
-        //        var result = ParseInput("(Get-Location)")
-        //            .ScriptBlock
-        //            .ScriptBlockBody
-        //            .Statements
-        //            .Single()
-        //            .Pipeline
-        //            .Expression
-        //            .LogicalExpression
-        //            .BitwiseExpression
-        //            .ComparisonExpression
-        //            .AdditiveExpression
-        //            .MultiplyExpression
-        //            .FormatExpression
-        //            .RangeExpression
-        //            .ArrayLiteral
-        //            .UnaryExpression
-        //            .PrimaryExpression
-        //            .Value
-        //            .ParenthesizedExpression
-        //            .Pipeline
-        //            .Command
-        //            .Name;
+        [Test]
+        public void ParenthesizedExpression()
+        {
+            string result = ParseInput("(Get-Location)")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression
+                .Pipeline
+                .PipelineElements[0]
+                .CommandElements[0]
+                .Value;
 
-        //        Assert.AreEqual("Get-Location", result);
-        //    }
+            Assert.AreEqual("Get-Location", result);
+        }
 
-        //    [Test]
-        //    public void NegativeIntegerTest()
-        //    {
-        //        int result = ParseInput("-1")
-        //            .ScriptBlock
-        //            .ScriptBlockBody
-        //            .Statements
-        //            .Single()
-        //            .Pipeline
-        //            .Expression
-        //            .LogicalExpression
-        //            .BitwiseExpression
-        //            .ComparisonExpression
-        //            .AdditiveExpression
-        //            .MultiplyExpression
-        //            .FormatExpression
-        //            .RangeExpression
-        //            .ArrayLiteral
-        //            .UnaryExpression
-        //            .ExpressionWithUnaryOperator
-        //            .NegativeExpression
-        //            .PrimaryExpression
-        //            .Value
-        //            .Literal
-        //            .IntegerValue
-        //            .Value
-        //            ;
+        [Test]
+        public void NegativeIntegerTest()
+        {
+            int result = ParseInput("-1")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression
+                .Value;
 
-        //        Assert.AreEqual(1, result);
-        //    }
+            Assert.AreEqual(-1, result);
+        }
 
-        //    [Test]
-        //    public void HexIntegerTest()
-        //    {
-        //        var result = ParseInput("0xA")
-        //            .ScriptBlock
-        //            .ScriptBlockBody
-        //            .Statements
-        //            .Single()
-        //            .Pipeline
-        //            .Expression
-        //            .LogicalExpression
-        //            .BitwiseExpression
-        //            .ComparisonExpression
-        //            .AdditiveExpression
-        //            .MultiplyExpression
-        //            .FormatExpression
-        //            .RangeExpression
-        //            .ArrayLiteral
-        //            .UnaryExpression
-        //            .PrimaryExpression
-        //            .Value
-        //            .Literal
-        //            .IntegerValue
-        //            .Value
-        //            ;
+        [Test]
+        public void HexIntegerTest()
+        {
+            var result = ParseInput("0xA")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression
+                .Value;
 
-        //        Assert.AreEqual(0xa, result);
-        //    }
+            Assert.AreEqual(0xa, result);
+        }
 
-        //    [Test]
-        //    public void ArrayRangeTest()
-        //    {
-        //        var result = ParseInput("1..10")
-        //            .ScriptBlock
-        //            .ScriptBlockBody
-        //            .Statements
-        //            .Single()
-        //            .Pipeline
-        //            .Expression
-        //            .LogicalExpression
-        //            .BitwiseExpression
-        //            .ComparisonExpression
-        //            .AdditiveExpression
-        //            .MultiplyExpression
-        //            .FormatExpression
-        //            .RangeExpression
-        //            ;
+        [Test]
+        public void ArrayRangeTest()
+        {
+            BinaryExpressionAst result = ParseInput("1..10")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression;
 
-        //        Assert.AreEqual(1, result.RangeStart.ArrayLiteral.UnaryExpression.PrimaryExpression.Value.Literal.IntegerValue.Value);
-        //        Assert.AreEqual(10, result.RangeEnd.UnaryExpression.PrimaryExpression.Value.Literal.IntegerValue.Value);
-        //    }
+            ConstantExpressionAst left = (ConstantExpressionAst)result.Left;
+            ConstantExpressionAst right = (ConstantExpressionAst)result.Right;
 
-        //    [Test, Ignore]
-        //    public void UnaryMinusTest()
-        //    {
-        //        ////    7.2.5 Unary minus
-        //        // TODO:
-        //        ////    Examples:
-        //        ////    
-        //        ////    -$true         # type int, value -1
-        //        ////    -123L          # type long, value -123
-        //        ////    -0.12340D      # type decimal, value -0.12340
-        //    }
+            Assert.AreEqual(1, left.Value);
+            Assert.AreEqual(10, right.Value);
+        }
+
+        [Test, Ignore]
+        public void UnaryMinusTest()
+        {
+            ////    7.2.5 Unary minus
+            // TODO:
+            ////    Examples:
+            ////    
+            ////    -$true         # type int, value -1
+            ////    -123L          # type long, value -123
+            ////    -0.12340D      # type decimal, value -0.12340
+        }
 
 
-        //    [Test]
-        //    public void ArrayLiteralTest()
-        //    {
-        //        var result = ParseInput("1,3,3")
-        //            .ScriptBlock
-        //            .ScriptBlockBody
-        //            .Statements
-        //            .Single()
-        //            .Pipeline
-        //            .Expression
-        //            .LogicalExpression
-        //            .BitwiseExpression
-        //            .ComparisonExpression
-        //            .AdditiveExpression
-        //            .MultiplyExpression
-        //            .FormatExpression
-        //            .RangeExpression
-        //            .ArrayLiteral
-        //            ;
+        [Test]
+        public void ArrayLiteralTest()
+        {
+            var result = ParseInput("1,3,3")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression
+                .Elements;
 
-        //        Assert.AreEqual(1, result.UnaryExpression.PrimaryExpression.Value.Literal.IntegerValue.Value);
-        //        Assert.AreEqual(3, result.ArrayLiteralExpression.UnaryExpression.PrimaryExpression.Value.Literal.IntegerValue.Value);
-        //        Assert.AreEqual(3, result.ArrayLiteralExpression.ArrayLiteralExpression.UnaryExpression.PrimaryExpression.Value.Literal.IntegerValue.Value);
-        //    }
+            Assert.AreEqual(1, result[0].Value);
+            Assert.AreEqual(3, result[1].Value);
+            Assert.AreEqual(3, result[2].Value);
+        }
 
         static dynamic ParseInput(string s)
         {

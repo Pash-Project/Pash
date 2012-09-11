@@ -290,12 +290,34 @@ namespace Pash.ParserIntrinsics
             ////            unary_expression
             ////            unary_expression   ,    new_lines_opt   array_literal_expression
 
-            if (parseTreeNode.ChildNodes[0].Term == this._grammar.unary_expression)
+            VerifyTerm(parseTreeNode, this._grammar.array_literal_expression);
+            VerifyTerm(parseTreeNode.ChildNodes[0], this._grammar.unary_expression);
+
+            var unaryExpression = BuildUnaryExpressionAst(parseTreeNode.ChildNodes.First());
+
+            if (parseTreeNode.ChildNodes.Count == 1)
             {
-                return BuildUnaryExpressionAst(parseTreeNode.ChildNodes.Single());
+                return unaryExpression;
+            }
+            else if (parseTreeNode.ChildNodes.Count == 3)
+            {
+                List<ExpressionAst> elements = new List<ExpressionAst>();
+                elements.Add(unaryExpression);
+
+                var remaining = BuildArrayLiteralExpressionAst(parseTreeNode.ChildNodes[2]);
+                if (remaining is ArrayLiteralAst)
+                {
+                    elements.AddRange(((ArrayLiteralAst)remaining).Elements);
+                }
+                else
+                {
+                    elements.Add(remaining);
+                }
+
+                return new ArrayLiteralAst(new ScriptExtent(parseTreeNode), elements);
             }
 
-            else throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+            throw new InvalidOperationException(parseTreeNode.ToString());
         }
 
         ExpressionAst BuildUnaryExpressionAst(ParseTreeNode parseTreeNode)
@@ -309,7 +331,51 @@ namespace Pash.ParserIntrinsics
                 return BuildPrimaryExpressionAst(parseTreeNode.ChildNodes.Single());
             }
 
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar.expression_with_unary_operator)
+            {
+                return BuildExpressionWithUnaryOperatorAst(parseTreeNode.ChildNodes.Single());
+            }
+
             else throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+        }
+
+        private ExpressionAst BuildExpressionWithUnaryOperatorAst(ParseTreeNode parseTreeNode)
+        {
+            ////        expression_with_unary_operator:
+            ////            ,   new_lines_opt   unary_expression
+            ////            -not   new_lines_opt   unary_expression
+            ////            !   new_lines_opt   unary_expression
+            ////            -bnot   new_lines_opt   unary_expression
+            ////            +   new_lines_opt   unary_expression
+            ////            dash   new_lines_opt   unary_expression
+            ////            pre_increment_expression
+            ////            pre_decrement_expression
+            ////            cast_expression
+            ////            -split   new_lines_opt   unary_expression
+            ////            -join   new_lines_opt   unary_expression
+
+            if (parseTreeNode.ChildNodes[0].Term == PowerShellGrammar.Terminals.dash)
+            {
+                var expression = BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1]);
+                ConstantExpressionAst constantExpressionAst = expression as ConstantExpressionAst;
+                if (constantExpressionAst == null)
+                {
+                    throw new NotImplementedException(parseTreeNode.ToString());
+                }
+                else
+                {
+                    if (constantExpressionAst.StaticType == typeof(int))
+                    {
+                        return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0 - ((int)constantExpressionAst.Value));
+                    }
+                    else
+                    {
+                        throw new NotImplementedException(parseTreeNode.ToString());
+                    }
+                }
+            }
+
+            throw new NotImplementedException(parseTreeNode.ToString());
         }
 
         ExpressionAst BuildPrimaryExpressionAst(ParseTreeNode parseTreeNode)

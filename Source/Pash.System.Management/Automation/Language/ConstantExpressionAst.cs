@@ -12,8 +12,8 @@ namespace System.Management.Automation.Language
             this.Value = value;
         }
 
-        // Derived classes should override this
-        public override Type StaticType { get { throw new NotImplementedException(this.ToString()); } }
+
+        public override Type StaticType { get { return this.Value.GetType(); } }
 
         public object Value { get; private set; }
     }

@@ -41,7 +41,6 @@
     <Compile Include="CaseInsensitiveGrammarTests.cs" />
     <Compile Include="ExtensionsTests.cs" />
     <Compile Include="PowerShellGrammar.TerminalsTests.cs" />
-    <Compile Include="PowerShellGrammar.Tests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
