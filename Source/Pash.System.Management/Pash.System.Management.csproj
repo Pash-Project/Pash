@@ -310,6 +310,7 @@
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.cs" />
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.Terminals.cs" />
     <Compile Include="Extensions\String.cs" />
+    <Compile Include="Pash\ParserIntrinsics\ScriptExtent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
