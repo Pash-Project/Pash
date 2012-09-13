@@ -15,7 +15,6 @@ namespace ParserTests
     [TestFixture]
     class AstTests
     {
-
         [TestFixture]
         public class VerbatimStringLiteralExpressionTests
         {
@@ -242,6 +241,20 @@ namespace ParserTests
             Assert.AreEqual(1, result[0].Value);
             Assert.AreEqual(3, result[1].Value);
             Assert.AreEqual(3, result[2].Value);
+        }
+
+        [Test]
+        public void PipelineTest()
+        {
+            var pipelineAst = ParseInput("x | y")
+                .EndBlock
+                .Statements[0];
+
+            var firstCommand = pipelineAst.PipelineElements[0].CommandElements[0].Value;
+            var secondCommand = pipelineAst.PipelineElements[1].CommandElements[0].Value;
+
+            Assert.AreEqual("x", firstCommand);
+            Assert.AreEqual("y", secondCommand);
         }
 
         static dynamic ParseInput(string s)

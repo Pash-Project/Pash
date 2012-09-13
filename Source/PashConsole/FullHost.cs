@@ -135,8 +135,16 @@ namespace Pash
 
         internal void Prompt()
         {
-            // This should be "prompt | write-host -nonewline", but that doesn't work yet.
-            Execute("prompt");
+            try
+            {
+                Execute("prompt | write-host -nonewline");
+
+            }
+            catch (Exception ex)
+            {
+
+                this.myHost.UI.WriteLine(ex.ToString());
+            }
         }
 
         void ExecuteHelper(string cmd, object input)

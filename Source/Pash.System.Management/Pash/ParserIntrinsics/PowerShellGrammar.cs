@@ -79,6 +79,8 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal data_commands_list = null; // Initialized by reflection.
         public readonly NonTerminal data_command = null; // Initialized by reflection.
         public readonly NonTerminal pipeline = null; // Initialized by reflection.
+        public readonly NonTerminal _pipeline_expression = null; // Initialized by reflection.
+        public readonly NonTerminal _pipeline_command = null; // Initialized by reflection.
         public readonly NonTerminal assignment_expression = null; // Initialized by reflection.
         public readonly NonTerminal pipeline_tail = null; // Initialized by reflection.
         public readonly NonTerminal command = null; // Initialized by reflection.
@@ -458,7 +460,21 @@ namespace Pash.ParserIntrinsics
             ////            expression   redirections_opt  pipeline_tail_opt
             ////            command   pipeline_tail_opt
             // TODO: redirections_opt
-            pipeline.Rule = assignment_expression | expression + (pipeline_tail | Empty) | command + (pipeline_tail | Empty);
+
+            // alternative grammar:
+            //          pipeline:
+            //            assignment_expression
+            //            _pipeline_expression
+            //            _pipeline_command
+
+            //        _pipeline_expression:
+            //            expression   redirections_opt  pipeline_tail_opt
+            //
+            //        _pipeline_command:
+            //            command   pipeline_tail_opt
+            pipeline.Rule = assignment_expression | _pipeline_expression | _pipeline_command;
+            _pipeline_expression.Rule = expression + (pipeline_tail | Empty);
+            _pipeline_command.Rule = command + (pipeline_tail | Empty);
 
             ////        assignment_expression:
             ////            expression   assignment_operator   statement

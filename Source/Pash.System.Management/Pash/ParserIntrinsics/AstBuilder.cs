@@ -117,34 +117,99 @@ namespace Pash.ParserIntrinsics
 
         PipelineBaseAst BuildPipelineAst(ParseTreeNode pipelineNode)
         {
-            ////        pipeline:
-            ////            assignment_expression
-            ////            expression   redirections_opt  pipeline_tail_opt
-            ////            command   pipeline_tail_opt
+            // alternative grammar:
+            //          pipeline:
+            //            assignment_expression
+            //            _pipeline_expression
+            //            _pipeline_command
 
             VerifyTerm(pipelineNode, this._grammar.pipeline);
+            var childNode = pipelineNode.ChildNodes.Single();
 
-            if (pipelineNode.ChildNodes[0].Term == this._grammar.assignment_expression)
+            if (childNode.Term == this._grammar.assignment_expression)
             {
                 throw new NotImplementedException(pipelineNode.ChildNodes[0].Term.Name);
             }
 
-            else if (pipelineNode.ChildNodes[0].Term == this._grammar.expression)
+            else if (childNode.Term == this._grammar._pipeline_expression)
             {
-                var commandExpressionAst = new CommandExpressionAst(new ScriptExtent(pipelineNode.ChildNodes[0]), BuildExpressionAst(pipelineNode.ChildNodes[0]), null);
+                return BuildPipelineExpressionAst(childNode);
+            }
 
+            else if (childNode.Term == this._grammar._pipeline_command)
+            {
+                return BuildPipelineCommandAst(childNode);
+            }
+
+            else throw new InvalidOperationException(pipelineNode.ToString());
+        }
+
+        private PipelineBaseAst BuildPipelineExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            //        _pipeline_expression:
+            //            expression   redirections_opt  pipeline_tail_opt
+            VerifyTerm(parseTreeNode, this._grammar._pipeline_expression);
+
+            var commandExpressionAst = new CommandExpressionAst(
+                new ScriptExtent(parseTreeNode.ChildNodes[0]),
+                BuildExpressionAst(parseTreeNode.ChildNodes[0]), null
+                );
+
+            if (parseTreeNode.ChildNodes.Count == 1)
+            {
                 return new PipelineAst(
-                    new ScriptExtent(pipelineNode),
+                    new ScriptExtent(parseTreeNode),
                     commandExpressionAst
                     );
             }
-
-            else if (pipelineNode.ChildNodes[0].Term == this._grammar.command)
+            else if (parseTreeNode.ChildNodes.Count == 2 && parseTreeNode.ChildNodes[1].Term == this._grammar.pipeline_tail)
             {
-                return new PipelineAst(new ScriptExtent(pipelineNode), BuildCommandAst(pipelineNode.ChildNodes.Single()));
+                var pipelineTail = GetPipelineTailCommandList(parseTreeNode.ChildNodes[1]).ToList();
+                pipelineTail.Insert(0, commandExpressionAst);
+                return new PipelineAst(new ScriptExtent(parseTreeNode), pipelineTail);
             }
 
-            else throw new InvalidOperationException(this.ToString());
+            else throw new NotImplementedException(parseTreeNode.ToString());
+
+        }
+
+        private PipelineBaseAst BuildPipelineCommandAst(ParseTreeNode parseTreeNode)
+        {
+            //        _pipeline_command:
+            //            command   pipeline_tail_opt
+
+            VerifyTerm(parseTreeNode, this._grammar._pipeline_command);
+
+            CommandAst commandAst = BuildCommandAst(parseTreeNode.ChildNodes[0]);
+            if (parseTreeNode.ChildNodes.Count == 1)
+            {
+                return new PipelineAst(new ScriptExtent(parseTreeNode), commandAst);
+            }
+            else if (parseTreeNode.ChildNodes.Count == 2)
+            {
+                var pipelineTail = GetPipelineTailCommandList(parseTreeNode.ChildNodes[1]).ToList();
+                pipelineTail.Insert(0, commandAst);
+                return new PipelineAst(new ScriptExtent(parseTreeNode), pipelineTail);
+            }
+            else throw new InvalidOperationException(parseTreeNode.ToString());
+        }
+
+        IEnumerable<CommandBaseAst> GetPipelineTailCommandList(ParseTreeNode parseTreeNode)
+        {
+            ////        pipeline_tail:
+            ////            |   new_lines_opt   command
+            ////            |   new_lines_opt   command   pipeline_tail
+
+            VerifyTerm(parseTreeNode, this._grammar.pipeline_tail);
+
+            yield return BuildCommandAst(parseTreeNode.ChildNodes[1]);
+
+            while (parseTreeNode.ChildNodes.Count == 3)
+            {
+                parseTreeNode = parseTreeNode.ChildNodes[2];
+                VerifyTerm(parseTreeNode, this._grammar.pipeline_tail);
+                yield return BuildCommandAst(parseTreeNode.ChildNodes[1]);
+            }
         }
 
         ExpressionAst BuildExpressionAst(ParseTreeNode expressionNode)

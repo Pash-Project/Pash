@@ -10,6 +10,18 @@ namespace TestHost
     class Tests
     {
         [Test]
+        public void PipelineTest()
+        {
+            Assert.AreEqual("xxx", TestHost.Execute("'xxx' | Write-Host -NoNewline"));
+        }
+
+        [Test]
+        public void PipelineTest2()
+        {
+            Assert.AreEqual("xxx\r\n", TestHost.Execute("'xxx' | Write-Host"));
+        }
+
+        [Test]
         public void WriteOutputString()
         {
             Assert.AreEqual("xxx\r\n", TestHost.Execute("Write-Output 'xxx'"));

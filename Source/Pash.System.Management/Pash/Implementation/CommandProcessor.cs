@@ -117,6 +117,11 @@ namespace System.Management.Automation
                 propertyInfo.SetValue(Command, PSObject.AsPSObject(value), null);
             }
 
+            else if (propertyInfo.PropertyType == typeof(SwitchParameter))
+            {
+                propertyInfo.SetValue(Command, new SwitchParameter(true), null);
+            }
+
             else
             {
                 propertyInfo.SetValue(Command, value, null);

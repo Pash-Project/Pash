@@ -124,14 +124,7 @@ namespace System.Management.Pash.Implementation
                 var result = pipeline.Invoke();
                 if (result.Any())
                 {
-                    if (result.Count == 1)
-                    {
-                        this._pipelineCommandRuntime.outputResults.Write(result.Single());
-                    }
-                    else
-                    {
-                        this._pipelineCommandRuntime.outputResults.Write(result);
-                    }
+                    this._pipelineCommandRuntime.WriteObject(result, true);
                 }
             }
             finally
@@ -192,6 +185,36 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitConstantExpression(ConstantExpressionAst constantExpressionAst)
         {
             this._pipelineCommandRuntime.outputResults.Write(constantExpressionAst.Value);
+            return AstVisitAction.SkipChildren;
+        }
+
+        public override AstVisitAction VisitPipeline(PipelineAst pipelineAst)
+        {
+            // TODO: rewrite this - it should expand the commands in the original pipe
+
+            PipelineCommandRuntime subRuntime = null;
+
+            foreach (var pipelineElement in pipelineAst.PipelineElements)
+            {
+                ExecutionContext subContext = this._context.CreateNestedContext();
+
+                if (subRuntime == null)
+                {
+                    subContext.inputStreamReader = this._context.inputStreamReader;
+                }
+                else
+                {
+                    subContext.inputStreamReader = new PSObjectPipelineReader(subRuntime.outputResults);
+                }
+
+                subRuntime = new PipelineCommandRuntime(this._pipelineCommandRuntime.pipelineProcessor);
+                subContext.inputStreamReader = subContext.inputStreamReader;
+
+                pipelineElement.Visit(new ExecutionVisitor(subContext, subRuntime));
+            }
+
+            this._pipelineCommandRuntime.WriteObject(subRuntime.outputResults.Read(), true);
+
             return AstVisitAction.SkipChildren;
         }
     }
