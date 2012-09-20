@@ -19,17 +19,15 @@ namespace Pash.ParserIntrinsics
 
     partial class PowerShellGrammar
     {
-        public static class Terminals
-        {
-            static Terminals()
+            static PowerShellGrammar()
             {
-                var q = from field in typeof(PowerShellGrammar.Terminals).GetFields()
+                var q = from field in typeof(PowerShellGrammar).GetFields()
                         where field.FieldType == typeof(RegexBasedTerminal)
                         select field;
 
                 foreach (var field in q)
                 {
-                    var patternFieldInfo = typeof(PowerShellGrammar.Terminals).GetField(
+                    var patternFieldInfo = typeof(PowerShellGrammar).GetField(
                         field.Name + "_pattern",
                         BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static
                         );
@@ -558,6 +556,5 @@ namespace Pash.ParserIntrinsics
             ////            dash   f
             #endregion
             #endregion
-        }
     }
 }

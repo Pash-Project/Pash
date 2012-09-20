@@ -286,7 +286,7 @@ namespace Pash.ParserIntrinsics
                 return new BinaryExpressionAst(
                     new ScriptExtent(parseTreeNode),
                     BuildAdditiveExpressionAst(leftOperand),
-                    operatorNode.Term == PowerShellGrammar.Terminals.dash ? TokenKind.Minus : TokenKind.Plus,
+                    operatorNode.Term == PowerShellGrammar.dash ? TokenKind.Minus : TokenKind.Plus,
                     BuildMultiplicativeExpressionAst(rightOperand),
                     new ScriptExtent(operatorNode)
                     );
@@ -419,7 +419,7 @@ namespace Pash.ParserIntrinsics
             ////            -split   new_lines_opt   unary_expression
             ////            -join   new_lines_opt   unary_expression
 
-            if (parseTreeNode.ChildNodes[0].Term == PowerShellGrammar.Terminals.dash)
+            if (parseTreeNode.ChildNodes[0].Term == PowerShellGrammar.dash)
             {
                 var expression = BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1]);
                 ConstantExpressionAst constantExpressionAst = expression as ConstantExpressionAst;
@@ -525,12 +525,12 @@ namespace Pash.ParserIntrinsics
             ////            decimal_integer_literal
             ////            hexadecimal_integer_literal
 
-            if (parseTreeNode.ChildNodes[0].Term == PowerShellGrammar.Terminals.decimal_integer_literal)
+            if (parseTreeNode.ChildNodes[0].Term == PowerShellGrammar.decimal_integer_literal)
             {
                 return BuildDecimalIntegerLiteralExpressionAst(parseTreeNode.ChildNodes.Single());
             }
 
-            else if (parseTreeNode.ChildNodes[0].Term == PowerShellGrammar.Terminals.hexadecimal_integer_literal)
+            else if (parseTreeNode.ChildNodes[0].Term == PowerShellGrammar.hexadecimal_integer_literal)
             {
                 return BuildHexaecimalIntegerLiteralExpressionAst(parseTreeNode.ChildNodes.Single());
             }
@@ -542,8 +542,8 @@ namespace Pash.ParserIntrinsics
         {
             ////        decimal_integer_literal:
             ////            decimal_digits   numeric_type_suffix_opt   numeric_multiplier_opt
-            var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), PowerShellGrammar.Terminals.decimal_integer_literal.Pattern, RegexOptions.IgnoreCase);
-            string value = matches.Groups[PowerShellGrammar.Terminals.decimal_digits.Name].Value;
+            var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), PowerShellGrammar.decimal_integer_literal.Pattern, RegexOptions.IgnoreCase);
+            string value = matches.Groups[PowerShellGrammar.decimal_digits.Name].Value;
 
             return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), Convert.ToInt32(value, 10));
         }
@@ -552,8 +552,8 @@ namespace Pash.ParserIntrinsics
         {
             ////        hexadecimal_integer_literal:
             ////            0x   hexadecimal_digits   long_type_suffix_opt   numeric_multiplier_opt
-            var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), PowerShellGrammar.Terminals.hexadecimal_integer_literal.Pattern, RegexOptions.IgnoreCase);
-            string value = matches.Groups[PowerShellGrammar.Terminals.hexadecimal_digits.Name].Value;
+            var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), PowerShellGrammar.hexadecimal_integer_literal.Pattern, RegexOptions.IgnoreCase);
+            string value = matches.Groups[PowerShellGrammar.hexadecimal_digits.Name].Value;
 
             return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), Convert.ToInt32(value, 16));
         }
@@ -568,12 +568,12 @@ namespace Pash.ParserIntrinsics
 
             VerifyTerm(parseTreeNode, this._grammar.string_literal);
 
-            if (parseTreeNode.ChildNodes[0].Term == PowerShellGrammar.Terminals.expandable_string_literal)
+            if (parseTreeNode.ChildNodes[0].Term == PowerShellGrammar.expandable_string_literal)
             {
                 return BuildExpandableStringLiteralExpressionAst(parseTreeNode.ChildNodes.Single());
             }
 
-            else if (parseTreeNode.ChildNodes[0].Term == PowerShellGrammar.Terminals.verbatim_string_literal)
+            else if (parseTreeNode.ChildNodes[0].Term == PowerShellGrammar.verbatim_string_literal)
             {
                 return BuildVerbatimStringLiteralExpressionAst(parseTreeNode.ChildNodes.Single());
             }
@@ -585,9 +585,9 @@ namespace Pash.ParserIntrinsics
         {
             ////        expandable_string_literal:
             ////            double_quote_character   expandable_string_characters_opt   dollars_opt   double_quote_character
-            var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), PowerShellGrammar.Terminals.expandable_string_literal.Pattern, RegexOptions.IgnoreCase);
-            string value = matches.Groups[PowerShellGrammar.Terminals.expandable_string_characters.Name].Value +
-                matches.Groups[PowerShellGrammar.Terminals.dollars.Name].Value
+            var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), PowerShellGrammar.expandable_string_literal.Pattern, RegexOptions.IgnoreCase);
+            string value = matches.Groups[PowerShellGrammar.expandable_string_characters.Name].Value +
+                matches.Groups[PowerShellGrammar.dollars.Name].Value
                 ;
 
             return new StringConstantExpressionAst(new ScriptExtent(parseTreeNode), value, StringConstantType.DoubleQuoted);
@@ -598,8 +598,8 @@ namespace Pash.ParserIntrinsics
             ////        verbatim_string_literal:
             ////            single_quote_character   verbatim_string_characters_opt   single_quote_char [sic]
 
-            var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), PowerShellGrammar.Terminals.verbatim_string_literal.Pattern, RegexOptions.IgnoreCase);
-            string value = matches.Groups[PowerShellGrammar.Terminals.verbatim_string_characters.Name].Value;
+            var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), PowerShellGrammar.verbatim_string_literal.Pattern, RegexOptions.IgnoreCase);
+            string value = matches.Groups[PowerShellGrammar.verbatim_string_characters.Name].Value;
 
             return new StringConstantExpressionAst(new ScriptExtent(parseTreeNode), value, StringConstantType.SingleQuoted);
         }
@@ -645,7 +645,7 @@ namespace Pash.ParserIntrinsics
 
             VerifyTerm(parseTreeNode, this._grammar.command_name);
 
-            if (parseTreeNode.ChildNodes.Single().Term == PowerShellGrammar.Terminals.generic_token)
+            if (parseTreeNode.ChildNodes.Single().Term == PowerShellGrammar.generic_token)
             {
                 return BuildGenericTokenAst(parseTreeNode.ChildNodes.Single());
             }
@@ -658,7 +658,7 @@ namespace Pash.ParserIntrinsics
             ////        generic_token:
             ////            generic_token_parts
 
-            VerifyTerm(parseTreeNode, PowerShellGrammar.Terminals.generic_token);
+            VerifyTerm(parseTreeNode, PowerShellGrammar.generic_token);
 
             ////        generic_token_part:
             ////            expandable_string_literal
@@ -672,11 +672,11 @@ namespace Pash.ParserIntrinsics
             //    PS> & $x"ChildItem"   # works!
             //    PS> g"et-childite"m   # also works
 
-            var match = PowerShellGrammar.Terminals.generic_token.Expression.Match(parseTreeNode.Token.Text);
+            var match = PowerShellGrammar.generic_token.Expression.Match(parseTreeNode.Token.Text);
 
-            if (match.Groups[PowerShellGrammar.Terminals.expandable_string_literal.Name].Success) throw new NotImplementedException(parseTreeNode.ToString());
-            //if (match.Groups[PowerShellGrammar.Terminals.verbatim_here_string_literal.Name].Success) throw new NotImplementedException(parseTreeNode.ToString());
-            if (match.Groups[PowerShellGrammar.Terminals.variable.Name].Success) throw new NotImplementedException(parseTreeNode.ToString());
+            if (match.Groups[PowerShellGrammar.expandable_string_literal.Name].Success) throw new NotImplementedException(parseTreeNode.ToString());
+            //if (match.Groups[PowerShellGrammar.verbatim_here_string_literal.Name].Success) throw new NotImplementedException(parseTreeNode.ToString());
+            if (match.Groups[PowerShellGrammar.variable.Name].Success) throw new NotImplementedException(parseTreeNode.ToString());
 
             return new StringConstantExpressionAst(new ScriptExtent(parseTreeNode), parseTreeNode.Token.Text, StringConstantType.BareWord);
         }
@@ -692,7 +692,7 @@ namespace Pash.ParserIntrinsics
 
             var childNode = parseTreeNode.ChildNodes.Single();
 
-            if (childNode.Term == PowerShellGrammar.Terminals.command_parameter)
+            if (childNode.Term == PowerShellGrammar.command_parameter)
             {
                 return BuildCommandParameterAst(childNode);
             }
@@ -743,12 +743,12 @@ namespace Pash.ParserIntrinsics
             ////        command_parameter:
             ////            dash   first_parameter_char   parameter_chars   colon_opt
 
-            VerifyTerm(parseTreeNode, PowerShellGrammar.Terminals.command_parameter);
+            VerifyTerm(parseTreeNode, PowerShellGrammar.command_parameter);
 
-            var match = PowerShellGrammar.Terminals.command_parameter.Expression.Match(parseTreeNode.Token.Text);
-            var parameterName = match.Groups[PowerShellGrammar.Terminals._parameter_name.Name].Value;
+            var match = PowerShellGrammar.command_parameter.Expression.Match(parseTreeNode.Token.Text);
+            var parameterName = match.Groups[PowerShellGrammar._parameter_name.Name].Value;
 
-            bool colon = match.Groups[PowerShellGrammar.Terminals.colon.Name].Success;
+            bool colon = match.Groups[PowerShellGrammar.colon.Name].Success;
 
             // to match PowerShell's behavior, we have to bump command_parameter to be a nonterminal. Later.
             // 

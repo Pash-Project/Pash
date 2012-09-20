@@ -15,112 +15,112 @@ namespace ParserTests
         [Test]
         public void LetterAsTokenChar()
         {
-            Assert.IsTrue(Regex.IsMatch("x", PowerShellGrammar.Terminals.generic_token_char.Pattern));
+            Assert.IsTrue(Regex.IsMatch("x", PowerShellGrammar.generic_token_char.Pattern));
         }
 
         [Test]
         public void DigitAsTokenChar()
         {
-            Assert.IsTrue(Regex.IsMatch("1", PowerShellGrammar.Terminals.generic_token_char.Pattern));
+            Assert.IsTrue(Regex.IsMatch("1", PowerShellGrammar.generic_token_char.Pattern));
         }
 
         [Test]
         public void SingleQuoteIsNotTokenChar()
         {
-            Assert.IsFalse(Regex.IsMatch("'", PowerShellGrammar.Terminals.generic_token_char.Pattern));
+            Assert.IsFalse(Regex.IsMatch("'", PowerShellGrammar.generic_token_char.Pattern));
         }
 
         [Test]
         public void GenericToken_Match()
         {
-            AssertIsFullStringMatch(PowerShellGrammar.Terminals.generic_token.Pattern, "foo");
+            AssertIsFullStringMatch(PowerShellGrammar.generic_token.Pattern, "foo");
         }
 
         [Test]
         public void GenericToken_DoubleToken_NotMatch()
         {
-            Assert.IsFalse(Regex.IsMatch("foo foo", "^" + PowerShellGrammar.Terminals.generic_token.Pattern + "$"));
+            Assert.IsFalse(Regex.IsMatch("foo foo", "^" + PowerShellGrammar.generic_token.Pattern + "$"));
         }
 
         // make sure we don't see string literals as `generic_token`.
         [Test]
         public void GenericToken_String_NotMatch()
         {
-            StringAssert.DoesNotMatch("^" + PowerShellGrammar.Terminals.generic_token.Pattern + "$", "\"PS> \"");
+            StringAssert.DoesNotMatch("^" + PowerShellGrammar.generic_token.Pattern + "$", "\"PS> \"");
         }
 
         [Test]
         public void VerbatimStringMatch()
         {
-            var matches = Regex.Match("'PS> '", PowerShellGrammar.Terminals.verbatim_string_characters.Pattern);
+            var matches = Regex.Match("'PS> '", PowerShellGrammar.verbatim_string_characters.Pattern);
             Assert.True(matches.Success);
 
             // How to get the useful value out a terminal. Consider that there are 4 different accepted single-quote
             // characters that could demarcate a string literal, and we really don't care which one you used - 
             // we just want the contents.
-            Assert.AreEqual("PS> ", matches.Groups[PowerShellGrammar.Terminals.verbatim_string_characters.Name].Value);
+            Assert.AreEqual("PS> ", matches.Groups[PowerShellGrammar.verbatim_string_characters.Name].Value);
         }
 
         [Test]
         public void DecimalIntegerLiteralTest()
         {
-            var matches = Regex.Match("17", PowerShellGrammar.Terminals.decimal_integer_literal.Pattern);
+            var matches = Regex.Match("17", PowerShellGrammar.decimal_integer_literal.Pattern);
             Assert.True(matches.Success);
-            Assert.AreEqual(17.ToString(), matches.Groups[PowerShellGrammar.Terminals.decimal_integer_literal.Name].Value);
+            Assert.AreEqual(17.ToString(), matches.Groups[PowerShellGrammar.decimal_integer_literal.Name].Value);
         }
 
         [Test]
         public void HexIntegerLiteralTest()
         {
-            var matches = Regex.Match("0x17", PowerShellGrammar.Terminals.hexadecimal_integer_literal.Pattern);
+            var matches = Regex.Match("0x17", PowerShellGrammar.hexadecimal_integer_literal.Pattern);
             Assert.True(matches.Success);
-            Assert.AreEqual("0x17", matches.Groups[PowerShellGrammar.Terminals.hexadecimal_integer_literal.Name].Value);
+            Assert.AreEqual("0x17", matches.Groups[PowerShellGrammar.hexadecimal_integer_literal.Name].Value);
         }
 
         [Test]
         public void HexIntegerLiteralTest2()
         {
-            var matches = Regex.Match("0x17", PowerShellGrammar.Terminals.hexadecimal_integer_literal.Pattern);
+            var matches = Regex.Match("0x17", PowerShellGrammar.hexadecimal_integer_literal.Pattern);
             Assert.True(matches.Success);
             Assert.AreEqual("0x17", matches.Value);
-            Assert.AreEqual("0x17", matches.Groups[PowerShellGrammar.Terminals.hexadecimal_integer_literal.Name].Value);
+            Assert.AreEqual("0x17", matches.Groups[PowerShellGrammar.hexadecimal_integer_literal.Name].Value);
         }
 
         [Test]
         public void HexIntegerLiteralTest3()
         {
-            var matches = Regex.Match("0x17", PowerShellGrammar.Terminals.hexadecimal_integer_literal.Pattern);
+            var matches = Regex.Match("0x17", PowerShellGrammar.hexadecimal_integer_literal.Pattern);
             Assert.True(matches.Success);
-            Assert.AreEqual("0x17", matches.Groups[PowerShellGrammar.Terminals.hexadecimal_integer_literal.Name].Value);
+            Assert.AreEqual("0x17", matches.Groups[PowerShellGrammar.hexadecimal_integer_literal.Name].Value);
         }
 
         [Test]
         public void HEXIntegerLiteralTest()
         {
-            var matches = Regex.Match("0X17", PowerShellGrammar.Terminals.hexadecimal_integer_literal.Pattern, RegexOptions.IgnoreCase);
+            var matches = Regex.Match("0X17", PowerShellGrammar.hexadecimal_integer_literal.Pattern, RegexOptions.IgnoreCase);
             Assert.True(matches.Success);
-            Assert.AreEqual("0X17", matches.Groups[PowerShellGrammar.Terminals.hexadecimal_integer_literal.Name].Value);
+            Assert.AreEqual("0X17", matches.Groups[PowerShellGrammar.hexadecimal_integer_literal.Name].Value);
         }
 
         // Simply ensure that the reflection used to initialize these fields actually worked
         [Test]
         public void RegexInitTest()
         {
-            Assert.IsNotNull(PowerShellGrammar.Terminals.new_lines);
-            Assert.AreEqual("new_lines", PowerShellGrammar.Terminals.new_lines.Name);
+            Assert.IsNotNull(PowerShellGrammar.new_lines);
+            Assert.AreEqual("new_lines", PowerShellGrammar.new_lines.Name);
         }
 
         [Test]
         public void TokenizeStringTest()
         {
-            AssertIsFullStringMatch(PowerShellGrammar.Terminals.expandable_string_literal.Pattern, "\"PS> \"");
+            AssertIsFullStringMatch(PowerShellGrammar.expandable_string_literal.Pattern, "\"PS> \"");
         }
 
         [Test, Ignore]
         public void generic_token_AstConfig_Test()
         {
-            //Assert.AreEqual(typeof(generic_token_astnode), PowerShellGrammar.Terminals.generic_token.AstConfig.NodeType);
-            Assert.IsFalse((PowerShellGrammar.Terminals.generic_token.Flags & TermFlags.NoAstNode) != 0);
+            //Assert.AreEqual(typeof(generic_token_astnode), PowerShellGrammar.generic_token.AstConfig.NodeType);
+            Assert.IsFalse((PowerShellGrammar.generic_token.Flags & TermFlags.NoAstNode) != 0);
         }
 
         // Use this to confirm that the regex matches greedily enough.

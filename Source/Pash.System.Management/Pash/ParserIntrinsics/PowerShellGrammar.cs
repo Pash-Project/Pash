@@ -242,14 +242,14 @@ namespace Pash.ParserIntrinsics
             ////        integer_literal:
             ////            decimal_integer_literal
             ////            hexadecimal_integer_literal
-            integer_literal.Rule = Terminals.decimal_integer_literal | Terminals.hexadecimal_integer_literal;
+            integer_literal.Rule = decimal_integer_literal | hexadecimal_integer_literal;
 
             ////        string_literal:
             ////            expandable_string_literal
             ////            expandable_here_string_literal
             ////            verbatim_string_literal
             ////            verbatim_here_string_literal
-            string_literal.Rule = Terminals.expandable_string_literal | Terminals.verbatim_string_literal;
+            string_literal.Rule = expandable_string_literal | verbatim_string_literal;
             #endregion
             #endregion
 
@@ -335,7 +335,7 @@ namespace Pash.ParserIntrinsics
             ////        statement_terminator:
             ////            ;
             ////            new_line_character
-            statement_terminator.Rule = ToTerm(";") | Terminals.new_line_character;
+            statement_terminator.Rule = ToTerm(";") | new_line_character;
             MarkTransient(statement_terminator);
 
             ////        statement_terminators:
@@ -481,12 +481,12 @@ namespace Pash.ParserIntrinsics
             //
             // I think the left side should be primary_expression. But as a hack for now, I'm jumping straight to 
             // variable;
-            assignment_expression.Rule = /*expression*/Terminals.variable + Terminals.assignment_operator + statement;
+            assignment_expression.Rule = /*expression*/variable + assignment_operator + statement;
 
             ////        pipeline_tail:
             ////            |   new_lines_opt   command
             ////            |   new_lines_opt   command   pipeline_tail
-            pipeline_tail.Rule = ToTerm("|") + (Terminals.new_lines | Empty) + command + (pipeline_tail | Empty);
+            pipeline_tail.Rule = ToTerm("|") + (new_lines | Empty) + command + (pipeline_tail | Empty);
 
             ////        command:
             ////            command_name   command_elements_opt
@@ -502,7 +502,7 @@ namespace Pash.ParserIntrinsics
             ////            generic_token
             ////            generic_token_with_subexpr
             // TODO: more
-            command_name.Rule = Terminals.generic_token;
+            command_name.Rule = generic_token;
 
             ////        generic_token_with_subexpr:
             ////            No whitespace is allowed between ) and command_name.
@@ -522,7 +522,7 @@ namespace Pash.ParserIntrinsics
             ////            command_argument
             ////            redirection
             // TODO: more
-            command_element.Rule = Terminals.command_parameter | command_argument;
+            command_element.Rule = command_parameter | command_argument;
 
             ////        command_argument:
             ////            command_name_expr
@@ -574,7 +574,7 @@ namespace Pash.ParserIntrinsics
             // TODO: more
             additive_expression.Rule =
                 multiplicative_expression |
-                (additive_expression + "+" + (Terminals.new_lines | Empty) + multiplicative_expression);
+                (additive_expression + "+" + (new_lines | Empty) + multiplicative_expression);
 
             ////        multiplicative_expression:
             ////            format_expression
@@ -594,13 +594,13 @@ namespace Pash.ParserIntrinsics
             ////            array_literal_expression
             ////            range_expression   ..   new_lines_opt   array_literal_expression
             // TODO: more
-            range_expression.Rule = array_literal_expression | (range_expression + ".." + (Terminals.new_lines | Empty) + array_literal_expression);
+            range_expression.Rule = array_literal_expression | (range_expression + ".." + (new_lines | Empty) + array_literal_expression);
 
             ////        array_literal_expression:
             ////            unary_expression
             ////            unary_expression   ,    new_lines_opt   array_literal_expression
             // TODO: more
-            array_literal_expression.Rule = unary_expression | (unary_expression + "," + (Terminals.new_lines | Empty) + array_literal_expression);
+            array_literal_expression.Rule = unary_expression | (unary_expression + "," + (new_lines | Empty) + array_literal_expression);
 
             ////        unary_expression:
             ////            primary_expression
@@ -619,7 +619,7 @@ namespace Pash.ParserIntrinsics
             ////            cast_expression
             ////            -split   new_lines_opt   unary_expression
             ////            -join   new_lines_opt   unary_expression
-            expression_with_unary_operator.Rule = Terminals.dash + (Terminals.new_lines | Empty) + unary_expression;
+            expression_with_unary_operator.Rule = dash + (new_lines | Empty) + unary_expression;
 
             ////        pre_increment_expression:
             ////            ++   new_lines_opt   unary_expression
@@ -647,11 +647,11 @@ namespace Pash.ParserIntrinsics
             ////            type_literal
             ////            variable
             // TODO: more
-            value.Rule = parenthesized_expression | literal | Terminals.variable;
+            value.Rule = parenthesized_expression | literal | variable;
 
             ////        parenthesized_expression:
             ////            (   new_lines_opt   pipeline   new_lines_opt   )
-            parenthesized_expression.Rule = ToTerm("(") + (Terminals.new_lines | Empty) + pipeline + (Terminals.new_lines | Empty) + ")";
+            parenthesized_expression.Rule = ToTerm("(") + (new_lines | Empty) + pipeline + (new_lines | Empty) + ")";
 
             ////        sub_expression:
             ////            $(   new_lines_opt   statement_list_opt   new_lines_opt   )
