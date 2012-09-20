@@ -11,11 +11,15 @@ namespace System.Management.Automation
     internal class CommandProcessor : CommandProcessorBase
     {
         internal Cmdlet Command { get; set; }
-        private CmdletInfo _cmdletInfo;
+        readonly CmdletInfo _cmdletInfo;
         private bool _beganProcessing;
 
+        internal override CommandInfo CommandInfo
+        {
+            get { return this._cmdletInfo; }
+        }
+
         public CommandProcessor(CmdletInfo cmdletInfo)
-            : base(cmdletInfo)
         {
             _cmdletInfo = cmdletInfo;
             _beganProcessing = false;

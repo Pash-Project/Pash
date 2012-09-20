@@ -14,9 +14,15 @@ namespace Pash.Implementation
 {
     internal class ScriptProcessor : CommandProcessorBase
     {
-        public ScriptProcessor(ScriptInfo scriptInfo)
-            : base(scriptInfo)
+        readonly ScriptInfo _scriptInfo;
+
+        internal override CommandInfo CommandInfo
         {
+            get { return this._scriptInfo; }
+        }
+        public ScriptProcessor(ScriptInfo scriptInfo)
+        {
+            this._scriptInfo = scriptInfo;
         }
 
         internal override ICommandRuntime CommandRuntime { get; set; }
@@ -37,7 +43,7 @@ namespace Pash.Implementation
 
             PipelineCommandRuntime pipelineCommandRuntime = (PipelineCommandRuntime)CommandRuntime;
 
-            ((ScriptInfo)CommandInfo).ScriptBlock.Ast.Visit(new ExecutionVisitor(context, pipelineCommandRuntime));
+            this._scriptInfo.ScriptBlock.Ast.Visit(new ExecutionVisitor(context, pipelineCommandRuntime));
         }
 
         internal override void Complete()
