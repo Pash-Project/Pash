@@ -141,6 +141,19 @@ namespace ParserTests
         }
 
         [Test]
+        public void NewlineContinuationTest()
+        {
+            var expression = ParseInput(
+@"'x' + `
+'y'"
+                )
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression;
+        }
+
+        [Test]
         public void AdditiveExpression_AddStrings()
         {
             var expression = ParseInput("'x' + 'y'")

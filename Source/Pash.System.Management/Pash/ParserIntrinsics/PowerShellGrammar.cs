@@ -4,6 +4,8 @@ using System.Management.Automation.Language;
 using System.Reflection;
 using Extensions.String;
 using Irony.Parsing;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Pash.ParserIntrinsics
 {
@@ -775,6 +777,59 @@ namespace Pash.ParserIntrinsics
             ////            new_lines_opt   simple_name   =   new_lines_opt   expression
             #endregion
             #endregion
+        }
+
+        // returns the number of characters to skip
+        int SkipSingleWhitespace(ISourceStream source)
+        {
+            switch (CharUnicodeInfo.GetUnicodeCategory(source.PreviewChar))
+            {
+                ////        whitespace:
+                ////            Any character with Unicode class Zs, Zl, or Zp
+                case UnicodeCategory.SpaceSeparator:        // Zs
+                case UnicodeCategory.LineSeparator:         // Zl
+                case UnicodeCategory.ParagraphSeparator:    // Zp
+                    return 1;
+            }
+
+            switch (source.PreviewChar)
+            {
+                ////            Horizontal tab character (U+0009)
+                case '\u0009':
+                ////            Vertical tab character (U+000B)
+                case '\u000B':
+                ////            Form feed character (U+000C)
+                case '\u000C':
+                    return 1;
+            }
+
+            ////            `   (The backtick character U+0060) followed by new_line_character
+            ////        new_line_character:
+            ////            Carriage return character (U+000D)
+            ////            Line feed character (U+000A)
+            ////            Carriage return character (U+000D) followed by line feed character (U+000A)
+            if (source.PreviewChar == '`')
+            {
+                if (source.NextPreviewChar == '\u000D' && source.NextNextPreviewChar == '\u000A') return 3;
+
+                if (source.NextPreviewChar == '\u000D') return 2;
+
+                if (source.NextPreviewChar == '\u000A') return 2;
+            }
+
+            return 0;
+        }
+
+        public override void SkipWhitespace(ISourceStream source)
+        {
+            while (!source.EOF())
+            {
+                int count = SkipSingleWhitespace(source);
+
+                if (count == 0) return;
+
+                else source.PreviewPosition += count;
+            }
         }
 
         void InitializeNonTerminals()

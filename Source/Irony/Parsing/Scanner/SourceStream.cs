@@ -78,7 +78,18 @@ namespace Irony.Parsing {
       }
     }
 
-    public bool MatchSymbol(string symbol) {
+    public char NextNextPreviewChar
+    {
+        [System.Diagnostics.DebuggerStepThrough]
+        get
+        {
+            if (_previewPosition + 2 >= _textLength) return '\0';
+            return _chars[_previewPosition + 2];
+        }
+    }
+
+    public bool MatchSymbol(string symbol)
+    {
       try {
         int cmp = string.Compare(_text, PreviewPosition, symbol, 0, symbol.Length, _stringComparison);
         return cmp == 0;
