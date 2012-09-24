@@ -15,6 +15,114 @@ namespace ParserTests
     [TestFixture]
     class AstTests
     {
+        [Test]
+        public void HashTable0()
+        {
+            HashtableAst hashtableAst = ParseInput("@{ }")
+                    .EndBlock
+                    .Statements[0]
+                    .PipelineElements[0]
+                    .Expression;
+
+            Assert.AreEqual(0, hashtableAst.KeyValuePairs.Count);
+        }
+
+        [Test]
+        public void HashTable1()
+        {
+            HashtableAst hashtableAst = ParseInput("@{ 'a' = 'b' }")
+                    .EndBlock
+                    .Statements[0]
+                    .PipelineElements[0]
+                    .Expression;
+
+            Assert.AreEqual(1, hashtableAst.KeyValuePairs.Count);
+            dynamic keyValuePair = hashtableAst.KeyValuePairs.Single();
+
+            StringConstantExpressionAst nameAst = keyValuePair.Item1;
+            StringConstantExpressionAst valueAst = keyValuePair.Item2.PipelineElements[0].Expression;
+
+            Assert.AreEqual("a", nameAst.Value);
+            Assert.AreEqual("b", valueAst.Value);
+        }
+
+        [Test]
+        public void HashTable2()
+        {
+            HashtableAst hashtableAst = ParseInput("@{ a = b ; c = d }")
+                    .EndBlock
+                    .Statements[0]
+                    .PipelineElements[0]
+                    .Expression;
+
+            Assert.AreEqual(2, hashtableAst.KeyValuePairs.Count);
+        }
+
+        [Test]
+        public void HashTableIntegerKey()
+        {
+            HashtableAst hashtableAst = ParseInput("@{ 10 = 'b' }")
+                    .EndBlock
+                    .Statements[0]
+                    .PipelineElements[0]
+                    .Expression;
+
+            var nameAst = (ConstantExpressionAst)hashtableAst.KeyValuePairs.Single().Item1;
+
+            Assert.AreEqual(10, nameAst.Value);
+        }
+
+        [Test]
+        public void HashTableUnquotedName()
+        {
+            HashtableAst hashtableAst = ParseInput("@{ a = 'b' }")
+                    .EndBlock
+                    .Statements[0]
+                    .PipelineElements[0]
+                    .Expression;
+
+            var nameAst = (StringConstantExpressionAst)hashtableAst.KeyValuePairs.Single().Item1;
+
+            Assert.AreEqual("a", nameAst.Value);
+        }
+
+        [Test]
+        public void StatementSequenceWithSemicolon()
+        {
+            var statements = ParseInput("Set-Location ; Get-Location")
+                    .EndBlock
+                    .Statements;
+
+            Assert.AreEqual(2, statements.Count);
+        }
+
+        [Test(Description = "Issue: https://github.com/JayBazuzi/Pash2/issues/7"), ExpectedException]
+        public void StatementSequenceWithoutSemicolonTest()
+        {
+            var statements = ParseInput("if ($true) { } Get-Location")
+                    .EndBlock
+                    .Statements;
+
+            Assert.AreEqual(2, statements.Count);
+        }
+
+        [Test]
+        public void SingleStatementInBlockTest()
+        {
+            StringConstantExpressionAst command = ParseInput("{ Get-ChildItem }")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression
+                .ScriptBlock
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .CommandElements[0];
+
+            Assert.AreEqual("Get-ChildItem", command.Value);
+        }
+
         [TestFixture]
         public class VerbatimStringLiteralExpressionTests
         {

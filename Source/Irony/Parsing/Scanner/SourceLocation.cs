@@ -20,9 +20,9 @@ namespace Irony.Parsing {
   public struct SourceLocation {
     public int Position;
     /// <summary>Source line number, 0-based.</summary>
-    public int Line;
+    public readonly int Line;
     /// <summary>Source column number, 0-based.</summary>
-    public int Column;
+    public readonly int Column;
     public SourceLocation(int position, int line, int column) {
       Position = position;
       Line = line;

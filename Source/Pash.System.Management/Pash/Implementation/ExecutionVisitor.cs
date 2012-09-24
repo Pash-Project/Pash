@@ -7,6 +7,7 @@ using Pash.Implementation;
 using System.Management.Automation;
 using System.Reflection;
 using System.Management.Automation.Runspaces;
+using System.Collections;
 
 namespace System.Management.Pash.Implementation
 {
@@ -37,8 +38,8 @@ namespace System.Management.Pash.Implementation
 
         object EvaluateBinaryExpression(BinaryExpressionAst binaryExpressionAst)
         {
-            var leftOperand = EvaluateExpression(binaryExpressionAst.Left);
-            var rightOperand = EvaluateExpression(binaryExpressionAst.Right);
+            var leftOperand = EvaluateAst(binaryExpressionAst.Left);
+            var rightOperand = EvaluateAst(binaryExpressionAst.Right);
 
             if (binaryExpressionAst.Operator == TokenKind.Plus)
             {
@@ -171,7 +172,7 @@ namespace System.Management.Pash.Implementation
             throw new NotImplementedException(this.ToString());
         }
 
-        object EvaluateExpression(ExpressionAst expressionAst)
+        object EvaluateAst(Ast expressionAst)
         {
             var subVisitor = this.CloneSub();
             expressionAst.Visit(subVisitor);
@@ -214,6 +215,20 @@ namespace System.Management.Pash.Implementation
             }
 
             this._pipelineCommandRuntime.WriteObject(subRuntime.outputResults.Read(), true);
+
+            return AstVisitAction.SkipChildren;
+        }
+
+        public override AstVisitAction VisitHashtable(HashtableAst hashtableAst)
+        {
+            Hashtable hashTable = new Hashtable();
+
+            foreach (var pair in hashtableAst.KeyValuePairs)
+            {
+                hashTable.Add(EvaluateAst(pair.Item1), EvaluateAst(pair.Item2));
+            }
+
+            this._pipelineCommandRuntime.WriteObject(hashTable);
 
             return AstVisitAction.SkipChildren;
         }

@@ -60,6 +60,22 @@ namespace Pash.ParserIntrinsics
                 );
         }
 
+        ScriptBlockExpressionAst BuildScriptBlockExpressionAst(ParseTreeNode scriptBlockExpressionNode)
+        {
+            VerifyTerm(scriptBlockExpressionNode, this._grammar.script_block_expression);
+            ////        script_block_expression:
+            ////            {   new_lines_opt   script_block   new_lines_opt   }
+
+            var scriptBlockNode = scriptBlockExpressionNode.ChildNodes[1];
+
+            VerifyTerm(scriptBlockNode, this._grammar.script_block);
+
+            return new ScriptBlockExpressionAst(
+                new ScriptExtent(scriptBlockNode),
+                BuildScriptBlockAst(scriptBlockNode)
+                );
+        }
+
         StatementBlockAst BuildStatementBlockAst(ParseTreeNode scriptBlockBodyNode)
         {
             VerifyTerm(scriptBlockBodyNode, this._grammar.script_block_body/* TODO: , named_block_list*/);
@@ -87,7 +103,7 @@ namespace Pash.ParserIntrinsics
             VerifyTerm(statementListNode, this._grammar.statement_list/* TODO: , named_block_list*/);
 
             // +2 because it alternaties statement/terminator
-            for (int i = 0; i < statementListNode.ChildNodes.Count; i += 2)
+            for (int i = 0; i < statementListNode.ChildNodes.Count; i ++)
             {
                 yield return BuildStatementAst(statementListNode.ChildNodes[i]);
             }
@@ -103,13 +119,13 @@ namespace Pash.ParserIntrinsics
             ////            trap_statement
             ////            try_statement
             ////            data_statement
-            ////            pipeline   statement_terminator
+            ////            pipeline   statement_terminator(_opt)
 
             VerifyTerm(statementNode, this._grammar.statement);
 
-            if (statementNode.ChildNodes[0].Term == this._grammar.pipeline)
+            if (statementNode.ChildNodes[0].Term == this._grammar._statement_pipeline)
             {
-                return BuildPipelineAst(statementNode.ChildNodes[0]);
+                return BuildPipelineAst(statementNode.ChildNodes[0].ChildNodes[0]);
             }
 
             else throw new NotImplementedException(statementNode.ChildNodes[0].Term.Name);
@@ -473,17 +489,112 @@ namespace Pash.ParserIntrinsics
             ////            type_literal
             ////            variable
 
-            if (parseTreeNode.ChildNodes[0].Term == this._grammar.literal)
+            VerifyTerm(parseTreeNode, this._grammar.value);
+
+            var childNode = parseTreeNode.ChildNodes.Single();
+
+            if (childNode.Term == this._grammar.parenthesized_expression)
             {
-                return BuildLiteralExpressionAst(parseTreeNode.ChildNodes.Single());
+                return BuildParenExpressionAst(childNode);
             }
 
-            else if (parseTreeNode.ChildNodes[0].Term == this._grammar.parenthesized_expression)
+            if (childNode.Term == this._grammar.sub_expression)
             {
-                return BuildParenExpressionAst(parseTreeNode.ChildNodes[0]);
+                throw new NotImplementedException(childNode.Term.Name);
             }
 
-            else throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+            if (childNode.Term == this._grammar.array_expression)
+            {
+                throw new NotImplementedException(childNode.Term.Name);
+            }
+
+            if (childNode.Term == this._grammar.script_block_expression)
+            {
+                return BuildScriptBlockExpressionAst(childNode);
+            }
+
+            if (childNode.Term == this._grammar.hash_literal_expression)
+            {
+                return BuildHashExpressionAst(childNode);
+            }
+
+            if (childNode.Term == this._grammar.literal)
+            {
+                return BuildLiteralExpressionAst(childNode);
+            }
+
+            if (childNode.Term == this._grammar.type_literal)
+            {
+                throw new NotImplementedException(childNode.Term.Name);
+            }
+
+            if (childNode.Term == PowerShellGrammar.variable)
+            {
+                throw new NotImplementedException(childNode.Term.Name);
+            }
+
+            throw new InvalidOperationException(childNode.Term.Name);
+        }
+
+        private HashtableAst BuildHashExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            ////        hash_literal_expression:
+            ////            @{   new_lines_opt   hash_literal_body_opt   new_lines_opt   }
+
+            VerifyTerm(parseTreeNode, this._grammar.hash_literal_expression);
+
+            List<Tuple<ExpressionAst, StatementAst>> hashEntries = new List<Tuple<ExpressionAst, StatementAst>>();
+
+            if (parseTreeNode.ChildNodes.Count == 3)
+            {
+
+                var hashLiteralBodyParseTreeNode = parseTreeNode.ChildNodes[1];
+
+                ////        hash_literal_body:
+                ////            hash_entry
+                ////            hash_literal_body   statement_terminators   hash_entry
+
+                VerifyTerm(hashLiteralBodyParseTreeNode, this._grammar.hash_literal_body);
+
+                for (int i = 0; i < hashLiteralBodyParseTreeNode.ChildNodes.Count; i ++)
+                {
+                    var hashEntryParseTreeNode = hashLiteralBodyParseTreeNode.ChildNodes[i];
+
+                    VerifyTerm(hashEntryParseTreeNode, this._grammar.hash_entry);
+
+                    ////        hash_entry:
+                    ////            key_expression   =   new_lines_opt   statement
+                    var keyExpressionAst = BuildKeyExpressionAst(hashEntryParseTreeNode.ChildNodes[0]);
+                    var valueAst = BuildStatementAst(hashEntryParseTreeNode.ChildNodes[2]);
+
+                    hashEntries.Add(new Tuple<ExpressionAst, StatementAst>(keyExpressionAst, valueAst));
+                }
+            }
+
+            return new HashtableAst(new ScriptExtent(parseTreeNode), hashEntries);
+        }
+
+        private ExpressionAst BuildKeyExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            ////        key_expression:
+            ////            simple_name
+            ////            unary_expression
+
+            VerifyTerm(parseTreeNode, this._grammar.key_expression);
+
+            var childParseTreeNode = parseTreeNode.ChildNodes.Single();
+
+            if (childParseTreeNode.Term == PowerShellGrammar.simple_name)
+            {
+                return new StringConstantExpressionAst(new ScriptExtent(childParseTreeNode), childParseTreeNode.Token.Text, StringConstantType.BareWord);
+            }
+
+            else if (childParseTreeNode.Term == this._grammar.unary_expression)
+            {
+                return BuildUnaryExpressionAst(childParseTreeNode);
+            }
+
+            throw new InvalidOperationException(childParseTreeNode.ToString());
         }
 
         private ParenExpressionAst BuildParenExpressionAst(ParseTreeNode parseTreeNode)
@@ -612,8 +723,9 @@ namespace Pash.ParserIntrinsics
 
             VerifyTerm(parseTreeNode, this._grammar.command);
 
-            if (parseTreeNode.ChildNodes[0].Term == this._grammar.command_name)
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar._command_simple)
             {
+                parseTreeNode = parseTreeNode.ChildNodes.Single();
                 var commandElements = new List<CommandElementAst>();
 
                 commandElements.Add(BuildCommandNameAst(parseTreeNode.ChildNodes[0]));
@@ -633,8 +745,13 @@ namespace Pash.ParserIntrinsics
                     null);
 
             }
+            else if (parseTreeNode.ChildNodes[0].Term == this._grammar._command_invocation)
+            {
+                parseTreeNode = parseTreeNode.ChildNodes.Single();
+                throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+            }
 
-            throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+            throw new InvalidOperationException(parseTreeNode.ChildNodes[0].Term.Name);
         }
 
         private CommandElementAst BuildCommandNameAst(ParseTreeNode parseTreeNode)

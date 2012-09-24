@@ -42,13 +42,6 @@ namespace ParserTests
             Assert.IsFalse(Regex.IsMatch("foo foo", "^" + PowerShellGrammar.generic_token.Pattern + "$"));
         }
 
-        // make sure we don't see string literals as `generic_token`.
-        [Test]
-        public void GenericToken_String_NotMatch()
-        {
-            StringAssert.DoesNotMatch("^" + PowerShellGrammar.generic_token.Pattern + "$", "\"PS> \"");
-        }
-
         [Test]
         public void VerbatimStringMatch()
         {
@@ -106,8 +99,8 @@ namespace ParserTests
         [Test]
         public void RegexInitTest()
         {
-            Assert.IsNotNull(PowerShellGrammar.new_lines);
-            Assert.AreEqual("new_lines", PowerShellGrammar.new_lines.Name);
+            Assert.IsNotNull(PowerShellGrammar.dash);
+            Assert.AreEqual("dash", PowerShellGrammar.dash.Name);
         }
 
         [Test]

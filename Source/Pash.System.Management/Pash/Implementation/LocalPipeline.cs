@@ -121,7 +121,18 @@ namespace Pash.Implementation
                 if (string.IsNullOrEmpty(command.CommandText))
                     continue;
 
-                CommandProcessorBase commandProcessor = command.CreateCommandProcessor(context, _runspace.CommandManager, false);
+                CommandProcessorBase commandProcessor;
+
+                try
+                {
+                    commandProcessor = command.CreateCommandProcessor(context, _runspace.CommandManager, false);
+                }
+                catch (Exception ex)
+                {
+                    ((LocalRunspace)_runspace).PSHost.UI.WriteErrorLine(ex.Message);
+                    return null;
+                }
+
                 commandProcessor.Initialize();
                 processor.Add(commandProcessor);
 
