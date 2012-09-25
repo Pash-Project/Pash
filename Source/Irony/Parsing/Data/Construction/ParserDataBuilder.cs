@@ -129,7 +129,7 @@ namespace Irony.Parsing.Construction {
     // are created. 
     private void ComputeTransitions(LRItemSet forItems) {
       var newItemsNeedLookbacks = forItems;
-      while(newItemsNeedLookbacks.Count > 0) {
+      while(newItemsNeedLookbacks.Any()) {
         var newTransitions = CreateLookbackTransitions(newItemsNeedLookbacks);
         newItemsNeedLookbacks = SelectNewItemsThatNeedLookback(newTransitions);
       }

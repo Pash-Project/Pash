@@ -5,6 +5,7 @@ using System.Management.Automation.Runspaces;
 using System.Collections.ObjectModel;
 using System.Collections;
 using System.Management.Automation;
+using Pash.ParserIntrinsics;
 
 namespace Pash.Implementation
 {
@@ -127,9 +128,9 @@ namespace Pash.Implementation
                 {
                     commandProcessor = command.CreateCommandProcessor(context, _runspace.CommandManager, false);
                 }
-                catch (Exception ex)
+                catch (PowerShellGrammar.ParseException exception)
                 {
-                    ((LocalRunspace)_runspace).PSHost.UI.WriteErrorLine(ex.Message);
+                    _runspace.PSHost.UI.WriteErrorLine("parse error at " + exception.LogMessage.Location.ToUiString());
                     return null;
                 }
 

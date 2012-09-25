@@ -6,6 +6,7 @@ using Extensions.String;
 using Irony.Parsing;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Irony;
 
 namespace Pash.ParserIntrinsics
 {
@@ -237,6 +238,16 @@ namespace Pash.ParserIntrinsics
 
         static Parser parser;
 
+        public class ParseException : Exception
+        {
+            public readonly LogMessage LogMessage;
+
+            public ParseException(LogMessage logMessage)
+            {
+                this.LogMessage = logMessage;
+            }
+        }
+
         public static ScriptBlockAst ParseInteractiveInput(string input)
         {
             if (parser == null) parser = new Parser(new InteractiveInput());
@@ -245,8 +256,7 @@ namespace Pash.ParserIntrinsics
 
             if (parseTree.HasErrors())
             {
-                // TODO: implement a parsing exception
-                throw new Exception(parseTree.ParserMessages.JoinString("\n"));
+                throw new ParseException(parseTree.ParserMessages.First());
             }
 
             return new AstBuilder((PowerShellGrammar)parser.Language.Grammar).BuildInteractiveInputAst(parseTree.Root);

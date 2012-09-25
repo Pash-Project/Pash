@@ -15,6 +15,13 @@ namespace ParserTests
     [TestFixture]
     class AstTests
     {
+
+        [Test, ExpectedException(typeof(PowerShellGrammar.ParseException))]
+        public void ParseError()
+        {
+            ParseInput("$");
+        }
+
         [Test]
         public void HashTable0()
         {

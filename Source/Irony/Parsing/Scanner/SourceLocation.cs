@@ -18,7 +18,7 @@ using System.Text;
 namespace Irony.Parsing {
 
   public struct SourceLocation {
-    public int Position;
+    public readonly int Position;
     /// <summary>Source line number, 0-based.</summary>
     public readonly int Line;
     /// <summary>Source column number, 0-based.</summary>
