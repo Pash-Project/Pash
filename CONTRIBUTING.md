@@ -3,6 +3,14 @@ Contributing to Pash
 
 I'm so grateful that anyone would consider helping improve Pash. Thanks! --JayBazuzi
 
+Building Pash
+----
+
+I use VS Express for Desktop 2012 on Windows. You should be able to use Visual C# Express 2010 (on Windows) or MonoDevelop 3.0 (on Windows or Linux). I don't test those very often, but if you try it and find problems, fix them or report them. 
+
+You'll need to install gtk-sharp from http://www.go-mono.com/mono-downloads/download.html
+
+
 Make these things easy:
 ----
 
