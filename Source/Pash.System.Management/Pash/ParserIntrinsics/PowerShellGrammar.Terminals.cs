@@ -19,7 +19,7 @@ namespace Pash.ParserIntrinsics
 
     partial class PowerShellGrammar
     {
-        static PowerShellGrammar()
+        void InitializeTerminalFields()
         {
             var q = from field in typeof(PowerShellGrammar).GetFields()
                     where field.FieldType == typeof(RegexBasedTerminal)
@@ -34,7 +34,7 @@ namespace Pash.ParserIntrinsics
                 var pattern = patternFieldInfo.GetValue<string>(null);
                 var regexBasedTerminal = new RegexBasedTerminal(field.Name, pattern);
 
-                field.SetValue(null, regexBasedTerminal);
+                field.SetValue(this, regexBasedTerminal);
             }
 
             // I'd rather that any other token be selected over `generic_token`, since it's, you know, generic.
@@ -71,15 +71,14 @@ namespace Pash.ParserIntrinsics
         ////            Carriage return character (U+000D)
         ////            Line feed character (U+000A)
         ////            Carriage return character (U+000D) followed by line feed character (U+000A)
-        public static readonly RegexBasedTerminal new_line_character = null; // Initialized by reflection.
+        public readonly RegexBasedTerminal new_line_character = null; // Initialized by reflection.
         const string new_line_character_pattern = "(?<new_line_character>" + @"\u000D|\u000A|\u000D\u000A" + ")";
         const string new_line_character_ = @"\u000D\u000A";
 
         ////        new_lines:
         ////            new_line_character
         ////            new_lines   new_line_character
-        // Every use of `new_lines` is `_opt`, so save us the hassle and do it here.
-        public static readonly RegexBasedTerminal new_lines = null; // Initialized by reflection.
+        public readonly RegexBasedTerminal new_lines = null; // Initialized by reflection.
         const string new_lines_pattern = "(?<new_lines>" + new_line_character_pattern + "+" + ")";
 
         #endregion
@@ -104,12 +103,12 @@ namespace Pash.ParserIntrinsics
         ////            EnDash character (U+2013)
         ////            EmDash character (U+2014)
         ////            Horizontal bar character (U+2015)
-        public static readonly RegexBasedTerminal dash = null; // Initialized by reflection
+        public readonly RegexBasedTerminal dash = null; // Initialized by reflection
         const string dash_pattern = "(?<dash>" + @"[\u002D\u2013\u2014\u2015]" + ")";
 
         ////        dashdash:
         ////            dash   dash
-        public static readonly RegexBasedTerminal dashdash = null; // Initialized by reflection
+        public readonly RegexBasedTerminal dashdash = null; // Initialized by reflection
         const string dashdash_pattern = "(?<dashdash>" + dash_pattern + dash_pattern + ")";
 
         ////        delimited_comment:
@@ -136,7 +135,7 @@ namespace Pash.ParserIntrinsics
         ////            `   (The backtick character U+0060) followed by new_line_character
         // TODO: line continuation
         const string whitespace_ = @"\p{Zs}\p{Zl}\p{Zp}\u0009\u000B\u000C";
-        public static readonly RegexBasedTerminal whitespace = null; // Initialized by reflection.
+        public readonly RegexBasedTerminal whitespace = null; // Initialized by reflection.
         const string whitespace_pattern = "(?<whitespace>" + "[" + whitespace_ + "]" + ")";
         #endregion
 
@@ -174,7 +173,7 @@ namespace Pash.ParserIntrinsics
         ////            $   variable_scope_opt  variable_characters
         ////            @   variable_scope_opt   variable_characters
         ////            braced_variable
-        public static readonly RegexBasedTerminal variable = null; // Initialized by reflection
+        public readonly RegexBasedTerminal variable = null; // Initialized by reflection
         const string variable_pattern = "(?<variable>" +
             _dollar_dollar_pattern + "|" +
             _dollar_question_pattern + "|" +
@@ -185,24 +184,24 @@ namespace Pash.ParserIntrinsics
             ")";
 
         // Not part of the original grammar, but helpful in making sense of the parse tree.
-        public static readonly RegexBasedTerminal _dollar_dollar = null; // Initialized by reflection
+        public readonly RegexBasedTerminal _dollar_dollar = null; // Initialized by reflection
         const string _dollar_dollar_pattern = "(?<_dollar_dollar>" + @"\$\$" + ")";
 
-        public static readonly RegexBasedTerminal _dollar_question = null; // Initialized by reflection
+        public readonly RegexBasedTerminal _dollar_question = null; // Initialized by reflection
         const string _dollar_question_pattern = "(?<_dollar_question>" + @"\$\?" + ")";
 
-        public static readonly RegexBasedTerminal _dollar_hat = null; // Initialized by reflection
+        public readonly RegexBasedTerminal _dollar_hat = null; // Initialized by reflection
         const string _dollar_hat_pattern = "(?<_dollar_hat>" + @"\$\^" + ")";
 
-        public static readonly RegexBasedTerminal _ordinary_variable = null; // Initialized by reflection
+        public readonly RegexBasedTerminal _ordinary_variable = null; // Initialized by reflection
         const string _ordinary_variable_pattern = "(?<_ordinary_variable>" + @"\$" + variable_scope_pattern + "?" + variable_characters_pattern + ")";
 
-        public static readonly RegexBasedTerminal _splatted_variable = null; // Initialized by reflection
+        public readonly RegexBasedTerminal _splatted_variable = null; // Initialized by reflection
         const string _splatted_variable_pattern = "(?<_splatted_variable>" + @"\@" + variable_scope_pattern + "?" + variable_characters_pattern + ")";
 
         ////        braced_variable:
         ////            ${   variable_scope_opt   braced_variable_characters   }
-        public static readonly RegexBasedTerminal braced_variable = null; // Initialized by reflection
+        public readonly RegexBasedTerminal braced_variable = null; // Initialized by reflection
         const string braced_variable_pattern = "(?<braced_variable>" + @"\$\{" + braced_variable_characters_pattern + @"\}" + ")";
 
         ////        variable_scope:
@@ -211,31 +210,31 @@ namespace Pash.ParserIntrinsics
         ////            private:
         ////            script:
         ////            variable_namespace
-        public static readonly RegexBasedTerminal variable_scope = null; // Initialized by reflection
+        public readonly RegexBasedTerminal variable_scope = null; // Initialized by reflection
         const string variable_scope_pattern = "(?<variable_scope>" + @"global\:|local\:|private\:|script\:|" + variable_namespace_pattern + ")";
 
         ////        variable_namespace:
         ////            variable_characters   :
-        public static readonly RegexBasedTerminal variable_namespace = null; // Initialized by reflection
+        public readonly RegexBasedTerminal variable_namespace = null; // Initialized by reflection
         const string variable_namespace_pattern = "(?<variable_namespace>" + variable_characters_pattern + @"\:" + ")";
 
         ////        variable_characters:
         ////            variable_character
         ////            variable_characters   variable_character
-        public static readonly RegexBasedTerminal variable_characters = null; // Initialized by reflection
+        public readonly RegexBasedTerminal variable_characters = null; // Initialized by reflection
         const string variable_characters_pattern = "(?<variable_characters>" + variable_character_pattern + "+" + ")";
 
         ////        variable_character:
         ////            A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nd
         ////            _   (The underscore character U+005F)
         ////            ?
-        public static readonly RegexBasedTerminal variable_character = null; // Initialized by reflection
+        public readonly RegexBasedTerminal variable_character = null; // Initialized by reflection
         const string variable_character_pattern = "(?<variable_character>" + @"\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nd}|\u005F|\?" + ")";
 
         ////        braced_variable_characters:
         ////            braced_variable_character
         ////            braced_variable_characters   braced_variable_character
-        public static readonly RegexBasedTerminal braced_variable_characters = null; // Initialized by reflection
+        public readonly RegexBasedTerminal braced_variable_characters = null; // Initialized by reflection
         const string braced_variable_characters_pattern = "(?<braced_variable_characters>" + braced_variable_character_pattern + "+" + ")";
 
         ////        braced_variable_character:
@@ -243,12 +242,12 @@ namespace Pash.ParserIntrinsics
         ////                    }   (The closing curly brace character U+007D)
         ////                    `   (The backtick character U+0060)
         ////            escaped_character
-        public static readonly RegexBasedTerminal braced_variable_character = null; // Initialized by reflection
+        public readonly RegexBasedTerminal braced_variable_character = null; // Initialized by reflection
         const string braced_variable_character_pattern = "(?<braced_variable_character>" + @"[^\u007D\0060]|" + escaped_character_pattern + ")";
 
         ////        escaped_character:
         ////            `   (The backtick character U+0060) followed by any Unicode character
-        public static readonly RegexBasedTerminal escaped_character = null; // Initialized by reflection
+        public readonly RegexBasedTerminal escaped_character = null; // Initialized by reflection
         const string escaped_character_pattern = "(?<escaped_character>" + @"\u0060." + ")";
 
         #endregion
@@ -256,13 +255,13 @@ namespace Pash.ParserIntrinsics
         #region B.1.7 Commands
         ////        generic_token:
         ////            generic_token_parts
-        public static readonly RegexBasedTerminal generic_token = null; // Initialized by reflection.
+        public readonly RegexBasedTerminal generic_token = null; // Initialized by reflection.
         const string generic_token_pattern = "(?<generic_token>" + generic_token_parts_pattern + ")";
 
         ////        generic_token_parts:
         ////            generic_token_part
         ////            generic_token_parts   generic_token_part
-        public static readonly RegexBasedTerminal generic_token_parts = null; // Initialized by reflection.
+        public readonly RegexBasedTerminal generic_token_parts = null; // Initialized by reflection.
         const string generic_token_parts_pattern = "(?<generic_token_parts>" + generic_token_part_pattern + "+" + ")";
 
         ////        generic_token_part:
@@ -270,7 +269,7 @@ namespace Pash.ParserIntrinsics
         ////            verbatim_here_string_literal
         ////            variable
         ////            generic_token_char
-        public static readonly RegexBasedTerminal generic_token_part = null; // Initialized by reflection.
+        public readonly RegexBasedTerminal generic_token_part = null; // Initialized by reflection.
         const string generic_token_part_pattern = "(?<generic_token_part>" + expandable_string_literal_pattern /*TODO: + "|" + verbatim_here_string_literal_pattern*/ + "|" + variable_pattern + "|" + generic_token_char_pattern + ")";
 
         ////        generic_token_char:
@@ -282,33 +281,33 @@ namespace Pash.ParserIntrinsics
         ////                    whitespace
         ////                    new_line_character
         ////:            escaped_character
-        public static readonly RegexBasedTerminal generic_token_char = null; // Initialized by reflection.
+        public readonly RegexBasedTerminal generic_token_char = null; // Initialized by reflection.
         const string generic_token_char_pattern = "(?<generic_token_char>" + "[^" + @"\{\}\(\)\;\,\|\&\$\u0060" + double_quote_character_ + single_quote_character_ + whitespace_ + new_line_character_ + "]|" + escaped_character_pattern + ")";
 
         ////        generic_token_with_subexpr_start:
         ////            generic_token_parts   $(
-        public static readonly RegexBasedTerminal generic_token_with_subexpr_start = null; // Initialized by reflection
+        public readonly RegexBasedTerminal generic_token_with_subexpr_start = null; // Initialized by reflection
         const string generic_token_with_subexpr_start_pattern = "(?<generic_token_with_subexpr_start>" + generic_token_parts_pattern + @"\$\(" + ")";
 
         ////        command_parameter:
         ////            dash   first_parameter_char   parameter_chars   colon_opt
-        public static readonly RegexBasedTerminal command_parameter = null; // Initialized by reflection
+        public readonly RegexBasedTerminal command_parameter = null; // Initialized by reflection
         const string command_parameter_pattern = "(?<command_parameter>" + dash_pattern + _parameter_name_pattern + colon_pattern + "?" + ")";
 
-        public static readonly RegexBasedTerminal _parameter_name = null; // Initialized by reflection
+        public readonly RegexBasedTerminal _parameter_name = null; // Initialized by reflection
         const string _parameter_name_pattern = "(?<_parameter_name>" + first_parameter_char_pattern + parameter_chars_pattern + ")";
 
         ////        first_parameter_char:
         ////            A Unicode character of classes Lu, Ll, Lt, Lm, or Lo
         ////            _   (The underscore character U+005F)
         ////            ?
-        public static readonly RegexBasedTerminal first_parameter_char = null; // Initialized by reflection
+        public readonly RegexBasedTerminal first_parameter_char = null; // Initialized by reflection
         const string first_parameter_char_pattern = "(?<first_parameter_char>" + @"[\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\u005F\?]" + ")";
 
         ////        parameter_chars:
         ////            parameter_char
         ////            parameter_chars   parameter_char
-        public static readonly RegexBasedTerminal parameter_chars = null; // Initialized by reflection
+        public readonly RegexBasedTerminal parameter_chars = null; // Initialized by reflection
         const string parameter_chars_pattern = "(?<parameter_chars>" + parameter_char_pattern + "+" + ")";
 
         ////        parameter_char:
@@ -317,12 +316,12 @@ namespace Pash.ParserIntrinsics
         ////                colon
         ////                whitespace
         ////                new_line_character
-        public static readonly RegexBasedTerminal parameter_char = null; // Initialized by reflection
+        public readonly RegexBasedTerminal parameter_char = null; // Initialized by reflection
         const string parameter_char_pattern = "(?<parameter_char>" + @"[^\{\}\(\)\;\,\|\&\.\[" + colon_ + whitespace_ + new_line_character_ + "]" + ")";
 
         ////        colon:
         ////            :   (The colon character U+003A)
-        public static readonly RegexBasedTerminal colon = null; // Initialized by reflection.
+        public readonly RegexBasedTerminal colon = null; // Initialized by reflection.
         const string colon_pattern = "(?<colon>" + colon_ + ")";
         const string colon_ = @"\u003A";
         #endregion
@@ -332,51 +331,51 @@ namespace Pash.ParserIntrinsics
         #region Integer Literals
         ////        decimal_integer_literal:
         ////            decimal_digits   numeric_type_suffix_opt   numeric_multiplier_opt
-        public static readonly RegexBasedTerminal decimal_integer_literal = null; // Initialized by reflection
+        public readonly RegexBasedTerminal decimal_integer_literal = null; // Initialized by reflection
         const string decimal_integer_literal_pattern = "(?<decimal_integer_literal>" + decimal_digits_pattern + numeric_type_suffix_pattern + "?" + numeric_multiplier_pattern + "?" + ")";
 
         ////        decimal_digits:
         ////            decimal_digit
         ////            decimal_digit   decimal_digits
-        public static readonly RegexBasedTerminal decimal_digits = null; // Initialized by reflection
+        public readonly RegexBasedTerminal decimal_digits = null; // Initialized by reflection
         const string decimal_digits_pattern = "(?<decimal_digits>" + decimal_digit_pattern + "+" + ")";
 
         ////        decimal_digit:   one of
         ////            0   1   2   3   4   5   6   7   8   9
-        public static readonly RegexBasedTerminal decimal_digit = null; // Initialized by reflection
+        public readonly RegexBasedTerminal decimal_digit = null; // Initialized by reflection
         const string decimal_digit_pattern = "(?<decimal_digit>" + "[0123456789]" + ")";
 
         ////        numeric_type_suffix:
         ////            long_type_suffix
         ////            decimal_type_suffix
-        public static readonly RegexBasedTerminal numeric_type_suffix = null; // Initialized by reflection
+        public readonly RegexBasedTerminal numeric_type_suffix = null; // Initialized by reflection
         const string numeric_type_suffix_pattern = "(?<numeric_type_suffix>" + long_type_suffix_pattern + "|" + decimal_type_suffix_pattern + ")";
 
 
         ////        hexadecimal_integer_literal:
         ////            0x   hexadecimal_digits   long_type_suffix_opt   numeric_multiplier_opt
-        public static readonly RegexBasedTerminal hexadecimal_integer_literal = null; // Initialized by reflection
+        public readonly RegexBasedTerminal hexadecimal_integer_literal = null; // Initialized by reflection
         const string hexadecimal_integer_literal_pattern = "(?<hexadecimal_integer_literal>" + "0x" + hexadecimal_digits_pattern + long_type_suffix_pattern + "?" + numeric_multiplier_pattern + "?" + ")";
 
         ////        hexadecimal_digits:
         ////            hexadecimal_digit
         ////            hexadecimal_digit   decimal_digits
-        public static readonly RegexBasedTerminal hexadecimal_digits = null; // Initialized by reflection
+        public readonly RegexBasedTerminal hexadecimal_digits = null; // Initialized by reflection
         const string hexadecimal_digits_pattern = "(?<hexadecimal_digits>" + hexadecimal_digit_pattern + "+" + ")";
 
         ////        hexadecimal_digit:   one of
         ////            0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
-        public static readonly RegexBasedTerminal hexadecimal_digit = null; // Initialized by reflection
+        public readonly RegexBasedTerminal hexadecimal_digit = null; // Initialized by reflection
         const string hexadecimal_digit_pattern = "(?<hexadecimal_digit>" + "[0-9a-f]" + ")";
 
         ////        long_type_suffix:
         ////            l
-        public static readonly RegexBasedTerminal long_type_suffix = null; // Initialized by reflection
+        public readonly RegexBasedTerminal long_type_suffix = null; // Initialized by reflection
         const string long_type_suffix_pattern = "(?<long_type_suffix>" + "l" + ")";
 
         ////        numeric_multiplier:   one of
         ////            kb   mb   gb   tb   pb
-        public static readonly RegexBasedTerminal numeric_multiplier = null; // Initialized by reflection
+        public readonly RegexBasedTerminal numeric_multiplier = null; // Initialized by reflection
         const string numeric_multiplier_pattern = "(?<numeric_multiplier>" + "kb|mb|gb|tb|pb" + ")";
 
         #endregion
@@ -386,34 +385,34 @@ namespace Pash.ParserIntrinsics
         ////            decimal_digits   .   decimal_digits   exponent_part_opt   decimal_type_suffix_opt   numeric_multiplier_opt
         ////                             .   decimal_digits   exponent_part_opt   decimal_type_suffix_opt   numeric_multiplier_opt
         ////            decimal_digits                        exponent_part       decimal_type_suffix_opt   numeric_multiplier_opt
-        public static readonly RegexBasedTerminal real_literal = null; // Initialized by reflection
+        public readonly RegexBasedTerminal real_literal = null; // Initialized by reflection
         const string real_literal_pattern = "(?<real_literal>" + _real_literal_1_pattern + "|" + _real_literal_2_pattern + "|" + _real_literal_3_pattern + ")";
 
-        public static readonly RegexBasedTerminal _real_literal_1 = null; // Initialized by reflection
+        public readonly RegexBasedTerminal _real_literal_1 = null; // Initialized by reflection
         const string _real_literal_1_pattern = "(?<_real_literal_1>" + decimal_digits_pattern + @"\." + decimal_digits_pattern + exponent_part_pattern + "?" + decimal_type_suffix_pattern + "?" + numeric_multiplier_pattern + "?" + ")";
 
-        public static readonly RegexBasedTerminal _real_literal_2 = null; // Initialized by reflection
+        public readonly RegexBasedTerminal _real_literal_2 = null; // Initialized by reflection
         const string _real_literal_2_pattern = "(?<_real_literal_2>" + @"\." + decimal_digits_pattern + exponent_part_pattern + "?" + decimal_type_suffix_pattern + "?" + numeric_multiplier_pattern + "?" + ")";
 
-        public static readonly RegexBasedTerminal _real_literal_3 = null; // Initialized by reflection
+        public readonly RegexBasedTerminal _real_literal_3 = null; // Initialized by reflection
         const string _real_literal_3_pattern = "(?<_real_literal_3>" + decimal_digits_pattern + exponent_part_pattern + decimal_type_suffix_pattern + "?" + numeric_multiplier_pattern + "?" + ")";
 
         ////        exponent_part:
         ////            e   sign_opt   decimal_digits
-        public static readonly RegexBasedTerminal exponent_part = null; // Initialized by reflection
+        public readonly RegexBasedTerminal exponent_part = null; // Initialized by reflection
         const string exponent_part_pattern = "(?<exponent_part>" + "e" + sign_pattern + "?" + decimal_digit_pattern + ")";
 
 
         ////        sign:   one of
         ////            +
         ////            dash
-        public static readonly RegexBasedTerminal sign = null; // Initialized by reflection
+        public readonly RegexBasedTerminal sign = null; // Initialized by reflection
         const string sign_pattern = "(?<sign>" + @"\+|" + dash_pattern + ")";
 
 
         ////        decimal_type_suffix:
         ////            d
-        public static readonly RegexBasedTerminal decimal_type_suffix = null; // Initialized by reflection
+        public readonly RegexBasedTerminal decimal_type_suffix = null; // Initialized by reflection
         const string decimal_type_suffix_pattern = "(?<decimal_type_suffix>" + "d" + ")";
 
         #endregion
@@ -422,7 +421,7 @@ namespace Pash.ParserIntrinsics
 
         ////        expandable_string_literal:
         ////            double_quote_character   expandable_string_characters_opt   dollars_opt   double_quote_character
-        public static readonly RegexBasedTerminal expandable_string_literal = null; // Initialized by reflection.
+        public readonly RegexBasedTerminal expandable_string_literal = null; // Initialized by reflection.
         const string expandable_string_literal_pattern = "(?<expandable_string_literal>" + double_quote_character_pattern + expandable_string_characters_pattern + "?" + dollars_pattern + "?" + double_quote_character_pattern + ")";
 
         ////        double_quote_character:
@@ -430,14 +429,14 @@ namespace Pash.ParserIntrinsics
         ////            Left double quotation mark (U+201C)
         ////            Right double quotation mark (U+201D)
         ////            Double low_9 quotation mark (U+201E)
-        public static readonly RegexBasedTerminal double_quote_character = null; // Initialized by reflection.
+        public readonly RegexBasedTerminal double_quote_character = null; // Initialized by reflection.
         const string double_quote_character_pattern = "(?<double_quote_character>" + "[" + double_quote_character_ + "]" + ")";
         const string double_quote_character_ = @"\u0022\u201C\u201D\u201E";
 
         ////        expandable_string_characters:
         ////            expandable_string_part
         ////            expandable_string_characters   expandable_string_part
-        public static readonly RegexBasedTerminal expandable_string_characters = null; // Initialized by reflection.
+        public readonly RegexBasedTerminal expandable_string_characters = null; // Initialized by reflection.
         const string expandable_string_characters_pattern = "(?<expandable_string_characters>" + expandable_string_part_pattern + "+" + ")";
 
         ////        expandable_string_part:
@@ -454,7 +453,7 @@ namespace Pash.ParserIntrinsics
         ////            $   escaped_character
         ////            escaped_character
         ////            double_quote_character   double_quote_character
-        public static readonly RegexBasedTerminal expandable_string_part = null; // Initialized by reflection.
+        public readonly RegexBasedTerminal expandable_string_part = null; // Initialized by reflection.
         const string expandable_string_part_pattern = "(?<expandable_string_part>" +
             _expandable_string_part_plain_pattern + "|" +
             _expandable_string_part_braced_variable_pattern + "|" +
@@ -464,29 +463,29 @@ namespace Pash.ParserIntrinsics
             _expandable_string_part_quotequote_pattern + "|" +
             ")";
 
-        public static readonly RegexBasedTerminal _expandable_string_part_plain = null; // Initialized by reflection
+        public readonly RegexBasedTerminal _expandable_string_part_plain = null; // Initialized by reflection
         const string _expandable_string_part_plain_pattern = "(?<_expandable_string_part_plain>" + @"[^\$" + double_quote_character_ + @"\u0060]" + ")";
 
-        public static readonly RegexBasedTerminal _expandable_string_part_braced_variable = null; // Initialized by reflection
+        public readonly RegexBasedTerminal _expandable_string_part_braced_variable = null; // Initialized by reflection
         const string _expandable_string_part_braced_variable_pattern = "(?<_expandable_string_part_braced_variable>" + braced_variable_character_pattern + ")";
 
-        public static readonly RegexBasedTerminal _expandable_string_part_expansion = null; // Initialized by reflection
+        public readonly RegexBasedTerminal _expandable_string_part_expansion = null; // Initialized by reflection
         const string _expandable_string_part_expansion_pattern = "(?<_expandable_string_part_expansion>" + ")";
 
-        public static readonly RegexBasedTerminal _expandable_string_part_dollarescaped = null; // Initialized by reflection
+        public readonly RegexBasedTerminal _expandable_string_part_dollarescaped = null; // Initialized by reflection
         const string _expandable_string_part_dollarescaped_pattern = "(?<_expandable_string_part_dollarescaped>" + ")";
 
-        public static readonly RegexBasedTerminal _expandable_string_part_escaped = null; // Initialized by reflection
+        public readonly RegexBasedTerminal _expandable_string_part_escaped = null; // Initialized by reflection
         const string _expandable_string_part_escaped_pattern = "(?<_expandable_string_part_escaped>" + ")";
 
-        public static readonly RegexBasedTerminal _expandable_string_part_quotequote = null; // Initialized by reflection
+        public readonly RegexBasedTerminal _expandable_string_part_quotequote = null; // Initialized by reflection
         const string _expandable_string_part_quotequote_pattern = "(?<_expandable_string_part_quotequote>" + ")";
 
 
         ////        dollars:
         ////            $
         ////            dollars   $
-        public static readonly RegexBasedTerminal dollars = null; // Initialized by reflection.
+        public readonly RegexBasedTerminal dollars = null; // Initialized by reflection.
         const string dollars_pattern = "(?<dollars>" + @"\$+" + ")";
 
         ////        expandable_here_string_literal:
@@ -510,13 +509,13 @@ namespace Pash.ParserIntrinsics
 
         ////        expandable_string_with_subexpr_start:
         ////            double_quote_character   expandable_string_chars_opt [sic]   $(
-        public static readonly RegexBasedTerminal expandable_string_with_subexpr_start = null; // Initialized by reflection
+        public readonly RegexBasedTerminal expandable_string_with_subexpr_start = null; // Initialized by reflection
         const string expandable_string_with_subexpr_start_pattern = "(?<expandable_string_with_subexpr_start>" + double_quote_character_pattern + expandable_string_characters_pattern + "?" + @"\$\(" + ")";
 
         ////        expandable_string_with_subexpr_end:
         ////            double_quote_char
         // Why does this exist as a distinct token? 
-        public static readonly RegexBasedTerminal expandable_string_with_subexpr_end = null; // Initialized by reflection
+        public readonly RegexBasedTerminal expandable_string_with_subexpr_end = null; // Initialized by reflection
         const string expandable_string_with_subexpr_end_pattern = "(?<expandable_string_with_subexpr_end>" + double_quote_character_pattern + ")";
 
         ////        expandable_here_string_with_subexpr_start:
@@ -527,7 +526,7 @@ namespace Pash.ParserIntrinsics
 
         ////        verbatim_string_literal:
         ////            single_quote_character   verbatim_string_characters_opt   single_quote_char [sic]
-        public static readonly RegexBasedTerminal verbatim_string_literal = null; // Initialized by reflection
+        public readonly RegexBasedTerminal verbatim_string_literal = null; // Initialized by reflection
         const string verbatim_string_literal_pattern = "(?<verbatim_string_literal>" + single_quote_character_pattern + verbatim_string_characters_pattern + "?" + single_quote_character_pattern + ")";
 
         ////        single_quote_character:
@@ -536,20 +535,20 @@ namespace Pash.ParserIntrinsics
         ////            Right single quotation mark (U+2019)
         ////            Single low_9 quotation mark (U+201A)
         ////            Single high_reversed_9 quotation mark (U+201B)
-        public static readonly RegexBasedTerminal single_quote_character = null; // Initialized by reflection.
+        public readonly RegexBasedTerminal single_quote_character = null; // Initialized by reflection.
         const string single_quote_character_pattern = "(?<single_quote_character>" + "[" + single_quote_character_ + "]" + ")";
         const string single_quote_character_ = @"\u0027\u2018\u2019\u201A";
 
         ////        verbatim_string_characters:
         ////            verbatim_string_part
         ////            verbatim_string_characters   verbatim_string_part
-        public static readonly RegexBasedTerminal verbatim_string_characters = null; // Initialized by reflection.
+        public readonly RegexBasedTerminal verbatim_string_characters = null; // Initialized by reflection.
         const string verbatim_string_characters_pattern = "(?<verbatim_string_characters>" + verbatim_string_part_pattern + "+" + ")";
 
         ////        verbatim_string_part:
         ////            Any Unicode character except single_quote_character
         ////            single_quote_character   single_quote_character
-        public static readonly RegexBasedTerminal verbatim_string_part = null; // Initialized by reflection
+        public readonly RegexBasedTerminal verbatim_string_part = null; // Initialized by reflection
         const string verbatim_string_part_pattern = "(?<verbatim_string_part>" + "[^" + single_quote_character_ + "]|" + single_quote_character_ + single_quote_character_ + ")";
 
         ////        verbatim_here_string_literal:
@@ -571,21 +570,21 @@ namespace Pash.ParserIntrinsics
         ////        simple_name_chars:
         ////            simple_name_char
         ////            simple_name_chars   simple_name_char
-        // The spec seems to require that simple names be at least 2 characters long (hence the '?') but I think
-        // single-characters simple names should be OK (replace '?' with '*')
-        public static readonly RegexBasedTerminal simple_name = null; // Initialized by reflection
-        const string simple_name_pattern = "(?<simple_name>" + simple_name_first_char_pattern + simple_name_char_pattern + "?" + ")";
+        // The spec seems to require that simple names be at least 2 characters long but I think
+        // single-characters simple names should be OK.
+        public readonly RegexBasedTerminal simple_name = null; // Initialized by reflection
+        const string simple_name_pattern = "(?<simple_name>" + simple_name_first_char_pattern + simple_name_char_pattern + "*" + ")";
 
         ////        simple_name_first_char:
         ////            A Unicode character of classes Lu, Ll, Lt, Lm, or Lo
         ////            _   (The underscore character U+005F)
-        public static readonly RegexBasedTerminal simple_name_first_char = null; // Initialized by reflection
+        public readonly RegexBasedTerminal simple_name_first_char = null; // Initialized by reflection
         const string simple_name_first_char_pattern = "(?<simple_name_first_char>" + @"[\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\u005F]" + ")";
 
         ////        simple_name_char:
         ////            A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nd
         ////            _   (The underscore character U+005F)
-        public static readonly RegexBasedTerminal simple_name_char = null; // Initialized by reflection
+        public readonly RegexBasedTerminal simple_name_char = null; // Initialized by reflection
         const string simple_name_char_pattern = "(?<simple_name_char>" + @"[\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nd}\u005F]" + ")";
 
         #endregion
@@ -594,31 +593,31 @@ namespace Pash.ParserIntrinsics
         ////        type_name:
         ////            type_identifier
         ////            type_name   .   type_identifier
-        public static readonly RegexBasedTerminal type_name = null; // Initialized by reflection
-        const string type_name_pattern = "(?<type_name>" + type_identifier_pattern + "+" + ")";
+        public readonly RegexBasedTerminal type_name = null; // Initialized by reflection
+        const string type_name_pattern = "(?<type_name>" + type_identifier_pattern + "(" + @"\." + type_identifier_pattern + ")*" + ")";
 
         ////        type_identifier:
         ////            type_characters
         ////        type_characters:
         ////            type_character
         ////            type_characters   type_character
-        public static readonly RegexBasedTerminal type_identifier = null; // Initialized by reflection
+        public readonly RegexBasedTerminal type_identifier = null; // Initialized by reflection
         const string type_identifier_pattern = "(?<type_character>" + type_character_pattern + "+" + ")";
 
         ////        type_character:
         ////            A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nd
         ////            _   (The underscore character U+005F)
-        public static readonly RegexBasedTerminal type_character = null; // Initialized by reflection
+        public readonly RegexBasedTerminal type_character = null; // Initialized by reflection
         const string type_character_pattern = "(?<type_character>" + @"\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nd}|\u005F" + ")";
 
         ////        array_type_name:
         ////            type_name   [
-        public static readonly RegexBasedTerminal array_type_name = null; // Initialized by reflection
+        public readonly RegexBasedTerminal array_type_name = null; // Initialized by reflection
         const string array_type_name_pattern = "(?<array_type_name>" + type_name_pattern + @"\[" + ")";
 
         ////        generic_type_name:
         ////            type_name   [
-        public static readonly RegexBasedTerminal generic_type_name = null; // Initialized by reflection
+        public readonly RegexBasedTerminal generic_type_name = null; // Initialized by reflection
         const string generic_type_name_pattern = "(?<generic_type_name>" + type_name_pattern + @"\[" + ")";
 
         #endregion
@@ -639,12 +638,12 @@ namespace Pash.ParserIntrinsics
 
         ////        assignment_operator:  one of
         ////            =		dash   =			+=		*=		/=		%=
-        public static readonly RegexBasedTerminal assignment_operator = null; // Initialized by reflection
+        public readonly RegexBasedTerminal assignment_operator = null; // Initialized by reflection
         const string assignment_operator_pattern = "(?<assignment_operator>" + @"(\=)|(" + dash_pattern + @"\=)|(\+\=)|(\*\=)|(\/\=)|(\%\=)" + ")";
 
         ////        file_redirection_operator:  one of
         ////            >>		>		<		2>>		2>
-        public static readonly RegexBasedTerminal file_redirection_operator = null; // Initialized by reflection
+        public readonly RegexBasedTerminal file_redirection_operator = null; // Initialized by reflection
         const string file_redirection_operator_pattern = "(?<file_redirection_operator>" + @"(\>\>)|" + @"(\>)|" + @"(\<)|" + @"(2\>\>)|" + @"(2\>)" + ")";
 
         ////        comparison_operator:  one of
@@ -664,7 +663,7 @@ namespace Pash.ParserIntrinsics
         ////            dash   match				dash   ne						dash   notcontains
         ////            dash   notlike				dash   notmatch					dash   replace
         ////            dash   split
-        public static readonly RegexBasedTerminal comparison_operator = null; // Initialized by reflection
+        public readonly RegexBasedTerminal comparison_operator = null; // Initialized by reflection
         const string comparison_operator_pattern = "(?<comparison_operator>" + dash_pattern + @"
                                   as					| ccontains					| ceq 
                                 | cge					| cgt						| cle
@@ -688,14 +687,14 @@ namespace Pash.ParserIntrinsics
 
         ////        format_operator:
         ////            dash   f
-        public static readonly RegexBasedTerminal format_operator = null; // Initialized by reflection
+        public readonly RegexBasedTerminal format_operator = null; // Initialized by reflection
         const string format_operator_pattern = "(?<format_operator>" + dash_pattern + "f" + ")";
 
         #endregion
         #endregion
 
         // this appears to be missing from the language spec
-        public static readonly RegexBasedTerminal label = null; // Initialized by reflection
+        public readonly RegexBasedTerminal label = null; // Initialized by reflection
         const string label_pattern = "(?<label>" + simple_name_pattern + @"\:" + ")";
 
     }

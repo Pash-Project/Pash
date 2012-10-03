@@ -37,10 +37,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="Ast.Tests.cs" />
+    <Compile Include="Ast\Ast.Tests.cs" />
     <Compile Include="CaseInsensitiveGrammarTests.cs" />
     <Compile Include="ExtensionsTests.cs" />
-    <Compile Include="PowerShellGrammar.TerminalsTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -15,6 +15,78 @@ namespace ParserTests
     [TestFixture]
     class AstTests
     {
+        [TestFixture]
+        class ScriptBlockTests
+        {
+            [Test, Ignore]
+            public void Empty()
+            {
+                ScriptBlockAst scriptBlockAst = ParseInput("{}").EndBlock.
+                    Statements[0].
+                    PipelineElements[0].
+                    Expression.
+                    ScriptBlock;
+
+                Assert.AreEqual(0, scriptBlockAst.ParamBlock.Parameters.Count);
+                Assert.AreEqual(0, scriptBlockAst.EndBlock.Statements.Count);
+            }
+
+            [Test, Ignore]
+            public void Param()
+            {
+                ScriptBlockAst scriptBlockAst = ParseInput("{ param ([string]$s) }").EndBlock.
+                    Statements[0].
+                    PipelineElements[0].
+                    Expression.
+                    ScriptBlock;
+
+                Assert.AreEqual(1, scriptBlockAst.ParamBlock.Parameters.Count);
+                Assert.AreEqual(0, scriptBlockAst.EndBlock.Statements.Count);
+            }
+
+            [Test, Ignore]
+            public void Statement()
+            {
+                ScriptBlockAst scriptBlockAst = ParseInput("{ Get-ChildItem }").EndBlock.
+                    Statements[0].
+                    PipelineElements[0].
+                    Expression.
+                    ScriptBlock;
+
+                Assert.AreEqual(0, scriptBlockAst.ParamBlock.Parameters.Count);
+                Assert.AreEqual(1, scriptBlockAst.EndBlock.Statements.Count);
+            }
+
+            [Test, Ignore]
+            public void ParamAndStatement()
+            {
+                ScriptBlockAst scriptBlockAst = ParseInput("{ param ([string]$s) Get-ChildItem }").EndBlock.
+                    Statements[0].
+                    PipelineElements[0].
+                    Expression.
+                    ScriptBlock;
+
+                Assert.AreEqual(1, scriptBlockAst.ParamBlock.Parameters.Count);
+                Assert.AreEqual(1, scriptBlockAst.EndBlock.Statements.Count);
+            }
+        }
+
+        [Test, Ignore("Need whitespace prohibition")]
+        public void MemberAccess()
+        {
+            MemberExpressionAst memberExpressionAst = ParseInput("[System.Int32]::MaxValue")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression;
+        }
+
+        [Test, ExpectedException(typeof(PowerShellGrammar.ParseException)), Ignore]
+        public void BadMemberAccess()
+        {
+            // The language spec says this space is prohibited.
+            ParseInput("[System.Int32] ::MaxValue");
+        }
 
         [Test, ExpectedException(typeof(PowerShellGrammar.ParseException))]
         public void ParseError()
@@ -255,7 +327,7 @@ namespace ParserTests
             Assert.AreEqual(1, rightValue.Value);
         }
 
-        [Test]
+        [Test, Ignore("disabled because it requires an extension to Irony that is incompatable with Irony's GrammarExplorer")]
         public void NewlineContinuationTest()
         {
             var expression = ParseInput(
@@ -383,6 +455,22 @@ namespace ParserTests
 
             Assert.AreEqual("x", firstCommand);
             Assert.AreEqual("y", secondCommand);
+        }
+
+        [Test]
+        public void Pipeline3Test()
+        {
+            var pipelineAst = ParseInput("x | y | z")
+                .EndBlock
+                .Statements[0];
+
+            var firstCommand = pipelineAst.PipelineElements[0].CommandElements[0].Value;
+            var secondCommand = pipelineAst.PipelineElements[1].CommandElements[0].Value;
+            var thirdCommand = pipelineAst.PipelineElements[2].CommandElements[0].Value;
+
+            Assert.AreEqual("x", firstCommand);
+            Assert.AreEqual("y", secondCommand);
+            Assert.AreEqual("z", thirdCommand);
         }
 
         static dynamic ParseInput(string s)

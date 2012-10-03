@@ -230,13 +230,14 @@ namespace Pash.ParserIntrinsics
 
         PowerShellGrammar()
         {
-            InitializeNonTerminals();
+            InitializeTerminalFields();
+            InitializeNonTerminalFields();
 
             // delegate to a new method, so we don't accidentally overwrite a readonly field.
-            InitializeProductionRules();
+            BuildProductionRules();
         }
 
-        static Parser parser;
+        static Parser parser = new Parser(new InteractiveInput());
 
         public class ParseException : Exception
         {
@@ -250,8 +251,6 @@ namespace Pash.ParserIntrinsics
 
         public static ScriptBlockAst ParseInteractiveInput(string input)
         {
-            if (parser == null) parser = new Parser(new InteractiveInput());
-
             var parseTree = parser.Parse(input);
 
             if (parseTree.HasErrors())
@@ -267,7 +266,7 @@ namespace Pash.ParserIntrinsics
             if (language.ErrorLevel != GrammarErrorLevel.NoError) throw new Exception(language.ErrorLevel.ToString());
         }
 
-        public void InitializeProductionRules()
+        public void BuildProductionRules()
         {
             new_lines_opt.Rule = new_lines | Empty;
             new_lines_opt.SetFlag(TermFlags.IsTransient);
@@ -346,7 +345,7 @@ namespace Pash.ParserIntrinsics
             ////            new_lines_opt   attribute_list_opt   new_lines_opt   param   new_lines_opt
             ////                    (   parameter_list_opt   new_lines_opt   )
             param_block.Rule =
-                new_lines_opt + (attribute_list | Empty) + new_lines_opt + "param" + new_lines_opt
+                /* new_lines_opt + TODO: https://github.com/JayBazuzi/Pash2/issues/11 (attribute_list | Empty) + new_lines_opt + */ "param" + new_lines_opt
                         + "(" + (parameter_list | Empty) + new_lines_opt + ")";
 
             ////        parameter_list:
@@ -358,7 +357,7 @@ namespace Pash.ParserIntrinsics
             ////        script_parameter:
             ////            new_lines_opt   attribute_list_opt   new_lines_opt   variable   script_parameter_default_opt
             script_parameter.Rule =
-                new_lines_opt + (attribute_list | Empty) + new_lines_opt + variable + (script_parameter_default | Empty);
+                new_lines_opt + /* TODO: https://github.com/JayBazuzi/Pash2/issues/11 (attribute_list | Empty) + new_lines_opt + */ variable + (script_parameter_default | Empty);
 
             ////        script_parameter_default:
             ////            new_lines_opt   =   new_lines_opt   expression
@@ -648,7 +647,7 @@ namespace Pash.ParserIntrinsics
             ////        trap_statement:
             ////            trap  new_lines_opt   type_literal_opt   new_lines_opt   statement_block
             trap_statement.Rule =
-                "trap" + new_lines_opt + (type_literal | Empty) + new_lines_opt + statement_block;
+                "trap" + new_lines_opt + ((type_literal + new_lines_opt) | Empty) + statement_block;
 
             ////        try_statement:
             ////            try   statement_block   catch_clauses
@@ -730,16 +729,17 @@ namespace Pash.ParserIntrinsics
             ////        pipeline_tail:
             ////            |   new_lines_opt   command
             ////            |   new_lines_opt   command   pipeline_tail
-            // TODO: Use MakeListRule
-            pipeline_tail.Rule =
-                ToTerm("|") + new_lines_opt + command + (pipeline_tail | Empty);
+            pipeline_tail.Rule = MakePlusRule(pipeline_tail, "|" + new_lines_opt + command);
 
             ////        command:
             ////            command_name   command_elements_opt
             ////            command_invocation_operator   command_module_opt  command_name_expr   command_elements_opt
             command.Rule = _command_simple | _command_invocation;
             _command_simple.Rule = command_name + (command_elements | Empty);
-            _command_invocation.Rule = command_invocation_operator + (command_module | Empty) + command_name_expr + (command_elements | Empty);
+            _command_invocation.Rule = command_invocation_operator +
+                // ISSUE: https://github.com/JayBazuzi/Pash2/issues/8
+                /* (command_module | Empty) + */
+                command_name_expr + (command_elements | Empty);
 
             ////        command_invocation_operator:  one of
             ////            &	.
@@ -748,6 +748,7 @@ namespace Pash.ParserIntrinsics
 
             ////        command_module:
             ////            primary_expression
+            // ISSUE: https://github.com/JayBazuzi/Pash2/issues/8
             command_module.Rule =
                 primary_expression;
 
@@ -755,12 +756,16 @@ namespace Pash.ParserIntrinsics
             ////            generic_token
             ////            generic_token_with_subexpr
             command_name.Rule =
-                generic_token |
-                generic_token_with_subexpr;
+                generic_token
+                // ISSUE: https://github.com/JayBazuzi/Pash2/issues/9 - need whitespace prohibition
+                /*  |
+                generic_token_with_subexpr */
+                ;
 
             ////        generic_token_with_subexpr:
             ////            No whitespace is allowed between ) and command_name.
             ////            generic_token_with_subexpr_start   statement_list_opt   )   command_name
+            // ISSUE: https://github.com/JayBazuzi/Pash2/issues/9 - need whitespace prohibition
             generic_token_with_subexpr.Rule =
                 generic_token_with_subexpr_start + (statement_list | Empty) + ")" + command_name;
 
@@ -808,9 +813,11 @@ namespace Pash.ParserIntrinsics
             ////        redirected_file_name:
             ////            command_argument
             ////            primary_expression
+            // I think there's a bug here in the grammar, as command_argument already points to primary_expression.
             redirected_file_name.Rule =
-                command_argument |
-                primary_expression;
+                command_argument
+                // | primary_expression
+                ;
             #endregion
 
             #region B.2.3 Expressions
@@ -880,7 +887,7 @@ namespace Pash.ParserIntrinsics
             ////            unary_expression   ,    new_lines_opt   array_literal_expression
             array_literal_expression.Rule =
                 unary_expression |
-                (unary_expression + "," + new_lines_opt + array_literal_expression);
+                (unary_expression + PreferShiftHere() + "," + new_lines_opt + array_literal_expression);
 
             ////        unary_expression:
             ////            primary_expression
@@ -939,9 +946,10 @@ namespace Pash.ParserIntrinsics
             ////            post_decrement_expression
             primary_expression.Rule =
                 value |
-                member_access |
-                element_access |
-                invocation_expression |
+                // ISSUE: https://github.com/JayBazuzi/Pash2/issues/9 - need whitespace prohibition
+                // member_access |
+                // element_access |
+                // invocation_expression |
                 post_increment_expression |
                 post_decrement_expression;
 
@@ -1019,17 +1027,20 @@ namespace Pash.ParserIntrinsics
             ////        member_access: Note no whitespace is allowed between terms in these productions.
             ////            primary_expression   .   member_name
             ////            primary_expression   ::   member_name
+            // ISSUE: https://github.com/JayBazuzi/Pash2/issues/9 - need whitespace prohibition
             member_access.Rule =
                 primary_expression + (ToTerm(".") | "::") + member_name;
 
             ////        element_access: Note no whitespace is allowed between primary_expression and [.
             ////            primary_expression   [  new_lines_opt   expression   new_lines_opt   ]
+            // ISSUE: https://github.com/JayBazuzi/Pash2/issues/9 - need whitespace prohibition
             element_access.Rule =
                 primary_expression + "[" + new_lines_opt + expression + new_lines_opt + "]";
 
             ////        invocation_expression: Note no whitespace is allowed between terms in these productions.
             ////            primary_expression   .   member_name   argument_list
             ////            primary_expression   ::   member_name   argument_list
+            // ISSUE: https://github.com/JayBazuzi/Pash2/issues/9 - need whitespace prohibition
             invocation_expression.Rule =
                 primary_expression + (ToTerm(".") | "::") + member_name + argument_expression;
 
@@ -1251,7 +1262,8 @@ namespace Pash.ParserIntrinsics
             ////            Carriage return character (U+000D) followed by line feed character (U+000A)
             if (source.PreviewChar == '`')
             {
-                if (source.NextPreviewChar == '\u000D' && source.NextNextPreviewChar == '\u000A') return 3;
+                // https://github.com/JayBazuzi/Pash2/issues/12
+                //if (source.NextPreviewChar == '\u000D' && source.NextNextPreviewChar == '\u000A') return 3;
 
                 if (source.NextPreviewChar == '\u000D') return 2;
 
@@ -1273,7 +1285,7 @@ namespace Pash.ParserIntrinsics
             }
         }
 
-        void InitializeNonTerminals()
+        void InitializeNonTerminalFields()
         {
             foreach (var field in this.GetType().GetFields().Where(f => f.FieldType == typeof(NonTerminal)))
             {

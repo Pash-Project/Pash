@@ -232,5 +232,10 @@ namespace System.Management.Pash.Implementation
 
             return AstVisitAction.SkipChildren;
         }
+
+        public override AstVisitAction VisitTypeExpression(TypeExpressionAst typeExpressionAst)
+        {
+            throw new NotImplementedException(typeExpressionAst.ToString());
+        }
     }
 }
