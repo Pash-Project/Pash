@@ -233,9 +233,240 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
+        #region  NYI
+        public override AstVisitAction VisitArrayExpression(ArrayExpressionAst arrayExpressionAst)
+        {
+            throw new NotImplementedException(); //VisitArrayExpression(arrayExpressionAst);
+        }
+
+        public override AstVisitAction VisitArrayLiteral(ArrayLiteralAst arrayLiteralAst)
+        {
+            throw new NotImplementedException(); //VisitArrayLiteral(arrayLiteralAst);
+        }
+
+        public override AstVisitAction VisitAssignmentStatement(AssignmentStatementAst assignmentStatementAst)
+        {
+            throw new NotImplementedException(); //VisitAssignmentStatement(assignmentStatementAst);
+        }
+
+        public override AstVisitAction VisitAttribute(AttributeAst attributeAst)
+        {
+            throw new NotImplementedException(); //VisitAttribute(attributeAst);
+        }
+
+        public override AstVisitAction VisitAttributedExpression(AttributedExpressionAst attributedExpressionAst)
+        {
+            throw new NotImplementedException(); //VisitAttributedExpression(attributedExpressionAst);
+        }
+
+        public override AstVisitAction VisitBreakStatement(BreakStatementAst breakStatementAst)
+        {
+            throw new NotImplementedException(); //VisitBreakStatement(breakStatementAst);
+        }
+
+        public override AstVisitAction VisitCatchClause(CatchClauseAst catchClauseAst)
+        {
+            throw new NotImplementedException(); //VisitCatchClause(catchClauseAst);
+        }
+
+        public override AstVisitAction VisitCommandExpression(CommandExpressionAst commandExpressionAst)
+        {
+            // just iterate over children
+            return base.VisitCommandExpression(commandExpressionAst);
+        }
+
+        public override AstVisitAction VisitCommandParameter(CommandParameterAst commandParameterAst)
+        {
+            throw new NotImplementedException(); //VisitCommandParameter(commandParameterAst);
+        }
+
+        public override AstVisitAction VisitContinueStatement(ContinueStatementAst continueStatementAst)
+        {
+            throw new NotImplementedException(); //VisitContinueStatement(continueStatementAst);
+        }
+
+        public override AstVisitAction VisitConvertExpression(ConvertExpressionAst convertExpressionAst)
+        {
+            throw new NotImplementedException(); //VisitConvertExpression(convertExpressionAst);
+        }
+
+        public override AstVisitAction VisitDataStatement(DataStatementAst dataStatementAst)
+        {
+            throw new NotImplementedException(); //VisitDataStatement(dataStatementAst);
+        }
+
+        public override AstVisitAction VisitDoUntilStatement(DoUntilStatementAst doUntilStatementAst)
+        {
+            throw new NotImplementedException(); //VisitDoUntilStatement(doUntilStatementAst);
+        }
+
+        public override AstVisitAction VisitDoWhileStatement(DoWhileStatementAst doWhileStatementAst)
+        {
+            throw new NotImplementedException(); //VisitDoWhileStatement(doWhileStatementAst);
+        }
+
+        public override AstVisitAction VisitExitStatement(ExitStatementAst exitStatementAst)
+        {
+            throw new NotImplementedException(); //VisitExitStatement(exitStatementAst);
+        }
+
+        public override AstVisitAction VisitExpandableStringExpression(ExpandableStringExpressionAst expandableStringExpressionAst)
+        {
+            throw new NotImplementedException(); //VisitExpandableStringExpression(expandableStringExpressionAst);
+        }
+
+        public override AstVisitAction VisitFileRedirection(FileRedirectionAst redirectionAst)
+        {
+            throw new NotImplementedException(); //VisitFileRedirection(redirectionAst);
+        }
+
+        public override AstVisitAction VisitForEachStatement(ForEachStatementAst forEachStatementAst)
+        {
+            throw new NotImplementedException(); //VisitForEachStatement(forEachStatementAst);
+        }
+
+        public override AstVisitAction VisitForStatement(ForStatementAst forStatementAst)
+        {
+            throw new NotImplementedException(); //VisitForStatement(forStatementAst);
+        }
+
+        public override AstVisitAction VisitFunctionDefinition(FunctionDefinitionAst functionDefinitionAst)
+        {
+            throw new NotImplementedException(); //VisitFunctionDefinition(functionDefinitionAst);
+        }
+
+        public override AstVisitAction VisitIfStatement(IfStatementAst ifStmtAst)
+        {
+            throw new NotImplementedException(); //VisitIfStatement(ifStmtAst);
+        }
+
+        public override AstVisitAction VisitIndexExpression(IndexExpressionAst indexExpressionAst)
+        {
+            throw new NotImplementedException(); //VisitIndexExpression(indexExpressionAst);
+        }
+
+        public override AstVisitAction VisitInvokeMemberExpression(InvokeMemberExpressionAst methodCallAst)
+        {
+            throw new NotImplementedException(); //VisitInvokeMemberExpression(methodCallAst);
+        }
+
+        public override AstVisitAction VisitMemberExpression(MemberExpressionAst memberExpressionAst)
+        {
+            throw new NotImplementedException(); //VisitMemberExpression(memberExpressionAst);
+        }
+
+        public override AstVisitAction VisitMergingRedirection(MergingRedirectionAst redirectionAst)
+        {
+            throw new NotImplementedException(); //VisitMergingRedirection(redirectionAst);
+        }
+
+        public override AstVisitAction VisitNamedAttributeArgument(NamedAttributeArgumentAst namedAttributeArgumentAst)
+        {
+            throw new NotImplementedException(); //VisitNamedAttributeArgument(namedAttributeArgumentAst);
+        }
+
+        public override AstVisitAction VisitNamedBlock(NamedBlockAst namedBlockAst)
+        {
+            // just iterate over children
+            return base.VisitNamedBlock(namedBlockAst);
+        }
+
+        public override AstVisitAction VisitParamBlock(ParamBlockAst paramBlockAst)
+        {
+            throw new NotImplementedException(); //VisitParamBlock(paramBlockAst);
+        }
+
+        public override AstVisitAction VisitParameter(ParameterAst parameterAst)
+        {
+            throw new NotImplementedException(); //VisitParameter(parameterAst);
+        }
+
+        public override AstVisitAction VisitParenExpression(ParenExpressionAst parenExpressionAst)
+        {
+            // just iterate over children
+            return base.VisitParenExpression(parenExpressionAst);
+        }
+
+        public override AstVisitAction VisitReturnStatement(ReturnStatementAst returnStatementAst)
+        {
+            throw new NotImplementedException(); //VisitReturnStatement(returnStatementAst);
+        }
+
+        public override AstVisitAction VisitScriptBlock(ScriptBlockAst scriptBlockAst)
+        {
+            // just iterate over children
+            return base.VisitScriptBlock(scriptBlockAst);
+        }
+
+        public override AstVisitAction VisitScriptBlockExpression(ScriptBlockExpressionAst scriptBlockExpressionAst)
+        {
+            throw new NotImplementedException(); //VisitScriptBlockExpression(scriptBlockExpressionAst);
+        }
+
+        public override AstVisitAction VisitStatementBlock(StatementBlockAst statementBlockAst)
+        {
+            throw new NotImplementedException(); //VisitStatementBlock(statementBlockAst);
+        }
+
+        public override AstVisitAction VisitStringConstantExpression(StringConstantExpressionAst stringConstantExpressionAst)
+        {
+            throw new NotImplementedException(); //VisitStringConstantExpression(stringConstantExpressionAst);
+        }
+
+        public override AstVisitAction VisitSubExpression(SubExpressionAst subExpressionAst)
+        {
+            throw new NotImplementedException(); //VisitSubExpression(subExpressionAst);
+        }
+
+        public override AstVisitAction VisitSwitchStatement(SwitchStatementAst switchStatementAst)
+        {
+            throw new NotImplementedException(); //VisitSwitchStatement(switchStatementAst);
+        }
+
+        public override AstVisitAction VisitThrowStatement(ThrowStatementAst throwStatementAst)
+        {
+            throw new NotImplementedException(); //VisitThrowStatement(throwStatementAst);
+        }
+
+        public override AstVisitAction VisitTrap(TrapStatementAst trapStatementAst)
+        {
+            throw new NotImplementedException(); //VisitTrap(trapStatementAst);
+        }
+
+        public override AstVisitAction VisitTryStatement(TryStatementAst tryStatementAst)
+        {
+            throw new NotImplementedException(); //VisitTryStatement(tryStatementAst);
+        }
+
+        public override AstVisitAction VisitTypeConstraint(TypeConstraintAst typeConstraintAst)
+        {
+            throw new NotImplementedException(); //VisitTypeConstraint(typeConstraintAst);
+        }
+
+        public override AstVisitAction VisitUnaryExpression(UnaryExpressionAst unaryExpressionAst)
+        {
+            throw new NotImplementedException(); //VisitUnaryExpression(unaryExpressionAst);
+        }
+
+        public override AstVisitAction VisitUsingExpression(UsingExpressionAst usingExpressionAst)
+        {
+            throw new NotImplementedException(); //VisitUsingExpression(usingExpressionAst);
+        }
+
+        public override AstVisitAction VisitVariableExpression(VariableExpressionAst variableExpressionAst)
+        {
+            throw new NotImplementedException(); //VisitVariableExpression(variableExpressionAst);
+        }
+
+        public override AstVisitAction VisitWhileStatement(WhileStatementAst whileStatementAst)
+        {
+            throw new NotImplementedException(); //VisitWhileStatement(whileStatementAst);
+        }
+
         public override AstVisitAction VisitTypeExpression(TypeExpressionAst typeExpressionAst)
         {
             throw new NotImplementedException(typeExpressionAst.ToString());
         }
+        #endregion
     }
 }
