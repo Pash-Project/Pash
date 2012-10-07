@@ -235,9 +235,27 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitVariableExpression(VariableExpressionAst variableExpressionAst)
         {
+            var variable = GetVariable(variableExpressionAst);
+            this._pipelineCommandRuntime.WriteObject(variable.Value);
+
+            return AstVisitAction.SkipChildren;
+        }
+
+        private PSVariable GetVariable(VariableExpressionAst variableExpressionAst)
+        {
             var variable = this._context.SessionState.SessionStateGlobal.GetVariable(variableExpressionAst.VariablePath.UserPath);
 
-            this._pipelineCommandRuntime.WriteObject(variable.Value);
+            return variable;
+        }
+
+        public override AstVisitAction VisitAssignmentStatement(AssignmentStatementAst assignmentStatementAst)
+        {
+            var variableExpressionAst = assignmentStatementAst.Left as VariableExpressionAst;
+            if (variableExpressionAst == null) throw new NotImplementedException(assignmentStatementAst.ToString());
+
+            // I think
+            var variable = this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, EvaluateAst(assignmentStatementAst.Right));
+            this._pipelineCommandRuntime.WriteObject(variable);
 
             return AstVisitAction.SkipChildren;
         }
@@ -251,11 +269,6 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitArrayLiteral(ArrayLiteralAst arrayLiteralAst)
         {
             throw new NotImplementedException(); //VisitArrayLiteral(arrayLiteralAst);
-        }
-
-        public override AstVisitAction VisitAssignmentStatement(AssignmentStatementAst assignmentStatementAst)
-        {
-            throw new NotImplementedException(); //VisitAssignmentStatement(assignmentStatementAst);
         }
 
         public override AstVisitAction VisitAttribute(AttributeAst attributeAst)

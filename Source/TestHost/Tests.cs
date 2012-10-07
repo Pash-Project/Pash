@@ -14,6 +14,13 @@ namespace TestHost
         {
             StringAssert.AreEqualIgnoringCase("variable:\\\r\n", TestHost.Execute("cd variable:", "$PWD"));
         }
+
+        [Test]
+        public void WriteVariableTest()
+        {
+            StringAssert.AreEqualIgnoringCase("$x = y\r\ny\r\n", TestHost.Execute("$x = 'y'", "$x"));
+        }
+
         [Test]
         public void PipelineTest()
         {

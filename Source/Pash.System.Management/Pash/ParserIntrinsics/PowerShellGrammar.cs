@@ -721,10 +721,9 @@ namespace Pash.ParserIntrinsics
             ////        assignment_expression:
             ////            expression   assignment_operator   statement
             //
-            // I think the left side should be `primary_expression`, not `expression`. But as a hack for now, I'm 
-            // jumping straight to variable;
+            // I think the left side should be `primary_expression`, not `expression`.
             assignment_expression.Rule =
-                /*expression*/variable + assignment_operator + statement;
+                primary_expression + assignment_operator + statement;
 
             ////        pipeline_tail:
             ////            |   new_lines_opt   command

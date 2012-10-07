@@ -15,6 +15,15 @@ namespace ParserTests
     [TestFixture]
     class AstTests
     {
+        [Test]
+        public void AssignmentTest()
+        {
+            AssignmentStatementAst assignmentStatementAst = ParseInput("$x = 'y'").
+                    EndBlock.
+                    Statements[0];
+
+            Assert.AreEqual(TokenKind.Equals, assignmentStatementAst.Operator);
+        }
         [TestFixture]
         class VariableExpressionAstTests
         {

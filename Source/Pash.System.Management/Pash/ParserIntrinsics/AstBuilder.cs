@@ -287,7 +287,7 @@ namespace Pash.ParserIntrinsics
 
             if (childNode.Term == this._grammar.assignment_expression)
             {
-                throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+                return BuildAssignementExpression(childNode);
             }
 
             if (childNode.Term == this._grammar._pipeline_expression)
@@ -301,6 +301,43 @@ namespace Pash.ParserIntrinsics
             }
 
             throw new InvalidOperationException(parseTreeNode.ToString());
+        }
+
+        private PipelineBaseAst BuildAssignementExpression(ParseTreeNode parseTreeNode)
+        {
+            ////        assignment_expression:
+            ////            expression   assignment_operator   statement
+            //
+            // I think the left side should be `primary_expression`, not `expression`.
+            VerifyTerm(parseTreeNode, this._grammar.assignment_expression);
+
+            var expressionAst = BuildPrimaryExpressionAst(parseTreeNode.ChildNodes[0]);
+            TokenKind assignmentTokenKind = SelectTokenKind(parseTreeNode.ChildNodes[1]);
+            var statementAst = BuildStatementAst(parseTreeNode.ChildNodes[2]);
+
+            return new AssignmentStatementAst(
+                new ScriptExtent(parseTreeNode),
+                expressionAst,
+                assignmentTokenKind,
+                statementAst,
+                new ScriptExtent(parseTreeNode.ChildNodes[1])
+                );
+        }
+
+        private TokenKind SelectTokenKind(ParseTreeNode parseTreeNode)
+        {
+            if (!(parseTreeNode.Term is Terminal)) throw new InvalidOperationException(parseTreeNode.ToString());
+
+            var text = parseTreeNode.FindTokenAndGetText();
+
+            switch (text)
+            {
+                case "=":
+                    return TokenKind.Equals;
+
+                default:
+                    throw new NotImplementedException(parseTreeNode.ToString());
+            }
         }
 
         PipelineBaseAst BuildPipelineExpressionAst(ParseTreeNode parseTreeNode)
