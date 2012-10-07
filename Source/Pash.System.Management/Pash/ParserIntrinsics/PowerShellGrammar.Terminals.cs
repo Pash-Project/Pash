@@ -174,30 +174,30 @@ namespace Pash.ParserIntrinsics
         ////            @   variable_scope_opt   variable_characters
         ////            braced_variable
         public readonly RegexBasedTerminal variable = null; // Initialized by reflection
-        const string variable_pattern = "(?<variable>" +
-            _dollar_dollar_pattern + "|" +
-            _dollar_question_pattern + "|" +
-            _dollar_hat_pattern + "|" +
-            _ordinary_variable_pattern + "|" +
-            _splatted_variable_pattern + "|" +
+        internal const string variable_pattern = "(?<variable>" +
+            _variable_dollar_dollar_pattern + "|" +
+            _variable_dollar_question_pattern + "|" +
+            _variable_dollar_hat_pattern + "|" +
+            _variable_ordinary_variable_pattern + "|" +
+            _variable_splatted_variable_pattern + "|" +
             braced_variable_pattern +
             ")";
 
-        // Not part of the original grammar, but helpful in making sense of the parse tree.
-        public readonly RegexBasedTerminal _dollar_dollar = null; // Initialized by reflection
-        const string _dollar_dollar_pattern = "(?<_dollar_dollar>" + @"\$\$" + ")";
+        // Not part of the original grammar, but helpful in making sense of this token tree.
+        public readonly RegexBasedTerminal _variable_dollar_dollar = null; // Initialized by reflection
+        internal const string _variable_dollar_dollar_pattern = "(?<_variable_dollar_dollar>" + @"\$\$" + ")";
 
-        public readonly RegexBasedTerminal _dollar_question = null; // Initialized by reflection
-        const string _dollar_question_pattern = "(?<_dollar_question>" + @"\$\?" + ")";
+        public readonly RegexBasedTerminal _variable_dollar_question = null; // Initialized by reflection
+        internal const string _variable_dollar_question_pattern = "(?<_variable_dollar_question>" + @"\$\?" + ")";
 
-        public readonly RegexBasedTerminal _dollar_hat = null; // Initialized by reflection
-        const string _dollar_hat_pattern = "(?<_dollar_hat>" + @"\$\^" + ")";
+        public readonly RegexBasedTerminal _variable_dollar_hat = null; // Initialized by reflection
+        internal const string _variable_dollar_hat_pattern = "(?<_variable_dollar_hat>" + @"\$\^" + ")";
 
-        public readonly RegexBasedTerminal _ordinary_variable = null; // Initialized by reflection
-        const string _ordinary_variable_pattern = "(?<_ordinary_variable>" + @"\$" + variable_scope_pattern + "?" + variable_characters_pattern + ")";
+        public readonly RegexBasedTerminal _variable_ordinary_variable = null; // Initialized by reflection
+        internal const string _variable_ordinary_variable_pattern = "(?<_variable_ordinary_variable>" + @"\$" + variable_scope_pattern + "?" + variable_characters_pattern + ")";
 
-        public readonly RegexBasedTerminal _splatted_variable = null; // Initialized by reflection
-        const string _splatted_variable_pattern = "(?<_splatted_variable>" + @"\@" + variable_scope_pattern + "?" + variable_characters_pattern + ")";
+        public readonly RegexBasedTerminal _variable_splatted_variable = null; // Initialized by reflection
+        internal const string _variable_splatted_variable_pattern = "(?<_variable_splatted_variable>" + @"\@" + variable_scope_pattern + "?" + variable_characters_pattern + ")";
 
         ////        braced_variable:
         ////            ${   variable_scope_opt   braced_variable_characters   }

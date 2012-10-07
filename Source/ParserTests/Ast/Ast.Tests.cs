@@ -16,12 +16,131 @@ namespace ParserTests
     class AstTests
     {
         [TestFixture]
+        class VariableExpressionAstTests
+        {
+            [Test]
+            public void Simple()
+            {
+                VariableExpressionAst variableExpressionAst = ParseInput("$x").
+                    EndBlock.
+                    Statements[0].
+                    PipelineElements[0]
+                    .Expression;
+
+                Assert.False(variableExpressionAst.Splatted);
+                Assert.AreEqual(typeof(object), variableExpressionAst.StaticType);
+
+                var variablePath = variableExpressionAst.VariablePath;
+
+                Assert.AreEqual("x", variablePath.UserPath);
+                Assert.False(variablePath.IsGlobal);
+                Assert.False(variablePath.IsLocal);
+                Assert.False(variablePath.IsPrivate);
+                Assert.False(variablePath.IsScript);
+                Assert.True(variablePath.IsUnqualified);
+                Assert.True(variablePath.IsUnscopedVariable);
+                Assert.True(variablePath.IsVariable);
+                Assert.False(variablePath.IsDriveQualified);
+                Assert.IsNull(variablePath.DriveName);
+            }
+
+            [Test]
+            public void Global()
+            {
+                VariablePath variablePath = ParseInput("$global:x").
+                    EndBlock.
+                    Statements[0].
+                    PipelineElements[0]
+                    .Expression
+                    .VariablePath;
+
+                Assert.AreEqual("global:x", variablePath.UserPath);
+                Assert.True(variablePath.IsGlobal);
+                Assert.False(variablePath.IsLocal);
+                Assert.False(variablePath.IsPrivate);
+                Assert.False(variablePath.IsScript);
+                Assert.False(variablePath.IsUnqualified);
+                Assert.False(variablePath.IsUnscopedVariable);
+                Assert.True(variablePath.IsVariable);
+                Assert.False(variablePath.IsDriveQualified);
+                Assert.IsNull(variablePath.DriveName);
+            }
+
+            [Test]
+            public void Function()
+            {
+                VariablePath variablePath = ParseInput("$function:prompt").
+                    EndBlock.
+                    Statements[0].
+                    PipelineElements[0]
+                    .Expression
+                    .VariablePath;
+
+                Assert.AreEqual("function:prompt", variablePath.UserPath);
+                Assert.False(variablePath.IsGlobal);
+                Assert.False(variablePath.IsLocal);
+                Assert.False(variablePath.IsPrivate);
+                Assert.False(variablePath.IsScript);
+                Assert.False(variablePath.IsUnqualified);
+                Assert.False(variablePath.IsUnscopedVariable);
+                Assert.False(variablePath.IsVariable);
+                Assert.True(variablePath.IsDriveQualified);
+                Assert.AreEqual("function", variablePath.DriveName);
+            }
+
+            [Test]
+            public void Local()
+            {
+                VariablePath variablePath = ParseInput("$local:x").
+                    EndBlock.
+                    Statements[0].
+                    PipelineElements[0]
+                    .Expression
+                    .VariablePath;
+
+                Assert.AreEqual("local:x", variablePath.UserPath);
+                Assert.False(variablePath.IsGlobal);
+                Assert.True(variablePath.IsLocal);
+                Assert.False(variablePath.IsPrivate);
+                Assert.False(variablePath.IsScript);
+                Assert.False(variablePath.IsUnqualified);
+                Assert.False(variablePath.IsUnscopedVariable);
+                Assert.True(variablePath.IsVariable);
+                Assert.False(variablePath.IsDriveQualified);
+                Assert.IsNull(variablePath.DriveName);
+            }
+
+            [Test, Ignore]
+            public void Dollar()
+            {
+                VariablePath variablePath = ParseInput("$$").
+                    EndBlock.
+                    Statements[0].
+                    PipelineElements[0]
+                    .Expression
+                    .VariablePath;
+
+                Assert.AreEqual("$", variablePath.UserPath);
+                Assert.False(variablePath.IsGlobal);
+                Assert.False(variablePath.IsLocal);
+                Assert.False(variablePath.IsPrivate);
+                Assert.False(variablePath.IsScript);
+                Assert.True(variablePath.IsUnqualified);
+                Assert.True(variablePath.IsUnscopedVariable);
+                Assert.True(variablePath.IsVariable);
+                Assert.False(variablePath.IsDriveQualified);
+                Assert.IsNull(variablePath.DriveName);
+            }
+        }
+
+        [TestFixture]
         class ScriptBlockTests
         {
             [Test, Ignore]
             public void Empty()
             {
-                ScriptBlockAst scriptBlockAst = ParseInput("{}").EndBlock.
+                ScriptBlockAst scriptBlockAst = ParseInput("{}").
+                    EndBlock.
                     Statements[0].
                     PipelineElements[0].
                     Expression.
@@ -34,7 +153,8 @@ namespace ParserTests
             [Test, Ignore]
             public void Param()
             {
-                ScriptBlockAst scriptBlockAst = ParseInput("{ param ([string]$s) }").EndBlock.
+                ScriptBlockAst scriptBlockAst = ParseInput("{ param ([string]$s) }").
+                    EndBlock.
                     Statements[0].
                     PipelineElements[0].
                     Expression.
@@ -47,7 +167,8 @@ namespace ParserTests
             [Test, Ignore]
             public void Statement()
             {
-                ScriptBlockAst scriptBlockAst = ParseInput("{ Get-ChildItem }").EndBlock.
+                ScriptBlockAst scriptBlockAst = ParseInput("{ Get-ChildItem }").
+                    EndBlock.
                     Statements[0].
                     PipelineElements[0].
                     Expression.
@@ -60,7 +181,8 @@ namespace ParserTests
             [Test, Ignore]
             public void ParamAndStatement()
             {
-                ScriptBlockAst scriptBlockAst = ParseInput("{ param ([string]$s) Get-ChildItem }").EndBlock.
+                ScriptBlockAst scriptBlockAst = ParseInput("{ param ([string]$s) Get-ChildItem }").
+                    EndBlock.
                     Statements[0].
                     PipelineElements[0].
                     Expression.

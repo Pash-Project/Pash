@@ -233,6 +233,15 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
+        public override AstVisitAction VisitVariableExpression(VariableExpressionAst variableExpressionAst)
+        {
+            var variable = this._context.SessionState.SessionStateGlobal.GetVariable(variableExpressionAst.VariablePath.UserPath);
+
+            this._pipelineCommandRuntime.WriteObject(variable.Value);
+
+            return AstVisitAction.SkipChildren;
+        }
+
         #region  NYI
         public override AstVisitAction VisitArrayExpression(ArrayExpressionAst arrayExpressionAst)
         {
@@ -451,11 +460,6 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitUsingExpression(UsingExpressionAst usingExpressionAst)
         {
             throw new NotImplementedException(); //VisitUsingExpression(usingExpressionAst);
-        }
-
-        public override AstVisitAction VisitVariableExpression(VariableExpressionAst variableExpressionAst)
-        {
-            throw new NotImplementedException(); //VisitVariableExpression(variableExpressionAst);
         }
 
         public override AstVisitAction VisitWhileStatement(WhileStatementAst whileStatementAst)

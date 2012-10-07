@@ -10,6 +10,11 @@ namespace TestHost
     class Tests
     {
         [Test]
+        public void VariableTest()
+        {
+            StringAssert.AreEqualIgnoringCase("variable:\\\r\n", TestHost.Execute("cd variable:", "$PWD"));
+        }
+        [Test]
         public void PipelineTest()
         {
             Assert.AreEqual("xxx", TestHost.Execute("'xxx' | Write-Host -NoNewline"));

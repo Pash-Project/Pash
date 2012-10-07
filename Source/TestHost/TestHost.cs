@@ -11,7 +11,7 @@ namespace TestHost
     {
         readonly PSHostUserInterface _ui = new TestHostUserInterface();
 
-        public static string Execute(string statement)
+        public static string Execute(params string[] statements)
         {
             TestHostUserInterface ui = new TestHostUserInterface();
 
@@ -19,11 +19,14 @@ namespace TestHost
             var myRunSpace = RunspaceFactory.CreateRunspace(host);
             myRunSpace.Open();
 
-            using (var currentPipeline = myRunSpace.CreatePipeline())
+            foreach (var statement in statements)
             {
-                currentPipeline.Commands.Add(statement);
-                currentPipeline.Commands.Add("Out-Default");
-                currentPipeline.Invoke();
+                using (var currentPipeline = myRunSpace.CreatePipeline())
+                {
+                    currentPipeline.Commands.Add(statement);
+                    currentPipeline.Commands.Add("Out-Default");
+                    currentPipeline.Invoke();
+                }
             }
 
             return ui.Log.ToString();

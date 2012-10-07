@@ -744,10 +744,31 @@ namespace Pash.ParserIntrinsics
 
             if (childNode.Term == this._grammar.variable)
             {
-                throw new NotImplementedException(childNode.Term.Name);
+                return BuildVariableAst(childNode);
             }
 
             throw new InvalidOperationException(childNode.Term.Name);
+        }
+
+        VariableExpressionAst BuildVariableAst(ParseTreeNode parseTreeNode)
+        {
+            ////        variable:
+            ////            $$
+            ////            $?
+            ////            $^
+            ////            $   variable_scope_opt  variable_characters
+            ////            @   variable_scope_opt   variable_characters
+            ////            braced_variable
+            VerifyTerm(parseTreeNode, this._grammar.variable);
+
+            var match = this._grammar.variable.Expression.Match(parseTreeNode.Token.Text);
+
+            if (match.Groups[this._grammar._variable_ordinary_variable.Name].Success)
+            {
+                return new VariableExpressionAst(new ScriptExtent(parseTreeNode), parseTreeNode.Token.Text.Substring(1), false);
+            }
+
+            throw new NotImplementedException(parseTreeNode.ToString());
         }
 
         TypeExpressionAst BuildTypeLiteralAst(ParseTreeNode parseTreeNode)
