@@ -203,8 +203,18 @@ namespace Pash.ParserIntrinsics
             ////        function_statement:
             ////            function   new_lines_opt   function_name   function_parameter_declaration_opt   {   script_block   }
             ////            filter   new_lines_opt   function_name   function_parameter_declaration_opt   {   script_block   }
+            VerifyTerm(parseTreeNode, this._grammar.function_statement);
 
-            throw new NotImplementedException();
+            bool isFilter = parseTreeNode.ChildNodes[0].Token.Text=="filter";
+
+            return new FunctionDefinitionAst(
+                new ScriptExtent(parseTreeNode),
+                isFilter,
+                false,
+                parseTreeNode.ChildNodes[1].FindTokenAndGetText(),
+                null,
+                BuildScriptBlockAst(parseTreeNode.ChildNodes[3])
+                );
         }
 
         StatementAst BuildFlowControlStatementAst(ParseTreeNode parseTreeNode)

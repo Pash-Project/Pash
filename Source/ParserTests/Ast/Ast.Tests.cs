@@ -16,6 +16,18 @@ namespace ParserTests
     class AstTests
     {
         [Test]
+        public void FunctionTest()
+        {
+            FunctionDefinitionAst functionDefinitionAst = ParseInput("function f { 'x' }").
+                   EndBlock.
+                   Statements[0];
+
+            Assert.IsFalse(functionDefinitionAst.IsFilter);
+            Assert.IsFalse(functionDefinitionAst.IsWorkflow);
+            Assert.AreEqual("f", functionDefinitionAst.Name);
+        }
+
+        [Test]
         public void AssignmentTest()
         {
             AssignmentStatementAst assignmentStatementAst = ParseInput("$x = 'y'").
@@ -24,6 +36,7 @@ namespace ParserTests
 
             Assert.AreEqual(TokenKind.Equals, assignmentStatementAst.Operator);
         }
+
         [TestFixture]
         class VariableExpressionAstTests
         {

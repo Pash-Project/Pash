@@ -617,7 +617,9 @@ namespace Pash.ParserIntrinsics
             ////        function_name:
             ////            command_argument
             function_name.Rule =
-                command_argument;
+                generic_token
+                //command_argument // I don't know how this can be anything other than a generic_token
+                ;
 
             ////        function_parameter_declaration:
             ////            new_lines_opt   (   parameter_list   new_lines_opt   )
