@@ -21,6 +21,12 @@ namespace TestHost
             StringAssert.AreEqualIgnoringCase("$x = y\r\ny\r\n", TestHost.Execute("$x = 'y'", "$x"));
         }
 
+        [Test, Ignore ("correct behavior")]
+        public void WriteVariableTestCorrect()
+        {
+            StringAssert.AreEqualIgnoringCase("\r\n", TestHost.Execute("$x = 'y'"));
+        }
+
         [Test]
         public void PipelineTest()
         {
