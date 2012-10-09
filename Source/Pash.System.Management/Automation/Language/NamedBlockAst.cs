@@ -12,7 +12,14 @@ namespace System.Management.Automation.Language
             : base(extent)
         {
             this.BlockKind = blockName;
-            this.Statements = statementBlock.Statements;
+            if (statementBlock == null)
+            {
+                this.Statements = new ReadOnlyCollection<StatementAst>(new StatementAst[]{});
+            }
+            else
+            {
+                this.Statements = statementBlock.Statements;
+            }
             this.Unnamed = unnamed;
         }
 

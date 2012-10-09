@@ -16,6 +16,20 @@ namespace ParserTests
     class AstTests
     {
         [Test]
+        public void SemicolonOnly()
+        {
+            ScriptBlockAst scriptBlockAst = ParseInput(";");
+
+            Assert.IsNull(scriptBlockAst.ParamBlock);
+            Assert.IsNull(scriptBlockAst.BeginBlock);
+            Assert.IsNull(scriptBlockAst.ProcessBlock);
+            Assert.IsNull(scriptBlockAst.DynamicParamBlock);
+            Assert.IsNull(scriptBlockAst.Parent);
+
+            CollectionAssert.IsEmpty(scriptBlockAst.EndBlock.Statements);
+        }
+
+        [Test]
         public void FunctionTest()
         {
             FunctionDefinitionAst functionDefinitionAst = ParseInput("function f { 'x' }").

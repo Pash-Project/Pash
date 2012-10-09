@@ -10,6 +10,12 @@ namespace TestHost
     class Tests
     {
         [Test]
+        public void SemicolonOnlyTest()
+        {
+            StringAssert.AreEqualIgnoringCase("", TestHost.Execute(";"));
+        }
+
+        [Test]
         public void VariableTest()
         {
             StringAssert.AreEqualIgnoringCase("variable:\\\r\n", TestHost.Execute("cd variable:", "$PWD"));
@@ -21,7 +27,7 @@ namespace TestHost
             StringAssert.AreEqualIgnoringCase("$x = y\r\ny\r\n", TestHost.Execute("$x = 'y'", "$x"));
         }
 
-        [Test, Ignore ("correct behavior")]
+        [Test, Ignore("correct behavior")]
         public void WriteVariableTestCorrect()
         {
             StringAssert.AreEqualIgnoringCase("\r\n", TestHost.Execute("$x = 'y'"));
