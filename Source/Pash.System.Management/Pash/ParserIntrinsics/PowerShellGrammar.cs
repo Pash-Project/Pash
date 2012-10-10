@@ -21,6 +21,14 @@ namespace Pash.ParserIntrinsics
 
         public readonly NonTerminal new_lines_opt = null; // Initialized by reflection.
 
+        #region B.1 Lexical grammar
+        #region B.1.8 Literals
+        public readonly NonTerminal literal = null; // Initialized by reflection
+        public readonly NonTerminal integer_literal = null; // Initialized by reflection
+        public readonly NonTerminal string_literal = null; // Initialized by reflection
+        #endregion
+        #endregion
+
         #region B.2 Syntactic grammar
 
         #region B.2.1 Basic concepts
@@ -185,14 +193,6 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal attribute_name = null; // Initialized by reflection.
         public readonly NonTerminal attribute_arguments = null; // Initialized by reflection.
         public readonly NonTerminal attribute_argument = null; // Initialized by reflection.
-        #endregion
-        #endregion
-
-        #region B.1 Lexical grammar
-        #region B.1.8 Literals
-        public readonly NonTerminal literal = null; // Initialized by reflection
-        public readonly NonTerminal integer_literal = null; // Initialized by reflection
-        public readonly NonTerminal string_literal = null; // Initialized by reflection
         #endregion
         #endregion
 
