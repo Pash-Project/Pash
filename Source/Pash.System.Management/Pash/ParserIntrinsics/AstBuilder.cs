@@ -27,7 +27,7 @@ namespace Pash.ParserIntrinsics
         {
             var allExpected = new[] { expectedTerm }.Concat(moreExpectedTerms);
 
-            if (!allExpected.Where(node => parseTreeNode.Term == expectedTerm).Any())
+            if (!allExpected.Where(node => parseTreeNode.Term == node).Any())
             {
                 throw new InvalidOperationException("expected '{0}' to be a '{1}'".FormatString(parseTreeNode, allExpected.ToArray().JoinString(", ")));
             }
