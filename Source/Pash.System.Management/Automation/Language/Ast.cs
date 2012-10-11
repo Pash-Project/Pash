@@ -32,12 +32,13 @@ namespace System.Management.Automation.Language
 
         public void Visit(AstVisitor astVisitor)
         {
-            Stack<Ast> stack = new Stack<Ast>();
-            stack.Push(this);
+            Queue<Ast> queue = new Queue<Ast>();
 
-            while (stack.Any())
+            queue.Enqueue(this);
+
+            while (queue.Any())
             {
-                var nextItem = stack.Pop();
+                var nextItem = queue.Dequeue();
                 AstVisitAction astVisitAction = DispatchVisitor(astVisitor, nextItem);
 
                 switch (astVisitAction)
@@ -45,7 +46,7 @@ namespace System.Management.Automation.Language
                     case AstVisitAction.Continue:
                         foreach (var item in nextItem.Children)
                         {
-                            stack.Push(item);
+                            queue.Enqueue(item);
                         }
                         break;
 

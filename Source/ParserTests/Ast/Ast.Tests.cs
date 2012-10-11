@@ -30,6 +30,15 @@ namespace ParserTests
         }
 
         [Test]
+        public void ATest()
+        {
+            var scriptBlockAst = ParseInput("function F { 'hi' } ; F");
+
+            FunctionDefinitionAst functionDefinitionAst = scriptBlockAst.EndBlock.Statements[0];
+            PipelineAst pipelineAst = scriptBlockAst.EndBlock.Statements[1];
+        }
+
+        [Test]
         public void TwoSemicolonsTest()
         {
             ParseInput("a ; ; b");

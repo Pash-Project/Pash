@@ -9,6 +9,12 @@ namespace TestHost
     [TestFixture]
     class Tests
     {
+        [Test(Description = "Issue#14")]
+        public void TwoCommandsTest()
+        {
+            StringAssert.AreEqualIgnoringCase("a\r\nb\r\n", TestHost.Execute("'a' ; 'b'"));
+        }
+
         [Test]
         public void SemicolonOnlyTest()
         {
