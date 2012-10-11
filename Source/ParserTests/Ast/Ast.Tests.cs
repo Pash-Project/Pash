@@ -30,6 +30,12 @@ namespace ParserTests
         }
 
         [Test]
+        public void TwoSemicolonsTest()
+        {
+            ParseInput("a ; ; b");
+        }
+
+        [Test]
         public void FunctionTest()
         {
             FunctionDefinitionAst functionDefinitionAst = ParseInput("function f { 'x' }").

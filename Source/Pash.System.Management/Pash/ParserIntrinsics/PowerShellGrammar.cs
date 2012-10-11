@@ -410,7 +410,7 @@ namespace Pash.ParserIntrinsics
 #else
             // There's a bug in the language spec here. See https://github.com/JayBazuzi/Pash2/issues/7
             statement_list.Rule =
-                MakePlusRule(statement_list, statement_terminator, statement);
+                MakePlusRule(statement_list, statement_terminators, statement);
 #endif
 
             ////        statement:
