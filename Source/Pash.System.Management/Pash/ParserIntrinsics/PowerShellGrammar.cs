@@ -410,7 +410,7 @@ namespace Pash.ParserIntrinsics
 #else
             // There's a bug in the language spec here. See https://github.com/JayBazuzi/Pash2/issues/7
             statement_list.Rule =
-                MakePlusRule(statement_list, statement_terminators, statement);
+                MakeListRule(statement_list, statement_terminators, statement, TermListOptions.AllowTrailingDelimiter | TermListOptions.PlusList);
 #endif
 
             ////        statement:
@@ -455,8 +455,11 @@ namespace Pash.ParserIntrinsics
             ////        statement_terminator:
             ////            ;
             ////            new_line_character
+            var semicolon = ToTerm(";");
+            semicolon.SetFlag(TermFlags.IsTransient);
+
             statement_terminator.Rule =
-                ToTerm(";") 
+                semicolon
                 |
                 new_line_character
                 ;
@@ -467,6 +470,7 @@ namespace Pash.ParserIntrinsics
             ////            statement_terminators   statement_terminator
             statement_terminators.Rule =
                 MakePlusRule(statement_terminators, statement_terminator);
+            MarkTransient(statement_terminators);
 
             ////        if_statement:
             ////            if   new_lines_opt   (   new_lines_opt   pipeline   new_lines_opt   )   statement_block elseif_clauses_opt   else_clause_opt

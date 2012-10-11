@@ -16,6 +16,12 @@ namespace TestHost
         }
 
         [Test]
+        public void SemicolonTerminatedTest()
+        {
+            StringAssert.AreEqualIgnoringCase("xxx\r\n", TestHost.Execute("'xxx';"));
+        }
+
+        [Test]
         public void VariableTest()
         {
             StringAssert.AreEqualIgnoringCase("variable:\\\r\n", TestHost.Execute("cd variable:", "$PWD"));

@@ -36,6 +36,20 @@ namespace ParserTests
         }
 
         [Test]
+        public void SemicolonTerminatedTest()
+        {
+            ScriptBlockAst scriptBlockAst = ParseInput("Get-ChildItem;");
+
+            Assert.IsNull(scriptBlockAst.ParamBlock);
+            Assert.IsNull(scriptBlockAst.BeginBlock);
+            Assert.IsNull(scriptBlockAst.ProcessBlock);
+            Assert.IsNull(scriptBlockAst.DynamicParamBlock);
+            Assert.IsNull(scriptBlockAst.Parent);
+
+            Assert.AreEqual(1, scriptBlockAst.EndBlock.Statements.Count);
+        }
+
+        [Test]
         public void FunctionTest()
         {
             FunctionDefinitionAst functionDefinitionAst = ParseInput("function f { 'x' }").
