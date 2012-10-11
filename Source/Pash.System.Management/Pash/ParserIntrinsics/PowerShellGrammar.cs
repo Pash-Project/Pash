@@ -268,6 +268,7 @@ namespace Pash.ParserIntrinsics
 
         public void BuildProductionRules()
         {
+            // convenient `_opt` rules
             new_lines_opt.Rule = new_lines | Empty;
             new_lines_opt.SetFlag(TermFlags.IsTransient);
 
@@ -281,16 +282,21 @@ namespace Pash.ParserIntrinsics
             ////            real_literal
             ////            string_literal
             literal.Rule =
-                integer_literal |
-                real_literal |
-                string_literal;
+                integer_literal
+                |
+                real_literal
+                |
+                string_literal
+                ;
 
             ////        integer_literal:
             ////            decimal_integer_literal
             ////            hexadecimal_integer_literal
             integer_literal.Rule =
-                decimal_integer_literal |
-                hexadecimal_integer_literal;
+                decimal_integer_literal
+                |
+                hexadecimal_integer_literal
+                ;
 
             ////        real-literal:
             ////            decimal-digits   .   decimal-digits   exponent-partopt   decimal-type-suffixopt   numeric-multiplieropt
@@ -313,8 +319,10 @@ namespace Pash.ParserIntrinsics
             ////            verbatim_string_literal
             ////            verbatim_here_string_literal
             string_literal.Rule =
-                expandable_string_literal |
-                verbatim_string_literal;
+                expandable_string_literal
+                |
+                verbatim_string_literal
+                ;
             #endregion
             #endregion
 
@@ -368,8 +376,10 @@ namespace Pash.ParserIntrinsics
             ////            named_block_list
             ////            statement_list
             script_block_body.Rule =
-                named_block_list |
-                statement_list;
+                named_block_list
+                |
+                statement_list
+                ;
 
             ////        named_block_list:
             ////            named_block
@@ -414,14 +424,22 @@ namespace Pash.ParserIntrinsics
             ////            pipeline   statement_terminator
             // The spec doesn't define `label`. I'm using `simple_name` for that purpose.
             statement.Rule =
-                if_statement |
-                _statement_labeled_statement |
-                function_statement |
-                _statement_flow_control_statement |
-                trap_statement |
-                try_statement |
-                data_statement |
-                _statement_pipeline;
+                if_statement
+                |
+                _statement_labeled_statement
+                |
+                function_statement
+                |
+                _statement_flow_control_statement
+                |
+                trap_statement
+                |
+                try_statement
+                |
+                data_statement
+                |
+                _statement_pipeline
+                ;
 
             _statement_labeled_statement.Rule =
                 (label | Empty) + labeled_statement;
@@ -438,7 +456,10 @@ namespace Pash.ParserIntrinsics
             ////            ;
             ////            new_line_character
             statement_terminator.Rule =
-                ToTerm(";") | new_line_character;
+                ToTerm(";") 
+                |
+                new_line_character
+                ;
             MarkTransient(statement_terminator);
 
             ////        statement_terminators:
@@ -475,11 +496,16 @@ namespace Pash.ParserIntrinsics
             ////            while_statement
             ////            do_statement
             labeled_statement.Rule =
-                switch_statement |
-                foreach_statement |
-                for_statement |
-                while_statement |
-                do_statement;
+                switch_statement
+                |
+                foreach_statement
+                |
+                for_statement
+                |
+                while_statement
+                |
+                do_statement
+                ;
 
             ////        switch_statement:
             ////            switch   new_lines_opt   switch_parameters_opt   switch_condition   switch_body
@@ -498,10 +524,14 @@ namespace Pash.ParserIntrinsics
             ////            _exact
             ////            _casesensitive
             switch_parameter.Rule =
-                ToTerm("-regex") |
-                "-wildcard" |
-                "-exact" |
-                "-casesensitive";
+                ToTerm("-regex")
+                |
+                "-wildcard"
+                |
+                "-exact"
+                |
+                "-casesensitive"
+                ;
 
             ////        switch_condition:
             ////            (   new_lines_opt   pipeline   new_lines_opt   )
@@ -514,8 +544,10 @@ namespace Pash.ParserIntrinsics
             ////            command_argument
             ////            primary_expression
             switch_filename.Rule =
-                command_argument |
-                primary_expression;
+                command_argument
+                |
+                primary_expression
+                ;
 
             ////        switch_body:
             ////            new_lines_opt   {   new_lines_opt   switch_clauses   }
@@ -537,8 +569,10 @@ namespace Pash.ParserIntrinsics
             ////            command_argument
             ////            primary_expression
             switch_clause_condition.Rule =
-                command_argument |
-                primary_expression;
+                command_argument
+                |
+                primary_expression
+                ;
 
             ////        foreach_statement:
             ////            foreach   new_lines_opt   (   new_lines_opt   variable   new_lines_opt   in   new_lines_opt   pipeline
@@ -643,8 +677,10 @@ namespace Pash.ParserIntrinsics
             ////            simple_name
             ////            unary_expression
             label_expression.Rule =
-                simple_name |
-                unary_expression;
+                simple_name
+                |
+                unary_expression
+                ;
 
             ////        trap_statement:
             ////            trap  new_lines_opt   type_literal_opt   new_lines_opt   statement_block
@@ -759,8 +795,8 @@ namespace Pash.ParserIntrinsics
             command_name.Rule =
                 generic_token
                 // ISSUE: https://github.com/JayBazuzi/Pash2/issues/9 - need whitespace prohibition
-                /*  |
-                generic_token_with_subexpr */
+                // |
+                // generic_token_with_subexpr
                 ;
 
             ////        generic_token_with_subexpr:
@@ -774,8 +810,10 @@ namespace Pash.ParserIntrinsics
             ////            command_name
             ////            primary_expression
             command_name_expr.Rule =
-                command_name |
-                primary_expression;
+                command_name
+                |
+                primary_expression
+                ;
 
             ////        command_elements:
             ////            command_element
@@ -788,9 +826,12 @@ namespace Pash.ParserIntrinsics
             ////            command_argument
             ////            redirection
             command_element.Rule =
-                command_parameter |
-                command_argument |
-                redirection;
+                command_parameter
+                |
+                command_argument
+                |
+                redirection
+                ;
 
             ////        command_argument:
             ////            command_name_expr
@@ -833,8 +874,10 @@ namespace Pash.ParserIntrinsics
             ////            logical_expression   _or   new_lines_opt   bitwise_expression
             ////            logical_expression   _xor   new_lines_opt   bitwise_expression
             logical_expression.Rule =
-                bitwise_expression |
-                (logical_expression + (ToTerm("-and") | "-or" | "-xor") + new_lines_opt + bitwise_expression);
+                bitwise_expression
+                |
+                (logical_expression + (ToTerm("-and") | "-or" | "-xor") + new_lines_opt + bitwise_expression)
+                ;
 
             ////        bitwise_expression:
             ////            comparison_expression
@@ -842,23 +885,29 @@ namespace Pash.ParserIntrinsics
             ////            bitwise_expression   _bor   new_lines_opt   comparison_expression
             ////            bitwise_expression   _bxor   new_lines_opt   comparison_expression
             bitwise_expression.Rule =
-                comparison_expression |
-                (bitwise_expression + (ToTerm("-band") | "-bor" | "-bxor") + new_lines_opt + comparison_expression);
+                comparison_expression
+                |
+                (bitwise_expression + (ToTerm("-band") | "-bor" | "-bxor") + new_lines_opt + comparison_expression)
+                ;
 
             ////        comparison_expression:
             ////            additive_expression
             ////            comparison_expression   comparison_operator   new_lines_opt   additive_expression
             comparison_expression.Rule =
-                additive_expression |
-                (comparison_expression + comparison_operator + new_lines_opt + additive_expression);
+                additive_expression
+                |
+                (comparison_expression + comparison_operator + new_lines_opt + additive_expression)
+                ;
 
             ////        additive_expression:
             ////            multiplicative_expression
             ////            additive_expression   +   new_lines_opt   multiplicative_expression
             ////            additive_expression   dash   new_lines_opt   multiplicative_expression
             additive_expression.Rule =
-                multiplicative_expression |
-                (additive_expression + ("+" | dash) + new_lines_opt + multiplicative_expression);
+                multiplicative_expression
+                |
+                (additive_expression + ("+" | dash) + new_lines_opt + multiplicative_expression)
+                ;
 
             ////        multiplicative_expression:
             ////            format_expression
@@ -866,36 +915,46 @@ namespace Pash.ParserIntrinsics
             ////            multiplicative_expression   /   new_lines_opt   format_expression
             ////            multiplicative_expression   %   new_lines_opt   format_expression
             multiplicative_expression.Rule =
-                format_expression |
-                (multiplicative_expression + (ToTerm("*") | ToTerm("/") | ToTerm("%")) + new_lines_opt + format_expression);
+                format_expression
+                |
+                (multiplicative_expression + (ToTerm("*") | ToTerm("/") | ToTerm("%")) + new_lines_opt + format_expression)
+                ;
 
             ////        format_expression:
             ////            range_expression
             ////            format_expression   format_operator    new_lines_opt   range_expression
             format_expression.Rule =
-                range_expression |
-                (format_expression + format_operator + new_lines_opt + range_expression);
+                range_expression
+                |
+                (format_expression + format_operator + new_lines_opt + range_expression)
+                ;
 
             ////        range_expression:
             ////            array_literal_expression
             ////            range_expression   ..   new_lines_opt   array_literal_expression
             range_expression.Rule =
-                array_literal_expression |
-                (range_expression + ".." + new_lines_opt + array_literal_expression);
+                array_literal_expression
+                |
+                (range_expression + ".." + new_lines_opt + array_literal_expression)
+                ;
 
             ////        array_literal_expression:
             ////            unary_expression
             ////            unary_expression   ,    new_lines_opt   array_literal_expression
             array_literal_expression.Rule =
-                unary_expression |
-                (unary_expression + PreferShiftHere() + "," + new_lines_opt + array_literal_expression);
+                unary_expression
+                |
+                (unary_expression + PreferShiftHere() + "," + new_lines_opt + array_literal_expression)
+                ;
 
             ////        unary_expression:
             ////            primary_expression
             ////            expression_with_unary_operator
             unary_expression.Rule =
-                primary_expression |
-                expression_with_unary_operator;
+                primary_expression
+                |
+                expression_with_unary_operator
+                ;
 
             ////        expression_with_unary_operator:
             ////            ,   new_lines_opt   unary_expression
@@ -910,16 +969,26 @@ namespace Pash.ParserIntrinsics
             ////            -split   new_lines_opt   unary_expression
             ////            -join   new_lines_opt   unary_expression
             expression_with_unary_operator.Rule =
-                ("," + new_lines_opt + unary_expression) |
-                ("-not" + new_lines_opt + unary_expression) |
-                ("!" + new_lines_opt + unary_expression) |
-                ("-bnot" + new_lines_opt + unary_expression) |
-                ("+" + new_lines_opt + unary_expression) |
-                (dash + new_lines_opt + unary_expression) |
-                (pre_increment_expression) |
-                (pre_decrement_expression) |
-                (cast_expression) |
-                ("-split" + new_lines_opt + unary_expression) |
+                ("," + new_lines_opt + unary_expression)
+                |
+                ("-not" + new_lines_opt + unary_expression)
+                |
+                ("!" + new_lines_opt + unary_expression)
+                |
+                ("-bnot" + new_lines_opt + unary_expression)
+                |
+                ("+" + new_lines_opt + unary_expression)
+                |
+                (dash + new_lines_opt + unary_expression)
+                |
+                (pre_increment_expression)
+                |
+                (pre_decrement_expression)
+                |
+                (cast_expression)
+                |
+                ("-split" + new_lines_opt + unary_expression)
+                |
                 ("-join" + new_lines_opt + unary_expression)
                 ;
 
@@ -946,13 +1015,19 @@ namespace Pash.ParserIntrinsics
             ////            post_increment_expression
             ////            post_decrement_expression
             primary_expression.Rule =
-                value |
+                value
+                |
                 // ISSUE: https://github.com/JayBazuzi/Pash2/issues/9 - need whitespace prohibition
-                // member_access |
-                // element_access |
-                // invocation_expression |
-                post_increment_expression |
-                post_decrement_expression;
+                // member_access
+                // |
+                // element_access
+                // |
+                // invocation_expression
+                // |
+                post_increment_expression
+                |
+                post_decrement_expression
+                ;
 
             ////        value:
             ////            parenthesized_expression
@@ -963,14 +1038,22 @@ namespace Pash.ParserIntrinsics
             ////            literal
             ////            type_literal
             ////            variable
-            value.Rule = parenthesized_expression |
-                sub_expression |
-                array_expression |
-                script_block_expression |
-                hash_literal_expression |
-                literal |
-                type_literal |
-                variable;
+            value.Rule = parenthesized_expression
+                |
+                sub_expression
+                |
+                array_expression
+                |
+                script_block_expression
+                |
+                hash_literal_expression
+                |
+                literal
+                |
+                type_literal
+                |
+                variable
+                ;
 
             ////        parenthesized_expression:
             ////            (   new_lines_opt   pipeline   new_lines_opt   )
@@ -1012,8 +1095,10 @@ namespace Pash.ParserIntrinsics
             ////            simple_name
             ////            unary_expression
             key_expression.Rule =
-                simple_name |
-                unary_expression;
+                simple_name
+                |
+                unary_expression
+                ;
 
             ////        post_increment_expression:
             ////            primary_expression   ++
@@ -1067,8 +1152,10 @@ namespace Pash.ParserIntrinsics
             ////            logical_argument_expression   _or   new_lines_opt   bitwise_argument_expression
             ////            logical_argument_expression   _xor   new_lines_opt   bitwise_argument_expression
             logical_argument_expression.Rule =
-                bitwise_argument_expression |
-                logical_argument_expression + (ToTerm("-and") | "-or" | "-xor") + new_lines_opt + bitwise_argument_expression;
+                bitwise_argument_expression
+                |
+                logical_argument_expression + (ToTerm("-and") | "-or" | "-xor") + new_lines_opt + bitwise_argument_expression
+                ;
 
             ////        bitwise_argument_expression:
             ////            comparison_argument_expression
@@ -1076,25 +1163,31 @@ namespace Pash.ParserIntrinsics
             ////            bitwise_argument_expression   _bor   new_lines_opt   comparison_argument_expression
             ////            bitwise_argument_expression   _bxor   new_lines_opt   comparison_argument_expression
             bitwise_argument_expression.Rule =
-                comparison_argument_expression |
-                bitwise_argument_expression + (ToTerm("-band") | "-bor" | "-bxor") + new_lines_opt + comparison_argument_expression;
+                comparison_argument_expression
+                |
+                bitwise_argument_expression + (ToTerm("-band") | "-bor" | "-bxor") + new_lines_opt + comparison_argument_expression
+                ;
 
             ////        comparison_argument_expression:
             ////            additive_argument_expression
             ////            comparison_argument_expression   comparison_operator
             ////                        new_lines_opt   additive_argument_expression
             comparison_argument_expression.Rule =
-                additive_argument_expression |
+                additive_argument_expression
+                |
                 comparison_argument_expression + comparison_operator +
-                            new_lines_opt + additive_argument_expression;
+                            new_lines_opt + additive_argument_expression
+                            ;
 
             ////        additive_argument_expression:
             ////            multiplicative_argument_expression
             ////            additive_argument_expression   +   new_lines_opt   multiplicative_argument_expression
             ////            additive_argument_expression   dash   new_lines_opt   multiplicative_argument_expression
             additive_argument_expression.Rule =
-                multiplicative_argument_expression |
-                (additive_argument_expression + ("+" | dash) + new_lines_opt + multiplicative_argument_expression);
+                multiplicative_argument_expression
+                |
+                (additive_argument_expression + ("+" | dash) + new_lines_opt + multiplicative_argument_expression)
+                ;
 
             ////        multiplicative_argument_expression:
             ////            format_argument_expression
@@ -1102,22 +1195,28 @@ namespace Pash.ParserIntrinsics
             ////            multiplicative_argument_expression   /   new_lines_opt   format_argument_expression
             ////            multiplicative_argument_expression   %   new_lines_opt   format_argument_expression
             multiplicative_argument_expression.Rule =
-                format_argument_expression |
-                (multiplicative_argument_expression + (ToTerm("*") | "/" | "%") + new_lines_opt + format_argument_expression);
+                format_argument_expression
+                |
+                (multiplicative_argument_expression + (ToTerm("*") | "/" | "%") + new_lines_opt + format_argument_expression)
+                ;
 
             ////        format_argument_expression:
             ////            range_argument_expression
             ////            format_argument_expression   format_operator   new_lines_opt   range_argument_expression
             format_argument_expression.Rule =
-                range_argument_expression |
-                (format_argument_expression + format_operator + new_lines_opt + range_argument_expression);
+                range_argument_expression
+                |
+                (format_argument_expression + format_operator + new_lines_opt + range_argument_expression)
+                ;
 
             ////        range_argument_expression:
             ////            unary_expression
             ////            range_expression   ..   new_lines_opt   unary_expression
             range_argument_expression.Rule =
-                unary_expression |
-                (range_expression + ".." + new_lines_opt + unary_expression);
+                unary_expression
+                |
+                (range_expression + ".." + new_lines_opt + unary_expression)
+                ;
 
             ////        member_name:
             ////            simple_name
@@ -1126,11 +1225,16 @@ namespace Pash.ParserIntrinsics
             ////            expression_with_unary_operator
             ////            value
             member_name.Rule =
-                simple_name |
-                string_literal |
-                string_literal_with_subexpression |
-                expression_with_unary_operator |
-                value;
+                simple_name
+                |
+                string_literal
+                |
+                string_literal_with_subexpression
+                |
+                expression_with_unary_operator
+                |
+                value
+                ;
 
             ////        string_literal_with_subexpression:
             ////            expandable_string_literal_with_subexpr
@@ -1160,8 +1264,10 @@ namespace Pash.ParserIntrinsics
             ////            sub_expression
             ////            expandable_string_part
             expandable_string_with_subexpr_part.Rule =
-                sub_expression |
-                expandable_string_part;
+                sub_expression
+                |
+                expandable_string_part
+                ;
 
             ////        expandable_here_string_with_subexpr_characters:
             ////            expandable_here_string_with_subexpr_part
@@ -1183,9 +1289,12 @@ namespace Pash.ParserIntrinsics
             ////            ,
             ////            dimension   ,
             type_spec.Rule =
-                _type_spec_array |
-                _type_spec_generic |
-                type_name;
+                _type_spec_array
+                |
+                _type_spec_generic
+                |
+                type_name
+                ;
 
             _type_spec_array.Rule = array_type_name + MakeStarRule(_type_spec_array, ToTerm(",")) + "]";
 
@@ -1209,8 +1318,10 @@ namespace Pash.ParserIntrinsics
             ////            [   attribute_name   (   attribute_arguments   new_lines_opt   )  new_lines_opt   ]
             ////            type_literal
             attribute.Rule =
-                ("[" + attribute_name + "(" + attribute_arguments + new_lines_opt + ")" + new_lines_opt + "]") |
-                type_literal;
+                ("[" + attribute_name + "(" + attribute_arguments + new_lines_opt + ")" + new_lines_opt + "]")
+                |
+                type_literal
+                ;
 
             ////        attribute_name:
             ////            type_spec
@@ -1226,8 +1337,10 @@ namespace Pash.ParserIntrinsics
             ////            new_lines_opt   expression
             ////            new_lines_opt   simple_name   =   new_lines_opt   expression
             attribute_argument.Rule =
-                (new_lines_opt + expression) |
-                (new_lines_opt + simple_name + "=" + new_lines_opt + expression);
+                (new_lines_opt + expression)
+                |
+                (new_lines_opt + simple_name + "=" + new_lines_opt + expression)
+                ;
             #endregion
             #endregion
         }
