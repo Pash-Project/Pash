@@ -1052,9 +1052,10 @@ namespace Pash.ParserIntrinsics
             ////            command_invocation_operator   command_module_opt  command_name_expr   command_elements_opt
             VerifyTerm(parseTreeNode, this._grammar.command);
 
-            if (parseTreeNode.ChildNodes[0].Term == this._grammar._command_simple)
+            parseTreeNode = parseTreeNode.ChildNodes.Single();
+
+            if (parseTreeNode.Term == this._grammar._command_simple)
             {
-                parseTreeNode = parseTreeNode.ChildNodes.Single();
                 var commandElements = new List<CommandElementAst>();
 
                 commandElements.Add(BuildCommandNameAst(parseTreeNode.ChildNodes[0]));
@@ -1072,11 +1073,10 @@ namespace Pash.ParserIntrinsics
                     commandElements,
                     TokenKind.Unknown,
                     null);
-
             }
-            if (parseTreeNode.ChildNodes[0].Term == this._grammar._command_invocation)
+
+            if (parseTreeNode.Term == this._grammar._command_invocation)
             {
-                parseTreeNode = parseTreeNode.ChildNodes.Single();
                 throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
             }
 
