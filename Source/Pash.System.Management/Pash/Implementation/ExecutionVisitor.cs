@@ -260,6 +260,16 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
+        public override AstVisitAction VisitFunctionDefinition(FunctionDefinitionAst functionDefinitionAst)
+        {
+            var functionInfo = new /*FunctionInfo*/ScriptInfo(functionDefinitionAst.Name, functionDefinitionAst.Body.GetScriptBlock());
+
+            // HACK: we shouldn't be casting this. But I'm too confused about runspace management in Pash.
+            ((LocalRunspace)this._context.CurrentRunspace).CommandManager.SetFunction(functionInfo);
+
+            return AstVisitAction.SkipChildren;
+        }
+
         #region  NYI
         public override AstVisitAction VisitArrayExpression(ArrayExpressionAst arrayExpressionAst)
         {
@@ -350,11 +360,6 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitForStatement(ForStatementAst forStatementAst)
         {
             throw new NotImplementedException(); //VisitForStatement(forStatementAst);
-        }
-
-        public override AstVisitAction VisitFunctionDefinition(FunctionDefinitionAst functionDefinitionAst)
-        {
-            throw new NotImplementedException(); //VisitFunctionDefinition(functionDefinitionAst);
         }
 
         public override AstVisitAction VisitIfStatement(IfStatementAst ifStmtAst)

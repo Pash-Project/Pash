@@ -324,6 +324,12 @@ namespace Pash.Implementation
 
             return collection;
         }
+
+        // HACK: all functions are currently stored as scripts. But I'm confused, so I don't know how to fix it.
+        internal void SetFunction(/*FunctionInfo */ScriptInfo functionInfo)
+        {
+            this._scripts[functionInfo.Name] = functionInfo;
+        }
     }
 
 }

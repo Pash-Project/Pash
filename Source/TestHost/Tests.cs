@@ -9,6 +9,12 @@ namespace TestHost
     [TestFixture]
     class Tests
     {
+        [Test]
+        public void FunctionTest()
+        {
+            StringAssert.AreEqualIgnoringCase("xxx\r\n", TestHost.Execute("function f { 'xxx' } ; f"));
+        }
+
         [Test(Description = "Issue#14")]
         public void TwoCommandsTest()
         {
