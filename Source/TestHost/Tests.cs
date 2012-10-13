@@ -10,6 +10,12 @@ namespace TestHost
     class Tests
     {
         [Test]
+        public void AmpersandInvocationTest()
+        {
+            StringAssert.AreEqualIgnoringCase("xxx\r\n", TestHost.Execute("& 'Write-Host' 'xxx'"));
+        }
+
+        [Test]
         public void FunctionTest()
         {
             StringAssert.AreEqualIgnoringCase("xxx\r\n", TestHost.Execute("function f { 'xxx' } ; f"));

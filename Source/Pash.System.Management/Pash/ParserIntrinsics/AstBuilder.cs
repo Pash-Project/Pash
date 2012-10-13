@@ -205,7 +205,7 @@ namespace Pash.ParserIntrinsics
             ////            filter   new_lines_opt   function_name   function_parameter_declaration_opt   {   script_block   }
             VerifyTerm(parseTreeNode, this._grammar.function_statement);
 
-            bool isFilter = parseTreeNode.ChildNodes[0].Token.Text=="filter";
+            bool isFilter = parseTreeNode.ChildNodes[0].Token.Text == "filter";
 
             return new FunctionDefinitionAst(
                 new ScriptExtent(parseTreeNode),
@@ -1050,37 +1050,75 @@ namespace Pash.ParserIntrinsics
             ////        command:
             ////            command_name   command_elements_opt
             ////            command_invocation_operator   command_module_opt  command_name_expr   command_elements_opt
+
             VerifyTerm(parseTreeNode, this._grammar.command);
 
             parseTreeNode = parseTreeNode.ChildNodes.Single();
 
-            if (parseTreeNode.Term == this._grammar._command_simple)
-            {
-                var commandElements = new List<CommandElementAst>();
+            var commandElements = new List<CommandElementAst>();
 
-                commandElements.Add(BuildCommandNameAst(parseTreeNode.ChildNodes[0]));
-
-                if (parseTreeNode.ChildNodes.Count == 2)
-                {
-                    foreach (var commandElementNode in parseTreeNode.ChildNodes[1].ChildNodes)
-                    {
-                        commandElements.Add(BuildCommandElementAst(commandElementNode));
-                    }
-                }
-
-                return new CommandAst(
-                    new ScriptExtent(parseTreeNode),
-                    commandElements,
-                    TokenKind.Unknown,
-                    null);
-            }
+            TokenKind invocationOperator = TokenKind.Unknown;
 
             if (parseTreeNode.Term == this._grammar._command_invocation)
             {
-                throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+                VerifyTerm(parseTreeNode.ChildNodes[0], this._grammar.command_invocation_operator);
+
+                switch (parseTreeNode.ChildNodes[0].FindTokenAndGetText())
+                {
+                    case "&":
+                        invocationOperator = TokenKind.Ampersand;
+                        break;
+
+                    case ".":
+                        invocationOperator = TokenKind.Dot;
+                        break;
+
+                    default:
+                        throw new InvalidOperationException(parseTreeNode.ChildNodes[0].ToString());
+                }
+
+                // Issue: https://github.com/JayBazuzi/Pash2/issues/8 - command_module_opt is not in the grammar right now.
+
+                commandElements.Add(BuildCommandNameExprAst(parseTreeNode.ChildNodes[1]));
             }
 
-            throw new InvalidOperationException(parseTreeNode.ChildNodes[0].Term.Name);
+            else if (parseTreeNode.Term == this._grammar._command_simple)
+            {
+                commandElements.Add(BuildCommandNameAst(parseTreeNode.ChildNodes[0]));
+            }
+
+            else throw new InvalidOperationException(parseTreeNode.ChildNodes[0].Term.Name);
+
+            ParseTreeNode commandElementsOptNode = parseTreeNode.ChildNodes.Last();
+
+            if (commandElementsOptNode.ChildNodes.Any())
+            {
+                commandElements.AddRange(commandElementsOptNode.ChildNodes.Single().ChildNodes.Select(BuildCommandElementAst));
+            }
+
+            return new CommandAst(
+                new ScriptExtent(parseTreeNode),
+                commandElements,
+                invocationOperator,
+                null);
+
+        }
+
+        CommandElementAst BuildCommandNameExprAst(ParseTreeNode parseTreeNode)
+        {
+            ////        command_name_expr:
+            ////            command_name
+            ////            primary_expression
+
+            VerifyTerm(parseTreeNode, this._grammar.command_name_expr);
+
+            parseTreeNode=parseTreeNode.ChildNodes.Single();
+
+            if (parseTreeNode.Term == this._grammar.command_name) return BuildCommandNameAst(parseTreeNode);
+
+            if (parseTreeNode.Term == this._grammar.primary_expression) return BuildPrimaryExpressionAst(parseTreeNode);
+
+            throw new InvalidOperationException(parseTreeNode.ToString());
         }
 
         CommandElementAst BuildCommandNameAst(ParseTreeNode parseTreeNode)

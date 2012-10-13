@@ -16,6 +16,12 @@ namespace ParserTests
     class AstTests
     {
         [Test]
+        public void CommandInvocationOperatorTest()
+        {
+            var result = ParseInput("& 'ls'");
+        }
+
+        [Test]
         public void SemicolonOnly()
         {
             ScriptBlockAst scriptBlockAst = ParseInput(";");

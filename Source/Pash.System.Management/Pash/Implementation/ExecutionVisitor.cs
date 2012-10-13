@@ -91,6 +91,8 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitCommand(CommandAst commandAst)
         {
+            if (commandAst.InvocationOperator == TokenKind.Dot) throw new NotImplementedException(commandAst.ToString());
+
             Pipeline pipeline = this._context.CurrentRunspace.CreateNestedPipeline();
 
             pipeline.Input.Write(this._context.inputStreamReader.ReadToEnd(), true);

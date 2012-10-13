@@ -123,6 +123,7 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal generic_token_with_subexpr = null; // Initialized by reflection.
         public readonly NonTerminal command_name_expr = null; // Initialized by reflection.
         public readonly NonTerminal command_elements = null; // Initialized by reflection.
+        public readonly NonTerminal command_elements_opt = null; // Initialized by reflection.
         public readonly NonTerminal command_element = null; // Initialized by reflection.
         public readonly NonTerminal command_argument = null; // Initialized by reflection.
         public readonly NonTerminal redirections = null; // Initialized by reflection.
@@ -775,12 +776,15 @@ namespace Pash.ParserIntrinsics
             ////        command:
             ////            command_name   command_elements_opt
             ////            command_invocation_operator   command_module_opt  command_name_expr   command_elements_opt
-            command.Rule = _command_simple | _command_invocation;
-            _command_simple.Rule = command_name + (command_elements | Empty);
-            _command_invocation.Rule = command_invocation_operator +
-                // ISSUE: https://github.com/JayBazuzi/Pash2/issues/8
-                /* (command_module | Empty) + */
-                command_name_expr + (command_elements | Empty);
+            command.Rule =
+                _command_simple | _command_invocation;
+
+            _command_simple.Rule =
+                command_name + command_elements_opt;
+
+            // ISSUE: https://github.com/JayBazuzi/Pash2/issues/8
+            _command_invocation.Rule =
+                command_invocation_operator + /* (command_module | Empty) + */ command_name_expr + command_elements_opt;
 
             ////        command_invocation_operator:  one of
             ////            &	.
@@ -824,6 +828,7 @@ namespace Pash.ParserIntrinsics
             ////            command_elements   command_element
             command_elements.Rule =
                 MakePlusRule(command_elements, command_element);
+            command_elements_opt.Rule = command_elements | Empty;
 
             ////        command_element:
             ////            command_parameter
