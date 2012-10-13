@@ -471,7 +471,6 @@ namespace Pash.ParserIntrinsics
             ////            statement_terminators   statement_terminator
             statement_terminators.Rule =
                 MakePlusRule(statement_terminators, statement_terminator);
-            MarkTransient(statement_terminators);
 
             ////        if_statement:
             ////            if   new_lines_opt   (   new_lines_opt   pipeline   new_lines_opt   )   statement_block elseif_clauses_opt   else_clause_opt

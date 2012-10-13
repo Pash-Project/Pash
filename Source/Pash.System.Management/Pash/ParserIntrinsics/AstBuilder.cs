@@ -130,7 +130,12 @@ namespace Pash.ParserIntrinsics
             //            statement
             //            statement_list   statement_terminator    statement
 
-            IEnumerable<StatementAst> statements = parseTreeNode.ChildNodes.Select(BuildStatementAst);
+            IEnumerable<StatementAst> statements = parseTreeNode
+                .ChildNodes
+                .Where(node => node.Term != this._grammar.statement_terminators)
+                .Select(BuildStatementAst)
+                ;
+
             return new StatementBlockAst(new ScriptExtent(parseTreeNode), statements, new TrapStatementAst[] { });
         }
 
@@ -1112,7 +1117,7 @@ namespace Pash.ParserIntrinsics
 
             VerifyTerm(parseTreeNode, this._grammar.command_name_expr);
 
-            parseTreeNode=parseTreeNode.ChildNodes.Single();
+            parseTreeNode = parseTreeNode.ChildNodes.Single();
 
             if (parseTreeNode.Term == this._grammar.command_name) return BuildCommandNameAst(parseTreeNode);
 
