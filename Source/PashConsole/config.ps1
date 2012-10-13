@@ -1,0 +1,1 @@
+function Prompt { 'PS ' + (Get-Location) + '> ' }
