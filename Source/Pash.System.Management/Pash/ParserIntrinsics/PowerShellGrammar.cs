@@ -239,6 +239,7 @@ namespace Pash.ParserIntrinsics
         {
             InitializeTerminalFields();
             InitializeNonTerminalFields();
+            InitializeComments();
 
             // delegate to a new method, so we don't accidentally overwrite a readonly field.
             BuildProductionRules();
@@ -1369,6 +1370,8 @@ namespace Pash.ParserIntrinsics
             #endregion
             #endregion
         }
+
+
 
         // returns the number of characters to skip
         int SkipSingleWhitespace(ISourceStream source)

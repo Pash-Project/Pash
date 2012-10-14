@@ -16,6 +16,18 @@ namespace ParserTests
     class AstTests
     {
         [Test]
+        public void CommentTest()
+        {
+            ScriptBlockAst scriptBlockAst = ParseInput(
+@"
+# a comment
+9
+");
+
+            Assert.AreEqual(1, scriptBlockAst.EndBlock.Statements.Count);
+        }
+
+        [Test]
         public void MultiLineTest()
         {
             ScriptBlockAst scriptBlockAst = ParseInput(
