@@ -53,7 +53,7 @@ namespace TestHost
         [Test]
         public void VariableTest()
         {
-            StringAssert.AreEqualIgnoringCase("variable:\\\r\n", TestHost.Execute("cd variable:", "$PWD"));
+            StringAssert.AreEqualIgnoringCase("variable:\\\r\n", TestHost.Execute("Set-Location variable:", "$PWD"));
         }
 
         [Test]
