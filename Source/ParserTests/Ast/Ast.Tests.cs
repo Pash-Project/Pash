@@ -16,6 +16,12 @@ namespace ParserTests
     class AstTests
     {
         [Test]
+        public void MultiLineTest()
+        {
+            var result = ParseInput("ls\r\nls");
+        }
+
+        [Test]
         public void CommandInvocationOperatorTest()
         {
             var result = ParseInput("& 'ls'");

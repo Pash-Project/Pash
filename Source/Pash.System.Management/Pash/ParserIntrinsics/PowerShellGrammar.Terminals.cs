@@ -40,9 +40,6 @@ namespace Pash.ParserIntrinsics
             // I'd rather that any other token be selected over `generic_token`, since it's, you know, generic.
             generic_token.Priority = TerminalPriority.Low - 1;
 
-            // We never actually want to see newlines.
-            new_lines.SetFlag(TermFlags.IsTransient);
-
             // we want 'Get-ChildItem' to parse as a single token, not as 'Get - ChildItem'
             dash.Priority = TerminalPriority.Low;
         }
@@ -67,6 +64,7 @@ namespace Pash.ParserIntrinsics
         ////            new_line_character   # SIG # End signature block   new_line_character
 
         #region B.1.1 Line terminators
+
         ////        new_line_character:
         ////            Carriage return character (U+000D)
         ////            Line feed character (U+000A)
@@ -74,12 +72,6 @@ namespace Pash.ParserIntrinsics
         public readonly RegexBasedTerminal new_line_character = null; // Initialized by reflection.
         const string new_line_character_pattern = "(?<new_line_character>" + @"\u000D|\u000A|\u000D\u000A" + ")";
         const string new_line_character_ = @"\u000D\u000A";
-
-        ////        new_lines:
-        ////            new_line_character
-        ////            new_lines   new_line_character
-        public readonly RegexBasedTerminal new_lines = null; // Initialized by reflection.
-        const string new_lines_pattern = "(?<new_lines>" + new_line_character_pattern + "+" + ")";
 
         #endregion
 

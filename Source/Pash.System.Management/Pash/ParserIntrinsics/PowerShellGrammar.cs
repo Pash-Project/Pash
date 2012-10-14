@@ -22,11 +22,17 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal new_lines_opt = null; // Initialized by reflection.
 
         #region B.1 Lexical grammar
+
+        #region B.1.1 Line terminators
+        public readonly NonTerminal new_lines = null; // Initialized by reflection.
+        #endregion
+
         #region B.1.8 Literals
         public readonly NonTerminal literal = null; // Initialized by reflection
         public readonly NonTerminal integer_literal = null; // Initialized by reflection
         public readonly NonTerminal string_literal = null; // Initialized by reflection
         #endregion
+
         #endregion
 
         #region B.2 Syntactic grammar
@@ -274,8 +280,19 @@ namespace Pash.ParserIntrinsics
             new_lines_opt.SetFlag(TermFlags.IsTransient);
 
             #region B.1 Lexical grammar
+
             // this was presented as part of the lexical grammar, but I'd rather see this as production rules than 
             // as regex patterns.
+
+            #region B.1.1 Line terminators
+
+            ////        new_lines:
+            ////            new_line_character
+            ////            new_lines   new_line_character
+            new_lines.Rule =
+                MakePlusRule(new_lines, new_line_character);
+
+            #endregion
 
             #region B.1.8 Literals
             ////        literal:
