@@ -18,7 +18,12 @@ namespace ParserTests
         [Test]
         public void MultiLineTest()
         {
-            var result = ParseInput("ls\r\nls");
+            ScriptBlockAst scriptBlockAst = ParseInput(
+@"
+ls
+ls
+");
+            Assert.AreEqual(2, scriptBlockAst.EndBlock.Statements.Count);
         }
 
         [Test]
