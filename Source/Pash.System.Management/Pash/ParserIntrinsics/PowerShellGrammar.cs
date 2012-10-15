@@ -22,11 +22,17 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal new_lines_opt = null; // Initialized by reflection.
 
         #region B.1 Lexical grammar
+
+        #region B.1.1 Line terminators
+        public readonly NonTerminal new_lines = null; // Initialized by reflection.
+        #endregion
+
         #region B.1.8 Literals
         public readonly NonTerminal literal = null; // Initialized by reflection
         public readonly NonTerminal integer_literal = null; // Initialized by reflection
         public readonly NonTerminal string_literal = null; // Initialized by reflection
         #endregion
+
         #endregion
 
         #region B.2 Syntactic grammar
@@ -123,6 +129,7 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal generic_token_with_subexpr = null; // Initialized by reflection.
         public readonly NonTerminal command_name_expr = null; // Initialized by reflection.
         public readonly NonTerminal command_elements = null; // Initialized by reflection.
+        public readonly NonTerminal command_elements_opt = null; // Initialized by reflection.
         public readonly NonTerminal command_element = null; // Initialized by reflection.
         public readonly NonTerminal command_argument = null; // Initialized by reflection.
         public readonly NonTerminal redirections = null; // Initialized by reflection.
@@ -232,6 +239,7 @@ namespace Pash.ParserIntrinsics
         {
             InitializeTerminalFields();
             InitializeNonTerminalFields();
+            InitializeComments();
 
             // delegate to a new method, so we don't accidentally overwrite a readonly field.
             BuildProductionRules();
@@ -273,8 +281,19 @@ namespace Pash.ParserIntrinsics
             new_lines_opt.SetFlag(TermFlags.IsTransient);
 
             #region B.1 Lexical grammar
+
             // this was presented as part of the lexical grammar, but I'd rather see this as production rules than 
             // as regex patterns.
+
+            #region B.1.1 Line terminators
+
+            ////        new_lines:
+            ////            new_line_character
+            ////            new_lines   new_line_character
+            new_lines.Rule =
+                MakePlusRule(new_lines, new_line_character);
+
+            #endregion
 
             #region B.1.8 Literals
             ////        literal:
@@ -470,7 +489,6 @@ namespace Pash.ParserIntrinsics
             ////            statement_terminators   statement_terminator
             statement_terminators.Rule =
                 MakePlusRule(statement_terminators, statement_terminator);
-            MarkTransient(statement_terminators);
 
             ////        if_statement:
             ////            if   new_lines_opt   (   new_lines_opt   pipeline   new_lines_opt   )   statement_block elseif_clauses_opt   else_clause_opt
@@ -775,12 +793,15 @@ namespace Pash.ParserIntrinsics
             ////        command:
             ////            command_name   command_elements_opt
             ////            command_invocation_operator   command_module_opt  command_name_expr   command_elements_opt
-            command.Rule = _command_simple | _command_invocation;
-            _command_simple.Rule = command_name + (command_elements | Empty);
-            _command_invocation.Rule = command_invocation_operator +
-                // ISSUE: https://github.com/JayBazuzi/Pash2/issues/8
-                /* (command_module | Empty) + */
-                command_name_expr + (command_elements | Empty);
+            command.Rule =
+                _command_simple | _command_invocation;
+
+            _command_simple.Rule =
+                command_name + command_elements_opt;
+
+            // ISSUE: https://github.com/JayBazuzi/Pash2/issues/8
+            _command_invocation.Rule =
+                command_invocation_operator + /* (command_module | Empty) + */ command_name_expr + command_elements_opt;
 
             ////        command_invocation_operator:  one of
             ////            &	.
@@ -824,6 +845,7 @@ namespace Pash.ParserIntrinsics
             ////            command_elements   command_element
             command_elements.Rule =
                 MakePlusRule(command_elements, command_element);
+            command_elements_opt.Rule = command_elements | Empty;
 
             ////        command_element:
             ////            command_parameter
@@ -1348,6 +1370,8 @@ namespace Pash.ParserIntrinsics
             #endregion
             #endregion
         }
+
+
 
         // returns the number of characters to skip
         int SkipSingleWhitespace(ISourceStream source)

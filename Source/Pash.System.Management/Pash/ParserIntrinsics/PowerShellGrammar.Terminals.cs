@@ -40,9 +40,6 @@ namespace Pash.ParserIntrinsics
             // I'd rather that any other token be selected over `generic_token`, since it's, you know, generic.
             generic_token.Priority = TerminalPriority.Low - 1;
 
-            // We never actually want to see newlines.
-            new_lines.SetFlag(TermFlags.IsTransient);
-
             // we want 'Get-ChildItem' to parse as a single token, not as 'Get - ChildItem'
             dash.Priority = TerminalPriority.Low;
         }
@@ -67,6 +64,7 @@ namespace Pash.ParserIntrinsics
         ////            new_line_character   # SIG # End signature block   new_line_character
 
         #region B.1.1 Line terminators
+
         ////        new_line_character:
         ////            Carriage return character (U+000D)
         ////            Line feed character (U+000A)
@@ -75,41 +73,30 @@ namespace Pash.ParserIntrinsics
         const string new_line_character_pattern = "(?<new_line_character>" + @"\u000D|\u000A|\u000D\u000A" + ")";
         const string new_line_character_ = @"\u000D\u000A";
 
-        ////        new_lines:
-        ////            new_line_character
-        ////            new_lines   new_line_character
-        public readonly RegexBasedTerminal new_lines = null; // Initialized by reflection.
-        const string new_lines_pattern = "(?<new_lines>" + new_line_character_pattern + "+" + ")";
-
         #endregion
 
         #region B.1.2 Comments
-        ////        comment:
-        ////            single_line_comment
-        ////            requires_comment
-        ////            delimited_comment
-        ////        single_line_comment:
-        ////            #   input_characters_opt
-        ////        input_characters:
-        ////            input_character
-        ////            input_characters   input_character
-        ////        input_character:
-        ////            Any Unicode character except a new_line_character
+        void InitializeComments()
+        {
+            ////        comment:
+            ////            single_line_comment
+            ////            requires_comment
+            ////            delimited_comment
+
+            ////        single_line_comment:
+            ////            #   input_characters_opt
+            ////        input_characters:
+            ////            input_character
+            ////            input_characters   input_character
+            ////        input_character:
+            ////            Any Unicode character except a new_line_character
+            CommentTerminal comment = new CommentTerminal("comment", "#", "\r", "\n", "\r\n");
+            NonGrammarTerminals.Add(comment);
+        }
+
+
         ////        requires_comment:
         ////            #requires   whitespace   command_arguments
-
-        ////        dash:
-        ////            - (U+002D)
-        ////            EnDash character (U+2013)
-        ////            EmDash character (U+2014)
-        ////            Horizontal bar character (U+2015)
-        public readonly RegexBasedTerminal dash = null; // Initialized by reflection
-        const string dash_pattern = "(?<dash>" + @"[\u002D\u2013\u2014\u2015]" + ")";
-
-        ////        dashdash:
-        ////            dash   dash
-        public readonly RegexBasedTerminal dashdash = null; // Initialized by reflection
-        const string dashdash_pattern = "(?<dashdash>" + dash_pattern + dash_pattern + ")";
 
         ////        delimited_comment:
         ////            <#   delimited_comment_text_opt   hashes   >
@@ -124,6 +111,24 @@ namespace Pash.ParserIntrinsics
         ////            hashes   #
         ////        not_greater_than_or_hash:
         ////            Any Unicode character except > or #
+        #endregion
+
+        #region B.1.? dashes
+
+        // this is in section B.1.2 in the spec, but it has nothing to do with comments
+        ////        dash:
+        ////            - (U+002D)
+        ////            EnDash character (U+2013)
+        ////            EmDash character (U+2014)
+        ////            Horizontal bar character (U+2015)
+        public readonly RegexBasedTerminal dash = null; // Initialized by reflection
+        const string dash_pattern = "(?<dash>" + @"[\u002D\u2013\u2014\u2015]" + ")";
+
+        ////        dashdash:
+        ////            dash   dash
+        public readonly RegexBasedTerminal dashdash = null; // Initialized by reflection
+        const string dashdash_pattern = "(?<dashdash>" + dash_pattern + dash_pattern + ")";
+
         #endregion
 
         #region B.1.3 White space
