@@ -3,12 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using System.IO;
 
 namespace TestHost
 {
     [TestFixture]
     class Tests
     {
+        [Test]
+        public void ExecuteScriptTest()
+        {
+            string scriptPath = Path.GetTempFileName();
+            scriptPath += ".ps1";
+            File.WriteAllText(scriptPath, "'xxx'");
+
+            StringAssert.AreEqualIgnoringCase("xxx\r\n", TestHost.Execute("& " + scriptPath));
+        }
+
+        [Test]
+        public void AmpersandInvocationTest()
+        {
+            StringAssert.AreEqualIgnoringCase("xxx\r\n", TestHost.Execute("& 'Write-Host' 'xxx'"));
+        }
+
         [Test]
         public void FunctionTest()
         {
@@ -36,7 +53,7 @@ namespace TestHost
         [Test]
         public void VariableTest()
         {
-            StringAssert.AreEqualIgnoringCase("variable:\\\r\n", TestHost.Execute("cd variable:", "$PWD"));
+            StringAssert.AreEqualIgnoringCase("variable:\\\r\n", TestHost.Execute("Set-Location variable:", "$PWD"));
         }
 
         [Test]

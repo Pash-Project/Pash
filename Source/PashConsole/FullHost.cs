@@ -4,6 +4,8 @@ using System.Management.Automation.Runspaces;
 using System.Management.Automation;
 using System.Collections.ObjectModel;
 using Pash.Implementation;
+using System.Reflection;
+using System.IO;
 
 namespace Pash
 {
@@ -18,6 +20,11 @@ namespace Pash
             myHost = new LocalHost();
             myRunSpace = RunspaceFactory.CreateRunspace(myHost);
             myRunSpace.Open();
+
+            string exePath = Assembly.GetCallingAssembly().Location;
+            string configPath = Path.Combine(Path.GetDirectoryName(exePath), "config.ps1");
+
+            Execute(configPath);
         }
 
         void executeHelper(string cmd, object input)

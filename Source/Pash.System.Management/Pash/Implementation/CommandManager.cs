@@ -10,6 +10,7 @@ using Pash.Implementation;
 using Pash.Configuration;
 using Pash.ParserIntrinsics;
 using Irony.Parsing;
+using System.IO;
 
 namespace Pash.Implementation
 {
@@ -204,6 +205,15 @@ namespace Pash.Implementation
                     if (_scripts.ContainsKey(cmdName))
                     {
                         commandInfo = _scripts[cmdName];
+                    }
+                }
+
+                if (commandInfo == null)
+                {
+                    if (File.Exists(cmdName))
+                    {
+                        // I think we should be using a ScriptFile parser, but this will do for now.
+                        commandInfo = new ScriptInfo(cmdName, new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(File.ReadAllText(cmdName))));
                     }
                 }
             }
