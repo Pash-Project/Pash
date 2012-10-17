@@ -318,7 +318,7 @@ namespace Pash.ParserIntrinsics
             throw new InvalidOperationException(parseTreeNode.ToString());
         }
 
-        private PipelineBaseAst BuildAssignementExpression(ParseTreeNode parseTreeNode)
+        PipelineBaseAst BuildAssignementExpression(ParseTreeNode parseTreeNode)
         {
             ////        assignment_expression:
             ////            expression   assignment_operator   statement
@@ -339,7 +339,7 @@ namespace Pash.ParserIntrinsics
                 );
         }
 
-        private TokenKind SelectTokenKind(ParseTreeNode parseTreeNode)
+        TokenKind SelectTokenKind(ParseTreeNode parseTreeNode)
         {
             if (!(parseTreeNode.Term is Terminal)) throw new InvalidOperationException(parseTreeNode.ToString());
 
@@ -673,18 +673,69 @@ namespace Pash.ParserIntrinsics
 
             if (parseTreeNode.Term == this._grammar.value)
             {
-                return BuildValueExpressionAst(parseTreeNode);
+                return BuildValueAst(parseTreeNode);
             }
 
             if (parseTreeNode.Term == this._grammar.member_access)
             {
-                return BuildMemberExpressionAst(parseTreeNode);
+                return BuildMemberAccessAst(parseTreeNode);
             }
 
-            throw new NotImplementedException(parseTreeNode.ToString());
+            if (parseTreeNode.Term == this._grammar.element_access)
+            {
+                return BuildElementAccessAst(parseTreeNode);
+            }
+
+            if (parseTreeNode.Term == this._grammar.invocation_expression)
+            {
+                return BuildInvocationExpressionAst(parseTreeNode);
+            }
+
+            if (parseTreeNode.Term == this._grammar.post_increment_expression)
+            {
+                return BuildPostIncrementExpressionAst(parseTreeNode);
+            }
+
+            if (parseTreeNode.Term == this._grammar.post_decrement_expression)
+            {
+                return BuildPostDecrementExpressionAst(parseTreeNode);
+            }
+
+            throw new InvalidOperationException(parseTreeNode.ToString());
         }
 
-        MemberExpressionAst BuildMemberExpressionAst(ParseTreeNode parseTreeNode)
+        ExpressionAst BuildPostDecrementExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            throw new NotImplementedException();
+        }
+
+        ExpressionAst BuildPostIncrementExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            throw new NotImplementedException();
+        }
+
+        ExpressionAst BuildInvocationExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            throw new NotImplementedException();
+        }
+
+        IndexExpressionAst BuildElementAccessAst(ParseTreeNode parseTreeNode)
+        {
+            ////        element_access: Note no whitespace is allowed between primary_expression and [.
+            ////            primary_expression   [  new_lines_opt   expression   new_lines_opt   ]
+            VerifyTerm(parseTreeNode, this._grammar.element_access);
+
+            var targetNode = parseTreeNode.ChildNodes[0];
+            var indexNode = parseTreeNode.ChildNodes[2];
+
+            return new IndexExpressionAst(
+                new ScriptExtent(parseTreeNode),
+                BuildPrimaryExpressionAst(targetNode),
+                BuildExpressionAst(indexNode)
+                );
+        }
+
+        MemberExpressionAst BuildMemberAccessAst(ParseTreeNode parseTreeNode)
         {
             ////        member_access: 
             ////            primary_expression   .   member_name
@@ -733,7 +784,7 @@ namespace Pash.ParserIntrinsics
 
             if (parseTreeNode.Term == this._grammar.value)
             {
-                return BuildValueExpressionAst(parseTreeNode);
+                return BuildValueAst(parseTreeNode);
             }
 
             throw new InvalidOperationException(parseTreeNode.ToString());
@@ -744,7 +795,7 @@ namespace Pash.ParserIntrinsics
             throw new NotImplementedException(parseTreeNode.ToString());
         }
 
-        ExpressionAst BuildValueExpressionAst(ParseTreeNode parseTreeNode)
+        ExpressionAst BuildValueAst(ParseTreeNode parseTreeNode)
         {
             ////        value:
             ////            parenthesized_expression

@@ -287,7 +287,30 @@ ls
             }
         }
 
-        [Test, Ignore("Need whitespace prohibition")]
+        [Test]
+        public void IndexTest()
+        {
+            var indexExpressionAst = ParseInput("'abc'[2]")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression
+                ;
+
+            Assert.AreEqual("abc", indexExpressionAst.Target.Value);
+            Assert.AreEqual(2, indexExpressionAst.Index.Value);
+        }
+
+        [Test
+        // This is a bug, but not a serious one.
+        //, ExpectedException(typeof(PowerShellGrammar.ParseException))
+        ]
+        public void IndexWithSpaceShouldFail()
+        {
+            ParseInput("'abc' [2]");
+        }
+
+        [Test, Ignore]
         public void MemberAccess()
         {
             MemberExpressionAst memberExpressionAst = ParseInput("[System.Int32]::MaxValue")

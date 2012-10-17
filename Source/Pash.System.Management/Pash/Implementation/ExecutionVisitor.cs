@@ -272,6 +272,24 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
+        public override AstVisitAction VisitIndexExpression(IndexExpressionAst indexExpressionAst)
+        {
+            var targetValue = EvaluateAst(indexExpressionAst.Target);
+
+            int index = (int)EvaluateAst(indexExpressionAst.Index);
+
+            var stringTargetValue = targetValue as string;
+            if (stringTargetValue != null)
+            {
+                var result = stringTargetValue[index];
+                this._pipelineCommandRuntime.WriteObject(result);
+            }
+
+            else throw new NotImplementedException(indexExpressionAst.ToString() + " " + targetValue.GetType());
+
+            return AstVisitAction.SkipChildren;
+        }
+
         #region  NYI
         public override AstVisitAction VisitArrayExpression(ArrayExpressionAst arrayExpressionAst)
         {
@@ -367,11 +385,6 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitIfStatement(IfStatementAst ifStmtAst)
         {
             throw new NotImplementedException(); //VisitIfStatement(ifStmtAst);
-        }
-
-        public override AstVisitAction VisitIndexExpression(IndexExpressionAst indexExpressionAst)
-        {
-            throw new NotImplementedException(); //VisitIndexExpression(indexExpressionAst);
         }
 
         public override AstVisitAction VisitInvokeMemberExpression(InvokeMemberExpressionAst methodCallAst)

@@ -1043,11 +1043,10 @@ namespace Pash.ParserIntrinsics
             primary_expression.Rule =
                 value
                 |
-                // ISSUE: https://github.com/JayBazuzi/Pash2/issues/9 - need whitespace prohibition
                 // member_access
                 // |
-                // element_access
-                // |
+                element_access
+                |
                 // invocation_expression
                 // |
                 post_increment_expression
@@ -1147,7 +1146,7 @@ namespace Pash.ParserIntrinsics
             ////            primary_expression   [  new_lines_opt   expression   new_lines_opt   ]
             // ISSUE: https://github.com/JayBazuzi/Pash2/issues/9 - need whitespace prohibition
             element_access.Rule =
-                primary_expression + "[" + new_lines_opt + expression + new_lines_opt + "]";
+                primary_expression + PreferShiftHere() + "[" + new_lines_opt + expression + new_lines_opt + "]";
 
             ////        invocation_expression: Note no whitespace is allowed between terms in these productions.
             ////            primary_expression   .   member_name   argument_list
