@@ -44,10 +44,10 @@ namespace Pash.ParserIntrinsics
         #region B.2 Syntactic grammar
 
         #region B.2.1 Basic concepts
-        public readonly NonTerminal script_file = null; // Initialized by reflection.
-        public readonly NonTerminal module_file = null; // Initialized by reflection.
-        public readonly NonTerminal interactive_input = null; // Initialized by reflection.
-        public readonly NonTerminal data_file = null; // Initialized by reflection.
+        //public readonly NonTerminal script_file = null; // Initialized by reflection.
+        //public readonly NonTerminal module_file = null; // Initialized by reflection.
+        //public readonly NonTerminal interactive_input = null; // Initialized by reflection.
+        //public readonly NonTerminal data_file = null; // Initialized by reflection.
         #endregion
 
         #region B.2.2 Statements
@@ -209,38 +209,6 @@ namespace Pash.ParserIntrinsics
         #endregion
         #endregion
 
-        class ScriptFile : PowerShellGrammar
-        {
-            public ScriptFile()
-            {
-                Root = this.script_file;
-            }
-        }
-
-        class ModuleFile : PowerShellGrammar
-        {
-            public ModuleFile()
-            {
-                Root = this.module_file;
-            }
-        }
-
-        class InteractiveInput : PowerShellGrammar
-        {
-            public InteractiveInput()
-            {
-                Root = this.interactive_input;
-            }
-        }
-
-        class DataFile : PowerShellGrammar
-        {
-            public DataFile()
-            {
-                Root = this.data_file;
-            }
-        }
-
         PowerShellGrammar()
         {
             InitializeTerminalFields();
@@ -249,9 +217,11 @@ namespace Pash.ParserIntrinsics
 
             // delegate to a new method, so we don't accidentally overwrite a readonly field.
             BuildProductionRules();
+
+            Root = this.script_block;
         }
 
-        static Parser parser = new Parser(new InteractiveInput());
+        static Parser parser = new Parser(new PowerShellGrammar());
 
         public class ParseException : Exception
         {
@@ -272,7 +242,7 @@ namespace Pash.ParserIntrinsics
                 throw new ParseException(parseTree.ParserMessages.First());
             }
 
-            return new AstBuilder((PowerShellGrammar)parser.Language.Grammar).BuildInteractiveInputAst(parseTree.Root);
+            return new AstBuilder((PowerShellGrammar)parser.Language.Grammar).BuildScriptBlockAst(parseTree.Root);
         }
 
         public override void OnLanguageDataConstructed(LanguageData language)
@@ -402,12 +372,8 @@ namespace Pash.ParserIntrinsics
             ////            script_block
             ////        module_file:
             ////            script_block
-
             ////        interactive_input:
             ////            script_block
-            interactive_input.Rule =
-                script_block;
-
             ////        data_file:
             ////            statement_list
             #endregion

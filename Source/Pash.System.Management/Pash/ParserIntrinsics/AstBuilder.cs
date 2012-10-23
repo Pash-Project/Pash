@@ -33,16 +33,7 @@ namespace Pash.ParserIntrinsics
             }
         }
 
-        public ScriptBlockAst BuildInteractiveInputAst(ParseTreeNode parseTreeNode)
-        {
-            ////        interactive_input:
-            ////            script_block
-            VerifyTerm(parseTreeNode, this._grammar.interactive_input);
-
-            return BuildScriptBlockAst(parseTreeNode.ChildNodes.Single());
-        }
-
-        ScriptBlockAst BuildScriptBlockAst(ParseTreeNode parseTreeNode)
+        public ScriptBlockAst BuildScriptBlockAst(ParseTreeNode parseTreeNode)
         {
             ////        script_block:
             ////            param_block_opt   statement_terminators_opt    script_block_body_opt
