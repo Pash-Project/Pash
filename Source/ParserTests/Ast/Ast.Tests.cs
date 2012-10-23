@@ -16,6 +16,21 @@ namespace ParserTests
     class AstTests
     {
         [Test]
+        public void GreaterThatEqualTest()
+        {
+            var binaryExpressionAst = ParseInput("10 -gt 1")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression
+                ;
+
+            Assert.AreEqual(TokenKind.Igt, binaryExpressionAst.Operator);
+            Assert.AreEqual(10, binaryExpressionAst.Left.Value);
+            Assert.AreEqual(1, binaryExpressionAst.Right.Value);
+        }
+
+        [Test]
         public void CommentTest()
         {
             ScriptBlockAst scriptBlockAst = ParseInput(

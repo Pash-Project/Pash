@@ -11,6 +11,13 @@ namespace TestHost
     class Tests
     {
         [Test]
+        public void ComparisonTest()
+        {
+            StringAssert.AreEqualIgnoringCase("True\r\n", TestHost.Execute("1 -eq 1"));
+
+        }
+
+        [Test]
         public void ElementAccessTest()
         {
             StringAssert.AreEqualIgnoringCase("b\r\n", TestHost.Execute("'abc'[1]"));

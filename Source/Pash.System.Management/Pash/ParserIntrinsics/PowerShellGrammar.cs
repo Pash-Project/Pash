@@ -33,6 +33,12 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal string_literal = null; // Initialized by reflection
         #endregion
 
+        #region B.1.11 Operators and punctuators
+
+        public readonly NonTerminal comparison_operator = null; // Initialized by reflection.
+
+        #endregion
+
         #endregion
 
         #region B.2 Syntactic grammar
@@ -343,6 +349,50 @@ namespace Pash.ParserIntrinsics
                 verbatim_string_literal
                 ;
             #endregion
+
+            #region B.1.11 Operators and punctuators
+
+            ////        comparison_operator:  one of
+            ////            dash   as					dash   ccontains				dash   ceq
+            ////            dash   cge					dash   cgt						dash   cle
+            ////            dash   clike				dash   clt						dash   cmatch
+            ////            dash   cne					dash   cnotcontains				dash   cnotlike
+            ////            dash   cnotmatch			dash   contains					dash   creplace
+            ////            dash   csplit				dash   eq						dash   ge
+            ////            dash   gt					dash   icontains				dash   ieq
+            ////            dash   ige					dash   igt						dash   ile
+            ////            dash   ilike				dash   ilt						dash   imatch
+            ////            dash   ine					dash   inotcontains				dash   inotlike
+            ////            dash   inotmatch			dash   ireplace					dash   is
+            ////            dash   isnot				dash   isplit					dash   join
+            ////            dash   le					dash   like						dash   lt
+            ////            dash   match				dash   ne						dash   notcontains
+            ////            dash   notlike				dash   notmatch					dash   replace
+            ////            dash   split
+
+            // tiny comments to keep the autoformatter from destroying the columns.
+            comparison_operator.Rule =
+                       _comparison_operator_as					/**/ | _comparison_operator_ccontains				/**/ | _comparison_operator_ceq
+                /**/ | _comparison_operator_cge					/**/ | _comparison_operator_cgt						/**/ | _comparison_operator_cle
+                /**/ | _comparison_operator_clike				/**/ | _comparison_operator_clt						/**/ | _comparison_operator_cmatch
+                /**/ | _comparison_operator_cne					/**/ | _comparison_operator_cnotcontains			/**/ | _comparison_operator_cnotlike
+                /**/ | _comparison_operator_cnotmatch			/**/ | _comparison_operator_contains				/**/ | _comparison_operator_creplace
+                /**/ | _comparison_operator_csplit				/**/ | _comparison_operator_eq						/**/ | _comparison_operator_ge
+                /**/ | _comparison_operator_gt					/**/ | _comparison_operator_icontains				/**/ | _comparison_operator_ieq
+                /**/ | _comparison_operator_ige					/**/ | _comparison_operator_igt						/**/ | _comparison_operator_ile
+                /**/ | _comparison_operator_ilike				/**/ | _comparison_operator_ilt						/**/ | _comparison_operator_imatch
+                /**/ | _comparison_operator_ine					/**/ | _comparison_operator_inotcontains			/**/ | _comparison_operator_inotlike
+                /**/ | _comparison_operator_inotmatch			/**/ | _comparison_operator_ireplace				/**/ | _comparison_operator_is
+                /**/ | _comparison_operator_isnot				/**/ | _comparison_operator_isplit					/**/ | _comparison_operator_join
+                /**/ | _comparison_operator_le					/**/ | _comparison_operator_like					/**/ | _comparison_operator_lt
+                /**/ | _comparison_operator_match				/**/ | _comparison_operator_ne						/**/ | _comparison_operator_notcontains
+                /**/ | _comparison_operator_notlike				/**/ | _comparison_operator_notmatch				/**/ | _comparison_operator_replace
+                /**/ | _comparison_operator_split
+                ;
+            MarkTransient(comparison_operator);
+
+            #endregion
+
             #endregion
 
             #region B.2 Syntactic grammar

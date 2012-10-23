@@ -49,6 +49,10 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Plus:
                     return Add(leftOperand, rightOperand);
 
+                case TokenKind.Ieq:
+                    if (leftOperand.GetType() == typeof(int)) return ((int)leftOperand) == ((int)rightOperand);
+                    throw new NotImplementedException(binaryExpressionAst.ToString());
+
                 case TokenKind.Multiply:
                 case TokenKind.Divide:
                 case TokenKind.Minus:
@@ -68,7 +72,6 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Bor:
                 case TokenKind.Bxor:
                 case TokenKind.Join:
-                case TokenKind.Ieq:
                 case TokenKind.Ine:
                 case TokenKind.Ige:
                 case TokenKind.Igt:

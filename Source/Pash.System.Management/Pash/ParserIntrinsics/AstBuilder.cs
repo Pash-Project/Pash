@@ -471,7 +471,15 @@ namespace Pash.ParserIntrinsics
                 return BuildAdditiveExpressionAst(parseTreeNode.ChildNodes.Single());
             }
 
-            throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+            var comparisonOperatorTerminal = (PowerShellGrammar.ComparisonOperatorTerminal)(parseTreeNode.ChildNodes[1].Term);
+
+            return new BinaryExpressionAst(
+                new ScriptExtent(parseTreeNode),
+                BuildComparisonExpressionAst(parseTreeNode.ChildNodes[0]),
+                comparisonOperatorTerminal.TokenKind,
+                BuildAdditiveExpressionAst(parseTreeNode.ChildNodes[2]),
+                new ScriptExtent(parseTreeNode.ChildNodes[1])
+                );
         }
 
         ExpressionAst BuildAdditiveExpressionAst(ParseTreeNode parseTreeNode)
