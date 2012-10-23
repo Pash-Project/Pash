@@ -12,9 +12,13 @@ namespace System.Management.Automation.Language
             this.Value = value;
         }
 
-
         public override Type StaticType { get { return this.Value.GetType(); } }
 
         public object Value { get; private set; }
+
+        public override string ToString()
+        {
+            return this.Value.ToString();
+        }
     }
 }
