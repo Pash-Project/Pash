@@ -222,12 +222,12 @@ namespace Pash.ParserIntrinsics
         }
 
         public static readonly PowerShellGrammar Instance;
-        static readonly Parser s_parser;
+        public static readonly Parser Parser;
 
         static PowerShellGrammar()
         {
             Instance = new PowerShellGrammar();
-            s_parser = new Parser(Instance);
+            Parser = new Parser(Instance);
         }
 
         public class ParseException : Exception
@@ -242,7 +242,7 @@ namespace Pash.ParserIntrinsics
 
         public static ScriptBlockAst ParseInteractiveInput(string input)
         {
-            var parseTree = s_parser.Parse(input);
+            var parseTree = Parser.Parse(input);
 
             if (parseTree.HasErrors())
             {
