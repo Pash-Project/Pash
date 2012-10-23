@@ -41,20 +41,78 @@ namespace System.Management.Pash.Implementation
             var leftOperand = EvaluateAst(binaryExpressionAst.Left);
             var rightOperand = EvaluateAst(binaryExpressionAst.Right);
 
-            if (binaryExpressionAst.Operator == TokenKind.Plus)
+            switch (binaryExpressionAst.Operator)
             {
-                return Add(leftOperand, rightOperand);
-            }
+                case TokenKind.DotDot:
+                    return Range((int)leftOperand, (int)rightOperand);
 
-            else if (binaryExpressionAst.Operator == TokenKind.DotDot)
-            {
-                return Range((int)leftOperand, (int)rightOperand);
-            }
+                case TokenKind.Plus:
+                    return Add(leftOperand, rightOperand);
 
-            else throw new NotImplementedException(binaryExpressionAst.ToString());
+                case TokenKind.Multiply:
+                case TokenKind.Divide:
+                case TokenKind.Minus:
+                case TokenKind.Equals:
+                case TokenKind.PlusEquals:
+                case TokenKind.MinusEquals:
+                case TokenKind.MultiplyEquals:
+                case TokenKind.DivideEquals:
+                case TokenKind.RemainderEquals:
+                case TokenKind.Format:
+                case TokenKind.Not:
+                case TokenKind.Bnot:
+                case TokenKind.And:
+                case TokenKind.Or:
+                case TokenKind.Xor:
+                case TokenKind.Band:
+                case TokenKind.Bor:
+                case TokenKind.Bxor:
+                case TokenKind.Join:
+                case TokenKind.Ieq:
+                case TokenKind.Ine:
+                case TokenKind.Ige:
+                case TokenKind.Igt:
+                case TokenKind.Ilt:
+                case TokenKind.Ile:
+                case TokenKind.Ilike:
+                case TokenKind.Inotlike:
+                case TokenKind.Imatch:
+                case TokenKind.Inotmatch:
+                case TokenKind.Ireplace:
+                case TokenKind.Icontains:
+                case TokenKind.Inotcontains:
+                case TokenKind.Iin:
+                case TokenKind.Inotin:
+                case TokenKind.Isplit:
+                case TokenKind.Ceq:
+                case TokenKind.Cne:
+                case TokenKind.Cge:
+                case TokenKind.Cgt:
+                case TokenKind.Clt:
+                case TokenKind.Cle:
+                case TokenKind.Clike:
+                case TokenKind.Cnotlike:
+                case TokenKind.Cmatch:
+                case TokenKind.Cnotmatch:
+                case TokenKind.Creplace:
+                case TokenKind.Ccontains:
+                case TokenKind.Cnotcontains:
+                case TokenKind.Cin:
+                case TokenKind.Cnotin:
+                case TokenKind.Csplit:
+                case TokenKind.Is:
+                case TokenKind.IsNot:
+                case TokenKind.As:
+                case TokenKind.Shl:
+                case TokenKind.Shr:
+                    throw new NotImplementedException(binaryExpressionAst.ToString());
+
+                default:
+                    throw new InvalidOperationException(binaryExpressionAst.ToString());
+            }
         }
 
-        private IEnumerable<int> Range(int start, int end)
+        IEnumerable<int> Range(int start, int end)
         {
             //// Description:
             ////
