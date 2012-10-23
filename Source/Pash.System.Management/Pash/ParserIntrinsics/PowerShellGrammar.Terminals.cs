@@ -669,7 +669,8 @@ namespace Pash.ParserIntrinsics
         ////            dash   notlike				dash   notmatch					dash   replace
         ////            dash   split
         public readonly RegexBasedTerminal comparison_operator = null; // Initialized by reflection
-        const string comparison_operator_pattern = "(?<comparison_operator>" + dash_pattern + @"
+        const string comparison_operator_pattern = "(?<comparison_operator>(?x)" + dash_pattern + @"
+                            (
                                   as					| ccontains					| ceq 
                                 | cge					| cgt						| cle
                                 | clike					| clt						| cmatch
@@ -686,6 +687,7 @@ namespace Pash.ParserIntrinsics
                                 | match					| ne						| notcontains
                                 | notlike				| notmatch					| replace
                                 | split
+                            )
 "
             + ")";
 
