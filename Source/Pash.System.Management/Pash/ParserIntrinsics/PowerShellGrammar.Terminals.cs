@@ -22,11 +22,7 @@ namespace Pash.ParserIntrinsics
     {
         void InitializeTerminalFields()
         {
-            var q = from field in typeof(PowerShellGrammar).GetFields()
-                    where field.FieldType == typeof(RegexBasedTerminal)
-                    select field;
-
-            foreach (var field in q)
+            foreach (var field in this.GetType().GetFields().Where(f => f.FieldType == typeof(RegexBasedTerminal)))
             {
                 var patternFieldInfo = typeof(PowerShellGrammar).GetField(
                     field.Name + "_pattern",
