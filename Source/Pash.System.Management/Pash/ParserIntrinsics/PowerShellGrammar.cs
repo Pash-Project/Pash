@@ -221,7 +221,14 @@ namespace Pash.ParserIntrinsics
             Root = this.script_block;
         }
 
-        static Parser parser = new Parser(new PowerShellGrammar());
+        public static readonly PowerShellGrammar Instance;
+        static readonly Parser s_parser;
+
+        static PowerShellGrammar()
+        {
+            Instance = new PowerShellGrammar();
+            s_parser = new Parser(Instance);
+        }
 
         public class ParseException : Exception
         {
@@ -235,14 +242,14 @@ namespace Pash.ParserIntrinsics
 
         public static ScriptBlockAst ParseInteractiveInput(string input)
         {
-            var parseTree = parser.Parse(input);
+            var parseTree = s_parser.Parse(input);
 
             if (parseTree.HasErrors())
             {
                 throw new ParseException(parseTree.ParserMessages.First());
             }
 
-            return new AstBuilder((PowerShellGrammar)parser.Language.Grammar).BuildScriptBlockAst(parseTree.Root);
+            return new AstBuilder(Instance).BuildScriptBlockAst(parseTree.Root);
         }
 
         public override void OnLanguageDataConstructed(LanguageData language)
