@@ -16,6 +16,31 @@ namespace ParserTests
     class AstTests
     {
         [Test]
+        public void IfEmptyStatementTest()
+        {
+            IfStatementAst ifStatementAst = ParseInput("if ($true) {}")
+                .EndBlock
+                .Statements[0]
+                ;
+
+            Assert.IsNull(ifStatementAst.ElseClause);
+            var clause = ifStatementAst.Clauses.Single();
+
+            CollectionAssert.IsEmpty(clause.Item2.Statements);
+        }
+
+        [Test]
+        public void IfWithStatementTest()
+        {
+            IfStatementAst ifStatementAst = ParseInput("if ($true) { Get-ChildItem }")
+                .EndBlock
+                .Statements[0]
+                ;
+
+            Assert.AreEqual(1, ifStatementAst.Clauses.Count);
+        }
+
+        [Test]
         public void GreaterThatEqualTest()
         {
             var binaryExpressionAst = ParseInput("10 -gt 1")

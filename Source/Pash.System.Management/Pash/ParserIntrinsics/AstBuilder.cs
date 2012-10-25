@@ -116,10 +116,7 @@ namespace Pash.ParserIntrinsics
             ////            statement
             ////            statement_list   statement
 
-            // HACK: I used
-            //        statement_list:
-            //            statement
-            //            statement_list   statement_terminator    statement
+            VerifyTerm(parseTreeNode, this._grammar.statement_list);
 
             IEnumerable<StatementAst> statements = parseTreeNode
                 .ChildNodes
@@ -273,12 +270,60 @@ namespace Pash.ParserIntrinsics
             throw new NotImplementedException();
         }
 
-        StatementAst BuildIfStatementAst(ParseTreeNode parseTreeNode)
+        IfStatementAst BuildIfStatementAst(ParseTreeNode parseTreeNode)
         {
             ////        if_statement:
             ////            if   new_lines_opt   (   new_lines_opt   pipeline   new_lines_opt   )   statement_block elseif_clauses_opt   else_clause_opt
+            // The actual grammar is broken up a little differently.
+            VerifyTerm(parseTreeNode, this._grammar.if_statement);
 
-            throw new NotImplementedException();
+            var clauses = new List<Tuple<PipelineBaseAst, StatementBlockAst>>();
+
+            clauses.Add(new Tuple<PipelineBaseAst, StatementBlockAst>(
+                BuildIfStatementConditionAst(parseTreeNode.ChildNodes[1].ChildNodes[0]),
+                BuildStatementBlockAst(parseTreeNode.ChildNodes[1].ChildNodes[1])
+            ));
+
+            StatementBlockAst elseClause = null;
+
+            return new IfStatementAst(
+                new ScriptExtent(parseTreeNode),
+                clauses,
+                elseClause
+                );
+
+            throw new NotImplementedException(parseTreeNode.ToString());
+        }
+
+        private PipelineBaseAst BuildIfStatementConditionAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar._if_statement_condition);
+            return BuildPipelineAst(parseTreeNode.ChildNodes[1]);
+        }
+
+        private StatementBlockAst BuildStatementBlockAst(ParseTreeNode parseTreeNode)
+        {
+            ////        statement_block:
+            ////            new_lines_opt   {   statement_list_opt   new_lines_opt   }
+            VerifyTerm(parseTreeNode, this._grammar.statement_block);
+
+            parseTreeNode = parseTreeNode.ChildNodes.Single();
+
+            if (parseTreeNode.Term == this._grammar._statement_block_empty)
+            {
+                return new StatementBlockAst(
+                    new ScriptExtent(parseTreeNode),
+                    null,
+                    null
+                    );
+            }
+
+            if (parseTreeNode.Term == this._grammar._statement_block_full)
+            {
+                return BuildStatementListAst(parseTreeNode.ChildNodes[1]);
+            }
+
+            throw new InvalidOperationException(parseTreeNode.ToString());
         }
 
         PipelineBaseAst BuildPipelineAst(ParseTreeNode parseTreeNode)

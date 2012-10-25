@@ -40,6 +40,7 @@
     <Compile Include="Ast\Ast.Tests.cs" />
     <Compile Include="CaseInsensitiveGrammarTests.cs" />
     <Compile Include="ExtensionsTests.cs" />
+    <Compile Include="ParserTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

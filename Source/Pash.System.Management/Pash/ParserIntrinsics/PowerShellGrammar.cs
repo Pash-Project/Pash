@@ -61,6 +61,8 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal named_block = null; // Initialized by reflection.
         public readonly NonTerminal block_name = null; // Initialized by reflection.
         public readonly NonTerminal statement_block = null; // Initialized by reflection.
+        public readonly NonTerminal _statement_block_empty = null; // Initialized by reflection.
+        public readonly NonTerminal _statement_block_full = null; // Initialized by reflection.
         public readonly NonTerminal statement_list = null; // Initialized by reflection.
         public readonly NonTerminal statement = null; // Initialized by reflection.
         public readonly NonTerminal _statement_labeled_statement = null; // Initialized by reflection.
@@ -69,6 +71,8 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal statement_terminator = null; // Initialized by reflection.
         public readonly NonTerminal statement_terminators = null; // Initialized by reflection.
         public readonly NonTerminal if_statement = null; // Initialized by reflection.
+        public readonly NonTerminal _if_statement_clause = null; // Initialized by reflection.
+        public readonly NonTerminal _if_statement_condition = null; // Initialized by reflection.
         public readonly NonTerminal elseif_clauses = null; // Initialized by reflection.
         public readonly NonTerminal elseif_clause = null; // Initialized by reflection.
         public readonly NonTerminal else_clause = null; // Initialized by reflection.
@@ -442,7 +446,15 @@ namespace Pash.ParserIntrinsics
             ////        statement_block:
             ////            new_lines_opt   {   statement_list_opt   new_lines_opt   }
             statement_block.Rule =
-                new_lines_opt + "{" + (statement_list | Empty) + new_lines_opt + "}";
+                _statement_block_empty
+                |
+                _statement_block_full;
+
+            _statement_block_empty.Rule =
+                new_lines_opt + "{" + new_lines_opt + "}";
+
+            _statement_block_full.Rule =
+                new_lines_opt + "{" + statement_list + new_lines_opt + "}";
 
 #if false
             ////        statement_list:
@@ -515,19 +527,20 @@ namespace Pash.ParserIntrinsics
 
             ////        if_statement:
             ////            if   new_lines_opt   (   new_lines_opt   pipeline   new_lines_opt   )   statement_block elseif_clauses_opt   else_clause_opt
-            if_statement.Rule =
-                "if" + new_lines_opt + "(" + new_lines_opt + pipeline + new_lines_opt + ")" + statement_block + (elseif_clauses | Empty) + (else_clause + Empty);
-
             ////        elseif_clauses:
             ////            elseif_clause
             ////            elseif_clauses   elseif_clause
-            elseif_clauses.Rule =
-                MakePlusRule(elseif_clauses, elseif_clause);
-
             ////        elseif_clause:
             ////            new_lines_opt   elseif   new_lines_opt   (   new_lines_opt   pipeline   new_lines_opt   )   statement_block
-            elseif_clause.Rule =
-                new_lines_opt + "elseif" + new_lines_opt + "(" + new_lines_opt + pipeline + new_lines_opt + ")" + statement_block;
+            if_statement.Rule =
+                "if" + _if_statement_clause + elseif_clauses + (else_clause | Empty)
+                ;
+
+            elseif_clauses.Rule =
+                MakeStarRule(elseif_clauses, new_lines_opt + "elseif" + new_lines_opt, new_lines_opt + "elseif" + _if_statement_clause);
+
+            _if_statement_clause.Rule = new_lines_opt + _if_statement_condition + statement_block;
+            _if_statement_condition.Rule = "(" + new_lines_opt + pipeline + new_lines_opt + ")";
 
             ////        else_clause:
             ////            new_lines_opt   else   statement_block
