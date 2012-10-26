@@ -23,10 +23,8 @@ namespace ParserTests
                 .Statements[0]
                 ;
 
+            CollectionAssert.IsEmpty(ifStatementAst.Clauses.Single().Item2.Statements);
             Assert.IsNull(ifStatementAst.ElseClause);
-            var clause = ifStatementAst.Clauses.Single();
-
-            CollectionAssert.IsEmpty(clause.Item2.Statements);
         }
 
         [Test]
@@ -37,7 +35,19 @@ namespace ParserTests
                 .Statements[0]
                 ;
 
-            Assert.AreEqual(1, ifStatementAst.Clauses.Count);
+            Assert.AreEqual(1, ifStatementAst.Clauses.Single().Item2.Statements.Count);
+            Assert.IsNull(ifStatementAst.ElseClause);
+        }
+
+        [Test]
+        public void IfElseTest()
+        {
+            IfStatementAst ifStatementAst = ParseInput("if ($true) {} else {}")
+                .EndBlock
+                .Statements[0]
+                ;
+
+            Assert.IsNotNull(ifStatementAst.ElseClause);
         }
 
         [Test]
@@ -342,8 +352,8 @@ ls
         }
 
         [Test
-        // This is a bug, but not a serious one.
-        //, ExpectedException(typeof(PowerShellGrammar.ParseException))
+            // This is a bug, but not a serious one.
+            //, ExpectedException(typeof(PowerShellGrammar.ParseException))
         ]
         public void IndexWithSpaceShouldFail()
         {

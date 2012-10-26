@@ -11,7 +11,7 @@ namespace System.Management.Automation.Language
             : base(extent)
         {
             this.Clauses = clauses.ToReadOnlyCollection();
-            this.ElseClause = ElseClause;
+            this.ElseClause = elseClause;
         }
 
         public ReadOnlyCollection<Tuple<PipelineBaseAst, StatementBlockAst>> Clauses { get; private set; }

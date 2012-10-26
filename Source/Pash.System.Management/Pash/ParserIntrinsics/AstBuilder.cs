@@ -286,6 +286,11 @@ namespace Pash.ParserIntrinsics
 
             StatementBlockAst elseClause = null;
 
+            if (parseTreeNode.ChildNodes.Last().Term == this._grammar.else_clause)
+            {
+                elseClause = BuildStatementBlockAst(parseTreeNode.ChildNodes.Last().ChildNodes[1]);
+            }
+
             return new IfStatementAst(
                 new ScriptExtent(parseTreeNode),
                 clauses,
