@@ -51,6 +51,18 @@ namespace ParserTests
         }
 
         [Test]
+        public void IfElseifTest()
+        {
+            IfStatementAst ifStatementAst = ParseInput("if ($true) {} elseif ($false) {}")
+                .EndBlock
+                .Statements[0]
+                ;
+
+            Assert.IsNull(ifStatementAst.ElseClause);
+            Assert.AreEqual(2, ifStatementAst.Clauses.Count);
+        }
+
+        [Test]
         public void GreaterThatEqualTest()
         {
             var binaryExpressionAst = ParseInput("10 -gt 1")

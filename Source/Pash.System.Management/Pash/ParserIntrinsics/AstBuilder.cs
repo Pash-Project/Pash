@@ -279,10 +279,15 @@ namespace Pash.ParserIntrinsics
 
             var clauses = new List<Tuple<PipelineBaseAst, StatementBlockAst>>();
 
-            clauses.Add(new Tuple<PipelineBaseAst, StatementBlockAst>(
-                BuildIfStatementConditionAst(parseTreeNode.ChildNodes[1].ChildNodes[0]),
-                BuildStatementBlockAst(parseTreeNode.ChildNodes[1].ChildNodes[1])
-            ));
+            clauses.Add(BuildIfStatementClauseAst(parseTreeNode.ChildNodes[1]));
+
+            var elseifNodes = parseTreeNode.ChildNodes[2].ChildNodes;
+
+            clauses.AddRange(
+                elseifNodes
+                    .Where((node, index) => index % 2 == 1)
+                    .Select(BuildIfStatementClauseAst)
+            );
 
             StatementBlockAst elseClause = null;
 
@@ -300,13 +305,22 @@ namespace Pash.ParserIntrinsics
             throw new NotImplementedException(parseTreeNode.ToString());
         }
 
-        private PipelineBaseAst BuildIfStatementConditionAst(ParseTreeNode parseTreeNode)
+        Tuple<PipelineBaseAst, StatementBlockAst> BuildIfStatementClauseAst(ParseTreeNode parseTreeNode)
+        {
+            return new Tuple<PipelineBaseAst, StatementBlockAst>(
+                            BuildIfStatementConditionAst(parseTreeNode.ChildNodes[0]),
+                            BuildStatementBlockAst(parseTreeNode.ChildNodes[1])
+                        );
+        }
+
+
+        PipelineBaseAst BuildIfStatementConditionAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar._if_statement_condition);
             return BuildPipelineAst(parseTreeNode.ChildNodes[1]);
         }
 
-        private StatementBlockAst BuildStatementBlockAst(ParseTreeNode parseTreeNode)
+        StatementBlockAst BuildStatementBlockAst(ParseTreeNode parseTreeNode)
         {
             ////        statement_block:
             ////            new_lines_opt   {   statement_list_opt   new_lines_opt   }
