@@ -23,5 +23,9 @@ namespace System.Management.Automation.Language
             }
         }
 
+        public override string ToString()
+        {
+            return string.Format("exit {0}", this.Pipeline);
+        }
     }
 }

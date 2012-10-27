@@ -26,5 +26,10 @@ namespace System.Management.Automation.Language
                 foreach (var item in base.Children) yield return item;
             }
         }
+
+        public override string ToString()
+        {
+            return string.Format("{0}{1}", Enum.GetName(typeof(TokenKind), this.TokenKind), this.Child);
+        }
     }
 }

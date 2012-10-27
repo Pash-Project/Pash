@@ -15,5 +15,10 @@ namespace System.Management.Automation.Language
         {
             throw new NotImplementedException(this.ToString());
         }
+
+        public override string ToString()
+        {
+            return this.TypeName.ToString();
+        }
     }
 }

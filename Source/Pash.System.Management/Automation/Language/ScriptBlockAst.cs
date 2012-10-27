@@ -37,11 +37,6 @@ namespace System.Management.Automation.Language
             return new ScriptBlock(this);
         }
 
-        public override string ToString()
-        {
-            return this.Extent.Text;
-        }
-
         internal override IEnumerable<Ast> Children
         {
             get
@@ -53,6 +48,11 @@ namespace System.Management.Automation.Language
                 if (this.ProcessBlock != null) yield return this.ProcessBlock;
                 foreach (var item in base.Children) yield return item;
             }
+        }
+
+        public override string ToString()
+        {
+            return this.EndBlock.ToString();
         }
     }
 }

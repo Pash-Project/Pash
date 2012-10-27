@@ -12,5 +12,10 @@ namespace System.Management.Automation.Language
         }
 
         public RedirectionStream FromStream { get; private set; }
+
+        public override string ToString()
+        {
+            return string.Format("< {0}", Enum.GetName(typeof(RedirectionStream), this.FromStream));
+        }
     }
 }

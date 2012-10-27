@@ -23,5 +23,11 @@ namespace System.Management.Automation.Language
         public VariablePath VariablePath { get; private set; }
 
         public bool IsConstantVariable() { throw new NotImplementedException(this.ToString()); }
+
+
+        public override string ToString()
+        {
+            return string.Format("${0}", this.VariablePath.ToString());
+        }
     }
 }

@@ -65,5 +65,10 @@ namespace System.Management.Automation.Language
         {
             throw new NotImplementedException();
         }
+
+        public override string ToString()
+        {
+            return string.Format("[{0}]", this.Name);
+        }
     }
 }

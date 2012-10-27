@@ -26,9 +26,14 @@ namespace System.Management.Automation.Language
                 yield return this.Body;
                 foreach (var item in this.CatchClauses) { yield return item; }
                 yield return this.Finally;
-            
+
                 foreach (var item in base.Children) yield return item;
             }
+        }
+
+        public override string ToString()
+        {
+            return "try...";
         }
     }
 }

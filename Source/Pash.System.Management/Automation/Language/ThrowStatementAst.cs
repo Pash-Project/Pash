@@ -14,5 +14,10 @@ namespace System.Management.Automation.Language
 
         public bool IsRethrow { get { throw new NotImplementedException(this.ToString()); } }
         public PipelineBaseAst Pipeline { get; private set; }
+
+        public override string ToString()
+        {
+            return string.Format("throw {0}", this.Pipeline);
+        }
     }
 }

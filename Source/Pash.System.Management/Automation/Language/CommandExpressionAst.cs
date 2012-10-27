@@ -22,5 +22,10 @@ namespace System.Management.Automation.Language
                 foreach (var item in base.Children) yield return item;
             }
         }
+
+        public override string ToString()
+        {
+            return this.Expression.ToString();
+        }
     }
 }

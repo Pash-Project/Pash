@@ -15,5 +15,30 @@ namespace System.Management.Automation.Language
         public override Type StaticType { get { return typeof(string); } }
         public StringConstantType StringConstantType { get; private set; }
         public string Value { get; private set; }
+
+        public override string ToString()
+        {
+            switch (this.StringConstantType)
+            {
+                case StringConstantType.SingleQuoted:
+                    return string.Format("'{0}'", this.Value);
+
+                case StringConstantType.SingleQuotedHereString:
+                    return string.Format("@'{0}'", this.Value);
+
+                case StringConstantType.DoubleQuoted:
+                    return string.Format("\"{0}\"", this.Value);
+
+                case StringConstantType.DoubleQuotedHereString:
+                    return string.Format("@\"{0}\"", this.Value);
+
+                case StringConstantType.BareWord:
+                    return string.Format("{0}", this.Value);
+
+
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
     }
 }

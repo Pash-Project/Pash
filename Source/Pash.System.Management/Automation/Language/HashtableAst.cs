@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
+using System.Linq;
 
 namespace System.Management.Automation.Language
 {
@@ -23,6 +24,11 @@ namespace System.Management.Automation.Language
                 // Examine how PowerShell does this.
                 throw new NotImplementedException(this.ToString());
             }
+        }
+
+        public override string ToString()
+        {
+            return string.Format("@{ {0} ... }", this.KeyValuePairs.FirstOrDefault().ToString() ?? "<empty>");
         }
     }
 }

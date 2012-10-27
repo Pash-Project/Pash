@@ -24,5 +24,10 @@ namespace System.Management.Automation.Language
                 foreach (var item in base.Children) yield return item;
             }
         }
+
+        public override string ToString()
+        {
+            return string.Format("for ( {0} ; {1} ; {2} { ... }", this.Initializer, this.Condition, this.Iterator);
+        }
     }
 }
