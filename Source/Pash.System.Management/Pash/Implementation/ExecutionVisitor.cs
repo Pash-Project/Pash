@@ -316,7 +316,6 @@ namespace System.Management.Pash.Implementation
             var variableExpressionAst = assignmentStatementAst.Left as VariableExpressionAst;
             if (variableExpressionAst == null) throw new NotImplementedException(assignmentStatementAst.ToString());
 
-            // I think
             var variable = this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, EvaluateAst(assignmentStatementAst.Right));
             this._pipelineCommandRuntime.WriteObject(variable);
 
@@ -347,6 +346,47 @@ namespace System.Management.Pash.Implementation
             }
 
             else throw new NotImplementedException(indexExpressionAst.ToString() + " " + targetValue.GetType());
+
+            return AstVisitAction.SkipChildren;
+        }
+
+        public override AstVisitAction VisitIfStatement(IfStatementAst ifStatementAst)
+        {
+            ////    8.3 The if statement
+            ////        The pipeline controlling expressions must have type bool or be implicitly convertible to that 
+            ////        type. The else-clause is optional. There may be zero or more elseif-clauses.
+            ////        
+            ////        If the top-level pipeline tests True, then its statement-block is executed and execution of 
+            ////        the statement terminates. Otherwise, if an elseif-clause is present, if its pipeline tests 
+            ////        True, then its statement-block is executed and execution of the statement terminates. 
+            ////        Otherwise, if an else-clause is present, its statement-block is executed.
+
+            foreach (var clause in ifStatementAst.Clauses)
+            {
+                var condition = EvaluateAst(clause.Item1);
+
+                if (condition == null) continue;
+
+                if (condition.GetType() == typeof(bool))
+                {
+                    if ((bool)condition)
+                    {
+                        this._pipelineCommandRuntime.WriteObject(EvaluateAst(clause.Item2));
+                        return AstVisitAction.SkipChildren;
+                    }
+                }
+
+                else throw new NotImplementedException(ifStatementAst.ToString());
+            }
+
+            if (ifStatementAst.ElseClause != null)
+            {
+                // iterating over a statement list should be its own method.
+                foreach (var statement in ifStatementAst.ElseClause.Statements)
+                {
+                    this._pipelineCommandRuntime.WriteObject(EvaluateAst(statement));
+                }
+            }
 
             return AstVisitAction.SkipChildren;
         }
@@ -443,11 +483,6 @@ namespace System.Management.Pash.Implementation
             throw new NotImplementedException(); //VisitForStatement(forStatementAst);
         }
 
-        public override AstVisitAction VisitIfStatement(IfStatementAst ifStmtAst)
-        {
-            throw new NotImplementedException(); //VisitIfStatement(ifStmtAst);
-        }
-
         public override AstVisitAction VisitInvokeMemberExpression(InvokeMemberExpressionAst methodCallAst)
         {
             throw new NotImplementedException(); //VisitInvokeMemberExpression(methodCallAst);
@@ -508,7 +543,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitStatementBlock(StatementBlockAst statementBlockAst)
         {
-            throw new NotImplementedException(); //VisitStatementBlock(statementBlockAst);
+            return base.VisitStatementBlock(statementBlockAst);
         }
 
         public override AstVisitAction VisitStringConstantExpression(StringConstantExpressionAst stringConstantExpressionAst)
