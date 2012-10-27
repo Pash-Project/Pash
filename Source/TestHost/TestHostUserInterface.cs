@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Management.Automation.Host;
+using NUnit.Framework;
 
 namespace TestHost
 {
@@ -62,7 +63,7 @@ namespace TestHost
 
         public override void WriteErrorLine(string value)
         {
-            throw new Exception(value);
+            Assert.Fail(value);
         }
 
         public override void WriteLine(string value)
