@@ -36,11 +36,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="Ast\Ast.Tests.cs" />
-    <Compile Include="CaseInsensitiveGrammarTests.cs" />
-    <Compile Include="ExtensionsTests.cs" />
-    <Compile Include="ParserTests.cs" />
+    <Compile Include="**\*.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

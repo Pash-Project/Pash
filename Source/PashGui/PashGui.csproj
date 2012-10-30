@@ -59,14 +59,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="gtk-gui\generated.cs" />
-    <Compile Include="MainWindow.cs" />
-    <Compile Include="gtk-gui\MainWindow.cs" />
-    <Compile Include="Main.cs" />
-    <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="ConsoleView.cs" />
-    <Compile Include="Host.cs" />
-    <Compile Include="Model.cs" />
+    <Compile Include="**\*.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

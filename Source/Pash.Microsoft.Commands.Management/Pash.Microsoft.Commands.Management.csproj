@@ -39,19 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CoreCommandBase.cs" />
-    <Compile Include="DriveMatchingCoreCommandBase.cs" />
-    <Compile Include="GetChildItemCommand.cs" />
-    <Compile Include="GetLocationCommand.cs" />
-    <Compile Include="GetProcessCommand.cs" />
-    <Compile Include="GetPSDriveCommand.cs" />
-    <Compile Include="GetPSProviderCommand.cs" />
-    <Compile Include="ISupportShouldProcess.cs" />
-    <Compile Include="ProcessBaseCommand.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PSManagementPSSnapIn.cs" />
-    <Compile Include="SetLocationCommand.cs" />
-    <Compile Include="StopProcessCommand.cs" />
+    <Compile Include="**\*.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pash.System.Management\Pash.System.Management.csproj">

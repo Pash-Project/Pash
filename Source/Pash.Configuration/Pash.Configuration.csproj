@@ -40,12 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AliasElement.cs" />
-    <Compile Include="ExecutionContextConfigurationSection.cs" />
-    <Compile Include="FunctionElement.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PSSnapinElement.cs" />
-    <Compile Include="VariableElement.cs" />
+    <Compile Include="**\*.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
