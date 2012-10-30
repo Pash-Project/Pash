@@ -24,16 +24,6 @@ namespace System.Management.Automation.Language
             get
             {
                 throw new NotImplementedException("verify behavior with PowerShell");
-                // A little odd. Verify what PowerShell does and write a test.
-                foreach (var item in this.Clauses)
-                {
-                    yield return item.Item1;
-                    yield return item.Item2;
-                }
-
-                yield return this.Default;
-
-                foreach (var item in base.Children) yield return item;
             }
         }
 

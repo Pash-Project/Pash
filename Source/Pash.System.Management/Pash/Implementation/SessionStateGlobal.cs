@@ -601,7 +601,6 @@ namespace Pash.Implementation
             string driveName = null;
 
             string str = path;
-            string providerId = null;
             PSDriveInfo currentDrive = CurrentDrive;
 
             // If path doesn't start with a drive name
@@ -622,10 +621,6 @@ namespace Pash.Implementation
 
             SetVariable("PWD", CurrentLocation);
             return CurrentLocation;
-
-            PSDriveInfo drive = CurrentDrive;
-
-            SetLocation(path);
         }
     }
 }

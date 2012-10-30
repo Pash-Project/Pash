@@ -50,7 +50,8 @@ namespace Pash.Implementation
             get { throw new NotImplementedException(); }
         }
 
-        public override event EventHandler DataReady;
+        // unused - NYI
+        public override event EventHandler DataReady = delegate { };
 
         public override void Close()
         {

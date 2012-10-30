@@ -36,7 +36,7 @@ namespace Microsoft.PowerShell.Commands
                 {
                     stopped = process.HasExited;
                 }
-                catch (Exception ex)
+                catch //(Exception ex)
                 {
                     // TODO: WriteError
                     continue;
@@ -47,7 +47,7 @@ namespace Microsoft.PowerShell.Commands
                     {
                         process.Kill();
                     }
-                    catch (Exception ex)
+                    catch// (Exception ex)
                     {
                         // TODO: WriteError
                     }

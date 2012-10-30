@@ -49,7 +49,7 @@ namespace Microsoft.PowerShell.Commands
             {
                 SessionState.SessionStateGlobal.SetAlias(this.Name, this.Value);
             }
-            catch (Exception ex)
+            catch// (Exception ex)
             {
                 //TODO:
                 //WriteError(new ErrorRecord(ex, "", ErrorCategory.InvalidOperation, alias));

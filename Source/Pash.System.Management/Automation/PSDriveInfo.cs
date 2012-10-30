@@ -17,7 +17,7 @@ namespace System.Management.Automation
         internal bool RemovableDrive { get; set; }
 
         protected PSDriveInfo(PSDriveInfo driveInfo)
-            : this (driveInfo.Name, driveInfo.Provider, driveInfo.Root, driveInfo.Description, driveInfo.Credential)
+            : this(driveInfo.Name, driveInfo.Provider, driveInfo.Root, driveInfo.Description, driveInfo.Credential)
         {
             CurrentLocation = driveInfo.CurrentLocation;
         }
@@ -98,6 +98,11 @@ namespace System.Management.Automation
         public override string ToString()
         {
             return string.Format("{0} -> {1}", Provider.FullName, Name);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Name.GetHashCode();
         }
 
         #region IComparable Members

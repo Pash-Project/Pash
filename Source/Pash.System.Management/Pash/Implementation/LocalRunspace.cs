@@ -46,7 +46,8 @@ namespace Pash.Implementation
             get { return new Version(1, 0, 0, 0); }
         }
 
-        public override event EventHandler<RunspaceStateEventArgs> StateChanged;
+        // unusued - NYI
+        public override event EventHandler<RunspaceStateEventArgs> StateChanged = delegate { };
 
         public override Pipeline CreateNestedPipeline()
         {

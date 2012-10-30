@@ -40,7 +40,7 @@ namespace MonoDevelop.Components
         Stack<string> commandHistoryFuture = new Stack<string>();
         bool inBlock = false;
         string blockText = "";
-        bool auto_indent;
+        bool auto_indent = false;
         TextView textView;
     
         public ConsoleView()

@@ -9,7 +9,8 @@ namespace Pash.Implementation
     internal class PipelineProcessor
     {
         // TODO: implement pipeline stopping mechanism
-        private bool _stopping;
+        // Not really supposed to be `const`, that's just to clarify that this variable isn't currently used.
+        private const bool _stopping = false;
 
         internal bool Stopping
         {

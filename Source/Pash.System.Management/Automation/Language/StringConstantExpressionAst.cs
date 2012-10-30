@@ -14,7 +14,7 @@ namespace System.Management.Automation.Language
 
         public override Type StaticType { get { return typeof(string); } }
         public StringConstantType StringConstantType { get; private set; }
-        public string Value { get; private set; }
+        public new string Value { get; private set; }
 
         public override string ToString()
         {

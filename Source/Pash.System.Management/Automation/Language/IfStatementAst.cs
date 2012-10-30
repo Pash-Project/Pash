@@ -22,13 +22,6 @@ namespace System.Management.Automation.Language
             get
             {
                 throw new NotImplementedException("Verify with powershell");
-                foreach (var item in this.Clauses)
-                {
-                    yield return item.Item1;
-                    yield return item.Item2;
-                }
-                yield return this.ElseClause;
-                foreach (var item in base.Children) yield return item;
             }
         }
 
