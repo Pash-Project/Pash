@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Management.Automation.Runspaces;
 using System.Management.Automation;
 using Pash.Implementation;
-using Pash.Configuration;
 using Pash.ParserIntrinsics;
 using Irony.Parsing;
 using System.IO;
@@ -48,83 +47,41 @@ namespace Pash.Implementation
             // if no execution scope is provided load all the initial settings from the config file
             if (context == null)
             {
-                ExecutionContextConfigurationSection configSection = System.Configuration.ConfigurationManager.GetSection("defaultExecutionContext") as ExecutionContextConfigurationSection;
-                if (configSection != null)
+                // TODO: move this to config.ps1
+                foreach (var snapinTypeName in new[] { 
+                    "System.Management.Automation.PSCorePSSnapIn, System.Management.Automation",
+                    "Microsoft.PowerShell.PSUtilityPSSnapIn, Microsoft.PowerShell.Commands.Utility",
+                    "Microsoft.Commands.Management.PSManagementPSSnapIn, Microsoft.Commands.Management",
+                })
                 {
-                    if (configSection.PSSnapins != null)
+                    var tmpProviders = new Collection<SnapinProviderPair>();
+
+                    // Load all PSSnapin's
+                    foreach (CmdletInfo cmdLetInfo in LoadCmdletsFromPSSnapin(snapinTypeName, out tmpProviders))
                     {
-                        foreach (PSSnapinElement snapin in configSection.PSSnapins)
+                        // Register PSSnapin
+                        if (_snapins.ContainsKey(cmdLetInfo.PSSnapIn.Name))
                         {
-                            var tmpProviders = new Collection<SnapinProviderPair>();
-
-                            // Load all PSSnapin's
-                            foreach (CmdletInfo cmdLetInfo in LoadCmdletsFromPSSnapin(snapin.type, out tmpProviders))
-                            {
-                                // Register PSSnapin
-                                if (_snapins.ContainsKey(cmdLetInfo.PSSnapIn.Name))
-                                {
-                                    _snapins.Add(cmdLetInfo.PSSnapIn.Name, cmdLetInfo.PSSnapIn);
-                                }
-
-                                // Copy all the found Cmdlets
-                                List<CmdletInfo> cmdletList = null;
-                                if (_cmdLets.ContainsKey(cmdLetInfo.Name))
-                                {
-                                    cmdletList = _cmdLets[cmdLetInfo.Name];
-                                }
-                                else
-                                {
-                                    cmdletList = new List<CmdletInfo>();
-                                    _cmdLets.Add(cmdLetInfo.Name, cmdletList);
-                                }
-                                cmdletList.Add(cmdLetInfo);
-                            }
-
-                            foreach (SnapinProviderPair providerTypePair in tmpProviders)
-                            {
-                                _providers.Add(providerTypePair);
-                            }
+                            _snapins.Add(cmdLetInfo.PSSnapIn.Name, cmdLetInfo.PSSnapIn);
                         }
+
+                        // Copy all the found Cmdlets
+                        List<CmdletInfo> cmdletList = null;
+                        if (_cmdLets.ContainsKey(cmdLetInfo.Name))
+                        {
+                            cmdletList = _cmdLets[cmdLetInfo.Name];
+                        }
+                        else
+                        {
+                            cmdletList = new List<CmdletInfo>();
+                            _cmdLets.Add(cmdLetInfo.Name, cmdletList);
+                        }
+                        cmdletList.Add(cmdLetInfo);
                     }
 
-                    // copy functions
-                    if (configSection.Functions != null)
+                    foreach (SnapinProviderPair providerTypePair in tmpProviders)
                     {
-                        // TODO: resolve the difference between the function and a script?
-                        foreach (FunctionElement function in configSection.Functions)
-                        {
-                            ScriptInfo scriptInfo = null;
-                            switch (function.type)
-                            {
-                                case "inline":
-                                    scriptInfo = new ScriptInfo(function.name, new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(function.value)));
-                                    break;
-
-                                case "file":
-                                    // TODO: read the function from a file
-                                    break;
-                            }
-
-                            if (scriptInfo != null)
-                                _scripts.Add(scriptInfo.Name, scriptInfo);
-                        }
-                    }
-                    if (configSection.Aliases != null)
-                    {
-                        // TODO: cache aliases
-                        foreach (AliasElement alias in configSection.Aliases)
-                        {
-                            NewAlias(alias.name, alias.definition);
-                        }
-                    }
-                    // fill variables into the execution scope
-                    if (_context != null)
-                    {
-                        if (configSection.Variables != null)
-                        {
-                            // TODO: prepopulate variables list
-                        }
-                        // TODO: copy all the variables from the environment
+                        _providers.Add(providerTypePair);
                     }
                 }
             }

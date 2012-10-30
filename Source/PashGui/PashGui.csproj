@@ -80,9 +80,4 @@
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
-  <ItemGroup>
-    <None Include="..\PashConsole\App.config">
-      <Link>App.config</Link>
-    </None>
-  </ItemGroup>
 </Project>

@@ -58,9 +58,5 @@
       <Project>{D81F5C91-D7DB-46E5-BC99-49488FB6814C}</Project>
       <Name>010.Irony.2010</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Pash.Configuration\Pash.Configuration.csproj">
-      <Project>{F125870F-2B9E-49A8-82FE-6B67A766AA1F}</Project>
-      <Name>Pash.Configuration</Name>
-    </ProjectReference>
   </ItemGroup>
 </Project>
