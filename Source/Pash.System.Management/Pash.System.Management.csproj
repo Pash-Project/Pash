@@ -55,8 +55,8 @@
   </Target>
   -->
   <ItemGroup>
-    <ProjectReference Include="..\Irony\010.Irony.2010.csproj">
-      <Project>{D81F5C91-D7DB-46E5-BC99-49488FB6814C}</Project>
+    <ProjectReference Include="..\..\Libraries\Irony\Irony\010.Irony.2010.csproj">
+      <Project>{d81f5c91-d7db-46e5-bc99-49488fb6814c}</Project>
       <Name>010.Irony.2010</Name>
     </ProjectReference>
   </ItemGroup>
