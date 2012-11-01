@@ -39,7 +39,7 @@ namespace Irony {
     public readonly string Message;
 
     public override string ToString() {
-      return Message;
+        return Location + ": " + Message;
     }
   }//class
 
