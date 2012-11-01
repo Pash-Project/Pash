@@ -50,6 +50,10 @@ namespace Irony.Parsing {
     /// Gets the char at position next after the PrevewPosition 
     /// </summary>
     char NextPreviewChar { get; }    //char at PreviewPosition+1
+    /// <summary>
+    /// Gets the char at position next after the NextPrevewPosition 
+    /// </summary>
+    char NextNextPreviewChar { get; }    //char at PreviewPosition+2
     
     /// <summary>
     /// Creates a new token based on current preview position.
