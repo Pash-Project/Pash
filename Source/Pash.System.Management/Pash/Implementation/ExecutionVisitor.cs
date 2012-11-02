@@ -312,7 +312,7 @@ namespace System.Management.Pash.Implementation
 
         private PSVariable GetVariable(VariableExpressionAst variableExpressionAst)
         {
-            var variable = this._context.SessionState.SessionStateGlobal.GetVariable(variableExpressionAst.VariablePath.UserPath);
+            var variable = this._context.SessionState.PSVariable.Get(variableExpressionAst.VariablePath.UserPath);
 
             return variable;
         }

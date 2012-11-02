@@ -11,6 +11,24 @@ namespace TestHost
     class Tests
     {
         [Test]
+        public void TrueTest()
+        {
+            StringAssert.AreEqualIgnoringCase("True\r\n", TestHost.Execute("$true"));
+        }
+
+        [Test]
+        public void IfTrueTest()
+        {
+            StringAssert.AreEqualIgnoringCase("xxx\r\n", TestHost.Execute("if ($true) { 'xxx' }"));
+        }
+
+        [Test]
+        public void IfFalseTest()
+        {
+            StringAssert.AreEqualIgnoringCase("yyy\r\n", TestHost.Execute("if ($false) { 'xxx' } else { 'yyy' }"));
+
+        }
+        [Test]
         public void IfTest()
         {
             StringAssert.AreEqualIgnoringCase("xxx\r\n", TestHost.Execute("if (1 -eq 1) { 'xxx' }"));

@@ -32,6 +32,9 @@ namespace Pash.Implementation
             _aliases = new Dictionary<string, AliasInfo>(StringComparer.CurrentCultureIgnoreCase);
             _functions = new Dictionary<string, CommandInfo>(StringComparer.CurrentCultureIgnoreCase);
             _variables = new HybridDictionary(true);
+            
+            SetVariable("true", true);
+            SetVariable("false", false);
         }
 
         internal SessionStateGlobal(ExecutionContext context)
@@ -236,7 +239,7 @@ namespace Pash.Implementation
             // TODO: deal with scopes
 
             if (_variables.Contains(name))
-                return _variables[name] as PSVariable;
+                return (PSVariable)_variables[name];
 
             return null;
         }
