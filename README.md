@@ -6,7 +6,12 @@ An Open Source reimplementation of Windows PowerShell.
 License
 -------
 
-Dual licensed GPL / BSD, except where otherwise noted.
+The original release of Pash in 2008 didn't include a LICENSE or COPYING file, or other indication of license. However, at https://sourceforge.net/projects/pash/ it says:
+
+> License
+> BSD License, GNU General Public License (GPL)
+
+I have emailed Igor Moochnick a few times to clarify his licensing intent, but he hasn't responded. So I'm treating that as authoritative.
 
 History
 -------
