@@ -3,6 +3,11 @@ Pash2
 
 An Open Source reimplementation of Windows PowerShell.
 
+License
+-------
+
+Dual licensed GPL / BSD, except where otherwise noted.
+
 History
 -------
 
