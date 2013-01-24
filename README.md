@@ -11,7 +11,7 @@ The original release of Pash in 2008 didn't include a LICENSE or COPYING file, o
 > License
 > BSD License, GNU General Public License (GPL)
 
-I have emailed Igor Moochnick a few times to clarify his licensing intent, but he hasn't responded. So I'm treating that as authoritative.
+I have emailed Igor Moochnick a few times to clarify his licensing intent, but he hasn't responded. So I'm treating that note on sourceforge as authoritative.
 
 History
 -------
