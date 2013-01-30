@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,7 +31,7 @@ namespace Microsoft.PowerShell.Commands.Utility
             {
                 writeAction(ForegroundColor, BackgroundColor, "");
             }
-            else if (Object.BaseObject is Enumerable)
+            else if (Object.BaseObject is IEnumerable)
             {
                 throw new NotImplementedException();
             }
