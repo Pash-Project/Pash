@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Management.Automation;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using Extensions.Queue;
 
 namespace System.Management.Automation.Language
 {
@@ -44,10 +45,7 @@ namespace System.Management.Automation.Language
                 switch (astVisitAction)
                 {
                     case AstVisitAction.Continue:
-                        foreach (var item in nextItem.Children)
-                        {
-                            queue.Enqueue(item);
-                        }
+                        queue.EnqueueAll(nextItem.Children);
                         break;
 
                     case AstVisitAction.SkipChildren:

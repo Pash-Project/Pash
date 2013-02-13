@@ -261,6 +261,7 @@
     <Compile Include="Automation\WildcardOptions.cs" />
     <Compile Include="Automation\WildcardPattern.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Extensions\QueueExtensions.cs" />
     <Compile Include="Extensions\Reflection.cs" />
     <Compile Include="Extensions\String.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AddPSSnapinCommand.cs" />
