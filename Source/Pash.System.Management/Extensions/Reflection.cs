@@ -6,8 +6,13 @@ using System.Reflection;
 
 namespace Extensions.Reflection
 {
-    static class Extensions
+    static class _
     {
-        public static T GetValue<T>(this FieldInfo fieldInfo, object obj = null) { return (T)fieldInfo.GetValue(obj); }
+        public static T GetValue<T>(this FieldInfo fieldInfo, object obj = null)
+        {
+            return (T)fieldInfo.GetValue(obj);
+        }
+
+
     }
 }
