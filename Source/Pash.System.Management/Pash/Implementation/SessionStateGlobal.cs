@@ -33,7 +33,7 @@ namespace Pash.Implementation
             _aliases = new Dictionary<string, AliasInfo>(StringComparer.CurrentCultureIgnoreCase);
             _functions = new Dictionary<string, CommandInfo>(StringComparer.CurrentCultureIgnoreCase);
             _variables = new HybridDictionary(true);
-            
+
             SetVariable("true", true);
             SetVariable("false", false);
         }
