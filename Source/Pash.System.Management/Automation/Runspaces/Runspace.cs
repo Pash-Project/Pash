@@ -30,6 +30,8 @@ namespace System.Management.Automation.Runspaces
         public abstract void Open();
         public abstract void OpenAsync();
 
+        public abstract InitialSessionState InitialSessionState { get; }
+
         // internals
         //internal long GeneratePipelineId();
         internal abstract SessionStateProxy GetSessionStateProxy();
