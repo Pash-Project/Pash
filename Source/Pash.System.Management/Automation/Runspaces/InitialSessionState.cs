@@ -1,4 +1,4 @@
-﻿// Copyright (C) Pash Contributors. License GPL/BSD. See https://github.com/Pash-Project/Pash/
+// Copyright (C) Pash Contributors. License GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,10 +12,12 @@ namespace System.Management.Automation.Runspaces
     {
         PSLanguageMode langmode;
         InitialSessionStateEntryCollection<SessionStateCommandEntry> sessionstatentry;
+        InitialSessionStateEntryCollection<SessionStateProviderEntry> sessionstatprovider;
 
         protected InitialSessionState()
         {
             sessionstatentry = new InitialSessionStateEntryCollection<SessionStateCommandEntry>();
+            sessionstatprovider = new InitialSessionStateEntryCollection<SessionStateProviderEntry>();
         }
 
         #region Properties
@@ -104,7 +106,7 @@ namespace System.Management.Automation.Runspaces
         {
             get
             {
-                throw new NotImplementedException();
+                return sessionstatprovider;
             }
         }
 
