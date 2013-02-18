@@ -6,11 +6,6 @@ namespace Microsoft.PowerShell.Commands
 {
     public class DriveMatchingCoreCommandBase : CoreCommandBase
     {
-        public DriveMatchingCoreCommandBase()
-        {
-
-        }
-
         internal List<PSDriveInfo> GetDrivesByName(string driveName, string[] providerNames)
         {
             List<PSDriveInfo> list = new List<PSDriveInfo>();
