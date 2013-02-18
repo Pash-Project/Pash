@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
+using System.Linq;
 using System.Text;
 
 namespace Pash.Implementation
@@ -70,12 +71,7 @@ namespace Pash.Implementation
             // Write the final result to the output pipeline
             context.outputStreamWriter.Write(dataCollection, true);
 
-            object[] dataResult = new object[dataCollection.Count];
-            int index = 0;
-            foreach (PSObject obj in dataCollection)
-                dataResult[index++] = obj;
-
-            return dataResult;
+            return dataCollection.Cast<object>().ToArray();
         }
     }
 }
