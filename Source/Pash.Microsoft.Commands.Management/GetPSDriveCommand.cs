@@ -51,8 +51,6 @@ namespace Microsoft.PowerShell.Commands
                     }
                 }
             }
-
         }
     }
-
 }

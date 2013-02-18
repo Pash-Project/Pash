@@ -29,6 +29,5 @@ namespace Microsoft.PowerShell.Commands
                 InputObjects.Add(InputObject);
             }
         }
-
     }
 }

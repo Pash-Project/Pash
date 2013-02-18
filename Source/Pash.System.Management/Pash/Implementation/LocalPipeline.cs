@@ -133,7 +133,6 @@ namespace Pash.Implementation
 
                 commandProcessor.Initialize();
                 processor.Add(commandProcessor);
-
             }
 
             // TODO: add a default out-command to the pipeline
