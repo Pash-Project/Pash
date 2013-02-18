@@ -266,7 +266,7 @@ ls
                 Assert.IsNull(variablePath.DriveName);
             }
 
-            [Test, Ignore]
+            [Test, Explicit]
             public void Dollar()
             {
                 VariablePath variablePath = ParseInput("$$").
@@ -289,10 +289,10 @@ ls
             }
         }
 
-        [TestFixture]
+        [TestFixture, Explicit]
         class ScriptBlockTests
         {
-            [Test, Ignore]
+            [Test, Explicit]
             public void Empty()
             {
                 ScriptBlockAst scriptBlockAst = ParseInput("{}").
@@ -306,7 +306,7 @@ ls
                 Assert.AreEqual(0, scriptBlockAst.EndBlock.Statements.Count);
             }
 
-            [Test, Ignore]
+            [Test, Explicit]
             public void Param()
             {
                 ScriptBlockAst scriptBlockAst = ParseInput("{ param ([string]$s) }").
@@ -320,7 +320,7 @@ ls
                 Assert.AreEqual(0, scriptBlockAst.EndBlock.Statements.Count);
             }
 
-            [Test, Ignore]
+            [Test, Explicit]
             public void Statement()
             {
                 ScriptBlockAst scriptBlockAst = ParseInput("{ Get-ChildItem }").
@@ -334,7 +334,7 @@ ls
                 Assert.AreEqual(1, scriptBlockAst.EndBlock.Statements.Count);
             }
 
-            [Test, Ignore]
+            [Test, Explicit]
             public void ParamAndStatement()
             {
                 ScriptBlockAst scriptBlockAst = ParseInput("{ param ([string]$s) Get-ChildItem }").
@@ -372,7 +372,7 @@ ls
             ParseInput("'abc' [2]");
         }
 
-        [Test, Ignore]
+        [Test, Explicit]
         public void MemberAccess()
         {
             MemberExpressionAst memberExpressionAst = ParseInput("[System.Int32]::MaxValue")
@@ -382,7 +382,7 @@ ls
                 .Expression;
         }
 
-        [Test, ExpectedException(typeof(PowerShellGrammar.ParseException)), Ignore]
+        [Test, ExpectedException(typeof(PowerShellGrammar.ParseException))]
         public void BadMemberAccess()
         {
             // The language spec says this space is prohibited.
@@ -545,7 +545,7 @@ ls
                 Assert.AreEqual("'PS> '", this._stringConstantExpressionAst.Extent.Text);
             }
 
-            [Test, Ignore("I don't know why this test fails & makes NUnit hang")]
+            [Test, Explicit("I don't know why this test fails & makes NUnit hang")]
             public void Parent()
             {
                 Assert.AreEqual(this._commandExpressionAst, this._stringConstantExpressionAst.Parent);
@@ -573,7 +573,7 @@ ls
                 Assert.AreEqual(1, this._constantExpressionAst.Value);
             }
 
-            [Test, Ignore]
+            [Test]
             public void StaticType()
             {
                 Assert.AreEqual(typeof(int), this._constantExpressionAst.StaticType);
@@ -628,7 +628,7 @@ ls
             Assert.AreEqual(1, rightValue.Value);
         }
 
-        [Test, Ignore("disabled because it requires an extension to Irony that is incompatable with Irony's GrammarExplorer")]
+        [Test, Explicit("disabled because it requires an extension to Irony that is incompatable with Irony's GrammarExplorer")]
         public void NewlineContinuationTest()
         {
             var expression = ParseInput(
@@ -716,7 +716,7 @@ ls
             Assert.AreEqual(10, right.Value);
         }
 
-        [Test, Ignore]
+        [Test, Explicit]
         public void UnaryMinusTest()
         {
             ////    7.2.5 Unary minus
@@ -726,6 +726,7 @@ ls
             ////    -$true         # type int, value -1
             ////    -123L          # type long, value -123
             ////    -0.12340D      # type decimal, value -0.12340
+            Assert.Fail("test not yet implemented");
         }
 
 

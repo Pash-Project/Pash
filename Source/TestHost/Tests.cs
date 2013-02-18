@@ -93,7 +93,7 @@ namespace TestHost
             StringAssert.AreEqualIgnoringCase("$x = y\r\ny\r\n", TestHost.Execute("$x = 'y'", "$x"));
         }
 
-        [Test, Ignore("correct behavior")]
+        [Test, Explicit("correct behavior")]
         public void WriteVariableTestCorrect()
         {
             StringAssert.AreEqualIgnoringCase("\r\n", TestHost.Execute("$x = 'y'"));
@@ -172,7 +172,7 @@ namespace TestHost
             ////    "0xf".."0xa"        # descending range 15..10           
         }
 
-        [Test, Ignore("bug")]
+        [Test, Explicit("bug")]
         public void JaggedArrayTest()
         {
             // This should make a 2-element array, where the 2nd element is itself an array.

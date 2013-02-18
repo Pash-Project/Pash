@@ -43,7 +43,7 @@ namespace ParserTests
             }
         }
 
-        [Test, Ignore("bug")]
+        [Test, Explicit("bug")]
         public void IfElseIfElseTest()
         {
             var parseTree = PowerShellGrammar.Parser.Parse(@"if ($true) {} elseif {$true) {} else {}");
@@ -55,7 +55,7 @@ namespace ParserTests
         }
 
 
-        [Test, Ignore("bug")]
+        [Test, Explicit("bug")]
         public void IfElseifElseTest()
         {
             var parseTree = PowerShellGrammar.Parser.Parse(@"if ($true) {} elseif ($true) {} elseif ($true) else {}");
