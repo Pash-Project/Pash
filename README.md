@@ -8,7 +8,7 @@ An Open Source reimplementation of Windows PowerShell.
 License
 -------
 
-The original release of Pash in 2008 didn't include a LICENSE or COPYING file, or other indication of license. However, at https://sourceforge.net/projects/pash/ it says:
+The original release of Pash in 2008 didn't include a LICENSE or COPYING file, or other indication of license. However, at [https://sourceforge.net/projects/pash/](http://web.archive.org/web/20121111142027/http://sourceforge.net/projects/pash/) it says:
 
 > License
 > BSD License, GNU General Public License (GPL)
