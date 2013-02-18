@@ -5,6 +5,7 @@ using System.Management.Automation;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Extensions.Queue;
+using Extensions.Reflection;
 
 namespace System.Management.Automation.Language
 {
@@ -64,7 +65,7 @@ namespace System.Management.Automation.Language
         {
             var dispatchMethodInfos = from dmi in astVisitor.GetType().GetMethods()
                                       where dmi.Name.StartsWith("Visit")
-                                      where dmi.GetParameters()[0].ParameterType.IsAssignableFrom(nextItem.GetType())
+                                      where dmi.GetParameters()[0].ParameterType.IsAssignableFrom(nextItem)
                                       select dmi;
 
             if (dispatchMethodInfos.Any())

@@ -13,6 +13,9 @@ namespace Extensions.Reflection
             return (T)fieldInfo.GetValue(obj);
         }
 
-
+        public static bool IsAssignableFrom<T>(this Type @this, T t)
+        {
+            return @this.IsAssignableFrom(t.GetType());
+        }
     }
 }
