@@ -119,9 +119,6 @@ namespace Pash.Implementation
             // TODO: implement script execution
             foreach (Command command in Commands)
             {
-                if (string.IsNullOrEmpty(command.CommandText))
-                    continue;
-
                 CommandProcessorBase commandProcessor;
 
                 try
