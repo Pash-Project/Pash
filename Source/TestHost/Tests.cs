@@ -181,5 +181,11 @@ namespace TestHost
             Assert.AreEqual(2, result);
         }
 
+        [Test, Description("https://github.com/JayBazuzi/Pash2/issues/6"), Explicit("bug")]
+        public void UnrecognizedCommandBug()
+        {
+            // notice typo
+            TestHost.Execute("Get-ChlidItem");
+        }
     }
 }
