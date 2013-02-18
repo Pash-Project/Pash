@@ -3,6 +3,8 @@ Pash2
 
 An Open Source reimplementation of Windows PowerShell.
 
+<a href='http://www.pledgie.com/campaigns/19268'><img alt='Click here to lend your support to: Pash - The Open Source PowerShell for Mono and make a donation at www.pledgie.com.' src='http://www.pledgie.com/campaigns/19268.png?skin_name=chrome' border='0' /></a>
+
 License
 -------
 
