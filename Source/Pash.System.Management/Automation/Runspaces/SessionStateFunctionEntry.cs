@@ -7,11 +7,14 @@ namespace System.Management.Automation.Runspaces
 {
     public sealed class SessionStateFunctionEntry : SessionStateCommandEntry
     {
+        private string definition;
+        private ScopedItemOptions options;
+
         public string Definition
         {
             get
             {
-                throw new NotImplementedException();
+                return definition;
             }
         }
 
@@ -19,20 +22,23 @@ namespace System.Management.Automation.Runspaces
         {
             get
             {
-                throw new NotImplementedException();
+                return options;
             }
         }
 
         public SessionStateFunctionEntry(string name, string definition, ScopedItemOptions options)
             : base(name, SessionStateEntryVisibility.Public)
         {
-            throw new NotImplementedException();
+            this.commandType = CommandTypes.Function;
+            this.definition = definition;
+            this.options = options;
         }
 
         public SessionStateFunctionEntry(string name, string definition)
             : base(name)
         {
-            throw new NotImplementedException();
+            this.commandType = CommandTypes.Function;
+            this.definition = definition;
         }
 
         public override InitialSessionStateEntry Clone()
