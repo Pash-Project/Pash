@@ -114,7 +114,7 @@ namespace Pash.Implementation
             ExecutionContext context = _runspace.ExecutionContext.Clone();
             RerouteExecutionContext(context);
 
-            PipelineProcessor processor = new PipelineProcessor();
+            PipelineProcessor pipelineProcessor = new PipelineProcessor();
 
             // TODO: implement script execution
             foreach (Command command in Commands)
@@ -132,7 +132,7 @@ namespace Pash.Implementation
                 }
 
                 commandProcessor.Initialize();
-                processor.Add(commandProcessor);
+                pipelineProcessor.Add(commandProcessor);
             }
 
             // TODO: add a default out-command to the pipeline
@@ -141,7 +141,7 @@ namespace Pash.Implementation
             SetPipelineState(PipelineState.Running);
             try
             {
-                processor.Execute(context);
+                pipelineProcessor.Execute(context);
                 SetPipelineState(PipelineState.Completed);
             }
             catch (Exception ex)
