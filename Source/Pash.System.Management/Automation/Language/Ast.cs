@@ -15,6 +15,24 @@ namespace System.Management.Automation.Language
         {
             return new ReadOnlyCollection<T>(new List<T>(source ?? new T[] { }));
         }
+
+        public static AstVisitAction Visit(this AstVisitor astVisitor, Ast ast)
+        {
+            var dispatchMethodInfos = from dmi in astVisitor.GetType().GetMethods()
+                                      where dmi.Name.StartsWith("Visit")
+                                      where dmi.GetParameters()[0].ParameterType.IsAssignableFrom(ast)
+                                      select dmi;
+
+            // TODO: Find out what PowerShell does when there's more than one match.
+            //
+            // e.g., `StringConstantExpression` is also a `ConstantExpression`
+            if (dispatchMethodInfos.Any())
+            {
+                return (AstVisitAction)dispatchMethodInfos.First().Invoke(astVisitor, new[] { ast });
+            }
+
+            else throw new InvalidOperationException(ast.ToString());
+        }
     }
 
     public abstract class Ast
@@ -40,13 +58,13 @@ namespace System.Management.Automation.Language
 
             while (queue.Any())
             {
-                var nextItem = queue.Dequeue();
-                AstVisitAction astVisitAction = DispatchVisitor(astVisitor, nextItem);
+                var nextAst = queue.Dequeue();
+                AstVisitAction astVisitAction = astVisitor.Visit(nextAst);
 
                 switch (astVisitAction)
                 {
                     case AstVisitAction.Continue:
-                        queue.EnqueueAll(nextItem.Children);
+                        queue.EnqueueAll(nextAst.Children);
                         break;
 
                     case AstVisitAction.SkipChildren:
@@ -59,21 +77,6 @@ namespace System.Management.Automation.Language
                         throw new InvalidOperationException(astVisitAction.ToString());
                 }
             }
-        }
-
-        static AstVisitAction DispatchVisitor(AstVisitor astVisitor, Ast nextItem)
-        {
-            var dispatchMethodInfos = from dmi in astVisitor.GetType().GetMethods()
-                                      where dmi.Name.StartsWith("Visit")
-                                      where dmi.GetParameters()[0].ParameterType.IsAssignableFrom(nextItem)
-                                      select dmi;
-
-            if (dispatchMethodInfos.Any())
-            {
-                return (AstVisitAction)dispatchMethodInfos.First().Invoke(astVisitor, new[] { nextItem });
-            }
-
-            else throw new InvalidOperationException(nextItem.ToString());
         }
 
         public object Visit(ICustomAstVisitor astVisitor)
