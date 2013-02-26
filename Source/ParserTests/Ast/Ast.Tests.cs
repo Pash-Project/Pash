@@ -15,6 +15,12 @@ namespace ParserTests
     [TestFixture]
     class AstTests
     {
+        [Test, Description("I once wrote the `label` rule as as `foo:`, which broke this")]
+        public void ScriptPathWithColon()
+        {
+            ParseInput(@"C:\foo.ps1");
+        }
+
         [Test]
         public void IfEmptyStatementTest()
         {

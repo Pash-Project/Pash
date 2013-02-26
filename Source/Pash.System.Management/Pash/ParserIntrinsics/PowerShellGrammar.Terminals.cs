@@ -738,7 +738,7 @@ namespace Pash.ParserIntrinsics
 
         // this appears to be missing from the language spec
         public readonly RegexBasedTerminal label = null; // Initialized by reflection
-        const string label_pattern = "(?<label>" + simple_name_pattern + @"\:" + ")";
+        const string label_pattern = "(?<label>" + @"\:" + simple_name_pattern + ")";
 
     }
 }
