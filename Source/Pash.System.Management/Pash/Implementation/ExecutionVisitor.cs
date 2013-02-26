@@ -164,18 +164,7 @@ namespace System.Management.Pash.Implementation
             // the first CommandElements is the command itself. The rest are parameters/arguments
             foreach (var commandElement in commandAst.CommandElements.Skip(1))
             {
-                var commandParameterAst = commandElement as CommandParameterAst;
-                var stringConstantExpressionAst = commandElement as StringConstantExpressionAst;
-
-                if (commandParameterAst != null)
-                {
-                    commandParameters.Add(new CommandParameter(commandParameterAst.ParameterName, commandParameterAst.Argument));
-                }
-
-                else if (stringConstantExpressionAst != null)
-                {
-                    commandParameters.Add(new CommandParameter(null, stringConstantExpressionAst.Value));
-                }
+                commandParameters.Add(ConvertCommandElementToCommandParameter(commandElement));
             }
 
             commandParameters.ForEach(commandParameter => command.Parameters.Add(commandParameter));
@@ -197,6 +186,24 @@ namespace System.Management.Pash.Implementation
             }
 
             return AstVisitAction.SkipChildren;
+        }
+
+        static CommandParameter ConvertCommandElementToCommandParameter(CommandElementAst commandElement)
+        {
+            var commandParameterAst = commandElement as CommandParameterAst;
+            var stringConstantExpressionAst = commandElement as StringConstantExpressionAst;
+
+            if (commandParameterAst != null)
+            {
+                return new CommandParameter(commandParameterAst.ParameterName, commandParameterAst.Argument);
+            }
+
+            else if (stringConstantExpressionAst != null)
+            {
+                return new CommandParameter(null, stringConstantExpressionAst.Value);
+            }
+
+            else throw new NotImplementedException();
         }
 
         Command GetCommand(CommandAst commandAst)
