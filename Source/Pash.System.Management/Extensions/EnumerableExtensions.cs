@@ -17,5 +17,10 @@ namespace Extensions.Enumerable
 
             yield return end;
         }
+
+        internal static void ForEach<T>(this IEnumerable<T> @this, Action<T> action)
+        {
+            foreach (var item in @this) action(item);
+        }
     }
 }
