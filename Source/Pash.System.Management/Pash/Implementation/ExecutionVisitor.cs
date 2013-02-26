@@ -8,6 +8,7 @@ using System.Management.Automation;
 using System.Reflection;
 using System.Management.Automation.Runspaces;
 using System.Collections;
+using Extensions.Enumerable;
 
 namespace System.Management.Pash.Implementation
 {
@@ -159,15 +160,13 @@ namespace System.Management.Pash.Implementation
             pipeline.Input.Write(this._context.inputStreamReader.ReadToEnd(), true);
 
             var command = GetCommand(commandAst);
-            List<CommandParameter> commandParameters = new List<CommandParameter>();
 
-            // the first CommandElements is the command itself. The rest are parameters/arguments
-            foreach (var commandElement in commandAst.CommandElements.Skip(1))
-            {
-                commandParameters.Add(ConvertCommandElementToCommandParameter(commandElement));
-            }
+            commandAst.CommandElements
+                // the first CommandElements is the command itself. The rest are parameters/arguments
+                .Skip(1)
+                .Select(ConvertCommandElementToCommandParameter)
+                .ForEach(command.Parameters.Add);
 
-            commandParameters.ForEach(commandParameter => command.Parameters.Add(commandParameter));
             pipeline.Commands.Add(command);
 
             this._context.PushPipeline(pipeline);
