@@ -114,6 +114,32 @@ namespace Pash.Implementation
             ExecutionContext context = _runspace.ExecutionContext.Clone();
             RerouteExecutionContext(context);
 
+            PipelineProcessor pipelineProcessor = BuildPipelineProcessor(context);
+            if (pipelineProcessor == null) return null;
+
+            // TODO: add a default out-command to the pipeline
+            // TODO: it should do the "foreach read from pipe and out via formatter"
+
+            SetPipelineState(PipelineState.Running);
+            try
+            {
+                pipelineProcessor.Execute(context);
+                SetPipelineState(PipelineState.Completed);
+            }
+            catch (Exception ex)
+            {
+                SetPipelineState(PipelineState.Failed, ex);
+
+                ((LocalRunspace)_runspace).PSHost.UI.WriteErrorLine(ex.Message);
+            }
+
+            // TODO: process Error results
+
+            return Output.NonBlockingRead();
+        }
+
+        PipelineProcessor BuildPipelineProcessor(ExecutionContext context)
+        {
             PipelineProcessor pipelineProcessor = new PipelineProcessor();
 
             // TODO: implement script execution
@@ -135,25 +161,7 @@ namespace Pash.Implementation
                 pipelineProcessor.Add(commandProcessor);
             }
 
-            // TODO: add a default out-command to the pipeline
-            // TODO: it should do the "foreach read from pipe and out via formatter"
-
-            SetPipelineState(PipelineState.Running);
-            try
-            {
-                pipelineProcessor.Execute(context);
-                SetPipelineState(PipelineState.Completed);
-            }
-            catch (Exception ex)
-            {
-                SetPipelineState(PipelineState.Failed, ex);
-
-                ((LocalRunspace)_runspace).PSHost.UI.WriteErrorLine(ex.Message);
-            }
-
-            // TODO: process Error results
-
-            return Output.NonBlockingRead();
+            return pipelineProcessor;
         }
 
         internal void RerouteExecutionContext(ExecutionContext context)
