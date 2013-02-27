@@ -167,7 +167,7 @@ namespace Pash.Implementation
 
                 if (commandInfo == null)
                 {
-                    if (File.Exists(cmdName))
+                    if (File.Exists(cmdName) && Path.GetExtension(cmdName) == ".ps1")
                     {
                         // I think we should be using a ScriptFile parser, but this will do for now.
                         commandInfo = new ScriptInfo(cmdName, new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(File.ReadAllText(cmdName))));
