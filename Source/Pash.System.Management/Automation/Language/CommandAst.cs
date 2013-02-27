@@ -40,5 +40,9 @@ namespace System.Management.Automation.Language
             }
         }
 
+        public override string ToString()
+        {
+            return "> " + this.CommandElements.First().ToString();
+        }
     }
 }
