@@ -13,7 +13,14 @@ namespace TestHost
 
         public static string Execute(params string[] statements)
         {
+            return Execute(false, statements);
+        }
+
+        public static string Execute(bool logErrors, params string[] statements)
+        {
             TestHostUserInterface ui = new TestHostUserInterface();
+
+            if (logErrors) ui.OnWriteErrorLineString = s => ui.Log.Append(s);
 
             TestHost host = new TestHost(ui);
             var myRunSpace = RunspaceFactory.CreateRunspace(host);
