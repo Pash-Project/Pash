@@ -156,6 +156,12 @@ namespace Pash.Implementation
                     _runspace.PSHost.UI.WriteErrorLine("parse error at " + exception.LogMessage.Location.ToUiString());
                     return null;
                 }
+                catch (Exception exception)
+                {
+                    _runspace.PSHost.UI.WriteErrorLine(exception.Message);
+                    return null;
+                }
+
 
                 commandProcessor.Initialize();
                 pipelineProcessor.Add(commandProcessor);

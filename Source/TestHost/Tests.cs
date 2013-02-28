@@ -199,11 +199,13 @@ namespace TestHost
             Assert.AreEqual(2, result);
         }
 
-        [Test, Description("https://github.com/JayBazuzi/Pash2/issues/6"), Explicit("bug")]
+        [Test, Description("https://github.com/JayBazuzi/Pash2/issues/6")]
         public void UnrecognizedCommandBug()
         {
             // notice typo
-            TestHost.Execute("Get-ChlidItem");
+            var result = TestHost.Execute(true, "Get-ChlidItem");
+
+            Assert.AreEqual("Command 'Get-ChlidItem' not found.", result);
         }
     }
 }
