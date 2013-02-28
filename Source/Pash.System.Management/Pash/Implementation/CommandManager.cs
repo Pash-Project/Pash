@@ -10,6 +10,7 @@ using Pash.Implementation;
 using Pash.ParserIntrinsics;
 using Irony.Parsing;
 using System.IO;
+using System.Management.Automation.Language;
 
 namespace Pash.Implementation
 {
@@ -119,69 +120,65 @@ namespace Pash.Implementation
             }
         }
 
-        public CommandInfo GetCommandInfo(string commandName)
-        {
-            // TODO: there can be more than one CmdLet with the same name
-            CommandInfo commandInfo = null;
-
-            if (commandInfo == null)
-            {
-                throw new CommandNotFoundException(commandName, null, "CommandNotFoundException", new object[0]);
-            }
-
-            return commandInfo;
-        }
-
         public CommandProcessorBase CreateCommandProcessor(Command command)
         {
             string cmdName = command.CommandText;
 
             CommandInfo commandInfo = null;
 
-            if (!command.IsScript)
-            {
-                // check aliases
-                if (_aliases.ContainsKey(cmdName))
-                {
-                    var aliasInfo = _aliases[cmdName];
-                    commandInfo = aliasInfo.ReferencedCommand;
-                }
-
-                if (commandInfo == null)
-                {
-                    if (_cmdLets.ContainsKey(cmdName))
-                    {
-                        var cmdletInfoList = _cmdLets[cmdName];
-                        if ((cmdletInfoList != null) && (cmdletInfoList.Count > 0))
-                            commandInfo = cmdletInfoList[0];
-                    }
-                }
-
-                if (commandInfo == null)
-                {
-                    if (_scripts.ContainsKey(cmdName))
-                    {
-                        commandInfo = _scripts[cmdName];
-                    }
-                }
-
-                if (commandInfo == null)
-                {
-                    if (File.Exists(cmdName) && Path.GetExtension(cmdName) == ".ps1")
-                    {
-                        // I think we should be using a ScriptFile parser, but this will do for now.
-                        commandInfo = new ScriptInfo(cmdName, new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(File.ReadAllText(cmdName))));
-                    }
-                }
-            }
-            else
+            if (command.IsScript)
             {
                 // TODO: take care of the script commands
+                throw new NotImplementedException(this.ToString());
+            }
+
+            if (commandInfo == null && _aliases.ContainsKey(cmdName))
+            {
+                commandInfo = _aliases[cmdName].ReferencedCommand;
+            }
+
+            if (commandInfo == null && _cmdLets.ContainsKey(cmdName))
+            {
+                commandInfo = _cmdLets[cmdName].First();
+            }
+
+            if (commandInfo == null && _scripts.ContainsKey(cmdName))
+            {
+                commandInfo = _scripts[cmdName];
             }
 
             // TODO: if the command wasn't found should we treat is as a Script?
             if (commandInfo == null)
-                commandInfo = new ScriptInfo("", new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(command.CommandText)));
+            {
+                var parseTree = PowerShellGrammar.ParseInteractiveInput(command.CommandText);
+                var statements = parseTree.EndBlock.Statements;
+                if (statements.Count == 1 && statements.Single() is PipelineAst)
+                {
+                    var pipelineAst = statements.Single() as PipelineAst;
+                    if (pipelineAst.PipelineElements.Count == 1 && pipelineAst.PipelineElements.Single() is CommandAst)
+                    {
+                        var commandAst = pipelineAst.PipelineElements.Single() as CommandAst;
+                        if (commandAst.CommandElements.Count == 1 && commandAst.CommandElements.Single() is StringConstantExpressionAst)
+                        {
+                            var stringAst = commandAst.CommandElements.Single() as StringConstantExpressionAst;
+
+                            if (File.Exists(stringAst.Value) && Path.GetExtension(stringAst.Value) == ".ps1")
+                            {
+                                // I think we should be using a ScriptFile parser, but this will do for now.
+                                commandInfo = new ScriptInfo(stringAst.Value, new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(File.ReadAllText(stringAst.Value))));
+                            }
+
+                            else
+                            {
+                                throw new Exception(string.Format("Command '{0}' not found.", cmdName));
+                            }
+                        }
+                    }
+                }
+
+                if (commandInfo == null)
+                    commandInfo = new ScriptInfo("", new ScriptBlock(parseTree));
+            }
 
             if (commandInfo != null)
             {
@@ -199,7 +196,7 @@ namespace Pash.Implementation
                 }
             }
 
-            throw new Exception(string.Format("Command {0} not found.", cmdName));
+            throw new Exception(string.Format("Command '{0}' not found.", cmdName));
         }
 
         internal CommandInfo FindCommand(string command)

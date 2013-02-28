@@ -9,6 +9,8 @@ namespace TestHost
 {
     class TestHostUserInterface : PSHostUserInterface
     {
+        public Action<string> OnWriteErrorLineString = delegate(string s) { Assert.Fail(s); };
+
         public override PSHostRawUserInterface RawUI
         {
             get { throw new NotImplementedException(); }
@@ -63,7 +65,7 @@ namespace TestHost
 
         public override void WriteErrorLine(string value)
         {
-            Assert.Fail(value);
+            this.OnWriteErrorLineString(value);
         }
 
         public override void WriteLine(string value)
