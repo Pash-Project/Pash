@@ -126,37 +126,35 @@ namespace Pash.Implementation
 
             CommandInfo commandInfo = null;
 
-            if (!command.IsScript)
-            {
-                // check aliases
-                if (_aliases.ContainsKey(cmdName))
-                {
-                    var aliasInfo = _aliases[cmdName];
-                    commandInfo = aliasInfo.ReferencedCommand;
-                }
-
-                if (commandInfo == null)
-                {
-                    if (_cmdLets.ContainsKey(cmdName))
-                    {
-                        var cmdletInfoList = _cmdLets[cmdName];
-                        if ((cmdletInfoList != null) && (cmdletInfoList.Count > 0))
-                            commandInfo = cmdletInfoList[0];
-                    }
-                }
-
-                if (commandInfo == null)
-                {
-                    if (_scripts.ContainsKey(cmdName))
-                    {
-                        commandInfo = _scripts[cmdName];
-                    }
-                }
-            }
-            else
+            if (command.IsScript)
             {
                 // TODO: take care of the script commands
                 throw new NotImplementedException(this.ToString());
+            }
+
+            // check aliases
+            if (_aliases.ContainsKey(cmdName))
+            {
+                var aliasInfo = _aliases[cmdName];
+                commandInfo = aliasInfo.ReferencedCommand;
+            }
+
+            if (commandInfo == null)
+            {
+                if (_cmdLets.ContainsKey(cmdName))
+                {
+                    var cmdletInfoList = _cmdLets[cmdName];
+                    if ((cmdletInfoList != null) && (cmdletInfoList.Count > 0))
+                        commandInfo = cmdletInfoList[0];
+                }
+            }
+
+            if (commandInfo == null)
+            {
+                if (_scripts.ContainsKey(cmdName))
+                {
+                    commandInfo = _scripts[cmdName];
+                }
             }
 
             // TODO: if the command wasn't found should we treat is as a Script?
