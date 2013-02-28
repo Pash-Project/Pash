@@ -41,7 +41,6 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Automation\ ValidateEnumeratedArgumentsAttribute.cs" />
     <Compile Include="Automation\AliasAttribute.cs" />
     <Compile Include="Automation\AliasInfo.cs" />
     <Compile Include="Automation\AllowEmptyCollectionAttribute.cs" />
@@ -252,6 +251,7 @@
     <Compile Include="Automation\ShouldProcessReason.cs" />
     <Compile Include="Automation\SwitchParameter.cs" />
     <Compile Include="Automation\ValidateArgumentsAttribute.cs" />
+    <Compile Include="Automation\ValidateEnumeratedArgumentsAttribute.cs" />
     <Compile Include="Automation\ValidateNotNullAttribute.cs" />
     <Compile Include="Automation\ValidateNotNullOrEmptyAttribute.cs" />
     <Compile Include="Automation\ValidateRangeAttribute.cs" />
