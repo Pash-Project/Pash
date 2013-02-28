@@ -132,29 +132,19 @@ namespace Pash.Implementation
                 throw new NotImplementedException(this.ToString());
             }
 
-            // check aliases
-            if (_aliases.ContainsKey(cmdName))
+            if (commandInfo == null && _aliases.ContainsKey(cmdName))
             {
-                var aliasInfo = _aliases[cmdName];
-                commandInfo = aliasInfo.ReferencedCommand;
+                commandInfo = _aliases[cmdName].ReferencedCommand;
             }
 
-            if (commandInfo == null)
+            if (commandInfo == null && _cmdLets.ContainsKey(cmdName))
             {
-                if (_cmdLets.ContainsKey(cmdName))
-                {
-                    var cmdletInfoList = _cmdLets[cmdName];
-                    if ((cmdletInfoList != null) && (cmdletInfoList.Count > 0))
-                        commandInfo = cmdletInfoList[0];
-                }
+                commandInfo = _cmdLets[cmdName].First();
             }
 
-            if (commandInfo == null)
+            if (commandInfo == null && _scripts.ContainsKey(cmdName))
             {
-                if (_scripts.ContainsKey(cmdName))
-                {
-                    commandInfo = _scripts[cmdName];
-                }
+                commandInfo = _scripts[cmdName];
             }
 
             // TODO: if the command wasn't found should we treat is as a Script?
