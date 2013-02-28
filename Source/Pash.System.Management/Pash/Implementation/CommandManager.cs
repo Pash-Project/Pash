@@ -119,19 +119,6 @@ namespace Pash.Implementation
             }
         }
 
-        public CommandInfo GetCommandInfo(string commandName)
-        {
-            // TODO: there can be more than one CmdLet with the same name
-            CommandInfo commandInfo = null;
-
-            if (commandInfo == null)
-            {
-                throw new CommandNotFoundException(commandName, null, "CommandNotFoundException", new object[0]);
-            }
-
-            return commandInfo;
-        }
-
         public CommandProcessorBase CreateCommandProcessor(Command command)
         {
             string cmdName = command.CommandText;
