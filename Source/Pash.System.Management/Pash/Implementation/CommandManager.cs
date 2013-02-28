@@ -164,6 +164,7 @@ namespace Pash.Implementation
             else
             {
                 // TODO: take care of the script commands
+                throw new NotImplementedException(this.ToString());
             }
 
             // TODO: if the command wasn't found should we treat is as a Script?
