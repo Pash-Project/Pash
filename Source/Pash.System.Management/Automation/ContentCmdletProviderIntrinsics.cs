@@ -7,10 +7,10 @@ namespace System.Management.Automation
 {
     public sealed class ContentCmdletProviderIntrinsics
     {
-        private InternalCommand _cmdlet;
+//        private InternalCommand _cmdlet;
         internal ContentCmdletProviderIntrinsics(Cmdlet cmdlet)
         {
-            _cmdlet = cmdlet;
+//            _cmdlet = cmdlet;
         }
 
         public void Clear(string path) { throw new NotImplementedException(); }

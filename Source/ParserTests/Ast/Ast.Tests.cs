@@ -9,6 +9,7 @@ using Pash.ParserIntrinsics;
 using System.Collections;
 using System.Management.Automation;
 using System.Management.Automation.Language;
+using System.Diagnostics;
 
 namespace ParserTests
 {
@@ -110,6 +111,7 @@ ls
         public void CommandInvocationOperatorTest()
         {
             var result = ParseInput("& 'ls'");
+			Debug.WriteLine(result);
         }
 
         [Test]
@@ -133,6 +135,10 @@ ls
 
             FunctionDefinitionAst functionDefinitionAst = scriptBlockAst.EndBlock.Statements[0];
             PipelineAst pipelineAst = scriptBlockAst.EndBlock.Statements[1];
+
+			
+			Debug.WriteLine(functionDefinitionAst);
+			Debug.WriteLine(pipelineAst);
         }
 
         [Test]
@@ -386,6 +392,8 @@ ls
                 .Statements[0]
                 .PipelineElements[0]
                 .Expression;
+
+			Debug.WriteLine(memberExpressionAst);
         }
 
         [Test, ExpectedException(typeof(PowerShellGrammar.ParseException))]
@@ -645,7 +653,9 @@ ls
                 .Statements[0]
                 .PipelineElements[0]
                 .Expression;
-        }
+
+			Debug.WriteLine(expression);
+		}
 
         [Test]
         public void AdditiveExpression_AddStrings()

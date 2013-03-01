@@ -11,18 +11,18 @@ namespace Pash.Implementation
 {
     internal class ObjectPipelineReader : PipelineReader<object>
     {
-        ObjectStream _stream;
+//        ObjectStream _stream;
 
         public ObjectPipelineReader(ObjectStream stream)
             : base()
         {
-            _stream = stream;
+//            _stream = stream;
         }
 
         public ObjectPipelineReader(IEnumerable input)
             : base()
         {
-            _stream = new ObjectStream(input);
+//            _stream = new ObjectStream(input);
         }
 
         public override int Count

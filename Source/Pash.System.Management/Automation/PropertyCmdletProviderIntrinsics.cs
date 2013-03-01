@@ -6,10 +6,10 @@ namespace System.Management.Automation
 {
     public sealed class PropertyCmdletProviderIntrinsics
     {
-        private InternalCommand _cmdlet;
+//        private InternalCommand _cmdlet;
         internal PropertyCmdletProviderIntrinsics(Cmdlet cmdlet)
         {
-            _cmdlet = cmdlet;
+//            _cmdlet = cmdlet;
         }
 
         public void Clear(string path, Collection<string> propertyToClear) { throw new NotImplementedException(); }

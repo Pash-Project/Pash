@@ -6,10 +6,10 @@ namespace System.Management.Automation
 {
     public sealed class ItemCmdletProviderIntrinsics
     {
-        private InternalCommand _cmdlet;
+//        private InternalCommand _cmdlet;
         internal ItemCmdletProviderIntrinsics(Cmdlet cmdlet)
         {
-            _cmdlet = cmdlet;
+//            _cmdlet = cmdlet;
         }
 
         public Collection<PSObject> Clear(string path) { throw new NotImplementedException(); }

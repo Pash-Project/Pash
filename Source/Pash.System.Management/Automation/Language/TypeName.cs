@@ -8,11 +8,11 @@ namespace System.Management.Automation.Language
 {
     public class TypeName : ITypeName
     {
-        readonly Type Type;
+//        readonly Type Type;
 
         public TypeName(Type type)
         {
-            this.Type = type;
+//            this.Type = type;
         }
 
         public TypeName(string name)
