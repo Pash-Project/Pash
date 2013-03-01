@@ -16,9 +16,10 @@ How to get up and going!
 
     git clone (this repo?)
 	cd Pash2
-	./build.sh
+	xbuild Source/Pash.sln
 
-- Now ???WHAT???
+- TODO: what to do next? (somehow we need to get to a console or point
+  to some docs on how to execute powershell (console/scripts etc)
 
 License
 -------
