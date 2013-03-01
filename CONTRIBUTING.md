@@ -1,7 +1,17 @@
 Contributing to Pash
 ==============================
 
-I'm so grateful that anyone would consider helping improve Pash. Thanks! --JayBazuzi
+I'm so grateful that anyone would consider helping improve Pash. Thanks!
+
+If you like Pash and want to express your gratitude, you could:
+
+- Contribute code to Pash.
+- Contribute to some other open source project.
+- Edit Wikipedia.
+- Create art, music, architecture, boat plans, whatever, and release it under Creative Commons.
+- Volunteer in your community.
+- Give free hugs!
+- [Send money.](http://pledgie.com/campaigns/19268) But really, please do the stuff listed above first. 
 
 Building Pash
 ----
