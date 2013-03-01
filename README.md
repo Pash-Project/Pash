@@ -5,6 +5,21 @@ An Open Source reimplementation of Windows PowerShell.
 
 <a href='http://www.pledgie.com/campaigns/19268'><img alt='Click here to lend your support to: Pash - The Open Source PowerShell for Mono and make a donation at www.pledgie.com.' src='http://www.pledgie.com/campaigns/19268.png?skin_name=chrome' border='0' /></a>
 
+How to get up and going!
+------------------------
+
+### Mac
+
+- Download and install
+[Mono](http://www.go-mono.com/mono-downloads/download.html)
+- Execute the following steps in a Terminal
+
+    git clone (this repo?)
+	cd Pash2
+	./build.sh
+
+- Now ???WHAT???
+
 License
 -------
 
