@@ -30,7 +30,13 @@ namespace Microsoft.PowerShell.Commands.Utility
             {
                 writeAction(ForegroundColor, BackgroundColor, "");
             }
+
+			//TODO look for a mono-only pre-compiler #if flag and wrap this
+#if __MonoCS__
+			else if (Object.BaseObject.GetType() == typeof(Enumerable))
+#else
             else if (Object.BaseObject is Enumerable)
+#endif
             {
                 throw new NotImplementedException();
             }
