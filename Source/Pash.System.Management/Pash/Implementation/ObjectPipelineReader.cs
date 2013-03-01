@@ -60,7 +60,7 @@ namespace Pash.Implementation
 
         public override Collection<object> NonBlockingRead()
         {
-            Collection<object> c = new Collection<object>();
+            //Collection<object> c = new Collection<object>();
 
             throw new NotImplementedException();
         }

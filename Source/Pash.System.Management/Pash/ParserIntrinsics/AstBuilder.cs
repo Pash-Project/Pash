@@ -301,8 +301,6 @@ namespace Pash.ParserIntrinsics
                 clauses,
                 elseClause
                 );
-
-            throw new NotImplementedException(parseTreeNode.ToString());
         }
 
         Tuple<PipelineBaseAst, StatementBlockAst> BuildIfStatementClauseAst(ParseTreeNode parseTreeNode)
