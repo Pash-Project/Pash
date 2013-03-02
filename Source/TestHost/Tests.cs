@@ -13,50 +13,50 @@ namespace TestHost
         [Test]
         public void TrueTest()
         {
-            StringAssert.AreEqualIgnoringCase("True\r\n", TestHost.Execute("$true"));
+            StringAssert.AreEqualIgnoringCase("True"+Environment.NewLine, TestHost.Execute("$true"));
         }
 
         [Test]
         public void IfTrueTest()
         {
-            StringAssert.AreEqualIgnoringCase("xxx\r\n", TestHost.Execute("if ($true) { 'xxx' }"));
+            StringAssert.AreEqualIgnoringCase("xxx"+Environment.NewLine, TestHost.Execute("if ($true) { 'xxx' }"));
         }
 
         [Test]
         public void IfFalseTest()
         {
-            StringAssert.AreEqualIgnoringCase("yyy\r\n", TestHost.Execute("if ($false) { 'xxx' } else { 'yyy' }"));
+            StringAssert.AreEqualIgnoringCase("yyy"+Environment.NewLine, TestHost.Execute("if ($false) { 'xxx' } else { 'yyy' }"));
 
         }
         [Test]
         public void IfTest()
         {
-            StringAssert.AreEqualIgnoringCase("xxx\r\n", TestHost.Execute("if (1 -eq 1) { 'xxx' }"));
+            StringAssert.AreEqualIgnoringCase("xxx"+Environment.NewLine, TestHost.Execute("if (1 -eq 1) { 'xxx' }"));
             StringAssert.AreEqualIgnoringCase("", TestHost.Execute("if (1 -eq 2) { 'xxx' }"));
         }
 
         [Test]
         public void ElseifTest()
         {
-            StringAssert.AreEqualIgnoringCase("yyy\r\n", TestHost.Execute("if (1 -eq 2) { 'xxx' } elseif (1 -eq 1) { 'yyy' }"));
+            StringAssert.AreEqualIgnoringCase("yyy"+Environment.NewLine, TestHost.Execute("if (1 -eq 2) { 'xxx' } elseif (1 -eq 1) { 'yyy' }"));
         }
 
         [Test]
         public void ElseTest()
         {
-            StringAssert.AreEqualIgnoringCase("yyy\r\n", TestHost.Execute("if (1 -eq 2) { 'xxx' } else { 'yyy' }"));
+            StringAssert.AreEqualIgnoringCase("yyy"+Environment.NewLine, TestHost.Execute("if (1 -eq 2) { 'xxx' } else { 'yyy' }"));
         }
 
         [Test]
         public void ComparisonTest()
         {
-            StringAssert.AreEqualIgnoringCase("True\r\n", TestHost.Execute("1 -eq 1"));
+            StringAssert.AreEqualIgnoringCase("True"+Environment.NewLine, TestHost.Execute("1 -eq 1"));
         }
 
         [Test]
         public void ElementAccessTest()
         {
-            StringAssert.AreEqualIgnoringCase("b\r\n", TestHost.Execute("'abc'[1]"));
+            StringAssert.AreEqualIgnoringCase("b"+Environment.NewLine, TestHost.Execute("'abc'[1]"));
         }
 
         [Test]
@@ -66,25 +66,25 @@ namespace TestHost
             scriptPath += ".ps1";
             File.WriteAllText(scriptPath, "'xxx'");
 
-            StringAssert.AreEqualIgnoringCase("xxx\r\n", TestHost.Execute("& " + scriptPath));
+            StringAssert.AreEqualIgnoringCase("xxx"+Environment.NewLine, TestHost.Execute("& " + scriptPath));
         }
 
         [Test]
         public void AmpersandInvocationTest()
         {
-            StringAssert.AreEqualIgnoringCase("xxx\r\n", TestHost.Execute("& 'Write-Host' 'xxx'"));
+            StringAssert.AreEqualIgnoringCase("xxx"+Environment.NewLine, TestHost.Execute("& 'Write-Host' 'xxx'"));
         }
 
         [Test]
         public void FunctionTest()
         {
-            StringAssert.AreEqualIgnoringCase("xxx\r\n", TestHost.Execute("function f { 'xxx' } ; f"));
+            StringAssert.AreEqualIgnoringCase("xxx"+Environment.NewLine, TestHost.Execute("function f { 'xxx' } ; f"));
         }
 
         [Test(Description = "Issue#14")]
         public void TwoCommandsTest()
         {
-            StringAssert.AreEqualIgnoringCase("a\r\nb\r\n", TestHost.Execute("'a' ; 'b'"));
+            StringAssert.AreEqualIgnoringCase("a"+Environment.NewLine+"b"+Environment.NewLine, TestHost.Execute("'a' ; 'b'"));
         }
 
         [Test]
@@ -96,25 +96,25 @@ namespace TestHost
         [Test]
         public void SemicolonTerminatedTest()
         {
-            StringAssert.AreEqualIgnoringCase("xxx\r\n", TestHost.Execute("'xxx';"));
+            StringAssert.AreEqualIgnoringCase("xxx"+Environment.NewLine, TestHost.Execute("'xxx';"));
         }
 
         [Test]
         public void VariableTest()
         {
-            StringAssert.AreEqualIgnoringCase("variable:\\\r\n", TestHost.Execute("Set-Location variable:", "$PWD"));
+            StringAssert.AreEqualIgnoringCase("variable:\\"+Environment.NewLine, TestHost.Execute("Set-Location variable:", "$PWD"));
         }
 
         [Test]
         public void WriteVariableTest()
         {
-            StringAssert.AreEqualIgnoringCase("$x = y\r\ny\r\n", TestHost.Execute("$x = 'y'", "$x"));
+            StringAssert.AreEqualIgnoringCase("$x = y"+Environment.NewLine+"y"+Environment.NewLine, TestHost.Execute("$x = 'y'", "$x"));
         }
 
         [Test, Explicit("correct behavior")]
         public void WriteVariableTestCorrect()
         {
-            StringAssert.AreEqualIgnoringCase("\r\n", TestHost.Execute("$x = 'y'"));
+            StringAssert.AreEqualIgnoringCase(Environment.NewLine, TestHost.Execute("$x = 'y'"));
         }
 
         [Test]
@@ -126,25 +126,25 @@ namespace TestHost
         [Test]
         public void PipelineTest2()
         {
-            Assert.AreEqual("xxx\r\n", TestHost.Execute("'xxx' | Write-Host"));
+            Assert.AreEqual("xxx"+Environment.NewLine, TestHost.Execute("'xxx' | Write-Host"));
         }
 
         [Test]
         public void WriteOutputString()
         {
-            Assert.AreEqual("xxx\r\n", TestHost.Execute("Write-Output 'xxx'"));
+            Assert.AreEqual("xxx"+Environment.NewLine, TestHost.Execute("Write-Output 'xxx'"));
         }
 
         [Test]
         public void WriteHost()
         {
-            Assert.AreEqual("xxx\r\n", TestHost.Execute("Write-Host 'xxx'"));
+            Assert.AreEqual("xxx"+Environment.NewLine, TestHost.Execute("Write-Host 'xxx'"));
         }
 
         [Test]
         public void WriteHostNothing()
         {
-            Assert.AreEqual("\r\n", TestHost.Execute("Write-Host"));
+            Assert.AreEqual(Environment.NewLine, TestHost.Execute("Write-Host"));
         }
 
         [Test]
