@@ -1,0 +1,6 @@
+language: c
+
+install:
+  - sudo apt-get install mono-devel nunit-consolescript gtk-sharp
+  - xbuild Source\Pash.sln
+  - nunit-console Pash.nunit
