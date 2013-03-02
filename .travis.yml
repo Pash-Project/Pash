@@ -2,5 +2,5 @@ language: c
 
 install:
   - sudo apt-get install mono-devel gtk-sharp2
-  - xbuild Source\Pash.sln
+  - xbuild Source/Pash.sln
   - nunit-console Pash.nunit
