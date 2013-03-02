@@ -1,6 +1,6 @@
 ﻿<NUnitProject>
   <Settings activeconfig="Debug" processModel="Default" domainUsage="Default" />
-  <Config name="Debug" binpathtype="Auto" configfile="C:/Users/Jay/GitHub/Pash2/Source/TestHost/bin/Debug/TestHost.exe.config" >
+  <Config name="Debug" binpathtype="Auto" configfile="Source/TestHost/bin/Debug/TestHost.exe.config" >
     <assembly path="Source/TestHost/bin/Debug/TestHost.exe" />
     <assembly path="Source/PashGui/bin/Debug/PashGui.exe" />
     <assembly path="Source/ParserTests/bin/Debug/ParserTests.dll" />
