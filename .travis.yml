@@ -1,6 +1,10 @@
 language: c
 
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq mono-devel gtk-sharp2
+
 install:
-  - sudo apt-get install mono-devel gtk-sharp2
   - xbuild Source/Pash.sln
-  - nunit-console Pash.nunit
+  - mono Tools/NUnit-2.6.1/bin/nunit-console.exe Pash.nunit 
+
