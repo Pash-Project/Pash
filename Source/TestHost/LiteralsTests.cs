@@ -20,34 +20,34 @@ namespace TestHost
         public void AdditionExamples()
         {
             ////          12 + -10L               # long result 2
-            Assert.AreEqual("2"+Environment.NewLine, TestHost.Execute("12 + -10L"));
+            Assert.AreEqual("2" + Environment.NewLine, TestHost.Execute("12 + -10L"));
 
             ////          -10.300D + 12           # decimal result 1.700
-            Assert.AreEqual("1.700"+Environment.NewLine, TestHost.Execute("-10.300D + 12"));
+            Assert.AreEqual("1.700" + Environment.NewLine, TestHost.Execute("-10.300D + 12"));
 
             ////          10.6 + 12               # double result 22.6
-            Assert.AreEqual("22.6"+Environment.NewLine, TestHost.Execute("10.6 + 12"));
+            Assert.AreEqual("22.6" + Environment.NewLine, TestHost.Execute("10.6 + 12"));
 
             ////          12 + "0xabc"            # int result 2760
-            Assert.AreEqual("2760"+Environment.NewLine, TestHost.Execute("12 + \"0xabc\""));
+            Assert.AreEqual("2760" + Environment.NewLine, TestHost.Execute("12 + \"0xabc\""));
         }
 
         [Test]
         public void AddIntegers()
         {
-            Assert.AreEqual("3"+Environment.NewLine, TestHost.Execute("1 + 2"));
+            Assert.AreEqual("3" + Environment.NewLine, TestHost.Execute("1 + 2"));
         }
 
         [Test]
         public void ConcatStringInteger()
         {
-            Assert.AreEqual("xxx1"+Environment.NewLine, TestHost.Execute("'xxx' + 1"));
+            Assert.AreEqual("xxx1" + Environment.NewLine, TestHost.Execute("'xxx' + 1"));
         }
 
         [Test]
         public void VerbatimString()
         {
-            Assert.AreEqual("xxx"+Environment.NewLine, TestHost.Execute("'xxx'"));
+            Assert.AreEqual("xxx" + Environment.NewLine, TestHost.Execute("'xxx'"));
         }
     }
 }
