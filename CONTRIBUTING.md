@@ -13,7 +13,7 @@ If you like Pash and want to express your gratitude, you could:
 - Give free hugs!
 - [Send money.](http://pledgie.com/campaigns/19268) But really, please do the stuff listed above first. 
 
-Building Pash
+Building Pash on Windows
 ----
 
 I want it to be easy to build this project. You should be able to use:
@@ -24,7 +24,10 @@ I want it to be easy to build this project. You should be able to use:
 
 - Visual C# 2010
 
-- MonoDevelop 3.0 on Windows or Linux. (See https://github.com/JayBazuzi/Pash2/issues/16). You'll need to install gtk-sharp from http://www.go-mono.com/mono-downloads/download.html
+Building Pash on Mac or Linux
+----
+
+- MonoDevelop 3.0 on Windows or Linux. (See https://github.com/JayBazuzi/Pash2/issues/16). Follow the steps in `.travis.yml`.
 
 Make these things easy:
 ----
@@ -55,31 +58,13 @@ Make these things easy:
 Tests
 ----
 
-Tests are great! Ideally, you write a new, failing acceptance test for the bug or feature you plan to work on. Then a series of unit tests as you red/green/refactor your way to the new functionality.
+Tests are great! All tests should pass all the time. See `.travis.yml` for how to run the tests.
 
 
 Coding Style:
 ----
 
-Use the default Visual Studio formatting settings. Keep files formatted that way at all times. 4 spaces, no tabs, open brace on the next line (because that's the VS default).
-
-One type per file. Even nested types. For example:
-
-    ---- Foo.cs ----
-    public partial class Foo
-    {
-        void F() { ... }
-        // etc
-    }
-
-    ---- Foo.Bar.cs ----
-    partial class Foo
-    {
-        class Bar
-        {
-            // ...
-        }
-    }
+- Use the default Visual Studio formatting settings. Keep files formatted that way at all times. 4 spaces, no tabs, open brace on the next line (because that's the VS default).
 
 - Commit **refactorings** (which tend to modify a lot of code but hopefully don't change behavior) **separately from features/bugs** (which tend to modify less code, but deliberately introduce behavior changes). One way I like to work is to make most of my commits be refactorings, reshaping the code to make my new feature trivial to implement, followed by a single, simple commit that introduces the new behavior.
 
