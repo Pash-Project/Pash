@@ -11,7 +11,7 @@ If you like Pash and want to express your gratitude, you could:
 - Create art, music, architecture, boat plans, whatever, and release it under Creative Commons.
 - Volunteer in your community.
 - Give free hugs!
-- [Send money.](http://pledgie.com/campaigns/19268) But really, please do the stuff listed above first. 
+- If you're making money with Pash, then [send money](http://pledgie.com/campaigns/19268).
 
 Building Pash on Windows
 ----
@@ -28,6 +28,11 @@ Building Pash on Mac or Linux
 ----
 
 - MonoDevelop 3.0 on Windows or Linux. (See https://github.com/JayBazuzi/Pash2/issues/16). Follow the steps in `.travis.yml`.
+
+Travis
+----
+
+We're hooked up to Travis-CI. See https://travis-ci.org/JayBazuzi/Pash2
 
 Make these things easy:
 ----
