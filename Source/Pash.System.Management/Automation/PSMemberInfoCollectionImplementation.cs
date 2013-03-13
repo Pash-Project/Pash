@@ -7,13 +7,13 @@ namespace System.Management.Automation
     internal class PSMemberInfoCollectionImplementation<T> : PSMemberInfoCollection<T>, IEnumerable<T>, IEnumerable where T : PSMemberInfo
     {
         private Collection<PSMemberInfo> _collection;
-        private PSObject _owner;
+//        private PSObject _owner;
 
         public PSMemberInfoCollectionImplementation(object owner)
         {
             // TODO: allow to provide an owner's reference Collection<PSMemberInfo> collection
 
-            _owner = owner as PSObject;
+//            _owner = owner as PSObject;
             _collection = new Collection<PSMemberInfo>();
         }
 

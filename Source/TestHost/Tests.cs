@@ -8,7 +8,7 @@ using System.IO;
 namespace TestHost
 {
     [TestFixture]
-    class Tests
+    public class Tests
     {
         [Test]
         public void TrueTest()

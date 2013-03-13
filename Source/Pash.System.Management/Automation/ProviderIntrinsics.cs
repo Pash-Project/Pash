@@ -18,7 +18,7 @@ namespace System.Management.Automation
         // internals
         //internal ProviderIntrinsics(SessionStateInternal sessionState);
 
-        private InternalCommand _cmdlet;
+//        private InternalCommand _cmdlet;
 
         internal ProviderIntrinsics(Cmdlet cmdlet)
         {
@@ -27,7 +27,7 @@ namespace System.Management.Automation
                 throw new NullReferenceException("Cmdlet can't be null.");
             }
 
-            _cmdlet = cmdlet;
+//            _cmdlet = cmdlet;
             ChildItem = new ChildItemCmdletProviderIntrinsics(cmdlet);
             Content = new ContentCmdletProviderIntrinsics(cmdlet);
             Item = new ItemCmdletProviderIntrinsics(cmdlet);

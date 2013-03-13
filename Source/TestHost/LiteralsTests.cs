@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace TestHost
 {
     [TestFixture]
-    class LiteralsTests
+    public class LiteralsTests
     {
         ////  7.7.1 Addition
         ////      Description:

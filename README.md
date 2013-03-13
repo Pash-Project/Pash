@@ -10,6 +10,24 @@ Status
 
 **Pre-alpha**. This project is not yet useful for any real work.
 
+How to get up and going!
+------------------------
+
+### Mac
+
+- Download and install
+[Mono](http://www.go-mono.com/mono-downloads/download.html)
+- Execute the following steps in a Terminal
+
+```sh
+    git clone (this repo?)
+    cd Pash2
+    xbuild Source/Pash.sln
+```
+
+- TODO: what to do next? (somehow we need to get to a console or point
+  to some docs on how to execute powershell (console/scripts etc)
+
 License
 -------
 

@@ -17,7 +17,7 @@ namespace System.Management.Automation
         public string Verb { get; private set; }
         public ReadOnlyCollection<CommandParameterSetInfo> ParameterSets { get; private set; }
 
-        private ExecutionContext _context;
+//        private ExecutionContext _context;
 
         internal CmdletInfo(string name, Type implementingType, string helpFile, PSSnapInInfo PSSnapin, ExecutionContext context)
             : base(name, CommandTypes.Cmdlet)
@@ -32,7 +32,7 @@ namespace System.Management.Automation
             ImplementingType = implementingType;
             HelpFile = helpFile;
             PSSnapIn = PSSnapin;
-            _context = context;
+//            _context = context;
             ParameterSets = GetParameterSetInfo(implementingType);
         }
 

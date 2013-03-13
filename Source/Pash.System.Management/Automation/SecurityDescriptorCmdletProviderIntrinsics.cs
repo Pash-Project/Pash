@@ -7,10 +7,10 @@ namespace System.Management.Automation
 {
     public sealed class SecurityDescriptorCmdletProviderIntrinsics
     {
-        private InternalCommand _cmdlet;
+//        private InternalCommand _cmdlet;
         internal SecurityDescriptorCmdletProviderIntrinsics(Cmdlet cmdlet)
         {
-            _cmdlet = cmdlet;
+//            _cmdlet = cmdlet;
         }
 
         public Collection<PSObject> Get(string path, AccessControlSections includeSections) { throw new NotImplementedException(); }
