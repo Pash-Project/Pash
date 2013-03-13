@@ -10,6 +10,28 @@ Status
 
 **Pre-alpha**. This project is not yet useful for any real work.
 
+How to get up and going!
+------------------------
+
+### Mac
+
+- Download and install
+[Mono](http://www.go-mono.com/mono-downloads/download.html)
+- Execute the following steps in a Terminal
+
+```sh
+    git clone (this repo?)
+    cd Pash2
+	rake build
+	rake test # <== this is optional
+    mono Source/PashConsole/bin/Debug/Pash.exe
+```
+
+You should be presented with a PowerShell console where you can start
+entering commands (note: there is still lots of work to do to make
+the happy paths work as expected)
+
+
 License
 -------
 

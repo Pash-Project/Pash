@@ -46,7 +46,7 @@ namespace System.Management.Automation.Language
 
         public IEnumerable<Ast> FindAll(Func<Ast, bool> predicate, bool searchNestedScriptBlocks) { throw new NotImplementedException(this.ToString()); }
 
-        public override string ToString() { throw new NotImplementedException(); }
+//        public override string ToString() { throw new NotImplementedException(); }
 
         internal virtual IEnumerable<Ast> Children { get { yield break; } }
 

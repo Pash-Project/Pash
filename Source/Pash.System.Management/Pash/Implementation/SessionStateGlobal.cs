@@ -600,16 +600,16 @@ namespace Pash.Implementation
 
             path = PathIntrinsics.NormalizePath(path);
 
-            ProviderInfo provider = null;
+            // ProviderInfo provider = null;
             string driveName = null;
 
-            string str = path;
-            PSDriveInfo currentDrive = CurrentDrive;
+            //string str = path;
+            //PSDriveInfo currentDrive = CurrentDrive;
 
             // If path doesn't start with a drive name
             if (path.StartsWith(PathIntrinsics.CorrectSlash.ToString()))
             {
-                provider = CurrentLocation.Provider;
+                //provider = CurrentLocation.Provider;
             }
             else if (PathIntrinsics.IsAbsolutePath(path, out driveName))
             {

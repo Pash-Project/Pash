@@ -301,8 +301,6 @@ namespace Pash.ParserIntrinsics
                 clauses,
                 elseClause
                 );
-
-            throw new NotImplementedException(parseTreeNode.ToString());
         }
 
         Tuple<PipelineBaseAst, StatementBlockAst> BuildIfStatementClauseAst(ParseTreeNode parseTreeNode)
@@ -955,7 +953,7 @@ namespace Pash.ParserIntrinsics
 
             VerifyTerm(parseTreeNode, this._grammar.type_spec);
 
-            var firstNode = parseTreeNode.ChildNodes.First();
+            //var firstNode = parseTreeNode.ChildNodes.First();
 
             var typeNameNode = parseTreeNode.ChildNodes.First();
 

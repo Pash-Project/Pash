@@ -8,7 +8,7 @@ using Pash.ParserIntrinsics;
 namespace ParserTests
 {
     [TestFixture]
-    class CaseInsensitiveGrammarTests
+    public class CaseInsensitiveGrammarTests
     {
         // I had a bug where I got the case-insenstive bool flag backwards!
 

@@ -6,7 +6,7 @@ namespace System.Management.Automation.Provider
 {
     public abstract class NavigationCmdletProvider : ContainerCmdletProvider
     {
-        private ProviderRuntime _providerRuntime;
+//        private ProviderRuntime _providerRuntime;
 
         protected NavigationCmdletProvider()
         {
@@ -33,7 +33,7 @@ namespace System.Management.Automation.Provider
 
         internal string GetChildName(string path, ProviderRuntime providerRuntime)
         {
-            _providerRuntime = providerRuntime;
+//            _providerRuntime = providerRuntime;
             return GetChildName(path);
         }
 
@@ -71,7 +71,7 @@ namespace System.Management.Automation.Provider
 
         internal string GetParentPath(string path, string root, ProviderRuntime providerRuntime)
         {
-            _providerRuntime = providerRuntime;
+//            _providerRuntime = providerRuntime;
             return GetParentPath(path, root);
         }
 
@@ -82,7 +82,7 @@ namespace System.Management.Automation.Provider
 
         internal bool IsItemContainer(string path, ProviderRuntime providerRuntime)
         {
-            _providerRuntime = providerRuntime;
+//            _providerRuntime = providerRuntime;
             return IsItemContainer(path);
         }
 

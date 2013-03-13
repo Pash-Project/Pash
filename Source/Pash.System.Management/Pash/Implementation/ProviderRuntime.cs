@@ -14,12 +14,12 @@ namespace Pash.Implementation
 
         private Cmdlet _cmdlet;
         private Collection<PSObject> _outputData;
-        private Collection<ErrorRecord> _errorData;
+//        private Collection<ErrorRecord> _errorData;
 
         private ProviderRuntime()
         {
             _outputData = new Collection<PSObject>();
-            _errorData = new Collection<ErrorRecord>();
+//            _errorData = new Collection<ErrorRecord>();
         }
 
         internal ProviderRuntime(ExecutionContext executionContext)

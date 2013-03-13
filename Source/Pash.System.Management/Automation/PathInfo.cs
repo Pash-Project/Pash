@@ -26,14 +26,14 @@ namespace System.Management.Automation
             }
         }
 
-        private SessionState _sessionState;
+//        private SessionState _sessionState;
 
         internal PathInfo(PSDriveInfo drive, ProviderInfo provider, string path, SessionState sessionState)
         {
             Drive = drive;
             Provider = provider;
             _path = path;
-            _sessionState = sessionState;
+//            _sessionState = sessionState;
         }
 
         public override string ToString()
