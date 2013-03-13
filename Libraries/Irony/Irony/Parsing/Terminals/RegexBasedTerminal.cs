@@ -27,6 +27,8 @@ namespace Irony.Parsing {
     //
     // See https://github.com/JayBazuzi/Pash2/issues/24
     //
+    // See https://github.com/JayBazuzi/Pash2/issues/29
+    //
     // See https://bugzilla.xamarin.com/show_bug.cgi?id=6541
     private RegexBasedTerminal(string pattern, params string[] prefixes)
       : base("name") {
