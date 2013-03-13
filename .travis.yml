@@ -6,5 +6,5 @@ before_install:
 
 install:
   - xbuild Source/Pash.sln
+  - mono Tools/NUnit-2.6.1/bin/nunit-console.exe Pash.nunit /run=Libraries.Tests
   - mono Tools/NUnit-2.6.1/bin/nunit-console.exe Pash.nunit 
-
