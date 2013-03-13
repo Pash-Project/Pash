@@ -111,7 +111,7 @@ ls
         public void CommandInvocationOperatorTest()
         {
             var result = ParseInput("& 'ls'");
-			Debug.WriteLine(result);
+            Debug.WriteLine(result);
         }
 
         [Test]
@@ -136,9 +136,9 @@ ls
             FunctionDefinitionAst functionDefinitionAst = scriptBlockAst.EndBlock.Statements[0];
             PipelineAst pipelineAst = scriptBlockAst.EndBlock.Statements[1];
 
-			
-			Debug.WriteLine(functionDefinitionAst);
-			Debug.WriteLine(pipelineAst);
+                                    
+            Debug.WriteLine(functionDefinitionAst);
+            Debug.WriteLine(pipelineAst);
         }
 
         [Test]
@@ -393,7 +393,7 @@ ls
                 .PipelineElements[0]
                 .Expression;
 
-			Debug.WriteLine(memberExpressionAst);
+            Debug.WriteLine(memberExpressionAst);
         }
 
         [Test, ExpectedException(typeof(PowerShellGrammar.ParseException))]
@@ -654,8 +654,8 @@ ls
                 .PipelineElements[0]
                 .Expression;
 
-			Debug.WriteLine(expression);
-		}
+         	Debug.WriteLine(expression);
+         }
 
         [Test]
         public void AdditiveExpression_AddStrings()
