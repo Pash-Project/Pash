@@ -391,7 +391,8 @@ ls
         [Test]
         public void BadMemberAccess()
         {
-            Assert.Throws<PowerShellGrammar.ParseException>(() => {
+            Assert.Throws<PowerShellGrammar.ParseException>(() =>
+            {
 
                 // The language spec says this space is prohibited.
                 ParseInput("[System.Int32] ::MaxValue");
@@ -402,8 +403,9 @@ ls
         [Test]
         public void ParseError()
         {
-            Assert.Throws<PowerShellGrammar.ParseException>(() => {
-                
+            Assert.Throws<PowerShellGrammar.ParseException>(() =>
+            {
+
                 ParseInput("$");
 
             });
@@ -493,12 +495,13 @@ ls
         [Test(Description = "Issue: https://github.com/JayBazuzi/Pash2/issues/7")]
         public void StatementSequenceWithoutSemicolonTest()
         {
-            Assert.Throws<PowerShellGrammar.ParseException>(() => {
+            Assert.Throws<PowerShellGrammar.ParseException>(() =>
+            {
 
                 var statements = ParseInput("if ($true) { } Get-Location")
                     .EndBlock
                         .Statements;
-                
+
                 Assert.AreEqual(2, statements.Count);
 
             });
