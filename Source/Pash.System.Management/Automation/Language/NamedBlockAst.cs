@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
@@ -14,7 +14,7 @@ namespace System.Management.Automation.Language
             this.BlockKind = blockName;
             if (statementBlock == null)
             {
-                this.Statements = new ReadOnlyCollection<StatementAst>(new StatementAst[]{});
+                this.Statements = new ReadOnlyCollection<StatementAst>(new StatementAst[] { });
             }
             else
             {
@@ -33,11 +33,12 @@ namespace System.Management.Automation.Language
             get
             {
                 foreach (var item in this.Statements) yield return item;
-				foreach (var item in privateGetChildren()) yield return item;
-			}
-		}
-		
-		// Method call works around an issue compiling in mono
-		private IEnumerable<Ast> privateGetChildren(){ return base.Children;}
-	}
+                foreach (var item in privateGetChildren()) yield return item;
+            }
+        }
+
+        // Method call works around a Mono C# compiler crash
+        [System.Diagnostics.DebuggerStepThrough]
+        private IEnumerable<Ast> privateGetChildren() { return base.Children; }
+    }
 }

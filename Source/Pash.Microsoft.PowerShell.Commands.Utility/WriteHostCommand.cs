@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Management.Automation;
 using Extensions.String;
+using System.Collections;
 
 namespace Microsoft.PowerShell.Commands.Utility
 {
@@ -29,16 +30,6 @@ namespace Microsoft.PowerShell.Commands.Utility
             if (Object == null)
             {
                 writeAction(ForegroundColor, BackgroundColor, "");
-            }
-
-			//TODO look for a mono-only pre-compiler #if flag and wrap this
-#if __MonoCS__
-			else if (Object.BaseObject.GetType() == typeof(Enumerable))
-#else
-            else if (Object.BaseObject is Enumerable)
-#endif
-            {
-                throw new NotImplementedException();
             }
             else
             {

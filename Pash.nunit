@@ -1,13 +1,15 @@
 ﻿<NUnitProject>
   <Settings activeconfig="Debug" processModel="Default" domainUsage="Default" />
-  <Config name="Debug" binpathtype="Auto" configfile="C:\Users\Jay\GitHub\Pash2\Source\TestHost\bin\Debug\TestHost.exe.config" >
-    <assembly path="Source\TestHost\bin\Debug\TestHost.exe" />
-    <assembly path="Source\PashGui\bin\Debug\PashGui.exe" />
-    <assembly path="Source\ParserTests\bin\Debug\ParserTests.dll" />
+  <Config name="Debug" binpathtype="Auto" configfile="Source/TestHost/bin/Debug/TestHost.exe.config" >
+    <assembly path="Source/TestHost/bin/Debug/TestHost.exe" />
+    <assembly path="Source/PashGui/bin/Debug/PashGui.exe" />
+    <assembly path="Source/ParserTests/bin/Debug/ParserTests.dll" />
+    <assembly path="Libraries/Libraries.Tests/bin/Debug/Libraries.Tests.dll" />
   </Config>
   <Config name="Release" binpathtype="Auto">
-    <assembly path="Source\TestHost\bin\Release\TestHost.exe" />
-    <assembly path="Source\PashGui\bin\Release\PashGui.exe" />
-    <assembly path="Source\ParserTests\bin\Release\ParserTests.dll" />
+    <assembly path="Source/TestHost/bin/Release/TestHost.exe" />
+    <assembly path="Source/PashGui/bin/Release/PashGui.exe" />
+    <assembly path="Source/ParserTests/bin/Release/ParserTests.dll" />
+    <assembly path="Libraries/Libraries.Tests/bin/Release/Libraries.Tests.dll" />
   </Config>
 </NUnitProject>
