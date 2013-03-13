@@ -22,11 +22,15 @@ How to get up and going!
 ```sh
     git clone (this repo?)
     cd Pash2
-    xbuild Source/Pash.sln
+	rake build
+	rake test # <== this is optional
+    mono Source/PashConsole/bin/Debug/Pash.exe
 ```
 
-- TODO: what to do next? (somehow we need to get to a console or point
-  to some docs on how to execute powershell (console/scripts etc)
+You should be presented with a PowerShell console where you can start
+entering commands (note: there is still lots of work to do to make
+the happy paths work as expected)
+
 
 License
 -------
