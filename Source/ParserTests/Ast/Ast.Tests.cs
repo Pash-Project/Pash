@@ -13,7 +13,7 @@ using System.Management.Automation.Language;
 namespace ParserTests
 {
     [TestFixture]
-    class AstTests
+    public class AstTests
     {
         [Test, Description("I once wrote the `label` rule as as `foo:`, which broke this")]
         public void ScriptPathWithColon()
@@ -178,7 +178,7 @@ ls
         }
 
         [TestFixture]
-        class VariableExpressionAstTests
+        public class VariableExpressionAstTests
         {
             [Test]
             public void Simple()
@@ -296,7 +296,7 @@ ls
         }
 
         [TestFixture, Explicit]
-        class ScriptBlockTests
+        public class ScriptBlockTests
         {
             [Test, Explicit]
             public void Empty()
@@ -388,17 +388,27 @@ ls
                 .Expression;
         }
 
-        [Test, ExpectedException(typeof(PowerShellGrammar.ParseException))]
+        [Test]
         public void BadMemberAccess()
         {
-            // The language spec says this space is prohibited.
-            ParseInput("[System.Int32] ::MaxValue");
+            Assert.Throws<PowerShellGrammar.ParseException>(() =>
+            {
+
+                // The language spec says this space is prohibited.
+                ParseInput("[System.Int32] ::MaxValue");
+
+            });
         }
 
-        [Test, ExpectedException(typeof(PowerShellGrammar.ParseException))]
+        [Test]
         public void ParseError()
         {
-            ParseInput("$");
+            Assert.Throws<PowerShellGrammar.ParseException>(() =>
+            {
+
+                ParseInput("$");
+
+            });
         }
 
         [Test]
@@ -482,14 +492,19 @@ ls
             Assert.AreEqual(2, statements.Count);
         }
 
-        [Test(Description = "Issue: https://github.com/JayBazuzi/Pash2/issues/7"), ExpectedException]
+        [Test(Description = "Issue: https://github.com/JayBazuzi/Pash2/issues/7")]
         public void StatementSequenceWithoutSemicolonTest()
         {
-            var statements = ParseInput("if ($true) { } Get-Location")
-                    .EndBlock
-                    .Statements;
+            Assert.Throws<PowerShellGrammar.ParseException>(() =>
+            {
 
-            Assert.AreEqual(2, statements.Count);
+                var statements = ParseInput("if ($true) { } Get-Location")
+                    .EndBlock
+                        .Statements;
+
+                Assert.AreEqual(2, statements.Count);
+
+            });
         }
 
         [Test]

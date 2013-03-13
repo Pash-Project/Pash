@@ -4,9 +4,5 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq mono-devel gtk-sharp2
 
-install:
-  - xbuild Source/Pash.sln
-# Disabling this test as we have worked around Mono bug 6541
-# See https://github.com/JayBazuzi/Pash2/issues/29
-#  - mono Tools/NUnit-2.6.1/bin/nunit-console.exe Pash.nunit -run='Libraries.Tests'
-  - mono Tools/NUnit-2.6.1/bin/nunit-console.exe Pash.nunit 
+script: rake test
+

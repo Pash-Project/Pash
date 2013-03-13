@@ -7,12 +7,12 @@ using NUnit.Framework;
 namespace ParserTests
 {
     [TestFixture]
-    class ExtensionsTests
+    public class ExtensionsTests
     {
         [Test]
         public void GenerateTest()
         {
-           CollectionAssert.AreEqual(new[]{1,2,3}, Extensions.Enumerable._.Generate(1, i => i + 1, 3).ToArray());
+            CollectionAssert.AreEqual(new[] { 1, 2, 3 }, Extensions.Enumerable._.Generate(1, i => i + 1, 3).ToArray());
         }
     }
 }

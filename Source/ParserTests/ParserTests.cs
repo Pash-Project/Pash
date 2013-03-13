@@ -8,7 +8,7 @@ using System.Text;
 namespace ParserTests
 {
     [TestFixture]
-    class ParserTests
+    public class ParserTests
     {
         [Test]
         public void IfTest()

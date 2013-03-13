@@ -38,7 +38,7 @@ namespace System.Management.Automation.Language
 
         public override string ToString()
         {
-            return string.Format("function {0} { ... }", this.Name);
+            return string.Format("function {0} {{ ... }}", this.Name);
         }
     }
 }
