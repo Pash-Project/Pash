@@ -30,3 +30,13 @@ task :test => ['build'] do
 
   puts 'TEST COMPLETE'.green
 end
+
+desc 'Staring the Console'
+task :run do
+  sh 'mono Source/PashConsole/bin/Debug/Pash.exe'
+end
+
+desc 'Open the solution file'
+task :open do
+	sh 'open Source/Pash.sln'
+end
