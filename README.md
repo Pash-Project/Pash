@@ -50,8 +50,9 @@ In 2012, Jay Bazuzi started exploring the project to see what potential it held.
 Media
 -----
 
-Igor's original announcement: http://igorshare.wordpress.com/2008/04/06/pash-cross-platform-powershell-is-out-in-the-wild-announcement/
-Followup, Igor's last message about Pash: http://igorshare.wordpress.com/2008/04/08/more-on-pash-mono-and-codecamp-9/
+- [Igor's original announcement](http://igorshare.wordpress.com/2008/04/06/pash-cross-platform-powershell-is-out-in-the-wild-announcement/)
 
-Official PowerShell Blog: http://blogs.msdn.com/b/powershell/archive/2008/04/08/powershell-on-linux-solaris-mac-etc.aspx
+- [Followup blog post](http://igorshare.wordpress.com/2008/04/08/more-on-pash-mono-and-codecamp-9/), Igor's last message about Pash: 
+
+- [Mention](http://blogs.msdn.com/b/powershell/archive/2008/04/08/powershell-on-linux-solaris-mac-etc.aspx) on the official PowerShell Blog: 
 

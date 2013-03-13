@@ -20,6 +20,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "010.Irony.2010", "..\Librar
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FFF03D2F-1256-443B-BE78-524EF43AC734}"
 	ProjectSection(SolutionItems) = preProject
+		..\.travis.yml = ..\.travis.yml
 		..\CONTRIBUTING.md = ..\CONTRIBUTING.md
 		..\LICENSE-BSD = ..\LICENSE-BSD
 		..\LICENSE-GPL = ..\LICENSE-GPL
