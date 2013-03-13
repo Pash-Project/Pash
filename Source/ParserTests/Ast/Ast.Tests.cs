@@ -13,7 +13,7 @@ using System.Management.Automation.Language;
 namespace ParserTests
 {
     [TestFixture]
-    class AstTests
+    public class AstTests
     {
         [Test, Description("I once wrote the `label` rule as as `foo:`, which broke this")]
         public void ScriptPathWithColon()
@@ -178,7 +178,7 @@ ls
         }
 
         [TestFixture]
-        class VariableExpressionAstTests
+        public class VariableExpressionAstTests
         {
             [Test]
             public void Simple()
@@ -296,7 +296,7 @@ ls
         }
 
         [TestFixture, Explicit]
-        class ScriptBlockTests
+        public class ScriptBlockTests
         {
             [Test, Explicit]
             public void Empty()

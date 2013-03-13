@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace ParserTests
 {
     [TestFixture]
-    class ExtensionsTests
+    public class ExtensionsTests
     {
         [Test]
         public void GenerateTest()
