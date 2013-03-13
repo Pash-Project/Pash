@@ -26,7 +26,7 @@ desc 'Running Tests'
 task :test => ['build'] do
 
   puts 'Running Tests'
-  sh 'nunit-console ./Source/ParserTests/bin/Debug/ParserTests.dll'
+  sh 'nunit-console ./Source/ParserTests/bin/Debug/ParserTests.dll Source/TestHost/bin/Debug/TestHost.exe'
 
   puts 'TEST COMPLETE'.green
 end
