@@ -15,7 +15,9 @@ namespace Libraries.Tests
         // This bug in Mono causes the parer to initialize incorrectly, making
         // the parser fail. Because it's a little subtle, I'm writing this unit
         // test to call it out.
-        [Test, Description("https://bugzilla.xamarin.com/show_bug.cgi?id=6541")]
+        [Test]
+        [Description("https://bugzilla.xamarin.com/show_bug.cgi?id=6541")]
+        [Explicit("reenable when https://github.com/JayBazuzi/Pash2/issues/29 is closed.")]
         public void MonoOverloadBug6541Test()
         {
             F("x");
