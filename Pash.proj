@@ -25,14 +25,6 @@
     <NUnitCommandLine>Tools\NUnit-2.6.1\bin\nunit-console.exe -nologo Pash.nunit</NUnitCommandLine>
   </PropertyGroup>
 
-  <!--=====================================================================-->
-  <Target Name="Run"
-          DependsOnTargets="Build"
-          >
-    <Exec Command="xterm -e mono $(PashConsoleCommandLine)" Condition = " '$(OS)' != 'Windows_NT' "/>
-    <Exec Command="start /wait   $(PashConsoleCommandLine)" Condition = " '$(OS)' == 'Windows_NT' "/>
-  </Target>
-
   <PropertyGroup>
     <PashConsoleCommandLine>Source\PashConsole\bin\Debug\Pash.exe</PashConsoleCommandLine>
   </PropertyGroup>

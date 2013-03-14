@@ -14,10 +14,14 @@ Getting Started
 
 <!-- Keep this in synch with CONTRIBUTING.md -->
 
+Assuming you have MonoDevelop installed:
+
 1. `git clone https://github.com/JayBazuzi/Pash2/`
 2. `cd Pash2`
-3. `xbuild /t:run` (Replace `xbuild` with `msbuild` if using Visual Studio)
+3. `xbuild`
+4. `mono Source/PashConsole/bin/Debug/Pash.exe`
 
+See `CONTRIBUTING.md` for more details.
 
 License
 -------

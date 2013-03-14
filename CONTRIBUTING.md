@@ -17,9 +17,10 @@ Open the solution at `Source/Pash.sln` and run. Or at the command line:
 
 <!-- duplication with README.md here; keep them in synch -->
 
-    > xbuild /t:run
+    > xbuild
+    > mono Source/PashConsole/bin/Debug/Pash.exe
 
-MSBuild works fine instead of xbuild, if you like.
+On Windows, you can use MSBuild instead of xbuild; the `mono` part is unecessary, and you'll probably need to add these to your PATH.
 
 
 Tests
