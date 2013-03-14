@@ -4,6 +4,4 @@ before_install:
 	- sudo apt-get update -qq
 	- sudo apt-get install -qq mono-devel gtk-sharp2
 
-script:
-	- xbuild
-	- xbuild /target:test
+script: "xbuild /target:test"
