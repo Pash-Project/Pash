@@ -3,35 +3,42 @@ Contributing to Pash
 
 I'm so grateful that anyone would consider helping improve Pash. Thanks!
 
-Building Pash on Windows
-----
+
+Building Pash on Windows, Linux, or Mac
+---------------------------------------
 
 I want it to be easy to build this project. You should be able to use:
 
-- [Visual Studio 2012 Pro](http://go.microsoft.com/?linkid=9810223) I use this. It's $500, unless you're a student.
+- [Visual C# Express 2010](http://www.microsoft.com/express/) or later. Windows only, of course.
 
-- [Visual Studio Express for Desktop 2012](http://go.microsoft.com/?linkid=9816758)
+- [MonoDevelop 3.0](http://monodevelop.com/) or later, or Xamarin Studio, on any platform.
 
-- [Visual C# Express 2010](http://go.microsoft.com/?linkid=9709939)
+Open the solution at `Source/Pash.sln` and run. Or at the command line:
 
-- [MonoDevelop 3.0](http://monodevelop.com/) or later.
+<!-- duplication with README.md here; keep them in synch -->
 
-Building Pash on Mac or Linux
-----
+    > xbuild /t:run
 
-- [MonoDevelop 3.0](http://monodevelop.com/) or later.
+MSBuild works fine instead of xbuild, if you like.
+
 
 Tests
 ----
 
-Tests are great! All tests should pass all the time. See `.travis.yml` for how we run the tests on Travis.
+We use NUnit to run. In `master`, all tests pass all the time.
+
+To run tests
+
+    > xbuild /t:test
+
 
 Travis
 ----
 
 We're hooked up to Travis-CI. See https://travis-ci.org/JayBazuzi/Pash2
 
-We won't merge in to `master` if Travis reports an error. So keep an eye on that.
+We don't merge in to `master` if Travis reports an error. So keep an eye on that.
+
 
 Guidelines
 ----
@@ -67,3 +74,5 @@ Coding Style:
 ----
 
 - Use the default Visual Studio formatting settings. Keep files formatted that way at all times.
+
+Beyond that, use your judgement to write the best code you know how.
