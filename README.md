@@ -3,12 +3,18 @@ Pash2
 
 An Open Source reimplementation of Windows PowerShell.
 
-See `CONTRIBUTING.md` for instructions on how to compile & run.
 
 Status
 ------
 
 **Pre-alpha**. This project is not yet useful for any real work.
+
+Getting Started
+---------------
+
+1. `git clone https://github.com/JayBazuzi/Pash2/`
+2. `cd Pash2`
+3. `xbuild /target:run` (Replace `xbuild` with `msbuild` if using Visual Studio)
 
 License
 -------
@@ -16,6 +22,7 @@ License
 The original release of Pash in 2008 didn't include a LICENSE or COPYING file, or other indication of license. However, at [https://sourceforge.net/projects/pash/](http://web.archive.org/web/20121111142027/http://sourceforge.net/projects/pash/) it says:
 
 > License
+>
 > BSD License, GNU General Public License (GPL)
 
 I have emailed Igor Moochnick a few times to clarify his licensing intent, but he hasn't responded. So I'm treating that note on sourceforge as authoritative.
@@ -38,3 +45,15 @@ Media
 
 - [Mention](http://blogs.msdn.com/b/powershell/archive/2008/04/08/powershell-on-linux-solaris-mac-etc.aspx) on the official PowerShell Blog: 
 
+Gratitude
+---------
+
+If you like Pash and want to express your gratitude, you could:
+
+- Contribute code to Pash. See [`CONTRIBUTING.md`](https://github.com/JayBazuzi/Pash2/blob/master/CONTRIBUTING.md) and send a pull request!
+- Contribute to some other open source project.
+- Edit Wikipedia.
+- Create art, music, architecture, boat plans, whatever, and release it under [Creative Commons](http://creativecommons.org/licenses/by-sa/2.5/).
+- Volunteer in your community.
+- Give free hugs!
+- If you're making money with Pash, then you should [send money](http://pledgie.com/campaigns/19268).

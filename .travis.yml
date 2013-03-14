@@ -1,8 +1,9 @@
 language: c
 
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq mono-devel gtk-sharp2
+	- sudo apt-get update -qq
+	- sudo apt-get install -qq mono-devel gtk-sharp2
 
-script: rake test
-
+script:
+	- xbuild
+	- xbuild /target:test

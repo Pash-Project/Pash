@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--=====================================================================-->
+  <Target Name="Build">
+    <MSBuild Projects="Source\Pash.sln" />
+  </Target>
+
+  <!--=====================================================================-->
+  <Target Name="Test"
+          DependsOnTargets="Build"
+          >
+    <!--
+    When this issue is resolved: https://github.com/JayBazuzi/Pash2/issues/29
+
+    Uncomment the next command & reenable the `Libraries.Tests.MonoTests.MonoOverloadBug6541Test`.
+
+    <Exec Command="Tools\NUnit-2.6.1\bin\nunit-console.exe /nologo Pash.nunit  /run=Libraries.Tests" />
+    -->
+    <Exec Command="Tools\NUnit-2.6.1\bin\nunit-console.exe /nologo Pash.nunit" />
+  </Target>
+
+  <!--=====================================================================-->
+  <Target Name="Run"
+          DependsOnTargets="Build"
+          >
+    <Exec Command="start /wait Source\PashConsole\bin\Debug\Pash.exe" />
+  </Target>
+
+</Project>
