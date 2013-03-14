@@ -29,8 +29,8 @@
   <Target Name="Run"
           DependsOnTargets="Build"
           >
-    <Exec Command="       mono $(PashConsoleCommandLine)" Condition = " '$(OS)' != 'Windows_NT' "/>
-    <Exec Command="start /wait $(PashConsoleCommandLine)" Condition = " '$(OS)' == 'Windows_NT' "/>
+    <Exec Command="xterm -e mono $(PashConsoleCommandLine)" Condition = " '$(OS)' != 'Windows_NT' "/>
+    <Exec Command="start /wait   $(PashConsoleCommandLine)" Condition = " '$(OS)' == 'Windows_NT' "/>
   </Target>
 
   <PropertyGroup>
