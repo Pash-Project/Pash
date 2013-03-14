@@ -1,5 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PashConsole", "PashConsole\PashConsole.csproj", "{BB348EAD-1713-4760-9953-BC721A203885}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{0850FA53-413E-4AF9-B918-8FF524FFA5D7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pash.Microsoft.Commands.Management", "Pash.Microsoft.Commands.Management\Pash.Microsoft.Commands.Management.csproj", "{91225A72-A021-4B7D-BA56-5E1B7AC02F03}"
@@ -7,8 +9,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pash.Microsoft.PowerShell.Commands.Utility", "Pash.Microsoft.PowerShell.Commands.Utility\Pash.Microsoft.PowerShell.Commands.Utility.csproj", "{0E1D573C-C57D-4A83-A739-3A38E719D87E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pash.System.Management", "Pash.System.Management\Pash.System.Management.csproj", "{C5E303EC-5684-4C95-B0EC-2593E6662403}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PashConsole", "PashConsole\PashConsole.csproj", "{BB348EAD-1713-4760-9953-BC721A203885}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PashGui", "PashGui\PashGui.csproj", "{A7B03D7C-D239-4352-ACB8-5C7563F1D551}"
 EndProject
