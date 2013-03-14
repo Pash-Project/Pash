@@ -25,7 +25,7 @@ MSBuild works fine instead of xbuild, if you like.
 Tests
 ----
 
-We use NUnit to run. In `master`, all tests pass all the time.
+We use NUnit. In `master`, all tests pass all the time.
 
 To run tests
 
