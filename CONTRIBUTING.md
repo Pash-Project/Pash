@@ -26,7 +26,7 @@ On Windows, you can use MSBuild instead of xbuild; the `mono` part is unecessary
 Tests
 ----
 
-We use NUnit to run. In `master`, all tests pass all the time.
+We use NUnit. In `master`, all tests pass all the time.
 
 To run tests
 
