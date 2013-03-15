@@ -48,7 +48,22 @@ namespace System.Management
         {
             return new Path(path);
         }
-        
+
+        public override bool Equals(object obj)
+        {
+            if (obj is string)
+            {
+                return _rawPath.Equals(obj);
+            }
+
+            var objPath = obj as Path;
+            if (objPath != null)
+            {
+                return _rawPath.Equals(objPath._rawPath);
+            }
+            
+            return base.Equals(obj);
+        }
 
 
 
@@ -99,9 +114,6 @@ namespace System.Management
         {
             var path = this;
 
-            if (string.IsNullOrEmpty(path))
-                throw new NullReferenceException("Path can't be empty");
-            
             path = path.NormalizeSlashes();
             path = path.TrimEndSlash();
             
@@ -136,5 +148,14 @@ namespace System.Management
 
         public int Length { get { return _rawPath.Length; } }
     }
+
+    public static partial class _
+    {
+        public static Path AsPath(this string value)
+        {
+            return (Path)value;
+        }
+    }
+
 }
 
