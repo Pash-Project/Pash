@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using Pash.ParserIntrinsics;
 
-namespace ParserTests
+namespace Pash.ParserIntrinsics.Tests
 {
     [TestFixture]
     public class CaseInsensitiveGrammarTests

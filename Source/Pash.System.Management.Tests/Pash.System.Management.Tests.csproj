@@ -42,9 +42,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Ast\Ast.Tests.cs" />
-    <Compile Include="CaseInsensitiveGrammarTests.cs" />
+    <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammarTests.cs" />
     <Compile Include="ExtensionsTests.cs" />
-    <Compile Include="ParserTests.cs" />
+    <Compile Include="Pash\ParserIntrinsics\ParserTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
