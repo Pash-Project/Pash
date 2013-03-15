@@ -148,10 +148,6 @@ namespace System.Management.Automation
             return string.Format(format, new object[] { drive.Name, path });
         }
 
-        public static string GetDriveFromPath(Path path)
-        {
-            return path.GetDrive();
-        }
         #endregion
 
         internal static bool IsAbsolutePath(string path, out string driveName)

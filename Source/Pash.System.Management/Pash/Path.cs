@@ -229,6 +229,11 @@ namespace System.Management
             {
                 return this;
             }
+
+            if (this.StartsWithSlash())
+            {
+                return CorrectSlash;
+            }
             
             int iDelimiter = _rawPath.IndexOf(':');
             

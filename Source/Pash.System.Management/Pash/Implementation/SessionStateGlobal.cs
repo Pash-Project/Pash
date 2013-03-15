@@ -3,10 +3,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Management.Automation;
 using System.Collections.Specialized;
-using System.Management.Automation.Provider;
 using Microsoft.PowerShell.Commands;
+using System.Management;
+using System.Management.Automation;
+using System.Management.Automation.Provider;
 
 namespace Pash.Implementation
 {
@@ -542,13 +543,13 @@ namespace Pash.Implementation
             return providerRuntime.RetreiveAllProviderData();
         }
 
-        private CmdletProvider GetProviderByPath(string path)
+        private CmdletProvider GetProviderByPath(Path path)
         {
             // MUST: implement for "dir"
             if (string.IsNullOrEmpty(path))
                 path = CurrentLocation.Path;
 
-            string driveName = PathIntrinsics.GetDriveFromPath(path);
+            string driveName = path.GetDrive();
 
             PSDriveInfo drive = GetDrive(driveName, null);
 

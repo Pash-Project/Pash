@@ -216,11 +216,21 @@ namespace TestHost
         }
 
         [Test]
-        public void GetChildItemShouldReturnSomething()
+        public void GetChildItemFromRootDefaultProviderShouldReturnSomething()
         {
             // notice typo
             var result = TestHost.Execute(true, "Get-ChildItem /");
 
+            Assert.Greater(result.Length, 0);
+        }
+
+        // NOTE: mac/linux only? (how to make this generic?)
+        [Test]
+        public void GetChildItemFromPathShouldReturnSomething()
+        {
+            // notice typo
+            var result = TestHost.Execute(true, "Get-ChildItem /users");
+            
             Assert.Greater(result.Length, 0);
         }
 
