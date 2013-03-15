@@ -37,6 +37,7 @@ namespace System.Management
         }
 
         public string CorrectSlash { get; set; }
+
         public string WrongSlash { get; set; }
 
         public static implicit operator string(Path path)
@@ -64,8 +65,6 @@ namespace System.Management
             
             return base.Equals(obj);
         }
-
-
 
         public Path NormalizeSlashes()
         {
@@ -106,10 +105,6 @@ namespace System.Management
             return path._rawPath.Substring(iLastSlash + 1);
         }
 
-//        public string Substring(int startIndex, int length)
-//        {
-//            return _rawPath.Substring(startIndex, length);
-//        }
         public Path GetParentPath(Path root)
         {
             var path = this;
@@ -136,9 +131,82 @@ namespace System.Management
             return string.Empty;
 
         }
-        public bool EndsWith(string value)
+
+        public Path Combine(Path child)
         {
-            return _rawPath.EndsWith(value);
+            var parent = this;
+
+            if (string.IsNullOrEmpty(parent) && string.IsNullOrEmpty(child))
+            {
+                return child;
+            }
+
+            if (string.IsNullOrEmpty(parent) && !string.IsNullOrEmpty(child))
+            {
+                return child.NormalizeSlashes();
+            }
+            
+            parent = parent.NormalizeSlashes();
+            
+            if (!string.IsNullOrEmpty(parent) && string.IsNullOrEmpty(child))
+            {
+                if (parent.EndsWithSlash())
+                {
+                    return parent;
+                } else
+                {
+                    return parent.AppendSlashAtEnd();
+                }
+            }
+            
+            child = child.NormalizeSlashes();
+            var builder = new System.Text.StringBuilder(parent);
+            
+            if (!parent.EndsWithSlash())
+                builder.Append(CorrectSlash);
+            
+            // Make sure we do not add two \
+            if (child.StartsWithSlash())
+            {
+                builder.Append(child, 1, child.Length - 1);
+            } else
+            {
+                builder.Append(child);
+            }
+            
+            return builder.ToString();
+
+        }
+
+        public bool StartsWithSlash()
+        {
+            if (this.NormalizeSlashes()._rawPath.StartsWith(CorrectSlash))
+            {
+                return true;
+            }
+            return false;
+        }
+        public bool EndsWithSlash()
+        {
+            if (this.NormalizeSlashes()._rawPath.EndsWith(CorrectSlash))
+            {
+                return true;
+            }
+            return false;
+        }
+//        public bool EndsWith(string value)
+//        {
+//            return _rawPath.EndsWith(value);
+//        }
+
+        public Path AppendSlashAtEnd()
+        {
+            if (this.EndsWithSlash())
+            {
+                return this;
+            }
+
+            return this + CorrectSlash;
         }
 
         public bool StartsWith(string value)

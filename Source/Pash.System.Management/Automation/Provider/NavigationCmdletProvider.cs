@@ -59,49 +59,7 @@ namespace System.Management.Automation.Provider
 
         protected virtual string MakePath(Path parent, Path child)
         {
-            if ((parent == null) && (child == null))
-            {
-                throw new NullReferenceException("Can't call MakePath with null values.");
-            }
-            if (string.IsNullOrEmpty(parent) && string.IsNullOrEmpty(child))
-            {
-                return string.Empty;
-            }
-            if (string.IsNullOrEmpty(parent) && !string.IsNullOrEmpty(child))
-            {
-                return NormalizePath(child);
-            }
-
-            parent = NormalizePath(parent);
-            if (!string.IsNullOrEmpty(parent) && string.IsNullOrEmpty(child))
-            {
-                if (parent.EndsWith("\\"))
-                {
-                    return parent;
-                }
-                else
-                {
-                    return parent + '\\';
-                }
-            }
-
-            child = NormalizePath(child);
-            StringBuilder builder = new StringBuilder(parent);
-
-            if (!parent.EndsWith("\\"))
-                builder.Append("\\");
-
-            // Make sure we do not add two \
-            if (child.StartsWith("\\"))
-            {
-                builder.Append(child, 1, child.Length - 1);
-            }
-            else
-            {
-                builder.Append(child);
-            }
-
-            return builder.ToString();
+            return parent.Combine(child);
         }
 
         protected virtual void MoveItem(Path path, Path destination) { throw new NotImplementedException(); }
