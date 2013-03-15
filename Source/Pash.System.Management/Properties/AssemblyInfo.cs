@@ -1,4 +1,4 @@
-﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -36,7 +36,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
+[assembly: InternalsVisibleTo("Microsoft.PowerShell.Commands.Utility")]
 [assembly: InternalsVisibleTo("Pash.System.Automation.Tests")]
 [assembly: InternalsVisibleTo("Microsoft.Commands.Management")]
-[assembly: InternalsVisibleTo("Microsoft.PowerShell.Commands.Utility")]
+[assembly: InternalsVisibleTo("Pash.System.Management.Tests")]
 [assembly: InternalsVisibleTo("ParserTests")]
