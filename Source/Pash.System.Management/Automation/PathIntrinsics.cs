@@ -132,10 +132,10 @@ namespace System.Management.Automation
         public const char CorrectSlash = '\\';
         public const char WrongSlash = '/';
 
-        internal static string NormalizePath(string path)
+        internal static Path NormalizePath(Path path)
         {
             // TODO: should we normilize the path into a different direction on Unix?
-            return path.Replace(WrongSlash, CorrectSlash);
+            return path.NormalizeSlashes();
         }
 
         public static string MakePath(string path, PSDriveInfo drive)

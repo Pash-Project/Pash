@@ -7,11 +7,11 @@ namespace System.Management.Automation.Provider
 {
     public interface IPropertyCmdletProvider
     {
-        void ClearProperty(string path, Collection<string> propertyToClear);
-        object ClearPropertyDynamicParameters(string path, Collection<string> propertyToClear);
-        void GetProperty(string path, Collection<string> providerSpecificPickList);
-        object GetPropertyDynamicParameters(string path, Collection<string> providerSpecificPickList);
-        void SetProperty(string path, PSObject propertyValue);
-        object SetPropertyDynamicParameters(string path, PSObject propertyValue);
+        void ClearProperty(Path path, Collection<string> propertyToClear);
+        object ClearPropertyDynamicParameters(Path path, Collection<string> propertyToClear);
+        void GetProperty(Path path, Collection<string> providerSpecificPickList);
+        object GetPropertyDynamicParameters(Path path, Collection<string> providerSpecificPickList);
+        void SetProperty(Path path, PSObject propertyValue);
+        object SetPropertyDynamicParameters(Path path, PSObject propertyValue);
     }
 }

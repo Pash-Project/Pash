@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.ObjectModel;
+using System.Management;
 using System.Management.Automation;
 using System.Management.Automation.Provider;
 
@@ -17,12 +18,12 @@ namespace Microsoft.PowerShell.Commands
             return new Collection<PSDriveInfo> { new PSDriveInfo("Function", base.ProviderInfo) };
         }
 
-        protected override object NewItemDynamicParameters(string path, string type, object newItemValue)
+        protected override object NewItemDynamicParameters(Path path, string type, object newItemValue)
         {
             return new FunctionProviderDynamicParameters();
         }
 
-        protected override object SetItemDynamicParameters(string path, object value)
+        protected override object SetItemDynamicParameters(Path path, object value)
         {
             return new FunctionProviderDynamicParameters();
         }
@@ -32,7 +33,7 @@ namespace Microsoft.PowerShell.Commands
             throw new NotImplementedException();
         }
 
-        internal override object GetSessionStateItem(string name)
+        internal override object GetSessionStateItem(Path name)
         {
             throw new NotImplementedException();
         }
@@ -58,13 +59,13 @@ namespace Microsoft.PowerShell.Commands
 
         }
 
-        internal override void RemoveSessionStateItem(string name)
+        internal override void RemoveSessionStateItem(Path name)
         {
             // TODO: can be Force'ed
             SessionState.SessionStateGlobal.RemoveFunction(name);
         }
 
-        internal override void SetSessionStateItem(string name, object value, bool writeItem)
+        internal override void SetSessionStateItem(Path name, object value, bool writeItem)
         {
             throw new NotImplementedException();
         }

@@ -6,9 +6,9 @@ namespace System.Management.Automation.Provider
 {
     public interface ISecurityDescriptorCmdletProvider
     {
-        void GetSecurityDescriptor(string path, AccessControlSections includeSections);
-        ObjectSecurity NewSecurityDescriptorFromPath(string path, AccessControlSections includeSections);
+        void GetSecurityDescriptor(Path path, AccessControlSections includeSections);
+        ObjectSecurity NewSecurityDescriptorFromPath(Path path, AccessControlSections includeSections);
         ObjectSecurity NewSecurityDescriptorOfType(string type, AccessControlSections includeSections);
-        void SetSecurityDescriptor(string path, ObjectSecurity securityDescriptor);
+        void SetSecurityDescriptor(Path path, ObjectSecurity securityDescriptor);
     }
 }
