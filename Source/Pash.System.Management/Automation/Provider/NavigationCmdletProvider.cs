@@ -20,16 +20,7 @@ namespace System.Management.Automation.Provider
                 throw new NullReferenceException("Path can't be null");
             }
 
-            path = path.NormalizeSlashes();
-            path = path.TrimEnd(PathIntrinsics.CorrectSlash);
-
-            int iLastSlash = path.LastIndexOf('\\');
-            if (iLastSlash == -1)
-            {
-                return path;
-            }
-
-            return path.Substring(iLastSlash + 1);
+            return path.GetChildNameOrSelfIfNoChild();
         }
 
         internal string GetChildName(Path path, ProviderRuntime providerRuntime)
@@ -40,34 +31,13 @@ namespace System.Management.Automation.Provider
 
         protected virtual Path GetParentPath(Path path, Path root)
         {
-            if (string.IsNullOrEmpty(path))
-                throw new NullReferenceException("Path can't be empty");
-
             if ((root == null) && (PSDriveInfo != null))
             {
                 root = PSDriveInfo.Root;
             }
+            
 
-            path = path.NormalizeSlashes();// PathIntrinsics.NormalizePath(path);
-            path = path.TrimEnd(PathIntrinsics.CorrectSlash);
-
-            if (root != null)
-            {
-                if (string.Equals(path, root, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    return string.Empty;
-                }
-            }
-
-            int iLastSlash = path.LastIndexOf(PathIntrinsics.CorrectSlash);
-
-            if (iLastSlash > 0)
-                return path.Substring(0, iLastSlash);
-
-            if (iLastSlash == 1)
-                return PathIntrinsics.CorrectSlash.ToString();
-
-            return string.Empty;
+            return path.GetParentPath(root);
         }
 
         internal string GetParentPath(Path path, string root, ProviderRuntime providerRuntime)

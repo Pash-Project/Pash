@@ -108,15 +108,18 @@ namespace Microsoft.PowerShell.Commands
                 throw new NullReferenceException("Path can't be null");
             }
 
-            path = PathIntrinsics.NormalizePath(path);
-            path = path.TrimEnd('\\');
-
-            int num = path.LastIndexOf('\\');
-            if (num == -1)
-            {
-                return MakeSlashedPath(path);
-            }
-            return path.Substring(num + 1);
+            return path.GetChildNameOrSelfIfNoChild();
+//
+//            path = PathIntrinsics.NormalizePath(path);
+//            path = path.TrimEnd('\\');
+//
+//            int num = path.LastIndexOf('\\');
+//            if (num == -1)
+//            {
+            //TODO: what is this MakeSlashedPath and should the above GetChildNameOrSelfIfNoChild do somthing like that?
+//                return MakeSlashedPath(path);
+//            }
+//            return path.Substring(num + 1);
         }
 
         protected override void GetChildNames(Path path, ReturnContainers returnContainers)
