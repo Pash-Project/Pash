@@ -214,6 +214,29 @@ namespace System.Management
             return _rawPath.StartsWith(value);
         }
 
+        public bool IsRootPath()
+        {
+            if (_rawPath == CorrectSlash)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public string GetDrive()
+        {
+            if (IsRootPath())
+            {
+                return this;
+            }
+            
+            int iDelimiter = _rawPath.IndexOf(':');
+            
+            if (iDelimiter == -1)
+                return null;
+            
+            return _rawPath.Substring(0, iDelimiter);
+        }
         public int Length { get { return _rawPath.Length; } }
     }
 

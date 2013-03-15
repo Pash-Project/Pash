@@ -214,5 +214,15 @@ namespace TestHost
 
             Assert.AreEqual("Command 'Get-ChlidItem' not found.", result);
         }
+
+        [Test]
+        public void GetChildItemShouldReturnSomething()
+        {
+            // notice typo
+            var result = TestHost.Execute(true, "Get-ChildItem /");
+
+            Assert.Greater(result.Length, 0);
+        }
+
     }
 }

@@ -148,14 +148,9 @@ namespace System.Management.Automation
             return string.Format(format, new object[] { drive.Name, path });
         }
 
-        public static string GetDriveFromPath(string path)
+        public static string GetDriveFromPath(Path path)
         {
-            int iDelimiter = path.IndexOf(':');
-
-            if (iDelimiter == -1)
-                return null;
-
-            return path.Substring(0, iDelimiter);
+            return path.GetDrive();
         }
         #endregion
 
