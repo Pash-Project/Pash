@@ -138,16 +138,6 @@ namespace System.Management.Automation
             return path.NormalizeSlashes();
         }
 
-        public static string MakePath(string path, PSDriveInfo drive)
-        {
-            string format = "{0}:" + '\\' + "{1}";
-            if (path.StartsWith("\\"))
-            {
-                format = "{0}:{1}";
-            }
-            return string.Format(format, new object[] { drive.Name, path });
-        }
-
         #endregion
 
         internal static bool IsAbsolutePath(string path, out string driveName)

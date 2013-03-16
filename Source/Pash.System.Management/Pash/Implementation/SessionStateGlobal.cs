@@ -624,6 +624,7 @@ namespace Pash.Implementation
 
             _providersCurrentDrive[CurrentDrive.Provider] = CurrentDrive;
 
+            // this 'set variable' feels funny - should this be an alias instead?
             SetVariable("PWD", CurrentLocation);
             return CurrentLocation;
         }

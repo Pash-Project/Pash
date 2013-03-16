@@ -248,6 +248,33 @@ namespace System.Management
             
             return _rawPath.Substring(0, iDelimiter);
         }
+
+        
+        public Path MakePath(string driveName)
+        {
+            Path fullPath;
+            if (driveName == CorrectSlash)
+            {
+                string preSlash = this.StartsWithSlash() ? string.Empty : CorrectSlash;
+
+                fullPath = new Path(CorrectSlash, WrongSlash, string.Format("{0}{1}", preSlash, this));
+            }
+            else
+            {
+                //TODO: should this take a "current path" parameter? EX: {drive}:{currentPath??}/{this}
+                string preSlash = this.StartsWithSlash() ? string.Empty : CorrectSlash;
+                
+                fullPath = new Path(CorrectSlash, WrongSlash, string.Format("{0}:{1}{2}", driveName, preSlash, this));
+            }
+
+            return fullPath.NormalizeSlashes();
+        }
+
+        public override string ToString()
+        {
+            return _rawPath;
+        }
+
         public int Length { get { return _rawPath.Length; } }
     }
 

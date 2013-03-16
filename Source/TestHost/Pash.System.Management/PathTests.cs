@@ -74,6 +74,31 @@ namespace TestHost
         }
 
 
+        [Test]
+        [TestCase("C", "foo\\bar", "C:\\foo\\bar", "")]
+        [TestCase("C", "foo/bar", "C:\\foo\\bar", "")]
+        public void MakePathForWindows(string driveName, string input, string expected, string failureMessage)
+        {
+            var inputPath = SetWindowsPaths(input);
+            var expectedPath = SetWindowsPaths(expected);
+            
+            inputPath.MakePath(driveName)
+                .ShouldEqual(expectedPath, failureMessage);
+        }
+
+        
+        [Test]
+        [TestCase("/", "foo\\bar", "/foo/bar", "")]
+        [TestCase("/", "foo/bar", "/foo/bar", "")]
+        public void MakePathForUnix(string driveName, string input, string expected, string failureMessage)
+        {
+            var inputPath = SetUnixPaths(input);
+            var expectedPath = SetUnixPaths(expected);
+            
+            inputPath.MakePath(driveName)
+                .ShouldEqual(expectedPath, failureMessage);
+        }
+
         private Path SetUnixPaths(Path path)
         {
             path.CorrectSlash = "/";

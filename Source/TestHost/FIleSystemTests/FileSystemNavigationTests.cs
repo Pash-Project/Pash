@@ -17,15 +17,29 @@ namespace TestHost
             });
         }
 
-        // FIXME: get-location should not be returning the /:\\ 
-        [Test, Ignore]
+        [Test]
         public void CanSetLocationIntoSubDirectory()
         {
             // notice typo
-            var result = TestHost.ExecuteWithZeroErrors("set-location " + _path, "Get-Location");
+            var result = TestHost.ExecuteWithZeroErrors(
+                "Set-Location " + _path,
+                "Get-Location");
+            
+            result.Trim().ShouldEqual((string)_path);
 
-            result.ShouldEqual((string)_path);
+            result = TestHost.ExecuteWithZeroErrors(
+                "Set-Location " + _path + "/FolderA",
+                "Get-Location");
 
+
+            result.Trim().ShouldEqual((string)_path + "/FolderA");
+            
+            result = TestHost.ExecuteWithZeroErrors(
+                "Set-Location " + _path + "/FolderA/SubfolderA",
+                "Get-Location");
+            
+            result.Trim().ShouldEqual((string)_path + "/FolderA/SubfolderA");
+            
         }
     }
 }

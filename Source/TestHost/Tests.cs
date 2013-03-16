@@ -109,7 +109,9 @@ namespace TestHost
         [Test]
         public void VariableTest()
         {
-            StringAssert.AreEqualIgnoringCase("variable:\\" + Environment.NewLine, TestHost.Execute("Set-Location variable:", "$PWD"));
+            System.Management.Path path = "";
+
+            StringAssert.AreEqualIgnoringCase("variable:" + path.CorrectSlash + Environment.NewLine, TestHost.Execute("Set-Location variable:", "$PWD"));
         }
 
         [Test]
