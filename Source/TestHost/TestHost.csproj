@@ -59,6 +59,9 @@
     <Compile Include="Tests.cs" />
     <Compile Include="Pash.System.Management\PathTests.cs" />
     <Compile Include="TestHelpers\NUnitSpecificationExtensions.cs" />
+    <Compile Include="FIleSystemTests\FileSystemTestBase.cs" />
+    <Compile Include="FIleSystemTests\FileSystemTestBaseTests.cs" />
+    <Compile Include="FIleSystemTests\FileSystemNavigationTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pash.Microsoft.Commands.Management\Pash.Microsoft.Commands.Management.csproj">
@@ -92,5 +95,6 @@
   <ItemGroup>
     <Folder Include="Pash.System.Management\" />
     <Folder Include="TestHelpers\" />
+    <Folder Include="FIleSystemTests\" />
   </ItemGroup>
 </Project>

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Management.Automation.Host;
 using System.Management.Automation.Runspaces;
+using Extensions.String;
 
 namespace TestHost
 {
@@ -12,16 +13,41 @@ namespace TestHost
     {
         readonly PSHostUserInterface _ui = new TestHostUserInterface();
 
+        
         public static string Execute(params string[] statements)
         {
-            return Execute(false, statements);
+            return Execute(false, error => {/* do nothing with error? weird? */}, statements);
+        }
+        
+        public static string Execute(bool logErrors, params string[] statements)
+        {
+            if(logErrors)
+            {
+                return ExecuteWithZeroErrors(statements);
+            }
+            return Execute(statements);
+        }
+        
+        public static string ExecuteWithZeroErrors(params string[] statements)
+        {
+            var errors = new List<string>();
+            //Execute
+            var result = Execute(true, error => errors.Add(error), statements);
+            
+            if (errors.Any())
+            {
+                var exceptionMessage = string.Join(Environment.NewLine, errors);
+                throw new Exception(exceptionMessage);
+            }
+            return result;
         }
 
-        public static string Execute(bool logErrors, params string[] statements)
+        private static string Execute(bool logErrors, Action<string> onErrorHandler, params string[] statements)
         {
             TestHostUserInterface ui = new TestHostUserInterface();
 
-            if (logErrors) ui.OnWriteErrorLineString = s => ui.Log.Append(s);
+            if (logErrors)
+                ui.OnWriteErrorLineString = s => ui.Log.Append(s);
 
             TestHost host = new TestHost(ui);
             var myRunSpace = RunspaceFactory.CreateRunspace(host);
@@ -39,7 +65,6 @@ namespace TestHost
 
             return ui.Log.ToString();
         }
-
 
         public TestHost(TestHostUserInterface ui)
         {

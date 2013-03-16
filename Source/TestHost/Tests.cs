@@ -210,7 +210,7 @@ namespace TestHost
         public void UnrecognizedCommandBug()
         {
             // notice typo
-            var result = TestHost.Execute(true, "Get-ChlidItem");
+            var result = TestHost.ExecuteWithZeroErrors("Get-ChlidItem");
 
             Assert.AreEqual("Command 'Get-ChlidItem' not found.", result);
         }
@@ -219,19 +219,27 @@ namespace TestHost
         public void GetChildItemFromRootDefaultProviderShouldReturnSomething()
         {
             // notice typo
-            var result = TestHost.Execute(true, "Get-ChildItem /");
+            var result = TestHost.ExecuteWithZeroErrors("Get-ChildItem /");
 
             Assert.Greater(result.Length, 0);
         }
 
         // NOTE: mac/linux only? (how to make this generic?)
         [Test]
-        public void GetChildItemFromPathShouldReturnSomething()
+        [TestCase("", 0)]
+        [TestCase("\\", 0)]
+        [TestCase("/", 0)]
+        [TestCase("/users", 0)]
+        [TestCase("\\users", 0)]
+        [TestCase("/users/", 0)]
+        [TestCase("/users/../", 0)]
+        [TestCase("\\users\\", 0)]
+        public void GetChildItemFromPathShouldReturnSomething(string path, int greaterThan)
         {
             // notice typo
-            var result = TestHost.Execute(true, "Get-ChildItem /users");
+            var result = TestHost.ExecuteWithZeroErrors("Get-ChildItem " + path);
             
-            Assert.Greater(result.Length, 0);
+            Assert.Greater(result.Length, greaterThan);
         }
 
     }

@@ -6,6 +6,7 @@ namespace System.Management
     /// <summary>
     /// Imutable class that acts like a string, but provides many options around manipulating a powershell 'path'.
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay("Path:{_rawPath}")]
     public class Path
     {
         private string _rawPath;
@@ -64,6 +65,11 @@ namespace System.Management
             }
             
             return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return _rawPath.GetHashCode();
         }
 
         public Path NormalizeSlashes()
