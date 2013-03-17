@@ -30,7 +30,7 @@ namespace System.Management.Automation.Language
 
         public override string ToString()
         {
-            return string.Format("param { {0} ... }", this.Parameters.FirstOrDefault().ToString() ?? "<empty>");
+            return string.Format("param {{ {0} ... }}", this.Parameters.FirstOrDefault().ToString() ?? "<empty>");
         }
     }
 }

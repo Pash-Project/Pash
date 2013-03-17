@@ -26,7 +26,7 @@ namespace System.Management.Automation.Language
 
         public override string ToString()
         {
-            return string.Format("foreach ({0} in {1}) { ... }", this.Variable, this.Condition);
+            return string.Format("foreach ({0} in {1}) {{ ... }}", this.Variable, this.Condition);
         }
     }
 }

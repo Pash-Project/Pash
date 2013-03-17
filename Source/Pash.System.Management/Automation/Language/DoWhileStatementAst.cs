@@ -11,7 +11,7 @@ namespace System.Management.Automation.Language
 
         public override string ToString()
         {
-            return string.Format("do { ... } while {0}", this.Condition);
+            return string.Format("do {{ ... }} while {0}", this.Condition);
         }
     }
 }

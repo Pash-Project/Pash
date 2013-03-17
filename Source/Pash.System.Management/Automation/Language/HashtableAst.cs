@@ -28,7 +28,7 @@ namespace System.Management.Automation.Language
 
         public override string ToString()
         {
-            return string.Format("@{ {0} ... }", this.KeyValuePairs.FirstOrDefault().ToString() ?? "<empty>");
+            return string.Format("@{{ {0} ... }}", this.KeyValuePairs.FirstOrDefault().ToString() ?? "<empty>");
         }
     }
 }
