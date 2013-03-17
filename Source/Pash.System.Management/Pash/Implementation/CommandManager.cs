@@ -11,6 +11,7 @@ using Pash.ParserIntrinsics;
 using Irony.Parsing;
 using System.IO;
 using System.Management.Automation.Language;
+using Extensions.Enumerable;
 
 namespace Pash.Implementation
 {
@@ -253,33 +254,25 @@ namespace Pash.Implementation
 
                 PSSnapInInfo snapinInfo = new PSSnapInInfo(snapin.Name, false, string.Empty, assembly.GetName().Name, string.Empty, new Version(1, 0), null, null, null, snapin.Description, snapin.Vendor);
 
-                foreach (Type type in assembly.GetTypes())
-                {
-                    if (type.IsSubclassOf(typeof(Cmdlet)))
-                    {
-                        foreach (CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof(CmdletAttribute), true))
-                        {
-                            CmdletInfo cmdletInfo =
-                                new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, _context);
-                            collection.Add(cmdletInfo);
-                        }
-                        continue;
-                    }
+                var cmdletInfos = from Type type in assembly.GetTypes()
+                                  where type.IsSubclassOf(typeof(Cmdlet))
+                                  from CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof(CmdletAttribute), true)
+                                  select new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, _context);
 
-                    if (type.IsSubclassOf(typeof(CmdletProvider)))
-                    {
-                        foreach (CmdletProviderAttribute providerAttr in type.GetCustomAttributes(typeof(CmdletProviderAttribute), true))
-                        {
-                            providers.Add(new SnapinProviderPair()
-                            {
-                                snapinInfo = snapinInfo,
-                                providerType = type,
-                                providerAttr = providerAttr
-                            });
-                        }
-                        continue;
-                    }
-                }
+                collection = cmdletInfos.ToCollection();
+
+                var snapinProviderPairs = from Type type in assembly.GetTypes()
+                                          where !type.IsSubclassOf(typeof(Cmdlet))
+                                          where type.IsSubclassOf(typeof(CmdletProvider))
+                                          from CmdletProviderAttribute providerAttr in type.GetCustomAttributes(typeof(CmdletProviderAttribute), true)
+                                          select new SnapinProviderPair
+                                            {
+                                                snapinInfo = snapinInfo,
+                                                providerType = type,
+                                                providerAttr = providerAttr
+                                            };
+
+                providers = snapinProviderPairs.ToCollection();
             }
             catch (Exception ex)
             {
