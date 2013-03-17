@@ -224,19 +224,11 @@ namespace Pash.Implementation
             return null;
         }
 
-        internal List<CommandInfo> FindCommands(string pattern)
+        internal IEnumerable<CommandInfo> FindCommands(string pattern)
         {
-            List<CommandInfo> commandsList = new List<CommandInfo>();
-
-            foreach (List<CmdletInfo> cmdletInfoList in _cmdLets.Values)
-            {
-                foreach (CmdletInfo info in cmdletInfoList)
-                {
-                    commandsList.Add(info);
-                }
-            }
-
-            return commandsList;
+            return from List<CmdletInfo> cmdletInfoList in _cmdLets.Values
+                   from CmdletInfo info in cmdletInfoList
+                   select info;
         }
 
         // TODO: separate providers from cmdlets
