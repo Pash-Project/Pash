@@ -242,44 +242,32 @@ namespace Pash.Implementation
         // TODO: separate providers from cmdlets
         internal Collection<CmdletInfo> LoadCmdletsFromPSSnapin(string strType, out Collection<SnapinProviderPair> providers)
         {
-            Collection<CmdletInfo> collection = new Collection<CmdletInfo>();
-            providers = new Collection<SnapinProviderPair>();
+            Type snapinType = Type.GetType(strType, true);
+            Assembly assembly = snapinType.Assembly;
 
-            try
-            {
-                Type snapinType = Type.GetType(strType, true);
-                Assembly assembly = snapinType.Assembly;
+            PSSnapIn snapin = Activator.CreateInstance(snapinType) as PSSnapIn;
 
-                PSSnapIn snapin = Activator.CreateInstance(snapinType) as PSSnapIn;
+            PSSnapInInfo snapinInfo = new PSSnapInInfo(snapin.Name, false, string.Empty, assembly.GetName().Name, string.Empty, new Version(1, 0), null, null, null, snapin.Description, snapin.Vendor);
 
-                PSSnapInInfo snapinInfo = new PSSnapInInfo(snapin.Name, false, string.Empty, assembly.GetName().Name, string.Empty, new Version(1, 0), null, null, null, snapin.Description, snapin.Vendor);
+            var snapinProviderPairs = from Type type in assembly.GetTypes()
+                                      where !type.IsSubclassOf(typeof(Cmdlet))
+                                      where type.IsSubclassOf(typeof(CmdletProvider))
+                                      from CmdletProviderAttribute providerAttr in type.GetCustomAttributes(typeof(CmdletProviderAttribute), true)
+                                      select new SnapinProviderPair
+                                        {
+                                            snapinInfo = snapinInfo,
+                                            providerType = type,
+                                            providerAttr = providerAttr
+                                        };
 
-                var cmdletInfos = from Type type in assembly.GetTypes()
-                                  where type.IsSubclassOf(typeof(Cmdlet))
-                                  from CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof(CmdletAttribute), true)
-                                  select new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, _context);
+            providers = snapinProviderPairs.ToCollection();
 
-                collection = cmdletInfos.ToCollection();
+            var cmdletInfos = from Type type in assembly.GetTypes()
+                              where type.IsSubclassOf(typeof(Cmdlet))
+                              from CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof(CmdletAttribute), true)
+                              select new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, _context);
 
-                var snapinProviderPairs = from Type type in assembly.GetTypes()
-                                          where !type.IsSubclassOf(typeof(Cmdlet))
-                                          where type.IsSubclassOf(typeof(CmdletProvider))
-                                          from CmdletProviderAttribute providerAttr in type.GetCustomAttributes(typeof(CmdletProviderAttribute), true)
-                                          select new SnapinProviderPair
-                                            {
-                                                snapinInfo = snapinInfo,
-                                                providerType = type,
-                                                providerAttr = providerAttr
-                                            };
-
-                providers = snapinProviderPairs.ToCollection();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.WriteLine(ex.ToString());
-            }
-
-            return collection;
+            return cmdletInfos.ToCollection();
         }
 
         // HACK: all functions are currently stored as scripts. But I'm confused, so I don't know how to fix it.
