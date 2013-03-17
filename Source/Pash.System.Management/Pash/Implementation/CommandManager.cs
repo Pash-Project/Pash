@@ -260,7 +260,7 @@ namespace Pash.Implementation
                         foreach (CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof(CmdletAttribute), true))
                         {
                             CmdletInfo cmdletInfo =
-                                new CmdletInfo(cmdletAttribute.ToString(), type, null, snapinInfo, _context);
+                                new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, _context);
                             collection.Add(cmdletInfo);
                         }
                         continue;
