@@ -591,7 +591,7 @@ namespace Pash.Implementation
             throw new NotImplementedException();
         }
 
-        internal PathInfo SetLocation(string path, ProviderRuntime providerRuntime)
+        internal PathInfo SetLocation(Path path, ProviderRuntime providerRuntime)
         {
             // TODO: deal with paths starting with ".\"
 
@@ -600,24 +600,24 @@ namespace Pash.Implementation
                 throw new NullReferenceException("Path can't be null");
             }
 
-            path = PathIntrinsics.NormalizePath(path);
+            path = path.NormalizeSlashes();
 
             ProviderInfo provider = null;
             string driveName = null;
 
-            string str = path;
             PSDriveInfo currentDrive = CurrentDrive;
 
             // If path doesn't start with a drive name
-            if (path.StartsWith(PathIntrinsics.CorrectSlash.ToString()))
-            {
-                provider = CurrentLocation.Provider;
-            }
-            else if (PathIntrinsics.IsAbsolutePath(path, out driveName))
+            if (PathIntrinsics.IsAbsolutePath(path, out driveName))
             {
                 _currentDrive = GetDrive(driveName, null);
 
                 path = PathIntrinsics.NormalizePath(PathIntrinsics.RemoveDriveName(path));
+            }
+
+            if (path.IsMoveUpOneDir())
+            {
+                path = _currentDrive.CurrentLocation.GetParentPath(null);
             }
 
             _currentDrive.CurrentLocation = path;

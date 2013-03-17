@@ -249,6 +249,25 @@ namespace System.Management
             return _rawPath.Substring(0, iDelimiter);
         }
 
+        public bool HasDrive()
+        {
+            var drive = GetDrive();
+
+            if (string.IsNullOrEmpty(drive))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public bool IsMoveUpOneDir()
+        {
+            if (_rawPath == "..")
+            {
+                return true;
+            }
+            return false;
+        }
         
         public Path MakePath(string driveName)
         {
