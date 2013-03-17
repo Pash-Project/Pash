@@ -220,7 +220,6 @@ namespace TestHost
         [Test]
         public void GetChildItemFromRootDefaultProviderShouldReturnSomething()
         {
-            // notice typo
             var result = TestHost.ExecuteWithZeroErrors("Get-ChildItem /");
 
             Assert.Greater(result.Length, 0);
@@ -238,7 +237,6 @@ namespace TestHost
         [TestCase("\\users\\", 0)]
         public void GetChildItemFromPathShouldReturnSomething(string path, int greaterThan)
         {
-            // notice typo
             var result = TestHost.ExecuteWithZeroErrors("Get-ChildItem " + path);
             
             Assert.Greater(result.Length, greaterThan);

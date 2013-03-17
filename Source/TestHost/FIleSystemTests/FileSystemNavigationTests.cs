@@ -20,7 +20,6 @@ namespace TestHost
         [Test]
         public void CanSetLocationIntoSubDirectory()
         {
-            // notice typo
             var result = TestHost.ExecuteWithZeroErrors(
                 "Set-Location " + _path,
                 "Get-Location");
