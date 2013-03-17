@@ -10,9 +10,9 @@ namespace TestHost.Cmdlets
     public class NewObjectCommandTests
     {
         [Test]
-        public void ATest()
+        public void CanCreateTypeWithNoParameters()
         {
-            Assert.AreEqual("xxx" + Environment.NewLine, TestHost.Execute("New-Object string 'xxx'"));
+            Assert.AreEqual("0.0" + Environment.NewLine, TestHost.Execute("New-Object System.Version"));
         }
     }
 }
