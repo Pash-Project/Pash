@@ -20,5 +20,11 @@ namespace TestHost.Cmdlets
         {
             Assert.AreEqual("0.0" + Environment.NewLine, TestHost.Execute("New-Object Version"));
         }
+
+        [Test]
+        public void CaseInsenstive()
+        {
+            Assert.AreEqual("0.0" + Environment.NewLine, TestHost.Execute("New-Object version"));
+        }
     }
 }
