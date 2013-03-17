@@ -28,6 +28,7 @@ namespace Microsoft.PowerShell.Commands.Utility
         protected override void ProcessRecord()
         {
             var type = Type.GetType(this.TypeName);
+            if (type == null) type = Type.GetType("System." + this.TypeName);
             var ctor = type.GetConstructor(Type.EmptyTypes);
             var result = ctor.Invoke(null);
             WriteObject(result);

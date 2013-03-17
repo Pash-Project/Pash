@@ -14,5 +14,11 @@ namespace TestHost.Cmdlets
         {
             Assert.AreEqual("0.0" + Environment.NewLine, TestHost.Execute("New-Object System.Version"));
         }
+
+        [Test]
+        public void SystemPrefixIsOptional()
+        {
+            Assert.AreEqual("0.0" + Environment.NewLine, TestHost.Execute("New-Object Version"));
+        }
     }
 }
