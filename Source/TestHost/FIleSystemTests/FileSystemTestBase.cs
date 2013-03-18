@@ -3,7 +3,7 @@ using System.Management;
 using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace TestHost
+namespace TestHost.FileSystemTests
 {
     public class FileSystemTestBase
     {

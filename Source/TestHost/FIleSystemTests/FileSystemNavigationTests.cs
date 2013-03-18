@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using System.Management;
 
-namespace TestHost
+namespace TestHost.FileSystemTests
 {
     [TestFixture]
     public class FileSystemNavigationTests : FileSystemTestBase

@@ -227,23 +227,5 @@ namespace TestHost
 
             Assert.Greater(result.Length, 0);
         }
-
-        // NOTE: mac/linux only? (how to make this generic?)
-        [Test]
-        [TestCase("", 0)]
-        [TestCase("\\", 0)]
-        [TestCase("/", 0)]
-        [TestCase("/users", 0)]
-        [TestCase("\\users", 0)]
-        [TestCase("/users/", 0)]
-        [TestCase("/users/../", 0)]
-        [TestCase("\\users\\", 0)]
-        public void GetChildItemFromPathShouldReturnSomething(string path, int greaterThan)
-        {
-            var result = TestHost.ExecuteWithZeroErrors("Get-ChildItem " + path);
-            
-            Assert.Greater(result.Length, greaterThan);
-        }
-
     }
 }
