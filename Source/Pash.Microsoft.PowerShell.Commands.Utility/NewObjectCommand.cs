@@ -67,8 +67,7 @@ namespace Microsoft.PowerShell.Commands.Utility
                 type = type ?? assembly.GetType("System." + this.TypeName, false, true);
             }
 
-            var ctor = type.GetConstructor(Type.EmptyTypes);
-            var result = ctor.Invoke(null);
+            var result = Activator.CreateInstance(type);
             WriteObject(result);
         }
     }

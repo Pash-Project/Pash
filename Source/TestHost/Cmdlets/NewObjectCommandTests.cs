@@ -33,5 +33,11 @@ namespace TestHost.Cmdlets
         {
             Assert.AreEqual("System.Net.WebClient" + Environment.NewLine, TestHost.Execute("New-Object Net.WebClient"));
         }
+
+        [Test]
+        public void ValueTypes()
+        {
+            Assert.AreEqual("False" + Environment.NewLine, TestHost.Execute("New-Object Boolean"));
+        }
     }
 }
