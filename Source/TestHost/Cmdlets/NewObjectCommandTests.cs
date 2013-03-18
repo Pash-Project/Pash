@@ -26,5 +26,12 @@ namespace TestHost.Cmdlets
         {
             Assert.AreEqual("0.0" + Environment.NewLine, TestHost.Execute("New-Object version"));
         }
+
+        // this one is not in mscorlib
+        [Test]
+        public void WebClient()
+        {
+            Assert.AreEqual("System.Net.WebClient" + Environment.NewLine, TestHost.Execute("New-Object Net.WebClient"));
+        }
     }
 }

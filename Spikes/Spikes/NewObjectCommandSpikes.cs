@@ -1,32 +1,30 @@
-﻿using System;
-using System.Collections;
+﻿using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Management.Automation;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Microsoft.PowerShell.Commands.Utility
+namespace Spikes
 {
-    [Cmdlet("New", "Object")]
-    public sealed class NewObjectCommand : PSCmdlet
+    [TestFixture]
+    public class NewObjectCommandSpikes
     {
-        [Parameter(ParameterSetName = "Net", Mandatory = false, Position = 1)]
-        public object[] ArgumentList { get; set; }
+        [Test]
+        public void FromMscorlib()
+        {
+            Assert.AreEqual(typeof(System.Version), Type.GetType("System.Version"));
+        }
 
-        [Parameter(ParameterSetName = "Com", Mandatory = true, Position = 0)]
-        public string ComObject { get; set; }
+        [Test]
+        public void CaseInsenstive()
+        {
+            Assert.AreEqual(typeof(System.Version), Type.GetType("system.version", false, true));
+        }
 
-        [Parameter]
-        public IDictionary Property { get; set; }
-
-        [Parameter(ParameterSetName = "Com")]
-        public SwitchParameter Strict { get; set; }
-
-        [Parameter(/*ParameterSetName = "Net", */Mandatory = true, Position = 0)]
-        public string TypeName { get; set; }
-
-        protected override void ProcessRecord()
+        [Test]
+        public void AssembliesSearch()
         {
             /*
              * In PowerShell, I ran:
@@ -58,18 +56,13 @@ namespace Microsoft.PowerShell.Commands.Utility
                 "System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
             };
 
-            // I tried to write this in LINQ but it didn't out clean. 
-            Type type = null;
+            Type webClientType = null;
             foreach (var item in defaultSearchAssemblies)
             {
-                var assembly = Assembly.Load(item);
-                type = type ?? assembly.GetType(this.TypeName, false, true);
-                type = type ?? assembly.GetType("System." + this.TypeName, false, true);
+                webClientType = webClientType ?? Assembly.Load(item).GetType("System.Net.WebClient");
             }
 
-            var ctor = type.GetConstructor(Type.EmptyTypes);
-            var result = ctor.Invoke(null);
-            WriteObject(result);
+            Assert.AreEqual(typeof(System.Net.WebClient), webClientType);
         }
     }
 }
