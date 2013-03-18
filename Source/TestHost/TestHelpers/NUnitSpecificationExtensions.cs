@@ -220,7 +220,7 @@ public static class NUnitSpecificationExtensions
 
     public static System.Management.Path ShouldEqual(this System.Management.Path inputPath, System.Management.Path expectedPath, string message = null)
     {
-        Assert.AreEqual((string)inputPath, (string)expectedPath, message);
+        Assert.AreEqual((string)expectedPath, (string)inputPath, message);
         return inputPath;
     }
 }
