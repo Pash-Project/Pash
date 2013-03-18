@@ -11,6 +11,7 @@ using Pash.ParserIntrinsics;
 using Irony.Parsing;
 using System.IO;
 using System.Management.Automation.Language;
+using Extensions.Enumerable;
 
 namespace Pash.Implementation
 {
@@ -223,70 +224,42 @@ namespace Pash.Implementation
             return null;
         }
 
-        internal List<CommandInfo> FindCommands(string pattern)
+        internal IEnumerable<CommandInfo> FindCommands(string pattern)
         {
-            List<CommandInfo> commandsList = new List<CommandInfo>();
-
-            foreach (List<CmdletInfo> cmdletInfoList in _cmdLets.Values)
-            {
-                foreach (CmdletInfo info in cmdletInfoList)
-                {
-                    commandsList.Add(info);
-                }
-            }
-
-            return commandsList;
+            return from List<CmdletInfo> cmdletInfoList in _cmdLets.Values
+                   from CmdletInfo info in cmdletInfoList
+                   select info;
         }
 
         // TODO: separate providers from cmdlets
         internal Collection<CmdletInfo> LoadCmdletsFromPSSnapin(string strType, out Collection<SnapinProviderPair> providers)
         {
-            Collection<CmdletInfo> collection = new Collection<CmdletInfo>();
-            providers = new Collection<SnapinProviderPair>();
+            Type snapinType = Type.GetType(strType, true);
+            Assembly assembly = snapinType.Assembly;
 
-            try
-            {
-                Type snapinType = Type.GetType(strType, true);
-                Assembly assembly = snapinType.Assembly;
+            PSSnapIn snapin = Activator.CreateInstance(snapinType) as PSSnapIn;
 
-                PSSnapIn snapin = Activator.CreateInstance(snapinType) as PSSnapIn;
+            PSSnapInInfo snapinInfo = new PSSnapInInfo(snapin.Name, false, string.Empty, assembly.GetName().Name, string.Empty, new Version(1, 0), null, null, null, snapin.Description, snapin.Vendor);
 
-                PSSnapInInfo snapinInfo = new PSSnapInInfo(snapin.Name, false, string.Empty, assembly.GetName().Name, string.Empty, new Version(1, 0), null, null, null, snapin.Description, snapin.Vendor);
+            var snapinProviderPairs = from Type type in assembly.GetTypes()
+                                      where !type.IsSubclassOf(typeof(Cmdlet))
+                                      where type.IsSubclassOf(typeof(CmdletProvider))
+                                      from CmdletProviderAttribute providerAttr in type.GetCustomAttributes(typeof(CmdletProviderAttribute), true)
+                                      select new SnapinProviderPair
+                                        {
+                                            snapinInfo = snapinInfo,
+                                            providerType = type,
+                                            providerAttr = providerAttr
+                                        };
 
-                foreach (Type type in assembly.GetTypes())
-                {
-                    if (type.IsSubclassOf(typeof(Cmdlet)))
-                    {
-                        foreach (CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof(CmdletAttribute), true))
-                        {
-                            CmdletInfo cmdletInfo =
-                                new CmdletInfo(cmdletAttribute.ToString(), type, null, snapinInfo, _context);
-                            collection.Add(cmdletInfo);
-                        }
-                        continue;
-                    }
+            providers = snapinProviderPairs.ToCollection();
 
-                    if (type.IsSubclassOf(typeof(CmdletProvider)))
-                    {
-                        foreach (CmdletProviderAttribute providerAttr in type.GetCustomAttributes(typeof(CmdletProviderAttribute), true))
-                        {
-                            providers.Add(new SnapinProviderPair()
-                            {
-                                snapinInfo = snapinInfo,
-                                providerType = type,
-                                providerAttr = providerAttr
-                            });
-                        }
-                        continue;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.WriteLine(ex.ToString());
-            }
+            var cmdletInfos = from Type type in assembly.GetTypes()
+                              where type.IsSubclassOf(typeof(Cmdlet))
+                              from CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof(CmdletAttribute), true)
+                              select new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, _context);
 
-            return collection;
+            return cmdletInfos.ToCollection();
         }
 
         // HACK: all functions are currently stored as scripts. But I'm confused, so I don't know how to fix it.

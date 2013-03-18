@@ -45,6 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cmdlets\GetCommandTests.cs" />
+    <Compile Include="Cmdlets\NewObjectCommandTests.cs" />
     <Compile Include="LiteralsTests.cs">
       <SubType>Code</SubType>
     </Compile>

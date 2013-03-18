@@ -12,7 +12,7 @@ namespace System.Management.Automation
         {
             get
             {
-                return ToString();
+                return PathIntrinsics.MakePath(_path, Drive);
             }
         }
 
@@ -38,7 +38,7 @@ namespace System.Management.Automation
 
         public override string ToString()
         {
-            return PathIntrinsics.MakePath(_path, Drive);
+            return this.Path;
         }
     }
 }
