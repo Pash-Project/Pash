@@ -37,6 +37,7 @@ namespace TestHost
 
         [Test]
         [TestCase("..", "/a/b/c/d/e/f", "")]
+        [TestCase("../", "/a/b/c/d/e/f", "")]
         public void CDWithTwoPeriodsShouldMoveUpOneDirectory(string setLocationParam, string expectedLocation, string errorMessage)
         {
             var rootPath = base.SetupFileSystemWithStructure(new []{

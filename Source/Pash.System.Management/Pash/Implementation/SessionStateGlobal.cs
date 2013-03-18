@@ -11,12 +11,47 @@ using System.Management.Automation.Provider;
 
 namespace Pash.Implementation
 {
+    public class PSDriveInfoCollection //: IEnumerable<KeyValuePair<string, PSDriveInfo>>
+    {
+
+        private Dictionary<string, PSDriveInfo> _drives;
+        public PSDriveInfoCollection()
+        {
+            _drives = new Dictionary<string, PSDriveInfo>(StringComparer.CurrentCultureIgnoreCase);
+        }
+
+        public void Add(string name, PSDriveInfo driveInfo)
+        {
+            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException("name");
+            if (driveInfo == null) throw new ArgumentNullException("driveInfo");
+            _drives.Add(name, driveInfo);
+        }
+
+        public bool ContainsKey(string driveName)
+        {
+            return _drives.ContainsKey(driveName);
+        }
+
+        public PSDriveInfo GetDrive(string driveName)
+        {
+            if (!_drives.ContainsKey(driveName))
+                return null;
+            
+            return _drives[driveName];
+        }
+
+        public IEnumerable<PSDriveInfo> Drives
+        {
+            get{ return _drives.Values;}
+        }
+    }
+
     internal class SessionStateGlobal
     {
         private Dictionary<string, List<ProviderInfo>> _providers;
         private Dictionary<string, List<CmdletProvider>> _providerInstances;
         private Dictionary<ProviderInfo, PSDriveInfo> _providersCurrentDrive;
-        private Dictionary<string, PSDriveInfo> _drives;
+        private PSDriveInfoCollection _drives;
         private Dictionary<string, Stack<PathInfo>> _workingLocationStack;
         private Dictionary<string, AliasInfo> _aliases;
         private Dictionary<string, CommandInfo> _functions;
@@ -24,12 +59,15 @@ namespace Pash.Implementation
         private ExecutionContext _executionContext;
         internal PSDriveInfo _currentDrive;
 
+        // Test access only?? We need a better way to get access to 'state' for use in tests
+        internal PSDriveInfoCollection DrivesCollection{ get { return _drives; } }
+
         private SessionStateGlobal()
         {
             _providers = new Dictionary<string, List<ProviderInfo>>(StringComparer.CurrentCultureIgnoreCase);
             _providerInstances = new Dictionary<string, List<CmdletProvider>>(StringComparer.CurrentCultureIgnoreCase);
             _providersCurrentDrive = new Dictionary<ProviderInfo, PSDriveInfo>();
-            _drives = new Dictionary<string, PSDriveInfo>(StringComparer.CurrentCultureIgnoreCase);
+            _drives = new PSDriveInfoCollection();
             _workingLocationStack = new Dictionary<string, Stack<PathInfo>>(StringComparer.CurrentCultureIgnoreCase);
             _aliases = new Dictionary<string, AliasInfo>(StringComparer.CurrentCultureIgnoreCase);
             _functions = new Dictionary<string, CommandInfo>(StringComparer.CurrentCultureIgnoreCase);
@@ -206,6 +244,10 @@ namespace Pash.Implementation
             {
                 return _currentDrive;
             }
+            private set
+            {
+                _currentDrive = value;
+            }
         }
 
         internal void SetCurrentDrive()
@@ -352,12 +394,9 @@ namespace Pash.Implementation
         #endregion
 
         #region DriveManagementIntrinsics
-        internal PSDriveInfo GetDrive(string driveName, string scope)
+        internal PSDriveInfo GetDrive(string driveName)
         {
-            if (!_drives.ContainsKey(driveName))
-                return null;
-
-            return _drives[driveName];
+            return _drives.GetDrive(driveName);
         }
 
         /// <summary>
@@ -368,7 +407,7 @@ namespace Pash.Implementation
         internal Collection<PSDriveInfo> GetDrives(string scope)
         {
             Collection<PSDriveInfo> collection = new Collection<PSDriveInfo>();
-            foreach (PSDriveInfo info in _drives.Values)
+            foreach (PSDriveInfo info in _drives.Drives)
             {
                 // TODO: make sure not to include the removed drives or to
                 // TODO: make sure to mount all the removable drives
@@ -551,7 +590,7 @@ namespace Pash.Implementation
 
             string driveName = path.GetDrive();
 
-            PSDriveInfo drive = GetDrive(driveName, null);
+            PSDriveInfo drive = GetDrive(driveName);
 
             if (drive == null)
                 return null;
@@ -602,30 +641,27 @@ namespace Pash.Implementation
 
             path = path.NormalizeSlashes();
 
-            ProviderInfo provider = null;
             string driveName = null;
-
-            PSDriveInfo currentDrive = CurrentDrive;
-
-            // If path doesn't start with a drive name
-            if (PathIntrinsics.IsAbsolutePath(path, out driveName))
+            if (path.TryGetDriveName(out driveName))
             {
-                _currentDrive = GetDrive(driveName, null);
-
-                path = PathIntrinsics.NormalizePath(PathIntrinsics.RemoveDriveName(path));
+                CurrentDrive = GetDrive(driveName);
             }
 
-            if (path.IsMoveUpOneDir())
+            Path newLocation;
+
+            if (CurrentDrive.IsFileSystemProvider)
             {
-                path = _currentDrive.CurrentLocation.GetParentPath(null);
+                newLocation = path.GetFullPath(CurrentDrive.CurrentLocation, true);
+            }
+            else
+            {
+                newLocation = path.RemoveDrive();
             }
 
-            _currentDrive.CurrentLocation = path;
+            CurrentDrive.CurrentLocation = newLocation.TrimEndSlash();
 
             _providersCurrentDrive[CurrentDrive.Provider] = CurrentDrive;
 
-            // this 'set variable' feels funny - should this be an alias instead?
-            SetVariable("PWD", CurrentLocation);
             return CurrentLocation;
         }
     }

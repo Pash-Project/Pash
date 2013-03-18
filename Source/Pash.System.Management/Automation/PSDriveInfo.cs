@@ -33,6 +33,16 @@ namespace System.Management.Automation
             CurrentLocation = string.Empty;
         }
 
+        
+        public bool IsFileSystemProvider
+        {
+            get
+            {
+                return Provider.ImplementingType == typeof(Microsoft.PowerShell.Commands.FileSystemProvider);
+            }
+        }
+
+
         public static bool operator !=(PSDriveInfo drive1, PSDriveInfo drive2)
         {
             return !(drive1 == drive2);

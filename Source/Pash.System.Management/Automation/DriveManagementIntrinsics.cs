@@ -24,7 +24,7 @@ namespace System.Management.Automation
 
         public PSDriveInfo Get(string driveName)
         {
-            return _sessionState.GetDrive(driveName, null);
+            return _sessionState.GetDrive(driveName);
         }
 
         public Collection<PSDriveInfo> GetAll()
@@ -44,7 +44,8 @@ namespace System.Management.Automation
 
         public PSDriveInfo GetAtScope(string driveName, string scope)
         {
-            return _sessionState.GetDrive(driveName, scope);
+            // Scope?
+            return _sessionState.GetDrive(driveName);
         }
 
         public PSDriveInfo New(PSDriveInfo drive, string scope)

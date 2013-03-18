@@ -1,4 +1,6 @@
 using System;
+using System.Management.Automation;
+using Pash.Implementation;
 
 namespace System.Management
 {
@@ -184,14 +186,42 @@ namespace System.Management
 
         }
 
+        public Path GetFullPath(string currentLocation, bool isFileSystemProvider)
+        {
+            if (this.IsRootPath())
+            {
+                return this;
+            }
+            if (isFileSystemProvider)
+            {
+                Path combinedPath;
+                if (this.StartsWithSlash() /*TODO: || this.IsPathAbsolute()) */)
+                {
+                    combinedPath = this;
+                }
+                else
+                {
+                    combinedPath = ((Path)currentLocation).Combine(this);
+                }
+
+                return System.IO.Path.GetFullPath(combinedPath);
+            }
+
+
+            // TODO: this won't work with non-file-system paths that use "../" navigation or other "." navigation.
+            return ((Path)currentLocation).Combine(this);
+        }
+
         public bool StartsWithSlash()
         {
             if (this.NormalizeSlashes()._rawPath.StartsWith(CorrectSlash))
             {
                 return true;
             }
+
             return false;
         }
+
         public bool EndsWithSlash()
         {
             if (this.NormalizeSlashes()._rawPath.EndsWith(CorrectSlash))
@@ -249,6 +279,16 @@ namespace System.Management
             return _rawPath.Substring(0, iDelimiter);
         }
 
+        public bool TryGetDriveName(out string driveName)
+        {
+            driveName = GetDrive();
+            if (string.IsNullOrEmpty(driveName))
+            {
+                return false;
+            }
+            return true;
+        }
+
         public bool HasDrive()
         {
             var drive = GetDrive();
@@ -258,6 +298,20 @@ namespace System.Management
                 return false;
             }
             return true;
+        }
+
+        public Path RemoveDrive()
+        {
+            string drive;
+            if (this.TryGetDriveName(out drive))
+            {
+                var newPath = _rawPath.Substring(drive.Length);
+                if (newPath.StartsWith(":"))
+                    return newPath.Substring(1);
+                return newPath;
+            }
+
+            return this;
         }
 
         public bool IsMoveUpOneDir()
@@ -277,8 +331,7 @@ namespace System.Management
                 string preSlash = this.StartsWithSlash() ? string.Empty : CorrectSlash;
 
                 fullPath = new Path(CorrectSlash, WrongSlash, string.Format("{0}{1}", preSlash, this));
-            }
-            else
+            } else
             {
                 //TODO: should this take a "current path" parameter? EX: {drive}:{currentPath??}/{this}
                 string preSlash = this.StartsWithSlash() ? string.Empty : CorrectSlash;

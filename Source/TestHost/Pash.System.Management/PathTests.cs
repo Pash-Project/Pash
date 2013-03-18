@@ -99,6 +99,32 @@ namespace TestHost
                 .ShouldEqual(expectedPath, failureMessage);
         }
 
+
+        
+        [Test]
+        [TestCase("/", "", "/", "")]
+        [TestCase("/", "/foo", "/foo", "")]
+        [TestCase("/foo", "/", "/", "")]
+        [TestCase("/foo", "..", "/", "")]
+        [TestCase("/foo", "../", "/", "")]
+        [TestCase("/foo/bar", "../..", "/", "")]
+        [TestCase("/foo/bar", "../../", "/", "")]
+        [TestCase("/foo/bar", "../baz", "/foo/baz", "")]
+        [TestCase("/foo/bar", "../../foo/baz/../bar", "/foo/bar", "")]
+        [TestCase("Variable:", "/foo", "Variable:/foo", "")]
+        public void GetFullPathForUnix(string currentLocation, string input, string expected, string failureMessage)
+        {
+            var inputPath = SetUnixPaths(input);
+            var expectedPath = SetUnixPaths(expected);
+
+            var isFileSystemProvider = true;
+            if(currentLocation.StartsWith("Variable"))
+                isFileSystemProvider = false;
+
+            inputPath.GetFullPath(currentLocation, isFileSystemProvider)
+                .ShouldEqual(expectedPath, failureMessage);
+        }
+
         private Path SetUnixPaths(Path path)
         {
             path.CorrectSlash = "/";

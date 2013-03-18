@@ -111,7 +111,10 @@ namespace TestHost
         {
             System.Management.Path path = "";
 
-            StringAssert.AreEqualIgnoringCase("variable:" + path.CorrectSlash + Environment.NewLine, TestHost.Execute("Set-Location variable:", "$PWD"));
+            var expectedPath = "Variable:" + path.CorrectSlash;
+            var actualPath = TestHost.Execute("Set-Location variable:", "Get-Location").Trim();
+
+            StringAssert.AreEqualIgnoringCase(expectedPath, actualPath);
         }
 
         [Test]
