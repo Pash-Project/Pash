@@ -11,7 +11,7 @@ namespace Microsoft.PowerShell.Commands.Utility
     [Cmdlet("New", "Object")]
     public sealed class NewObjectCommand : PSCmdlet
     {
-        [Parameter(ParameterSetName = "Net", Mandatory = false, Position = 1)]
+        [Parameter(/*ParameterSetName = "Net", */Mandatory = false, Position = 1)]
         public object[] ArgumentList { get; set; }
 
         [Parameter(ParameterSetName = "Com", Mandatory = true, Position = 0)]
@@ -67,7 +67,7 @@ namespace Microsoft.PowerShell.Commands.Utility
                 type = type ?? assembly.GetType("System." + this.TypeName, false, true);
             }
 
-            var result = Activator.CreateInstance(type);
+            var result = Activator.CreateInstance(type, this.ArgumentList);
             WriteObject(result);
         }
     }

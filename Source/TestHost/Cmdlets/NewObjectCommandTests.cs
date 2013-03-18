@@ -39,5 +39,11 @@ namespace TestHost.Cmdlets
         {
             Assert.AreEqual("False" + Environment.NewLine, TestHost.Execute("New-Object Boolean"));
         }
+
+        [Test]
+        public void Parameter()
+        {
+            Assert.AreEqual("3.4.5.6" + Environment.NewLine, TestHost.Execute("New-Object version \"3.4.5.6\""));
+        }
     }
 }
