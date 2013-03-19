@@ -7,6 +7,7 @@ using Irony.Parsing;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Irony;
+using System.Diagnostics;
 
 namespace Pash.ParserIntrinsics
 {
@@ -1465,13 +1466,18 @@ namespace Pash.ParserIntrinsics
 
         void InitializeNonTerminalFields()
         {
-            foreach (var field in this.GetType().GetFields().Where(f => f.FieldType == typeof(NonTerminal)))
+            var nonTerminalFields = from field in this.GetType().GetFields()
+                                    where field.FieldType == typeof(NonTerminal)
+                                    select field;
+
+            foreach (var field in nonTerminalFields)
             {
-                if (field.GetValue(this) != null) throw new Exception("don't pre-init fields - let us take care of that for you.");
+                Debug.Assert(nonTerminalFields != null, "Don't pre-initalize the NonTerminal fields. We'll do that in reflection");
 
                 var nonTerminal = new NonTerminal(field.Name);
 
                 field.SetValue(this, nonTerminal);
+
             }
         }
     }
