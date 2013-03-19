@@ -207,5 +207,13 @@ namespace TestHost
 
             Assert.AreEqual("Command 'Get-ChlidItem' not found.", result);
         }
+
+        [Test]
+        public void InstanceMemberAccess()
+        {
+            var result = TestHost.Execute(true, @"'xxx'.Length");
+
+            Assert.AreEqual("3" + Environment.NewLine, result);
+        }
     }
 }
