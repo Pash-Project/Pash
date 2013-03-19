@@ -213,7 +213,7 @@ namespace Pash.ParserIntrinsics
         #endregion
         #endregion
 
-        PowerShellGrammar()
+        public PowerShellGrammar()
         {
             InitializeTerminalFields();
             InitializeNonTerminalFields();
@@ -1079,8 +1079,8 @@ namespace Pash.ParserIntrinsics
             primary_expression.Rule =
                 value
                 |
-                // member_access
-                // |
+                member_access
+                |
                 element_access
                 |
                 // invocation_expression
@@ -1291,8 +1291,9 @@ namespace Pash.ParserIntrinsics
                 string_literal
                 |
                 string_literal_with_subexpression
-                |
-                expression_with_unary_operator
+                // TODO: 
+                // |
+                // expression_with_unary_operator
                 |
                 value
                 ;
