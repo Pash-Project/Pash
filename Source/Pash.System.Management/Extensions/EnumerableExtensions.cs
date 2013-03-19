@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
@@ -21,6 +22,15 @@ namespace Extensions.Enumerable
         internal static void ForEach<T>(this IEnumerable<T> @this, Action<T> action)
         {
             foreach (var item in @this) action(item);
+        }
+
+        internal static Collection<T> ToCollection<T>(this IEnumerable<T> @this)
+        {
+            Collection<T> collection = new Collection<T>();
+
+            @this.ForEach(t => collection.Add(t));
+
+            return collection;
         }
     }
 }

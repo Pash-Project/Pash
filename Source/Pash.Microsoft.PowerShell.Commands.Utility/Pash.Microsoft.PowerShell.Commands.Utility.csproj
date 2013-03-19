@@ -38,6 +38,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Net" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -48,6 +49,7 @@
     </Compile>
     <Compile Include="GetVariableCommand.cs" />
     <Compile Include="MemberDefinition.cs" />
+    <Compile Include="NewObjectCommand.cs" />
     <Compile Include="NewAliasCommand.cs" />
     <Compile Include="NewVariableCommand.cs" />
     <Compile Include="ObjectCmdletBase.cs" />

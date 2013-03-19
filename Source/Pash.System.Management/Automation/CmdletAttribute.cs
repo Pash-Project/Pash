@@ -20,9 +20,18 @@ namespace System.Management.Automation
         public bool SupportsShouldProcess { get; set; }
         public string VerbName { get; private set; }
 
+        internal string FullName
+        {
+            get
+            {
+                return
+                    string.Format("{0}-{1}", this.VerbName, this.NounName);
+            }
+        }
+
         public override string ToString()
         {
-            return VerbName + "-" + NounName;
+            return this.FullName;
         }
     }
 }

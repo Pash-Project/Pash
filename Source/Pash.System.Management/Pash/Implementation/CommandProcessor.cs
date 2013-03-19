@@ -126,6 +126,11 @@ namespace System.Management.Automation
                 propertyInfo.SetValue(Command, new SwitchParameter(true), null);
             }
 
+            else if (propertyInfo.PropertyType == typeof(Object[]))
+            {
+                propertyInfo.SetValue(Command, new[] { value }, null);
+            }
+
             else
             {
                 propertyInfo.SetValue(Command, value, null);
