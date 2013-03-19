@@ -264,8 +264,6 @@ namespace Pash.ParserIntrinsics
 
         public void BuildProductionRules()
         {
-            // convenient `_opt` rules
-            new_lines_opt.Rule = new_lines | Empty;
             new_lines_opt.SetFlag(TermFlags.IsTransient);
 
             #region B.1 Lexical grammar
@@ -882,7 +880,6 @@ namespace Pash.ParserIntrinsics
             ////            command_elements   command_element
             command_elements.Rule =
                 MakePlusRule(command_elements, command_element);
-            command_elements_opt.Rule = command_elements | Empty;
 
             ////        command_element:
             ////            command_parameter
@@ -1477,7 +1474,15 @@ namespace Pash.ParserIntrinsics
                 var nonTerminal = new NonTerminal(field.Name);
 
                 field.SetValue(this, nonTerminal);
+            }
 
+            foreach (var field in nonTerminalFields.Where(f => f.Name.EndsWith("_opt")))
+            {
+                var parentFieldName = field.Name.Remove(field.Name.Length - "_opt".Length);
+                NonTerminal nonTerminal = (NonTerminal)field.GetValue(this);
+                NonTerminal nonTerminalParent = (NonTerminal)nonTerminalFields.Single(f => f.Name == parentFieldName).GetValue(this);
+
+                nonTerminal.Rule = nonTerminalParent | Empty;
             }
         }
     }
