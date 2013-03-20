@@ -54,10 +54,14 @@ namespace Pash.ParserIntrinsics
         #region B.2.2 Statements
         public readonly NonTerminal script_block = null; // Initialized by reflection.
         public readonly NonTerminal param_block = null; // Initialized by reflection.
+        public readonly NonTerminal param_block_opt = null; // Initialized by reflection.
         public readonly NonTerminal parameter_list = null; // Initialized by reflection.
+        public readonly NonTerminal parameter_list_opt = null; // Initialized by reflection.
         public readonly NonTerminal script_parameter = null; // Initialized by reflection.
         public readonly NonTerminal script_parameter_default = null; // Initialized by reflection.
+        public readonly NonTerminal script_parameter_default_opt = null; // Initialized by reflection.
         public readonly NonTerminal script_block_body = null; // Initialized by reflection.
+        public readonly NonTerminal script_block_body_opt = null; // Initialized by reflection.
         public readonly NonTerminal named_block_list = null; // Initialized by reflection.
         public readonly NonTerminal named_block = null; // Initialized by reflection.
         public readonly NonTerminal block_name = null; // Initialized by reflection.
@@ -65,21 +69,25 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal _statement_block_empty = null; // Initialized by reflection.
         public readonly NonTerminal _statement_block_full = null; // Initialized by reflection.
         public readonly NonTerminal statement_list = null; // Initialized by reflection.
+        public readonly NonTerminal statement_list_opt = null; // Initialized by reflection.
         public readonly NonTerminal statement = null; // Initialized by reflection.
         public readonly NonTerminal _statement_labeled_statement = null; // Initialized by reflection.
         public readonly NonTerminal _statement_flow_control_statement = null; // Initialized by reflection.
         public readonly NonTerminal _statement_pipeline = null; // Initialized by reflection.
         public readonly NonTerminal statement_terminator = null; // Initialized by reflection.
         public readonly NonTerminal statement_terminators = null; // Initialized by reflection.
+        public readonly NonTerminal statement_terminators_opt = null; // Initialized by reflection.
         public readonly NonTerminal if_statement = null; // Initialized by reflection.
         public readonly NonTerminal _if_statement_clause = null; // Initialized by reflection.
         public readonly NonTerminal _if_statement_condition = null; // Initialized by reflection.
         public readonly NonTerminal elseif_clauses = null; // Initialized by reflection.
         public readonly NonTerminal elseif_clause = null; // Initialized by reflection.
         public readonly NonTerminal else_clause = null; // Initialized by reflection.
+        public readonly NonTerminal else_clause_opt = null; // Initialized by reflection.
         public readonly NonTerminal labeled_statement = null; // Initialized by reflection.
         public readonly NonTerminal switch_statement = null; // Initialized by reflection.
         public readonly NonTerminal switch_parameters = null; // Initialized by reflection.
+        public readonly NonTerminal switch_parameters_opt = null; // Initialized by reflection.
         public readonly NonTerminal switch_parameter = null; // Initialized by reflection.
         public readonly NonTerminal switch_condition = null; // Initialized by reflection.
         public readonly NonTerminal _switch_condition_pipeline = null; // Initialized by reflection.
@@ -95,8 +103,11 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal _for_statement_2 = null; // Initialized by reflection.
         public readonly NonTerminal _for_statement_3 = null; // Initialized by reflection.
         public readonly NonTerminal for_initializer = null; // Initialized by reflection.
+        public readonly NonTerminal for_initializer_opt = null; // Initialized by reflection.
         public readonly NonTerminal for_condition = null; // Initialized by reflection.
+        public readonly NonTerminal for_condition_opt = null; // Initialized by reflection.
         public readonly NonTerminal for_iterator = null; // Initialized by reflection.
+        public readonly NonTerminal for_iterator_opt = null; // Initialized by reflection.
         public readonly NonTerminal while_statement = null; // Initialized by reflection.
         public readonly NonTerminal do_statement = null; // Initialized by reflection.
         public readonly NonTerminal _do_statement_while = null; // Initialized by reflection.
@@ -105,6 +116,7 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal function_statement = null; // Initialized by reflection.
         public readonly NonTerminal function_name = null; // Initialized by reflection.
         public readonly NonTerminal function_parameter_declaration = null; // Initialized by reflection.
+        public readonly NonTerminal function_parameter_declaration_opt = null; // Initialized by reflection.
         public readonly NonTerminal flow_control_statement = null; // Initialized by reflection.
         public readonly NonTerminal _flow_control_statement_break = null; // Initialized by reflection.
         public readonly NonTerminal _flow_control_statement_continue = null; // Initialized by reflection.
@@ -112,6 +124,7 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal _flow_control_statement_return = null; // Initialized by reflection.
         public readonly NonTerminal _flow_control_statement_exit = null; // Initialized by reflection.
         public readonly NonTerminal label_expression = null; // Initialized by reflection.
+        public readonly NonTerminal label_expression_opt = null; // Initialized by reflection.
         public readonly NonTerminal trap_statement = null; // Initialized by reflection.
         public readonly NonTerminal try_statement = null; // Initialized by reflection.
         public readonly NonTerminal _try_statement_catch = null; // Initialized by reflection.
@@ -120,17 +133,21 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal catch_clauses = null; // Initialized by reflection.
         public readonly NonTerminal catch_clause = null; // Initialized by reflection.
         public readonly NonTerminal catch_type_list = null; // Initialized by reflection.
+        public readonly NonTerminal catch_type_list_opt = null; // Initialized by reflection.
         public readonly NonTerminal finally_clause = null; // Initialized by reflection.
         public readonly NonTerminal data_statement = null; // Initialized by reflection.
         public readonly NonTerminal data_name = null; // Initialized by reflection.
         public readonly NonTerminal data_commands_allowed = null; // Initialized by reflection.
+        public readonly NonTerminal data_commands_allowed_opt = null; // Initialized by reflection.
         public readonly NonTerminal data_commands_list = null; // Initialized by reflection.
         public readonly NonTerminal data_command = null; // Initialized by reflection.
         public readonly NonTerminal pipeline = null; // Initialized by reflection.
+        public readonly NonTerminal pipeline_opt = null; // Initialized by reflection.
         public readonly NonTerminal _pipeline_expression = null; // Initialized by reflection.
         public readonly NonTerminal _pipeline_command = null; // Initialized by reflection.
         public readonly NonTerminal assignment_expression = null; // Initialized by reflection.
         public readonly NonTerminal pipeline_tail = null; // Initialized by reflection.
+        public readonly NonTerminal pipeline_tail_opt = null; // Initialized by reflection.
         public readonly NonTerminal command = null; // Initialized by reflection.
         public readonly NonTerminal _command_simple = null; // Initialized by reflection.
         public readonly NonTerminal _command_invocation = null; // Initialized by reflection.
@@ -144,6 +161,7 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal command_element = null; // Initialized by reflection.
         public readonly NonTerminal command_argument = null; // Initialized by reflection.
         public readonly NonTerminal redirections = null; // Initialized by reflection.
+        public readonly NonTerminal redirections_opt = null; // Initialized by reflection.
         public readonly NonTerminal redirection = null; // Initialized by reflection.
         public readonly NonTerminal _redirection_error_to_output = null; // Initialized by reflection.
         public readonly NonTerminal _redirection_reserved = null; // Initialized by reflection.
@@ -173,6 +191,7 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal script_block_expression = null; // Initialized by reflection.
         public readonly NonTerminal hash_literal_expression = null; // Initialized by reflection.
         public readonly NonTerminal hash_literal_body = null; // Initialized by reflection.
+        public readonly NonTerminal hash_literal_body_opt = null; // Initialized by reflection.
         public readonly NonTerminal hash_entry = null; // Initialized by reflection.
         public readonly NonTerminal key_expression = null; // Initialized by reflection.
         public readonly NonTerminal post_increment_expression = null; // Initialized by reflection.
@@ -182,6 +201,7 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal invocation_expression = null; // Initialized by reflection.
         public readonly NonTerminal argument_list = null; // Initialized by reflection.
         public readonly NonTerminal argument_expression_list = null; // Initialized by reflection.
+        public readonly NonTerminal argument_expression_list_opt = null; // Initialized by reflection.
         public readonly NonTerminal argument_expression = null; // Initialized by reflection.
         public readonly NonTerminal logical_argument_expression = null; // Initialized by reflection.
         public readonly NonTerminal bitwise_argument_expression = null; // Initialized by reflection.
@@ -392,14 +412,14 @@ namespace Pash.ParserIntrinsics
             ////        script_block:
             ////            param_block_opt   statement_terminators_opt    script_block_body_opt
             script_block.Rule =
-                (param_block | Empty) + (statement_terminators | Empty) + (script_block_body | Empty);
+                (param_block_opt) + (statement_terminators_opt) + (script_block_body_opt);
 
             ////        param_block:
             ////            new_lines_opt   attribute_list_opt   new_lines_opt   param   new_lines_opt
             ////                    (   parameter_list_opt   new_lines_opt   )
             param_block.Rule =
-                /* new_lines_opt + TODO: https://github.com/JayBazuzi/Pash2/issues/11 (attribute_list | Empty) + new_lines_opt + */ "param" + new_lines_opt
-                        + "(" + (parameter_list | Empty) + new_lines_opt + ")";
+                /* new_lines_opt + TODO: https://github.com/JayBazuzi/Pash2/issues/11 (attribute_list_opt) + new_lines_opt + */ "param" + new_lines_opt
+                        + "(" + (parameter_list_opt) + new_lines_opt + ")";
 
             ////        parameter_list:
             ////            script_parameter
@@ -410,7 +430,7 @@ namespace Pash.ParserIntrinsics
             ////        script_parameter:
             ////            new_lines_opt   attribute_list_opt   new_lines_opt   variable   script_parameter_default_opt
             script_parameter.Rule =
-                new_lines_opt + /* TODO: https://github.com/JayBazuzi/Pash2/issues/11 (attribute_list | Empty) + new_lines_opt + */ variable + (script_parameter_default | Empty);
+                new_lines_opt + /* TODO: https://github.com/JayBazuzi/Pash2/issues/11 (attribute_list_opt) + new_lines_opt + */ variable + (script_parameter_default_opt);
 
             ////        script_parameter_default:
             ////            new_lines_opt   =   new_lines_opt   expression
@@ -435,7 +455,7 @@ namespace Pash.ParserIntrinsics
             ////        named_block:
             ////            block_name   statement_block   statement_terminators_opt
             named_block.Rule =
-                block_name + statement_block + (statement_terminators | Empty);
+                block_name + statement_block + (statement_terminators_opt);
 
             ////        block_name:  one of
             ////            dynamicparam   begin   process   end
@@ -499,11 +519,11 @@ namespace Pash.ParserIntrinsics
 
             // See https://github.com/JayBazuzi/Pash2/issues/7
             _statement_flow_control_statement.Rule =
-                flow_control_statement /*+ (statement_terminator | Empty)*/;
+                flow_control_statement /*+ (statement_terminator_opt)*/;
 
             // See https://github.com/JayBazuzi/Pash2/issues/7
             _statement_pipeline.Rule =
-                pipeline /*+ (statement_terminator | Empty)*/;
+                pipeline /*+ (statement_terminator_opt)*/;
 
             ////        statement_terminator:
             ////            ;
@@ -532,7 +552,7 @@ namespace Pash.ParserIntrinsics
             ////        elseif_clause:
             ////            new_lines_opt   elseif   new_lines_opt   (   new_lines_opt   pipeline   new_lines_opt   )   statement_block
             if_statement.Rule =
-                "if" + _if_statement_clause + elseif_clauses + (else_clause | Empty)
+                "if" + _if_statement_clause + elseif_clauses + (else_clause_opt)
                 ;
 
             elseif_clauses.Rule =
@@ -567,7 +587,7 @@ namespace Pash.ParserIntrinsics
             ////        switch_statement:
             ////            switch   new_lines_opt   switch_parameters_opt   switch_condition   switch_body
             switch_statement.Rule =
-                "switch" + new_lines_opt + (switch_parameters | Empty) + switch_condition + switch_body;
+                "switch" + new_lines_opt + (switch_parameters_opt) + switch_condition + switch_body;
 
             ////        switch_parameters:
             ////            switch_parameter
@@ -620,7 +640,7 @@ namespace Pash.ParserIntrinsics
             ////        switch_clause:
             ////            switch_clause_condition   statement_block   statement_terimators_opt [sic]
             switch_clause.Rule =
-                switch_clause_condition + statement_block + (statement_terminators | Empty);
+                switch_clause_condition + statement_block + (statement_terminators_opt);
 
             ////        switch_clause_condition:
             ////            command_argument
@@ -653,18 +673,18 @@ namespace Pash.ParserIntrinsics
             ////                    new_lines_opt   )   statement_block
             for_statement.Rule = _for_statement_1 | _for_statement_2 | _for_statement_3;
             _for_statement_1.Rule = "for" + new_lines_opt + "(" +
-                    new_lines_opt + (for_initializer | Empty) + statement_terminator +
-                    new_lines_opt + (for_condition | Empty) + statement_terminator +
-                    new_lines_opt + (for_iterator | Empty) +
+                    new_lines_opt + (for_initializer_opt) + statement_terminator +
+                    new_lines_opt + (for_condition_opt) + statement_terminator +
+                    new_lines_opt + (for_iterator_opt) +
                     new_lines_opt + ")" + statement_block;
 
             _for_statement_2.Rule = "for" + new_lines_opt + "(" +
-                    new_lines_opt + (for_initializer | Empty) + statement_terminator +
-                    new_lines_opt + (for_condition | Empty) + statement_terminator +
+                    new_lines_opt + (for_initializer_opt) + statement_terminator +
+                    new_lines_opt + (for_condition_opt) + statement_terminator +
                     new_lines_opt + ")" + statement_block;
 
             _for_statement_3.Rule = "for" + new_lines_opt + "(" +
-                    new_lines_opt + (for_initializer | Empty) +
+                    new_lines_opt + (for_initializer_opt) +
                     new_lines_opt + ")" + statement_block;
 
             ////        for_initializer:
@@ -703,7 +723,7 @@ namespace Pash.ParserIntrinsics
             ////            function   new_lines_opt   function_name   function_parameter_declaration_opt   {   script_block   }
             ////            filter   new_lines_opt   function_name   function_parameter_declaration_opt   {   script_block   }
             function_statement.Rule =
-                (ToTerm("function") | "filter") + new_lines_opt + function_name + (function_parameter_declaration | Empty) + "{" + script_block + "}";
+                (ToTerm("function") | "filter") + new_lines_opt + function_name + (function_parameter_declaration_opt) + "{" + script_block + "}";
 
             ////        function_name:
             ////            command_argument
@@ -724,11 +744,11 @@ namespace Pash.ParserIntrinsics
             ////            return   pipeline_opt
             ////            exit   pipeline_opt
             flow_control_statement.Rule = _flow_control_statement_break | _flow_control_statement_continue | _flow_control_statement_throw | _flow_control_statement_return | _flow_control_statement_exit;
-            _flow_control_statement_break.Rule = "break" + (label_expression | Empty);
-            _flow_control_statement_continue.Rule = "continue" + (label_expression | Empty);
-            _flow_control_statement_throw.Rule = "throw" + (pipeline | Empty);
-            _flow_control_statement_return.Rule = "return" + (pipeline | Empty);
-            _flow_control_statement_exit.Rule = "exit" + (pipeline | Empty);
+            _flow_control_statement_break.Rule = "break" + (label_expression_opt);
+            _flow_control_statement_continue.Rule = "continue" + (label_expression_opt);
+            _flow_control_statement_throw.Rule = "throw" + (pipeline_opt);
+            _flow_control_statement_return.Rule = "return" + (pipeline_opt);
+            _flow_control_statement_exit.Rule = "exit" + (pipeline_opt);
 
             ////        label_expression:
             ////            simple_name
@@ -766,7 +786,7 @@ namespace Pash.ParserIntrinsics
             ////        catch_clause:
             ////            new_lines_opt   catch   catch_type_list_opt   statement_block
             catch_clause.Rule =
-                new_lines_opt + "catch" + (catch_type_list | Empty) + statement_block;
+                new_lines_opt + "catch" + (catch_type_list_opt) + statement_block;
 
             ////        catch_type_list:
             ////            new_lines_opt   type_literal
@@ -782,7 +802,7 @@ namespace Pash.ParserIntrinsics
             ////        data_statement:
             ////            data    new_lines_opt   data_name   data_commands_allowed_opt   statement_block
             data_statement.Rule =
-                "data" + new_lines_opt + data_name + (data_commands_allowed | Empty) + statement_block;
+                "data" + new_lines_opt + data_name + (data_commands_allowed_opt) + statement_block;
 
             ////        data_name:
             ////            simple_name
@@ -810,8 +830,8 @@ namespace Pash.ParserIntrinsics
             ////            expression   redirections_opt  pipeline_tail_opt
             ////            command   pipeline_tail_opt
             pipeline.Rule = assignment_expression | _pipeline_expression | _pipeline_command;
-            _pipeline_expression.Rule = expression + (redirections | Empty) + (pipeline_tail | Empty);
-            _pipeline_command.Rule = command + (pipeline_tail | Empty);
+            _pipeline_expression.Rule = expression + (redirections_opt) + (pipeline_tail_opt);
+            _pipeline_command.Rule = command + (pipeline_tail_opt);
 
             ////        assignment_expression:
             ////            expression   assignment_operator   statement
@@ -836,7 +856,7 @@ namespace Pash.ParserIntrinsics
 
             // ISSUE: https://github.com/JayBazuzi/Pash2/issues/8
             _command_invocation.Rule =
-                command_invocation_operator + /* (command_module | Empty) + */ command_name_expr + command_elements_opt;
+                command_invocation_operator + /* (command_module_opt) + */ command_name_expr + command_elements_opt;
 
             ////        command_invocation_operator:  one of
             ////            &	.
@@ -864,7 +884,7 @@ namespace Pash.ParserIntrinsics
             ////            generic_token_with_subexpr_start   statement_list_opt   )   command_name
             // ISSUE: https://github.com/JayBazuzi/Pash2/issues/9 - need whitespace prohibition
             generic_token_with_subexpr.Rule =
-                generic_token_with_subexpr_start + (statement_list | Empty) + ")" + command_name;
+                generic_token_with_subexpr_start + (statement_list_opt) + ")" + command_name;
 
             ////        command_name_expr:
             ////            command_name
@@ -880,6 +900,7 @@ namespace Pash.ParserIntrinsics
             ////            command_elements   command_element
             command_elements.Rule =
                 MakePlusRule(command_elements, command_element);
+            command_elements_opt.SetFlag(TermFlags.IsTransient, false);
 
             ////        command_element:
             ////            command_parameter
@@ -1122,12 +1143,12 @@ namespace Pash.ParserIntrinsics
             ////        sub_expression:
             ////            $(   new_lines_opt   statement_list_opt   new_lines_opt   )
             sub_expression.Rule =
-                "$(" + new_lines_opt + (statement_list | Empty) + new_lines_opt + ")";
+                "$(" + new_lines_opt + (statement_list_opt) + new_lines_opt + ")";
 
             ////        array_expression:
             ////            @(   new_lines_opt   statement_list_opt   new_lines_opt   )
             array_expression.Rule =
-                "@(" + new_lines_opt + (statement_list | Empty) + new_lines_opt + ")";
+                "@(" + new_lines_opt + (statement_list_opt) + new_lines_opt + ")";
 
             ////        script_block_expression:
             ////            {   new_lines_opt   script_block   new_lines_opt   }
@@ -1137,7 +1158,7 @@ namespace Pash.ParserIntrinsics
             ////        hash_literal_expression:
             ////            @{   new_lines_opt   hash_literal_body_opt   new_lines_opt   }
             hash_literal_expression.Rule =
-                ToTerm("@{") + new_lines_opt + (hash_literal_body | Empty) + new_lines_opt + "}";
+                ToTerm("@{") + new_lines_opt + (hash_literal_body_opt) + new_lines_opt + "}";
 
             ////        hash_literal_body:
             ////            hash_entry
@@ -1192,7 +1213,7 @@ namespace Pash.ParserIntrinsics
             ////        argument_list:
             ////            (   argument_expression_list_opt   new_lines_opt   )
             argument_list.Rule =
-                "(" + (argument_expression_list | Empty) + new_lines_opt + ")";
+                "(" + (argument_expression_list_opt) + new_lines_opt + ")";
 
             ////        argument_expression_list:
             ////            argument_expression
@@ -1311,7 +1332,7 @@ namespace Pash.ParserIntrinsics
             ////                    expandable_here_string_with_subexpr_end
             // TODO: expandable_here_string_with_subexpr_start
             expandable_string_literal_with_subexpr.Rule =
-                expandable_string_with_subexpr_start + (statement_list | Empty) + ")" +
+                expandable_string_with_subexpr_start + (statement_list_opt) + ")" +
                     expandable_string_with_subexpr_characters + expandable_string_with_subexpr_end;
 
             ////        expandable_string_with_subexpr_characters:
@@ -1483,6 +1504,7 @@ namespace Pash.ParserIntrinsics
                 NonTerminal nonTerminalParent = (NonTerminal)nonTerminalFields.Single(f => f.Name == parentFieldName).GetValue(this);
 
                 nonTerminal.Rule = nonTerminalParent | Empty;
+                MarkTransient(nonTerminal);
             }
         }
     }
