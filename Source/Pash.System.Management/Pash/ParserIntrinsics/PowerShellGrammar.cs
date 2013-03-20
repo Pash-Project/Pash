@@ -285,6 +285,8 @@ namespace Pash.ParserIntrinsics
         public void BuildProductionRules()
         {
             new_lines_opt.SetFlag(TermFlags.IsTransient);
+            new_lines_opt.Rule = Empty;
+
 
             #region B.1 Lexical grammar
 
