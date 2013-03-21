@@ -1,7 +1,7 @@
 
-function Prompt { 'PS ' + (Get-Location) + '> ' }
+function Prompt { 'PASH ' + (Get-Location) + '> ' }
 
-#function prompt { 'PS ' + $(Get-Location) + $(if ($nestedpromptlevel -ge 1) { '>>' }) + '> ' }
+#function prompt { 'PASH ' + $(Get-Location) + $(if ($nestedpromptlevel -ge 1) { '>>' }) + '> ' }
 #. HelpPagingFunction.Library.ps1
       
 #function mkdir { param([string[]]$paths); New-Item -type directory -path $paths }
