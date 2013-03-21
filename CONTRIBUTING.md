@@ -36,7 +36,7 @@ To run tests
 Travis
 ----
 
-We're hooked up to Travis-CI. See https://travis-ci.org/JayBazuzi/Pash2
+We're hooked up to Travis-CI. See https://travis-ci.org/profile/Pash-Project
 
 We don't merge in to `master` if Travis reports an error. So keep an eye on that.
 
