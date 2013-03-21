@@ -1,4 +1,4 @@
-// Copyright (C) Pash Contributors. All Rights Reserved. See https://github.com/Pash-Project/Pash/
+// Copyright (C) Pash Contributors (https://github.com/Pash-Project/Pash/blob/master/AUTHORS.md). All Rights Reserved.
 
 #region BSD License
 // Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,7 @@ namespace Pash.Implementation
             _aliases = new Dictionary<string, AliasInfo>(StringComparer.CurrentCultureIgnoreCase);
             _functions = new Dictionary<string, CommandInfo>(StringComparer.CurrentCultureIgnoreCase);
             _variables = new HybridDictionary(true);
-            
+
             SetVariable("true", true);
             SetVariable("false", false);
         }

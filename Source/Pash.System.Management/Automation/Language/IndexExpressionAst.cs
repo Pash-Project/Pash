@@ -1,4 +1,4 @@
-// Copyright (C) Pash Contributors. All Rights Reserved. See https://github.com/Pash-Project/Pash/
+// Copyright (C) Pash Contributors (https://github.com/Pash-Project/Pash/blob/master/AUTHORS.md). All Rights Reserved.
 
 #region BSD License
 // Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,9 @@ namespace System.Management.Automation.Language
 {
     public class IndexExpressionAst : ExpressionAst
     {
-        public IndexExpressionAst(IScriptExtent extent, ExpressionAst target, ExpressionAst index) : base(extent) {
+        public IndexExpressionAst(IScriptExtent extent, ExpressionAst target, ExpressionAst index)
+            : base(extent)
+        {
             this.Target = target;
             this.Index = index;
         }

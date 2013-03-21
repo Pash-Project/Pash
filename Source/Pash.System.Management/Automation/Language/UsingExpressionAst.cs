@@ -1,4 +1,4 @@
-// Copyright (C) Pash Contributors. All Rights Reserved. See https://github.com/Pash-Project/Pash/
+// Copyright (C) Pash Contributors (https://github.com/Pash-Project/Pash/blob/master/AUTHORS.md). All Rights Reserved.
 
 #region BSD License
 // Redistribution and use in source and binary forms, with or without
@@ -74,10 +74,10 @@ namespace System.Management.Automation.Language
                 foreach (var item in base.Children) yield return item;
             }
         }
-    
+
         public override string ToString()
         {
             return string.Format("using (0)", this.SubExpression);
         }
-}
+    }
 }

@@ -1,4 +1,4 @@
-// Copyright (C) Pash Contributors. All Rights Reserved. See https://github.com/Pash-Project/Pash/
+// Copyright (C) Pash Contributors (https://github.com/Pash-Project/Pash/blob/master/AUTHORS.md). All Rights Reserved.
 
 #region BSD License
 // Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@ namespace System.Management.Automation.Language
             this.TokenKind = tokenKind;
             this.Child = child;
         }
-        
+
         public ExpressionAst Child { get; private set; }
         public override Type StaticType { get { throw new NotImplementedException(this.ToString()); } }
         public TokenKind TokenKind { get; private set; }

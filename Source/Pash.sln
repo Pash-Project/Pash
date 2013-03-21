@@ -1,5 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PashConsole", "PashConsole\PashConsole.csproj", "{BB348EAD-1713-4760-9953-BC721A203885}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{0850FA53-413E-4AF9-B918-8FF524FFA5D7}"
@@ -10,7 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pash.Microsoft.PowerShell.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pash.System.Management", "Pash.System.Management\Pash.System.Management.csproj", "{C5E303EC-5684-4C95-B0EC-2593E6662403}"
 EndProject
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestHost", "TestHost\TestHost.csproj", "{A5550FB3-553B-441E-8386-AD1EF5C31FAE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParserTests", "ParserTests\ParserTests.csproj", "{7FDF583D-C91A-4284-B0A4-E25C96BBB828}"
@@ -20,6 +20,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FFF03D2F-1256-443B-BE78-524EF43AC734}"
 	ProjectSection(SolutionItems) = preProject
 		..\.travis.yml = ..\.travis.yml
+		..\AUTHORS.md = ..\AUTHORS.md
 		..\CONTRIBUTING.md = ..\CONTRIBUTING.md
 		..\LICENSE-BSD = ..\LICENSE-BSD
 		..\LICENSE-GPL = ..\LICENSE-GPL

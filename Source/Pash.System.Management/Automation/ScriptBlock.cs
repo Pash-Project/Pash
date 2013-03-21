@@ -1,4 +1,4 @@
-// Copyright (C) Pash Contributors. All Rights Reserved. See https://github.com/Pash-Project/Pash/
+// Copyright (C) Pash Contributors (https://github.com/Pash-Project/Pash/blob/master/AUTHORS.md). All Rights Reserved.
 
 #region BSD License
 // Redistribution and use in source and binary forms, with or without
@@ -78,6 +78,6 @@ namespace System.Management.Automation
         //public SteppablePipeline GetSteppablePipeline(CommandOrigin commandOrigin);
         //public Collection<PSObject> Invoke(params object[] args);
         //public object InvokeReturnAsIs(params object[] args);
-        public override string ToString() { return this.Ast.ToString();}
+        public override string ToString() { return this.Ast.ToString(); }
     }
 }
