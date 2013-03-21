@@ -1,7 +1,9 @@
 [Pash](https://github.com/Pash-Project/Pash/) [![Build Status](https://secure.travis-ci.org/Pash-Project/Pash.png)](http://travis-ci.org/Pash-Project/Pash)
 ====
 
-An Open Source reimplementation of Windows PowerShell.
+An Open Source reimplementation of Windows PowerShell.  
+
+Follow [@pashproject](http://twitter.com/pashproject)
 
 
 Status
