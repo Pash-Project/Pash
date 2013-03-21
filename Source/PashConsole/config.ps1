@@ -1,3 +1,4 @@
+# Copyright (C) Pash Contributors. All Rights Reserved. See https://github.com/Pash-Project/Pash/
 
 function Prompt { 'PASH ' + (Get-Location) + '> ' }
 

@@ -1,3 +1,5 @@
+<!-- Copyright (C) Pash Contributors. All Rights Reserved. See https://github.com/Pash-Project/Pash/ -->
+
 Contributing to Pash
 ==============================
 
