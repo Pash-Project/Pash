@@ -43,7 +43,6 @@
     </Compile>
     <Compile Include="Ast\Ast.Tests.cs" />
     <Compile Include="CaseInsensitiveGrammarTests.cs" />
-    <Compile Include="ErrorStatementAst.cs" />
     <Compile Include="ExtensionsTests.cs" />
     <Compile Include="ParserTests.cs" />
   </ItemGroup>

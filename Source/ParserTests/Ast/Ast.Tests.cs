@@ -378,8 +378,8 @@ ls
             ParseInput("'abc' [2]");
         }
 
-        [Test, Explicit]
-        public void MemberAccess()
+        [Test]
+        public void StaticMemberAccess()
         {
             MemberExpressionAst memberExpressionAst = ParseInput("[System.Int32]::MaxValue")
                 .EndBlock
@@ -389,6 +389,20 @@ ls
         }
 
         [Test]
+        public void InstanceMemberAccess()
+        {
+            var memberExpressionAst = ParseInput(@"'abc'.Length").EndBlock.Statements[0].PipelineElements[0].Expression;
+            StringConstantExpressionAst expressionAst = memberExpressionAst.Expression;
+            StringConstantExpressionAst memberAst = memberExpressionAst.Member;
+
+            Assert.AreEqual("abc", expressionAst.Value);
+            Assert.AreEqual(StringConstantType.SingleQuoted, expressionAst.StringConstantType);
+
+            Assert.AreEqual("Length", memberAst.Value);
+            Assert.AreEqual(StringConstantType.BareWord, memberAst.StringConstantType);
+        }
+
+        [Test, Explicit("Bug - https://github.com/JayBazuzi/Pash2/issues/9")]
         public void BadMemberAccess()
         {
             Assert.Throws<PowerShellGrammar.ParseException>(() =>

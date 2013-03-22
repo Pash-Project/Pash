@@ -1,6 +1,29 @@
-Parse tree definition.
+Notes about how the parser is written.
+=========
 
-Overview:
+Irony
+----
+
+From http://irony.codeplex.com. A local copy of the parsing engine only is checked in to Libraries\Irony. If you
+need to change this code, consider pushing the change upstream.
+
+When you change the grammar definition, you should analyze it with Irony's Grammar Explorer. You'll need to grab
+the full snapshot of Irony's source from CodePlex and build Grammar Explorer yourself. 
+
+
+
+PowerShell language specification
+----
+
+Microsoft has generously published a language specification document for PowerShell v2 and v3. It includes a BNF-style
+grammar, which is hugely helpful. However, there are some reasons the Pash grammar is different:
+
+- typos (usually easy to fix)
+- missing bits (not much)
+- ambiguities (plenty, and they're hard to fix)
+
+
+How the code is organized
 ----------
 
 In general, the lexical grammar is described as regular expressions in `PowerShellGrammar.Terminals.cs`, while the syntactic grammar is described as production rules in `PowerShellGrammar.cs`. 

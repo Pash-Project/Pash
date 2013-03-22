@@ -329,4 +329,7 @@
       <Name>010.Irony.2010</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Pash\ParserIntrinsics\README.TXT" />
+  </ItemGroup>
 </Project>
