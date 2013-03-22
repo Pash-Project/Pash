@@ -1,7 +1,9 @@
-Pash2
-=====
+[Pash](https://github.com/Pash-Project/Pash/) [![Build Status](https://secure.travis-ci.org/Pash-Project/Pash.png)](http://travis-ci.org/Pash-Project/Pash)
+====
 
-An Open Source reimplementation of Windows PowerShell.
+An Open Source reimplementation of Windows PowerShell.  
+
+Follow [@pashproject](http://twitter.com/pashproject)
 
 
 Status
@@ -16,8 +18,8 @@ Getting Started
 
 Assuming you have MonoDevelop installed:
 
-1. `git clone https://github.com/JayBazuzi/Pash2/`
-2. `cd Pash2`
+1. `git clone https://github.com/Pash-Project/Pash/`
+2. `cd Pash`
 3. `xbuild`
 4. `mono Source/PashConsole/bin/Debug/Pash.exe`
 
@@ -60,7 +62,7 @@ Gratitude
 
 If you like Pash and want to express your gratitude, you could:
 
-- Contribute code to Pash. See [`CONTRIBUTING.md`](https://github.com/JayBazuzi/Pash2/blob/master/CONTRIBUTING.md) and send a pull request!
+- Contribute code to Pash. See [`CONTRIBUTING.md`](https://github.com/Pash-Project/Pash/blob/master/CONTRIBUTING.md) and send a pull request!
 - Contribute to some other open source project.
 - Edit Wikipedia.
 - Create art, music, architecture, boat plans, whatever, and release it under [Creative Commons](http://creativecommons.org/licenses/by-sa/2.5/).

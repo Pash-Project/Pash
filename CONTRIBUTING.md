@@ -36,13 +36,20 @@ To run tests
 Travis
 ----
 
-We're hooked up to Travis-CI. See https://travis-ci.org/JayBazuzi/Pash2
+We're hooked up to Travis-CI. See https://travis-ci.org/profile/Pash-Project
 
 We don't merge in to `master` if Travis reports an error. So keep an eye on that.
 
 
-Guidelines
+Contribution Guidelines
 ----
+
+
+0. **You agree to the licensing requirements.**
+
+	Pash is dual-licensed GPL/BSD. By sending a Pull Request, **you agree** to license your contributions by those same licenses.
+
+	Please add yourself to AUTHORS.md.
 
 1. **Make merging easy.**
 
