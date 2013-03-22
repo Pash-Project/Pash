@@ -287,7 +287,6 @@ namespace Pash.ParserIntrinsics
             new_lines_opt.SetFlag(TermFlags.IsTransient);
             new_lines_opt.Rule = Empty;
 
-
             #region B.1 Lexical grammar
 
             // this was presented as part of the lexical grammar, but I'd rather see this as production rules than 
@@ -414,14 +413,14 @@ namespace Pash.ParserIntrinsics
             ////        script_block:
             ////            param_block_opt   statement_terminators_opt    script_block_body_opt
             script_block.Rule =
-                (param_block_opt) + (statement_terminators_opt) + (script_block_body_opt);
+                param_block_opt + statement_terminators_opt + script_block_body_opt;
 
             ////        param_block:
             ////            new_lines_opt   attribute_list_opt   new_lines_opt   param   new_lines_opt
             ////                    (   parameter_list_opt   new_lines_opt   )
             param_block.Rule =
-                /* new_lines_opt + TODO: https://github.com/JayBazuzi/Pash2/issues/11 (attribute_list_opt) + new_lines_opt + */ "param" + new_lines_opt
-                        + "(" + (parameter_list_opt) + new_lines_opt + ")";
+                /* new_lines_opt + TODO: https://github.com/JayBazuzi/Pash2/issues/11 attribute_list_opt + new_lines_opt + */ "param" + new_lines_opt
+                        + "(" + parameter_list_opt + new_lines_opt + ")";
 
             ////        parameter_list:
             ////            script_parameter
@@ -432,7 +431,7 @@ namespace Pash.ParserIntrinsics
             ////        script_parameter:
             ////            new_lines_opt   attribute_list_opt   new_lines_opt   variable   script_parameter_default_opt
             script_parameter.Rule =
-                new_lines_opt + /* TODO: https://github.com/JayBazuzi/Pash2/issues/11 (attribute_list_opt) + new_lines_opt + */ variable + (script_parameter_default_opt);
+                new_lines_opt + /* TODO: https://github.com/JayBazuzi/Pash2/issues/11 attribute_list_opt + new_lines_opt + */ variable + script_parameter_default_opt;
 
             ////        script_parameter_default:
             ////            new_lines_opt   =   new_lines_opt   expression
@@ -457,7 +456,7 @@ namespace Pash.ParserIntrinsics
             ////        named_block:
             ////            block_name   statement_block   statement_terminators_opt
             named_block.Rule =
-                block_name + statement_block + (statement_terminators_opt);
+                block_name + statement_block + statement_terminators_opt;
 
             ////        block_name:  one of
             ////            dynamicparam   begin   process   end
@@ -521,11 +520,11 @@ namespace Pash.ParserIntrinsics
 
             // See https://github.com/JayBazuzi/Pash2/issues/7
             _statement_flow_control_statement.Rule =
-                flow_control_statement /*+ (statement_terminator_opt)*/;
+                flow_control_statement /*+ statement_terminator_opt*/;
 
             // See https://github.com/JayBazuzi/Pash2/issues/7
             _statement_pipeline.Rule =
-                pipeline /*+ (statement_terminator_opt)*/;
+                pipeline /*+ statement_terminator_opt*/;
 
             ////        statement_terminator:
             ////            ;
@@ -554,7 +553,7 @@ namespace Pash.ParserIntrinsics
             ////        elseif_clause:
             ////            new_lines_opt   elseif   new_lines_opt   (   new_lines_opt   pipeline   new_lines_opt   )   statement_block
             if_statement.Rule =
-                "if" + _if_statement_clause + elseif_clauses + (else_clause_opt)
+                "if" + _if_statement_clause + elseif_clauses + else_clause_opt
                 ;
 
             elseif_clauses.Rule =
@@ -589,7 +588,7 @@ namespace Pash.ParserIntrinsics
             ////        switch_statement:
             ////            switch   new_lines_opt   switch_parameters_opt   switch_condition   switch_body
             switch_statement.Rule =
-                "switch" + new_lines_opt + (switch_parameters_opt) + switch_condition + switch_body;
+                "switch" + new_lines_opt + switch_parameters_opt + switch_condition + switch_body;
 
             ////        switch_parameters:
             ////            switch_parameter
@@ -642,7 +641,7 @@ namespace Pash.ParserIntrinsics
             ////        switch_clause:
             ////            switch_clause_condition   statement_block   statement_terimators_opt [sic]
             switch_clause.Rule =
-                switch_clause_condition + statement_block + (statement_terminators_opt);
+                switch_clause_condition + statement_block + statement_terminators_opt;
 
             ////        switch_clause_condition:
             ////            command_argument
@@ -675,18 +674,18 @@ namespace Pash.ParserIntrinsics
             ////                    new_lines_opt   )   statement_block
             for_statement.Rule = _for_statement_1 | _for_statement_2 | _for_statement_3;
             _for_statement_1.Rule = "for" + new_lines_opt + "(" +
-                    new_lines_opt + (for_initializer_opt) + statement_terminator +
-                    new_lines_opt + (for_condition_opt) + statement_terminator +
-                    new_lines_opt + (for_iterator_opt) +
+                    new_lines_opt + for_initializer_opt + statement_terminator +
+                    new_lines_opt + for_condition_opt + statement_terminator +
+                    new_lines_opt + for_iterator_opt +
                     new_lines_opt + ")" + statement_block;
 
             _for_statement_2.Rule = "for" + new_lines_opt + "(" +
-                    new_lines_opt + (for_initializer_opt) + statement_terminator +
-                    new_lines_opt + (for_condition_opt) + statement_terminator +
+                    new_lines_opt + for_initializer_opt + statement_terminator +
+                    new_lines_opt + for_condition_opt + statement_terminator +
                     new_lines_opt + ")" + statement_block;
 
             _for_statement_3.Rule = "for" + new_lines_opt + "(" +
-                    new_lines_opt + (for_initializer_opt) +
+                    new_lines_opt + for_initializer_opt +
                     new_lines_opt + ")" + statement_block;
 
             ////        for_initializer:
@@ -725,7 +724,7 @@ namespace Pash.ParserIntrinsics
             ////            function   new_lines_opt   function_name   function_parameter_declaration_opt   {   script_block   }
             ////            filter   new_lines_opt   function_name   function_parameter_declaration_opt   {   script_block   }
             function_statement.Rule =
-                (ToTerm("function") | "filter") + new_lines_opt + function_name + (function_parameter_declaration_opt) + "{" + script_block + "}";
+                (ToTerm("function") | "filter") + new_lines_opt + function_name + function_parameter_declaration_opt + "{" + script_block + "}";
 
             ////        function_name:
             ////            command_argument
@@ -746,11 +745,11 @@ namespace Pash.ParserIntrinsics
             ////            return   pipeline_opt
             ////            exit   pipeline_opt
             flow_control_statement.Rule = _flow_control_statement_break | _flow_control_statement_continue | _flow_control_statement_throw | _flow_control_statement_return | _flow_control_statement_exit;
-            _flow_control_statement_break.Rule = "break" + (label_expression_opt);
-            _flow_control_statement_continue.Rule = "continue" + (label_expression_opt);
-            _flow_control_statement_throw.Rule = "throw" + (pipeline_opt);
-            _flow_control_statement_return.Rule = "return" + (pipeline_opt);
-            _flow_control_statement_exit.Rule = "exit" + (pipeline_opt);
+            _flow_control_statement_break.Rule = "break" + label_expression_opt;
+            _flow_control_statement_continue.Rule = "continue" + label_expression_opt;
+            _flow_control_statement_throw.Rule = "throw" + pipeline_opt;
+            _flow_control_statement_return.Rule = "return" + pipeline_opt;
+            _flow_control_statement_exit.Rule = "exit" + pipeline_opt;
 
             ////        label_expression:
             ////            simple_name
@@ -788,7 +787,7 @@ namespace Pash.ParserIntrinsics
             ////        catch_clause:
             ////            new_lines_opt   catch   catch_type_list_opt   statement_block
             catch_clause.Rule =
-                new_lines_opt + "catch" + (catch_type_list_opt) + statement_block;
+                new_lines_opt + "catch" + catch_type_list_opt + statement_block;
 
             ////        catch_type_list:
             ////            new_lines_opt   type_literal
@@ -804,7 +803,7 @@ namespace Pash.ParserIntrinsics
             ////        data_statement:
             ////            data    new_lines_opt   data_name   data_commands_allowed_opt   statement_block
             data_statement.Rule =
-                "data" + new_lines_opt + data_name + (data_commands_allowed_opt) + statement_block;
+                "data" + new_lines_opt + data_name + data_commands_allowed_opt + statement_block;
 
             ////        data_name:
             ////            simple_name
@@ -832,8 +831,8 @@ namespace Pash.ParserIntrinsics
             ////            expression   redirections_opt  pipeline_tail_opt
             ////            command   pipeline_tail_opt
             pipeline.Rule = assignment_expression | _pipeline_expression | _pipeline_command;
-            _pipeline_expression.Rule = expression + (redirections_opt) + (pipeline_tail_opt);
-            _pipeline_command.Rule = command + (pipeline_tail_opt);
+            _pipeline_expression.Rule = expression + redirections_opt + pipeline_tail_opt;
+            _pipeline_command.Rule = command + pipeline_tail_opt;
 
             ////        assignment_expression:
             ////            expression   assignment_operator   statement
@@ -858,7 +857,7 @@ namespace Pash.ParserIntrinsics
 
             // ISSUE: https://github.com/JayBazuzi/Pash2/issues/8
             _command_invocation.Rule =
-                command_invocation_operator + /* (command_module_opt) + */ command_name_expr + command_elements_opt;
+                command_invocation_operator + /* command_module_opt + */ command_name_expr + command_elements_opt;
 
             ////        command_invocation_operator:  one of
             ////            &	.
@@ -886,7 +885,7 @@ namespace Pash.ParserIntrinsics
             ////            generic_token_with_subexpr_start   statement_list_opt   )   command_name
             // ISSUE: https://github.com/JayBazuzi/Pash2/issues/9 - need whitespace prohibition
             generic_token_with_subexpr.Rule =
-                generic_token_with_subexpr_start + (statement_list_opt) + ")" + command_name;
+                generic_token_with_subexpr_start + statement_list_opt + ")" + command_name;
 
             ////        command_name_expr:
             ////            command_name
@@ -1064,11 +1063,11 @@ namespace Pash.ParserIntrinsics
                 |
                 (dash + new_lines_opt + unary_expression)
                 |
-                (pre_increment_expression)
+                pre_increment_expression
                 |
-                (pre_decrement_expression)
+                pre_decrement_expression
                 |
-                (cast_expression)
+                cast_expression
                 |
                 ("-split" + new_lines_opt + unary_expression)
                 |
@@ -1145,12 +1144,12 @@ namespace Pash.ParserIntrinsics
             ////        sub_expression:
             ////            $(   new_lines_opt   statement_list_opt   new_lines_opt   )
             sub_expression.Rule =
-                "$(" + new_lines_opt + (statement_list_opt) + new_lines_opt + ")";
+                "$(" + new_lines_opt + statement_list_opt + new_lines_opt + ")";
 
             ////        array_expression:
             ////            @(   new_lines_opt   statement_list_opt   new_lines_opt   )
             array_expression.Rule =
-                "@(" + new_lines_opt + (statement_list_opt) + new_lines_opt + ")";
+                "@(" + new_lines_opt + statement_list_opt + new_lines_opt + ")";
 
             ////        script_block_expression:
             ////            {   new_lines_opt   script_block   new_lines_opt   }
@@ -1160,7 +1159,7 @@ namespace Pash.ParserIntrinsics
             ////        hash_literal_expression:
             ////            @{   new_lines_opt   hash_literal_body_opt   new_lines_opt   }
             hash_literal_expression.Rule =
-                ToTerm("@{") + new_lines_opt + (hash_literal_body_opt) + new_lines_opt + "}";
+                ToTerm("@{") + new_lines_opt + hash_literal_body_opt + new_lines_opt + "}";
 
             ////        hash_literal_body:
             ////            hash_entry
@@ -1215,7 +1214,7 @@ namespace Pash.ParserIntrinsics
             ////        argument_list:
             ////            (   argument_expression_list_opt   new_lines_opt   )
             argument_list.Rule =
-                "(" + (argument_expression_list_opt) + new_lines_opt + ")";
+                "(" + argument_expression_list_opt + new_lines_opt + ")";
 
             ////        argument_expression_list:
             ////            argument_expression
@@ -1334,7 +1333,7 @@ namespace Pash.ParserIntrinsics
             ////                    expandable_here_string_with_subexpr_end
             // TODO: expandable_here_string_with_subexpr_start
             expandable_string_literal_with_subexpr.Rule =
-                expandable_string_with_subexpr_start + (statement_list_opt) + ")" +
+                expandable_string_with_subexpr_start + statement_list_opt + ")" +
                     expandable_string_with_subexpr_characters + expandable_string_with_subexpr_end;
 
             ////        expandable_string_with_subexpr_characters:
@@ -1427,8 +1426,6 @@ namespace Pash.ParserIntrinsics
             #endregion
             #endregion
         }
-
-
 
         // returns the number of characters to skip
         int SkipSingleWhitespace(ISourceStream source)
