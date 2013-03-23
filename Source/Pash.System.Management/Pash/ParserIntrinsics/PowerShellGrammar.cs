@@ -145,7 +145,7 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal _pipeline_command = null; // Initialized by reflection.
         public readonly NonTerminal assignment_expression = null; // Initialized by reflection.
         public readonly NonTerminal pipeline_tail = null; // Initialized by reflection.
-        public readonly NonTerminal pipeline_tail_opt = null; // Initialized by reflection.
+        public readonly NonTerminal pipeline_tails = null; // Initialized by reflection.
         public readonly NonTerminal command = null; // Initialized by reflection.
         public readonly NonTerminal _command_simple = null; // Initialized by reflection.
         public readonly NonTerminal _command_invocation = null; // Initialized by reflection.
@@ -543,17 +543,21 @@ namespace Pash.ParserIntrinsics
 
             ////        if_statement:
             ////            if   new_lines_opt   (   new_lines_opt   pipeline   new_lines_opt   )   statement_block elseif_clauses_opt   else_clause_opt
-            ////        elseif_clauses:
-            ////            elseif_clause
-            ////            elseif_clauses   elseif_clause
-            ////        elseif_clause:
-            ////            new_lines_opt   elseif   new_lines_opt   (   new_lines_opt   pipeline   new_lines_opt   )   statement_block
             if_statement.Rule =
                 "if" + _if_statement_clause + elseif_clauses + else_clause_opt
                 ;
 
+            ////        elseif_clause:
+            ////            new_lines_opt   elseif   new_lines_opt   (   new_lines_opt   pipeline   new_lines_opt   )   statement_block
+            elseif_clause.Rule =
+                "elseif" + _if_statement_clause
+                ;
+
+            ////        elseif_clauses:
+            ////            elseif_clause
+            ////            elseif_clauses   elseif_clause
             elseif_clauses.Rule =
-                MakeStarRule(elseif_clauses, ToTerm("elseif"), "elseif" + _if_statement_clause);
+                MakeStarRule(elseif_clauses, elseif_clause);
 
             _if_statement_clause.Rule = _if_statement_condition + statement_block;
             _if_statement_condition.Rule = "(" + pipeline + ")";
@@ -826,9 +830,18 @@ namespace Pash.ParserIntrinsics
             ////            assignment_expression
             ////            expression   redirections_opt  pipeline_tail_opt
             ////            command   pipeline_tail_opt
-            pipeline.Rule = assignment_expression | _pipeline_expression | _pipeline_command;
-            _pipeline_expression.Rule = expression + redirections_opt + pipeline_tail_opt;
-            _pipeline_command.Rule = command + pipeline_tail_opt;
+            ////        pipeline_tail:
+            ////            |   new_lines_opt   command
+            ////            |   new_lines_opt   command   pipeline_tail
+            pipeline.Rule =
+                assignment_expression | _pipeline_expression | _pipeline_command
+                ;
+
+            _pipeline_expression.Rule = expression + redirections_opt + pipeline_tails;
+            _pipeline_command.Rule = command + pipeline_tails;
+
+            pipeline_tails.Rule = MakeStarRule(pipeline_tails, pipeline_tail);
+            pipeline_tail.Rule = "|" + command;
 
             ////        assignment_expression:
             ////            expression   assignment_operator   statement
@@ -837,10 +850,6 @@ namespace Pash.ParserIntrinsics
             assignment_expression.Rule =
                 primary_expression + assignment_operator + statement;
 
-            ////        pipeline_tail:
-            ////            |   new_lines_opt   command
-            ////            |   new_lines_opt   command   pipeline_tail
-            pipeline_tail.Rule = MakePlusRule(pipeline_tail, "|" + command);
 
             ////        command:
             ////            command_name   command_elements_opt
