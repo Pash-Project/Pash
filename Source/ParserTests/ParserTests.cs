@@ -4,12 +4,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Extensions.String;
 
 namespace ParserTests
 {
     [TestFixture]
     public class ParserTests
     {
+        [Test]
+        public void ATest()
+        {
+            // Obviously, we'd rather drive this to 0, but for now, let's lock it down
+            Assert.AreEqual(5, PowerShellGrammar.Parser.Language.Errors.Count, PowerShellGrammar.Parser.Language.Errors.JoinString("\r\n"));
+        }
+
         [Test]
         [TestCase(@"if ($true) {} else {}")]
         [TestCase(@"if ($true) {} elseif ($true) {} ")]
