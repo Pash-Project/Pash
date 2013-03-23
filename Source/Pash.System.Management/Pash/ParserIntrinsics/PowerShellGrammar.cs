@@ -619,8 +619,8 @@ namespace Pash.ParserIntrinsics
             ////            primary_expression
             switch_filename.Rule =
                 command_argument
-                |
-                primary_expression
+                //|
+                //primary_expression
                 ;
 
             ////        switch_body:
@@ -644,8 +644,8 @@ namespace Pash.ParserIntrinsics
             ////            primary_expression
             switch_clause_condition.Rule =
                 command_argument
-                |
-                primary_expression
+                //|
+                //primary_expression
                 ;
 
             ////        foreach_statement:
