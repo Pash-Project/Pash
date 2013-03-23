@@ -27,10 +27,10 @@ namespace ParserTests
         [TestCase(@"[int],[string]")]
         [TestCase(@"$x = [int]")]
         [TestCase(@"$x::MaxValue")]
-        [TestCase(@"[int]::Parse()", Explicit = true)]
-        [TestCase(@"$x::Parse()", Explicit = true)]
+        [TestCase(@"[int]::Parse()")]
+        [TestCase(@"$x::Parse()")]
         [TestCase(@"$x.Assembly")]
-        [TestCase(@"$x.AsType()", Explicit = true)]
+        [TestCase(@"$x.AsType()")]
         public void TypesAndMembers(string input)
         {
             AssertIsValidInput(input);
@@ -74,7 +74,7 @@ namespace ParserTests
             AssertIsValidInput(input);
         }
 
-        [Test, Explicit("NYI")]
+        [Test]
         [TestCase(@"[math]::Sqrt(2.0)				# call method with argument 2.0")]
         [TestCase(@"[char]::IsUpper(""a"")			# call method")]
         [TestCase(@"$b = ""abc#$%XYZabc""")]
@@ -82,13 +82,13 @@ namespace ParserTests
         [TestCase(@"[math]::Sqrt(2) 				# convert 2 to 2.0 and call method")]
         [TestCase(@"[math]::Sqrt(2D) 				# convert 2D to 2.0 and call method")]
         [TestCase(@"[math]::Sqrt($true) 			# convert $true to 1.0 and call method")]
-        [TestCase(@"[math]::Sqrt(""20"") 			# convert ""20"" to 20 and call method")]
+        [TestCase(@"[math]::Sqrt(""20"") 			# convert ""20"" to 20 and call method", Explicit = true)]
         [TestCase(@"$a = [math]::Sqrt				# get method descriptor for Sqrt")]
         [TestCase(@"$a.Invoke(2.0)					# call Sqrt via the descriptor")]
-        [TestCase(@"$a = [math]::(""Sq""+""rt"")	# get method descriptor for Sqrt")]
+        [TestCase(@"$a = [math]::(""Sq""+""rt"")	# get method descriptor for Sqrt", Explicit = true)]
         [TestCase(@"$a.Invoke(2.0) 				# call Sqrt via the descriptor")]
         [TestCase(@"$a = [char]::ToLower			# get method descriptor for ToLower")]
-        [TestCase(@"$a.Invoke(""X"")					# call ToLower via the descriptor")]
+        [TestCase(@"$a.Invoke(""X"")					# call ToLower via the descriptor", Explicit = true)]
         public void Section7_1_3_InvocationExpressions(string input)
         {
             AssertIsValidInput(input);

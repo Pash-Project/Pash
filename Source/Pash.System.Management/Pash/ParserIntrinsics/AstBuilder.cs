@@ -739,19 +739,14 @@ namespace Pash.ParserIntrinsics
                 return BuildValueAst(parseTreeNode);
             }
 
-            if (parseTreeNode.Term == this._grammar.member_access)
+            if (parseTreeNode.Term == this._grammar.member_access_or_invocation_expression)
             {
-                return BuildMemberAccessAst(parseTreeNode);
+                return BuildMemberAccessOrInvocationExpressionAst(parseTreeNode);
             }
 
             if (parseTreeNode.Term == this._grammar.element_access)
             {
                 return BuildElementAccessAst(parseTreeNode);
-            }
-
-            if (parseTreeNode.Term == this._grammar.invocation_expression)
-            {
-                return BuildInvocationExpressionAst(parseTreeNode);
             }
 
             if (parseTreeNode.Term == this._grammar.post_increment_expression)
@@ -777,11 +772,6 @@ namespace Pash.ParserIntrinsics
             throw new NotImplementedException();
         }
 
-        ExpressionAst BuildInvocationExpressionAst(ParseTreeNode parseTreeNode)
-        {
-            throw new NotImplementedException();
-        }
-
         IndexExpressionAst BuildElementAccessAst(ParseTreeNode parseTreeNode)
         {
             ////        element_access: Note no whitespace is allowed between primary_expression and [.
@@ -798,12 +788,12 @@ namespace Pash.ParserIntrinsics
                 );
         }
 
-        MemberExpressionAst BuildMemberAccessAst(ParseTreeNode parseTreeNode)
+        MemberExpressionAst BuildMemberAccessOrInvocationExpressionAst(ParseTreeNode parseTreeNode)
         {
             ////        member_access: 
             ////            primary_expression   .   member_name
             ////            primary_expression   ::   member_name
-            VerifyTerm(parseTreeNode, this._grammar.member_access);
+            VerifyTerm(parseTreeNode, this._grammar.member_access_or_invocation_expression);
 
             var typeExpressionAst = BuildPrimaryExpressionAst(parseTreeNode.ChildNodes[0]);
             bool @static = parseTreeNode.ChildNodes[1].FindTokenAndGetText() == "::";
