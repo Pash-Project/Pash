@@ -1299,8 +1299,9 @@ namespace Pash.ParserIntrinsics
             member_name.Rule =
                 simple_name
                 |
-                string_literal
-                |
+                // value can be a string_literal
+                //string_literal
+                //|
                 string_literal_with_subexpression
                 // TODO: 
                 // |
