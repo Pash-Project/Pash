@@ -1,4 +1,5 @@
-﻿namespace System.Management.Automation.Language
+﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+namespace System.Management.Automation.Language
 {
     public abstract class StatementAst : Ast
     {

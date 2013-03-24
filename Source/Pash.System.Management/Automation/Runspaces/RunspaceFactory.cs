@@ -1,4 +1,5 @@
-﻿using System.Management.Automation.Host;
+﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using System.Management.Automation.Host;
 using Pash.Implementation;
 
 namespace System.Management.Automation.Runspaces

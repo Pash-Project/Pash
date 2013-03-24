@@ -1,4 +1,5 @@
-﻿namespace System.Management.Automation.Internal
+﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+namespace System.Management.Automation.Internal
 {
     public static class AutomationNull
     {

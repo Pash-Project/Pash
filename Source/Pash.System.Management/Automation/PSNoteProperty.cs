@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using System.Text;
 
 namespace System.Management.Automation
 {
