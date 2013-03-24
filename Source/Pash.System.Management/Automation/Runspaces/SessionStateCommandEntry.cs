@@ -7,18 +7,20 @@ namespace System.Management.Automation.Runspaces
 {
     public abstract class SessionStateCommandEntry : ConstrainedSessionStateEntry
     {
+        internal CommandTypes commandType;
+
         public CommandTypes CommandType
         {
             get
             {
-                throw new NotImplementedException();
+                return commandType;
             }
         }
 
         protected SessionStateCommandEntry(string name)
             : base(name, SessionStateEntryVisibility.Public)
         {
-            throw new NotImplementedException();
+
         }
 
         protected internal SessionStateCommandEntry(string name, SessionStateEntryVisibility visibility)
