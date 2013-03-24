@@ -399,12 +399,32 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitMemberExpression(MemberExpressionAst memberExpressionAst)
         {
-            var left = EvaluateAst(memberExpressionAst.Expression);
+            var expression = memberExpressionAst.Expression;
+
+            Type type;
+            object obj;
+            if (expression is TypeExpressionAst)
+            {
+                obj = null;
+                type = ((TypeExpressionAst)expression).TypeName.GetReflectionType();
+            }
+            else
+            {
+                obj = EvaluateAst(expression);
+                type = obj.GetType();
+            }
+
             if (memberExpressionAst.Member is StringConstantExpressionAst)
             {
                 var name = (memberExpressionAst.Member as StringConstantExpressionAst).Value;
-                var result = left.GetType().GetProperty(name).GetValue(left, null);
-                this._pipelineCommandRuntime.WriteObject(result);
+                var property = type.GetProperty(name);
+
+                // Try get field value if property not found.
+                var result = property != null
+                    ? property.GetValue(obj, null)
+                    : type.GetField(name).GetValue(obj);
+                
+                _pipelineCommandRuntime.WriteObject(result);
                 return AstVisitAction.SkipChildren;
             }
 
