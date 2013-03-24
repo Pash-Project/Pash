@@ -199,7 +199,7 @@ namespace TestHost
             Assert.AreEqual(2, result);
         }
 
-        [Test, Description("https://github.com/JayBazuzi/Pash2/issues/6")]
+        [Test, Description("https://github.com/Pash-Project/Pash/issues/6")]
         public void UnrecognizedCommandBug()
         {
             // notice typo

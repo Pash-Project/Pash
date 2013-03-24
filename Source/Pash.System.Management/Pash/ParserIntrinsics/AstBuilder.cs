@@ -1197,7 +1197,7 @@ namespace Pash.ParserIntrinsics
                         throw new InvalidOperationException(parseTreeNode.ChildNodes[0].ToString());
                 }
 
-                // Issue: https://github.com/JayBazuzi/Pash2/issues/8 - command_module_opt is not in the grammar right now.
+                // Issue: https://github.com/Pash-Project/Pash/issues/8 - command_module_opt is not in the grammar right now.
 
                 commandElements.Add(BuildCommandNameExprAst(parseTreeNode.ChildNodes[1]));
             }
