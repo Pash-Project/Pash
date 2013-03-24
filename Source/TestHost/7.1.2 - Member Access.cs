@@ -53,24 +53,24 @@ $a.$property				# property name is a variable
             Assert.AreEqual("3" + Environment.NewLine, result);
         }
 
-        [Test, Explicit]
+        [Test]
         public void StaticProperty()
         {
             var result = TestHost.Execute(true, @"
 [int]::MinValue					# get static property
 ");
 
-            Assert.AreEqual("3" + Environment.NewLine, result);
+            Assert.AreEqual(int.MinValue + Environment.NewLine, result);
         }
 
-        [Test, Explicit]
+        [Test]
         public void StaticProperty2()
         {
             var result = TestHost.Execute(true, @"
 [double]::PositiveInfinity		# get static property
 ");
 
-            Assert.AreEqual("3" + Environment.NewLine, result);
+            Assert.AreEqual(double.PositiveInfinity + Environment.NewLine, result);
         }
 
         [Test, Explicit]
