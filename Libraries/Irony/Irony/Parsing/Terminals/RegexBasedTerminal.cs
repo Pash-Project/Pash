@@ -25,9 +25,9 @@ namespace Irony.Parsing {
     // Mono's C# compiler prefers this overload, which is incorrect. Marking it `private` to
     // to work around.
     //
-    // See https://github.com/JayBazuzi/Pash2/issues/24
+    // See https://github.com/Pash-Project/Pash/issues/24
     //
-    // See https://github.com/JayBazuzi/Pash2/issues/29
+    // See https://github.com/Pash-Project/Pash/issues/29
     //
     // See https://bugzilla.xamarin.com/show_bug.cgi?id=6541
     private RegexBasedTerminal(string pattern, params string[] prefixes)
