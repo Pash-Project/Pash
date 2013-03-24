@@ -17,7 +17,7 @@ namespace Libraries.Tests
         // test to call it out.
         [Test]
         [Description("https://bugzilla.xamarin.com/show_bug.cgi?id=6541")]
-        [Explicit("reenable when https://github.com/JayBazuzi/Pash2/issues/29 is closed.")]
+        [Explicit("reenable when https://github.com/Pash-Project/Pash/issues/29 is closed.")]
         public void MonoOverloadBug6541Test()
         {
             F("x");
