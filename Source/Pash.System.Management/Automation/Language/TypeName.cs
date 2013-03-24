@@ -1,4 +1,9 @@
-﻿using System.Collections.Generic;
+// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Management.Automation.Language;
+using System.Text;
 
 namespace System.Management.Automation.Language
 {

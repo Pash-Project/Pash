@@ -1,4 +1,5 @@
-﻿using System.Management.Automation;
+﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using System.Management.Automation;
 using System;
 
 namespace Microsoft.PowerShell.Commands

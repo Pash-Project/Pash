@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
@@ -7,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Microsoft.PowerShell.Commands.Utility")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("IgorM @ IgorShare.Wordpress")]
-[assembly: AssemblyProduct("System.Management.Automation")]
-[assembly: AssemblyCopyright("IgorM @ IgorShare.Wordpress")]
+[assembly: AssemblyCompany("Pash Contributors")]
+[assembly: AssemblyProduct("Pash - https://github.com/Pash-Project/Pash/")]
+[assembly: AssemblyCopyright("Copyright © 2008,2012-2013 - License: GPL/BSD")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
