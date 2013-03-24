@@ -1,4 +1,5 @@
-﻿using Pash.ParserIntrinsics;
+﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using Pash.ParserIntrinsics;
 using System;
 using System.Text.RegularExpressions;
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
 
