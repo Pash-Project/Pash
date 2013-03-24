@@ -114,8 +114,7 @@ namespace Pash
             Console.CancelKeyPress += new ConsoleCancelEventHandler(HandleControlC);
             Console.TreatControlCAsInput = false;
 
-            myHost.UI.WriteLine(ConsoleColor.White, ConsoleColor.Black, "Pash (PowerShell open source reimplementation)");
-            myHost.UI.WriteLine(ConsoleColor.White, ConsoleColor.Black, "Implemented by IgorM @ http://IgorShare.WordPress.com");
+            myHost.UI.WriteLine(ConsoleColor.White, ConsoleColor.Black, "Pash - Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/");
             myHost.UI.WriteLine();
 
             // Loop reading commands to execute until ShouldExit is set by
