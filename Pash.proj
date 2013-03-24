@@ -11,7 +11,7 @@
           DependsOnTargets="Build"
           >
     <!--
-    When this issue is resolved: https://github.com/JayBazuzi/Pash2/issues/29
+    When this issue is resolved: https://github.com/Pash-Project/Pash/issues/29
 
     Uncomment the next command & reenable the `Libraries.Tests.MonoTests.MonoOverloadBug6541Test`.
 

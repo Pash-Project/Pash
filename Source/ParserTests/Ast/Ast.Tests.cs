@@ -402,7 +402,7 @@ ls
             Assert.AreEqual(StringConstantType.BareWord, memberAst.StringConstantType);
         }
 
-        [Test, Explicit("Bug - https://github.com/JayBazuzi/Pash2/issues/9")]
+        [Test, Explicit("Bug - https://github.com/Pash-Project/Pash/issues/9")]
         public void BadMemberAccess()
         {
             Assert.Throws<PowerShellGrammar.ParseException>(() =>
@@ -506,7 +506,7 @@ ls
             Assert.AreEqual(2, statements.Count);
         }
 
-        [Test(Description = "Issue: https://github.com/JayBazuzi/Pash2/issues/7")]
+        [Test(Description = "Issue: https://github.com/Pash-Project/Pash/issues/7")]
         public void StatementSequenceWithoutSemicolonTest()
         {
             Assert.Throws<PowerShellGrammar.ParseException>(() =>
