@@ -14,3 +14,4 @@ Igor Moochnick             | [@igormoochnick](http://github.com/igormoochnick)  
 Jay Bazuzi                 | [@jaybazuzi](http://github.com/jaybazuzi)              | <jay@bazuzi.com>              | Restarted Pash development in 2012
 Andrew Barnes              | [@b333z](http://github.com/b333z)                      |                               | 
 Jason Jarrett              | [@staxmanade](http://github.com/staxmanade)            | <jason@elegantcode.com>       | 
+Friedrich von Never        | [@ForNeVeR](http://github.com/ForNeVeR)                | <neverthness@gmail.com>       | 
