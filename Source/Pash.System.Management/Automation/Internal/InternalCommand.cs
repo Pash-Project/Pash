@@ -1,4 +1,4 @@
-using System.Management.Automation.Host;
+﻿using System.Management.Automation.Host;
 using System.Xml.Schema;
 using Pash.Implementation;
 

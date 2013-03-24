@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands.Internal.Format

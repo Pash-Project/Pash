@@ -1,4 +1,4 @@
-using System.Management.Automation.Internal;
+﻿using System.Management.Automation.Internal;
 
 namespace System.Management.Automation
 {

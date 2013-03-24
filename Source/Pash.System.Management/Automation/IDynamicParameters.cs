@@ -1,4 +1,4 @@
-namespace System.Management.Automation
+﻿namespace System.Management.Automation
 {
     public interface IDynamicParameters
     {

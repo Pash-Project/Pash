@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Irony.Parsing;
 
 namespace Pash.ParserIntrinsics

@@ -1,4 +1,4 @@
-namespace System.Management.Automation.Internal
+﻿namespace System.Management.Automation.Internal
 {
     public static class AutomationNull
     {

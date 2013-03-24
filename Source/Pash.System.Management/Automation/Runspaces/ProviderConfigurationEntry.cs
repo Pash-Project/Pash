@@ -1,4 +1,4 @@
-namespace System.Management.Automation.Runspaces
+﻿namespace System.Management.Automation.Runspaces
 {
     public sealed class ProviderConfigurationEntry : RunspaceConfigurationEntry
     {

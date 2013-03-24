@@ -1,4 +1,4 @@
-namespace System.Management.Automation
+﻿namespace System.Management.Automation
 {
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class ValidateRangeAttribute : ValidateEnumeratedArgumentsAttribute
