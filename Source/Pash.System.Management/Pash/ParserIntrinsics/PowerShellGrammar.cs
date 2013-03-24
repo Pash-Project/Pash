@@ -415,7 +415,7 @@ namespace Pash.ParserIntrinsics
             ////            new_lines_opt   attribute_list_opt   new_lines_opt   param   new_lines_opt
             ////                    (   parameter_list_opt   new_lines_opt   )
             param_block.Rule =
-                /*  TODO: https://github.com/JayBazuzi/Pash2/issues/11 attribute_list_opt +  */ "param"
+                /*  TODO: https://github.com/Pash-Project/Pash/issues/11 attribute_list_opt +  */ "param"
                         + "(" + parameter_list_opt + ")";
 
             ////        parameter_list:
@@ -427,7 +427,7 @@ namespace Pash.ParserIntrinsics
             ////        script_parameter:
             ////            new_lines_opt   attribute_list_opt   new_lines_opt   variable   script_parameter_default_opt
             script_parameter.Rule =
-                /* TODO: https://github.com/JayBazuzi/Pash2/issues/11 attribute_list_opt +  */ variable + script_parameter_default_opt;
+                /* TODO: https://github.com/Pash-Project/Pash/issues/11 attribute_list_opt +  */ variable + script_parameter_default_opt;
 
             ////        script_parameter_default:
             ////            new_lines_opt   =   new_lines_opt   expression
@@ -478,7 +478,7 @@ namespace Pash.ParserIntrinsics
             ////            statement_list   statement
             statement_list.Rule = MakePlusRule(statement_list, statement);
 #else
-            // There's a bug in the language spec here. See https://github.com/JayBazuzi/Pash2/issues/7
+            // There's a bug in the language spec here. See https://github.com/Pash-Project/Pash/issues/7
             statement_list.Rule =
                 MakeListRule(statement_list, statement_terminators, statement, TermListOptions.AllowTrailingDelimiter | TermListOptions.PlusList);
 #endif
@@ -514,11 +514,11 @@ namespace Pash.ParserIntrinsics
             _statement_labeled_statement.Rule =
                 (label | Empty) + labeled_statement;
 
-            // See https://github.com/JayBazuzi/Pash2/issues/7
+            // See https://github.com/Pash-Project/Pash/issues/7
             _statement_flow_control_statement.Rule =
                 flow_control_statement /*+ statement_terminator_opt*/;
 
-            // See https://github.com/JayBazuzi/Pash2/issues/7
+            // See https://github.com/Pash-Project/Pash/issues/7
             _statement_pipeline.Rule =
                 pipeline /*+ statement_terminator_opt*/;
 
@@ -860,7 +860,7 @@ namespace Pash.ParserIntrinsics
             _command_simple.Rule =
                 command_name + command_elements_opt;
 
-            // ISSUE: https://github.com/JayBazuzi/Pash2/issues/8
+            // ISSUE: https://github.com/Pash-Project/Pash/issues/8
             _command_invocation.Rule =
                 command_invocation_operator + /* command_module_opt + */ command_name_expr + command_elements_opt;
 
@@ -871,7 +871,7 @@ namespace Pash.ParserIntrinsics
 
             ////        command_module:
             ////            primary_expression
-            // ISSUE: https://github.com/JayBazuzi/Pash2/issues/8
+            // ISSUE: https://github.com/Pash-Project/Pash/issues/8
             command_module.Rule =
                 primary_expression;
 
@@ -880,7 +880,7 @@ namespace Pash.ParserIntrinsics
             ////            generic_token_with_subexpr
             command_name.Rule =
                 generic_token
-                // ISSUE: https://github.com/JayBazuzi/Pash2/issues/9 - need whitespace prohibition
+                // ISSUE: https://github.com/Pash-Project/Pash/issues/9 - need whitespace prohibition
                 // |
                 // generic_token_with_subexpr
                 ;
@@ -888,7 +888,7 @@ namespace Pash.ParserIntrinsics
             ////        generic_token_with_subexpr:
             ////            No whitespace is allowed between ) and command_name.
             ////            generic_token_with_subexpr_start   statement_list_opt   )   command_name
-            // ISSUE: https://github.com/JayBazuzi/Pash2/issues/9 - need whitespace prohibition
+            // ISSUE: https://github.com/Pash-Project/Pash/issues/9 - need whitespace prohibition
             generic_token_with_subexpr.Rule =
                 generic_token_with_subexpr_start + statement_list_opt + ")" + command_name;
 
@@ -1200,13 +1200,13 @@ namespace Pash.ParserIntrinsics
             ////        invocation_expression: Note no whitespace is allowed between terms in these productions.
             ////            primary_expression   .   member_name   argument_list
             ////            primary_expression   ::   member_name   argument_list
-            // ISSUE: https://github.com/JayBazuzi/Pash2/issues/9 - need whitespace prohibition
+            // ISSUE: https://github.com/Pash-Project/Pash/issues/9 - need whitespace prohibition
             member_access_or_invocation_expression.Rule =
                 primary_expression + (ToTerm(".") | "::") + member_name + (argument_list | Empty);
 
             ////        element_access: Note no whitespace is allowed between primary_expression and [.
             ////            primary_expression   [  new_lines_opt   expression   new_lines_opt   ]
-            // ISSUE: https://github.com/JayBazuzi/Pash2/issues/9 - need whitespace prohibition
+            // ISSUE: https://github.com/Pash-Project/Pash/issues/9 - need whitespace prohibition
             element_access.Rule =
                 primary_expression + PreferShiftHere() + "[" + expression + "]";
 
@@ -1459,7 +1459,7 @@ namespace Pash.ParserIntrinsics
             ////            Carriage return character (U+000D) followed by line feed character (U+000A)
             if (source.PreviewChar == '`')
             {
-                // https://github.com/JayBazuzi/Pash2/issues/12
+                // https://github.com/Pash-Project/Pash/issues/12
                 //if (source.NextPreviewChar == '\u000D' && source.NextNextPreviewChar == '\u000A') return 3;
 
                 if (source.NextPreviewChar == '\u000D') return 2;
