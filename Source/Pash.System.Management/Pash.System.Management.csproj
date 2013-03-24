@@ -275,6 +275,7 @@
     <Compile Include="Automation\Runspaces\RunspaceStateInfo.cs" />
     <Compile Include="Automation\Runspaces\ScriptConfigurationEntry.cs" />
     <Compile Include="Automation\Runspaces\SessionStateAliasEntry.cs" />
+    <Compile Include="Automation\Runspaces\SessionStateApplicationEntry.cs" />
     <Compile Include="Automation\Runspaces\SessionStateAssemblyEntry.cs" />
     <Compile Include="Automation\Runspaces\SessionStateCmdletEntry.cs" />
     <Compile Include="Automation\Runspaces\SessionStateCommandEntry.cs" />
@@ -282,6 +283,7 @@
     <Compile Include="Automation\Runspaces\SessionStateFunctionEntry.cs" />
     <Compile Include="Automation\Runspaces\SessionStateProviderEntry.cs" />
     <Compile Include="Automation\Runspaces\SessionStateProxy.cs" />
+    <Compile Include="Automation\Runspaces\SessionStateScriptEntry.cs" />
     <Compile Include="Automation\Runspaces\SessionStateTypeEntry.cs" />
     <Compile Include="Automation\Runspaces\SessionStateVariableEntry.cs" />
     <Compile Include="Automation\Runspaces\TypeTable.cs" />
