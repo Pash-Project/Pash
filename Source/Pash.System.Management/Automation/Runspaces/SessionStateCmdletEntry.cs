@@ -7,25 +7,30 @@ namespace System.Management.Automation.Runspaces
 {
     public sealed class SessionStateCmdletEntry : SessionStateCommandEntry
     {
+        Type implentingtype;
+        string helpfilename;
+
         public Type ImplementingType
         {
             get
             {
-                throw new NotImplementedException();
+                return implentingtype;
             }
         }
         public string HelpFileName
         {
             get
             {
-                throw new NotImplementedException();
+                return helpfilename;
             }
         }
 
         public SessionStateCmdletEntry(string name, Type implementingType, string helpFileName)
             : base(name, SessionStateEntryVisibility.Public)
         {
-            throw new NotImplementedException();
+            this.implentingtype = implementingType;
+            this.helpfilename = helpFileName;
+            this.commandType = CommandTypes.Cmdlet;
         }
 
         public override InitialSessionStateEntry Clone()
