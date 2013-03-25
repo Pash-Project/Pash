@@ -32,6 +32,6 @@ namespace System.Management.Automation
         //public SteppablePipeline GetSteppablePipeline(CommandOrigin commandOrigin);
         //public Collection<PSObject> Invoke(params object[] args);
         //public object InvokeReturnAsIs(params object[] args);
-        public override string ToString() { return this.Ast.ToString();}
+        public override string ToString() { return this.Ast.ToString(); }
     }
 }
