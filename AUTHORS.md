@@ -15,3 +15,4 @@ Jay Bazuzi                 | [@jaybazuzi](http://github.com/jaybazuzi)          
 Andrew Barnes              | [@b333z](http://github.com/b333z)                      |                               | 
 Jason Jarrett              | [@staxmanade](http://github.com/staxmanade)            | <jason@elegantcode.com>       | 
 Friedrich von Never        | [@ForNeVeR](http://github.com/ForNeVeR)                | <neverthness@gmail.com>       | 
+Alistair Leslie Hughes     | [@alesliehughes](https://github.com/alesliehughes)     |                               |
