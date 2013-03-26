@@ -13,7 +13,7 @@ namespace ParserTests
     public class ParserTests
     {
         [Test]
-        public void ATest()
+        public void GrammarErrorsCount()
         {
             // Obviously, we'd rather drive this to 0, but for now, let's lock it down
             Assert.AreEqual(4, PowerShellGrammar.Parser.Language.Errors.Count, PowerShellGrammar.Parser.Language.Errors.JoinString("\r\n"));
@@ -36,10 +36,11 @@ namespace ParserTests
         [TestCase(@"[int],[string]")]
         [TestCase(@"$x = [int]")]
         [TestCase(@"$x::MaxValue")]
-        [TestCase(@"[int]::Parse()")]
+        [TestCase(@"[int]::Parse('7')")]
         [TestCase(@"$x::Parse()")]
         [TestCase(@"$x.Assembly")]
         [TestCase(@"$x.AsType()")]
+        [TestCase(@"[char]::IsUpper(""AbC"", 1)", Description = "two parameters")]
         public void TypesAndMembers(string input)
         {
             AssertIsValidInput(input);
@@ -86,8 +87,8 @@ namespace ParserTests
         [Test]
         [TestCase(@"[math]::Sqrt(2.0)				# call method with argument 2.0")]
         [TestCase(@"[char]::IsUpper(""a"")			# call method")]
-        [TestCase(@"$b = ""abc#$%XYZabc""")]
-        [TestCase(@"$b.ToUpper()					# call instance method")]
+        [TestCase(@"$b = ""abc#$%XYZabc"" 
+                    $b.ToUpper()					# call instance method", Explicit = true)]
         [TestCase(@"[math]::Sqrt(2) 				# convert 2 to 2.0 and call method")]
         [TestCase(@"[math]::Sqrt(2D) 				# convert 2D to 2.0 and call method")]
         [TestCase(@"[math]::Sqrt($true) 			# convert $true to 1.0 and call method")]

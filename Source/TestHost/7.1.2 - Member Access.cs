@@ -30,6 +30,58 @@ a.Length
             Assert.AreEqual("3" + Environment.NewLine, result);
         }
 
+        [Test]
+        public void StaticMethodOnSystemType()
+        {
+            var result = TestHost.Execute(true, @"[System.Int32]::Parse('7')");
+
+            Assert.AreEqual("7" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void StaticMethodOnBuiltinType()
+        {
+            var result = TestHost.Execute(true, @"[int]::Parse('7')");
+
+            Assert.AreEqual("7" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void TwoParameters()
+        {
+            var result = TestHost.Execute(@"[char]::IsUpper(""AbC"", 1)");
+            Assert.AreEqual("False" + Environment.NewLine, result);
+            var result2 = TestHost.Execute(@"[char]::IsUpper(""AbC"", 2)");
+            Assert.AreEqual("True" + Environment.NewLine, result2);
+        }
+
+        [Test]
+        public void NoParametersTest()
+        {
+            var result = TestHost.Execute(@"'a'.GetType()");
+            Assert.AreEqual("System.String" + Environment.NewLine, result);
+        }
+
+        [Test]
+        [TestCase(@"[math]::Sqrt(2.0)				# call method with argument 2.0", Explicit = true)]
+        [TestCase(@"[char]::IsUpper(""a"")			# call method", Explicit = true, Description = "requires conversion")]
+        [TestCase(@"$b = ""abc#$%XYZabc""",
+                  @"$b.ToUpper()					# call instance method")]
+        [TestCase(@"[math]::Sqrt(2) 				# convert 2 to 2.0 and call method", Explicit = true)]
+        [TestCase(@"[math]::Sqrt(2D) 				# convert 2D to 2.0 and call method", Explicit = true)]
+        [TestCase(@"[math]::Sqrt($true) 			# convert $true to 1.0 and call method", Explicit = true)]
+        [TestCase(@"[math]::Sqrt(""20"") 			# convert ""20"" to 20 and call method", Explicit = true)]
+        [TestCase(@"$a = [math]::Sqrt				# get method descriptor for Sqrt
+                    $a.Invoke(2.0)					# call Sqrt via the descriptor
+                    $a = [math]::(""Sq""+""rt"")	# get method descriptor for Sqrt
+                    $a.Invoke(2.0) 					# call Sqrt via the descriptor", Explicit = true)]
+        [TestCase(@"$a = [char]::ToLower			# get method descriptor for ToLower
+                    $a.Invoke(""X"")				# call ToLower via the descriptor", Explicit = true)]
+        public void Section7_1_3_InvocationExpressions(params string[] input)
+        {
+            var result = TestHost.Execute(input);
+        }
+
         [Test, Explicit]
         public void InstancePropertyNameIsVariable()
         {

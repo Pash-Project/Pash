@@ -380,42 +380,6 @@ ls
         }
 
         [Test]
-        public void StaticMemberAccess()
-        {
-            MemberExpressionAst memberExpressionAst = ParseInput("[System.Int32]::MaxValue")
-                .EndBlock
-                .Statements[0]
-                .PipelineElements[0]
-                .Expression;
-        }
-
-        [Test]
-        public void InstanceMemberAccess()
-        {
-            var memberExpressionAst = ParseInput(@"'abc'.Length").EndBlock.Statements[0].PipelineElements[0].Expression;
-            StringConstantExpressionAst expressionAst = memberExpressionAst.Expression;
-            StringConstantExpressionAst memberAst = memberExpressionAst.Member;
-
-            Assert.AreEqual("abc", expressionAst.Value);
-            Assert.AreEqual(StringConstantType.SingleQuoted, expressionAst.StringConstantType);
-
-            Assert.AreEqual("Length", memberAst.Value);
-            Assert.AreEqual(StringConstantType.BareWord, memberAst.StringConstantType);
-        }
-
-        [Test, Explicit("Bug - https://github.com/Pash-Project/Pash/issues/9")]
-        public void BadMemberAccess()
-        {
-            Assert.Throws<PowerShellGrammar.ParseException>(() =>
-            {
-
-                // The language spec says this space is prohibited.
-                ParseInput("[System.Int32] ::MaxValue");
-
-            });
-        }
-
-        [Test]
         public void ParseError()
         {
             Assert.Throws<PowerShellGrammar.ParseException>(() =>
@@ -814,6 +778,66 @@ ls
         static dynamic ParseInput(string s)
         {
             return PowerShellGrammar.ParseInteractiveInput(s);
+        }
+
+        [TestFixture]
+        public class MemberAccess
+        {
+            [Test]
+            public void StaticProperty()
+            {
+                MemberExpressionAst memberExpressionAst = ParseInput("[System.Int32]::MaxValue")
+                    .EndBlock
+                    .Statements[0]
+                    .PipelineElements[0]
+                    .Expression;
+            }
+
+            [Test]
+            public void InstanceProperty()
+            {
+                var memberExpressionAst = ParseInput(@"'abc'.Length").EndBlock.Statements[0].PipelineElements[0].Expression;
+                StringConstantExpressionAst expressionAst = memberExpressionAst.Expression;
+                StringConstantExpressionAst memberAst = memberExpressionAst.Member;
+
+                Assert.AreEqual("abc", expressionAst.Value);
+                Assert.AreEqual(StringConstantType.SingleQuoted, expressionAst.StringConstantType);
+
+                Assert.AreEqual("Length", memberAst.Value);
+                Assert.AreEqual(StringConstantType.BareWord, memberAst.StringConstantType);
+            }
+
+            [Test, Explicit("Bug - https://github.com/Pash-Project/Pash/issues/9")]
+            public void BadMemberAccess()
+            {
+                Assert.Throws<PowerShellGrammar.ParseException>(() =>
+                {
+
+                    // The language spec says this space is prohibited.
+                    ParseInput("[System.Int32] ::MaxValue");
+
+                });
+            }
+
+            [Test]
+            public void StaticMethodInvocation()
+            {
+                InvokeMemberExpressionAst invokeMemberExpressionAst = ParseInput(@"[char]::IsUpper('a')")
+                    .EndBlock
+                    .Statements[0]
+                    .PipelineElements[0]
+                    .Expression;
+
+                var typeExpressionAst = (TypeExpressionAst)invokeMemberExpressionAst.Expression;
+                var stringConstantExpressionAst = (StringConstantExpressionAst)invokeMemberExpressionAst.Member;
+                var argumentAst = (StringConstantExpressionAst)invokeMemberExpressionAst.Arguments.Single();
+
+                Assert.AreEqual("char", typeExpressionAst.TypeName.Name);
+
+                Assert.AreEqual("IsUpper", stringConstantExpressionAst.Value);
+
+                Assert.AreEqual("a", argumentAst.Value);
+            }
         }
     }
 }
