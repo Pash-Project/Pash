@@ -685,7 +685,7 @@ namespace Pash.ParserIntrinsics
                     new ScriptExtent(parseTreeNode),
                     typeExpressionAst,
                     memberName,
-                    BuildArgumentExpressionList(parseTreeNode.ChildNodes[3].ChildNodes[1]),
+                    BuildArgumentList(parseTreeNode.ChildNodes[3]),
                     @static
                     );
             }
@@ -694,6 +694,26 @@ namespace Pash.ParserIntrinsics
             {
                 return new MemberExpressionAst(new ScriptExtent(parseTreeNode), typeExpressionAst, memberName, @static);
             }
+        }
+
+        IEnumerable<ExpressionAst> BuildArgumentList(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.argument_list);
+
+            if (parseTreeNode.ChildNodes.Count == 3)
+            {
+
+                var argumentExpressionListNode = parseTreeNode.ChildNodes[1];
+
+                return BuildArgumentExpressionList(argumentExpressionListNode);
+            }
+
+            else if (parseTreeNode.ChildNodes.Count == 2)
+            {
+                return new ExpressionAst[] { };
+            }
+
+            else throw new InvalidOperationException(parseTreeNode.ToString());
         }
 
         IEnumerable<ExpressionAst> BuildArgumentExpressionList(ParseTreeNode parseTreeNode)
