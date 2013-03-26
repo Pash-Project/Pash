@@ -46,5 +46,11 @@ namespace TestHost.Cmdlets
         {
             Assert.AreEqual("3.4.5.6" + Environment.NewLine, TestHost.Execute("New-Object version \"3.4.5.6\""));
         }
+
+        [Test]
+        public void BuiltinType()
+        {
+            Assert.AreEqual("False" + Environment.NewLine, TestHost.Execute("New-Object bool"));
+        }
     }
 }

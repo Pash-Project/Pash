@@ -31,7 +31,15 @@ a.Length
         }
 
         [Test]
-        public void StaticMethod()
+        public void StaticMethodOnSystemType()
+        {
+            var result = TestHost.Execute(true, @"[System.Int32]::Parse('7')");
+
+            Assert.AreEqual("7" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void StaticMethodOnBuiltinType()
         {
             var result = TestHost.Execute(true, @"[int]::Parse('7')");
 
