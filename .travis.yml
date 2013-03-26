@@ -1,5 +1,9 @@
 language: c
 
+notifications:
+  email:
+    on_success: always
+
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq mono-devel gtk-sharp2
