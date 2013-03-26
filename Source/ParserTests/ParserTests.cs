@@ -86,8 +86,8 @@ namespace ParserTests
         [Test]
         [TestCase(@"[math]::Sqrt(2.0)				# call method with argument 2.0")]
         [TestCase(@"[char]::IsUpper(""a"")			# call method")]
-        [TestCase(@"$b = ""abc#$%XYZabc""")]
-        [TestCase(@"$b.ToUpper()					# call instance method")]
+        [TestCase(@"$b = ""abc#$%XYZabc"" 
+                    $b.ToUpper()					# call instance method", Explicit = true)]
         [TestCase(@"[math]::Sqrt(2) 				# convert 2 to 2.0 and call method")]
         [TestCase(@"[math]::Sqrt(2D) 				# convert 2D to 2.0 and call method")]
         [TestCase(@"[math]::Sqrt($true) 			# convert $true to 1.0 and call method")]
