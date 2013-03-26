@@ -398,6 +398,38 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
+        public override AstVisitAction VisitInvokeMemberExpression(InvokeMemberExpressionAst methodCallAst)
+        {
+            var expression = methodCallAst.Expression;
+
+            Type type;
+            object obj;
+            if (expression is TypeExpressionAst)
+            {
+                obj = null;
+                type = ((TypeExpressionAst)expression).TypeName.GetReflectionType();
+            }
+            else
+            {
+                obj = EvaluateAst(expression);
+                type = obj.GetType();
+            }
+
+            var arguments = methodCallAst.Arguments.Select(EvaluateAst);
+
+            if (methodCallAst.Member is StringConstantExpressionAst)
+            {
+                var name = (methodCallAst.Member as StringConstantExpressionAst).Value;
+                var method = type.GetMethod(name, arguments.Select(a => a.GetType()).ToArray());
+                var result = method.Invoke(obj, arguments.ToArray());
+
+                _pipelineCommandRuntime.WriteObject(result);
+                return AstVisitAction.SkipChildren;
+            }
+
+            throw new NotImplementedException(this.ToString());
+        }
+
         public override AstVisitAction VisitMemberExpression(MemberExpressionAst memberExpressionAst)
         {
             var expression = memberExpressionAst.Expression;
@@ -522,11 +554,6 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitForStatement(ForStatementAst forStatementAst)
         {
             throw new NotImplementedException(); //VisitForStatement(forStatementAst);
-        }
-
-        public override AstVisitAction VisitInvokeMemberExpression(InvokeMemberExpressionAst methodCallAst)
-        {
-            throw new NotImplementedException(); //VisitInvokeMemberExpression(methodCallAst);
         }
 
         public override AstVisitAction VisitMergingRedirection(MergingRedirectionAst redirectionAst)
