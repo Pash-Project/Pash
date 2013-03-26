@@ -112,6 +112,7 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal _do_statement_until = null; // Initialized by reflection.
         public readonly NonTerminal while_condition = null; // Initialized by reflection.
         public readonly NonTerminal function_statement = null; // Initialized by reflection.
+        public readonly NonTerminal _function_or_filter_keyword = null; // Initialized by reflection.
         public readonly NonTerminal function_name = null; // Initialized by reflection.
         public readonly NonTerminal function_parameter_declaration = null; // Initialized by reflection.
         public readonly NonTerminal function_parameter_declaration_opt = null; // Initialized by reflection.
@@ -169,10 +170,14 @@ namespace Pash.ParserIntrinsics
         #region B.2.3 Expressions
         public readonly NonTerminal expression = null; // Initialized by reflection.
         public readonly NonTerminal logical_expression = null; // Initialized by reflection.
+        public readonly NonTerminal _logical_expression_operator = null; // Initialized by reflection.
         public readonly NonTerminal bitwise_expression = null; // Initialized by reflection.
+        public readonly NonTerminal _bitwise_expression_operator = null; // Initialized by reflection.
         public readonly NonTerminal comparison_expression = null; // Initialized by reflection.
         public readonly NonTerminal additive_expression = null; // Initialized by reflection.
+        public readonly NonTerminal _additive_expression_operator = null; // Initialized by reflection.
         public readonly NonTerminal multiplicative_expression = null; // Initialized by reflection.
+        public readonly NonTerminal _multiplicative_expression_operator = null; // Initialized by reflection.
         public readonly NonTerminal format_expression = null; // Initialized by reflection.
         public readonly NonTerminal range_expression = null; // Initialized by reflection.
         public readonly NonTerminal array_literal_expression = null; // Initialized by reflection.
@@ -194,7 +199,8 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal key_expression = null; // Initialized by reflection.
         public readonly NonTerminal post_increment_expression = null; // Initialized by reflection.
         public readonly NonTerminal post_decrement_expression = null; // Initialized by reflection.
-        public readonly NonTerminal member_access_or_invocation_expression = null; // Initialized by reflection.
+        public readonly NonTerminal _member_access_or_invocation_expression = null; // Initialized by reflection.
+        public readonly NonTerminal _member_access_or_invocation_expression_operator = null; // Initialized by reflection.
         public readonly NonTerminal element_access = null; // Initialized by reflection.
         public readonly NonTerminal argument_list = null; // Initialized by reflection.
         public readonly NonTerminal argument_expression_list = null; // Initialized by reflection.
@@ -230,6 +236,7 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal attribute_arguments = null; // Initialized by reflection.
         public readonly NonTerminal attribute_argument = null; // Initialized by reflection.
         #endregion
+
         #endregion
 
         public PowerShellGrammar()
@@ -724,7 +731,8 @@ namespace Pash.ParserIntrinsics
             ////            function   new_lines_opt   function_name   function_parameter_declaration_opt   {   script_block   }
             ////            filter   new_lines_opt   function_name   function_parameter_declaration_opt   {   script_block   }
             function_statement.Rule =
-                (ToTerm("function") | "filter") + function_name + function_parameter_declaration_opt + "{" + script_block + "}";
+                 _function_or_filter_keyword + function_name + function_parameter_declaration_opt + "{" + script_block + "}";
+            _function_or_filter_keyword.Rule = ToTerm("function") | "filter";
 
             ////        function_name:
             ////            command_argument
@@ -963,8 +971,9 @@ namespace Pash.ParserIntrinsics
             logical_expression.Rule =
                 bitwise_expression
                 |
-                (logical_expression + (ToTerm("-and") | "-or" | "-xor") + bitwise_expression)
+                (logical_expression + _logical_expression_operator + bitwise_expression)
                 ;
+            _logical_expression_operator.Rule = ToTerm("-and") | "-or" | "-xor";
 
             ////        bitwise_expression:
             ////            comparison_expression
@@ -974,8 +983,9 @@ namespace Pash.ParserIntrinsics
             bitwise_expression.Rule =
                 comparison_expression
                 |
-                (bitwise_expression + (ToTerm("-band") | "-bor" | "-bxor") + comparison_expression)
+                (bitwise_expression + _bitwise_expression_operator + comparison_expression)
                 ;
+            _bitwise_expression_operator.Rule = ToTerm("-band") | "-bor" | "-bxor";
 
             ////        comparison_expression:
             ////            additive_expression
@@ -993,8 +1003,9 @@ namespace Pash.ParserIntrinsics
             additive_expression.Rule =
                 multiplicative_expression
                 |
-                (additive_expression + ("+" | dash) + multiplicative_expression)
+                (additive_expression + _additive_expression_operator + multiplicative_expression)
                 ;
+            _additive_expression_operator.Rule = "+" | dash;
 
             ////        multiplicative_expression:
             ////            format_expression
@@ -1004,8 +1015,9 @@ namespace Pash.ParserIntrinsics
             multiplicative_expression.Rule =
                 format_expression
                 |
-                (multiplicative_expression + (ToTerm("*") | ToTerm("/") | ToTerm("%")) + format_expression)
+                (multiplicative_expression + _multiplicative_expression_operator + format_expression)
                 ;
+            _multiplicative_expression_operator.Rule = ToTerm("*") | ToTerm("/") | ToTerm("%");
 
             ////        format_expression:
             ////            range_expression
@@ -1064,9 +1076,7 @@ namespace Pash.ParserIntrinsics
                 |
                 ("-bnot" + unary_expression)
                 |
-                ("+" + unary_expression)
-                |
-                (dash + unary_expression)
+                (_additive_expression_operator + unary_expression)
                 |
                 (pre_increment_expression)
                 |
@@ -1104,7 +1114,7 @@ namespace Pash.ParserIntrinsics
             primary_expression.Rule =
                 value
                 |
-                member_access_or_invocation_expression
+                _member_access_or_invocation_expression
                 |
                 element_access
                 |
@@ -1201,15 +1211,15 @@ namespace Pash.ParserIntrinsics
             ////            primary_expression   .   member_name   argument_list
             ////            primary_expression   ::   member_name   argument_list
             // ISSUE: https://github.com/Pash-Project/Pash/issues/9 - need whitespace prohibition
-            member_access_or_invocation_expression.Rule =
-                primary_expression + (ToTerm(".") | "::") + member_name + (argument_list | Empty);
+            _member_access_or_invocation_expression.Rule =
+                primary_expression + _member_access_or_invocation_expression_operator + member_name + (argument_list | Empty);
+            _member_access_or_invocation_expression_operator.Rule = ToTerm(".") | "::";
 
             ////        element_access: Note no whitespace is allowed between primary_expression and [.
             ////            primary_expression   [  new_lines_opt   expression   new_lines_opt   ]
             // ISSUE: https://github.com/Pash-Project/Pash/issues/9 - need whitespace prohibition
             element_access.Rule =
                 primary_expression + PreferShiftHere() + "[" + expression + "]";
-
 
             ////        argument_list:
             ////            (   argument_expression_list_opt   new_lines_opt   )
@@ -1235,7 +1245,7 @@ namespace Pash.ParserIntrinsics
             logical_argument_expression.Rule =
                 bitwise_argument_expression
                 |
-                logical_argument_expression + (ToTerm("-and") | "-or" | "-xor") + bitwise_argument_expression
+                logical_argument_expression + _logical_expression_operator + bitwise_argument_expression
                 ;
 
             ////        bitwise_argument_expression:
@@ -1246,7 +1256,7 @@ namespace Pash.ParserIntrinsics
             bitwise_argument_expression.Rule =
                 comparison_argument_expression
                 |
-                bitwise_argument_expression + (ToTerm("-band") | "-bor" | "-bxor") + comparison_argument_expression
+                bitwise_argument_expression + _bitwise_expression_operator + comparison_argument_expression
                 ;
 
             ////        comparison_argument_expression:
@@ -1267,7 +1277,7 @@ namespace Pash.ParserIntrinsics
             additive_argument_expression.Rule =
                 multiplicative_argument_expression
                 |
-                (additive_argument_expression + ("+" | dash) + multiplicative_argument_expression)
+                (additive_argument_expression + _additive_expression_operator + multiplicative_argument_expression)
                 ;
 
             ////        multiplicative_argument_expression:
@@ -1278,7 +1288,7 @@ namespace Pash.ParserIntrinsics
             multiplicative_argument_expression.Rule =
                 format_argument_expression
                 |
-                (multiplicative_argument_expression + (ToTerm("*") | "/" | "%") + format_argument_expression)
+                (multiplicative_argument_expression + _multiplicative_expression_operator + format_argument_expression)
                 ;
 
             ////        format_argument_expression:
@@ -1501,9 +1511,9 @@ namespace Pash.ParserIntrinsics
             {
                 var parentFieldName = field.Name.Remove(field.Name.Length - "_opt".Length);
                 NonTerminal nonTerminal = (NonTerminal)field.GetValue(this);
-                NonTerminal nonTerminalParent = (NonTerminal)nonTerminalFields.Single(f => f.Name == parentFieldName).GetValue(this);
+                BnfTerm term = (BnfTerm)nonTerminalFields.Single(f => f.Name == parentFieldName).GetValue(this);
 
-                nonTerminal.Rule = nonTerminalParent | Empty;
+                nonTerminal.Rule = term | Empty;
                 MarkTransient(nonTerminal);
             }
         }

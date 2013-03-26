@@ -174,7 +174,9 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.function_statement);
 
-            bool isFilter = parseTreeNode.ChildNodes[0].Token.Text == "filter";
+            var functionOrFilterTerm = parseTreeNode.ChildNodes[0];
+
+            bool isFilter = functionOrFilterTerm.ChildNodes.Single().Token.Text == "filter";
 
             return new FunctionDefinitionAst(
                 new ScriptExtent(parseTreeNode),
@@ -584,23 +586,26 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.expression_with_unary_operator);
 
-            if (parseTreeNode.ChildNodes[0].Term == this._grammar.dash)
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar._additive_expression_operator)
             {
-                var expression = BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1]);
-                ConstantExpressionAst constantExpressionAst = expression as ConstantExpressionAst;
-                if (constantExpressionAst == null)
+                if (parseTreeNode.ChildNodes[0].ChildNodes.Single().Term == this._grammar.dash)
                 {
-                    throw new NotImplementedException(parseTreeNode.ToString());
-                }
-                else
-                {
-                    if (constantExpressionAst.StaticType == typeof(int))
+                    var expression = BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1]);
+                    ConstantExpressionAst constantExpressionAst = expression as ConstantExpressionAst;
+                    if (constantExpressionAst == null)
                     {
-                        return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0 - ((int)constantExpressionAst.Value));
+                        throw new NotImplementedException(parseTreeNode.ToString());
                     }
                     else
                     {
-                        throw new NotImplementedException(parseTreeNode.ToString());
+                        if (constantExpressionAst.StaticType == typeof(int))
+                        {
+                            return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0 - ((int)constantExpressionAst.Value));
+                        }
+                        else
+                        {
+                            throw new NotImplementedException(parseTreeNode.ToString());
+                        }
                     }
                 }
             }
@@ -619,7 +624,7 @@ namespace Pash.ParserIntrinsics
                 return BuildValueAst(parseTreeNode);
             }
 
-            if (parseTreeNode.Term == this._grammar.member_access_or_invocation_expression)
+            if (parseTreeNode.Term == this._grammar._member_access_or_invocation_expression)
             {
                 return BuildMemberAccessOrInvocationExpressionAst(parseTreeNode);
             }
@@ -668,7 +673,7 @@ namespace Pash.ParserIntrinsics
 
         MemberExpressionAst BuildMemberAccessOrInvocationExpressionAst(ParseTreeNode parseTreeNode)
         {
-            VerifyTerm(parseTreeNode, this._grammar.member_access_or_invocation_expression);
+            VerifyTerm(parseTreeNode, this._grammar._member_access_or_invocation_expression);
 
             var typeExpressionAst = BuildPrimaryExpressionAst(parseTreeNode.ChildNodes[0]);
             bool @static = parseTreeNode.ChildNodes[1].FindTokenAndGetText() == "::";
