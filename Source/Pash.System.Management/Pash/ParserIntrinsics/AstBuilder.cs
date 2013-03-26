@@ -36,8 +36,6 @@ namespace Pash.ParserIntrinsics
 
         public ScriptBlockAst BuildScriptBlockAst(ParseTreeNode parseTreeNode)
         {
-            ////        script_block:
-            ////            param_block_opt   statement_terminators_opt    script_block_body_opt
             VerifyTerm(parseTreeNode, this._grammar.script_block);
 
             ParamBlockAst paramBlockAst = null;
@@ -67,9 +65,6 @@ namespace Pash.ParserIntrinsics
 
         ParamBlockAst BuildParamBlockAst(ParseTreeNode parseTreeNode)
         {
-            ////        param_block:
-            ////            new_lines_opt   attribute_list_opt   new_lines_opt   param   new_lines_opt
-            ////                    (   parameter_list_opt   new_lines_opt   )
             VerifyTerm(parseTreeNode, this._grammar.param_block);
 
             throw new NotImplementedException(parseTreeNode.ToString());
@@ -77,8 +72,6 @@ namespace Pash.ParserIntrinsics
 
         ScriptBlockExpressionAst BuildScriptBlockExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        script_block_expression:
-            ////            {   new_lines_opt   script_block   new_lines_opt   }
             VerifyTerm(parseTreeNode, this._grammar.script_block_expression);
 
             var scriptBlockNode = parseTreeNode.ChildNodes[1];
@@ -91,9 +84,6 @@ namespace Pash.ParserIntrinsics
 
         StatementBlockAst BuildScriptBlockBodyAst(ParseTreeNode parseTreeNode)
         {
-            ////        script_block_body:
-            ////            named_block_list
-            ////            statement_list
             VerifyTerm(parseTreeNode, this._grammar.script_block_body);
 
             parseTreeNode = parseTreeNode.ChildNodes.Single();
@@ -113,9 +103,6 @@ namespace Pash.ParserIntrinsics
 
         StatementBlockAst BuildStatementListAst(ParseTreeNode parseTreeNode)
         {
-            ////        statement_list:
-            ////            statement
-            ////            statement_list   statement
 
             VerifyTerm(parseTreeNode, this._grammar.statement_list);
 
@@ -135,15 +122,6 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildStatementAst(ParseTreeNode parseTreeNode)
         {
-            ////        statement:
-            ////            if_statement
-            ////            label_opt   labeled_statement
-            ////            function_statement
-            ////            flow_control_statement   statement_terminator
-            ////            trap_statement
-            ////            try_statement
-            ////            data_statement
-            ////            pipeline   statement_terminator(_opt)
 
             VerifyTerm(parseTreeNode, this._grammar.statement);
 
@@ -194,9 +172,6 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildFunctionStatementAst(ParseTreeNode parseTreeNode)
         {
-            ////        function_statement:
-            ////            function   new_lines_opt   function_name   function_parameter_declaration_opt   {   script_block   }
-            ////            filter   new_lines_opt   function_name   function_parameter_declaration_opt   {   script_block   }
             VerifyTerm(parseTreeNode, this._grammar.function_statement);
 
             bool isFilter = parseTreeNode.ChildNodes[0].Token.Text == "filter";
@@ -213,47 +188,30 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildFlowControlStatementAst(ParseTreeNode parseTreeNode)
         {
-            ////        flow_control_statement:
-            ////            break   label_expression_opt
-            ////            continue   label_expression_opt
-            ////            throw    pipeline_opt
-            ////            return   pipeline_opt
-            ////            exit   pipeline_opt
 
             throw new NotImplementedException();
         }
 
         StatementAst BuildTrapStatementAst(ParseTreeNode parseTreeNode)
         {
-            ////        trap_statement:
-            ////            trap  new_lines_opt   type_literal_opt   new_lines_opt   statement_block
 
             throw new NotImplementedException();
         }
 
         StatementAst BuildTryStatementAst(ParseTreeNode parseTreeNode)
         {
-            ////        try_statement:
-            ////            try   statement_block   catch_clauses
-            ////            try   statement_block   finally_clause
-            ////            try   statement_block   catch_clauses   finally_clause
 
             throw new NotImplementedException();
         }
 
         StatementAst BuildDataStatementAst(ParseTreeNode parseTreeNode)
         {
-            ////        data_statement:
-            ////            data    new_lines_opt   data_name   data_commands_allowed_opt   statement_block
 
             throw new NotImplementedException();
         }
 
         StatementAst BuildStatementPipelineAst(ParseTreeNode parseTreeNode)
         {
-            //          _statement_pipeline:
-            //              pipeline   /* statement_terminator */
-
             VerifyTerm(parseTreeNode, this._grammar._statement_pipeline);
 
             return BuildPipelineAst(parseTreeNode.ChildNodes.Single());
@@ -261,21 +219,12 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildLabeledStatementAst(ParseTreeNode parseTreeNode)
         {
-            ////        labeled_statement:
-            ////            switch_statement
-            ////            foreach_statement
-            ////            for_statement
-            ////            while_statement
-            ////            do_statement
 
             throw new NotImplementedException();
         }
 
         IfStatementAst BuildIfStatementAst(ParseTreeNode parseTreeNode)
         {
-            ////        if_statement:
-            ////            if   new_lines_opt   (   new_lines_opt   pipeline   new_lines_opt   )   statement_block elseif_clauses_opt   else_clause_opt
-            // The actual grammar is broken up a little differently.
             VerifyTerm(parseTreeNode, this._grammar.if_statement);
 
             var clauses = new List<Tuple<PipelineBaseAst, StatementBlockAst>>();
@@ -326,8 +275,6 @@ namespace Pash.ParserIntrinsics
 
         StatementBlockAst BuildStatementBlockAst(ParseTreeNode parseTreeNode)
         {
-            ////        statement_block:
-            ////            new_lines_opt   {   statement_list_opt   new_lines_opt   }
             VerifyTerm(parseTreeNode, this._grammar.statement_block);
 
             parseTreeNode = parseTreeNode.ChildNodes.Single();
@@ -351,11 +298,6 @@ namespace Pash.ParserIntrinsics
 
         PipelineBaseAst BuildPipelineAst(ParseTreeNode parseTreeNode)
         {
-            //          pipeline:
-            //            assignment_expression
-            //            _pipeline_expression
-            //            _pipeline_command
-
             VerifyTerm(parseTreeNode, this._grammar.pipeline);
             var childNode = parseTreeNode.ChildNodes.Single();
 
@@ -379,10 +321,6 @@ namespace Pash.ParserIntrinsics
 
         PipelineBaseAst BuildAssignementExpression(ParseTreeNode parseTreeNode)
         {
-            ////        assignment_expression:
-            ////            expression   assignment_operator   statement
-            //
-            // I think the left side should be `primary_expression`, not `expression`.
             VerifyTerm(parseTreeNode, this._grammar.assignment_expression);
 
             var expressionAst = BuildPrimaryExpressionAst(parseTreeNode.ChildNodes[0]);
@@ -416,8 +354,6 @@ namespace Pash.ParserIntrinsics
 
         PipelineBaseAst BuildPipelineExpressionAst(ParseTreeNode parseTreeNode)
         {
-            //        _pipeline_expression:
-            //            expression   redirections_opt  pipeline_tail_opt
             VerifyTerm(parseTreeNode, this._grammar._pipeline_expression);
 
             var commandExpressionAst = new CommandExpressionAst(
@@ -446,9 +382,6 @@ namespace Pash.ParserIntrinsics
 
         PipelineBaseAst BuildPipelineCommandAst(ParseTreeNode parseTreeNode)
         {
-            //        _pipeline_command:
-            //            command   pipeline_tail_opt
-
             VerifyTerm(parseTreeNode, this._grammar._pipeline_command);
 
             CommandAst commandAst = BuildCommandAst(parseTreeNode.ChildNodes[0]);
@@ -467,9 +400,6 @@ namespace Pash.ParserIntrinsics
 
         IEnumerable<CommandBaseAst> GetPipelineTailsCommandList(ParseTreeNode parseTreeNode)
         {
-            ////        pipeline_tail:
-            ////            |   new_lines_opt   command
-            ////            |   new_lines_opt   command   pipeline_tail
 
             VerifyTerm(parseTreeNode, this._grammar.pipeline_tails);
 
@@ -478,8 +408,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        expression:
-            ////            logical_expression
             VerifyTerm(parseTreeNode, this._grammar.expression);
 
             return BuildLogicalExpressionAst(parseTreeNode.ChildNodes.Single());
@@ -487,11 +415,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildLogicalExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        logical_expression:
-            ////            bitwise_expression
-            ////            logical_expression   _and   new_lines_opt   bitwise_expression
-            ////            logical_expression   _or   new_lines_opt   bitwise_expression
-            ////            logical_expression   _xor   new_lines_opt   bitwise_expression
             VerifyTerm(parseTreeNode, this._grammar.logical_expression);
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.bitwise_expression)
@@ -504,11 +427,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildBitwiseExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        bitwise_expression:
-            ////            comparison_expression
-            ////            bitwise_expression   _band   new_lines_opt   comparison_expression
-            ////            bitwise_expression   _bor   new_lines_opt   comparison_expression
-            ////            bitwise_expression   _bxor   new_lines_opt   comparison_expression
             VerifyTerm(parseTreeNode, this._grammar.bitwise_expression);
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.comparison_expression)
@@ -521,9 +439,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildComparisonExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        comparison_expression:
-            ////            additive_expression
-            ////            comparison_expression   comparison_operator   new_lines_opt   additive_expression
             VerifyTerm(parseTreeNode, this._grammar.comparison_expression);
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.additive_expression)
@@ -544,10 +459,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildAdditiveExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        additive_expression:
-            ////            multiplicative_expression
-            ////            additive_expression   +   new_lines_opt   multiplicative_expression
-            ////            additive_expression   dash   new_lines_opt   multiplicative_expression
             VerifyTerm(parseTreeNode, this._grammar.additive_expression);
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.multiplicative_expression)
@@ -573,11 +484,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildMultiplicativeExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        multiplicative_expression:
-            ////            format_expression
-            ////            multiplicative_expression   *   new_lines_opt   format_expression
-            ////            multiplicative_expression   /   new_lines_opt   format_expression
-            ////            multiplicative_expression   %   new_lines_opt   format_expression
             VerifyTerm(parseTreeNode, this._grammar.multiplicative_expression);
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.format_expression)
@@ -590,9 +496,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildFormatExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        format_expression:
-            ////            range_expression
-            ////            format_expression   format_operator    new_lines_opt   range_expression
             VerifyTerm(parseTreeNode, this._grammar.format_expression);
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.range_expression)
@@ -605,9 +508,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildRangeExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        range_expression:
-            ////            array_literal_expression
-            ////            range_expression   ..   new_lines_opt   array_literal_expression
             VerifyTerm(parseTreeNode, this._grammar.range_expression);
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.array_literal_expression)
@@ -632,9 +532,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildArrayLiteralExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        array_literal_expression:
-            ////            unary_expression
-            ////            unary_expression   ,    new_lines_opt   array_literal_expression
 
             VerifyTerm(parseTreeNode, this._grammar.array_literal_expression);
             VerifyTerm(parseTreeNode.ChildNodes[0], this._grammar.unary_expression);
@@ -668,9 +565,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildUnaryExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        unary_expression:
-            ////            primary_expression
-            ////            expression_with_unary_operator
             VerifyTerm(parseTreeNode, this._grammar.unary_expression);
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.primary_expression)
@@ -688,18 +582,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildExpressionWithUnaryOperatorAst(ParseTreeNode parseTreeNode)
         {
-            ////        expression_with_unary_operator:
-            ////            ,   new_lines_opt   unary_expression
-            ////            -not   new_lines_opt   unary_expression
-            ////            !   new_lines_opt   unary_expression
-            ////            -bnot   new_lines_opt   unary_expression
-            ////            +   new_lines_opt   unary_expression
-            ////            dash   new_lines_opt   unary_expression
-            ////            pre_increment_expression
-            ////            pre_decrement_expression
-            ////            cast_expression
-            ////            -split   new_lines_opt   unary_expression
-            ////            -join   new_lines_opt   unary_expression
             VerifyTerm(parseTreeNode, this._grammar.expression_with_unary_operator);
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.dash)
@@ -728,13 +610,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildPrimaryExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        primary_expression:
-            ////            value
-            ////            member_access
-            ////            element_access
-            ////            invocation_expression
-            ////            post_increment_expression
-            ////            post_decrement_expression
             VerifyTerm(parseTreeNode, this._grammar.primary_expression);
 
             parseTreeNode = parseTreeNode.ChildNodes.Single();
@@ -779,8 +654,6 @@ namespace Pash.ParserIntrinsics
 
         IndexExpressionAst BuildElementAccessAst(ParseTreeNode parseTreeNode)
         {
-            ////        element_access: Note no whitespace is allowed between primary_expression and [.
-            ////            primary_expression   [  new_lines_opt   expression   new_lines_opt   ]
             VerifyTerm(parseTreeNode, this._grammar.element_access);
 
             var targetNode = parseTreeNode.ChildNodes[0];
@@ -795,9 +668,6 @@ namespace Pash.ParserIntrinsics
 
         MemberExpressionAst BuildMemberAccessOrInvocationExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        member_access: 
-            ////            primary_expression   .   member_name
-            ////            primary_expression   ::   member_name
             VerifyTerm(parseTreeNode, this._grammar.member_access_or_invocation_expression);
 
             var typeExpressionAst = BuildPrimaryExpressionAst(parseTreeNode.ChildNodes[0]);
@@ -809,12 +679,6 @@ namespace Pash.ParserIntrinsics
 
         CommandElementAst BuildMemberNameAst(ParseTreeNode parseTreeNode)
         {
-            ////        member_name:
-            ////            simple_name
-            ////            string_literal
-            ////            string_literal_with_subexpression
-            ////            expression_with_unary_operator
-            ////            value
             VerifyTerm(parseTreeNode, this._grammar.member_name);
 
             parseTreeNode = parseTreeNode.ChildNodes.Single();
@@ -855,15 +719,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildValueAst(ParseTreeNode parseTreeNode)
         {
-            ////        value:
-            ////            parenthesized_expression
-            ////            sub_expression
-            ////            array_expression
-            ////            script_block_expression
-            ////            hash_literal_expression
-            ////            literal
-            ////            type_literal
-            ////            variable
             VerifyTerm(parseTreeNode, this._grammar.value);
 
             var childNode = parseTreeNode.ChildNodes.Single();
@@ -913,13 +768,6 @@ namespace Pash.ParserIntrinsics
 
         VariableExpressionAst BuildVariableAst(ParseTreeNode parseTreeNode)
         {
-            ////        variable:
-            ////            $$
-            ////            $?
-            ////            $^
-            ////            $   variable_scope_opt  variable_characters
-            ////            @   variable_scope_opt   variable_characters
-            ////            braced_variable
             VerifyTerm(parseTreeNode, this._grammar.variable);
 
             var match = this._grammar.variable.Expression.Match(parseTreeNode.Token.Text);
@@ -934,19 +782,10 @@ namespace Pash.ParserIntrinsics
 
         TypeExpressionAst BuildTypeLiteralAst(ParseTreeNode parseTreeNode)
         {
-            ////        type_literal:
-            ////            [    type_spec   ]
             VerifyTerm(parseTreeNode, this._grammar.type_literal);
 
             parseTreeNode = parseTreeNode.ChildNodes[1];
 
-            ////        type_spec:
-            ////            array_type_name    dimension_opt   ]
-            ////            generic_type_name   generic_type_arguments   ]
-            ////            type_name
-            ////        dimension:
-            ////            ,
-            ////            dimension   ,
 
             VerifyTerm(parseTreeNode, this._grammar.type_spec);
 
@@ -966,8 +805,6 @@ namespace Pash.ParserIntrinsics
 
         HashtableAst BuildHashLiteralExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        hash_literal_expression:
-            ////            @{   new_lines_opt   hash_literal_body_opt   new_lines_opt   }
 
             VerifyTerm(parseTreeNode, this._grammar.hash_literal_expression);
 
@@ -978,9 +815,6 @@ namespace Pash.ParserIntrinsics
 
                 var hashLiteralBodyParseTreeNode = parseTreeNode.ChildNodes[1];
 
-                ////        hash_literal_body:
-                ////            hash_entry
-                ////            hash_literal_body   statement_terminators   hash_entry
 
                 VerifyTerm(hashLiteralBodyParseTreeNode, this._grammar.hash_literal_body);
 
@@ -990,8 +824,6 @@ namespace Pash.ParserIntrinsics
 
                     VerifyTerm(hashEntryParseTreeNode, this._grammar.hash_entry);
 
-                    ////        hash_entry:
-                    ////            key_expression   =   new_lines_opt   statement
                     var keyExpressionAst = BuildKeyExpressionAst(hashEntryParseTreeNode.ChildNodes[0]);
                     var valueAst = BuildStatementAst(hashEntryParseTreeNode.ChildNodes[2]);
 
@@ -1004,9 +836,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildKeyExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        key_expression:
-            ////            simple_name
-            ////            unary_expression
 
             VerifyTerm(parseTreeNode, this._grammar.key_expression);
 
@@ -1027,11 +856,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildSimpleNameAst(ParseTreeNode parseTreeNode)
         {
-            ////        simple_name:
-            ////            simple_name_first_char   simple_name_chars
-            ////        simple_name_chars:
-            ////            simple_name_char
-            ////            simple_name_chars   simple_name_char
 
             VerifyTerm(parseTreeNode, this._grammar.simple_name);
             return new StringConstantExpressionAst(new ScriptExtent(parseTreeNode), parseTreeNode.Token.Text, StringConstantType.BareWord);
@@ -1039,8 +863,6 @@ namespace Pash.ParserIntrinsics
 
         ParenExpressionAst BuildParenthesizedExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        parenthesized_expression:
-            ////            (   new_lines_opt   pipeline   new_lines_opt   )
             VerifyTerm(parseTreeNode, this._grammar.parenthesized_expression);
 
             return new ParenExpressionAst(
@@ -1051,10 +873,6 @@ namespace Pash.ParserIntrinsics
 
         ConstantExpressionAst BuildLiteralAst(ParseTreeNode parseTreeNode)
         {
-            ////        literal:
-            ////            integer_literal
-            ////            real_literal
-            ////            string_literal
             VerifyTerm(parseTreeNode, this._grammar.literal);
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.integer_literal)
@@ -1072,9 +890,6 @@ namespace Pash.ParserIntrinsics
 
         ConstantExpressionAst BuildIntegerLiteralAst(ParseTreeNode parseTreeNode)
         {
-            ////        integer_literal:
-            ////            decimal_integer_literal
-            ////            hexadecimal_integer_literal
             VerifyTerm(parseTreeNode, this._grammar.integer_literal);
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.decimal_integer_literal)
@@ -1092,8 +907,6 @@ namespace Pash.ParserIntrinsics
 
         ConstantExpressionAst BuildDecimalIntegerLiteralAst(ParseTreeNode parseTreeNode)
         {
-            ////        decimal_integer_literal:
-            ////            decimal_digits   numeric_type_suffix_opt   numeric_multiplier_opt
             VerifyTerm(parseTreeNode, this._grammar.decimal_integer_literal);
             var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), this._grammar.decimal_integer_literal.Pattern, RegexOptions.IgnoreCase);
             string value = matches.Groups[this._grammar.decimal_digits.Name].Value;
@@ -1103,8 +916,6 @@ namespace Pash.ParserIntrinsics
 
         ConstantExpressionAst BuildHexaecimalIntegerLiteralAst(ParseTreeNode parseTreeNode)
         {
-            ////        hexadecimal_integer_literal:
-            ////            0x   hexadecimal_digits   long_type_suffix_opt   numeric_multiplier_opt
             VerifyTerm(parseTreeNode, this._grammar.hexadecimal_integer_literal);
 
             var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), this._grammar.hexadecimal_integer_literal.Pattern, RegexOptions.IgnoreCase);
@@ -1115,11 +926,6 @@ namespace Pash.ParserIntrinsics
 
         StringConstantExpressionAst BuildStringLiteralAst(ParseTreeNode parseTreeNode)
         {
-            ////        string_literal:
-            ////            expandable_string_literal
-            ////            expandable_here_string_literal
-            ////            verbatim_string_literal
-            ////            verbatim_here_string_literal
             VerifyTerm(parseTreeNode, this._grammar.string_literal);
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.expandable_string_literal)
@@ -1137,8 +943,6 @@ namespace Pash.ParserIntrinsics
 
         StringConstantExpressionAst BuildExpandableStringLiteralAst(ParseTreeNode parseTreeNode)
         {
-            ////        expandable_string_literal:
-            ////            double_quote_character   expandable_string_characters_opt   dollars_opt   double_quote_character
             var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), this._grammar.expandable_string_literal.Pattern, RegexOptions.IgnoreCase);
             string value = matches.Groups[this._grammar.expandable_string_characters.Name].Value +
                 matches.Groups[this._grammar.dollars.Name].Value
@@ -1149,8 +953,6 @@ namespace Pash.ParserIntrinsics
 
         StringConstantExpressionAst BuildVerbatimStringLiteralAst(ParseTreeNode parseTreeNode)
         {
-            ////        verbatim_string_literal:
-            ////            single_quote_character   verbatim_string_characters_opt   single_quote_char [sic]
             VerifyTerm(parseTreeNode, this._grammar.verbatim_string_literal);
 
             var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), this._grammar.verbatim_string_literal.Pattern, RegexOptions.IgnoreCase);
@@ -1168,9 +970,6 @@ namespace Pash.ParserIntrinsics
 
         CommandAst BuildCommandAst(ParseTreeNode parseTreeNode)
         {
-            ////        command:
-            ////            command_name   command_elements_opt
-            ////            command_invocation_operator   command_module_opt  command_name_expr   command_elements_opt
 
             VerifyTerm(parseTreeNode, this._grammar.command);
 
@@ -1227,9 +1026,6 @@ namespace Pash.ParserIntrinsics
 
         CommandElementAst BuildCommandNameExprAst(ParseTreeNode parseTreeNode)
         {
-            ////        command_name_expr:
-            ////            command_name
-            ////            primary_expression
 
             VerifyTerm(parseTreeNode, this._grammar.command_name_expr);
 
@@ -1244,9 +1040,6 @@ namespace Pash.ParserIntrinsics
 
         CommandElementAst BuildCommandNameAst(ParseTreeNode parseTreeNode)
         {
-            ////        command_name:
-            ////            generic_token
-            ////            generic_token_with_subexpr
             VerifyTerm(parseTreeNode, this._grammar.command_name);
 
             if (parseTreeNode.ChildNodes.Single().Term == this._grammar.generic_token)
@@ -1259,15 +1052,8 @@ namespace Pash.ParserIntrinsics
 
         StringConstantExpressionAst BuildGenericTokenAst(ParseTreeNode parseTreeNode)
         {
-            ////        generic_token:
-            ////            generic_token_parts
             VerifyTerm(parseTreeNode, this._grammar.generic_token);
 
-            ////        generic_token_part:
-            ////            expandable_string_literal
-            ////            verbatim_here_string_literal
-            ////            variable
-            ////            generic_token_char
 
             // I'm confused by the idea that a generic_token could have several of these things smushed together, like this:
             //    PS> $x = "Get-"
@@ -1286,10 +1072,6 @@ namespace Pash.ParserIntrinsics
 
         CommandElementAst BuildCommandElementAst(ParseTreeNode parseTreeNode)
         {
-            ////        command_element:
-            ////            command_parameter
-            ////            command_argument
-            ////            redirection
             VerifyTerm(parseTreeNode, this._grammar.command_element);
 
             var childNode = parseTreeNode.ChildNodes.Single();
@@ -1311,8 +1093,6 @@ namespace Pash.ParserIntrinsics
 
         CommandElementAst BuildCommandArgumentAst(ParseTreeNode parseTreeNode)
         {
-            ////        command_argument:
-            ////            command_name_expr
 
             VerifyTerm(parseTreeNode, this._grammar.command_argument);
 
@@ -1321,9 +1101,6 @@ namespace Pash.ParserIntrinsics
 
         CommandElementAst BuildCommandNameExpressionAst(ParseTreeNode parseTreeNode)
         {
-            ////        command_name_expr:
-            ////            command_name
-            ////            primary_expression
 
             VerifyTerm(parseTreeNode, this._grammar.command_name_expr);
 
@@ -1342,8 +1119,6 @@ namespace Pash.ParserIntrinsics
 
         CommandParameterAst BuildCommandParameterAst(ParseTreeNode parseTreeNode)
         {
-            ////        command_parameter:
-            ////            dash   first_parameter_char   parameter_chars   colon_opt
 
             VerifyTerm(parseTreeNode, this._grammar.command_parameter);
 
