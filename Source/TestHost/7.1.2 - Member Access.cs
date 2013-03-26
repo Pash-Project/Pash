@@ -56,9 +56,9 @@ a.Length
 
         [Test]
         [TestCase(@"[math]::Sqrt(2.0)				# call method with argument 2.0", Explicit = true)]
-        [TestCase(@"[char]::IsUpper(""a"")			# call method", Explicit = true)]
-        [TestCase(@"$b = ""abc#$%XYZabc""
-                  $b.ToUpper()						# call instance method", Explicit = true)]
+        [TestCase(@"[char]::IsUpper(""a"")			# call method", Explicit = true, Description = "requires conversion")]
+        [TestCase(@"$b = ""abc#$%XYZabc""",
+                  @"$b.ToUpper()					# call instance method")]
         [TestCase(@"[math]::Sqrt(2) 				# convert 2 to 2.0 and call method", Explicit = true)]
         [TestCase(@"[math]::Sqrt(2D) 				# convert 2D to 2.0 and call method", Explicit = true)]
         [TestCase(@"[math]::Sqrt($true) 			# convert $true to 1.0 and call method", Explicit = true)]
@@ -69,7 +69,7 @@ a.Length
                     $a.Invoke(2.0) 					# call Sqrt via the descriptor", Explicit = true)]
         [TestCase(@"$a = [char]::ToLower			# get method descriptor for ToLower
                     $a.Invoke(""X"")				# call ToLower via the descriptor", Explicit = true)]
-        public void Section7_1_3_InvocationExpressions(string input)
+        public void Section7_1_3_InvocationExpressions(params string[] input)
         {
             var result = TestHost.Execute(input);
         }
