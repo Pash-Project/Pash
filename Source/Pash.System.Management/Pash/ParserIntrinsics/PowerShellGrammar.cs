@@ -20,7 +20,6 @@ namespace Pash.ParserIntrinsics
 
     public partial class PowerShellGrammar : CaseInsensitiveGrammar
     {
-
         #region B.1 Lexical grammar
 
         #region B.1.1 Line terminators

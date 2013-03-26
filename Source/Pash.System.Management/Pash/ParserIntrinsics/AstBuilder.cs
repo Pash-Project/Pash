@@ -674,7 +674,152 @@ namespace Pash.ParserIntrinsics
             bool @static = parseTreeNode.ChildNodes[1].FindTokenAndGetText() == "::";
             var memberName = BuildMemberNameAst(parseTreeNode.ChildNodes[2]);
 
-            return new MemberExpressionAst(new ScriptExtent(parseTreeNode), typeExpressionAst, memberName, @static);
+            if (parseTreeNode.ChildNodes.Count == 4)
+            {
+                return new InvokeMemberExpressionAst(
+                    new ScriptExtent(parseTreeNode),
+                    typeExpressionAst,
+                    memberName,
+                    BuildArgumentExpressionList(parseTreeNode.ChildNodes[3].ChildNodes[1]),
+                    @static
+                    );
+            }
+
+            else
+            {
+                return new MemberExpressionAst(new ScriptExtent(parseTreeNode), typeExpressionAst, memberName, @static);
+            }
+        }
+
+        IEnumerable<ExpressionAst> BuildArgumentExpressionList(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.argument_expression_list);
+
+            return parseTreeNode.ChildNodes.Select(BuildArgumentExpressionAst);
+        }
+
+        ExpressionAst BuildArgumentExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.argument_expression);
+
+            return BuildLogicalArgumentExpressionAst(parseTreeNode.ChildNodes.Single());
+        }
+
+        ExpressionAst BuildLogicalArgumentExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.logical_argument_expression);
+
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar.bitwise_argument_expression)
+            {
+                return BuildBitwiseArgumentExpressionAst(parseTreeNode.ChildNodes.Single());
+            }
+
+            throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+        }
+
+        ExpressionAst BuildBitwiseArgumentExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.bitwise_argument_expression);
+
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar.comparison_argument_expression)
+            {
+                return BuildComparisonArgumentExpressionAst(parseTreeNode.ChildNodes.Single());
+            }
+
+            throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+        }
+
+        ExpressionAst BuildComparisonArgumentExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.comparison_argument_expression);
+
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar.additive_argument_expression)
+            {
+                return BuildAdditiveArgumentExpressionAst(parseTreeNode.ChildNodes.Single());
+            }
+
+            var comparisonOperatorTerminal = (PowerShellGrammar.ComparisonOperatorTerminal)(parseTreeNode.ChildNodes[1].Term);
+
+            return new BinaryExpressionAst(
+                new ScriptExtent(parseTreeNode),
+                BuildComparisonArgumentExpressionAst(parseTreeNode.ChildNodes[0]),
+                comparisonOperatorTerminal.TokenKind,
+                BuildAdditiveArgumentExpressionAst(parseTreeNode.ChildNodes[2]),
+                new ScriptExtent(parseTreeNode.ChildNodes[1])
+                );
+        }
+
+        ExpressionAst BuildAdditiveArgumentExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.additive_argument_expression);
+
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar.multiplicative_argument_expression)
+            {
+                return BuildMultiplicativeArgumentExpressionAst(parseTreeNode.ChildNodes.Single());
+            }
+
+            else
+            {
+                var leftOperand = parseTreeNode.ChildNodes[0];
+                var operatorNode = parseTreeNode.ChildNodes[1];
+                var rightOperand = parseTreeNode.ChildNodes[2];
+
+                return new BinaryExpressionAst(
+                    new ScriptExtent(parseTreeNode),
+                    BuildAdditiveArgumentExpressionAst(leftOperand),
+                    operatorNode.Term == this._grammar.dash ? TokenKind.Minus : TokenKind.Plus,
+                    BuildMultiplicativeArgumentExpressionAst(rightOperand),
+                    new ScriptExtent(operatorNode)
+                    );
+            }
+        }
+
+        ExpressionAst BuildMultiplicativeArgumentExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.multiplicative_argument_expression);
+
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar.format_argument_expression)
+            {
+                return BuildFormatArgumentExpressionAst(parseTreeNode.ChildNodes.Single());
+            }
+
+            throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+        }
+
+        ExpressionAst BuildFormatArgumentExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.format_argument_expression);
+
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar.range_argument_expression)
+            {
+                return BuildRangeArgumentExpressionAst(parseTreeNode.ChildNodes.Single());
+            }
+
+            throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+        }
+
+        ExpressionAst BuildRangeArgumentExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.range_argument_expression);
+
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar.unary_expression)
+            {
+                return BuildUnaryExpressionAst(parseTreeNode.ChildNodes.Single());
+            }
+            else
+            {
+                var startNode = parseTreeNode.ChildNodes[0];
+                var dotDotNode = parseTreeNode.ChildNodes[1];
+                var endNode = parseTreeNode.ChildNodes[2];
+
+                return new BinaryExpressionAst(
+                    new ScriptExtent(parseTreeNode),
+                    BuildRangeExpressionAst(startNode),
+                    TokenKind.DotDot,
+                    BuildUnaryExpressionAst(endNode),
+                    new ScriptExtent(dotDotNode)
+                    );
+            }
         }
 
         CommandElementAst BuildMemberNameAst(ParseTreeNode parseTreeNode)
