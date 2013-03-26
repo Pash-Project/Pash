@@ -59,7 +59,7 @@ namespace Microsoft.PowerShell.Commands.Utility
                 "System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
             };
 
-            // I tried to write this in LINQ but it didn't out clean. 
+            // I tried to write this in LINQ but it didn't come out clean.
             Type type = null;
             foreach (var item in defaultSearchAssemblies)
             {
