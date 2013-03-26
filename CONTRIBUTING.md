@@ -3,6 +3,8 @@ Contributing to Pash
 
 I'm so grateful that anyone would consider helping improve Pash. Thanks!
 
+If you're looking for a place to start, pick a unit test marked `Explicit` (disabled). Enable it, and make it pass.
+
 
 Building Pash on Windows, Linux, or Mac
 ---------------------------------------
