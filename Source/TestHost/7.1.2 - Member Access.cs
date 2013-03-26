@@ -39,6 +39,15 @@ a.Length
         }
 
         [Test]
+        public void TwoParameters()
+        {
+            var result = TestHost.Execute(@"[char]::IsUpper(""AbC"", 1)");
+            Assert.AreEqual("False" + Environment.NewLine, result);
+            var result2 = TestHost.Execute(@"[char]::IsUpper(""AbC"", 2)");
+            Assert.AreEqual("True" + Environment.NewLine, result2);
+        }
+
+        [Test]
         [TestCase(@"[math]::Sqrt(2.0)				# call method with argument 2.0", Explicit = true)]
         [TestCase(@"[char]::IsUpper(""a"")			# call method", Explicit = true)]
         [TestCase(@"$b = ""abc#$%XYZabc""

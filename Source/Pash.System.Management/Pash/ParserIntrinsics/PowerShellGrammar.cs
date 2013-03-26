@@ -1303,10 +1303,11 @@ namespace Pash.ParserIntrinsics
             ////        range_argument_expression:
             ////            unary_expression
             ////            range_expression   ..   new_lines_opt   unary_expression
+            // See https://github.com/Pash-Project/Pash/issues/51
             range_argument_expression.Rule =
                 unary_expression
                 |
-                (range_expression + ".." + unary_expression)
+                (unary_expression + ".." + unary_expression)
                 ;
 
             ////        member_name:

@@ -13,7 +13,7 @@ namespace ParserTests
     public class ParserTests
     {
         [Test]
-        public void ATest()
+        public void GrammarErrorsCount()
         {
             // Obviously, we'd rather drive this to 0, but for now, let's lock it down
             Assert.AreEqual(4, PowerShellGrammar.Parser.Language.Errors.Count, PowerShellGrammar.Parser.Language.Errors.JoinString("\r\n"));
@@ -36,10 +36,11 @@ namespace ParserTests
         [TestCase(@"[int],[string]")]
         [TestCase(@"$x = [int]")]
         [TestCase(@"$x::MaxValue")]
-        [TestCase(@"[int]::Parse()")]
+        [TestCase(@"[int]::Parse('7')")]
         [TestCase(@"$x::Parse()")]
         [TestCase(@"$x.Assembly")]
         [TestCase(@"$x.AsType()")]
+        [TestCase(@"[char]::IsUpper(""AbC"", 1)", Description = "two parameters")]
         public void TypesAndMembers(string input)
         {
             AssertIsValidInput(input);
