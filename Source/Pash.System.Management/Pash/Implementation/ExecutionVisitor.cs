@@ -449,15 +449,31 @@ namespace System.Management.Pash.Implementation
 
             if (memberExpressionAst.Member is StringConstantExpressionAst)
             {
+                object result = null;
                 var name = (memberExpressionAst.Member as StringConstantExpressionAst).Value;
-                var property = type.GetProperty(name);
 
-                // Try get field value if property not found.
-                var result = property == null
-                    ? type.GetField(name).GetValue(obj)
-                    : property.GetValue(obj, null)
-                    ;
-                
+                BindingFlags bindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
+
+                // TODO: Single() is a problem for overloaded methods
+                var memberInfo = type.GetMember(name, bindingFlags).Single();
+
+                if (memberInfo != null)
+                {
+                    switch (memberInfo.MemberType)
+                    {
+                        case MemberTypes.Field:
+                            result = ((FieldInfo)memberInfo).GetValue(obj);
+                            break;
+
+                        case MemberTypes.Property:
+                            result = ((PropertyInfo)memberInfo).GetValue(obj, null);
+                            break;
+
+                        default:
+                            throw new NotImplementedException(this.ToString());
+                    }
+                }
+
                 _pipelineCommandRuntime.WriteObject(result);
                 return AstVisitAction.SkipChildren;
             }
