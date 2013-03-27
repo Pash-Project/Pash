@@ -29,11 +29,19 @@ namespace TestHost
             StringAssert.AreEqualIgnoringCase("yyy" + Environment.NewLine, TestHost.Execute("if ($false) { 'xxx' } else { 'yyy' }"));
 
         }
+
         [Test]
-        public void IfTest()
+        public void IfEqualTest()
         {
             StringAssert.AreEqualIgnoringCase("xxx" + Environment.NewLine, TestHost.Execute("if (1 -eq 1) { 'xxx' }"));
             StringAssert.AreEqualIgnoringCase("", TestHost.Execute("if (1 -eq 2) { 'xxx' }"));
+        }
+
+        [Test]
+        public void IfNotEqualTest()
+        {
+            StringAssert.AreEqualIgnoringCase("", TestHost.Execute("if (1 -ne 1) { 'xxx' }"));
+            StringAssert.AreEqualIgnoringCase("xxx" + Environment.NewLine, TestHost.Execute("if (1 -ne 2) { 'xxx' }"));
         }
 
         [Test]
