@@ -453,9 +453,10 @@ namespace System.Management.Pash.Implementation
                 var property = type.GetProperty(name);
 
                 // Try get field value if property not found.
-                var result = property != null
-                    ? property.GetValue(obj, null)
-                    : type.GetField(name).GetValue(obj);
+                var result = property == null
+                    ? type.GetField(name).GetValue(obj)
+                    : property.GetValue(obj, null)
+                    ;
                 
                 _pipelineCommandRuntime.WriteObject(result);
                 return AstVisitAction.SkipChildren;
