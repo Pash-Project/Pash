@@ -1,4 +1,4 @@
-[Pash](https://github.com/Pash-Project/Pash/) [![Build Status](https://secure.travis-ci.org/Pash-Project/Pash.png)](http://travis-ci.org/Pash-Project/Pash)
+[Pash](https://github.com/Pash-Project/Pash/) [![Build Status](https://secure.travis-ci.org/Pash-Project/Pash.png?branch=master )](http://travis-ci.org/Pash-Project/Pash)
 ====
 
 An Open Source reimplementation of Windows PowerShell.  
