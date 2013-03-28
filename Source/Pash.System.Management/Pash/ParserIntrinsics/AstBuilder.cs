@@ -679,20 +679,20 @@ namespace Pash.ParserIntrinsics
             bool @static = parseTreeNode.ChildNodes[1].FindTokenAndGetText() == "::";
             var memberName = BuildMemberNameAst(parseTreeNode.ChildNodes[2]);
 
-            var argumentListNode = parseTreeNode.ChildNodes[3];
-
-            if (argumentListNode.ChildNodes.Count == 0)
+            if (parseTreeNode.ChildNodes.Count == 3)
             {
                 return new MemberExpressionAst(new ScriptExtent(parseTreeNode), typeExpressionAst, memberName, @static);
             }
 
             else
             {
+                var argumentListNode = parseTreeNode.ChildNodes[3];
+
                 return new InvokeMemberExpressionAst(
                     new ScriptExtent(parseTreeNode),
                     typeExpressionAst,
                     memberName,
-                    BuildArgumentList(argumentListNode.ChildNodes[0]),
+                    BuildArgumentList(argumentListNode),
                     @static
                     );
             }
@@ -704,7 +704,6 @@ namespace Pash.ParserIntrinsics
 
             if (parseTreeNode.ChildNodes.Count == 3)
             {
-
                 var argumentExpressionListNode = parseTreeNode.ChildNodes[1];
 
                 return BuildArgumentExpressionList(argumentExpressionListNode);
