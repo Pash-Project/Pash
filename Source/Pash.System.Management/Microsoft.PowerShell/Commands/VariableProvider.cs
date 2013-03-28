@@ -14,9 +14,16 @@ namespace Microsoft.PowerShell.Commands
     {
         public const string ProviderName = "Variable";
 
+        public VariableProvider()
+        {
+        }
+
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
-            return new Collection<PSDriveInfo> { new PSDriveInfo("Variable", base.ProviderInfo) };
+            PSDriveInfo item = new PSDriveInfo("Variable", base.ProviderInfo, string.Empty, string.Empty, null);
+            Collection<PSDriveInfo> collection = new Collection<PSDriveInfo>();
+            collection.Add(item);
+            return collection;
         }
 
         internal override object GetSessionStateItem(string name)

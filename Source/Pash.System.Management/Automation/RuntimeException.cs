@@ -8,17 +8,30 @@ namespace System.Management.Automation
     public class RuntimeException : SystemException, IContainsErrorRecord
     {
         public RuntimeException() { throw new NotImplementedException(); }
+        
         public RuntimeException(string message) { throw new NotImplementedException(); }
-        protected RuntimeException(SerializationInfo info, StreamingContext context) { throw new NotImplementedException(); }
+        
         public RuntimeException(string message, Exception innerException) { throw new NotImplementedException(); }
 
-        public virtual ErrorRecord ErrorRecord { get; private set; }
-        public override string StackTrace { get { throw new NotImplementedException(); } }
+        public virtual ErrorRecord ErrorRecord { get; set; }
 
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            throw new NotImplementedException();
-        }
+        protected RuntimeException(SerializationInfo info, StreamingContext context) { throw new NotImplementedException(); }
+
+        internal ErrorCategory Category { private get; set; }
+
+        internal String Id { private get; set; }
+
+        /// <summary>
+        ///  Stop the runtime from prompting the error.
+        /// </summary>
+        internal bool NoPrompt { get; set; }
+
+
+        //    public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        //{
+        //    throw new NotImplementedException();
+        //}
+        //public override string StackTrace { get { throw new NotImplementedException(); } }
 
         // internals
         //internal static void LockStackTrace(System.Exception e);
@@ -26,7 +39,6 @@ namespace System.Management.Automation
         //internal static string RetrieveMessage(System.Exception e);
         //internal static string RetrieveMessage(System.Management.Automation.ErrorRecord errorRecord);
         //internal RuntimeException(string message, System.Exception innerException, System.Management.Automation.ErrorRecord errorRecord);
-        //internal void SetErrorCategory(System.Management.Automation.ErrorCategory errorCategory);
         //internal void SetErrorId(string errorId);
         //internal void SetTargetObject(object targetObject);
         //internal bool SuppressPromptInInterpreter { set; get; }

@@ -8,6 +8,8 @@ namespace System.Management.Automation
     // TODO: can we replace the runtime with the ExecutionContext?
     internal class PipelineCommandRuntime : ICommandRuntime
     {
+        private ExecutionContext _context;
+
         internal ObjectStream outputResults { get; private set; }
         internal ObjectStream errorResults { get; private set; }
         internal PipelineProcessor pipelineProcessor { get; private set; }
@@ -95,20 +97,25 @@ namespace System.Management.Automation
 
         public void WriteObject(object sendToPipeline, bool enumerateCollection)
         {
-            if (enumerateCollection && !(sendToPipeline is string))
+            if (!enumerateCollection)
+            {
+                outputResults.Write(PSObject.AsPSObject(sendToPipeline));
+            }
+            else
             {
                 IEnumerator enumerator = GetEnumerator(sendToPipeline);
                 if (enumerator != null)
                 {
-                    while ((enumerator.MoveNext()))
+                    while (enumerator.MoveNext())
                     {
-                        WriteObject(enumerator.Current);
+                        outputResults.Write(PSObject.AsPSObject(enumerator.Current));
                     }
-                    return;
+                }
+                else
+                {
+                    outputResults.Write(PSObject.AsPSObject(sendToPipeline));
                 }
             }
-
-            WriteObject(sendToPipeline);
         }
 
         public void WriteProgress(ProgressRecord progressRecord)

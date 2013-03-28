@@ -26,6 +26,7 @@
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors Condition=" '$(OS)' != 'Windows_NT' ">false</TreatWarningsAsErrors>
     <TreatWarningsAsErrors Condition=" '$(OS)' == 'Windows_NT' ">true</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -43,11 +44,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClearVariableCommand.cs" />
-    <Compile Include="ConsoleColorCmdlet.cs" />
-    <Compile Include="GetMemberCommand.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="ConvertToHtmlCommand.cs" />
+    <Compile Include="ExportCsvCommand.cs" />
+    <Compile Include="FormatElement.cs" />
+    <Compile Include="FormatListCommand.cs" />
+    <Compile Include="FormatTableCommand.cs" />
+    <Compile Include="FormatTableShape.cs" />
+    <Compile Include="GetDateCommand.cs" />
+    <Compile Include="GetMemberCommand.cs" />
+    <Compile Include="GetRandomCommand.cs" />
     <Compile Include="GetVariableCommand.cs" />
+    <Compile Include="ImportCsvCommand.cs" />
     <Compile Include="MemberDefinition.cs" />
     <Compile Include="NewObjectCommand.cs" />
     <Compile Include="NewAliasCommand.cs" />
@@ -63,8 +70,16 @@
     <Compile Include="SetAliasCommand.cs" />
     <Compile Include="SetVariableCommand.cs" />
     <Compile Include="SortObjectCommand.cs" />
+    <Compile Include="StartSleepCommand.cs" />
+    <Compile Include="StyleInfo.cs" />
+    <Compile Include="TeeObjectCommand.cs" />
+    <Compile Include="WriteDebugCommand.cs" />
+    <Compile Include="WriteErrorCommand.cs" />
     <Compile Include="WriteHostCommand.cs" />
     <Compile Include="WriteOutputCommand.cs" />
+    <Compile Include="WriteProgressCommand.cs" />
+    <Compile Include="WriteVerboseCommand.cs" />
+    <Compile Include="WriteWarningCommand.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pash.System.Management\Pash.System.Management.csproj">

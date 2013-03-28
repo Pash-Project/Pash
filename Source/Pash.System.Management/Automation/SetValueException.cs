@@ -1,4 +1,5 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using System;
 using System.Runtime.Serialization;
 
 namespace System.Management.Automation
@@ -6,17 +7,24 @@ namespace System.Management.Automation
     [Serializable]
     public class SetValueException : ExtendedTypeSystemException
     {
-        internal const string ReadOnlyProperty = "ReadOnlyProperty";
-        internal const string SetWithoutSetterExceptionMsg = "SetWithoutSetterException";
-        internal const string XmlNodeSetRestrictions = "XmlNodeSetShouldBeAString";
-        internal const string XmlNodeSetShouldBeAString = "XmlNodeSetShouldBeAString";
+        public SetValueException()
+            : base(typeof(SetValueException).FullName)
+        {
+        }
 
-        public SetValueException() { throw new NotImplementedException(); }
-        public SetValueException(string message) { throw new NotImplementedException(); }
-        protected SetValueException(SerializationInfo info, StreamingContext context) { throw new NotImplementedException(); }
-        public SetValueException(string message, Exception innerException) { throw new NotImplementedException(); }
+        public SetValueException(string message)
+            : base(message)
+        {
+        }
 
-        // internal SetValueException(string errorId, Exception innerException, string baseName, string resourceId, params object[] arguments);
+        protected SetValueException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
+        public SetValueException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
     }
-
 }

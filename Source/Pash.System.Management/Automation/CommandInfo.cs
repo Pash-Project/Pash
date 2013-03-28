@@ -5,6 +5,9 @@ using System.Text;
 
 namespace System.Management.Automation
 {
+    /// <summary>
+    /// Contains information about a Command.
+    /// </summary>
     public abstract class CommandInfo
     {
         internal CommandInfo(string name, CommandTypes type)
@@ -13,8 +16,14 @@ namespace System.Management.Automation
             Name = name;
         }
 
+        internal CommandInfo()
+        {
+        }
+
         public CommandTypes CommandType { get; private set; }
+
         public abstract string Definition { get; }
+
         public string Name { get; private set; }
 
         public override string ToString()

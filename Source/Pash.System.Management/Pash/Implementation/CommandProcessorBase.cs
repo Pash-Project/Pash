@@ -8,12 +8,13 @@ namespace Pash.Implementation
     {
         // parameters collection (addParameter)
 
-        internal abstract CommandInfo CommandInfo { get; }
+        internal CommandInfo CommandInfo { get; set; }
         internal ExecutionContext ExecutionContext { get; set; }
         internal CommandParameterCollection Parameters { get; private set; }
 
-        internal CommandProcessorBase()
+        internal CommandProcessorBase(CommandInfo cmdInfo)
         {
+            CommandInfo = cmdInfo;
             Parameters = new CommandParameterCollection();
         }
 

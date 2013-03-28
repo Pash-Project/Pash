@@ -1,6 +1,9 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 namespace System.Management.Automation
 {
+    /// <summary>
+    /// Verbs common to many different actions a cmdlet might take.
+    /// </summary>
     public static class VerbsCommon
     {
         public const string Add = "Add";

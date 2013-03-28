@@ -17,11 +17,8 @@ namespace Pash.Implementation
     {
         readonly ScriptInfo _scriptInfo;
 
-        internal override CommandInfo CommandInfo
-        {
-            get { return this._scriptInfo; }
-        }
-        public ScriptProcessor(ScriptInfo scriptInfo)
+        
+        public ScriptProcessor(ScriptInfo scriptInfo) : base (scriptInfo)
         {
             this._scriptInfo = scriptInfo;
         }

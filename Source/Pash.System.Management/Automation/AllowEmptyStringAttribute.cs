@@ -3,6 +3,9 @@ using System.Management.Automation.Internal;
 
 namespace System.Management.Automation
 {
+    /// <summary>
+    /// Attribute that allows an empty string as an arguement.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class AllowEmptyStringAttribute : CmdletMetadataAttribute
     {

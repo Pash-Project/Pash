@@ -29,8 +29,10 @@ namespace System.Management.Automation
             TargetObject = errorRecord.TargetObject;
         }
 
-        // public ErrorCategoryInfo CategoryInfo { get; }
-        // public ErrorDetails ErrorDetails { get; set; }
+
+        public ErrorCategoryInfo CategoryInfo { get; set; }
+        
+        public ErrorDetails ErrorDetails { get; set; }
         public Exception Exception { get; internal set; }
         public string FullyQualifiedErrorId { get; internal set; }
         // public InvocationInfo InvocationInfo { get; }
