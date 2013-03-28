@@ -203,6 +203,7 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal _member_access_or_invocation_expression_operator = null; // Initialized by reflection.
         public readonly NonTerminal element_access = null; // Initialized by reflection.
         public readonly NonTerminal argument_list = null; // Initialized by reflection.
+        public readonly NonTerminal argument_list_opt = null; // Initialized by reflection.
         public readonly NonTerminal argument_expression_list = null; // Initialized by reflection.
         public readonly NonTerminal argument_expression_list_opt = null; // Initialized by reflection.
         public readonly NonTerminal argument_expression = null; // Initialized by reflection.
@@ -1212,7 +1213,7 @@ namespace Pash.ParserIntrinsics
             ////            primary_expression   ::   member_name   argument_list
             // ISSUE: https://github.com/Pash-Project/Pash/issues/9 - need whitespace prohibition
             _member_access_or_invocation_expression.Rule =
-                primary_expression + _member_access_or_invocation_expression_operator + member_name + (argument_list | Empty);
+                primary_expression + _member_access_or_invocation_expression_operator + member_name + argument_list_opt;
             _member_access_or_invocation_expression_operator.Rule = ToTerm(".") | "::";
 
             ////        element_access: Note no whitespace is allowed between primary_expression and [.
