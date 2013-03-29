@@ -520,7 +520,10 @@ namespace Pash.ParserIntrinsics
                 ;
 
             _statement_labeled_statement.Rule =
-                (label | Empty) + labeled_statement;
+                label + labeled_statement
+                |
+                labeled_statement
+                ;
 
             // See https://github.com/Pash-Project/Pash/issues/7
             _statement_flow_control_statement.Rule =
