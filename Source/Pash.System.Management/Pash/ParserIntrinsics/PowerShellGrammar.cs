@@ -1214,9 +1214,15 @@ namespace Pash.ParserIntrinsics
             ////        invocation_expression: Note no whitespace is allowed between terms in these productions.
             ////            primary_expression   .   member_name   argument_list
             ////            primary_expression   ::   member_name   argument_list
+            ////        argument_list:
+            ////            (   argument_expression_list_opt   new_lines_opt   )
+
             // ISSUE: https://github.com/Pash-Project/Pash/issues/9 - need whitespace prohibition
             _member_access_or_invocation_expression.Rule =
-                primary_expression + _member_access_or_invocation_expression_operator + member_name + argument_list_opt;
+                primary_expression + _member_access_or_invocation_expression_operator + member_name + PreferShiftHere() + "(" + argument_expression_list_opt + ")"
+                |
+                primary_expression + _member_access_or_invocation_expression_operator + member_name
+                ;
             _member_access_or_invocation_expression_operator.Rule = ToTerm(".") | "::";
 
             ////        element_access: Note no whitespace is allowed between primary_expression and [.
@@ -1224,11 +1230,6 @@ namespace Pash.ParserIntrinsics
             // ISSUE: https://github.com/Pash-Project/Pash/issues/9 - need whitespace prohibition
             element_access.Rule =
                 primary_expression + PreferShiftHere() + "[" + expression + "]";
-
-            ////        argument_list:
-            ////            (   argument_expression_list_opt   new_lines_opt   )
-            argument_list.Rule =
-                "(" + argument_expression_list_opt + ")";
 
             ////        argument_expression_list:
             ////            argument_expression
