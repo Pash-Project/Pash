@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClearVariableCommand.cs" />
+    <Compile Include="ConsoleColorCmdlet.cs" />
     <Compile Include="ConvertToHtmlCommand.cs" />
     <Compile Include="ExportCsvCommand.cs" />
     <Compile Include="FormatElement.cs" />
