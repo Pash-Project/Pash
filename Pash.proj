@@ -17,8 +17,8 @@
 
     <Exec Command="Tools\NUnit-2.6.1\bin\nunit-console.exe -nologo Pash.nunit  -run=Libraries.Tests" />
     -->
-    <Exec Command="     $(NUnitCommandLine)" Condition=" '$(OS)' == 'Windows_NT' "/>
-    <Exec Command="mono $(NUnitCommandLine)" Condition=" '$(OS)' != 'Windows_NT' "/>
+    <Exec Command="                        $(NUnitCommandLine)" Condition=" '$(OS)' == 'Windows_NT' "/>
+    <Exec Command="mono $(MonoCommandArgs) $(NUnitCommandLine)" Condition=" '$(OS)' != 'Windows_NT' "/>
   </Target>
 
   <PropertyGroup>
@@ -27,6 +27,10 @@
 
   <PropertyGroup>
     <PashConsoleCommandLine>Source\PashConsole\bin\Debug\Pash.exe</PashConsoleCommandLine>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <MonoCommandArgs>--debug --runtime=v4.0</MonoCommandArgs>
   </PropertyGroup>
 
 </Project>
