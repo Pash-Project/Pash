@@ -38,6 +38,7 @@ namespace TestHost.FileSystemTests
         [Test]
         [TestCase(".", "/a/b/c/d/e/f/g", "should not change directories")]
         [TestCase("./../../../../../../", "/a", "should navigate up a bunch of directories")]
+        [TestCase("./../../../../../../../", "", "should navigate up a bunch of directories")]
         [TestCase("./..", "/a/b/c/d/e/f", "should nav up one dir")]
         [TestCase("./../", "/a/b/c/d/e/f", "should nav up one dir")]
         [TestCase("..", "/a/b/c/d/e/f", "should nav up one dir")]
@@ -70,6 +71,28 @@ namespace TestHost.FileSystemTests
             var currentLocationAfterBadCD = "Get-Location".Exec();
 
             currentLocation.ShouldEqual(currentLocationAfterBadCD);
+        }
+
+        [Test]
+        public void CDToSlashShouldTakeYouToTheRootOfTheFileSystemDrive()
+        {
+            var currentLocation = "Set-Location /; Get-Location".Exec();
+            
+            //TODO: how to assert this is "C:\" on windows?
+            currentLocation.ShouldEqual("/");
+        }
+        
+        [Test]
+        [TestCase("/", "root should be root")]
+        [TestCase("..", "one up from root should still be root")]
+        [TestCase("../..", "two up from root should still be root")]
+        public void CDShouldRemainAtRootLocation(string cdCommand, string errorMessage)
+        {
+            var rootPath = "Set-Location /;".Exec();
+
+            var rootPathAfterCDUpOneDirFromRoot = ("Set-Location /; Set-Location " + cdCommand).Exec();
+
+            rootPathAfterCDUpOneDirFromRoot.ShouldEqual(rootPath, errorMessage);
         }
     }
 

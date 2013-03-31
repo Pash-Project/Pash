@@ -657,16 +657,23 @@ namespace Pash.Implementation
                 newLocation = path.RemoveDrive();
             }
 
-            
+
+            // I'm not a fan of this block of code.
+            // The goal here is to throw an exception if trying to "CD" into an invalid location
+            //
+            // Not sure why the providerInstances are returned as a collection. Feels like given a 
+            // path we should have one provider we're talking to.
             if(_providerInstances.ContainsKey(nextDrive.Provider.Name))
             {
                 bool pathExists = false;
                 IEnumerable<ItemCmdletProvider> cmdletProviders = _providerInstances[nextDrive.Provider.Name].Where(x => x is ItemCmdletProvider).Cast<ItemCmdletProvider>();
+                ItemCmdletProvider currentProvider = null;
                 foreach(var provider in cmdletProviders)
                 {
                     if(provider.ItemExists(newLocation, providerRuntime))
                     {
                         pathExists = true;
+                        currentProvider = provider;
                         break;
                     }
                 }
@@ -674,6 +681,13 @@ namespace Pash.Implementation
                 if(!pathExists)
                 {
                     throw new Exception(string.Format("Cannot find path '{0}' because it does not exist.", newLocation));
+                }
+                else
+                {
+                    if(currentProvider is FileSystemProvider)
+                    {
+                        System.Environment.CurrentDirectory = newLocation;
+                    }
                 }
             }
             else

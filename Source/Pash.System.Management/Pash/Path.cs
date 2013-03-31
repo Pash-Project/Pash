@@ -314,15 +314,6 @@ namespace System.Management
             return this;
         }
 
-        public bool IsMoveUpOneDir()
-        {
-            if (_rawPath == "..")
-            {
-                return true;
-            }
-            return false;
-        }
-        
         public Path MakePath(string driveName)
         {
             Path fullPath;
