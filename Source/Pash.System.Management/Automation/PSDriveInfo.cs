@@ -32,7 +32,6 @@ namespace System.Management.Automation
             Credential = credential;
             CurrentLocation = string.Empty;
         }
-
         
         public bool IsFileSystemProvider
         {
@@ -41,7 +40,6 @@ namespace System.Management.Automation
                 return Provider.ImplementingType == typeof(Microsoft.PowerShell.Commands.FileSystemProvider);
             }
         }
-
 
         public static bool operator !=(PSDriveInfo drive1, PSDriveInfo drive2)
         {

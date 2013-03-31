@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Linq;
 using Microsoft.PowerShell.Commands;
 using System.Management;
 using System.Management.Automation;
@@ -254,26 +255,22 @@ namespace Pash.Implementation
         {
             ProviderInfo fileSystemProvider = GetProviderByName(FileSystemProvider.ProviderName);
             if (fileSystemProvider == null)
-                //throw new Exception("Can't find the FileSystemProvider");
-                return;
+                throw new Exception("FileSystemProvider not found.");
 
-            Collection<PSDriveInfo> drives = fileSystemProvider.Drives;
-            if ((drives != null) && (drives.Count > 0))
+            // Initialize the _currentDrive and set it's currentlocation 
+            // to the same as the current environment directory
+            foreach(var drive in fileSystemProvider.Drives)
             {
-                // Select the first one as a default
-                _currentDrive = drives[0];
-
-                // Traverse all the available drives and choose the "Fixed" one
-                foreach (PSDriveInfo drive in drives)
+                Path currentDir = System.Environment.CurrentDirectory;
+                if(drive.Name == currentDir.GetDrive())
                 {
-                    if (!drive.RemovableDrive)
-                    {
-                        _currentDrive = drive;
-                        break;
-                    }
+                    drive.CurrentLocation = currentDir;
+                    _currentDrive = drive;
+                    return;
                 }
             }
 
+            throw new NotImplementedException("why are we here?");
         }
         #endregion
 
@@ -639,17 +636,19 @@ namespace Pash.Implementation
                 throw new NullReferenceException("Path can't be null");
             }
 
+            PSDriveInfo nextDrive = CurrentDrive;
+
             path = path.NormalizeSlashes();
 
             string driveName = null;
             if (path.TryGetDriveName(out driveName))
             {
-                CurrentDrive = GetDrive(driveName);
+                nextDrive = GetDrive(driveName);
             }
 
             Path newLocation;
 
-            if (CurrentDrive.IsFileSystemProvider)
+            if (nextDrive.IsFileSystemProvider)
             {
                 newLocation = path.GetFullPath(CurrentDrive.CurrentLocation, true);
             }
@@ -658,10 +657,34 @@ namespace Pash.Implementation
                 newLocation = path.RemoveDrive();
             }
 
-            CurrentDrive.CurrentLocation = newLocation.TrimEndSlash();
+            
+            if(_providerInstances.ContainsKey(nextDrive.Provider.Name))
+            {
+                bool pathExists = false;
+                IEnumerable<ItemCmdletProvider> cmdletProviders = _providerInstances[nextDrive.Provider.Name].Where(x => x is ItemCmdletProvider).Cast<ItemCmdletProvider>();
+                foreach(var provider in cmdletProviders)
+                {
+                    if(provider.ItemExists(newLocation, providerRuntime))
+                    {
+                        pathExists = true;
+                        break;
+                    }
+                }
 
+                if(!pathExists)
+                {
+                    throw new Exception(string.Format("Cannot find path '{0}' because it does not exist.", newLocation));
+                }
+            }
+            else
+            {
+                throw new NotImplementedException("Unsure how to set location with provider:" + nextDrive.Provider.Name);
+            }
+
+            nextDrive.CurrentLocation = newLocation.TrimEndSlash();
+
+            CurrentDrive = nextDrive;
             _providersCurrentDrive[CurrentDrive.Provider] = CurrentDrive;
-
             return CurrentLocation;
         }
     }
