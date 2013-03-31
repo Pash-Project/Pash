@@ -11,9 +11,9 @@ namespace System.Management
     [System.Diagnostics.DebuggerDisplay("Path:{_rawPath}")]
     public class Path
     {
-        private string _rawPath;
-        static string _predeterminedCorrectSlash;
-        static string _predeterminedWrongSlash;
+        private readonly string _rawPath;
+        static readonly string _predeterminedCorrectSlash;
+        static readonly string _predeterminedWrongSlash;
 
         static Path()
         {
