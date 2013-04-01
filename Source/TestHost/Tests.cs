@@ -188,7 +188,7 @@ namespace TestHost
 8
 9
 10
-".Replace("\n", System.Environment.NewLine);
+";
 
                 Assert.AreEqual(expected, result);
             }
