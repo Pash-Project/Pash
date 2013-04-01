@@ -97,9 +97,7 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal switch_clause_condition = null; // Initialized by reflection.
         public readonly NonTerminal foreach_statement = null; // Initialized by reflection.
         public readonly NonTerminal for_statement = null; // Initialized by reflection.
-        public readonly NonTerminal _for_statement_1 = null; // Initialized by reflection.
-        public readonly NonTerminal _for_statement_2 = null; // Initialized by reflection.
-        public readonly NonTerminal _for_statement_3 = null; // Initialized by reflection.
+        public readonly NonTerminal _for_statement_internals = null; // Initialized by reflection.
         public readonly NonTerminal for_initializer = null; // Initialized by reflection.
         public readonly NonTerminal for_initializer_opt = null; // Initialized by reflection.
         public readonly NonTerminal for_condition = null; // Initialized by reflection.
@@ -203,6 +201,7 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal _member_access_or_invocation_expression_operator = null; // Initialized by reflection.
         public readonly NonTerminal element_access = null; // Initialized by reflection.
         public readonly NonTerminal argument_list = null; // Initialized by reflection.
+        public readonly NonTerminal argument_list_opt = null; // Initialized by reflection.
         public readonly NonTerminal argument_expression_list = null; // Initialized by reflection.
         public readonly NonTerminal argument_expression_list_opt = null; // Initialized by reflection.
         public readonly NonTerminal argument_expression = null; // Initialized by reflection.
@@ -519,7 +518,10 @@ namespace Pash.ParserIntrinsics
                 ;
 
             _statement_labeled_statement.Rule =
-                (label | Empty) + labeled_statement;
+                label + labeled_statement
+                |
+                labeled_statement
+                ;
 
             // See https://github.com/Pash-Project/Pash/issues/7
             _statement_flow_control_statement.Rule =
@@ -679,21 +681,10 @@ namespace Pash.ParserIntrinsics
             ////            for   new_lines_opt   (
             ////                    new_lines_opt   for_initializer_opt
             ////                    new_lines_opt   )   statement_block
-            for_statement.Rule = _for_statement_1 | _for_statement_2 | _for_statement_3;
-            _for_statement_1.Rule = "for" + "(" +
-                     for_initializer_opt + statement_terminator +
-                     for_condition_opt + statement_terminator +
-                     for_iterator_opt +
-                     ")" + statement_block;
-
-            _for_statement_2.Rule = "for" + "(" +
-                     for_initializer_opt + statement_terminator +
-                     for_condition_opt + statement_terminator +
-                     ")" + statement_block;
-
-            _for_statement_3.Rule = "for" + "(" +
-                     for_initializer_opt +
-                     ")" + statement_block;
+            _for_statement_internals.Rule =
+                MakePlusRule(_for_statement_internals, statement_terminator, pipeline_opt);
+            for_statement.Rule =
+                "for" + "(" + _for_statement_internals + ")" + statement_block;
 
             ////        for_initializer:
             ////            pipeline
@@ -1210,9 +1201,15 @@ namespace Pash.ParserIntrinsics
             ////        invocation_expression: Note no whitespace is allowed between terms in these productions.
             ////            primary_expression   .   member_name   argument_list
             ////            primary_expression   ::   member_name   argument_list
+            ////        argument_list:
+            ////            (   argument_expression_list_opt   new_lines_opt   )
+
             // ISSUE: https://github.com/Pash-Project/Pash/issues/9 - need whitespace prohibition
             _member_access_or_invocation_expression.Rule =
-                primary_expression + _member_access_or_invocation_expression_operator + member_name + (argument_list | Empty);
+                primary_expression + _member_access_or_invocation_expression_operator + member_name + PreferShiftHere() + "(" + argument_expression_list_opt + ")"
+                |
+                primary_expression + _member_access_or_invocation_expression_operator + member_name
+                ;
             _member_access_or_invocation_expression_operator.Rule = ToTerm(".") | "::";
 
             ////        element_access: Note no whitespace is allowed between primary_expression and [.
@@ -1220,11 +1217,6 @@ namespace Pash.ParserIntrinsics
             // ISSUE: https://github.com/Pash-Project/Pash/issues/9 - need whitespace prohibition
             element_access.Rule =
                 primary_expression + PreferShiftHere() + "[" + expression + "]";
-
-            ////        argument_list:
-            ////            (   argument_expression_list_opt   new_lines_opt   )
-            argument_list.Rule =
-                "(" + argument_expression_list_opt + ")";
 
             ////        argument_expression_list:
             ////            argument_expression

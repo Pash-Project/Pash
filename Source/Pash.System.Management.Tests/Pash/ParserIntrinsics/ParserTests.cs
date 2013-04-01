@@ -15,7 +15,7 @@ namespace Pash.ParserIntrinsics.Tests
         public void GrammarErrorsCount()
         {
             // Obviously, we'd rather drive this to 0, but for now, let's lock it down
-            Assert.AreEqual(4, PowerShellGrammar.Parser.Language.Errors.Count, PowerShellGrammar.Parser.Language.Errors.JoinString("\r\n"));
+            Assert.AreEqual(2, PowerShellGrammar.Parser.Language.Errors.Count, PowerShellGrammar.Parser.Language.Errors.JoinString("\r\n"));
         }
 
         [Test]

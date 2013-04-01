@@ -18,6 +18,14 @@ namespace TestHost
             Assert.AreEqual("3" + Environment.NewLine, result);
         }
 
+        [Test]
+        public void MemberCaseInsensitivy()
+        {
+            var result = TestHost.Execute(true, @"'xxx'.LENGTH");
+
+            Assert.AreEqual("3" + Environment.NewLine, result);
+        }
+
         // Taken from the spec, section 7.1.2
         [Test, Explicit]
         public void InstanceProperty()
