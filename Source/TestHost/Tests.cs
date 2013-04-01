@@ -12,6 +12,12 @@ namespace TestHost
     public class Tests
     {
         [Test]
+        public void RootPathTest()
+        {
+            StringAssert.AreEqualIgnoringCase(Path.GetPathRoot(Environment.CurrentDirectory) + Environment.NewLine, TestHost.Execute("Set-Location / ; Get-Location"));
+        }
+
+        [Test]
         public void TrueTest()
         {
             StringAssert.AreEqualIgnoringCase("True" + Environment.NewLine, TestHost.Execute("$true"));
@@ -103,7 +109,12 @@ namespace TestHost
         [Test]
         public void VariableTest()
         {
-            StringAssert.AreEqualIgnoringCase("variable:\\" + Environment.NewLine, TestHost.Execute("Set-Location variable:", "$PWD"));
+            System.Management.Path path = "";
+
+            var expectedPath = "Variable:" + path.CorrectSlash;
+            var actualPath = TestHost.Execute("Set-Location variable:", "Get-Location").Trim();
+
+            StringAssert.AreEqualIgnoringCase(expectedPath, actualPath);
         }
 
         [Test]
@@ -169,7 +180,7 @@ namespace TestHost
 8
 9
 10
-";
+".Replace("\n", System.Environment.NewLine);
 
                 Assert.AreEqual(expected, result);
             }
@@ -204,9 +215,17 @@ namespace TestHost
         public void UnrecognizedCommandBug()
         {
             // notice typo
-            var result = TestHost.Execute(true, "Get-ChlidItem");
+            var result = TestHost.ExecuteWithZeroErrors("Get-ChlidItem");
 
             Assert.AreEqual("Command 'Get-ChlidItem' not found.", result);
+        }
+
+        [Test]
+        public void GetChildItemFromRootDefaultProviderShouldReturnSomething()
+        {
+            var result = TestHost.ExecuteWithZeroErrors("Get-ChildItem /");
+
+            Assert.Greater(result.Length, 0);
         }
     }
 }

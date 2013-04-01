@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Management;
 using System.Management.Automation;
 using System.Management.Automation.Provider;
 using Microsoft.PowerShell.Commands;
@@ -19,7 +20,7 @@ namespace Microsoft.PowerShell.Commands
             return new Collection<PSDriveInfo> { new PSDriveInfo("Variable", base.ProviderInfo) };
         }
 
-        internal override object GetSessionStateItem(string name)
+        internal override object GetSessionStateItem(Path name)
         {
             // TODO: deal with empty path
             if (string.Equals("variable:\\", name, StringComparison.CurrentCultureIgnoreCase))
@@ -48,7 +49,7 @@ namespace Microsoft.PowerShell.Commands
             return (IDictionary)SessionState.SessionStateGlobal.GetVariables();
         }
 
-        internal override void SetSessionStateItem(string name, object value, bool writeItem)
+        internal override void SetSessionStateItem(Path name, object value, bool writeItem)
         {
             PSVariable variable = null;
             if (value != null)
@@ -77,13 +78,13 @@ namespace Microsoft.PowerShell.Commands
             }
         }
 
-        internal override void RemoveSessionStateItem(string name)
+        internal override void RemoveSessionStateItem(Path name)
         {
             // TODO: can be Force'ed
             SessionState.SessionStateGlobal.RemoveVariable(name);
         }
 
-        protected override void GetItem(string name)
+        protected override void GetItem(Path name)
         {
             // HACK: should it be this way?
 

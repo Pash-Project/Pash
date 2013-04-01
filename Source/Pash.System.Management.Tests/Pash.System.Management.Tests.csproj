@@ -7,8 +7,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{7FDF583D-C91A-4284-B0A4-E25C96BBB828}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>ParserTests</RootNamespace>
-    <AssemblyName>ParserTests</AssemblyName>
+    <RootNamespace>Pash.System.Management.Tests</RootNamespace>
+    <AssemblyName>Pash.System.Management.Tests</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -42,9 +42,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Ast\Ast.Tests.cs" />
-    <Compile Include="CaseInsensitiveGrammarTests.cs" />
+    <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammarTests.cs" />
     <Compile Include="ExtensionsTests.cs" />
-    <Compile Include="ParserTests.cs" />
+    <Compile Include="Pash\ParserIntrinsics\ParserTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

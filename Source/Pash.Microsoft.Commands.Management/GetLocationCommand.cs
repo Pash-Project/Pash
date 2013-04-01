@@ -42,7 +42,7 @@ namespace Microsoft.PowerShell.Commands
 
                         foreach (PSDriveInfo pdi in list)
                         {
-                            WriteObject(new PathInfo(pdi, pdi.Provider, PathIntrinsics.MakePath(pdi.CurrentLocation, pdi), SessionState));
+                            WriteObject(new PathInfo(pdi, pdi.Provider, pdi.CurrentLocation.MakePath(pdi.Name), SessionState));
                         }
                     }
                 }
