@@ -7,7 +7,9 @@ namespace System.Management.Automation.Language
 {
     public class IndexExpressionAst : ExpressionAst
     {
-        public IndexExpressionAst(IScriptExtent extent, ExpressionAst target, ExpressionAst index) : base(extent) {
+        public IndexExpressionAst(IScriptExtent extent, ExpressionAst target, ExpressionAst index)
+            : base(extent)
+        {
             this.Target = target;
             this.Index = index;
         }

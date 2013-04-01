@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Management;
 using System.Management.Automation;
 using System.Management.Automation.Provider;
 using Microsoft.PowerShell.Commands;
@@ -19,7 +20,7 @@ namespace Microsoft.PowerShell.Commands
             return new Collection<PSDriveInfo> { new PSDriveInfo("Env", base.ProviderInfo) };
         }
 
-        internal override object GetSessionStateItem(string name)
+        internal override object GetSessionStateItem(Path name)
         {
             string environmentVariable = Environment.GetEnvironmentVariable(name);
             if (environmentVariable != null)
@@ -39,16 +40,16 @@ namespace Microsoft.PowerShell.Commands
             return dictionary;
         }
 
-        internal override void RemoveSessionStateItem(string name)
+        internal override void RemoveSessionStateItem(Path name)
         {
             Environment.SetEnvironmentVariable(name, null);
         }
 
-        internal override void SetSessionStateItem(string name, object value, bool writeItem)
+        internal override void SetSessionStateItem(Path path, object value, bool writeItem)
         {
             if (value == null)
             {
-                Environment.SetEnvironmentVariable(name, null);
+                Environment.SetEnvironmentVariable(path, null);
             }
             else
             {
@@ -61,11 +62,11 @@ namespace Microsoft.PowerShell.Commands
                 {
                     str = PSObject.AsPSObject(value).ToString();
                 }
-                Environment.SetEnvironmentVariable(name, str);
-                DictionaryEntry item = new DictionaryEntry(name, str);
+                Environment.SetEnvironmentVariable(path, str);
+                DictionaryEntry item = new DictionaryEntry(path, str);
                 if (writeItem)
                 {
-                    WriteItemObject(item, name, false);
+                    WriteItemObject(item, path, false);
                 }
             }
         }

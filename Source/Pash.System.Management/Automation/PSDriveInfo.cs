@@ -14,7 +14,7 @@ namespace System.Management.Automation
         public string Root { get; internal set; }
         public string Description { get; set; }
         public PSCredential Credential { get; private set; }
-        public string CurrentLocation { get; set; }
+        public Path CurrentLocation { get; set; }
         internal bool RemovableDrive { get; set; }
 
         protected PSDriveInfo(PSDriveInfo driveInfo)
@@ -31,6 +31,14 @@ namespace System.Management.Automation
             Description = description ?? string.Empty;
             Credential = credential;
             CurrentLocation = string.Empty;
+        }
+
+        public bool IsFileSystemProvider
+        {
+            get
+            {
+                return Provider.ImplementingType == typeof(Microsoft.PowerShell.Commands.FileSystemProvider);
+            }
         }
 
         public static bool operator !=(PSDriveInfo drive1, PSDriveInfo drive2)

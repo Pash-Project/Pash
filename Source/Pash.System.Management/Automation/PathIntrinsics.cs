@@ -132,31 +132,12 @@ namespace System.Management.Automation
         public const char CorrectSlash = '\\';
         public const char WrongSlash = '/';
 
-        internal static string NormalizePath(string path)
+        internal static Path NormalizePath(Path path)
         {
             // TODO: should we normilize the path into a different direction on Unix?
-            return path.Replace(WrongSlash, CorrectSlash);
+            return path.NormalizeSlashes();
         }
 
-        public static string MakePath(string path, PSDriveInfo drive)
-        {
-            string format = "{0}:" + '\\' + "{1}";
-            if (path.StartsWith("\\"))
-            {
-                format = "{0}:{1}";
-            }
-            return string.Format(format, new object[] { drive.Name, path });
-        }
-
-        public static string GetDriveFromPath(string path)
-        {
-            int iDelimiter = path.IndexOf(':');
-
-            if (iDelimiter == -1)
-                return null;
-
-            return path.Substring(0, iDelimiter);
-        }
         #endregion
 
         internal static bool IsAbsolutePath(string path, out string driveName)

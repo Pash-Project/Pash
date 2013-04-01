@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Management.Automation.Provider;
 using System.Management.Automation;
+using System.Management;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -14,10 +15,10 @@ namespace Microsoft.PowerShell.Commands
         {
         }
 
-        protected override void ClearItem(string path) { throw new NotImplementedException(); }
-        protected override void CopyItem(string path, string copyPath, bool recurse) { throw new NotImplementedException(); }
+        protected override void ClearItem(Path path) { throw new NotImplementedException(); }
+        protected override void CopyItem(Path path, Path copyPath, bool recurse) { throw new NotImplementedException(); }
 
-        protected override void GetChildItems(string path, bool recurse)
+        protected override void GetChildItems(Path path, bool recurse)
         {
             if (path == "\\")
                 path = string.Empty;
@@ -42,12 +43,12 @@ namespace Microsoft.PowerShell.Commands
             }
         }
 
-        protected override void GetChildNames(string path, ReturnContainers returnContainers) { throw new NotImplementedException(); }
-        protected override void GetItem(string name) { throw new NotImplementedException(); }
-        protected override bool HasChildItems(string path) { throw new NotImplementedException(); }
-        protected override bool IsValidPath(string path) { throw new NotImplementedException(); }
+        protected override void GetChildNames(Path path, ReturnContainers returnContainers) { throw new NotImplementedException(); }
+        protected override void GetItem(Path name) { throw new NotImplementedException(); }
+        protected override bool HasChildItems(Path path) { throw new NotImplementedException(); }
+        protected override bool IsValidPath(Path path) { throw new NotImplementedException(); }
 
-        protected override bool ItemExists(string path)
+        protected override bool ItemExists(Path path)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -57,10 +58,10 @@ namespace Microsoft.PowerShell.Commands
             return null != GetSessionStateItem(path);
         }
 
-        protected override void NewItem(string path, string type, object newItem) { throw new NotImplementedException(); }
-        protected override void RemoveItem(string path, bool recurse) { throw new NotImplementedException(); }
-        protected override void RenameItem(string name, string newName) { throw new NotImplementedException(); }
-        protected override void SetItem(string name, object value) { throw new NotImplementedException(); }
+        protected override void NewItem(Path path, string type, object newItem) { throw new NotImplementedException(); }
+        protected override void RemoveItem(Path path, bool recurse) { throw new NotImplementedException(); }
+        protected override void RenameItem(Path name, Path newName) { throw new NotImplementedException(); }
+        protected override void SetItem(Path name, object value) { throw new NotImplementedException(); }
 
         // internals
         internal virtual bool CanRenameItem(object item)
@@ -68,7 +69,7 @@ namespace Microsoft.PowerShell.Commands
             return true;
         }
 
-        internal abstract object GetSessionStateItem(string name);
+        internal abstract object GetSessionStateItem(Path name);
         internal abstract IDictionary GetSessionStateTable();
         internal virtual object GetValueOfItem(object item)
         {
@@ -78,37 +79,37 @@ namespace Microsoft.PowerShell.Commands
             }
             return item;
         }
-        internal abstract void RemoveSessionStateItem(string name);
-        internal abstract void SetSessionStateItem(string name, object value, bool writeItem);
+        internal abstract void RemoveSessionStateItem(Path name);
+        internal abstract void SetSessionStateItem(Path name, object value, bool writeItem);
 
         #region IContentCmdletProvider Members
 
-        public void ClearContent(string path)
+        public void ClearContent(Path path)
         {
             throw new NotImplementedException();
         }
 
-        public object ClearContentDynamicParameters(string path)
+        public object ClearContentDynamicParameters(Path path)
         {
             throw new NotImplementedException();
         }
 
-        public IContentReader GetContentReader(string path)
+        public IContentReader GetContentReader(Path path)
         {
             throw new NotImplementedException();
         }
 
-        public object GetContentReaderDynamicParameters(string path)
+        public object GetContentReaderDynamicParameters(Path path)
         {
             throw new NotImplementedException();
         }
 
-        public IContentWriter GetContentWriter(string path)
+        public IContentWriter GetContentWriter(Path path)
         {
             throw new NotImplementedException();
         }
 
-        public object GetContentWriterDynamicParameters(string path)
+        public object GetContentWriterDynamicParameters(Path path)
         {
             throw new NotImplementedException();
         }

@@ -17,9 +17,9 @@
     <UpgradeBackupLocation />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
+    <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>False</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -29,7 +29,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>True</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -311,6 +311,7 @@
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.Terminals.cs" />
     <Compile Include="Pash\ParserIntrinsics\ScriptExtent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Pash\Path.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="System.Management.cd" />
@@ -325,7 +326,7 @@
   -->
   <ItemGroup>
     <ProjectReference Include="..\..\Libraries\Irony\Irony\010.Irony.2010.csproj">
-      <Project>{d81f5c91-d7db-46e5-bc99-49488fb6814c}</Project>
+      <Project>{D81F5C91-D7DB-46E5-BC99-49488FB6814C}</Project>
       <Name>010.Irony.2010</Name>
     </ProjectReference>
   </ItemGroup>

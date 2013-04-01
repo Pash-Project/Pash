@@ -3,19 +3,56 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Management.Automation;
 using System.Collections.Specialized;
-using System.Management.Automation.Provider;
+using System.Linq;
 using Microsoft.PowerShell.Commands;
+using System.Management;
+using System.Management.Automation;
+using System.Management.Automation.Provider;
 
 namespace Pash.Implementation
 {
+    public class PSDriveInfoCollection //: IEnumerable<KeyValuePair<string, PSDriveInfo>>
+    {
+
+        private Dictionary<string, PSDriveInfo> _drives;
+        public PSDriveInfoCollection()
+        {
+            _drives = new Dictionary<string, PSDriveInfo>(StringComparer.CurrentCultureIgnoreCase);
+        }
+
+        public void Add(string name, PSDriveInfo driveInfo)
+        {
+            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException("name");
+            if (driveInfo == null) throw new ArgumentNullException("driveInfo");
+            _drives.Add(name, driveInfo);
+        }
+
+        public bool ContainsKey(string driveName)
+        {
+            return _drives.ContainsKey(driveName);
+        }
+
+        public PSDriveInfo GetDrive(string driveName)
+        {
+            if (!_drives.ContainsKey(driveName))
+                return null;
+
+            return _drives[driveName];
+        }
+
+        public IEnumerable<PSDriveInfo> Drives
+        {
+            get { return _drives.Values; }
+        }
+    }
+
     internal class SessionStateGlobal
     {
         private Dictionary<string, List<ProviderInfo>> _providers;
         private Dictionary<string, List<CmdletProvider>> _providerInstances;
         private Dictionary<ProviderInfo, PSDriveInfo> _providersCurrentDrive;
-        private Dictionary<string, PSDriveInfo> _drives;
+        private PSDriveInfoCollection _drives;
         private Dictionary<string, Stack<PathInfo>> _workingLocationStack;
         private Dictionary<string, AliasInfo> _aliases;
         private Dictionary<string, CommandInfo> _functions;
@@ -23,17 +60,20 @@ namespace Pash.Implementation
         private ExecutionContext _executionContext;
         internal PSDriveInfo _currentDrive;
 
+        // Test access only?? We need a better way to get access to 'state' for use in tests
+        internal PSDriveInfoCollection DrivesCollection { get { return _drives; } }
+
         private SessionStateGlobal()
         {
             _providers = new Dictionary<string, List<ProviderInfo>>(StringComparer.CurrentCultureIgnoreCase);
             _providerInstances = new Dictionary<string, List<CmdletProvider>>(StringComparer.CurrentCultureIgnoreCase);
             _providersCurrentDrive = new Dictionary<ProviderInfo, PSDriveInfo>();
-            _drives = new Dictionary<string, PSDriveInfo>(StringComparer.CurrentCultureIgnoreCase);
+            _drives = new PSDriveInfoCollection();
             _workingLocationStack = new Dictionary<string, Stack<PathInfo>>(StringComparer.CurrentCultureIgnoreCase);
             _aliases = new Dictionary<string, AliasInfo>(StringComparer.CurrentCultureIgnoreCase);
             _functions = new Dictionary<string, CommandInfo>(StringComparer.CurrentCultureIgnoreCase);
             _variables = new HybridDictionary(true);
-            
+
             SetVariable("true", true);
             SetVariable("false", false);
         }
@@ -205,32 +245,32 @@ namespace Pash.Implementation
             {
                 return _currentDrive;
             }
+            private set
+            {
+                _currentDrive = value;
+            }
         }
 
         internal void SetCurrentDrive()
         {
             ProviderInfo fileSystemProvider = GetProviderByName(FileSystemProvider.ProviderName);
             if (fileSystemProvider == null)
-                //throw new Exception("Can't find the FileSystemProvider");
-                return;
+                throw new Exception("FileSystemProvider not found.");
 
-            Collection<PSDriveInfo> drives = fileSystemProvider.Drives;
-            if ((drives != null) && (drives.Count > 0))
+            // Initialize the _currentDrive and set it's currentlocation 
+            // to the same as the current environment directory
+            foreach (var drive in fileSystemProvider.Drives)
             {
-                // Select the first one as a default
-                _currentDrive = drives[0];
-
-                // Traverse all the available drives and choose the "Fixed" one
-                foreach (PSDriveInfo drive in drives)
+                Path currentDir = System.Environment.CurrentDirectory;
+                if (drive.Name == currentDir.GetDrive())
                 {
-                    if (!drive.RemovableDrive)
-                    {
-                        _currentDrive = drive;
-                        break;
-                    }
+                    drive.CurrentLocation = currentDir;
+                    _currentDrive = drive;
+                    return;
                 }
             }
 
+            throw new NotImplementedException("why are we here?");
         }
         #endregion
 
@@ -351,12 +391,9 @@ namespace Pash.Implementation
         #endregion
 
         #region DriveManagementIntrinsics
-        internal PSDriveInfo GetDrive(string driveName, string scope)
+        internal PSDriveInfo GetDrive(string driveName)
         {
-            if (!_drives.ContainsKey(driveName))
-                return null;
-
-            return _drives[driveName];
+            return _drives.GetDrive(driveName);
         }
 
         /// <summary>
@@ -367,7 +404,7 @@ namespace Pash.Implementation
         internal Collection<PSDriveInfo> GetDrives(string scope)
         {
             Collection<PSDriveInfo> collection = new Collection<PSDriveInfo>();
-            foreach (PSDriveInfo info in _drives.Values)
+            foreach (PSDriveInfo info in _drives.Drives)
             {
                 // TODO: make sure not to include the removed drives or to
                 // TODO: make sure to mount all the removable drives
@@ -542,15 +579,20 @@ namespace Pash.Implementation
             return providerRuntime.RetreiveAllProviderData();
         }
 
-        private CmdletProvider GetProviderByPath(string path)
+        private CmdletProvider GetProviderByPath(Path path)
         {
             // MUST: implement for "dir"
             if (string.IsNullOrEmpty(path))
                 path = CurrentLocation.Path;
 
-            string driveName = PathIntrinsics.GetDriveFromPath(path);
+            string driveName = path.GetDrive();
+            PSDriveInfo drive = GetDrive(driveName);
 
-            PSDriveInfo drive = GetDrive(driveName, null);
+            if (drive == null)
+            {
+                drive = CurrentLocation.Drive;
+            }
+
 
             if (drive == null)
                 return null;
@@ -590,7 +632,7 @@ namespace Pash.Implementation
             throw new NotImplementedException();
         }
 
-        internal PathInfo SetLocation(string path, ProviderRuntime providerRuntime)
+        internal PathInfo SetLocation(Path path, ProviderRuntime providerRuntime)
         {
             // TODO: deal with paths starting with ".\"
 
@@ -599,31 +641,74 @@ namespace Pash.Implementation
                 throw new NullReferenceException("Path can't be null");
             }
 
-            path = PathIntrinsics.NormalizePath(path);
+            PSDriveInfo nextDrive = CurrentDrive;
 
-            ProviderInfo provider = null;
+            path = path.NormalizeSlashes();
+
             string driveName = null;
-
-            string str = path;
-            PSDriveInfo currentDrive = CurrentDrive;
-
-            // If path doesn't start with a drive name
-            if (path.StartsWith(PathIntrinsics.CorrectSlash.ToString()))
+            if (path.TryGetDriveName(out driveName))
             {
-                provider = CurrentLocation.Provider;
-            }
-            else if (PathIntrinsics.IsAbsolutePath(path, out driveName))
-            {
-                _currentDrive = GetDrive(driveName, null);
-
-                path = PathIntrinsics.NormalizePath(PathIntrinsics.RemoveDriveName(path));
+                nextDrive = GetDrive(driveName);
             }
 
-            _currentDrive.CurrentLocation = path;
+            if (nextDrive == null)
+            {
+                nextDrive = CurrentDrive;
+            }
 
+            Path newLocation;
+
+            if (nextDrive.IsFileSystemProvider)
+            {
+                newLocation = path.GetFullPath(nextDrive.Name, nextDrive.CurrentLocation, true);
+            }
+            else
+            {
+                newLocation = path.RemoveDrive();
+            }
+
+
+            // I'm not a fan of this block of code.
+            // The goal here is to throw an exception if trying to "CD" into an invalid location
+            //
+            // Not sure why the providerInstances are returned as a collection. Feels like given a 
+            // path we should have one provider we're talking to.
+            if (_providerInstances.ContainsKey(nextDrive.Provider.Name))
+            {
+                bool pathExists = false;
+                IEnumerable<ItemCmdletProvider> cmdletProviders = _providerInstances[nextDrive.Provider.Name].Where(x => x is ItemCmdletProvider).Cast<ItemCmdletProvider>();
+                ItemCmdletProvider currentProvider = null;
+                foreach (var provider in cmdletProviders)
+                {
+                    if (provider.ItemExists(newLocation, providerRuntime))
+                    {
+                        pathExists = true;
+                        currentProvider = provider;
+                        break;
+                    }
+                }
+
+                if (!pathExists)
+                {
+                    throw new Exception(string.Format("Cannot find path '{0}' because it does not exist.", newLocation));
+                }
+                else
+                {
+                    if (currentProvider is FileSystemProvider)
+                    {
+                        System.Environment.CurrentDirectory = newLocation;
+                    }
+                }
+            }
+            else
+            {
+                throw new NotImplementedException("Unsure how to set location with provider:" + nextDrive.Provider.Name);
+            }
+
+            nextDrive.CurrentLocation = newLocation.TrimEndSlash();
+
+            CurrentDrive = nextDrive;
             _providersCurrentDrive[CurrentDrive.Provider] = CurrentDrive;
-
-            SetVariable("PWD", CurrentLocation);
             return CurrentLocation;
         }
     }

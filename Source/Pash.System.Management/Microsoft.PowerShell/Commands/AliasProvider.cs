@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using Microsoft.PowerShell.Commands;
 using System.Management.Automation.Provider;
 using System.Management.Automation;
+using System.Management;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -19,12 +20,12 @@ namespace Microsoft.PowerShell.Commands
             return new Collection<PSDriveInfo> { new PSDriveInfo("Alias", base.ProviderInfo) };
         }
 
-        protected override object NewItemDynamicParameters(string path, string type, object newItemValue)
+        protected override object NewItemDynamicParameters(Path path, string type, object newItemValue)
         {
             return new AliasProviderDynamicParameters();
         }
 
-        protected override object SetItemDynamicParameters(string path, object value)
+        protected override object SetItemDynamicParameters(Path path, object value)
         {
             return new AliasProviderDynamicParameters();
         }
@@ -34,7 +35,7 @@ namespace Microsoft.PowerShell.Commands
             throw new NotImplementedException();
         }
 
-        internal override object GetSessionStateItem(string name)
+        internal override object GetSessionStateItem(Path name)
         {
             throw new NotImplementedException();
         }
@@ -49,12 +50,12 @@ namespace Microsoft.PowerShell.Commands
             throw new NotImplementedException();
         }
 
-        internal override void RemoveSessionStateItem(string name)
+        internal override void RemoveSessionStateItem(Path name)
         {
             throw new NotImplementedException();
         }
 
-        internal override void SetSessionStateItem(string name, object value, bool writeItem)
+        internal override void SetSessionStateItem(Path name, object value, bool writeItem)
         {
             throw new NotImplementedException();
         }
