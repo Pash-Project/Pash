@@ -198,6 +198,13 @@ namespace ParserTests
             AssertIsValidInput(input);
         }
 
+        [Test]
+        public void StringWithDollarSign()
+        {
+            // This `$%` threw off the tokenizer
+            AssertIsValidInput(@"""abc#$%XYZabc""");
+        }
+
         static void AssertIsValidInput(string input)
         {
             var parseTree = PowerShellGrammar.Parser.Parse(input);
@@ -207,6 +214,5 @@ namespace ParserTests
                 Assert.Fail(parseTree.ParserMessages[0].ToString());
             }
         }
-
     }
 }

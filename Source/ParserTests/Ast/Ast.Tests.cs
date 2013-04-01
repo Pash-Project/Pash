@@ -16,6 +16,19 @@ namespace ParserTests
     [TestFixture]
     public class AstTests
     {
+        [Test, Description("Did this tokenize as 1 long string?")]
+        public void TwoStrings()
+        {
+            BinaryExpressionAst expressionAst = ParseInput(@"""a"" + ""b""")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression
+                ;
+
+            Assert.AreEqual(TokenKind.Plus, expressionAst.Operator);
+        }
+
         [Test, Description("I once wrote the `label` rule as as `foo:`, which broke this")]
         public void ScriptPathWithColon()
         {
