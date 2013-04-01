@@ -443,19 +443,6 @@ namespace Pash.ParserIntrinsics
         const string expandable_string_characters_pattern = "(?<expandable_string_characters>" + expandable_string_part_pattern + "+" + ")";
 
         ////        expandable_string_part:
-        ////            Any Unicode character except
-        ////                    $
-        ////                    double_quote_character
-        ////                    `   (The backtick character U+0060)
-        ////            braced_variable
-        ////            $   Any Unicode character except
-        ////                    (
-        ////                    {
-        ////                    double_quote_character
-        ////                    `   (The backtick character U+0060)
-        ////            $   escaped_character
-        ////            escaped_character
-        ////            double_quote_character   double_quote_character
         public readonly RegexBasedTerminal expandable_string_part = null; // Initialized by reflection.
         const string expandable_string_part_pattern = "(?<expandable_string_part>" +
             _expandable_string_part_plain_pattern + "|" +
@@ -463,26 +450,39 @@ namespace Pash.ParserIntrinsics
             _expandable_string_part_expansion_pattern + "|" +
             _expandable_string_part_dollarescaped_pattern + "|" +
             _expandable_string_part_escaped_pattern + "|" +
-            _expandable_string_part_quotequote_pattern + "|" +
+            _expandable_string_part_quotequote_pattern +
             ")";
 
+        ////            Any Unicode character except
+        ////                    $
+        ////                    double_quote_character
+        ////                    `   (The backtick character U+0060)
         public readonly RegexBasedTerminal _expandable_string_part_plain = null; // Initialized by reflection
         const string _expandable_string_part_plain_pattern = "(?<_expandable_string_part_plain>" + @"[^\$" + double_quote_character_ + @"\u0060]" + ")";
 
+        ////            braced_variable
         public readonly RegexBasedTerminal _expandable_string_part_braced_variable = null; // Initialized by reflection
-        const string _expandable_string_part_braced_variable_pattern = "(?<_expandable_string_part_braced_variable>" + braced_variable_character_pattern + ")";
+        const string _expandable_string_part_braced_variable_pattern = "(?<_expandable_string_part_braced_variable>" + braced_variable_pattern + ")";
 
+        ////            $   Any Unicode character except
+        ////                    (
+        ////                    {
+        ////                    double_quote_character
+        ////                    `   (The backtick character U+0060)
         public readonly RegexBasedTerminal _expandable_string_part_expansion = null; // Initialized by reflection
-        const string _expandable_string_part_expansion_pattern = "(?<_expandable_string_part_expansion>" + ")";
+        const string _expandable_string_part_expansion_pattern = "(?<_expandable_string_part_expansion>" + @"\$[\(\{" + double_quote_character_ + @"\u0060]" + ")";
 
+        ////            $   escaped_character
         public readonly RegexBasedTerminal _expandable_string_part_dollarescaped = null; // Initialized by reflection
-        const string _expandable_string_part_dollarescaped_pattern = "(?<_expandable_string_part_dollarescaped>" + ")";
+        const string _expandable_string_part_dollarescaped_pattern = "(?<_expandable_string_part_dollarescaped>" + @"\$" + escaped_character_pattern + ")";
 
+        ////            escaped_character
         public readonly RegexBasedTerminal _expandable_string_part_escaped = null; // Initialized by reflection
-        const string _expandable_string_part_escaped_pattern = "(?<_expandable_string_part_escaped>" + ")";
+        const string _expandable_string_part_escaped_pattern = "(?<_expandable_string_part_escaped>" + escaped_character_pattern + ")";
 
+        ////            double_quote_character   double_quote_character
         public readonly RegexBasedTerminal _expandable_string_part_quotequote = null; // Initialized by reflection
-        const string _expandable_string_part_quotequote_pattern = "(?<_expandable_string_part_quotequote>" + ")";
+        const string _expandable_string_part_quotequote_pattern = "(?<_expandable_string_part_quotequote>" + double_quote_character_pattern + double_quote_character_pattern + ")";
 
 
         ////        dollars:
@@ -735,11 +735,11 @@ namespace Pash.ParserIntrinsics
         const string format_operator_pattern = "(?<format_operator>" + dash_pattern + "f" + ")";
 
         #endregion
+
         #endregion
 
         // this appears to be missing from the language spec
         public readonly RegexBasedTerminal label = null; // Initialized by reflection
         const string label_pattern = "(?<label>" + @"\:" + simple_name_pattern + ")";
-
     }
 }
