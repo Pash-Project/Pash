@@ -186,16 +186,18 @@ namespace System.Management
 
         }
 
-        public Path GetFullPath(string currentLocation, bool isFileSystemProvider)
+        public Path GetFullPath(string driveName, string currentLocation, bool isFileSystemProvider)
         {
             if (this.IsRootPath())
             {
-                return this;
+                return this.MakePath(driveName);
             }
+
             if (isFileSystemProvider)
             {
                 Path combinedPath;
-                if (this.StartsWithSlash() /*TODO: || this.IsPathAbsolute()) */)
+
+                if (this.HasDrive())
                 {
                     combinedPath = this;
                 }
@@ -230,10 +232,6 @@ namespace System.Management
             }
             return false;
         }
-//        public bool EndsWith(string value)
-//        {
-//            return _rawPath.EndsWith(value);
-//        }
 
         public Path AppendSlashAtEnd()
         {
@@ -324,6 +322,11 @@ namespace System.Management
                 fullPath = new Path(CorrectSlash, WrongSlash, string.Format("{0}{1}", preSlash, this));
             } else
             {
+                if (this.HasDrive())
+                {
+                    return this;
+                }
+
                 //TODO: should this take a "current path" parameter? EX: {drive}:{currentPath??}/{this}
                 string preSlash = this.StartsWithSlash() ? string.Empty : CorrectSlash;
                 
@@ -346,6 +349,11 @@ namespace System.Management
         public static Path AsPath(this string value)
         {
             return (Path)value;
+        }
+
+        public static string NormalizeSlashes(this string value)
+        {
+            return ((Path)value).NormalizeSlashes();
         }
     }
 

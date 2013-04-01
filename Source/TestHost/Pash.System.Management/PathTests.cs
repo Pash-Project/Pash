@@ -121,8 +121,8 @@ namespace TestHost
             if(currentLocation.StartsWith("Variable"))
                 isFileSystemProvider = false;
 
-            inputPath.GetFullPath(currentLocation, isFileSystemProvider)
-                .ShouldEqual(expectedPath, failureMessage);
+            inputPath.GetFullPath("/", currentLocation, isFileSystemProvider)
+                .PathShouldEqual(expectedPath, failureMessage);
         }
 
         private Path SetUnixPaths(Path path)

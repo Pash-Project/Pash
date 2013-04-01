@@ -11,7 +11,7 @@ namespace TestHost.FileSystemTests
         public void CanSetLocationIntoSubDirectory()
         {
             var rootPath = base.SetupFileSystemWithStructure(new []{
-                "/FolderA/SubFolderA/FileA"
+                "/FolderA/SubFolderA/FileA".NormalizeSlashes()
             });
 
             var result = TestHost.ExecuteWithZeroErrors(
@@ -21,17 +21,17 @@ namespace TestHost.FileSystemTests
             result.Trim().ShouldEqual((string)rootPath);
 
             result = TestHost.ExecuteWithZeroErrors(
-                "Set-Location " + rootPath + "/FolderA",
+                "Set-Location " + (rootPath + "/FolderA").NormalizeSlashes(),
                 "Get-Location");
 
 
-            result.Trim().ShouldEqual((string)rootPath + "/FolderA");
+            result.Trim().ShouldEqual(((string)rootPath + "/FolderA").NormalizeSlashes());
             
             result = TestHost.ExecuteWithZeroErrors(
-                "Set-Location " + rootPath + "/FolderA/SubfolderA",
+                "Set-Location " + (rootPath + "/FolderA/SubfolderA").NormalizeSlashes(),
                 "Get-Location");
-            
-            result.Trim().ShouldEqual((string)rootPath + "/FolderA/SubfolderA");
+
+            result.Trim().PathShouldEqual(((string)rootPath + "/FolderA/SubfolderA").NormalizeSlashes());
             
         }
 
@@ -55,8 +55,8 @@ namespace TestHost.FileSystemTests
             var result = TestHost.ExecuteWithZeroErrors("Set-Location " + rootPath + "/a/b/c/d/e/f/g",
                                                         "Set-Location " + setLocationParam,
                                                         "Get-Location");
-            
-            result.Trim().ShouldEqual(rootPath + expectedLocation);
+
+            result.Trim().PathShouldEqual(rootPath + expectedLocation);
         }
 
         [Test]
@@ -70,7 +70,7 @@ namespace TestHost.FileSystemTests
 
             var currentLocationAfterBadCD = "Get-Location".Exec();
 
-            currentLocation.ShouldEqual(currentLocationAfterBadCD);
+            currentLocation.PathShouldEqual(currentLocationAfterBadCD);
         }
 
         [Test]
@@ -79,7 +79,7 @@ namespace TestHost.FileSystemTests
             var currentLocation = "Set-Location /; Get-Location".Exec();
             
             //TODO: how to assert this is "C:\" on windows?
-            currentLocation.ShouldEqual("/");
+            currentLocation.PathShouldEqual("/");
         }
         
         [Test]
@@ -92,7 +92,7 @@ namespace TestHost.FileSystemTests
 
             var rootPathAfterCDUpOneDirFromRoot = ("Set-Location /; Set-Location " + cdCommand).Exec();
 
-            rootPathAfterCDUpOneDirFromRoot.ShouldEqual(rootPath, errorMessage);
+            rootPathAfterCDUpOneDirFromRoot.PathShouldEqual(rootPath, errorMessage);
         }
     }
 
@@ -110,4 +110,3 @@ namespace TestHost.FileSystemTests
         }
     }
 }
-

@@ -586,8 +586,13 @@ namespace Pash.Implementation
                 path = CurrentLocation.Path;
 
             string driveName = path.GetDrive();
-
             PSDriveInfo drive = GetDrive(driveName);
+
+            if (drive == null)
+            {
+                drive = CurrentLocation.Drive;
+            }
+
 
             if (drive == null)
                 return null;
@@ -646,11 +651,16 @@ namespace Pash.Implementation
                 nextDrive = GetDrive(driveName);
             }
 
+            if (nextDrive == null)
+            {
+                nextDrive = CurrentDrive;
+            }
+
             Path newLocation;
 
             if (nextDrive.IsFileSystemProvider)
             {
-                newLocation = path.GetFullPath(CurrentDrive.CurrentLocation, true);
+                newLocation = path.GetFullPath(nextDrive.Name, nextDrive.CurrentLocation, true);
             }
             else
             {

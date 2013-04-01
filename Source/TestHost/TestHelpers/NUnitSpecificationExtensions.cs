@@ -223,4 +223,17 @@ public static class NUnitSpecificationExtensions
         Assert.AreEqual((string)expectedPath, (string)inputPath, message);
         return inputPath;
     }
+
+    public static string PathShouldEqual(this System.Management.Path actual, System.Management.Path expected, string message = null)
+    {
+        return PathShouldEqual((string)actual, (string)expected, message);
+    }
+
+    public static string PathShouldEqual(this string actual, string expected, string message = null)
+    {
+        expected = expected.Replace("C:\\", "/").Replace(System.IO.Path.AltDirectorySeparatorChar, System.IO.Path.DirectorySeparatorChar);
+        actual = actual.Replace("C:\\", "/").Replace(System.IO.Path.AltDirectorySeparatorChar, System.IO.Path.DirectorySeparatorChar);
+        return ShouldEqual(actual, expected, message);
+    }
+
 }
