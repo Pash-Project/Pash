@@ -11,10 +11,10 @@ using System.Management;
 namespace Microsoft.PowerShell.Commands
 {
     [CmdletProvider("FileSystem", ProviderCapabilities.Filter | ProviderCapabilities.ShouldProcess)]
-    public sealed class FileSystemProvider : 
-        NavigationCmdletProvider, 
-        IContentCmdletProvider, 
-        IPropertyCmdletProvider, 
+    public sealed class FileSystemProvider :
+        NavigationCmdletProvider,
+        IContentCmdletProvider,
+        IPropertyCmdletProvider,
         ISecurityDescriptorCmdletProvider
     {
         public const string ProviderName = "FileSystem";
@@ -109,17 +109,17 @@ namespace Microsoft.PowerShell.Commands
             }
 
             return path.GetChildNameOrSelfIfNoChild();
-//
-//            path = PathIntrinsics.NormalizePath(path);
-//            path = path.TrimEnd('\\');
-//
-//            int num = path.LastIndexOf('\\');
-//            if (num == -1)
-//            {
+            //
+            //            path = PathIntrinsics.NormalizePath(path);
+            //            path = path.TrimEnd('\\');
+            //
+            //            int num = path.LastIndexOf('\\');
+            //            if (num == -1)
+            //            {
             //TODO: what is this MakeSlashedPath and should the above GetChildNameOrSelfIfNoChild do somthing like that?
-//                return MakeSlashedPath(path);
-//            }
-//            return path.Substring(num + 1);
+            //                return MakeSlashedPath(path);
+            //            }
+            //            return path.Substring(num + 1);
         }
 
         protected override void GetChildNames(Path path, ReturnContainers returnContainers)

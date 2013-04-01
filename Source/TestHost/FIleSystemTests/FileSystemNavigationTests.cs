@@ -10,14 +10,14 @@ namespace TestHost.FileSystemTests
         [Test]
         public void CanSetLocationIntoSubDirectory()
         {
-            var rootPath = base.SetupFileSystemWithStructure(new []{
+            var rootPath = base.SetupFileSystemWithStructure(new[]{
                 "/FolderA/SubFolderA/FileA".NormalizeSlashes()
             });
 
             var result = TestHost.ExecuteWithZeroErrors(
                 "Set-Location " + rootPath,
                 "Get-Location");
-            
+
             result.Trim().ShouldEqual((string)rootPath);
 
             result = TestHost.ExecuteWithZeroErrors(
@@ -26,13 +26,13 @@ namespace TestHost.FileSystemTests
 
 
             result.Trim().ShouldEqual(((string)rootPath + "/FolderA").NormalizeSlashes());
-            
+
             result = TestHost.ExecuteWithZeroErrors(
                 "Set-Location " + (rootPath + "/FolderA/SubfolderA").NormalizeSlashes(),
                 "Get-Location");
 
             result.Trim().PathShouldEqual(((string)rootPath + "/FolderA/SubfolderA").NormalizeSlashes());
-            
+
         }
 
         [Test]
@@ -48,7 +48,7 @@ namespace TestHost.FileSystemTests
         [TestCase("h", "/a/b/c/d/e/f/g/h", "should down one dir")]
         public void CDWithTwoPeriodsShouldMoveUpOneDirectory(string setLocationParam, string expectedLocation, string errorMessage)
         {
-            var rootPath = base.SetupFileSystemWithStructure(new []{
+            var rootPath = base.SetupFileSystemWithStructure(new[]{
                 "/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p"
             });
 
@@ -77,11 +77,11 @@ namespace TestHost.FileSystemTests
         public void CDToSlashShouldTakeYouToTheRootOfTheFileSystemDrive()
         {
             var currentLocation = "Set-Location /; Get-Location".Exec();
-            
+
             //TODO: how to assert this is "C:\" on windows?
             currentLocation.PathShouldEqual("/");
         }
-        
+
         [Test]
         [TestCase("/", "root should be root")]
         [TestCase("..", "one up from root should still be root")]
@@ -101,7 +101,7 @@ namespace TestHost.FileSystemTests
         public static string Exec(this string command)
         {
             var result = TestHost.ExecuteWithZeroErrors(command);
-            if(result.EndsWith(Environment.NewLine))
+            if (result.EndsWith(Environment.NewLine))
             {
                 // trim the new-line at the end
                 return result.Substring(0, result.Length - Environment.NewLine.Length);

@@ -37,13 +37,13 @@ namespace Pash.Implementation
         {
             if (!_drives.ContainsKey(driveName))
                 return null;
-            
+
             return _drives[driveName];
         }
 
         public IEnumerable<PSDriveInfo> Drives
         {
-            get{ return _drives.Values;}
+            get { return _drives.Values; }
         }
     }
 
@@ -61,7 +61,7 @@ namespace Pash.Implementation
         internal PSDriveInfo _currentDrive;
 
         // Test access only?? We need a better way to get access to 'state' for use in tests
-        internal PSDriveInfoCollection DrivesCollection{ get { return _drives; } }
+        internal PSDriveInfoCollection DrivesCollection { get { return _drives; } }
 
         private SessionStateGlobal()
         {
@@ -73,7 +73,7 @@ namespace Pash.Implementation
             _aliases = new Dictionary<string, AliasInfo>(StringComparer.CurrentCultureIgnoreCase);
             _functions = new Dictionary<string, CommandInfo>(StringComparer.CurrentCultureIgnoreCase);
             _variables = new HybridDictionary(true);
-            
+
             SetVariable("true", true);
             SetVariable("false", false);
         }
@@ -259,10 +259,10 @@ namespace Pash.Implementation
 
             // Initialize the _currentDrive and set it's currentlocation 
             // to the same as the current environment directory
-            foreach(var drive in fileSystemProvider.Drives)
+            foreach (var drive in fileSystemProvider.Drives)
             {
                 Path currentDir = System.Environment.CurrentDirectory;
-                if(drive.Name == currentDir.GetDrive())
+                if (drive.Name == currentDir.GetDrive())
                 {
                     drive.CurrentLocation = currentDir;
                     _currentDrive = drive;
@@ -673,14 +673,14 @@ namespace Pash.Implementation
             //
             // Not sure why the providerInstances are returned as a collection. Feels like given a 
             // path we should have one provider we're talking to.
-            if(_providerInstances.ContainsKey(nextDrive.Provider.Name))
+            if (_providerInstances.ContainsKey(nextDrive.Provider.Name))
             {
                 bool pathExists = false;
                 IEnumerable<ItemCmdletProvider> cmdletProviders = _providerInstances[nextDrive.Provider.Name].Where(x => x is ItemCmdletProvider).Cast<ItemCmdletProvider>();
                 ItemCmdletProvider currentProvider = null;
-                foreach(var provider in cmdletProviders)
+                foreach (var provider in cmdletProviders)
                 {
-                    if(provider.ItemExists(newLocation, providerRuntime))
+                    if (provider.ItemExists(newLocation, providerRuntime))
                     {
                         pathExists = true;
                         currentProvider = provider;
@@ -688,13 +688,13 @@ namespace Pash.Implementation
                     }
                 }
 
-                if(!pathExists)
+                if (!pathExists)
                 {
                     throw new Exception(string.Format("Cannot find path '{0}' because it does not exist.", newLocation));
                 }
                 else
                 {
-                    if(currentProvider is FileSystemProvider)
+                    if (currentProvider is FileSystemProvider)
                     {
                         System.Environment.CurrentDirectory = newLocation;
                     }

@@ -21,14 +21,16 @@ namespace System.Management
             {
                 _predeterminedCorrectSlash = "/";
                 _predeterminedWrongSlash = "\\";
-            } else
+            }
+            else
             {
                 _predeterminedCorrectSlash = "\\";
                 _predeterminedWrongSlash = "/";
             }
         }
-               
-        public Path(string rawPath) : this(_predeterminedCorrectSlash, _predeterminedWrongSlash, rawPath)
+
+        public Path(string rawPath)
+            : this(_predeterminedCorrectSlash, _predeterminedWrongSlash, rawPath)
         {
         }
 
@@ -47,7 +49,7 @@ namespace System.Management
         {
             return path._rawPath;
         }
-        
+
         public static implicit operator Path(string path)
         {
             return new Path(path);
@@ -65,7 +67,7 @@ namespace System.Management
             {
                 return _rawPath.Equals(objPath._rawPath);
             }
-            
+
             return base.Equals(obj);
         }
 
@@ -103,13 +105,13 @@ namespace System.Management
         {
             Path path = this.NormalizeSlashes()
                 .TrimEndSlash();
-            
+
             int iLastSlash = path.LastIndexOf('\\');
             if (iLastSlash == -1)
             {
                 return path;
             }
-            
+
             return path._rawPath.Substring(iLastSlash + 1);
         }
 
@@ -119,7 +121,7 @@ namespace System.Management
 
             path = path.NormalizeSlashes();
             path = path.TrimEndSlash();
-            
+
             if (root != null)
             {
                 if (string.Equals(path, root, StringComparison.CurrentCultureIgnoreCase))
@@ -127,15 +129,15 @@ namespace System.Management
                     return string.Empty;
                 }
             }
-            
+
             int iLastSlash = path._rawPath.LastIndexOf(CorrectSlash);
-            
+
             if (iLastSlash > 0)
                 return path._rawPath.Substring(0, iLastSlash);
-            
+
             if (iLastSlash == 1)
                 return CorrectSlash;
-            
+
             return string.Empty;
 
         }
@@ -153,35 +155,37 @@ namespace System.Management
             {
                 return child.NormalizeSlashes();
             }
-            
+
             parent = parent.NormalizeSlashes();
-            
+
             if (!string.IsNullOrEmpty(parent) && string.IsNullOrEmpty(child))
             {
                 if (parent.EndsWithSlash())
                 {
                     return parent;
-                } else
+                }
+                else
                 {
                     return parent.AppendSlashAtEnd();
                 }
             }
-            
+
             child = child.NormalizeSlashes();
             var builder = new System.Text.StringBuilder(parent);
-            
+
             if (!parent.EndsWithSlash())
                 builder.Append(CorrectSlash);
-            
+
             // Make sure we do not add two \
             if (child.StartsWithSlash())
             {
                 builder.Append(child, 1, child.Length - 1);
-            } else
+            }
+            else
             {
                 builder.Append(child);
             }
-            
+
             return builder.ToString();
 
         }
@@ -268,12 +272,12 @@ namespace System.Management
             {
                 return CorrectSlash;
             }
-            
+
             int iDelimiter = _rawPath.IndexOf(':');
-            
+
             if (iDelimiter == -1)
                 return null;
-            
+
             return _rawPath.Substring(0, iDelimiter);
         }
 
@@ -320,7 +324,8 @@ namespace System.Management
                 string preSlash = this.StartsWithSlash() ? string.Empty : CorrectSlash;
 
                 fullPath = new Path(CorrectSlash, WrongSlash, string.Format("{0}{1}", preSlash, this));
-            } else
+            }
+            else
             {
                 if (this.HasDrive())
                 {
@@ -329,7 +334,7 @@ namespace System.Management
 
                 //TODO: should this take a "current path" parameter? EX: {drive}:{currentPath??}/{this}
                 string preSlash = this.StartsWithSlash() ? string.Empty : CorrectSlash;
-                
+
                 fullPath = new Path(CorrectSlash, WrongSlash, string.Format("{0}:{1}{2}", driveName, preSlash, this));
             }
 

@@ -21,7 +21,8 @@ namespace TestHost.FileSystemTests
                         System.IO.Directory.Delete(path);
                     }
                 }
-            } catch
+            }
+            catch
             {
                 // meh couldn't delete temp directory
             }
@@ -59,7 +60,8 @@ namespace TestHost.FileSystemTests
                 if (path.EndsWithSlash())
                 {
                     System.IO.Directory.CreateDirectory(fullPath);
-                } else
+                }
+                else
                 {
                     System.IO.File.CreateText(fullPath);
                 }

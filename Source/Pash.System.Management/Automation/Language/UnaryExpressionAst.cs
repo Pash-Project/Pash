@@ -13,7 +13,7 @@ namespace System.Management.Automation.Language
             this.TokenKind = tokenKind;
             this.Child = child;
         }
-        
+
         public ExpressionAst Child { get; private set; }
         public override Type StaticType { get { throw new NotImplementedException(this.ToString()); } }
         public TokenKind TokenKind { get; private set; }

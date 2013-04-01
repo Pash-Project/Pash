@@ -13,27 +13,27 @@ namespace TestHost
     {
         readonly PSHostUserInterface _ui = new TestHostUserInterface();
 
-        
+
         public static string Execute(params string[] statements)
         {
             return Execute(false, error => {/* do nothing with error? weird? */}, statements);
         }
-        
+
         public static string Execute(bool logErrors, params string[] statements)
         {
-            if(logErrors)
+            if (logErrors)
             {
                 return ExecuteWithZeroErrors(statements);
             }
             return Execute(statements);
         }
-        
+
         public static string ExecuteWithZeroErrors(params string[] statements)
         {
             var errors = new List<string>();
             //Execute
             var result = Execute(true, error => errors.Add(error), statements);
-            
+
             if (errors.Any())
             {
                 var exceptionMessage = string.Join(Environment.NewLine, errors);

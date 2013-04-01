@@ -35,7 +35,7 @@ namespace System.Management.Automation.Provider
             {
                 root = PSDriveInfo.Root;
             }
-            
+
 
             return path.GetParentPath(root);
         }

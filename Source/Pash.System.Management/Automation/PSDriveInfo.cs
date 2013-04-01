@@ -32,7 +32,7 @@ namespace System.Management.Automation
             Credential = credential;
             CurrentLocation = string.Empty;
         }
-        
+
         public bool IsFileSystemProvider
         {
             get

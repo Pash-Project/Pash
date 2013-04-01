@@ -456,7 +456,7 @@ namespace System.Management.Pash.Implementation
                 var result = property != null
                     ? property.GetValue(obj, null)
                     : type.GetField(name).GetValue(obj);
-                
+
                 _pipelineCommandRuntime.WriteObject(result);
                 return AstVisitAction.SkipChildren;
             }
