@@ -177,18 +177,7 @@ namespace TestHost
             {
                 var result = TestHost.Execute("1..10");
 
-                var expected =
-@"1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-".Replace("\n", System.Environment.NewLine);
+                var expected = string.Join(Environment.NewLine, Enumerable.Range(1, 10)) + Environment.NewLine;
 
                 Assert.AreEqual(expected, result);
             }
