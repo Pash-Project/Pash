@@ -7,7 +7,7 @@ namespace TestHost.FileSystemTests
     [TestFixture]
     public class FileSystemNavigationTests : FileSystemTestBase
     {
-        [Test, Explicit("Currently failing on Travis-ci, not on windows or mac locally though?")]
+        [Test]
         public void CanSetLocationIntoSubDirectory()
         {
             var rootPath = base.SetupFileSystemWithStructure(new[]{
@@ -28,11 +28,10 @@ namespace TestHost.FileSystemTests
             result.Trim().ShouldEqual(((string)rootPath + "/FolderA").NormalizeSlashes());
 
             result = TestHost.ExecuteWithZeroErrors(
-                "Set-Location " + (rootPath + "/FolderA/SubfolderA").NormalizeSlashes(),
+                "Set-Location " + (rootPath + "/FolderA/SubFolderA").NormalizeSlashes(),
                 "Get-Location");
 
-            result.Trim().PathShouldEqual(((string)rootPath + "/FolderA/SubfolderA").NormalizeSlashes());
-
+            result.Trim().PathShouldEqual(((string)rootPath + "/FolderA/SubFolderA").NormalizeSlashes());
         }
 
         [Test]
