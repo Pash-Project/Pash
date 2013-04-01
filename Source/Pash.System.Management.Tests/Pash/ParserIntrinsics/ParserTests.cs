@@ -1,13 +1,12 @@
-﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using NUnit.Framework;
-using Pash.ParserIntrinsics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Extensions.String;
 
-namespace ParserTests
+namespace Pash.ParserIntrinsics.Tests
 {
     [TestFixture]
     public class ParserTests

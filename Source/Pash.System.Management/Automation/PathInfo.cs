@@ -1,4 +1,4 @@
-﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Runtime.CompilerServices;
 
@@ -8,12 +8,12 @@ namespace System.Management.Automation
     {
         public PSDriveInfo Drive { get; private set; }
 
-        private string _path;
-        public string Path
+        private Path _path;
+        public Path Path
         {
             get
             {
-                return PathIntrinsics.MakePath(_path, Drive);
+                return ToString();
             }
         }
 
@@ -29,7 +29,7 @@ namespace System.Management.Automation
 
         private SessionState _sessionState;
 
-        internal PathInfo(PSDriveInfo drive, ProviderInfo provider, string path, SessionState sessionState)
+        internal PathInfo(PSDriveInfo drive, ProviderInfo provider, Path path, SessionState sessionState)
         {
             Drive = drive;
             Provider = provider;
@@ -39,7 +39,7 @@ namespace System.Management.Automation
 
         public override string ToString()
         {
-            return this.Path;
+            return _path.MakePath(Drive.Name);
         }
     }
 }

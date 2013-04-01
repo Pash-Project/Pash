@@ -65,7 +65,7 @@ namespace System.Management.Automation.Provider
         public void WriteDebug(string text) { throw new NotImplementedException(); }
         public void WriteError(ErrorRecord errorRecord) { throw new NotImplementedException(); }
 
-        public void WriteItemObject(object item, string path, bool isContainer)
+        public void WriteItemObject(object item, Path path, bool isContainer)
         {
             PSObject psObject = GetItemAsPSObject(item, path);
             PSNoteProperty member = new PSNoteProperty("PSIsContainer", isContainer);
@@ -93,7 +93,7 @@ namespace System.Management.Automation.Provider
             ProviderInfo = providerInfo;
         }
 
-        private PSObject GetItemAsPSObject(object item, string path)
+        private PSObject GetItemAsPSObject(object item, Path path)
         {
             if (item == null)
             {
