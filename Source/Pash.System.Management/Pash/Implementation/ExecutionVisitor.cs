@@ -55,6 +55,10 @@ namespace System.Management.Pash.Implementation
                     if (leftOperand.GetType() == typeof(int)) return ((int)leftOperand) == ((int)rightOperand);
                     throw new NotImplementedException(binaryExpressionAst.ToString());
 
+                case TokenKind.Ine:
+                    if (leftOperand.GetType() == typeof(int)) return ((int)leftOperand) != ((int)rightOperand);
+                    throw new NotImplementedException(binaryExpressionAst.ToString());
+
                 case TokenKind.Multiply:
                 case TokenKind.Divide:
                 case TokenKind.Minus:
@@ -74,7 +78,6 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Bor:
                 case TokenKind.Bxor:
                 case TokenKind.Join:
-                case TokenKind.Ine:
                 case TokenKind.Ige:
                 case TokenKind.Igt:
                 case TokenKind.Ilt:
@@ -449,13 +452,30 @@ namespace System.Management.Pash.Implementation
 
             if (memberExpressionAst.Member is StringConstantExpressionAst)
             {
+                object result = null;
                 var name = (memberExpressionAst.Member as StringConstantExpressionAst).Value;
-                var property = type.GetProperty(name);
 
-                // Try get field value if property not found.
-                var result = property != null
-                    ? property.GetValue(obj, null)
-                    : type.GetField(name).GetValue(obj);
+                BindingFlags bindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
+
+                // TODO: Single() is a problem for overloaded methods
+                var memberInfo = type.GetMember(name, bindingFlags).Single();
+
+                if (memberInfo != null)
+                {
+                    switch (memberInfo.MemberType)
+                    {
+                        case MemberTypes.Field:
+                            result = ((FieldInfo)memberInfo).GetValue(obj);
+                            break;
+
+                        case MemberTypes.Property:
+                            result = ((PropertyInfo)memberInfo).GetValue(obj, null);
+                            break;
+
+                        default:
+                            throw new NotImplementedException(this.ToString());
+                    }
+                }
 
                 _pipelineCommandRuntime.WriteObject(result);
                 return AstVisitAction.SkipChildren;

@@ -79,8 +79,7 @@ namespace Irony.Parsing.Construction {
         if (nt.Rule != null && !string.IsNullOrEmpty(nt.Rule.Name))
           nt.Name = nt.Rule.Name;
         else
-          nt.Name = "Unnamed" + (_unnamedCount++);
-          nt.SetFlag(TermFlags.NoAstNode | TermFlags.IsTransient);
+          nt.Name = "Unnamed" + (_unnamedCount++) + "_" + nt.Rule.ToString().Replace("|Empty", "_opt");
       }
       if (nt.Rule == null)
         _language.Errors.AddAndThrow(GrammarErrorLevel.Error, null, Resources.ErrNtRuleIsNull, nt.Name);
