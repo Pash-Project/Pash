@@ -22,7 +22,7 @@ Open the solution at `Source/Pash.sln` and run. Or at the command line:
     > xbuild
     > mono Source/PashConsole/bin/Debug/Pash.exe
 
-On Windows, you can use MSBuild instead of xbuild; the `mono` part is unecessary, and you'll probably need to add these to your PATH.
+On **Windows**, use `MSBuild` instead of `xbuild`; the `mono` part is unecessary, and you'll probably need to add these to your PATH.
 
 
 Tests
@@ -33,6 +33,8 @@ We use NUnit. In `master`, all tests pass all the time.
 To run tests
 
     > xbuild /t:test
+
+We want tests to pass on all three platforms all the time, although that can be difficult to guarantee. If you can, set up virtual machines so you can test on each platform.
 
 
 Travis
