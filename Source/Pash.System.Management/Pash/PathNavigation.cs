@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace System.Management
 {
@@ -14,32 +15,41 @@ namespace System.Management
 
             // use the input 'changeCommand' path if it's 
             // 'rooted' otherwise we go from the currentLocation
-            if(changeCommand.HasDrive())
+            if (changeCommand.HasDrive())
             {
-                resultPath = changeCommand;
+                // windows case where changeCommand == "/" or "\" but the currentLocation has a "C:" drive
+                string currentLocationDrive = currentLocation.GetDrive();
+                if (changeCommand.StartsWithSlash() && !changeCommand.GetDrive().Equals(currentLocationDrive, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    resultPath = new Path(currentLocation.CorrectSlash, currentLocation.WrongSlash, string.Format("{0}:{1}", currentLocationDrive, changeCommand));
+                }
+                else
+                {
+                    resultPath = changeCommand;
+                }
             }
-            else 
+            else
             {
                 applyParts = true;
                 resultPath = currentLocation;
             }
 
             var correctSeparator = Char.Parse(currentLocation.CorrectSlash);
-            var changeParts = changeCommand.ToString().Split(correctSeparator);
+            var changeParts = changeCommand.ToString().Split(correctSeparator).Where(s => !string.IsNullOrEmpty(s));
 
-            foreach(var part in changeParts)
+            foreach (var part in changeParts)
             {
                 // ignore single dot as it does nothing...
-                if(part == ".")
+                if (part == ".")
                 {
                     continue;
                 }
 
-                if(part == "..")
+                if (part == ".." && !resultPath.IsRootPath())
                 {
                     resultPath = resultPath.GetParentPath(currentLocation.GetDrive());
                 }
-                else if(applyParts)
+                else if (applyParts)
                 {
                     resultPath = resultPath.Combine(part);
                 }
