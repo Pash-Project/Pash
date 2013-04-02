@@ -675,7 +675,7 @@ namespace Pash.ParserIntrinsics
             public readonly TokenKind TokenKind;
 
             internal ComparisonOperatorTerminal(string @operator, TokenKind tokenKind)
-                : base(@operator, "(?<_comparison_operator_" + @operator + ">" + dash_pattern + @operator + ")")
+                : base("-" + @operator, "(?<_comparison_operator_" + @operator + ">" + dash_pattern + @operator + ")")
             {
                 this.Operator = @operator;
                 this.TokenKind = tokenKind;
