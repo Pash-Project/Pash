@@ -656,17 +656,7 @@ namespace Pash.Implementation
                 nextDrive = CurrentDrive;
             }
 
-            Path newLocation;
-
-            if (nextDrive.IsFileSystemProvider)
-            {
-                newLocation = path.GetFullPath(nextDrive.Name, nextDrive.CurrentLocation, true);
-            }
-            else
-            {
-                newLocation = path.RemoveDrive();
-            }
-
+            Path newLocation = PathNavigation.CalculateFullPath(nextDrive.CurrentLocation, path);
 
             // I'm not a fan of this block of code.
             // The goal here is to throw an exception if trying to "CD" into an invalid location
@@ -705,7 +695,7 @@ namespace Pash.Implementation
                 throw new NotImplementedException("Unsure how to set location with provider:" + nextDrive.Provider.Name);
             }
 
-            nextDrive.CurrentLocation = newLocation.TrimEndSlash();
+            nextDrive.CurrentLocation = newLocation;
 
             CurrentDrive = nextDrive;
             _providersCurrentDrive[CurrentDrive.Provider] = CurrentDrive;
