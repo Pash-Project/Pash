@@ -8,7 +8,6 @@ namespace System.Management
     /// <summary>
     /// Imutable class that acts like a string, but provides many options around manipulating a powershell 'path'.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("{_rawPath}")]
     public class Path
     {
         private readonly string _rawPath;
