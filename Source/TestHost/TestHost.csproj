@@ -62,6 +62,7 @@
     <Compile Include="FIleSystemTests\FileSystemTestBase.cs" />
     <Compile Include="FIleSystemTests\FileSystemTestBaseTests.cs" />
     <Compile Include="FIleSystemTests\FileSystemNavigationTests.cs" />
+    <Compile Include="Pash.System.Management\PathNavigationTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pash.Microsoft.Commands.Management\Pash.Microsoft.Commands.Management.csproj">

@@ -36,44 +36,6 @@ namespace TestHost
                 .ShouldEqual(expectedPath, failureMessage);
         }
 
-
-        [Test]
-        [TestCase("", "", "", "")]
-        [TestCase("/", "/", "", "if path and root are the get parent result should be an empty string")]
-        [TestCase("\\", "\\", "", "if path and root are the get parent result should be an empty string")]
-        [TestCase("/", "\\", "", "if path and root are the get parent result should be an empty string")]
-        [TestCase("/", "/foo", "", "if path and root are the get parent result should be an empty string")] // TODO: this doesn't make much sense (yet)
-        [TestCase("/", "/foo/bar", "/foo", null)]
-        [TestCase("/", "\\foo/bar", "/foo", null)]
-        public void GetParentPathForUnix(string root, string input, string expected, string failureMessage)
-        {
-            var rootPath = SetUnixPaths(root);
-            var inputPath = SetUnixPaths(input);
-            var expectedPath = SetUnixPaths(expected);
-
-            inputPath.GetParentPath(rootPath)
-                .ShouldEqual(expectedPath, failureMessage);
-        }
-
-        [Test]
-        [TestCase("", "", "", "")]
-        [TestCase("\\", "\\", "", "if path and root are the get parent result should be an empty string")]
-        [TestCase("/", "\\", "", "if path and root are the get parent result should be an empty string")]
-        [TestCase("/", "/", "", "if path and root are the get parent result should be an empty string")]
-        [TestCase("/", "\\foo", "", "if path and root are the get parent result should be an empty string")] // TODO: this doesn't make much sense (yet)
-        [TestCase("/", "\\foo\\bar", "\\foo", null)]
-        [TestCase("/", "/foo\\bar", "\\foo", null)]
-        public void GetParentPathForWindows(string root, string input, string expected, string failureMessage)
-        {
-            var rootPath = SetWindowsPaths(root);
-            var inputPath = SetWindowsPaths(input);
-            var expectedPath = SetWindowsPaths(expected);
-
-            inputPath.GetParentPath(rootPath)
-                .ShouldEqual(expectedPath, failureMessage);
-        }
-
-
         [Test]
         [TestCase("C", "foo\\bar", "C:\\foo\\bar", "")]
         [TestCase("C", "foo/bar", "C:\\foo\\bar", "")]
@@ -102,7 +64,6 @@ namespace TestHost
 
 
         [Test]
-        [TestCase("/", "", "/", "")]
         [TestCase("/", "/foo", "/foo", "")]
         [TestCase("/foo", "/", "/", "")]
         [TestCase("/foo", "..", "/", "")]
