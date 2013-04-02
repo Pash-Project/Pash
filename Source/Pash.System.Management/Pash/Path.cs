@@ -8,7 +8,7 @@ namespace System.Management
     /// <summary>
     /// Imutable class that acts like a string, but provides many options around manipulating a powershell 'path'.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Path:{_rawPath}")]
+    [System.Diagnostics.DebuggerDisplay("{_rawPath}")]
     public class Path
     {
         private readonly string _rawPath;
@@ -78,17 +78,17 @@ namespace System.Management
 
         public Path NormalizeSlashes()
         {
-            return new Path(_rawPath.Replace(WrongSlash, CorrectSlash));
+            return new Path(CorrectSlash, WrongSlash, _rawPath.Replace(WrongSlash, CorrectSlash));
         }
 
         public Path TrimEnd(params char[] trimChars)
         {
-            return new Path(_rawPath.TrimEnd(trimChars));
+            return new Path(CorrectSlash, WrongSlash, _rawPath.TrimEnd(trimChars));
         }
 
         public Path TrimEndSlash()
         {
-            return new Path(_rawPath.TrimEnd(char.Parse(CorrectSlash)));
+            return new Path(CorrectSlash, WrongSlash, _rawPath.TrimEnd(char.Parse(CorrectSlash)));
         }
 
         public int LastIndexOf(char value)
@@ -112,7 +112,7 @@ namespace System.Management
                 return path;
             }
 
-            return path._rawPath.Substring(iLastSlash + 1);
+            return new Path(CorrectSlash, WrongSlash, path._rawPath.Substring(iLastSlash + 1));
         }
 
         public Path GetParentPath(Path root)
@@ -126,20 +126,42 @@ namespace System.Management
             {
                 if (string.Equals(path, root, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    return string.Empty;
+                    return new Path(CorrectSlash, WrongSlash, string.Empty);
                 }
             }
 
             int iLastSlash = path._rawPath.LastIndexOf(CorrectSlash);
 
+            string newPath = root;
+
             if (iLastSlash > 0)
-                return path._rawPath.Substring(0, iLastSlash);
+            {
+                newPath = path._rawPath.Substring(0, iLastSlash);
+            }
+            else if (iLastSlash == 1)
+            {
+                newPath = new Path(CorrectSlash, WrongSlash, CorrectSlash);
+            }
 
-            if (iLastSlash == 1)
-                return CorrectSlash;
+            Path resultPath = new Path(CorrectSlash, WrongSlash, newPath);
 
-            return string.Empty;
+            return resultPath.ApplyDriveSlash();
+        }
 
+        public Path ApplyDriveSlash()
+        {
+            // append a slash to the end (if it's the root drive)
+            if(this.IsRootPath())
+            {
+                if(!this.EndsWithSlash())
+                {
+                    return this.AppendSlashAtEnd();
+                }
+                return this;
+            }
+
+            var result = this.TrimEndSlash();
+            return result;
         }
 
         public Path Combine(Path child)
@@ -186,7 +208,7 @@ namespace System.Management
                 builder.Append(child);
             }
 
-            return builder.ToString();
+            return new Path(CorrectSlash, WrongSlash, builder.ToString());
 
         }
 
@@ -210,12 +232,12 @@ namespace System.Management
                     combinedPath = ((Path)currentLocation).Combine(this);
                 }
 
-                return System.IO.Path.GetFullPath(combinedPath);
+                return new Path(CorrectSlash, WrongSlash, System.IO.Path.GetFullPath(combinedPath));
             }
 
 
             // TODO: this won't work with non-file-system paths that use "../" navigation or other "." navigation.
-            return ((Path)currentLocation).Combine(this);
+            return (new Path(CorrectSlash, WrongSlash, currentLocation)).Combine(this);
         }
 
         public bool StartsWithSlash()
@@ -244,7 +266,7 @@ namespace System.Management
                 return this;
             }
 
-            return this + CorrectSlash;
+            return new Path(CorrectSlash, WrongSlash, this._rawPath + CorrectSlash);
         }
 
         public bool StartsWith(string value)
@@ -254,22 +276,27 @@ namespace System.Management
 
         public bool IsRootPath()
         {
-            if (_rawPath == CorrectSlash)
+            // handle unix '/' path
+            if(this.Length == 1 && this == CorrectSlash)
             {
                 return true;
             }
+
+            // handle windows drive "C:" "C:\\"
+            var x = this.TrimEndSlash();
+            if(this.GetDrive() == x._rawPath.TrimEnd(':'))
+            {
+                return true;
+            }
+
             return false;
         }
 
         public string GetDrive()
         {
-            if (IsRootPath())
-            {
-                return this;
-            }
-
             if (this.StartsWithSlash())
             {
+                // return unix drive
                 return CorrectSlash;
             }
 
@@ -309,8 +336,8 @@ namespace System.Management
             {
                 var newPath = _rawPath.Substring(drive.Length);
                 if (newPath.StartsWith(":"))
-                    return newPath.Substring(1);
-                return newPath;
+                    return new Path(CorrectSlash, WrongSlash, newPath.Substring(1));
+                return new Path(CorrectSlash, WrongSlash, newPath);
             }
 
             return this;

@@ -23,7 +23,7 @@ namespace Microsoft.PowerShell.Commands
         internal override object GetSessionStateItem(Path name)
         {
             // TODO: deal with empty path
-            if (string.Equals("variable:\\", name, StringComparison.CurrentCultureIgnoreCase))
+            if (string.Equals("variable:" + name.CorrectSlash, name, StringComparison.CurrentCultureIgnoreCase))
                 return true;
 
             return SessionState.SessionStateGlobal.GetVariable(name);
