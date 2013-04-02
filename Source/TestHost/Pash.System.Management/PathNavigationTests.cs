@@ -10,6 +10,7 @@ namespace TestHost
         [Test]
         // Windows tests
         [TestCase("\\", "C:\\", "", "C:\\", "empty command should do nothing")]
+        [TestCase("\\", "C:\\", "..", "C:\\", "up one dir from root should stay at root")]
         [TestCase("\\", "C:\\", "/", "C:\\", "slash should return to root drive")]
         [TestCase("\\", "C:\\", ".", "C:\\", "single dot is ignored")]
         [TestCase("\\", "C:\\foo\\bar",".\\.\\.","C:\\foo\\bar", "single dot is ignored")]

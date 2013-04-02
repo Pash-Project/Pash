@@ -45,7 +45,13 @@ namespace System.Management
                     continue;
                 }
 
-                if (part == ".." && !resultPath.IsRootPath())
+                // ignore trying to go up a dir from the root dir
+                if (part == ".." && resultPath.IsRootPath())
+                {
+                    continue;
+                }
+
+                if (part == "..")
                 {
                     resultPath = resultPath.GetParentPath(currentLocation.GetDrive());
                 }
