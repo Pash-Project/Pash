@@ -250,6 +250,9 @@ namespace Pash.ParserIntrinsics
             Root = this.script_block;
         }
 
+        // This is a little weird. Hopefully someone will have a bright idea
+        // of how to refactor this to separate the grammar from the parser. Or
+        // merge them. Or whatever.
         public static readonly PowerShellGrammar Instance;
         public static readonly Parser Parser;
 
