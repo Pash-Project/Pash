@@ -279,9 +279,7 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.statement_block);
 
-            parseTreeNode = parseTreeNode.ChildNodes.Single();
-
-            if (parseTreeNode.Term == this._grammar._statement_block_empty)
+            if (parseTreeNode.ChildNodes.Count == 2)
             {
                 return new StatementBlockAst(
                     new ScriptExtent(parseTreeNode),
@@ -289,8 +287,7 @@ namespace Pash.ParserIntrinsics
                     null
                     );
             }
-
-            if (parseTreeNode.Term == this._grammar._statement_block_full)
+            else
             {
                 return BuildStatementListAst(parseTreeNode.ChildNodes[1]);
             }

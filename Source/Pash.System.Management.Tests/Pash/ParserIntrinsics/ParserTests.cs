@@ -19,6 +19,9 @@ namespace Pash.ParserIntrinsics.Tests
         }
 
         [Test]
+        [TestCase(@"if ($true) {}")]
+        [TestCase(@"if ($true) { }")] // having whitespace here was causing a parse error.
+        [TestCase(@"if ($host.Name -eq ""Console"") {  }")]
         [TestCase(@"if ($true) {} else {}")]
         [TestCase(@"if ($true) {} elseif ($true) {} ")]
         [TestCase(@"if ($true) {} elseif {$true) {} else {}", Explicit = true)]

@@ -470,15 +470,7 @@ namespace Pash.ParserIntrinsics
             ////        statement_block:
             ////            new_lines_opt   {   statement_list_opt   new_lines_opt   }
             statement_block.Rule =
-                _statement_block_empty
-                |
-                _statement_block_full;
-
-            _statement_block_empty.Rule =
-                 "{" + "}";
-
-            _statement_block_full.Rule =
-                 "{" + statement_list + "}";
+                "{" + statement_list_opt + "}";
 
 #if false
             ////        statement_list:
