@@ -9,6 +9,9 @@ using Pash.Implementation;
 
 namespace System.Management.Automation
 {
+    /// <summary>
+    /// Represents and contains information about a cmdlet.
+    /// </summary>
     public class CmdletInfo : CommandInfo
     {
         public string HelpFile { get; private set; }
@@ -141,12 +144,24 @@ namespace System.Management.Automation
 
         internal CommandParameterSetInfo GetParameterSetByName(string strParamSetName)
         {
-            return ParameterSets.SingleOrDefault(paramSetInfo => string.Compare(strParamSetName, paramSetInfo.Name, true) == 0);
+            foreach (CommandParameterSetInfo paramSetInfo in ParameterSets)
+            {
+                if (string.Compare(strParamSetName, paramSetInfo.Name, true) == 0)
+                    return paramSetInfo;
+            }
+
+            return null;
         }
 
         internal CommandParameterSetInfo GetDefaultParameterSet()
         {
-            return ParameterSets.SingleOrDefault(paramSetInfo => paramSetInfo.IsDefault);
+            foreach (CommandParameterSetInfo paramSetInfo in ParameterSets)
+            {
+                if (paramSetInfo.IsDefault)
+                    return paramSetInfo;
+            }
+
+            return null;
         }
     }
 }

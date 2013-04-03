@@ -15,9 +15,16 @@ namespace Microsoft.PowerShell.Commands
     {
         public const string ProviderName = "Environment";
 
+        public EnvironmentProvider()
+        {
+        }
+
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
-            return new Collection<PSDriveInfo> { new PSDriveInfo("Env", base.ProviderInfo) };
+            PSDriveInfo item = new PSDriveInfo("Env", ProviderInfo, string.Empty, string.Empty, null);
+            Collection<PSDriveInfo> collection = new Collection<PSDriveInfo>();
+            collection.Add(item);
+            return collection;
         }
 
         internal override object GetSessionStateItem(Path name)

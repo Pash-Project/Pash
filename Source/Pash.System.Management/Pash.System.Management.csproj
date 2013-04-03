@@ -26,6 +26,7 @@
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors Condition=" '$(OS)' != 'Windows_NT' ">false</TreatWarningsAsErrors>
     <TreatWarningsAsErrors Condition=" '$(OS)' == 'Windows_NT' ">true</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -42,38 +43,57 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Automation\ActionPreference.cs" />
+    <Compile Include="Automation\ActionPreferenceStopException.cs" />
     <Compile Include="Automation\AliasAttribute.cs" />
     <Compile Include="Automation\AliasInfo.cs" />
     <Compile Include="Automation\AllowEmptyCollectionAttribute.cs" />
     <Compile Include="Automation\AllowEmptyStringAttribute.cs" />
     <Compile Include="Automation\AllowNullAttribute.cs" />
+    <Compile Include="Automation\ApplicationFailedException.cs" />
+    <Compile Include="Automation\ApplicationInfo.cs" />
+    <Compile Include="Automation\ArgumentTransformationAttribute.cs" />
+    <Compile Include="Automation\ArgumentTransformationMetadataException.cs" />
+    <Compile Include="Automation\AuthorizationManager.cs" />
     <Compile Include="Automation\ChildItemCmdletProviderIntrinsics.cs" />
     <Compile Include="Automation\Cmdlet.cs" />
     <Compile Include="Automation\CmdletAttribute.cs" />
     <Compile Include="Automation\CmdletInfo.cs" />
+    <Compile Include="Automation\CmdletInvocationException.cs" />
+    <Compile Include="Automation\CmdletProviderInvocationException.cs" />
     <Compile Include="Automation\CmdletProviderManagementIntrinsics.cs" />
     <Compile Include="Automation\CommandInfo.cs" />
     <Compile Include="Automation\CommandInvocationIntrinsics.cs" />
     <Compile Include="Automation\CommandMetadata.cs" />
     <Compile Include="Automation\CommandNotFoundException.cs" />
+    <Compile Include="Automation\CommandOrigin.cs" />
     <Compile Include="Automation\CommandParameterInfo.cs" />
     <Compile Include="Automation\CommandParameterSetInfo.cs" />
     <Compile Include="Automation\CommandTypes.cs" />
     <Compile Include="Automation\ConfirmImpact.cs" />
     <Compile Include="Automation\ContentCmdletProviderIntrinsics.cs" />
+    <Compile Include="Automation\ConvertThroughString.cs" />
     <Compile Include="Automation\CopyContainers.cs" />
+    <Compile Include="Automation\CredentialAttribute.cs" />
+    <Compile Include="Automation\CustomPSSnapIn.cs" />
     <Compile Include="Automation\DataAddedEventArgs.cs" />
     <Compile Include="Automation\DebugRecord.cs" />
     <Compile Include="Automation\DefaultCommandRuntime.cs" />
     <Compile Include="Automation\DriveManagementIntrinsics.cs" />
+    <Compile Include="Automation\DriveNotFoundException.cs" />
     <Compile Include="Automation\EngineIntrinsics.cs" />
     <Compile Include="Automation\ErrorCategory.cs" />
     <Compile Include="Automation\ErrorCategoryInfo.cs" />
     <Compile Include="Automation\ErrorDetails.cs" />
     <Compile Include="Automation\ErrorRecord.cs" />
     <Compile Include="Automation\ExtendedTypeSystemException.cs" />
+    <Compile Include="Automation\ExternalScriptInfo.cs" />
+    <Compile Include="Automation\FilterInfo.cs" />
     <Compile Include="Automation\FunctionInfo.cs" />
     <Compile Include="Automation\GettingValueExceptionEventArgs.cs" />
+    <Compile Include="Automation\GetValueException.cs" />
+    <Compile Include="Automation\GetValueInvocationException.cs" />
+    <Compile Include="Automation\HaltCommandException.cs" />
     <Compile Include="Automation\Host\BufferCell.cs" />
     <Compile Include="Automation\Host\BufferCellType.cs" />
     <Compile Include="Automation\Host\ChoiceDescription.cs" />
@@ -89,6 +109,7 @@
     <Compile Include="Automation\ICommandRuntime.cs" />
     <Compile Include="Automation\IContainsErrorRecord.cs" />
     <Compile Include="Automation\IDynamicParameters.cs" />
+    <Compile Include="Automation\IncompleteParseException.cs" />
     <Compile Include="Automation\InformationalRecord.cs" />
     <Compile Include="Automation\Internal\AutomationNull.cs" />
     <Compile Include="Automation\Internal\CmdletMetadataAttribute.cs" />
@@ -171,20 +192,35 @@
     <Compile Include="Automation\Language\UsingExpressionAst.cs" />
     <Compile Include="Automation\Language\VariableExpressionAst.cs" />
     <Compile Include="Automation\Language\WhileStatementAst.cs" />
+    <Compile Include="Automation\LanguagePrimitives.cs" />
+    <Compile Include="Automation\MetadataException.cs" />
+    <Compile Include="Automation\MethodException.cs" />
+    <Compile Include="Automation\MethodInvocationException.cs" />
     <Compile Include="Automation\ParameterAttribute.cs" />
+    <Compile Include="Automation\ParameterBindingException.cs" />
     <Compile Include="Automation\ParameterMetadata.cs" />
     <Compile Include="Automation\ParameterSetMetadata.cs" />
+    <Compile Include="Automation\ParentContainsErrorRecordException.cs" />
+    <Compile Include="Automation\ParseException.cs" />
+    <Compile Include="Automation\ParsingMetadataException.cs" />
     <Compile Include="Automation\PathInfo.cs" />
     <Compile Include="Automation\PathInfoStack.cs" />
     <Compile Include="Automation\PathIntrinsics.cs" />
+    <Compile Include="Automation\PipelineClosedException.cs" />
+    <Compile Include="Automation\PipelineStoppedException.cs" />
     <Compile Include="Automation\PowerShell.cs" />
     <Compile Include="Automation\ProgressRecord.cs" />
     <Compile Include="Automation\ProgressRecordType.cs" />
     <Compile Include="Automation\PropertyCmdletProviderIntrinsics.cs" />
     <Compile Include="Automation\ProviderInfo.cs" />
     <Compile Include="Automation\ProviderIntrinsics.cs" />
+    <Compile Include="Automation\ProviderInvocationException.cs" />
+    <Compile Include="Automation\ProviderNameAmbiguousException.cs" />
     <Compile Include="Automation\ProviderNotFoundException.cs" />
     <Compile Include="Automation\Provider\CmdletProvider.cs" />
+    <Compile Include="Automation\PSAliasProperty.cs" />
+    <Compile Include="Automation\PSArgumentException.cs" />
+    <Compile Include="Automation\PSArgumentNullException.cs" />
     <Compile Include="Automation\Provider\CmdletProviderAttribute.cs" />
     <Compile Include="Automation\Provider\ContainerCmdletProvider.cs" />
     <Compile Include="Automation\Provider\DriveCmdletProvider.cs" />
@@ -205,6 +241,8 @@
     <Compile Include="Automation\PSCredentialTypes.cs" />
     <Compile Include="Automation\PSCredentialUIOptions.cs" />
     <Compile Include="Automation\PSCustomObject.cs" />
+    <Compile Include="Automation\PSInvalidCastException.cs" />
+    <Compile Include="Automation\PSInvalidOperationException.cs" />
     <Compile Include="Automation\PSDataCollection.cs" />
     <Compile Include="Automation\PSDataCollectionEnumerator.cs" />
     <Compile Include="Automation\PSDataStreams.cs" />
@@ -233,6 +271,7 @@
     <Compile Include="Automation\PSSnapInInfo.cs" />
     <Compile Include="Automation\PSSnapInInstaller.cs" />
     <Compile Include="Automation\PSSnapinQualifiedName.cs" />
+    <Compile Include="Automation\PSTypeConverter.cs" />
     <Compile Include="Automation\PSVariable.cs" />
     <Compile Include="Automation\PSVariableIntrinsics.cs" />
     <Compile Include="Automation\ReadOnlyPSMemberInfoCollection.cs" />
@@ -299,20 +338,35 @@
     <Compile Include="Automation\SessionStateException.cs" />
     <Compile Include="Automation\SettingValueExceptionEventArgs.cs" />
     <Compile Include="Automation\SetValueException.cs" />
+    <Compile Include="Automation\SetValueInvocationException.cs" />
     <Compile Include="Automation\ShouldProcessReason.cs" />
+    <Compile Include="Automation\Signature.cs" />
+    <Compile Include="Automation\SignatureStatus.cs" />
+    <Compile Include="Automation\SigningOption.cs" />
     <Compile Include="Automation\SwitchParameter.cs" />
     <Compile Include="Automation\ValidateArgumentsAttribute.cs" />
+    <Compile Include="Automation\ValidateCountAttribute.cs" />
     <Compile Include="Automation\ValidateEnumeratedArgumentsAttribute.cs" />
+    <Compile Include="Automation\ValidateLengthAttribute.cs" />
     <Compile Include="Automation\ValidateNotNullAttribute.cs" />
     <Compile Include="Automation\ValidateNotNullOrEmptyAttribute.cs" />
+    <Compile Include="Automation\ValidatePatternAttribute.cs" />
     <Compile Include="Automation\ValidateRangeAttribute.cs" />
     <Compile Include="Automation\ValidateSetAttribute.cs" />
+    <Compile Include="Automation\ValidationMetadataException.cs" />
     <Compile Include="Automation\VariablePath.cs" />
     <Compile Include="Automation\VerboseRecord.cs" />
     <Compile Include="Automation\VerbsCommon.cs" />
+    <Compile Include="Automation\VerbsCommunications.cs" />
+    <Compile Include="Automation\VerbsData.cs" />
+    <Compile Include="Automation\VerbsDiagnostic.cs" />
+    <Compile Include="Automation\VerbsLifecycle.cs" />
+    <Compile Include="Automation\VerbsOther.cs" />
+    <Compile Include="Automation\VerbsSecurity.cs" />
     <Compile Include="Automation\WarningRecord.cs" />
     <Compile Include="Automation\WildcardOptions.cs" />
     <Compile Include="Automation\WildcardPattern.cs" />
+    <Compile Include="Automation\WildcardPatternException.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\QueueExtensions.cs" />
     <Compile Include="Extensions\Reflection.cs" />

@@ -5,6 +5,9 @@ using System.Text;
 
 namespace System.Management.Automation
 {
+    /// <summary>
+    /// Used by the Command Manager to categories the different things that map to a parser command.
+    /// </summary>
     [Flags]
     public enum CommandTypes
     {

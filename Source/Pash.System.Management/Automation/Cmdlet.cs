@@ -5,13 +5,16 @@ using System.Management.Automation.Internal;
 using System.Resources;
 using System.Collections;
 using System.Threading;
-using ExecutionContext = Pash.Implementation.ExecutionContext;
+using ExecutionContext=Pash.Implementation.ExecutionContext;
 
 namespace System.Management.Automation
 {
+    /// <summary>
+    /// The class which all Cmdlets inherit from.
+    /// </summary>
     public class Cmdlet : InternalCommand
     {
-        internal string _ParameterSetName { get; set; }
+        internal string ParameterSetName { get; set; }
 
         protected Cmdlet()
         {
