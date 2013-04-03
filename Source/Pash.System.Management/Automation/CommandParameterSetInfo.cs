@@ -1,11 +1,13 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace System.Management.Automation
 {
+    /// <summary>
+    /// A type representing the set of command parameters for a cmdlet.
+    /// </summary>
     public class CommandParameterSetInfo
     {
         public bool IsDefault { get; private set; }
@@ -27,12 +29,24 @@ namespace System.Management.Automation
 
         internal CommandParameterInfo GetParameterByPosition(int position)
         {
-            return Parameters.SingleOrDefault(parameter => parameter.Position == position);
+            foreach (CommandParameterInfo parameter in Parameters)
+            {
+                if (parameter.Position == position)
+                    return parameter;
+            }
+
+            return null;
         }
 
         internal CommandParameterInfo GetParameterByName(string name)
         {
-            return Parameters.SingleOrDefault(parameter => string.Equals(parameter.Name, name, StringComparison.CurrentCultureIgnoreCase));
+            foreach (CommandParameterInfo parameter in Parameters)
+            {
+                if (string.Equals(parameter.Name, name, StringComparison.CurrentCultureIgnoreCase))
+                    return parameter;
+            }
+
+            return null;
         }
     }
 }

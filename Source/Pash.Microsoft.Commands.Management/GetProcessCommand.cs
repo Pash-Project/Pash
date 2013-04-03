@@ -1,51 +1,70 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
-using System.Diagnostics;
 using System.Management.Automation;
+using System.Diagnostics;
 
 namespace Microsoft.PowerShell.Commands
 {
-    [Cmdlet("Get", "Process", DefaultParameterSetName = "Name")]
-    public sealed class GetProcessCommand : ProcessBaseCommand
+    /// <summary>
+    /// NAME
+    ///   Get-Process
+    /// 
+    /// DESCRIPTION
+    ///   Displays processes running on the system.
+    /// 
+    /// RELATED PASH COMMANDS
+    ///   Stop-Process
+    ///   
+    /// RELATED POSIX COMMANDS
+    ///   ps 
+    /// </summary>
+    [Cmdlet(VerbsCommon.Get, "Process", DefaultParameterSetName = "Name")]
+    public sealed class GetProcessCommand : Cmdlet
     {
-        [Parameter(ParameterSetName = "Id", Mandatory = true, ValueFromPipelineByPropertyName = true)]
-        public int[] Id
-        {
-            get
-            {
-                return _processIds;
-            }
-            set
-            {
-                _matchType = MatchType.ById;
-                _processIds = value;
-            }
-        }
-
-        [Alias(new string[] { "ProcessName" }), Parameter(Position = 0, ParameterSetName = "Name", ValueFromPipelineByPropertyName = true), ValidateNotNullOrEmpty]
-        public string[] Name
-        {
-            get
-            {
-                return _processNames;
-            }
-            set
-            {
-                _matchType = MatchType.ByName;
-                _processNames = value;
-            }
-        }
-
-        public GetProcessCommand()
-        {
-        }
 
         protected override void ProcessRecord()
         {
-            foreach (Process process in FindProcesses())
-            {
-                WriteObject(process);
-            }
+            if (Name != null)
+                foreach (String _name in Name)
+                    WriteObject(Process.GetProcessesByName(_name), true);
+                
+            else if (Id != null)
+                foreach (int _id in Id)
+                    WriteObject(Process.GetProcessById(_id));
+
+            else if (InputObject != null)
+                WriteObject(InputObject, true);
+
+            else WriteObject(Process.GetProcesses(), true);
         }
+
+        /// <summary>
+        /// Return a process that has the given ID.
+        /// </summary>
+        [Parameter(
+            ParameterSetName = "Id", 
+            Mandatory = true, 
+            ValueFromPipelineByPropertyName = true)]
+        public int[] Id { get; set; }
+
+        /// <summary>
+        /// Return all process(es) which have the given name.
+        /// </summary>
+        [Alias(new string[] { "ProcessName" }),
+        Parameter(
+            ValueFromPipelineByPropertyName = true,
+            Position = 0, 
+            ParameterSetName = "Name"),
+        ValidateNotNullOrEmpty]
+        public String[] Name { get; set; }
+
+        /// <summary>
+        /// Return processes which match the given object.
+        /// </summary>
+        [Parameter(
+            Mandatory = true, 
+            ValueFromPipeline = true,
+            ParameterSetName = "InputObject")]
+        public Process[] InputObject { get; set; }
     }
 }

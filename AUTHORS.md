@@ -15,3 +15,5 @@ Jay Bazuzi                 | [@jaybazuzi](http://github.com/jaybazuzi)          
 Andrew Barnes              | [@b333z](http://github.com/b333z)                      |                               | 
 Jason Jarrett              | [@staxmanade](http://github.com/staxmanade)            | <jason@elegantcode.com>       | 
 Friedrich von Never        | [@ForNeVeR](http://github.com/ForNeVeR)                | <neverthness@gmail.com>       | 
+Jonathan Ben-Joseph        |                                                        | <jbenjos@gmail.com>           | Mono Summer of Code 2008
+Alistair Hughes            | [alesliehughes](https://github.com/alesliehughes)      |                               | 

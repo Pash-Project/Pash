@@ -3,6 +3,9 @@ using System;
 
 namespace System.Management.Automation
 {
+    /// <summary>
+    /// Gives options of how a copy of a provider container should happen.
+    /// </summary>
     public enum CopyContainers
     {
         CopyTargetContainer = 0,

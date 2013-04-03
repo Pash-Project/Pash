@@ -49,14 +49,6 @@ namespace System.Management.Automation
             }
         }
 
-        public string ParameterSetName
-        {
-            get
-            {
-                return _ParameterSetName;
-            }
-        }
-
         public SessionState SessionState
         {
             get

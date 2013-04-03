@@ -4,6 +4,9 @@ using System.Management.Automation.Internal;
 
 namespace System.Management.Automation
 {
+    /// <summary>
+    /// Attribute that allows empty collections as arguments.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public sealed class AllowEmptyCollectionAttribute : CmdletMetadataAttribute
     {

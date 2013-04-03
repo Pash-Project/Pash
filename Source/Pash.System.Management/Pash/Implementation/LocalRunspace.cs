@@ -8,6 +8,7 @@ namespace Pash.Implementation
 {
     internal class LocalRunspace : Runspace
     {
+        private InitialSessionState _initialSessionState;
         private RunspaceConfiguration _runspaceConfiguration;
 
         internal PSHost PSHost { get; set; }
@@ -18,12 +19,36 @@ namespace Pash.Implementation
         //internal static LocalRunspace DefaultRunspace { get; private set; }
 
         public LocalRunspace(PSHost host, RunspaceConfiguration configuration)
+            : this(host, configuration, null)
+        {
+
+        }
+
+        public LocalRunspace(PSHost host, InitialSessionState initialSessionState)
+            : this(host, null, initialSessionState)
+        {
+
+        }
+
+        internal LocalRunspace(PSHost host, RunspaceConfiguration configuration, InitialSessionState initialSessionState)
         {
             DefaultRunspace = this;
             PSHost = host;
-            _runspaceConfiguration = configuration;
+            if (configuration == null)
+                _runspaceConfiguration = RunspaceFactory.DefaultRunspaceConfiguration;
+            else
+                _runspaceConfiguration = configuration;
             ExecutionContext = new ExecutionContext(host, configuration);
             ExecutionContext.CurrentRunspace = this;
+            _initialSessionState = initialSessionState;
+        }
+
+        public override InitialSessionState InitialSessionState
+        {
+            get
+            {
+                return this._initialSessionState;
+            }
         }
 
         public override RunspaceConfiguration RunspaceConfiguration

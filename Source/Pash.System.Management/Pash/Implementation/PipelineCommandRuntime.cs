@@ -8,6 +8,8 @@ namespace System.Management.Automation
     // TODO: can we replace the runtime with the ExecutionContext?
     internal class PipelineCommandRuntime : ICommandRuntime
     {
+        private ExecutionContext _context;
+
         internal ObjectStream outputResults { get; private set; }
         internal ObjectStream errorResults { get; private set; }
         internal PipelineProcessor pipelineProcessor { get; private set; }
