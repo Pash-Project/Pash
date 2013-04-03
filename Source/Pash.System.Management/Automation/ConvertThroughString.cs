@@ -23,7 +23,7 @@ namespace System.Management.Automation
         public override object ConvertFrom(object sourceValue, Type destinationType, IFormatProvider formatProvider, bool ignoreCase)
         {
             return LanguagePrimitives.ConvertTo(
-                (LanguagePrimitives.ConvertTo(sourceValue, typeof(string), formatProvider) as String), 
+                (LanguagePrimitives.ConvertTo(sourceValue, typeof(string), formatProvider) as String),
                 destinationType, formatProvider);
         }
 

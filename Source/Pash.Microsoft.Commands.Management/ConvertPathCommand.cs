@@ -15,21 +15,21 @@ namespace Microsoft.PowerShell.Commands
         {
         }
 
-        [Parameter(Position = 0, 
-            ParameterSetName = "LiteralPath", 
-            Mandatory = true, 
-            ValueFromPipeline = false, 
-            ValueFromPipelineByPropertyName = true), 
+        [Parameter(Position = 0,
+            ParameterSetName = "LiteralPath",
+            Mandatory = true,
+            ValueFromPipeline = false,
+            ValueFromPipelineByPropertyName = true),
         Alias(new string[] { "PSPath" })]
         public string[] LiteralPath { get; set; }
 
-        [Parameter(Position = 0, 
-            ParameterSetName = "Path", 
-            Mandatory = true, 
-            ValueFromPipeline = true, 
+        [Parameter(Position = 0,
+            ParameterSetName = "Path",
+            Mandatory = true,
+            ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true)]
         public string[] Path { get; set; }
-      
+
     }
 }
 

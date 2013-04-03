@@ -24,14 +24,14 @@ namespace Microsoft.PowerShell.Commands
     {
         protected override void ProcessRecord()
         {
-          //[!TODO!]
+            //[!TODO!]
         }
 
         [Parameter]
         public int SecondsRemaining { get; set; }
 
         [Parameter(
-            Position = 0, 
+            Position = 0,
             Mandatory = true)]
         public string Activity { get; set; }
 

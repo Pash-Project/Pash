@@ -29,16 +29,16 @@ namespace Microsoft.PowerShell.Commands
         [Alias(new string[] { "PSPath" }),
         Parameter(
             ParameterSetName = "LiteralPath",
-            Position = 0, 
-            Mandatory = true, ValueFromPipeline = false, 
+            Position = 0,
+            Mandatory = true, ValueFromPipeline = false,
             ValueFromPipelineByPropertyName = true)]
         public string[] LiteralPath { get; set; }
 
         [Parameter(
-            ParameterSetName = "Path", 
-            Position = 0, 
-            Mandatory = true, 
-            ValueFromPipeline = true, 
+            ParameterSetName = "Path",
+            Position = 0,
+            Mandatory = true,
+            ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true)]
         public string[] Path { get; set; }
 

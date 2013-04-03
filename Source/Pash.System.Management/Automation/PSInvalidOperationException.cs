@@ -20,19 +20,19 @@ namespace System.Management.Automation
             id = "InvalidOperation";
         }
 
-        public PSInvalidOperationException(string message) 
+        public PSInvalidOperationException(string message)
             : base(message)
         {
             id = "InvalidOperation";
         }
 
-        public PSInvalidOperationException(string message, Exception innerException) 
+        public PSInvalidOperationException(string message, Exception innerException)
             : base(message, innerException)
         {
             id = "InvalidOperation";
         }
 
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter=true)]
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             id = "InvalidOperation";

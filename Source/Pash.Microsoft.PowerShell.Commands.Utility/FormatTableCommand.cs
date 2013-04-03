@@ -50,7 +50,7 @@ namespace Microsoft.PowerShell.Commands
         {
             int maxProp = 5;
 
-           // String line = "";
+            // String line = "";
 
             FormatElement line = new FormatElement();
 
@@ -65,9 +65,9 @@ namespace Microsoft.PowerShell.Commands
 
                     //todo: replace with better system
                     i++;
-                    if (i == maxProp) { break; } 
+                    if (i == maxProp) { break; }
                 }
-           }
+            }
 
             int j = 0;
             foreach (PSPropertyInfo _prop in InputObject.Properties)
@@ -111,7 +111,7 @@ namespace Microsoft.PowerShell.Commands
 
         [Parameter]
         public string View { get; set; }
-        
+
         [Parameter]
         public SwitchParameter Wrap { get; set; }
     }

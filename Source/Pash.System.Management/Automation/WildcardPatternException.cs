@@ -11,19 +11,19 @@ namespace System.Management.Automation
         public WildcardPatternException(string message)
             : base(message)
         {
-            
+
         }
 
         protected WildcardPatternException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-           
+
         }
 
         public WildcardPatternException(string message, Exception innerException)
             : base(message, innerException)
         {
-   
+
         }
     }
 }

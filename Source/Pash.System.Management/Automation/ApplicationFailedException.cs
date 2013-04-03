@@ -24,7 +24,7 @@ namespace System.Management.Automation
             base.Category = ErrorCategory.ResourceUnavailable;
         }
 
-        public ApplicationFailedException(string message, Exception innerException) 
+        public ApplicationFailedException(string message, Exception innerException)
             : base(message, innerException)
         {
             base.Id = "NativeCommandFailed";

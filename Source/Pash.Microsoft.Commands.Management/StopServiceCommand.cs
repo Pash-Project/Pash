@@ -78,10 +78,10 @@ namespace Microsoft.PowerShell.Commands
         /// </summary>
         [Alias(new string[] { "ServiceName" }),
          Parameter(
-             ParameterSetName = "Default", 
-             Position = 0, 
-             Mandatory = true, 
-             ValueFromPipelineByPropertyName = true, 
+             ParameterSetName = "Default",
+             Position = 0,
+             Mandatory = true,
+             ValueFromPipelineByPropertyName = true,
              ValueFromPipeline = true)]
         public string[] Name { get; set; }
 

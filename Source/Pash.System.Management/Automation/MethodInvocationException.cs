@@ -11,17 +11,17 @@ namespace System.Management.Automation
     [Serializable]
     public class MethodInvocationException : MethodException
     {
-        public MethodInvocationException() 
+        public MethodInvocationException()
             : base(typeof(MethodInvocationException).FullName)
         {
         }
 
-        public MethodInvocationException(string message) 
+        public MethodInvocationException(string message)
             : base(message)
         {
         }
 
-        public MethodInvocationException(string message, Exception innerException) 
+        public MethodInvocationException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

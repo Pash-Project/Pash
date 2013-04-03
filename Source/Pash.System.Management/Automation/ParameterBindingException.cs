@@ -43,17 +43,18 @@ namespace System.Management.Automation
         {
         }
 
-        public ParameterBindingException(string message) : base(message)
+        public ParameterBindingException(string message)
+            : base(message)
         {
         }
 
-        public ParameterBindingException(string message, Exception innerException) 
+        public ParameterBindingException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
 
         //todo: implement
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter=true)]
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
         }

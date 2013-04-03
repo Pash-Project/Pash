@@ -3,9 +3,9 @@ using System.Collections;
 
 namespace System.Management.Automation
 {
-	/// <summary>
-	/// Abstract class that validates arguments from a parameter.
-	/// </summary>
+    /// <summary>
+    /// Abstract class that validates arguments from a parameter.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public abstract class ValidateEnumeratedArgumentsAttribute : ValidateArgumentsAttribute
     {

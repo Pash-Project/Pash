@@ -8,8 +8,8 @@ namespace Microsoft.PowerShell.Commands
     {
         public static String Format(FormatElement formatable)
         {
-            String _row = new String(new char[]{'\0'});
-            
+            String _row = new String(new char[] { '\0' });
+
             foreach (String _cell in formatable.Values)
             {
                 // If the info doesn't fit into the column, strip it down and fit it in

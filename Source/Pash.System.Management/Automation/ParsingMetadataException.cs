@@ -11,15 +11,18 @@ namespace System.Management.Automation
     [Serializable]
     public class ParsingMetadataException : MetadataException
     {
-        public ParsingMetadataException() : base(typeof(ParsingMetadataException).FullName)
+        public ParsingMetadataException()
+            : base(typeof(ParsingMetadataException).FullName)
         {
         }
 
-        public ParsingMetadataException(string message) : base(message)
+        public ParsingMetadataException(string message)
+            : base(message)
         {
         }
 
-        public ParsingMetadataException(string message, Exception innerException) : base(message, innerException)
+        public ParsingMetadataException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
 

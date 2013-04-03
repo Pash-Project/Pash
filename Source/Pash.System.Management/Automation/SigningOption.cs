@@ -4,9 +4,9 @@ using System;
 
 namespace System.Management.Automation
 {
-	/// <summary>
-	/// Options for accepting signed Pash objects.
-	/// </summary>
+    /// <summary>
+    /// Options for accepting signed Pash objects.
+    /// </summary>
     public enum SigningOption
     {
         AddFullCertificateChain = 1,

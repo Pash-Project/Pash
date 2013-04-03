@@ -23,31 +23,31 @@ namespace System.Management.Automation
             id = "ArgumentNull";
         }
 
-        public PSArgumentNullException(string paramName) 
+        public PSArgumentNullException(string paramName)
             : base(paramName)
         {
             id = "ArgumentNull";
         }
 
-        protected PSArgumentNullException(SerializationInfo info, StreamingContext context) 
+        protected PSArgumentNullException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
             id = "ArgumentNull";
         }
 
-        public PSArgumentNullException(string message, Exception innerException) 
+        public PSArgumentNullException(string message, Exception innerException)
             : base(message, innerException)
         {
             id = "ArgumentNull";
         }
 
-        public PSArgumentNullException(string paramName, string message) 
+        public PSArgumentNullException(string paramName, string message)
             : base(paramName, message)
         {
             id = "ArgumentNull";
         }
 
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter=true)]
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             id = "ArgumentNull";

@@ -17,8 +17,9 @@ namespace Pash.Implementation
     {
         readonly ScriptInfo _scriptInfo;
 
-        
-        public ScriptProcessor(ScriptInfo scriptInfo) : base (scriptInfo)
+
+        public ScriptProcessor(ScriptInfo scriptInfo)
+            : base(scriptInfo)
         {
             this._scriptInfo = scriptInfo;
         }

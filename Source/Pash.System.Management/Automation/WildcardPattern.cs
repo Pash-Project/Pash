@@ -33,7 +33,7 @@ namespace System.Management.Automation
                 return false;
             }
 
-            return pattern.IndexOfAny(new char[] {'?', '*', '[', ']'}) != -1;
+            return pattern.IndexOfAny(new char[] { '?', '*', '[', ']' }) != -1;
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace System.Management.Automation
         /// </summary>
         /// <param name="pattern">The pattern to use.</param>
         /// <returns>The pattern without escape characters.</returns>
-        public static string Unescape(string pattern) 
+        public static string Unescape(string pattern)
         {
             // This block of code is actually about the same speed as a linear search because Mono (and probably .NET) seem to use the
             // Tuned Boyer-Moore text searching algorithm for Sting.Replace()

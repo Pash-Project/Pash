@@ -11,19 +11,23 @@ namespace System.Management.Automation
     [Serializable]
     public class GetValueInvocationException : GetValueException
     {
-        public GetValueInvocationException() : base(typeof(GetValueInvocationException).FullName)
+        public GetValueInvocationException()
+            : base(typeof(GetValueInvocationException).FullName)
         {
         }
 
-        public GetValueInvocationException(string message) : base(message)
+        public GetValueInvocationException(string message)
+            : base(message)
         {
         }
 
-        protected GetValueInvocationException(SerializationInfo info, StreamingContext context) : base(info, context)
+        protected GetValueInvocationException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
 
-        public GetValueInvocationException(string message, Exception innerException) : base(message, innerException)
+        public GetValueInvocationException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
     }

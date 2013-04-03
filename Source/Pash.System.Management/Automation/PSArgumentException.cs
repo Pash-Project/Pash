@@ -21,22 +21,22 @@ namespace System.Management.Automation
         {
         }
 
-        public PSArgumentException(string message) 
+        public PSArgumentException(string message)
             : base(message)
         {
         }
 
-        public PSArgumentException(string message, Exception innerException) 
+        public PSArgumentException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
 
-        public PSArgumentException(string message, string paramName) 
+        public PSArgumentException(string message, string paramName)
             : base(message, paramName)
         {
         }
 
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter=true)]
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
         }

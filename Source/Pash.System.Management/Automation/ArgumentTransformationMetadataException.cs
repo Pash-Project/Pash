@@ -11,22 +11,22 @@ namespace System.Management.Automation
     [Serializable]
     public class ArgumentTransformationMetadataException : MetadataException
     {
-        public ArgumentTransformationMetadataException() 
+        public ArgumentTransformationMetadataException()
             : base(typeof(ArgumentTransformationMetadataException).FullName)
         {
         }
 
-        public ArgumentTransformationMetadataException(string message) 
+        public ArgumentTransformationMetadataException(string message)
             : base(message)
         {
         }
 
-        protected ArgumentTransformationMetadataException(SerializationInfo info, StreamingContext context) 
+        protected ArgumentTransformationMetadataException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
 
-        public ArgumentTransformationMetadataException(string message, Exception innerException) 
+        public ArgumentTransformationMetadataException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

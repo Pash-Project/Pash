@@ -16,10 +16,10 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void BeginProcessing()
         {
-       
+
         }
 
-        [Alias(new string[] { "PSPath" }), 
+        [Alias(new string[] { "PSPath" }),
         Parameter(Mandatory = true, Position = 0, ParameterSetName = "File")]
         public string FilePath { get; set; }
 
@@ -29,6 +29,6 @@ namespace Microsoft.PowerShell.Commands
         [Parameter(Mandatory = true, ParameterSetName = "Variable")]
         public string Variable { get; set; }
     }
-   
+
 }
 

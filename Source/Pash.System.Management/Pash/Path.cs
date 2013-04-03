@@ -150,9 +150,9 @@ namespace System.Management
         public Path ApplyDriveSlash()
         {
             // append a slash to the end (if it's the root drive)
-            if(this.IsRootPath())
+            if (this.IsRootPath())
             {
-                if(!this.EndsWithSlash())
+                if (!this.EndsWithSlash())
                 {
                     return this.AppendSlashAtEnd();
                 }
@@ -276,14 +276,14 @@ namespace System.Management
         public bool IsRootPath()
         {
             // handle unix '/' path
-            if(this.Length == 1 && this == CorrectSlash)
+            if (this.Length == 1 && this == CorrectSlash)
             {
                 return true;
             }
 
             // handle windows drive "C:" "C:\\"
             var x = this.TrimEndSlash();
-            if(this.GetDrive() == x._rawPath.TrimEnd(':'))
+            if (this.GetDrive() == x._rawPath.TrimEnd(':'))
             {
                 return true;
             }

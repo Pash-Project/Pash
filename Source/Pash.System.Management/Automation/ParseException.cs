@@ -17,13 +17,15 @@ namespace System.Management.Automation
             base.Category = ErrorCategory.ParserError;
         }
 
-        public ParseException(string message) : base(message)
+        public ParseException(string message)
+            : base(message)
         {
             base.Id = "Parse";
             base.Category = ErrorCategory.ParserError;
         }
 
-        public ParseException(string message, Exception innerException) : base(message, innerException)
+        public ParseException(string message, Exception innerException)
+            : base(message, innerException)
         {
             base.Id = "Parse";
             base.Category = ErrorCategory.ParserError;

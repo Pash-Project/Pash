@@ -48,7 +48,7 @@ namespace System.Management.Automation
         {
             PSObject _psfirst = first as PSObject;
             PSObject _pssecond = second as PSObject;
-            
+
             // PSObject comparison
             if ((_psfirst != null) || (_pssecond != null))
                 return (_psfirst.BaseObject == _pssecond.BaseObject);
@@ -63,7 +63,7 @@ namespace System.Management.Automation
                 {
                     return (0 == String.Compare(_strsecond, _strfirst, ignoreCase, formatProvider as CultureInfo));
                 }
-                
+
                 return (0 == String.Compare(ConvertTo(second, typeof(String), formatProvider).ToString(), _strfirst, ignoreCase, formatProvider as CultureInfo));
 
             }
@@ -124,7 +124,7 @@ namespace System.Management.Automation
         {
             return TryConvertTo(valueToConvert, resultType, CultureInfo.InvariantCulture, out result);
         }
-        
+
         /// <summary>
         /// Tries to convert between types.
         /// </summary>
@@ -180,7 +180,7 @@ namespace System.Management.Automation
 
             if (resultType.IsAssignableFrom(valueToConvert.GetType()))
             {
-                return _cast.Invoke(null, new object [] { valueToConvert });
+                return _cast.Invoke(null, new object[] { valueToConvert });
             }
 
             PSObject _psvalue = valueToConvert as PSObject;
@@ -254,7 +254,7 @@ namespace System.Management.Automation
                     throw new ArgumentException("Types are not comparable.");
                 }
             }*/
-            
+
             // Floating point check
             //todo
             /*
@@ -341,4 +341,4 @@ namespace System.Management.Automation
     }
 }
 
- 
+

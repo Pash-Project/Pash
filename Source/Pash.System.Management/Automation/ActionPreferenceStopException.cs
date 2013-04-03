@@ -21,12 +21,12 @@ namespace System.Management.Automation
             }
         }
 
-        public ActionPreferenceStopException() 
+        public ActionPreferenceStopException()
             : this("ActionPreferenceStop")
         {
         }
 
-        public ActionPreferenceStopException(string message) 
+        public ActionPreferenceStopException(string message)
             : base(message)
         {
             base.Category = ErrorCategory.OperationStopped;
@@ -35,7 +35,8 @@ namespace System.Management.Automation
         }
 
 
-        public ActionPreferenceStopException(string message, Exception innerException) : base(message, innerException)
+        public ActionPreferenceStopException(string message, Exception innerException)
+            : base(message, innerException)
         {
             base.Category = ErrorCategory.OperationStopped;
             base.Id = "ActionPreferenceStop";

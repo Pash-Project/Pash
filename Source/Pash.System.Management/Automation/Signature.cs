@@ -19,7 +19,7 @@ namespace System.Management.Automation
 
         public string StatusMessage { get; private set; }
 
-        public X509Certificate2 TimeStamperCertificate { get; private set; }  
+        public X509Certificate2 TimeStamperCertificate { get; private set; }
     }
 }
 

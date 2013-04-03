@@ -11,7 +11,7 @@ namespace System.Management.Automation
     /// </summary>
     public class ApplicationInfo : CommandInfo
     {
-        internal ApplicationInfo(string name, string path, string extension) : 
+        internal ApplicationInfo(string name, string path, string extension) :
             base(name, CommandTypes.Application)
         {
             Path = path;
