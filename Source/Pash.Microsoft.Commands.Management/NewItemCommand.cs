@@ -5,7 +5,7 @@ using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands.Microsoft.PowerShell.Commands.Provider
 {
-    [Cmdlet("New", "Item", DefaultParameterSetName="pathSet", SupportsShouldProcess=true)]
+    [Cmdlet("New", "Item", DefaultParameterSetName = "pathSet", SupportsShouldProcess = true)]
     public class NewItemCommand : ProviderCommandBase
     {
         /// <summary>
@@ -48,20 +48,20 @@ namespace Microsoft.PowerShell.Commands.Microsoft.PowerShell.Commands.Provider
         /// What name you want to give the new item.
         /// </summary>
         [Parameter(
-            Mandatory = true, 
-            ParameterSetName = "nameSet", 
-            ValueFromPipelineByPropertyName = true), 
+            Mandatory = true,
+            ParameterSetName = "nameSet",
+            ValueFromPipelineByPropertyName = true),
         AllowEmptyString, AllowNull]
         public string Name { get; set; }
-        
+
         /// <summary>
         /// The path of the new item.
         /// </summary>
         [Parameter(
             Position = 0,
             Mandatory = true,
-            ParameterSetName = "pathSet",  
-            ValueFromPipelineByPropertyName = true), 
+            ParameterSetName = "pathSet",
+            ValueFromPipelineByPropertyName = true),
         Parameter(
             Position = 0,
             Mandatory = false,
@@ -73,7 +73,7 @@ namespace Microsoft.PowerShell.Commands.Microsoft.PowerShell.Commands.Provider
         /// The contents or value of the new item.
         /// </summary>
         [Parameter(
-            ValueFromPipeline = true, 
+            ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true)]
         public object Value { get; set; }
 

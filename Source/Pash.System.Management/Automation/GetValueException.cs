@@ -11,22 +11,22 @@ namespace System.Management.Automation
     [Serializable]
     public class GetValueException : ExtendedTypeSystemException
     {
-        public GetValueException() 
+        public GetValueException()
             : base(typeof(GetValueException).FullName)
         {
         }
 
-        public GetValueException(string message) 
+        public GetValueException(string message)
             : base(message)
         {
         }
 
-        protected GetValueException(SerializationInfo info, StreamingContext context) 
+        protected GetValueException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
 
-        public GetValueException(string message, Exception innerException) 
+        public GetValueException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

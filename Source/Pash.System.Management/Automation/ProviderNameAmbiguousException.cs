@@ -18,11 +18,13 @@ namespace System.Management.Automation
         {
         }
 
-        public ProviderNameAmbiguousException(string message) : base(message)
+        public ProviderNameAmbiguousException(string message)
+            : base(message)
         {
         }
 
-        public ProviderNameAmbiguousException(string message, Exception innerException) : base(message, innerException)
+        public ProviderNameAmbiguousException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
 

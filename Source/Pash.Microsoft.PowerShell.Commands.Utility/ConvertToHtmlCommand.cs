@@ -33,9 +33,9 @@ namespace Microsoft.PowerShell.Commands
             WriteObject
                 ("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n<html>\n<head>");
 
-            if (Head != null) 
+            if (Head != null)
                 WriteObject(Head, true);
-            
+
             WriteObject("<title>" + Title + "</title>\n</head>\n<body>");
 
             if (Body != null)
@@ -73,7 +73,7 @@ namespace Microsoft.PowerShell.Commands
                     }
                 }
                 notHeader = true;
-            
+
             }
 
             foreach (PSPropertyInfo _prop in InputObject.Properties)
@@ -93,7 +93,7 @@ namespace Microsoft.PowerShell.Commands
         /// </summary>
         [Parameter]
         public string[] Body { get; set; }
-        
+
         /// <summary>
         /// Specify text to include in the HTML head.
         /// </summary>

@@ -11,7 +11,7 @@ namespace System.Management.Automation
     {
         //todo: implement
         private string definition;
-        public override string Definition 
+        public override string Definition
         {
             get
             {

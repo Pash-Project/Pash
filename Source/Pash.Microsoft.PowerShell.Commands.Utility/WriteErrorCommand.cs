@@ -64,7 +64,7 @@ namespace Microsoft.PowerShell.Commands
 
             if (!String.IsNullOrEmpty(CategoryActivity))
                 _error.CategoryInfo.Activity = CategoryActivity;
-       
+
             if (!String.IsNullOrEmpty(CategoryTargetName))
                 _error.CategoryInfo.TargetName = CategoryTargetName;
 
@@ -99,14 +99,14 @@ namespace Microsoft.PowerShell.Commands
         /// <summary>
         /// The type of the category target.
         /// </summary>
-        [Parameter, 
+        [Parameter,
         Alias(new string[] { "TargetType" })]
         public string CategoryTargetType { get; set; }
 
         /// <summary>
         /// A unique string to identify this error.
         /// </summary>
-        [Parameter(ParameterSetName = "WithException"), 
+        [Parameter(ParameterSetName = "WithException"),
         Parameter(ParameterSetName = "NoException")]
         public string ErrorId { get; set; }
 
@@ -125,12 +125,12 @@ namespace Microsoft.PowerShell.Commands
         /// <summary>
         /// The error message. Typically displayed in the host.
         /// </summary>
-        [Parameter(ParameterSetName = "WithException"), 
-        AllowNull, 
+        [Parameter(ParameterSetName = "WithException"),
+        AllowNull,
         AllowEmptyString,
-        Parameter(Position = 0, 
-            ParameterSetName = "NoException", 
-            Mandatory = true, 
+        Parameter(Position = 0,
+            ParameterSetName = "NoException",
+            Mandatory = true,
             ValueFromPipeline = true)]
         public string Message { get; set; }
 

@@ -5,15 +5,15 @@ using System;
 
 namespace System.Management.Automation
 {
-	/// <summary>
-	/// Ensures that the value assigned to the parameter is not null.
-	/// </summary>
+    /// <summary>
+    /// Ensures that the value assigned to the parameter is not null.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class ValidateNotNullAttribute : ValidateArgumentsAttribute
     {
         public ValidateNotNullAttribute()
         {
-            
+
         }
 
         protected override void Validate(object arguments, EngineIntrinsics engineIntrinsics)

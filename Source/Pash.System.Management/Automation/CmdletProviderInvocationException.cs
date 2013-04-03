@@ -17,18 +17,18 @@ namespace System.Management.Automation
         {
         }
 
-        public CmdletProviderInvocationException(string message) 
+        public CmdletProviderInvocationException(string message)
             : base(message)
         {
         }
 
-        protected CmdletProviderInvocationException(SerializationInfo info, StreamingContext context) 
+        protected CmdletProviderInvocationException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
             ProviderInvocationException = base.InnerException as ProviderInvocationException;
         }
 
-        public CmdletProviderInvocationException(string message, Exception innerException) 
+        public CmdletProviderInvocationException(string message, Exception innerException)
             : base(message, innerException)
         {
             ProviderInvocationException = base.InnerException as ProviderInvocationException;

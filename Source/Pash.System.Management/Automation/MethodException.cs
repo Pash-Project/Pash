@@ -12,12 +12,12 @@ namespace System.Management.Automation
     public class MethodException : ExtendedTypeSystemException
     {
 
-        public MethodException() 
+        public MethodException()
             : base(typeof(MethodException).FullName)
         {
         }
 
-        public MethodException(string message) 
+        public MethodException(string message)
             : base(message)
         {
         }

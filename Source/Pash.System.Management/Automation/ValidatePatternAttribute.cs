@@ -6,9 +6,9 @@ using System.Text.RegularExpressions;
 
 namespace System.Management.Automation
 {
-	/// <summary>
-	/// Compares a regular expression to the value assigned to a parameter.
-	/// </summary>
+    /// <summary>
+    /// Compares a regular expression to the value assigned to a parameter.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class ValidatePatternAttribute : ValidateEnumeratedArgumentsAttribute
     {
@@ -17,7 +17,7 @@ namespace System.Management.Automation
         public string RegexPattern { get; private set; }
 
         public ValidatePatternAttribute(string regexPattern)
-        { 
+        {
             if (regexPattern == null)
             {
                 throw new MetadataException("Invalid regex provided to ValidatePatternAttribute");

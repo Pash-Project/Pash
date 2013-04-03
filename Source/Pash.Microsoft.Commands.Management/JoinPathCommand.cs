@@ -4,7 +4,7 @@
 
 using System;
 using System.Collections.ObjectModel;
-using System.Management.Automation; 
+using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -23,12 +23,12 @@ namespace Microsoft.PowerShell.Commands
         AllowEmptyString]
         public string ChildPath { get; set; }
 
-        
+
         [Parameter(
-            Position=0, 
-            Mandatory=true, 
-            ValueFromPipelineByPropertyName=true, 
-            ValueFromPipeline=true),
+            Position = 0,
+            Mandatory = true,
+            ValueFromPipelineByPropertyName = true,
+            ValueFromPipeline = true),
         Alias(new string[] { "PSPath" })]
         public string[] Path { get; set; }
 

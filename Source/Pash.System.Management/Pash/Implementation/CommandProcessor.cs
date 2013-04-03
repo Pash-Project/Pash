@@ -15,7 +15,8 @@ namespace System.Management.Automation
         private CmdletInfo _cmdletInfo;
         private bool _beganProcessing;
 
-        public CommandProcessor(CmdletInfo cmdletInfo) : base(cmdletInfo)
+        public CommandProcessor(CmdletInfo cmdletInfo)
+            : base(cmdletInfo)
         {
             _cmdletInfo = cmdletInfo;
             _beganProcessing = false;

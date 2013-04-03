@@ -7,7 +7,7 @@ namespace System.Management.Automation
     /// <summary>
     /// Parameter that accepts credentials.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple=false)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public sealed class CredentialAttribute : ArgumentTransformationAttribute
     {
         //todo: needs implemetation

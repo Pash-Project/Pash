@@ -27,7 +27,7 @@ namespace Microsoft.PowerShell.Commands
             if (Name != null)
                 foreach (String _name in Name)
                     WriteObject(Process.GetProcessesByName(_name), true);
-                
+
             else if (Id != null)
                 foreach (int _id in Id)
                     WriteObject(Process.GetProcessById(_id));
@@ -42,8 +42,8 @@ namespace Microsoft.PowerShell.Commands
         /// Return a process that has the given ID.
         /// </summary>
         [Parameter(
-            ParameterSetName = "Id", 
-            Mandatory = true, 
+            ParameterSetName = "Id",
+            Mandatory = true,
             ValueFromPipelineByPropertyName = true)]
         public int[] Id { get; set; }
 
@@ -53,7 +53,7 @@ namespace Microsoft.PowerShell.Commands
         [Alias(new string[] { "ProcessName" }),
         Parameter(
             ValueFromPipelineByPropertyName = true,
-            Position = 0, 
+            Position = 0,
             ParameterSetName = "Name"),
         ValidateNotNullOrEmpty]
         public String[] Name { get; set; }
@@ -62,7 +62,7 @@ namespace Microsoft.PowerShell.Commands
         /// Return processes which match the given object.
         /// </summary>
         [Parameter(
-            Mandatory = true, 
+            Mandatory = true,
             ValueFromPipeline = true,
             ParameterSetName = "InputObject")]
         public Process[] InputObject { get; set; }

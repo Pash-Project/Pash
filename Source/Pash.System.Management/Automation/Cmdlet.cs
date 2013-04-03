@@ -5,7 +5,7 @@ using System.Management.Automation.Internal;
 using System.Resources;
 using System.Collections;
 using System.Threading;
-using ExecutionContext=Pash.Implementation.ExecutionContext;
+using ExecutionContext = Pash.Implementation.ExecutionContext;
 
 namespace System.Management.Automation
 {

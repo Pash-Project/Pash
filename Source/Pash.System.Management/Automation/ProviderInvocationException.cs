@@ -16,12 +16,13 @@ namespace System.Management.Automation
         {
         }
 
-        public ProviderInvocationException(string message) : base(message)
+        public ProviderInvocationException(string message)
+            : base(message)
         {
             _message = message;
         }
 
-        public ProviderInvocationException(string message, Exception innerException) 
+        public ProviderInvocationException(string message, Exception innerException)
             : base(message, innerException)
         {
             _message = message;

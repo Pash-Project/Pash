@@ -12,7 +12,7 @@ namespace Microsoft.PowerShell.Commands
         {
             foreach (String _path in Path)
             {
-                InvokeProvider.Item.Copy(_path, Destination, Recurse.ToBool(), 
+                InvokeProvider.Item.Copy(_path, Destination, Recurse.ToBool(),
                     (Container.ToBool()) ? CopyContainers.CopyTargetContainer : CopyContainers.CopyChildrenOfTargetContainer);
 
                 if (PassThru.ToBool()) WriteObject(Path);
@@ -37,12 +37,12 @@ namespace Microsoft.PowerShell.Commands
         [Parameter]
         public override string[] Include { get; set; }
 
-        [Alias(new string[] { "PSPath" }), 
+        [Alias(new string[] { "PSPath" }),
         Parameter(
-            ParameterSetName = "LiteralPath", 
-            Position = 0, 
-            Mandatory = true, 
-            ValueFromPipeline = false, 
+            ParameterSetName = "LiteralPath",
+            Position = 0,
+            Mandatory = true,
+            ValueFromPipeline = false,
             ValueFromPipelineByPropertyName = true)]
         public string[] LiteralPath { get; set; }
 
@@ -50,10 +50,10 @@ namespace Microsoft.PowerShell.Commands
         public SwitchParameter PassThru { get; set; }
 
         [Parameter(
-            ParameterSetName = "Path", 
-            Position = 0, 
-            Mandatory = true, 
-            ValueFromPipeline = true, 
+            ParameterSetName = "Path",
+            Position = 0,
+            Mandatory = true,
+            ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true)]
         public string[] Path { get; set; }
 

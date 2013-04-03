@@ -32,9 +32,9 @@ namespace Microsoft.PowerShell.Commands
         /// The debug message to display.
         /// </summary>
         [Parameter(
-            Position = 0, 
-            Mandatory = true, 
-            ValueFromPipeline = true), 
+            Position = 0,
+            Mandatory = true,
+            ValueFromPipeline = true),
         AllowEmptyString]
         public string Message { get; set; }
     }

@@ -36,8 +36,8 @@ namespace Microsoft.PowerShell.Commands
             }
 
             else foreach (String _path in Path)
-                foreach (PSObject _item in 
-                    InvokeProvider.ChildItem.Get(_path, Recurse.ToBool()))
+                    foreach (PSObject _item in
+                        InvokeProvider.ChildItem.Get(_path, Recurse.ToBool()))
                         WriteObject(_item);
         }
 
@@ -67,7 +67,7 @@ namespace Microsoft.PowerShell.Commands
                 }
             }
         }
-                
+
 
         [Parameter]
         public /*override*/ string[] Exclude { get; set; }
@@ -83,10 +83,10 @@ namespace Microsoft.PowerShell.Commands
 
         [Alias(new string[] { "PSPath" }),
         Parameter(
-            Position = 0, 
-            ParameterSetName = "LiteralItems", 
+            Position = 0,
+            ParameterSetName = "LiteralItems",
             Mandatory = true,
-            ValueFromPipeline = false, 
+            ValueFromPipeline = false,
             ValueFromPipelineByPropertyName = true)]
         public string[] LiteralPath { get; set; }
 
@@ -94,9 +94,9 @@ namespace Microsoft.PowerShell.Commands
         public SwitchParameter Name { get; set; }
 
         [Parameter(
-            Position = 0, 
-            ParameterSetName = "Items", 
-            ValueFromPipeline = true, 
+            Position = 0,
+            ParameterSetName = "Items",
+            ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true)]
         public string[] Path { get; set; }
 

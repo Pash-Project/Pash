@@ -18,7 +18,7 @@ namespace Microsoft.PowerShell.Commands
     /// </summary>
     [Cmdlet("Start", "Sleep", DefaultParameterSetName = "Seconds")]
     public sealed class StartSleepCommand : PSCmdlet
-    {   
+    {
         protected override void ProcessRecord()
         {
             int _sleeptime;
@@ -47,13 +47,13 @@ namespace Microsoft.PowerShell.Commands
         /// </summary>
         [ValidateRange(0, 0x7fffffff),
         Parameter(
-            Mandatory = true, 
+            Mandatory = true,
             ParameterSetName = "Seconds",
-            Position = 0, 
-            ValueFromPipeline = true, 
+            Position = 0,
+            ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true)]
         public int Seconds { get; set; }
-        
+
     }
 
 }

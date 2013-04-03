@@ -8,9 +8,9 @@ namespace System.Management.Automation
     public class RuntimeException : SystemException, IContainsErrorRecord
     {
         public RuntimeException() { throw new NotImplementedException(); }
-        
+
         public RuntimeException(string message) { throw new NotImplementedException(); }
-        
+
         public RuntimeException(string message, Exception innerException) { throw new NotImplementedException(); }
 
         public virtual ErrorRecord ErrorRecord { get; set; }

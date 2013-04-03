@@ -36,13 +36,13 @@ namespace Microsoft.PowerShell.Commands
         [Alias(new string[] { "ServiceName" }),
          Parameter(Position = 0,
              Mandatory = true,
-             ParameterSetName = "Default", 
-             ValueFromPipelineByPropertyName = true, 
+             ParameterSetName = "Default",
+             ValueFromPipelineByPropertyName = true,
              ValueFromPipeline = true)]
         public string[] Name { get; set; }
 
         [Parameter]
         public SwitchParameter PassThru { get; set; }
- 
+
     }
 }

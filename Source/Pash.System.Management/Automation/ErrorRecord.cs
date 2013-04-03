@@ -31,7 +31,7 @@ namespace System.Management.Automation
 
 
         public ErrorCategoryInfo CategoryInfo { get; set; }
-        
+
         public ErrorDetails ErrorDetails { get; set; }
         public Exception Exception { get; internal set; }
         public string FullyQualifiedErrorId { get; internal set; }

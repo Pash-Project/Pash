@@ -16,13 +16,13 @@ namespace System.Management.Automation
             base.Id = "IncompleteParse";
         }
 
-        public IncompleteParseException(string message) 
+        public IncompleteParseException(string message)
             : base(message)
         {
             base.Id = "IncompleteParse";
         }
 
-        public IncompleteParseException(string message, Exception innerException) 
+        public IncompleteParseException(string message, Exception innerException)
             : base(message, innerException)
         {
             base.Id = "IncompleteParse";
