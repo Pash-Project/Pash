@@ -38,6 +38,11 @@ namespace Pash.ParserIntrinsics
             // I'd rather that any other token be selected over `generic_token`, since it's, you know, generic.
             generic_token.Priority = TerminalPriority.Low - 1;
 
+            foreach (var field in this.GetType().GetFields().Where(f => f.FieldType == typeof(KeyTerm)))
+            {
+                field.SetValue(this, ToTerm(field.Name));
+            }
+
             // we want 'Get-ChildItem' to parse as a single token, not as 'Get - ChildItem'
             dash.Priority = TerminalPriority.Low;
         }
@@ -166,6 +171,42 @@ namespace Pash.ParserIntrinsics
         ////            in					param			process		return
         ////            switch			throw			trap			try
         ////            until				using			var			while
+
+        /* These keywords are reserved for future use
+        readonly KeyTerm @class = null; // Initialized by reflection
+        readonly KeyTerm @define = null; // Initialized by reflection
+        readonly KeyTerm @from = null; // Initialized by reflection
+        readonly KeyTerm @using = null; // Initialized by reflection
+        readonly KeyTerm @var = null; // Initialized by reflection
+        */
+
+        public readonly KeyTerm @begin = null; // Initialized by reflection
+        public readonly KeyTerm @break = null; // Initialized by reflection
+        public readonly KeyTerm @catch = null; // Initialized by reflection
+        public readonly KeyTerm @continue = null; // Initialized by reflection
+        public readonly KeyTerm @data = null; // Initialized by reflection
+        public readonly KeyTerm @do = null; // Initialized by reflection
+        public readonly KeyTerm @dynamicparam = null; // Initialized by reflection
+        public readonly KeyTerm @else = null; // Initialized by reflection
+        public readonly KeyTerm @elseif = null; // Initialized by reflection
+        public readonly KeyTerm @end = null; // Initialized by reflection
+        public readonly KeyTerm @exit = null; // Initialized by reflection
+        public readonly KeyTerm @filter = null; // Initialized by reflection
+        public readonly KeyTerm @finally = null; // Initialized by reflection
+        public readonly KeyTerm @for = null; // Initialized by reflection
+        public readonly KeyTerm @foreach = null; // Initialized by reflection
+        public readonly KeyTerm @function = null; // Initialized by reflection
+        public readonly KeyTerm @if = null; // Initialized by reflection
+        public readonly KeyTerm @in = null; // Initialized by reflection
+        public readonly KeyTerm @param = null; // Initialized by reflection
+        public readonly KeyTerm @process = null; // Initialized by reflection
+        public readonly KeyTerm @return = null; // Initialized by reflection
+        public readonly KeyTerm @switch = null; // Initialized by reflection
+        public readonly KeyTerm @throw = null; // Initialized by reflection
+        public readonly KeyTerm @trap = null; // Initialized by reflection
+        public readonly KeyTerm @try = null; // Initialized by reflection
+        public readonly KeyTerm @until = null; // Initialized by reflection
+        public readonly KeyTerm @while = null; // Initialized by reflection
         #endregion
 
         #region B.1.6 Variables

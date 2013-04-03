@@ -424,7 +424,7 @@ namespace Pash.ParserIntrinsics
             ////            new_lines_opt   attribute_list_opt   new_lines_opt   param   new_lines_opt
             ////                    (   parameter_list_opt   new_lines_opt   )
             param_block.Rule =
-                /*  TODO: https://github.com/Pash-Project/Pash/issues/11 attribute_list_opt +  */ "param"
+                /*  TODO: https://github.com/Pash-Project/Pash/issues/11 attribute_list_opt +  */ @param
                         + "(" + parameter_list_opt + ")";
 
             ////        parameter_list:
@@ -466,7 +466,7 @@ namespace Pash.ParserIntrinsics
             ////        block_name:  one of
             ////            dynamicparam   begin   process   end
             block_name.Rule =
-                ToTerm("dynamicparam") | "begin" | "process" | "end";
+                @dynamicparam | @begin | @process | @end;
 
             ////        statement_block:
             ////            new_lines_opt   {   statement_list_opt   new_lines_opt   }
@@ -556,13 +556,13 @@ namespace Pash.ParserIntrinsics
             ////        if_statement:
             ////            if   new_lines_opt   (   new_lines_opt   pipeline   new_lines_opt   )   statement_block elseif_clauses_opt   else_clause_opt
             if_statement.Rule =
-                "if" + _if_statement_clause + elseif_clauses + else_clause_opt
+                @if + _if_statement_clause + elseif_clauses + else_clause_opt
                 ;
 
             ////        elseif_clause:
             ////            new_lines_opt   elseif   new_lines_opt   (   new_lines_opt   pipeline   new_lines_opt   )   statement_block
             elseif_clause.Rule =
-                "elseif" + _if_statement_clause
+                @elseif + _if_statement_clause
                 ;
 
             ////        elseif_clauses:
@@ -577,7 +577,7 @@ namespace Pash.ParserIntrinsics
             ////        else_clause:
             ////            new_lines_opt   else   statement_block
             else_clause.Rule =
-                 "else" + statement_block;
+                 @else + statement_block;
 
             ////        labeled_statement:
             ////            switch_statement
@@ -600,7 +600,7 @@ namespace Pash.ParserIntrinsics
             ////        switch_statement:
             ////            switch   new_lines_opt   switch_parameters_opt   switch_condition   switch_body
             switch_statement.Rule =
-                "switch" + switch_parameters_opt + switch_condition + switch_body;
+                @switch + switch_parameters_opt + switch_condition + switch_body;
 
             ////        switch_parameters:
             ////            switch_parameter
@@ -668,7 +668,7 @@ namespace Pash.ParserIntrinsics
             ////            foreach   new_lines_opt   (   new_lines_opt   variable   new_lines_opt   in   new_lines_opt   pipeline
             ////                    new_lines_opt   )   statement_block
             foreach_statement.Rule =
-                "foreach" + "(" + variable + "in" + pipeline +
+                @foreach + "(" + variable + @in + pipeline +
                      ")" + statement_block;
 
             ////        for_statement:
@@ -687,7 +687,7 @@ namespace Pash.ParserIntrinsics
             _for_statement_internals.Rule =
                 MakePlusRule(_for_statement_internals, statement_terminator, pipeline_opt);
             for_statement.Rule =
-                "for" + "(" + _for_statement_internals + ")" + statement_block;
+                @for + "(" + _for_statement_internals + ")" + statement_block;
 
             ////        for_initializer:
             ////            pipeline
@@ -707,14 +707,14 @@ namespace Pash.ParserIntrinsics
             ////        while_statement:
             ////            while   new_lines_opt   (   new_lines_opt   while_condition   new_lines_opt   )   statement_block
             while_statement.Rule =
-                "while" + "(" + while_condition + ")" + statement_block;
+                @while + "(" + while_condition + ")" + statement_block;
 
             ////        do_statement:
             ////            do   statement_block  new_lines_opt   while   new_lines_opt   (   while_condition   new_lines_opt   )
             ////            do   statement_block   new_lines_opt   until   new_lines_opt   (   while_condition   new_lines_opt   )
             do_statement.Rule = _do_statement_while | _do_statement_until;
-            _do_statement_while.Rule = "do" + statement_block + "while" + "(" + while_condition + ")";
-            _do_statement_until.Rule = "do" + statement_block + "until" + "(" + while_condition + ")";
+            _do_statement_while.Rule = @do + statement_block + @while + "(" + while_condition + ")";
+            _do_statement_until.Rule = @do + statement_block + @until + "(" + while_condition + ")";
 
             ////        while_condition:
             ////            new_lines_opt   pipeline
@@ -726,7 +726,7 @@ namespace Pash.ParserIntrinsics
             ////            filter   new_lines_opt   function_name   function_parameter_declaration_opt   {   script_block   }
             function_statement.Rule =
                  _function_or_filter_keyword + function_name + function_parameter_declaration_opt + "{" + script_block + "}";
-            _function_or_filter_keyword.Rule = ToTerm("function") | "filter";
+            _function_or_filter_keyword.Rule = @function | @filter;
 
             ////        function_name:
             ////            command_argument
@@ -747,11 +747,11 @@ namespace Pash.ParserIntrinsics
             ////            return   pipeline_opt
             ////            exit   pipeline_opt
             flow_control_statement.Rule = _flow_control_statement_break | _flow_control_statement_continue | _flow_control_statement_throw | _flow_control_statement_return | _flow_control_statement_exit;
-            _flow_control_statement_break.Rule = "break" + label_expression_opt;
-            _flow_control_statement_continue.Rule = "continue" + label_expression_opt;
-            _flow_control_statement_throw.Rule = "throw" + pipeline_opt;
-            _flow_control_statement_return.Rule = "return" + pipeline_opt;
-            _flow_control_statement_exit.Rule = "exit" + pipeline_opt;
+            _flow_control_statement_break.Rule = @break + label_expression_opt;
+            _flow_control_statement_continue.Rule = @continue + label_expression_opt;
+            _flow_control_statement_throw.Rule = @throw + pipeline_opt;
+            _flow_control_statement_return.Rule = @return + pipeline_opt;
+            _flow_control_statement_exit.Rule = @exit + pipeline_opt;
 
             ////        label_expression:
             ////            simple_name
@@ -765,7 +765,7 @@ namespace Pash.ParserIntrinsics
             ////        trap_statement:
             ////            trap  new_lines_opt   type_literal_opt   new_lines_opt   statement_block
             trap_statement.Rule =
-                "trap" + type_literal_opt + statement_block;
+                @trap + type_literal_opt + statement_block;
 
             ////        try_statement:
             ////            try   statement_block   catch_clauses
@@ -774,11 +774,11 @@ namespace Pash.ParserIntrinsics
             try_statement.Rule =
                 _try_statement_catch | _try_statement_finally | _try_statement_catch_finally;
             _try_statement_catch.Rule =
-                "try" + statement_block + catch_clauses;
+                @try + statement_block + catch_clauses;
             _try_statement_finally.Rule =
-                "try" + statement_block + finally_clause;
+                @try + statement_block + finally_clause;
             _try_statement_catch_finally.Rule =
-                "try" + statement_block + catch_clauses + finally_clause;
+                @try + statement_block + catch_clauses + finally_clause;
 
             ////        catch_clauses:
             ////            catch_clause
@@ -789,7 +789,7 @@ namespace Pash.ParserIntrinsics
             ////        catch_clause:
             ////            new_lines_opt   catch   catch_type_list_opt   statement_block
             catch_clause.Rule =
-                 "catch" + catch_type_list_opt + statement_block;
+                 @catch + catch_type_list_opt + statement_block;
 
             ////        catch_type_list:
             ////            new_lines_opt   type_literal
@@ -800,12 +800,12 @@ namespace Pash.ParserIntrinsics
             ////        finally_clause:
             ////            new_lines_opt   finally   statement_block
             finally_clause.Rule =
-                 "finally" + statement_block;
+                 @finally + statement_block;
 
             ////        data_statement:
             ////            data    new_lines_opt   data_name   data_commands_allowed_opt   statement_block
             data_statement.Rule =
-                "data" + data_name + data_commands_allowed_opt + statement_block;
+                @data + data_name + data_commands_allowed_opt + statement_block;
 
             ////        data_name:
             ////            simple_name
