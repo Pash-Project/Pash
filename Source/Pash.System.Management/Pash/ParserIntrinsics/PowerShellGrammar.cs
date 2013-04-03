@@ -395,7 +395,6 @@ namespace Pash.ParserIntrinsics
                 /**/ | _comparison_operator_notlike				/**/ | _comparison_operator_notmatch				/**/ | _comparison_operator_replace
                 /**/ | _comparison_operator_split
                 ;
-            MarkTransient(comparison_operator);
 
             #endregion
 

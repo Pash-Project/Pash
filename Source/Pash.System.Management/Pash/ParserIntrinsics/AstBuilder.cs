@@ -448,15 +448,24 @@ namespace Pash.ParserIntrinsics
                 return BuildAdditiveExpressionAst(parseTreeNode.ChildNodes.Single());
             }
 
-            var comparisonOperatorTerminal = (PowerShellGrammar.ComparisonOperatorTerminal)(parseTreeNode.ChildNodes[1].Term);
+            var comparisonOperatorNode = parseTreeNode.ChildNodes[1];
 
             return new BinaryExpressionAst(
                 new ScriptExtent(parseTreeNode),
                 BuildComparisonExpressionAst(parseTreeNode.ChildNodes[0]),
-                comparisonOperatorTerminal.TokenKind,
+                GetComparisonOperatorTokenKind(comparisonOperatorNode),
                 BuildAdditiveExpressionAst(parseTreeNode.ChildNodes[2]),
                 new ScriptExtent(parseTreeNode.ChildNodes[1])
                 );
+        }
+
+        TokenKind GetComparisonOperatorTokenKind(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.comparison_operator);
+
+            var comparisonOperatorTerminal = (PowerShellGrammar.ComparisonOperatorTerminal)(parseTreeNode.ChildNodes.Single().Term);
+
+            return comparisonOperatorTerminal.TokenKind;
         }
 
         ExpressionAst BuildAdditiveExpressionAst(ParseTreeNode parseTreeNode)
