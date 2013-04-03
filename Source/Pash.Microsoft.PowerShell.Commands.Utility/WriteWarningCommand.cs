@@ -30,9 +30,9 @@ namespace Microsoft.PowerShell.Commands
         /// The message to write.
         /// </summary>
         [Parameter(
-            Position=0, 
-            Mandatory=true, 
-            ValueFromPipeline=true),
+            Position = 0,
+            Mandatory = true,
+            ValueFromPipeline = true),
         AllowEmptyString]
         public string Message { get; set; }
 

@@ -3,9 +3,9 @@ using System;
 
 namespace System.Management.Automation
 {
-	/// <summary>
-	/// The type of a parameter which accepts no values (a "switch").
-	/// </summary>
+    /// <summary>
+    /// The type of a parameter which accepts no values (a "switch").
+    /// </summary>
     public struct SwitchParameter
     {
         public SwitchParameter(bool isPresent)

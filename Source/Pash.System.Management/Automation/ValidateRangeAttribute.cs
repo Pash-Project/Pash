@@ -5,9 +5,9 @@ using System.Management.Automation.Internal;
 
 namespace System.Management.Automation
 {
-	/// <summary>
-	/// Ensures that the Parameter falls in between two values.
-	/// </summary>
+    /// <summary>
+    /// Ensures that the Parameter falls in between two values.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class ValidateRangeAttribute : ValidateEnumeratedArgumentsAttribute
     {
@@ -19,7 +19,7 @@ namespace System.Management.Automation
 
         public ValidateRangeAttribute(object minRange, object maxRange)
         {
-            if ((minRange == null) || (maxRange == null) || (!(minRange.GetType().Equals(maxRange.GetType())))) 
+            if ((minRange == null) || (maxRange == null) || (!(minRange.GetType().Equals(maxRange.GetType()))))
             {
                 throw new ValidationMetadataException("Fatal error with ValidateRange!");
             }
@@ -40,7 +40,7 @@ namespace System.Management.Automation
             if (maxCompare.CompareTo(element) < 0)
             {
                 throw new ValidationMetadataException("Value is too large!");
-            } 
+            }
         }
     }
 }

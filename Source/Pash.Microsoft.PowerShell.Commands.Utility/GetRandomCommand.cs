@@ -30,7 +30,8 @@ namespace Microsoft.PowerShell.Commands
         }
 
         [Parameter]
-        public int SetSeed {
+        public int SetSeed
+        {
             get
             {
                 return seed;

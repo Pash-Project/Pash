@@ -5,9 +5,9 @@ using System.Management.Automation.Internal;
 
 namespace System.Management.Automation
 {
-	/// <summary>
-	/// Ensures the the value of the parameter is of a specifc range of lengths.
-	/// </summary>
+    /// <summary>
+    /// Ensures the the value of the parameter is of a specifc range of lengths.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class ValidateLengthAttribute : ValidateEnumeratedArgumentsAttribute
     {

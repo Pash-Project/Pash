@@ -15,12 +15,12 @@ namespace System.Management.Automation
         {
         }
 
-        public PipelineClosedException(string message) 
+        public PipelineClosedException(string message)
             : base(message)
         {
         }
 
-        public PipelineClosedException(string message, Exception innerException) 
+        public PipelineClosedException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

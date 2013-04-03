@@ -34,30 +34,30 @@ namespace Microsoft.PowerShell.Commands
             {
                 StreamReader _file = new StreamReader(_path);
                 PSObject _obj = new PSObject();
-                
+
                 if (_file.Peek() == '#')
                 {
                     String _line = _file.ReadLine();
                     if (_line.StartsWith("#TYPE"))
                     {
-                    _obj.TypeNames.Add(_line.Substring(5).Trim());
+                        _obj.TypeNames.Add(_line.Substring(5).Trim());
                     }
                 }
 
 
                 // Hold the names of the properties, the capacity is pretty arbitrary
                 List<String> _names = new List<String>(16);
-                
+
                 bool inValues = false;
-                
+
                 while (!_file.EndOfStream)
                 {
                     char _ch = (char)_file.Read();
                 }
-               /* if ((_ch == ',')
-                {
-                    _obj.Properties.Add(new PSNoteProperty());
-                } */
+                /* if ((_ch == ',')
+                 {
+                     _obj.Properties.Add(new PSNoteProperty());
+                 } */
             }
         }
 
@@ -65,9 +65,9 @@ namespace Microsoft.PowerShell.Commands
         /// The path of the CSV file to import.
         /// </summary>
         [Parameter(Position = 0,
-            Mandatory = true, 
-            ValueFromPipeline = true, 
-            ValueFromPipelineByPropertyName = true), 
+            Mandatory = true,
+            ValueFromPipeline = true,
+            ValueFromPipelineByPropertyName = true),
         Alias(new string[] { "PSPath" })]
         public String[] Path { get; set; }
 

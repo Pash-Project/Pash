@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Security.Permissions;
 
 namespace System.Management.Automation
-{  
+{
     /// <summary>
     /// Exception thrown when there is a serious error running a cmdlet.
     /// </summary>
@@ -32,16 +32,18 @@ namespace System.Management.Automation
         {
         }
 
-        public CmdletInvocationException(string message) : base(message)
+        public CmdletInvocationException(string message)
+            : base(message)
         {
         }
 
-        public CmdletInvocationException(string message, Exception innerException) : base(message, innerException)
+        public CmdletInvocationException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
 
         //todo: implement
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter=true)]
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
         }

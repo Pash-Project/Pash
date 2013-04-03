@@ -8,23 +8,23 @@ namespace System.Management.Automation
     [Serializable]
     public class PipelineStoppedException : RuntimeException
     {
-        public PipelineStoppedException() 
+        public PipelineStoppedException()
         {
             base.Id = "PipelineStopped";
             base.Category = ErrorCategory.OperationStopped;
         }
 
-        public PipelineStoppedException(string message) 
+        public PipelineStoppedException(string message)
             : base(message)
         {
         }
 
-        protected PipelineStoppedException(SerializationInfo info, StreamingContext context) 
+        protected PipelineStoppedException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
 
-        public PipelineStoppedException(string message, Exception innerException) 
+        public PipelineStoppedException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

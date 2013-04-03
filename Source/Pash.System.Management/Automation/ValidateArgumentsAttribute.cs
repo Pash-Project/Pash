@@ -4,9 +4,9 @@ using System.Management.Automation.Internal;
 
 namespace System.Management.Automation
 {
-	/// <summary>
-	/// Abstract class that validates arguements from a parameter.
-	/// </summary>
+    /// <summary>
+    /// Abstract class that validates arguements from a parameter.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public abstract class ValidateArgumentsAttribute : CmdletMetadataAttribute
     {

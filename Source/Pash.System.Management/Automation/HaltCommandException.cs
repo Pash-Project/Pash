@@ -11,16 +11,17 @@ namespace System.Management.Automation
     [Serializable]
     public class HaltCommandException : SystemException
     {
-        public HaltCommandException() 
+        public HaltCommandException()
         {
         }
 
-        public HaltCommandException(string message) 
+        public HaltCommandException(string message)
             : base(message)
         {
         }
 
-        public HaltCommandException(string message, Exception innerException) : base(message, innerException)
+        public HaltCommandException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
 

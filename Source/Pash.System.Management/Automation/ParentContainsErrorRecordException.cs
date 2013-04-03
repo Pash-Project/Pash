@@ -15,17 +15,17 @@ namespace System.Management.Automation
         {
         }
 
-        public ParentContainsErrorRecordException(Exception wrapperException) 
+        public ParentContainsErrorRecordException(Exception wrapperException)
             : base(wrapperException.Message)
         {
         }
 
-        public ParentContainsErrorRecordException(string message) 
+        public ParentContainsErrorRecordException(string message)
             : base(message)
         {
         }
 
-        public ParentContainsErrorRecordException(string message, Exception innerException) 
+        public ParentContainsErrorRecordException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

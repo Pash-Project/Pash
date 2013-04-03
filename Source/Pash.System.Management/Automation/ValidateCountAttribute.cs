@@ -6,9 +6,9 @@ using System.Management.Automation.Internal;
 
 namespace System.Management.Automation
 {
-	/// <summary>
-	/// Validates the range of number of arguements a parameter can have.
-	/// </summary>
+    /// <summary>
+    /// Validates the range of number of arguements a parameter can have.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class ValidateCountAttribute : ValidateArgumentsAttribute
     {

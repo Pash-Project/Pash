@@ -16,8 +16,8 @@ namespace Microsoft.PowerShell.Commands
         }
 
         [Parameter(
-            Position = 1, 
-            Mandatory = true, 
+            Position = 1,
+            Mandatory = true,
             ValueFromPipelineByPropertyName = true)]
         public string NewName { get; set; }
 
@@ -29,15 +29,15 @@ namespace Microsoft.PowerShell.Commands
 
         [Alias(new string[] { "PSPath" }),
         Parameter(
-            Position = 0, 
-            Mandatory = true, 
-            ValueFromPipeline = true, 
+            Position = 0,
+            Mandatory = true,
+            ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true)]
         public string Path { get; set; }
 
         //protected override bool ProviderSupportsShouldProcess { get; }
     }
 
- 
+
 
 }

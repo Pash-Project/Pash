@@ -14,12 +14,12 @@ namespace System.Management.Automation
         {
         }
 
-        public DriveNotFoundException(string message) 
+        public DriveNotFoundException(string message)
             : base(message)
         {
         }
 
-        public DriveNotFoundException(string message, Exception innerException) 
+        public DriveNotFoundException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

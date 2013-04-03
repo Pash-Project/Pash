@@ -51,11 +51,11 @@ namespace System.Management.Automation
         {
             id = errorid;
             CommandName = command;
-        } 
+        }
 
         public override ErrorRecord ErrorRecord
         {
-            
+
             get
             {
                 if (error != null)

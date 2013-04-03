@@ -30,7 +30,7 @@ namespace Microsoft.PowerShell.Commands
 
         private StreamWriter file;
         private bool typeWritten;
-        
+
 
         protected override void BeginProcessing()
         {
@@ -68,7 +68,7 @@ namespace Microsoft.PowerShell.Commands
             line.Remove((line.Length - 1), 1);
 
             file.WriteLine(line.ToString());
-         
+
         }
 
         protected override void EndProcessing()

@@ -27,7 +27,7 @@ namespace Microsoft.PowerShell.Commands
 
             if (dateIsSet)
                 _date = Date;
- 
+
             else _date = DateTime.Now;
 
             if (Year != 0)
@@ -56,8 +56,8 @@ namespace Microsoft.PowerShell.Commands
         /// </summary>
         [Alias(new string[] { "LastWriteTime" }),
         Parameter(
-            Position = 0, 
-            ValueFromPipeline = true, 
+            Position = 0,
+            ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true)]
         public DateTime Date
         {

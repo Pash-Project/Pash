@@ -17,7 +17,7 @@ namespace System.Management.Automation
         /****************************************************
         * CONTRUCTORS                                      *              
         ****************************************************/
-        
+
         /// <summary>
         /// Builds a new PSObject.
         /// </summary>
@@ -149,17 +149,17 @@ namespace System.Management.Automation
         public static PSObject AsPSObject(object obj)
         {
             PSObject _psobj = obj as PSObject;
-            
+
             if (_psobj != null)
                 return _psobj;
-            
+
             return new PSObject(obj);
         }
 
         #endregion
 
         #region IFormattable Members
-       /****************************************************
+        /****************************************************
         * IFormattable Members                             *               
         ****************************************************/
 

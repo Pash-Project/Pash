@@ -4,15 +4,15 @@ using System.Collections;
 
 namespace System.Management.Automation
 {
-	/// <summary>
-	/// Ensures that the value assigned to the parameter is not null or empty.
-	/// </summary>
+    /// <summary>
+    /// Ensures that the value assigned to the parameter is not null or empty.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public sealed class ValidateNotNullOrEmptyAttribute : ValidateArgumentsAttribute
     {
         public ValidateNotNullOrEmptyAttribute() { }
 
-        protected override void Validate(object arguments, EngineIntrinsics engineIntrinsics) 
+        protected override void Validate(object arguments, EngineIntrinsics engineIntrinsics)
         {
             // Null object test
             if (arguments == null)

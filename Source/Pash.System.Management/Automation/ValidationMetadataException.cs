@@ -5,9 +5,9 @@ using System.Runtime.Serialization;
 
 namespace System.Management.Automation
 {
-	/// <summary>
-	/// Thrown when an validation attribute fails to validate.
-	/// </summary>
+    /// <summary>
+    /// Thrown when an validation attribute fails to validate.
+    /// </summary>
     [Serializable]
     public class ValidationMetadataException : MetadataException
     {

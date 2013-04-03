@@ -4,9 +4,9 @@ using System;
 
 namespace System.Management.Automation
 {
-	/// <summary>
-	/// The status of a given Pash object's signature.
-	/// </summary>
+    /// <summary>
+    /// The status of a given Pash object's signature.
+    /// </summary>
     public enum SignatureStatus
     {
         Valid,

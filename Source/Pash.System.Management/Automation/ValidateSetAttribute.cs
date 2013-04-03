@@ -5,13 +5,13 @@ using System.Management.Automation.Internal;
 
 namespace System.Management.Automation
 {
-	/// <summary>
-	/// Validation attribute that checks if the parameter is of a certain set of options.
-	/// </summary>
+    /// <summary>
+    /// Validation attribute that checks if the parameter is of a certain set of options.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class ValidateSetAttribute : ValidateEnumeratedArgumentsAttribute
     {
-        
+
         public bool IgnoreCase { get; set; }
 
         public IList<string> ValidValues { get; private set; }
@@ -35,14 +35,14 @@ namespace System.Management.Automation
 
             string _element = element.ToString();
 
-            foreach (String _valid in ValidValues) 
+            foreach (String _valid in ValidValues)
             {
                 if (String.Equals(_valid, _element, StringComparison.CurrentCultureIgnoreCase))
                 {
                     return;
                 }
             }
-            
+
             //TODO: Might need to be fixed
             throw new ValidationMetadataException("Parameter must have value " + ValidValues.ToString());
         }
