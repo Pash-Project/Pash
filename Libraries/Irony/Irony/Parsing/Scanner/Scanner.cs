@@ -233,6 +233,12 @@ namespace Irony.Parsing {
         //skip it if it is shorter than previous token
         if (priorToken != null && !priorToken.IsError() && (token.Length < priorToken.Length))
           continue; 
+        if (priorToken != null && !priorToken.IsError() && (token.Length == priorToken.Length))
+        {
+          // This indicates an ambiguity in the grammar, where two terminals with the same priority
+          // become tokens of the same length. 
+          throw new Exception(string.Format("Ambiguous token match: {0} or {1}?", token, priorToken));
+        }
         Context.CurrentToken = token; //now it becomes current token
         term.OnValidateToken(Context); //validate it
         if (Context.CurrentToken != null) 

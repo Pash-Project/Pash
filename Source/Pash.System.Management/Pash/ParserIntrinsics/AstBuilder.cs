@@ -279,9 +279,7 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.statement_block);
 
-            parseTreeNode = parseTreeNode.ChildNodes.Single();
-
-            if (parseTreeNode.Term == this._grammar._statement_block_empty)
+            if (parseTreeNode.ChildNodes.Count == 2)
             {
                 return new StatementBlockAst(
                     new ScriptExtent(parseTreeNode),
@@ -289,8 +287,7 @@ namespace Pash.ParserIntrinsics
                     null
                     );
             }
-
-            if (parseTreeNode.Term == this._grammar._statement_block_full)
+            else
             {
                 return BuildStatementListAst(parseTreeNode.ChildNodes[1]);
             }
@@ -448,15 +445,24 @@ namespace Pash.ParserIntrinsics
                 return BuildAdditiveExpressionAst(parseTreeNode.ChildNodes.Single());
             }
 
-            var comparisonOperatorTerminal = (PowerShellGrammar.ComparisonOperatorTerminal)(parseTreeNode.ChildNodes[1].Term);
+            var comparisonOperatorNode = parseTreeNode.ChildNodes[1];
 
             return new BinaryExpressionAst(
                 new ScriptExtent(parseTreeNode),
                 BuildComparisonExpressionAst(parseTreeNode.ChildNodes[0]),
-                comparisonOperatorTerminal.TokenKind,
+                GetComparisonOperatorTokenKind(comparisonOperatorNode),
                 BuildAdditiveExpressionAst(parseTreeNode.ChildNodes[2]),
                 new ScriptExtent(parseTreeNode.ChildNodes[1])
                 );
+        }
+
+        TokenKind GetComparisonOperatorTokenKind(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.comparison_operator);
+
+            var comparisonOperatorTerminal = (PowerShellGrammar.ComparisonOperatorTerminal)(parseTreeNode.ChildNodes.Single().Term);
+
+            return comparisonOperatorTerminal.TokenKind;
         }
 
         ExpressionAst BuildAdditiveExpressionAst(ParseTreeNode parseTreeNode)
@@ -756,6 +762,7 @@ namespace Pash.ParserIntrinsics
                 return BuildAdditiveArgumentExpressionAst(parseTreeNode.ChildNodes.Single());
             }
 
+            // This should probably call GetComparisonOperatorTokenKind
             var comparisonOperatorTerminal = (PowerShellGrammar.ComparisonOperatorTerminal)(parseTreeNode.ChildNodes[1].Term);
 
             return new BinaryExpressionAst(
@@ -1219,10 +1226,7 @@ namespace Pash.ParserIntrinsics
 
 
             // I'm confused by the idea that a generic_token could have several of these things smushed together, like this:
-            //    PS> $x = "Get-"
-            //    PS> $x"ChildItem"     # really? This gives an error in PowerShell. But:
-            //    PS> & $x"ChildItem"   # works!
-            //    PS> g"et-childite"m   # also works
+            //    PS> g"et-childite"m   # OK!
 
             var match = this._grammar.generic_token.Expression.Match(parseTreeNode.Token.Text);
 
