@@ -6,6 +6,9 @@ using System.Management.Automation.Provider;
 
 namespace System.Management.Automation
 {
+    /// <summary>
+    /// Exposes functionality to cmdlets from providers.
+    /// </summary>
     public sealed class ContentCmdletProviderIntrinsics
     {
         private InternalCommand _cmdlet;
@@ -17,14 +20,5 @@ namespace System.Management.Automation
         public void Clear(string path) { throw new NotImplementedException(); }
         public Collection<IContentReader> GetReader(string path) { throw new NotImplementedException(); }
         public Collection<IContentWriter> GetWriter(string path) { throw new NotImplementedException(); }
-
-        // internals
-        //internal void Clear(string path, CmdletProviderContext context);
-        //internal object ClearContentDynamicParameters(string path, CmdletProviderContext context);
-        //internal ContentCmdletProviderIntrinsics(SessionStateInternal sessionState);
-        //internal object GetContentReaderDynamicParameters(string path, CmdletProviderContext context);
-        //internal object GetContentWriterDynamicParameters(string path, CmdletProviderContext context);
-        //internal Collection<IContentReader> GetReader(string path, CmdletProviderContext context);
-        //internal Collection<IContentWriter> GetWriter(string path, CmdletProviderContext context);
     }
 }

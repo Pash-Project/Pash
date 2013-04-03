@@ -6,6 +6,9 @@ using Pash.Implementation;
 
 namespace System.Management.Automation
 {
+    /// <summary>
+    /// Contains information about a Pash Alias.
+    /// </summary>
     public class AliasInfo : CommandInfo
     {
         private string _definition;

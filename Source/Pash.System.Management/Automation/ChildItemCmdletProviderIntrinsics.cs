@@ -6,6 +6,9 @@ using Pash.Implementation;
 
 namespace System.Management.Automation
 {
+    /// <summary>
+    /// Handles child items in providers.
+    /// </summary>
     public sealed class ChildItemCmdletProviderIntrinsics
     {
         private InternalCommand _cmdlet;
@@ -28,14 +31,6 @@ namespace System.Management.Automation
         {
             throw new NotImplementedException();
         }
-
-        // internals
-        //internal ChildItemCmdletProviderIntrinsics(SessionStateInternal sessionState);
-        //internal void Get(string path, bool recurse, CmdletProviderContext context);
-        //internal object GetChildItemsDynamicParameters(string path, bool recurse, CmdletProviderContext context);
-        //internal object GetChildNamesDynamicParameters(string path, CmdletProviderContext context);
-        //internal void GetNames(string path, ReturnContainers returnContainers, bool recurse, CmdletProviderContext context);
-        //internal bool HasChild(string path, CmdletProviderContext context);
 
         internal Collection<PSObject> Get(string path, bool recurse, ProviderRuntime providerRuntime)
         {

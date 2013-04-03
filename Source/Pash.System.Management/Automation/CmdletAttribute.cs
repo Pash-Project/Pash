@@ -6,6 +6,9 @@ using System.Management.Automation.Internal;
 
 namespace System.Management.Automation
 {
+    /// <summary>
+    /// Represents the Cmdlet attribute that all cmdlet classes are prefixed with. Has info like the Verb/Noun Name.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class CmdletAttribute : CmdletMetadataAttribute
     {

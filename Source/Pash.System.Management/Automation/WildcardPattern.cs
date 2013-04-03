@@ -21,19 +21,41 @@ namespace System.Management.Automation
             _options = options;
         }
 
+        /// <summary>
+        /// Checks if a given pattern is a wildcard.
+        /// </summary>
+        /// <param name="pattern">The pattern to check</param>
+        /// <returns>True if it is, false if it isn't.</returns>
         public static bool ContainsWildcardCharacters(string pattern)
         {
-            if ((pattern == null) || (pattern.Length == 0))
+            if (String.IsNullOrEmpty(pattern))
             {
                 return false;
             }
 
-            // TODO: deal with '[' & ']'
-            return pattern.IndexOfAny(new char[] { '?', '*' }) != -1;
+            return pattern.IndexOfAny(new char[] {'?', '*', '[', ']'}) != -1;
         }
 
-        public static string Escape(string pattern) { throw new NotImplementedException(); }
+        /// <summary>
+        /// Converts a string with without characters to one with escape characters.
+        /// </summary>
+        /// <param name="pattern">The pattern to use.</param>
+        /// <returns>The pattern with escape characters.</returns>
+        public static string Escape(string pattern)
+        {
+            // Looks pretty, but could be made faster.
+            return
+                pattern.Replace("*", "`*")
+                       .Replace("?", "`?")
+                       .Replace("[", "`[")
+                       .Replace("]", "`]");
+        }
 
+        /// <summary>
+        /// Checks if a given input is a wildcard match.
+        /// </summary>
+        /// <param name="input">The given input.</param>
+        /// <returns>True if it is, false if it isn't.</returns>
         public bool IsMatch(string input)
         {
             if (Clear())
@@ -43,7 +65,22 @@ namespace System.Management.Automation
             return false;
         }
 
-        public static string Unescape(string pattern) { throw new NotImplementedException(); }
+        /// <summary>
+        /// Converts a string with escape characters to one without. Opposite of Escape()
+        /// </summary>
+        /// <param name="pattern">The pattern to use.</param>
+        /// <returns>The pattern without escape characters.</returns>
+        public static string Unescape(string pattern) 
+        {
+            // This block of code is actually about the same speed as a linear search because Mono (and probably .NET) seem to use the
+            // Tuned Boyer-Moore text searching algorithm for Sting.Replace()
+            return
+                pattern.Replace("`*", "*")
+                       .Replace("`?", "?")
+                       .Replace("`[", "[")
+                       .Replace("`]", "]");
+
+        }
 
         private bool Clear()
         {
@@ -86,9 +123,9 @@ namespace System.Management.Automation
 
             // TODO: make this smarter / beef it up
 
-            pattern = pattern.Replace(".", "\\.");
-            pattern = pattern.Replace("*", ".*");
-            pattern = pattern.Replace("?", ".?");
+            pattern = pattern.Replace(".", "\\.")
+                             .Replace("*", ".*")
+                             .Replace("?", ".?");
 
             return pattern;
         }

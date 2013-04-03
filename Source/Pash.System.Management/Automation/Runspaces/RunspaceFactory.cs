@@ -30,5 +30,17 @@ namespace System.Management.Automation.Runspaces
         {
             return new LocalRunspace(host, runspaceConfiguration);
         }
+
+        public static Runspace CreateRunspace(PSHost host, InitialSessionState initialSessionState)
+        {
+            return new LocalRunspace(host, initialSessionState);
+        }
+
+        public static Runspace CreateRunspace(InitialSessionState initialSessionState)
+        {
+            PSHost host = new LocalHost(); // DefaultHost(Thread.CurrentThread.CurrentCulture, Thread.CurrentThread.CurrentUICulture);
+            return RunspaceFactory.CreateRunspace(host, initialSessionState);
+        }
+
     }
 }

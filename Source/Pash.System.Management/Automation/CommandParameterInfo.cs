@@ -5,6 +5,9 @@ using System.Collections.ObjectModel;
 
 namespace System.Management.Automation
 {
+    /// <summary>
+    /// A type representing information about a command's parameters.
+    /// </summary>
     public class CommandParameterInfo
     {
         public ReadOnlyCollection<string> Aliases { get; private set; }
@@ -33,11 +36,6 @@ namespace System.Management.Automation
             IsMandatory = paramAttr.Mandatory;
 
             // TODO: fill in aliases
-        }
-
-        public override string ToString()
-        {
-            return "{0} <{1}>".FormatString(Name, ParameterType);
         }
     }
 }
