@@ -1219,10 +1219,7 @@ namespace Pash.ParserIntrinsics
 
 
             // I'm confused by the idea that a generic_token could have several of these things smushed together, like this:
-            //    PS> $x = "Get-"
-            //    PS> $x"ChildItem"     # really? This gives an error in PowerShell. But:
-            //    PS> & $x"ChildItem"   # works!
-            //    PS> g"et-childite"m   # also works
+            //    PS> g"et-childite"m   # OK!
 
             var match = this._grammar.generic_token.Expression.Match(parseTreeNode.Token.Text);
 
