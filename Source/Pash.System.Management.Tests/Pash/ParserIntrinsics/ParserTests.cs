@@ -22,6 +22,7 @@ namespace Pash.ParserIntrinsics.Tests
         [TestCase(@"if ($true) {}")]
         [TestCase(@"if ($true) { }")] // having whitespace here was causing a parse error.
         [TestCase(@"if ($host.Name -eq ""Console"") {  }")]
+        [TestCase(@"if ($host.Name -ne ""Console"") {  }")]
         [TestCase(@"if ($true) {} else {}")]
         [TestCase(@"if ($true) {} elseif ($true) {} ")]
         [TestCase(@"if ($true) {} elseif {$true) {} else {}", Explicit = true)]
@@ -106,7 +107,7 @@ namespace Pash.ParserIntrinsics.Tests
             AssertIsValidInput(input);
         }
 
-        [TestCase(@"$a = [int[]](10,20,30)		# [int[]], Length 3")]
+        [TestCase(@"$a = [int[]](10,20,30)		# [int[]], Length 3", Explicit = true)]
         [TestCase(@"$a[1]								# returns int 20")]
         [TestCase(@"$a[20]							# no such position, returns $null")]
         [TestCase(@"$a[-1]							# returns int 30, i.e., $a[$a.Length-1]")]
@@ -139,9 +140,9 @@ namespace Pash.ParserIntrinsics.Tests
 
 
         [Test]
-        [TestCase(@"[int[]](30,40,50,60,70,80,90)")]
+        [TestCase(@"[int[]](30,40,50,60,70,80,90)", Explicit = true)]
 
-        [TestCase(@"$a = [int[]](30,40,50,60,70,80,90)")]
+        [TestCase(@"$a = [int[]](30,40,50,60,70,80,90)", Explicit = true)]
         [TestCase(@"$a[1,3,5]					# slice has Length 3, value 40,60,80")]
         [TestCase(@"++$a[1,3,5][1]				# preincrement 60 in array 40,60,80")]
         [TestCase(@"$a[,5]						# slice with Length 1")]

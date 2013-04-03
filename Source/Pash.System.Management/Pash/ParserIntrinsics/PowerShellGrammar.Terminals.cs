@@ -720,6 +720,7 @@ namespace Pash.ParserIntrinsics
             {
                 this.Operator = @operator;
                 this.TokenKind = tokenKind;
+                Priority = TerminalPriority.ReservedWords;
             }
         }
 

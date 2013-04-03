@@ -1369,10 +1369,11 @@ namespace Pash.ParserIntrinsics
             ////            ,
             ////            dimension   ,
             type_spec.Rule =
-                _type_spec_array
-                |
-                _type_spec_generic
-                |
+                // TODO:
+                //_type_spec_array
+                //|
+                //_type_spec_generic
+                //|
                 type_name
                 ;
 

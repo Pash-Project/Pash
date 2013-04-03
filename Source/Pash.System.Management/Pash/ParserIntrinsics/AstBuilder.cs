@@ -762,6 +762,7 @@ namespace Pash.ParserIntrinsics
                 return BuildAdditiveArgumentExpressionAst(parseTreeNode.ChildNodes.Single());
             }
 
+            // This should probably call GetComparisonOperatorTokenKind
             var comparisonOperatorTerminal = (PowerShellGrammar.ComparisonOperatorTerminal)(parseTreeNode.ChildNodes[1].Term);
 
             return new BinaryExpressionAst(
