@@ -51,6 +51,19 @@ namespace TestHost
         }
 
         [Test]
+        public void AnotherIfTest()
+        {
+            var result = TestHost.Execute(
+                @"$x = ""hi""",
+                @"if ($x.Length -ne 2) { write-host ""xxx"" }",
+                @"if ($x.Length -ne 3) { write-host ""yyy"" }"
+                );
+
+            // the fact that it prints out `$x = hi` is a known bug
+            StringAssert.AreEqualIgnoringCase("$x = hi" + Environment.NewLine + "yyy" + Environment.NewLine, result);
+        }
+
+        [Test]
         public void ElseifTest()
         {
             StringAssert.AreEqualIgnoringCase("yyy" + Environment.NewLine, TestHost.Execute("if (1 -eq 2) { 'xxx' } elseif (1 -eq 1) { 'yyy' }"));

@@ -35,51 +35,56 @@ namespace ParserTests
             ParseInput(@"C:\foo.ps1");
         }
 
-        [Test]
-        public void IfEmptyStatementTest()
+        [TestFixture]
+        public class ConditionalTests
         {
-            IfStatementAst ifStatementAst = ParseInput("if ($true) {}")
-                .EndBlock
-                .Statements[0]
-                ;
 
-            CollectionAssert.IsEmpty(ifStatementAst.Clauses.Single().Item2.Statements);
-            Assert.IsNull(ifStatementAst.ElseClause);
-        }
+            [Test]
+            public void IfEmptyStatementTest()
+            {
+                IfStatementAst ifStatementAst = ParseInput("if ($true) {}")
+                    .EndBlock
+                    .Statements[0]
+                    ;
 
-        [Test]
-        public void IfWithStatementTest()
-        {
-            IfStatementAst ifStatementAst = ParseInput("if ($true) { Get-ChildItem }")
-                .EndBlock
-                .Statements[0]
-                ;
+                CollectionAssert.IsEmpty(ifStatementAst.Clauses.Single().Item2.Statements);
+                Assert.IsNull(ifStatementAst.ElseClause);
+            }
 
-            Assert.AreEqual(1, ifStatementAst.Clauses.Single().Item2.Statements.Count);
-            Assert.IsNull(ifStatementAst.ElseClause);
-        }
+            [Test]
+            public void IfWithStatementTest()
+            {
+                IfStatementAst ifStatementAst = ParseInput("if ($true) { Get-ChildItem }")
+                    .EndBlock
+                    .Statements[0]
+                    ;
 
-        [Test]
-        public void IfElseTest()
-        {
-            IfStatementAst ifStatementAst = ParseInput("if ($true) {} else {}")
-                .EndBlock
-                .Statements[0]
-                ;
+                Assert.AreEqual(1, ifStatementAst.Clauses.Single().Item2.Statements.Count);
+                Assert.IsNull(ifStatementAst.ElseClause);
+            }
 
-            Assert.IsNotNull(ifStatementAst.ElseClause);
-        }
+            [Test]
+            public void IfElseTest()
+            {
+                IfStatementAst ifStatementAst = ParseInput("if ($true) {} else {}")
+                    .EndBlock
+                    .Statements[0]
+                    ;
 
-        [Test]
-        public void IfElseifTest()
-        {
-            IfStatementAst ifStatementAst = ParseInput("if ($true) {} elseif ($false) {}")
-                .EndBlock
-                .Statements[0]
-                ;
+                Assert.IsNotNull(ifStatementAst.ElseClause);
+            }
 
-            Assert.IsNull(ifStatementAst.ElseClause);
-            Assert.AreEqual(2, ifStatementAst.Clauses.Count);
+            [Test]
+            public void IfElseifTest()
+            {
+                IfStatementAst ifStatementAst = ParseInput("if ($true) {} elseif ($false) {}")
+                    .EndBlock
+                    .Statements[0]
+                    ;
+
+                Assert.IsNull(ifStatementAst.ElseClause);
+                Assert.AreEqual(2, ifStatementAst.Clauses.Count);
+            }
         }
 
         [Test]
