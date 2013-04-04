@@ -280,6 +280,7 @@
     <Compile Include="Automation\RunspacePoolStateInfo.cs" />
     <Compile Include="Automation\Runspaces\AuthenticationMechanism.cs" />
     <Compile Include="Automation\Runspaces\AuthorizationManager.cs" />
+    <Compile Include="Automation\Runspaces\CmdletConfigurationEntry.cs" />
     <Compile Include="Automation\Runspaces\Command.cs" />
     <Compile Include="Automation\Runspaces\CommandCollection.cs" />
     <Compile Include="Automation\Runspaces\CommandOrigin.cs" />
