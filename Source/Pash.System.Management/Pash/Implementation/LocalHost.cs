@@ -43,7 +43,7 @@ namespace Pash.Implementation
 
         public override string Name
         {
-            get { return "LocalHost"; }
+            get { return "ConsoleHost"; }
         }
 
         public override void NotifyBeginApplication()
