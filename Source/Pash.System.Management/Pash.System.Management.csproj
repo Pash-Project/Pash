@@ -368,6 +368,7 @@
     <Compile Include="Automation\WildcardPattern.cs" />
     <Compile Include="Automation\WildcardPatternException.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Extensions\Irony\ValidateTokenEventArgsExtensions.cs" />
     <Compile Include="Extensions\QueueExtensions.cs" />
     <Compile Include="Extensions\Reflection.cs" />
     <Compile Include="Extensions\String.cs" />
@@ -420,6 +421,7 @@
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.cs" />
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.Terminals.cs" />
     <Compile Include="Pash\ParserIntrinsics\ScriptExtent.cs" />
+    <Compile Include="Pash\ParserIntrinsics\SkippedTerminal.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Pash\Path.cs" />
     <Compile Include="Pash\PathNavigation.cs" />

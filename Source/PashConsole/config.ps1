@@ -1,5 +1,7 @@
 
-function Prompt { 'PASH ' + (Get-Location) + '> ' }
+function Prompt {
+    'PASH ' + (Get-Location) + '> '
+}
 
 #function prompt { 'PASH ' + $(Get-Location) + $(if ($nestedpromptlevel -ge 1) { '>>' }) + '> ' }
 #. HelpPagingFunction.Library.ps1
