@@ -26,7 +26,7 @@ namespace System.Management.Automation
         {
             get
             {
-                return ((pipelineProcessor != null) && pipelineProcessor.Stopping);
+                return (pipelineProcessor != null) && pipelineProcessor.Stopping;
             }
         }
 
@@ -102,7 +102,7 @@ namespace System.Management.Automation
                 IEnumerator enumerator = GetEnumerator(sendToPipeline);
                 if (enumerator != null)
                 {
-                    while ((enumerator.MoveNext()))
+                    while (enumerator.MoveNext())
                     {
                         WriteObject(enumerator.Current);
                     }
