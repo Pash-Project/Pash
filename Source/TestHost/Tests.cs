@@ -12,6 +12,12 @@ namespace TestHost
     public class Tests
     {
         [Test]
+        public void GetHostName()
+        {
+            StringAssert.AreEqualIgnoringCase("TestHost" + Environment.NewLine, TestHost.Execute("(Get-Host).Name"));
+        }
+
+        [Test]
         public void RootPathTest()
         {
             StringAssert.AreEqualIgnoringCase(Path.GetPathRoot(Environment.CurrentDirectory) + Environment.NewLine, TestHost.Execute("Set-Location / ; Get-Location"));

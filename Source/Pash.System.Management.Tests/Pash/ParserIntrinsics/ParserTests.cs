@@ -19,6 +19,16 @@ namespace Pash.ParserIntrinsics.Tests
         }
 
         [Test]
+        public void MultilineIfTest()
+        {
+            AssertIsValidInput(@"
+if ($true)
+{
+}
+");
+        }
+
+        [Test]
         [TestCase(@"if ($true) {}")]
         [TestCase(@"if ($true) { }")] // having whitespace here was causing a parse error.
         [TestCase(@"if ($host.Name -eq ""Console"") {  }")]
