@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using Irony;
 using System.Diagnostics;
+using Extensions.Irony;
 
 namespace Pash.ParserIntrinsics
 {
@@ -24,6 +25,7 @@ namespace Pash.ParserIntrinsics
 
         #region B.1.1 Line terminators
         public readonly NonTerminal new_lines = null; // Initialized by reflection.
+        public readonly Terminal skipped_new_line;
         #endregion
 
         #region B.1.8 Literals
@@ -247,7 +249,30 @@ namespace Pash.ParserIntrinsics
             // delegate to a new method, so we don't accidentally overwrite a readonly field.
             BuildProductionRules();
 
+            // Skip newlines within statements, e.g.:
+            //     if ($true)       # not the end of the statement - keep parsing!
+            //     {
+            //         "hi"
+            //     }
+            this.skipped_new_line = new SkippedTerminal(this.new_line_character);
+            new_line_character.ValidateToken += delegate(object sender, ValidateTokenEventArgs validateTokenEventArgs)
+            {
+                if (!IsNewlineExpected(validateTokenEventArgs))
+                {
+                    var current = validateTokenEventArgs.Context.CurrentToken;
+                    validateTokenEventArgs.ReplaceToken(this.skipped_new_line);
+                }
+            };
+
             Root = this.script_block;
+        }
+
+        bool IsNewlineExpected(ValidateTokenEventArgs validateTokenEventArgs)
+        {
+            // Remember that `validateTokenEventArgs.Context.CurrentParserState` points in to the finite state machine
+            // that Irony generates. `Actions` represents the valid transitions to new states. If this statement is
+            // `true`, it means the grammar has a plan for what to do with that `new_line_character`.
+            return validateTokenEventArgs.Context.CurrentParserState.Actions.ContainsKey(this.new_line_character);
         }
 
         // This is a little weird. Hopefully someone will have a bright idea

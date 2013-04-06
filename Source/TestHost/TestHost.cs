@@ -13,7 +13,6 @@ namespace TestHost
     {
         readonly PSHostUserInterface _ui = new TestHostUserInterface();
 
-
         public static string Execute(params string[] statements)
         {
             return Execute(false, error => {/* do nothing with error? weird? */}, statements);
@@ -89,7 +88,7 @@ namespace TestHost
 
         public override string Name
         {
-            get { throw new NotImplementedException(); }
+            get { return "TestHost"; }
         }
 
         public override PSHostUserInterface UI

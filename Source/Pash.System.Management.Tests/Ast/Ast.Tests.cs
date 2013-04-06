@@ -10,12 +10,19 @@ using Pash.ParserIntrinsics;
 using System.Collections;
 using System.Management.Automation;
 using System.Management.Automation.Language;
+using System.IO;
 
 namespace ParserTests
 {
     [TestFixture]
     public class AstTests
     {
+        [Test]
+        public void ConfigScriptIsValid()
+        {
+            var result = ParseInput(File.ReadAllText("config.ps1"));
+        }
+
         [Test, Description("Did this tokenize as 1 long string?")]
         public void TwoStrings()
         {
