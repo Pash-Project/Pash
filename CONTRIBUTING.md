@@ -81,6 +81,9 @@ Contribution Guidelines
 
 	**Good commit messages** should explain *why* you made this change, what other changes you considered, and why you rejected them, unless those things are obvious or irrelevant.
 
+5. **Don't write code you don't need.**
+
+	If you write some code you think we'll need some day, but there isn't a specific use for it now, it's just noise. Don't bother. How do you know it works? How do you know it won't break before you need it? At the very least, write tests for it.
 
 Coding Style:
 ----
