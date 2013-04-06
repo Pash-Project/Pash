@@ -4,24 +4,12 @@ using System;
 
 namespace System.Management.Automation
 {
-    /// <summary>
-    /// Information on a Pash filter.
-    /// </summary>
-    public class FilterInfo : CommandInfo
+    public class FilterInfo : FunctionInfo
     {
-        //todo: implement
-        private string definition;
-        public override string Definition
+        internal FilterInfo(string name, ScriptBlock filter)
+            : base(name, filter)
         {
-            get
-            {
-                return definition;
-            }
         }
-
-        public ScopedItemOptions Options { get; set; }
-
-        public ScriptBlock ScriptBlock { get; private set; }
     }
 }
 
