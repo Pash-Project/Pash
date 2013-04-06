@@ -3,6 +3,11 @@ function Prompt {
     'PASH ' + (Get-Location) + '> '
 }
 
+# TODO: Use `Set-Variable` to make this readonly,
+# e.g.
+#    Set-Variable -Name Host -Value (Get-Host) -Options ReadOnly
+$Host = Get-Host
+
 #function prompt { 'PASH ' + $(Get-Location) + $(if ($nestedpromptlevel -ge 1) { '>>' }) + '> ' }
 #. HelpPagingFunction.Library.ps1
       
