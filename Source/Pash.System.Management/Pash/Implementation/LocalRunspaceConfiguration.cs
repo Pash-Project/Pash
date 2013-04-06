@@ -5,6 +5,12 @@ namespace Pash.Implementation
 {
     public class LocalRunspaceConfiguration : RunspaceConfiguration
     {
-
+		public override string ShellId
+		{
+			get
+			{
+				return "LocalRunspaceConfiguration";
+			}
+		}
     }
 }

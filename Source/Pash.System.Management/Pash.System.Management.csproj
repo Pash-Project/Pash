@@ -55,6 +55,9 @@
     <Compile Include="Automation\ArgumentTransformationAttribute.cs" />
     <Compile Include="Automation\ArgumentTransformationMetadataException.cs" />
     <Compile Include="Automation\AuthorizationManager.cs" />
+    <Compile Include="Automation\Runspaces\AssemblyConfigurationEntry.cs" />
+    <Compile Include="Automation\Runspaces\FormatConfigurationEntry.cs" />
+    <Compile Include="Automation\Runspaces\TypeConfigurationEntry.cs" />
     <Compile Include="Automation\ChildItemCmdletProviderIntrinsics.cs" />
     <Compile Include="Automation\Cmdlet.cs" />
     <Compile Include="Automation\CmdletAttribute.cs" />
