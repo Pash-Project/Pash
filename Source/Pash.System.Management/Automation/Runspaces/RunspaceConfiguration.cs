@@ -12,6 +12,10 @@ namespace System.Management.Automation.Runspaces
             get;
         }
 
+        protected RunspaceConfiguration()
+        {
+        }
+
         public virtual RunspaceConfigurationEntryCollection<CmdletConfigurationEntry> Cmdlets
         {
             get
