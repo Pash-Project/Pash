@@ -12,8 +12,8 @@ namespace System.Management.Automation
     internal class CommandProcessor : CommandProcessorBase
     {
         internal Cmdlet Command { get; set; }
-        private CmdletInfo _cmdletInfo;
-        private bool _beganProcessing;
+        readonly CmdletInfo _cmdletInfo;
+        bool _beganProcessing;
 
         public CommandProcessor(CmdletInfo cmdletInfo)
             : base(cmdletInfo)

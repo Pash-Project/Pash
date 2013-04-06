@@ -13,10 +13,6 @@ namespace Microsoft.PowerShell.Commands
     {
         public const string ProviderName = "Function";
 
-        public FunctionProvider()
-        {
-        }
-
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
             PSDriveInfo item = new PSDriveInfo("Function", base.ProviderInfo, string.Empty, string.Empty, null);
