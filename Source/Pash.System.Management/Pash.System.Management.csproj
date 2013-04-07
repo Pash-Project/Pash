@@ -420,6 +420,7 @@
     <Compile Include="Pash\Implementation\ScriptProcessor.cs" />
     <Compile Include="Pash\Implementation\SessionStateGlobal.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstBuilder.cs" />
+    <Compile Include="Pash\ParserIntrinsics\BacktickLineContinuationTerminal.cs" />
     <Compile Include="Pash\ParserIntrinsics\BinaryExpressionAst.cs" />
     <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammar.cs" />
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.cs" />

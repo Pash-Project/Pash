@@ -15,7 +15,9 @@ namespace Pash.ParserIntrinsics.Tests
         public void GrammarErrorsCount()
         {
             // Obviously, we'd rather drive this to 0, but for now, let's lock it down
-            Assert.AreEqual(2, PowerShellGrammar.Parser.Language.Errors.Count, PowerShellGrammar.Parser.Language.Errors.JoinString("\r\n"));
+            //
+            // Report this number in https://github.com/Pash-Project/Pash/issues/38
+            Assert.AreEqual(3, PowerShellGrammar.Parser.Language.Errors.Count, PowerShellGrammar.Parser.Language.Errors.JoinString("\r\n"));
         }
 
         [Test]
@@ -24,6 +26,17 @@ namespace Pash.ParserIntrinsics.Tests
             AssertIsValidInput(@"
 if ($true)
 {
+}
+");
+        }
+
+        [Test]
+        public void MultilineHashTable()
+        {
+            AssertIsValidInput(@"
+@{
+    a = 'b'
+    c = 'd'
 }
 ");
         }

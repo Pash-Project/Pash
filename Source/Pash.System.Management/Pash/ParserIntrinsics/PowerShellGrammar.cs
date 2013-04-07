@@ -264,6 +264,8 @@ namespace Pash.ParserIntrinsics
                 }
             };
 
+            NonGrammarTerminals.Add(new BacktickLineContinuationTerminal());
+
             Root = this.script_block;
         }
 
@@ -1188,7 +1190,7 @@ namespace Pash.ParserIntrinsics
             ////            hash_entry
             ////            hash_literal_body   statement_terminators   hash_entry
             hash_literal_body.Rule =
-                MakePlusRule(hash_literal_body, ToTerm(";"), hash_entry);
+                MakeListRule(hash_literal_body, statement_terminators, hash_entry, TermListOptions.PlusList | TermListOptions.AllowTrailingDelimiter);
 
             ////        hash_entry:
             ////            key_expression   =   new_lines_opt   statement
@@ -1473,21 +1475,6 @@ namespace Pash.ParserIntrinsics
                 ////            Form feed character (U+000C)
                 case '\u000C':
                     return 1;
-            }
-
-            ////            `   (The backtick character U+0060) followed by new_line_character
-            ////        new_line_character:
-            ////            Carriage return character (U+000D)
-            ////            Line feed character (U+000A)
-            ////            Carriage return character (U+000D) followed by line feed character (U+000A)
-            if (source.PreviewChar == '`')
-            {
-                // https://github.com/Pash-Project/Pash/issues/12
-                //if (source.NextPreviewChar == '\u000D' && source.NextNextPreviewChar == '\u000A') return 3;
-
-                if (source.NextPreviewChar == '\u000D') return 2;
-
-                if (source.NextPreviewChar == '\u000A') return 2;
             }
 
             return 0;
