@@ -291,8 +291,9 @@ namespace Pash.ParserIntrinsics
 
         ////        escaped_character:
         ////            `   (The backtick character U+0060) followed by any Unicode character
+        // "any unicode character" included newline, which didn't seem right (and broke line continuation)
         public readonly RegexBasedTerminal escaped_character = null; // Initialized by reflection
-        const string escaped_character_pattern = "(?<escaped_character>" + @"\u0060." + ")";
+        const string escaped_character_pattern = "(?<escaped_character>" + @"\u0060[^\r\n]" + ")";
 
         #endregion
 
@@ -783,5 +784,6 @@ namespace Pash.ParserIntrinsics
         // this appears to be missing from the language spec
         public readonly RegexBasedTerminal label = null; // Initialized by reflection
         const string label_pattern = "(?<label>" + @"\:" + simple_name_pattern + ")";
+
     }
 }
