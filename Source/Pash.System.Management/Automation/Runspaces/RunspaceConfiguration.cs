@@ -101,7 +101,7 @@ namespace System.Management.Automation.Runspaces
 
         public static RunspaceConfiguration Create()
         {
-            return null;
+            return RunspaceFactory.DefaultRunspaceConfiguration;
         }
 
         public PSSnapInInfo AddPSSnapIn(string name, out PSSnapInException warning)
