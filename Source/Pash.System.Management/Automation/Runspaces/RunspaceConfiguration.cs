@@ -6,6 +6,7 @@ namespace System.Management.Automation.Runspaces
 {
     public abstract class RunspaceConfiguration
     {
+		private RunspaceConfigurationEntryCollection<CmdletConfigurationEntry> cmdlets;
 
         public abstract string ShellId
         {
@@ -16,13 +17,18 @@ namespace System.Management.Automation.Runspaces
         {
         }
 
-        public virtual RunspaceConfigurationEntryCollection<CmdletConfigurationEntry> Cmdlets
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+		public virtual RunspaceConfigurationEntryCollection<CmdletConfigurationEntry> Cmdlets
+		{
+			get
+			{
+				if(this.cmdlets == null)
+				{
+					this.cmdlets = new RunspaceConfigurationEntryCollection<CmdletConfigurationEntry>();
+				}
+
+				return this.cmdlets;
+			}
+		}
 
         public virtual RunspaceConfigurationEntryCollection<ProviderConfigurationEntry> Providers
         {
