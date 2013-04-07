@@ -159,7 +159,7 @@ namespace Pash.Implementation
                 }
                 catch (Exception exception)
                 {
-                    _runspace.PSHost.UI.WriteErrorLine(exception.Message);
+                    _runspace.PSHost.UI.WriteErrorLine(exception.GetType().Name + ": " + exception.Message);
                     return null;
                 }
 
