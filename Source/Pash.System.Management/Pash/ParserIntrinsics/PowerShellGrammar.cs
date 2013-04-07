@@ -1190,7 +1190,7 @@ namespace Pash.ParserIntrinsics
             ////            hash_entry
             ////            hash_literal_body   statement_terminators   hash_entry
             hash_literal_body.Rule =
-                MakePlusRule(hash_literal_body, ToTerm(";"), hash_entry);
+                MakeListRule(hash_literal_body, statement_terminators, hash_entry, TermListOptions.PlusList | TermListOptions.AllowTrailingDelimiter);
 
             ////        hash_entry:
             ////            key_expression   =   new_lines_opt   statement
