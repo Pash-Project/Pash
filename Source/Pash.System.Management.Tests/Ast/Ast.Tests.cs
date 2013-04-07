@@ -864,5 +864,59 @@ ls
                 Assert.AreEqual("a", argumentAst.Value);
             }
         }
+
+        [TestFixture]
+        public class LineContinuationTests
+        {
+            [Test]
+            public void CarriageReturn()
+            {
+                IEnumerable<StatementAst> statements = ParseInput("Write-Host`\r'xxx'")
+                    .EndBlock
+                    .Statements;
+
+                Assert.AreEqual(1, statements.Count());
+            }
+
+            [Test]
+            public void LineFeed()
+            {
+                IEnumerable<StatementAst> statements = ParseInput("Write-Host`\n'xxx'")
+                    .EndBlock
+                    .Statements;
+
+                Assert.AreEqual(1, statements.Count());
+            }
+
+            [Test]
+            public void CarriageReturnLineFeed()
+            {
+                IEnumerable<StatementAst> statements = ParseInput("Write-Host`\r\n'xxx'")
+                    .EndBlock
+                    .Statements;
+
+                Assert.AreEqual(1, statements.Count());
+            }
+
+            [Test]
+            public void CarriageReturnCarriageReturn()
+            {
+                IEnumerable<StatementAst> statements = ParseInput("Write-Host`\r\r'xxx'")
+                    .EndBlock
+                    .Statements;
+
+                Assert.AreEqual(2, statements.Count());
+            }
+
+            [Test]
+            public void LineFeedLineFeed()
+            {
+                IEnumerable<StatementAst> statements = ParseInput("Write-Host`\n\n'xxx'")
+                    .EndBlock
+                    .Statements;
+
+                Assert.AreEqual(2, statements.Count());
+            }
+        }
     }
 }
