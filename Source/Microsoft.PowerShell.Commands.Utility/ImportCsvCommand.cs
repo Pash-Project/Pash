@@ -46,9 +46,9 @@ namespace Microsoft.PowerShell.Commands
 
 
                 // Hold the names of the properties, the capacity is pretty arbitrary
-                List<String> _names = new List<String>(16);
+                //List<String> _names = new List<String>(16);
 
-                bool inValues = false;
+                //bool inValues = false;
 
                 while (!_file.EndOfStream)
                 {
