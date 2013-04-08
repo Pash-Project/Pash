@@ -32,8 +32,8 @@ namespace Microsoft.PowerShell.Commands
 
         private Process[] _input;
         internal MatchType _matchType;
-        internal int[] _processIds;
-        internal string[] _processNames;
+        internal int[] _processIds = new int[1];
+        internal string[] _processNames = new string[1];
 
         internal Process[] AllProcesses
         {
