@@ -59,9 +59,9 @@
     <Compile Include="Tests.cs" />
     <Compile Include="System.Management\PathTests.cs" />
     <Compile Include="TestHelpers\NUnitSpecificationExtensions.cs" />
-    <Compile Include="FIleSystemTests\FileSystemTestBase.cs" />
-    <Compile Include="FIleSystemTests\FileSystemTestBaseTests.cs" />
-    <Compile Include="FIleSystemTests\FileSystemNavigationTests.cs" />
+    <Compile Include="FileSystemTests\FileSystemTestBase.cs" />
+    <Compile Include="FileSystemTests\FileSystemTestBaseTests.cs" />
+    <Compile Include="FileSystemTests\FileSystemNavigationTests.cs" />
     <Compile Include="System.Management\PathNavigationTests.cs" />
   </ItemGroup>
   <ItemGroup>
