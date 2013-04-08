@@ -84,7 +84,7 @@
     <Compile Include="WriteWarningCommand.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Pash.System.Management\System.Management.csproj">
+    <ProjectReference Include="..\System.Management\System.Management.csproj">
       <Project>{C5E303EC-5684-4C95-B0EC-2593E6662403}</Project>
       <Name>System.Management</Name>
     </ProjectReference>

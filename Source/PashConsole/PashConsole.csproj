@@ -46,15 +46,15 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Pash.Microsoft.Commands.Management\Microsoft.Commands.Management.csproj">
+    <ProjectReference Include="..\Microsoft.Commands.Management\Microsoft.Commands.Management.csproj">
       <Project>{91225A72-A021-4B7D-BA56-5E1B7AC02F03}</Project>
       <Name>Microsoft.Commands.Management</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Pash.Microsoft.PowerShell.Commands.Utility\Microsoft.PowerShell.Commands.Utility.csproj">
+    <ProjectReference Include="..\Microsoft.PowerShell.Commands.Utility\Microsoft.PowerShell.Commands.Utility.csproj">
       <Project>{0E1D573C-C57D-4A83-A739-3A38E719D87E}</Project>
       <Name>Microsoft.PowerShell.Commands.Utility</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Pash.System.Management\System.Management.csproj">
+    <ProjectReference Include="..\System.Management\System.Management.csproj">
       <Project>{C5E303EC-5684-4C95-B0EC-2593E6662403}</Project>
       <Name>System.Management</Name>
     </ProjectReference>

@@ -2,13 +2,13 @@
   <Settings activeconfig="Debug" processModel="Default" domainUsage="Default" />
   <Config name="Debug" binpathtype="Auto" configfile="Source/TestHost/bin/Debug/TestHost.exe.config" >
     <assembly path="Source/TestHost/bin/Debug/TestHost.exe" />
-    <assembly path="Source/Pash.System.Management.Tests/bin/Debug/System.Management.Tests.dll" />
+    <assembly path="Source/System.Management.Tests/bin/Debug/System.Management.Tests.dll" />
     <assembly path="Libraries/Libraries.Tests/bin/Debug/Libraries.Tests.dll" />
     <assembly path="Spikes/Spikes/bin/Debug/Spikes.dll" />
   </Config>
   <Config name="Release" binpathtype="Auto">
     <assembly path="Source/TestHost/bin/Release/TestHost.exe" />
-    <assembly path="Source/Pash.System.Management.Tests/bin/Release/System.Management.Tests.dll" />
+    <assembly path="Source/System.Management.Tests/bin/Release/System.Management.Tests.dll" />
     <assembly path="Libraries/Libraries.Tests/bin/Release/Libraries.Tests.dll" />
     <assembly path="Spikes/Spikes/bin/Release/Spikes.dll" />
   </Config>

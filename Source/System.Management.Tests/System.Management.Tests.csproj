@@ -52,7 +52,7 @@
       <Project>{D81F5C91-D7DB-46E5-BC99-49488FB6814C}</Project>
       <Name>010.Irony.2010</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Pash.System.Management\System.Management.csproj">
+    <ProjectReference Include="..\System.Management\System.Management.csproj">
       <Project>{C5E303EC-5684-4C95-B0EC-2593E6662403}</Project>
       <Name>System.Management</Name>
     </ProjectReference>
