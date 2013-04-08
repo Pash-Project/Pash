@@ -57,12 +57,12 @@
     <Compile Include="TestHost.cs" />
     <Compile Include="TestHostUserInterface.cs" />
     <Compile Include="Tests.cs" />
-    <Compile Include="Pash.System.Management\PathTests.cs" />
+    <Compile Include="System.Management\PathTests.cs" />
     <Compile Include="TestHelpers\NUnitSpecificationExtensions.cs" />
     <Compile Include="FIleSystemTests\FileSystemTestBase.cs" />
     <Compile Include="FIleSystemTests\FileSystemTestBaseTests.cs" />
     <Compile Include="FIleSystemTests\FileSystemNavigationTests.cs" />
-    <Compile Include="Pash.System.Management\PathNavigationTests.cs" />
+    <Compile Include="System.Management\PathNavigationTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Commands.Management\Microsoft.Commands.Management.csproj">
