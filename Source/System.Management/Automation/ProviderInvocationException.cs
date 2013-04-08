@@ -31,6 +31,7 @@ namespace System.Management.Automation
         protected ProviderInvocationException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+            errorRecord = null;
         }
 
         //todo: implement

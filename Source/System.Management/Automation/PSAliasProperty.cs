@@ -40,22 +40,20 @@ namespace System.Management.Automation
 
         public Type ConversionType { get; private set; }
 
-        private bool isgettable;
         public override bool IsGettable
         {
             get
             {
-                return isgettable;
+                throw new NotImplementedException();
             }
         }
 
 
-        private bool issettable;
         public override bool IsSettable
         {
             get
             {
-                return issettable;
+                throw new NotImplementedException();
             }
         }
 
