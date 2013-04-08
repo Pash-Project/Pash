@@ -1225,21 +1225,17 @@ namespace Pash.ParserIntrinsics
             ////        argument_list:
             ////            (   argument_expression_list_opt   new_lines_opt   )
 
-            // ISSUE: https://github.com/Pash-Project/Pash/issues/9 - need whitespace prohibition
             _member_access_or_invocation_expression.Rule =
                 primary_expression + _member_access_or_invocation_expression_operator + member_name + PreferShiftHere() + "(" + argument_expression_list_opt + ")"
                 |
                 primary_expression + _member_access_or_invocation_expression_operator + member_name
                 ;
+
             _member_access_or_invocation_expression.Reduced += delegate(object sender, ReducedEventArgs e)
             {
-                var primaryExpressionSpan = e.ResultNode.ChildNodes[0].Span;
-                var operatorSpan = e.ResultNode.ChildNodes[1].Span;
-
-                if (SourceLocation.Compare(primaryExpressionSpan.Location + primaryExpressionSpan.Length, operatorSpan.Location) != 0)
+                if (!AreTerminalsContiguous(e.ResultNode.ChildNodes[0], e.ResultNode.ChildNodes[1]))
                 {
-                    e.Context.HasErrors = true;
-                    e.Context.AddParserMessage(ErrorLevel.Error, primaryExpressionSpan.Location + primaryExpressionSpan.Length, "unexpected whitespace");
+                    e.Context.AddParserError("unexpected whitespace", e.ResultNode.ChildNodes[0].Span.EndLocation());
                 }
             };
 
@@ -1463,6 +1459,11 @@ namespace Pash.ParserIntrinsics
                 ;
             #endregion
             #endregion
+        }
+
+        bool AreTerminalsContiguous(ParseTreeNode parseTreeNode1, ParseTreeNode parseTreeNode2)
+        {
+           return SourceLocation.Compare(parseTreeNode1.Span.EndLocation(), parseTreeNode2.Span.Location) == 0;
         }
 
         // returns the number of characters to skip
