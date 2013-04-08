@@ -1243,9 +1243,16 @@ namespace Pash.ParserIntrinsics
 
             ////        element_access: Note no whitespace is allowed between primary_expression and [.
             ////            primary_expression   [  new_lines_opt   expression   new_lines_opt   ]
-            // ISSUE: https://github.com/Pash-Project/Pash/issues/9 - need whitespace prohibition
             element_access.Rule =
                 primary_expression + PreferShiftHere() + "[" + expression + "]";
+
+            element_access.Reduced += delegate(object sender, ReducedEventArgs e)
+            {
+                if (!AreTerminalsContiguous(e.ResultNode.ChildNodes[0], e.ResultNode.ChildNodes[1]))
+                {
+                    e.Context.AddParserError("unexpected whitespace", e.ResultNode.ChildNodes[0].Span.EndLocation());
+                }
+            };
 
             ////        argument_expression_list:
             ////            argument_expression
