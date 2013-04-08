@@ -1225,19 +1225,34 @@ namespace Pash.ParserIntrinsics
             ////        argument_list:
             ////            (   argument_expression_list_opt   new_lines_opt   )
 
-            // ISSUE: https://github.com/Pash-Project/Pash/issues/9 - need whitespace prohibition
             _member_access_or_invocation_expression.Rule =
                 primary_expression + _member_access_or_invocation_expression_operator + member_name + PreferShiftHere() + "(" + argument_expression_list_opt + ")"
                 |
                 primary_expression + _member_access_or_invocation_expression_operator + member_name
                 ;
+
+            _member_access_or_invocation_expression.Reduced += delegate(object sender, ReducedEventArgs e)
+            {
+                if (!AreTerminalsContiguous(e.ResultNode.ChildNodes[0], e.ResultNode.ChildNodes[1]))
+                {
+                    e.Context.AddParserError("unexpected whitespace", e.ResultNode.ChildNodes[0].Span.EndLocation());
+                }
+            };
+
             _member_access_or_invocation_expression_operator.Rule = ToTerm(".") | "::";
 
             ////        element_access: Note no whitespace is allowed between primary_expression and [.
             ////            primary_expression   [  new_lines_opt   expression   new_lines_opt   ]
-            // ISSUE: https://github.com/Pash-Project/Pash/issues/9 - need whitespace prohibition
             element_access.Rule =
                 primary_expression + PreferShiftHere() + "[" + expression + "]";
+
+            element_access.Reduced += delegate(object sender, ReducedEventArgs e)
+            {
+                if (!AreTerminalsContiguous(e.ResultNode.ChildNodes[0], e.ResultNode.ChildNodes[1]))
+                {
+                    e.Context.AddParserError("unexpected whitespace", e.ResultNode.ChildNodes[0].Span.EndLocation());
+                }
+            };
 
             ////        argument_expression_list:
             ////            argument_expression
@@ -1451,6 +1466,11 @@ namespace Pash.ParserIntrinsics
                 ;
             #endregion
             #endregion
+        }
+
+        bool AreTerminalsContiguous(ParseTreeNode parseTreeNode1, ParseTreeNode parseTreeNode2)
+        {
+           return SourceLocation.Compare(parseTreeNode1.Span.EndLocation(), parseTreeNode2.Span.Location) == 0;
         }
 
         // returns the number of characters to skip

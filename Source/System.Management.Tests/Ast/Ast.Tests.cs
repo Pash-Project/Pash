@@ -395,9 +395,7 @@ ls
             Assert.AreEqual(2, indexExpressionAst.Index.Value);
         }
 
-        [Test
-            // This is a bug, but not a serious one.
-            //, ExpectedException(typeof(PowerShellGrammar.ParseException))
+        [Test, ExpectedException(typeof(PowerShellGrammar.ParseException))
         ]
         public void IndexWithSpaceShouldFail()
         {

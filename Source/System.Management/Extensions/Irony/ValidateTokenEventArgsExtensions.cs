@@ -1,4 +1,5 @@
-﻿using Irony.Parsing;
+﻿using Irony;
+using Irony.Parsing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,17 @@ namespace Extensions.Irony
         public static void ReplaceToken(this ValidateTokenEventArgs @this, Terminal newTerminal)
         {
             @this.ReplaceToken(new Token(newTerminal, @this.Context.CurrentToken.Location, @this.Context.CurrentToken.Text, @this.Context.CurrentToken.Value));
+        }
+
+        public static void AddParserError(this ParsingContext @this, string message, SourceLocation location, params object[] args)
+        {
+            @this.HasErrors = true;
+            @this.AddParserMessage(ErrorLevel.Error, location, message, args);
+        }
+
+        public static SourceLocation EndLocation(this SourceSpan @this)
+        {
+            return @this.Location + @this.Length;
         }
     }
 }
