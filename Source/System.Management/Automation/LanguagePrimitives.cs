@@ -19,7 +19,7 @@ namespace System.Management.Automation
         /// <param name="first">The first object.</param>
         /// <param name="second">The second object.</param>
         /// <returns>True if equal, false otherwise.</returns>
-        public static bool Equals(object first, object second)
+        public new static bool Equals(object first, object second)
         {
             return Equals(first, second, false, CultureInfo.InvariantCulture);
         }
