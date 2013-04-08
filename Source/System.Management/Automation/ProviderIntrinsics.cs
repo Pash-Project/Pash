@@ -19,7 +19,7 @@ namespace System.Management.Automation
         // internals
         //internal ProviderIntrinsics(SessionStateInternal sessionState);
 
-        private InternalCommand _cmdlet;
+        private Cmdlet _cmdlet;
 
         internal ProviderIntrinsics(Cmdlet cmdlet)
         {
@@ -29,11 +29,11 @@ namespace System.Management.Automation
             }
 
             _cmdlet = cmdlet;
-            ChildItem = new ChildItemCmdletProviderIntrinsics(cmdlet);
-            Content = new ContentCmdletProviderIntrinsics(cmdlet);
-            Item = new ItemCmdletProviderIntrinsics(cmdlet);
-            Property = new PropertyCmdletProviderIntrinsics(cmdlet);
-            SecurityDescriptor = new SecurityDescriptorCmdletProviderIntrinsics(cmdlet);
+            ChildItem = new ChildItemCmdletProviderIntrinsics(_cmdlet);
+            Content = new ContentCmdletProviderIntrinsics(_cmdlet);
+            Item = new ItemCmdletProviderIntrinsics(_cmdlet);
+            Property = new PropertyCmdletProviderIntrinsics(_cmdlet);
+            SecurityDescriptor = new SecurityDescriptorCmdletProviderIntrinsics(_cmdlet);
         }
     }
 }
