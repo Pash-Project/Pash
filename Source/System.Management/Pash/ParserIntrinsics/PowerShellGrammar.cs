@@ -1231,6 +1231,18 @@ namespace Pash.ParserIntrinsics
                 |
                 primary_expression + _member_access_or_invocation_expression_operator + member_name
                 ;
+            _member_access_or_invocation_expression.Reduced += delegate(object sender, ReducedEventArgs e)
+            {
+                var primaryExpressionSpan = e.ResultNode.ChildNodes[0].Span;
+                var operatorSpan = e.ResultNode.ChildNodes[1].Span;
+
+                if (SourceLocation.Compare(primaryExpressionSpan.Location + primaryExpressionSpan.Length, operatorSpan.Location) != 0)
+                {
+                    e.Context.HasErrors = true;
+                    e.Context.AddParserMessage(ErrorLevel.Error, primaryExpressionSpan.Location + primaryExpressionSpan.Length, "unexpected whitespace");
+                }
+            };
+
             _member_access_or_invocation_expression_operator.Rule = ToTerm(".") | "::";
 
             ////        element_access: Note no whitespace is allowed between primary_expression and [.

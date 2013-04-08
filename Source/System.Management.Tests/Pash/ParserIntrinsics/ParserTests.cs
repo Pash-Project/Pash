@@ -73,6 +73,15 @@ if ($true)
         }
 
         [Test]
+        [TestCase(@"[int] ::MaxValue")]
+        public void WhitespaceProhibition(string input)
+        {
+            var parseTree = PowerShellGrammar.Parser.Parse(input);
+
+            Assert.True(parseTree.HasErrors());
+        }
+
+        [Test]
         [TestCase(@"$i = 100			# $i designates an int value 100@")]
         [TestCase(@"$j = $i			# $j designates an int value 100, which is a copy@")]
         [TestCase(@"$a = 10,20,30	# $a designates an object[], Length 3, value 10,20,30@")]
