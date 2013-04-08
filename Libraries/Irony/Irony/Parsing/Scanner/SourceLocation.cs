@@ -66,6 +66,9 @@ namespace Irony.Parsing {
     public bool InRange(int position) {
       return (position >= Location.Position && position <= EndPosition);
     }
+    public override string ToString(){
+      return this.Location.ToUiString() + " + " + this.Length.ToString();
+    }
 
   }
 
