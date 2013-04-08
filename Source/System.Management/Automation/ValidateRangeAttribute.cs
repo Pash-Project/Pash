@@ -11,9 +11,24 @@ namespace System.Management.Automation
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class ValidateRangeAttribute : ValidateEnumeratedArgumentsAttribute
     {
-        public object MaxRange { get; private set; }
-        public object MinRange { get; private set; }
+        public object MaxRange
+        {
+            get
+            {
+                return maxRange;
+            }
+        }
 
+        public object MinRange
+        {
+            get
+            {
+                return minRange;
+            }
+        }
+
+        private object minRange;
+        private object maxRange;
         private IComparable minCompare;
         private IComparable maxCompare;
 
@@ -23,6 +38,20 @@ namespace System.Management.Automation
             {
                 throw new ValidationMetadataException("Fatal error with ValidateRange!");
             }
+
+            minCompare = minRange as IComparable;
+            if (minCompare == null)
+            {
+                throw new ValidationMetadataException("MinRange Not IComparable");
+            }
+            maxCompare = maxRange as IComparable;
+            if (maxCompare == null)
+            {
+                throw new ValidationMetadataException("MaxRange Not IComparable");
+            }
+
+            this.minRange = minRange;
+            this.maxRange = maxRange;
         }
 
         protected override void ValidateElement(object element)

@@ -17,7 +17,7 @@ namespace Microsoft.PowerShell.Commands
     {
 
 
-        bool isNotFirst;
+        //bool isNotFirst;
 
         protected override void BeginProcessing()
         {
@@ -46,9 +46,11 @@ namespace Microsoft.PowerShell.Commands
             
         }*/
 
+        //TODO: Implement.
         protected override void ProcessRecord()
         {
-            int maxProp = 5;
+            throw new NotImplementedException();
+            /*int maxProp = 5;
 
             // String line = "";
 
@@ -78,7 +80,7 @@ namespace Microsoft.PowerShell.Commands
                 j++;
                 if (j == maxProp) { break; }
             }
-            WriteObject(line);
+            WriteObject(line);*/
         }
 
         [Parameter]

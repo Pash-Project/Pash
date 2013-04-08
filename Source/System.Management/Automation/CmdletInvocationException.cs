@@ -52,6 +52,7 @@ namespace System.Management.Automation
         protected CmdletInvocationException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+            errorRecord = null;
         }
     }
 }

@@ -56,6 +56,8 @@ namespace System.Management.Automation
             : base(info, context)
         {
             base.NoPrompt = true;
+
+            errorRecord = null;
         }
 
     }

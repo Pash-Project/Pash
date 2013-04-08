@@ -46,11 +46,13 @@ namespace System.Management.Automation
         public ParameterBindingException(string message)
             : base(message)
         {
+            this.message = message;
         }
 
         public ParameterBindingException(string message, Exception innerException)
             : base(message, innerException)
         {
+            this.message = message;
         }
 
         //todo: implement
