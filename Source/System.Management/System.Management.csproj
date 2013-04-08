@@ -8,7 +8,7 @@
     <ProjectGuid>{C5E303EC-5684-4C95-B0EC-2593E6662403}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>System.Management</RootNamespace>
+    <RootNamespace>System.Management.Automation</RootNamespace>
     <AssemblyName>System.Management.Automation</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
@@ -430,9 +430,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Pash\Path.cs" />
     <Compile Include="Pash\PathNavigation.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="System.Management.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
