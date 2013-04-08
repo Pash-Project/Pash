@@ -65,17 +65,17 @@
     <Compile Include="Pash.System.Management\PathNavigationTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Pash.Microsoft.Commands.Management\Pash.Microsoft.Commands.Management.csproj">
+    <ProjectReference Include="..\Pash.Microsoft.Commands.Management\Microsoft.Commands.Management.csproj">
       <Project>{91225A72-A021-4B7D-BA56-5E1B7AC02F03}</Project>
-      <Name>Pash.Microsoft.Commands.Management</Name>
+      <Name>Microsoft.Commands.Management</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Pash.Microsoft.PowerShell.Commands.Utility\Pash.Microsoft.PowerShell.Commands.Utility.csproj">
+    <ProjectReference Include="..\Pash.Microsoft.PowerShell.Commands.Utility\Microsoft.PowerShell.Commands.Utility.csproj">
       <Project>{0E1D573C-C57D-4A83-A739-3A38E719D87E}</Project>
-      <Name>Pash.Microsoft.PowerShell.Commands.Utility</Name>
+      <Name>Microsoft.PowerShell.Commands.Utility</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Pash.System.Management\Pash.System.Management.csproj">
+    <ProjectReference Include="..\Pash.System.Management\System.Management.csproj">
       <Project>{C5E303EC-5684-4C95-B0EC-2593E6662403}</Project>
-      <Name>Pash.System.Management</Name>
+      <Name>System.Management</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -93,9 +93,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <Folder Include="Pash.System.Management\" />
-    <Folder Include="TestHelpers\" />
-    <Folder Include="FIleSystemTests\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>
