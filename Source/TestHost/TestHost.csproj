@@ -47,6 +47,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\System.Management\Extensions\EnumerableExtensions.cs">
+      <Link>Extensions\EnumerableExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Management\Extensions\FormatStringExtensions.cs">
+      <Link>Extensions\FormatStringExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Management\Extensions\JoinStringExtensions.cs">
+      <Link>Extensions\JoinStringExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Management\Extensions\QueueExtensions.cs">
+      <Link>Extensions\QueueExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\System.Management\Extensions\Reflection.cs">
+      <Link>Extensions\Reflection.cs</Link>
+    </Compile>
     <Compile Include="Cmdlets\GetCommandTests.cs" />
     <Compile Include="Cmdlets\NewObjectCommandTests.cs" />
     <Compile Include="LiteralsTests.cs">

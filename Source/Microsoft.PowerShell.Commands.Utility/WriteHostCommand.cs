@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Management.Automation;
-using Extensions.String;
 using System.Collections;
 
 namespace Microsoft.PowerShell.Commands.Utility

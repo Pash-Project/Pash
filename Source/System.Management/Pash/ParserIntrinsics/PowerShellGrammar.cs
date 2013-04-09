@@ -3,7 +3,6 @@ using System;
 using System.Linq;
 using System.Management.Automation.Language;
 using System.Reflection;
-using Extensions.String;
 using Irony.Parsing;
 using System.Globalization;
 using System.Text.RegularExpressions;

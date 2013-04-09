@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using Irony.Parsing;
-using Extensions.String;
 using Pash.ParserIntrinsics;
 using System.Collections;
 using System.Management.Automation;

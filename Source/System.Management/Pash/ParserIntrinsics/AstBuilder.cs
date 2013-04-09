@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Management.Automation.Language;
 
-using Extensions.String;
 using Irony.Parsing;
 using Pash.ParserIntrinsics;
 using System.Text.RegularExpressions;
@@ -30,7 +29,7 @@ namespace Pash.ParserIntrinsics
 
             if (!allExpected.Where(node => parseTreeNode.Term == node).Any())
             {
-                throw new InvalidOperationException("expected '{0}' to be a '{1}'".FormatString(parseTreeNode, allExpected.ToArray().JoinString(", ")));
+                throw new InvalidOperationException("expected '{0}' to be a '{1}'".FormatString(parseTreeNode, allExpected.JoinString(", ")));
             }
         }
 

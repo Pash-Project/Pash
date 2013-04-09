@@ -196,7 +196,7 @@ namespace TestHost
             {
                 var result = TestHost.Execute("1..10");
 
-                var expected = string.Join(Environment.NewLine, Enumerable.Range(1, 10)) + Environment.NewLine;
+                var expected = Enumerable.Range(1, 10).JoinString(Environment.NewLine) + Environment.NewLine;
 
                 Assert.AreEqual(expected, result);
             }
