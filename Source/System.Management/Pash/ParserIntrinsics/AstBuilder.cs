@@ -1262,25 +1262,7 @@ namespace Pash.ParserIntrinsics
 
             VerifyTerm(parseTreeNode, this._grammar.command_argument);
 
-            return BuildCommandNameExpressionAst(parseTreeNode.ChildNodes.Single());
-        }
-
-        CommandElementAst BuildCommandNameExpressionAst(ParseTreeNode parseTreeNode)
-        {
-
-            VerifyTerm(parseTreeNode, this._grammar.command_name_expr);
-
-            if (parseTreeNode.ChildNodes.Single().Term == this._grammar.command_name)
-            {
-                return BuildCommandNameAst(parseTreeNode.ChildNodes.Single());
-            }
-
-            if (parseTreeNode.ChildNodes.Single().Term == this._grammar.primary_expression)
-            {
-                return BuildPrimaryExpressionAst(parseTreeNode.ChildNodes.Single());
-            }
-
-            throw new InvalidOperationException(parseTreeNode.ToString());
+            return BuildCommandNameExprAst(parseTreeNode.ChildNodes.Single());
         }
 
         CommandParameterAst BuildCommandParameterAst(ParseTreeNode parseTreeNode)
