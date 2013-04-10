@@ -1193,7 +1193,7 @@ namespace Pash.ParserIntrinsics
 
         }
 
-        CommandElementAst BuildCommandNameExprAst(ParseTreeNode parseTreeNode)
+        ExpressionAst BuildCommandNameExprAst(ParseTreeNode parseTreeNode)
         {
 
             VerifyTerm(parseTreeNode, this._grammar.command_name_expr);
@@ -1207,7 +1207,7 @@ namespace Pash.ParserIntrinsics
             throw new InvalidOperationException(parseTreeNode.ToString());
         }
 
-        CommandElementAst BuildCommandNameAst(ParseTreeNode parseTreeNode)
+        StringConstantExpressionAst BuildCommandNameAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.command_name);
 
@@ -1257,7 +1257,7 @@ namespace Pash.ParserIntrinsics
             throw new InvalidOperationException(parseTreeNode.ToString());
         }
 
-        CommandElementAst BuildCommandArgumentAst(ParseTreeNode parseTreeNode)
+        ExpressionAst BuildCommandArgumentAst(ParseTreeNode parseTreeNode)
         {
 
             VerifyTerm(parseTreeNode, this._grammar.command_argument);
