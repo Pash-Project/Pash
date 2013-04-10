@@ -31,6 +31,10 @@ namespace Microsoft.PowerShell.Commands.Utility
             {
                 writeAction(ForegroundColor, BackgroundColor, "");
             }
+            else if (Object.BaseObject is Array)
+            {
+                Host.UI.WriteLine(ForegroundColor, BackgroundColor, string.Join(" ", (object[])Object.BaseObject));
+            }
             else
             {
                 writeAction(ForegroundColor, BackgroundColor, Object.ToString());

@@ -941,8 +941,9 @@ namespace Pash.ParserIntrinsics
 
             ////        command_argument:
             ////            command_name_expr
+            // Deviation from the official language spec here, to allow arrays
             command_argument.Rule =
-                command_name_expr;
+                MakePlusRule(command_argument, ToTerm(","), command_name_expr);
 
             ////        redirections:
             ////            redirection
@@ -1469,7 +1470,7 @@ namespace Pash.ParserIntrinsics
 
         bool AreTerminalsContiguous(ParseTreeNode parseTreeNode1, ParseTreeNode parseTreeNode2)
         {
-           return SourceLocation.Compare(parseTreeNode1.Span.EndLocation(), parseTreeNode2.Span.Location) == 0;
+            return SourceLocation.Compare(parseTreeNode1.Span.EndLocation(), parseTreeNode2.Span.Location) == 0;
         }
 
         // returns the number of characters to skip

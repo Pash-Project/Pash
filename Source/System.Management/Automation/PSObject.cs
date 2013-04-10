@@ -3,6 +3,7 @@ using System;
 using System.Text;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
+using System.Collections;
 
 namespace System.Management.Automation
 {
@@ -185,6 +186,5 @@ namespace System.Management.Automation
         }
 
         #endregion
-
     }
 }

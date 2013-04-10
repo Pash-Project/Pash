@@ -243,5 +243,27 @@ namespace TestHost
 
             Assert.Greater(result.Length, 0);
         }
+
+        [Test]
+        public void WriteHostArray()
+        {
+            var result = TestHost.ExecuteWithZeroErrors("Write-Host 1,aaa,$true");
+
+            Assert.AreEqual(
+                "1 aaa True" + Environment.NewLine,
+                result
+                );
+        }
+
+        [Test]
+        public void OutDefaultArray()
+        {
+            var result = TestHost.ExecuteWithZeroErrors("1,$true");
+
+            Assert.AreEqual(
+                "1" + Environment.NewLine + "True" + Environment.NewLine,
+                result
+                );
+        }
     }
 }

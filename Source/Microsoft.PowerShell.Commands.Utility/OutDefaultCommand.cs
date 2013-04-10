@@ -16,13 +16,20 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            // TODO: output the data vid OutHostCommand
+            // TODO: output the data via OutHostCommand
 
             // TODO: should we print Null?
             if (InputObject.ImmediateBaseObject == null)
                 return;
 
-            this.Host.UI.WriteLine(InputObject.ToString());
+            if (InputObject.BaseObject is Array)
+            {
+                Host.UI.WriteLine(string.Join(Environment.NewLine, (object[])InputObject.BaseObject));
+            }
+            else
+            {
+                this.Host.UI.WriteLine(InputObject.ToString());
+            }
         }
     }
 }

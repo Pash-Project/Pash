@@ -915,5 +915,27 @@ ls
                 Assert.AreEqual(2, statements.Count());
             }
         }
+
+        [Test]
+        public void ArrayArgument()
+        {
+            var commandElementAsts = ParseInput("Write-Host 3,$true")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .CommandElements;
+
+            StringConstantExpressionAst stringConstantExpressionAst = commandElementAsts[0];
+
+            Assert.AreEqual("Write-Host", stringConstantExpressionAst.Value);
+
+            var expressionAst = commandElementAsts[1];
+
+            ConstantExpressionAst value0 = expressionAst.Elements[0];
+            Assert.AreEqual(3, value0.Value);
+
+            VariableExpressionAst value1 = expressionAst.Elements[1];
+            Assert.AreEqual("true", value1.VariablePath.UserPath);
+        }
     }
 }

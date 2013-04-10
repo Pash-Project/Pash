@@ -531,7 +531,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildArrayLiteralExpressionAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.array_literal_expression);
             VerifyTerm(parseTreeNode.ChildNodes[0], this._grammar.unary_expression);
 
@@ -1248,7 +1247,13 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.command_argument);
 
-            return BuildCommandNameExprAst(parseTreeNode.ChildNodes.Single());
+            var expressionAsts = parseTreeNode.ChildNodes.Select(BuildCommandNameExprAst);
+
+            if (!expressionAsts.Any()) throw new InvalidOperationException();
+
+            if (expressionAsts.Count() == 1) return expressionAsts.Single();
+
+            else return new ArrayLiteralAst(new ScriptExtent(parseTreeNode), expressionAsts.ToList());
         }
 
         CommandParameterAst BuildCommandParameterAst(ParseTreeNode parseTreeNode)
