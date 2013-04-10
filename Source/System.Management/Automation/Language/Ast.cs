@@ -17,6 +17,7 @@ namespace System.Management.Automation.Language
             return new ReadOnlyCollection<T>(new List<T>(source ?? new T[] { }));
         }
 
+        [DebuggerStepThrough]
         public static AstVisitAction Visit(this AstVisitor astVisitor, Ast ast)
         {
             var dispatchMethodInfos = from dmi in astVisitor.GetType().GetMethods()
@@ -51,6 +52,7 @@ namespace System.Management.Automation.Language
 
         internal virtual IEnumerable<Ast> Children { get { yield break; } }
 
+        [DebuggerStepThrough]
         public void Visit(AstVisitor astVisitor)
         {
             Queue<Ast> queue = new Queue<Ast>();
