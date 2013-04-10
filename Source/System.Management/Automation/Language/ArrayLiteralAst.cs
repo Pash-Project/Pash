@@ -1,5 +1,6 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
@@ -29,5 +30,10 @@ namespace System.Management.Automation.Language
         // Method call works around a Mono C# compiler crash
         [System.Diagnostics.DebuggerStepThrough]
         private IEnumerable<Ast> privateGetChildren() { return base.Children; }
+
+        public override string ToString()
+        {
+            return string.Format("{0}, ...", this.Elements.First());
+        }
     }
 }
