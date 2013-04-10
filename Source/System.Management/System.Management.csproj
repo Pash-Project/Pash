@@ -372,9 +372,10 @@
     <Compile Include="Automation\WildcardPatternException.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\Irony\ValidateTokenEventArgsExtensions.cs" />
+    <Compile Include="Extensions\JoinStringExtensions.cs" />
     <Compile Include="Extensions\QueueExtensions.cs" />
     <Compile Include="Extensions\Reflection.cs" />
-    <Compile Include="Extensions\String.cs" />
+    <Compile Include="Extensions\FormatStringExtensions.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AddPSSnapinCommand.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AliasProvider.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AliasProviderDynamicParameters.cs" />

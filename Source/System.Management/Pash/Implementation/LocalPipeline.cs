@@ -196,10 +196,7 @@ namespace Pash.Implementation
 
         public override string ToString()
         {
-            return string.Join(
-                " | ",
-                this.Commands
-                );
+            return this.Commands.JoinString(" | ");
         }
     }
 }

@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Management.Automation.Language;
 
-using Extensions.String;
 using Irony.Parsing;
 using Pash.ParserIntrinsics;
 using System.Text.RegularExpressions;
@@ -30,7 +29,7 @@ namespace Pash.ParserIntrinsics
 
             if (!allExpected.Where(node => parseTreeNode.Term == node).Any())
             {
-                throw new InvalidOperationException("expected '{0}' to be a '{1}'".FormatString(parseTreeNode, allExpected.ToArray().JoinString(", ")));
+                throw new InvalidOperationException("expected '{0}' to be a '{1}'".FormatString(parseTreeNode, allExpected.JoinString(", ")));
             }
         }
 
@@ -103,7 +102,6 @@ namespace Pash.ParserIntrinsics
 
         StatementBlockAst BuildStatementListAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.statement_list);
 
             IEnumerable<StatementAst> statements = parseTreeNode
@@ -122,7 +120,6 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildStatementAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.statement);
 
             parseTreeNode = parseTreeNode.ChildNodes.Single();
@@ -190,25 +187,21 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildFlowControlStatementAst(ParseTreeNode parseTreeNode)
         {
-
             throw new NotImplementedException();
         }
 
         StatementAst BuildTrapStatementAst(ParseTreeNode parseTreeNode)
         {
-
             throw new NotImplementedException();
         }
 
         StatementAst BuildTryStatementAst(ParseTreeNode parseTreeNode)
         {
-
             throw new NotImplementedException();
         }
 
         StatementAst BuildDataStatementAst(ParseTreeNode parseTreeNode)
         {
-
             throw new NotImplementedException();
         }
 
@@ -221,7 +214,6 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildLabeledStatementAst(ParseTreeNode parseTreeNode)
         {
-
             throw new NotImplementedException();
         }
 
@@ -399,7 +391,6 @@ namespace Pash.ParserIntrinsics
 
         IEnumerable<CommandBaseAst> GetPipelineTailsCommandList(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.pipeline_tails);
 
             return parseTreeNode.ChildNodes.Select(BuildPipelineTailAst).ToList();
@@ -540,7 +531,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildArrayLiteralExpressionAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.array_literal_expression);
             VerifyTerm(parseTreeNode.ChildNodes[0], this._grammar.unary_expression);
 
@@ -975,7 +965,6 @@ namespace Pash.ParserIntrinsics
 
         HashtableAst BuildHashLiteralExpressionAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.hash_literal_expression);
 
             List<Tuple<ExpressionAst, StatementAst>> hashEntries = new List<Tuple<ExpressionAst, StatementAst>>();
@@ -1006,7 +995,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildKeyExpressionAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.key_expression);
 
             var childParseTreeNode = parseTreeNode.ChildNodes.Single();
@@ -1026,7 +1014,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildSimpleNameAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.simple_name);
             return new StringConstantExpressionAst(new ScriptExtent(parseTreeNode), parseTreeNode.Token.Text, StringConstantType.BareWord);
         }
@@ -1140,7 +1127,6 @@ namespace Pash.ParserIntrinsics
 
         CommandAst BuildCommandAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.command);
 
             parseTreeNode = parseTreeNode.ChildNodes.Single();
@@ -1194,9 +1180,8 @@ namespace Pash.ParserIntrinsics
 
         }
 
-        CommandElementAst BuildCommandNameExprAst(ParseTreeNode parseTreeNode)
+        ExpressionAst BuildCommandNameExprAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.command_name_expr);
 
             parseTreeNode = parseTreeNode.ChildNodes.Single();
@@ -1208,7 +1193,7 @@ namespace Pash.ParserIntrinsics
             throw new InvalidOperationException(parseTreeNode.ToString());
         }
 
-        CommandElementAst BuildCommandNameAst(ParseTreeNode parseTreeNode)
+        StringConstantExpressionAst BuildCommandNameAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.command_name);
 
@@ -1258,35 +1243,21 @@ namespace Pash.ParserIntrinsics
             throw new InvalidOperationException(parseTreeNode.ToString());
         }
 
-        CommandElementAst BuildCommandArgumentAst(ParseTreeNode parseTreeNode)
+        ExpressionAst BuildCommandArgumentAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.command_argument);
 
-            return BuildCommandNameExpressionAst(parseTreeNode.ChildNodes.Single());
-        }
+            var expressionAsts = parseTreeNode.ChildNodes.Select(BuildCommandNameExprAst);
 
-        CommandElementAst BuildCommandNameExpressionAst(ParseTreeNode parseTreeNode)
-        {
+            if (!expressionAsts.Any()) throw new InvalidOperationException();
 
-            VerifyTerm(parseTreeNode, this._grammar.command_name_expr);
+            if (expressionAsts.Count() == 1) return expressionAsts.Single();
 
-            if (parseTreeNode.ChildNodes.Single().Term == this._grammar.command_name)
-            {
-                return BuildCommandNameAst(parseTreeNode.ChildNodes.Single());
-            }
-
-            if (parseTreeNode.ChildNodes.Single().Term == this._grammar.primary_expression)
-            {
-                return BuildPrimaryExpressionAst(parseTreeNode.ChildNodes.Single());
-            }
-
-            throw new InvalidOperationException(parseTreeNode.ToString());
+            else return new ArrayLiteralAst(new ScriptExtent(parseTreeNode), expressionAsts.ToList());
         }
 
         CommandParameterAst BuildCommandParameterAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.command_parameter);
 
             var match = this._grammar.command_parameter.Expression.Match(parseTreeNode.Token.Text);

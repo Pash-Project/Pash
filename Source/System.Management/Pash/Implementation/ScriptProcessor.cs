@@ -7,7 +7,6 @@ using Pash.Implementation;
 using System.Management.Automation;
 using Pash.ParserIntrinsics;
 using Irony.Parsing;
-using Extensions.String;
 using System.Management.Automation.Language;
 using System.Management.Pash.Implementation;
 

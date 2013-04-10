@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Extensions.String;
 
 namespace Pash.ParserIntrinsics.Tests
 {
@@ -76,9 +75,7 @@ if ($true)
         [TestCase(@"[int] ::MaxValue")]
         public void WhitespaceProhibition(string input)
         {
-            var parseTree = PowerShellGrammar.Parser.Parse(input);
-
-            Assert.True(parseTree.HasErrors());
+            AssertIsNotValidInput(input);
         }
 
         [Test]
@@ -240,6 +237,24 @@ if ($true)
             AssertIsValidInput(@"""abc#$%XYZabc""");
         }
 
+        [Test]
+        public void ArrayLiteralParameter()
+        {
+            AssertIsValidInput(@"echo 1,2");
+        }
+
+        [Test]
+        public void UnaryArrayLiteralParameterShouldFail()
+        {
+            AssertIsNotValidInput(@"echo ,2");
+        }
+
+        [Test]
+        public void ParenthesisedUnaryArrayLiteralParameter()
+        {
+            AssertIsValidInput(@"echo (,2)");
+        }
+
         static void AssertIsValidInput(string input)
         {
             var parseTree = PowerShellGrammar.Parser.Parse(input);
@@ -247,6 +262,16 @@ if ($true)
             if (parseTree.HasErrors())
             {
                 Assert.Fail(parseTree.ParserMessages[0].ToString());
+            }
+        }
+
+        static void AssertIsNotValidInput(string input)
+        {
+            var parseTree = PowerShellGrammar.Parser.Parse(input);
+
+            if (!parseTree.HasErrors())
+            {
+                Assert.Fail();
             }
         }
     }
