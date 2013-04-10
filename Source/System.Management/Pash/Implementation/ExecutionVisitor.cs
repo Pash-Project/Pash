@@ -191,19 +191,24 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
-        static CommandParameter ConvertCommandElementToCommandParameter(CommandElementAst commandElement)
+        CommandParameter ConvertCommandElementToCommandParameter(CommandElementAst commandElement)
         {
-            var commandParameterAst = commandElement as CommandParameterAst;
-            var stringConstantExpressionAst = commandElement as StringConstantExpressionAst;
-
-            if (commandParameterAst != null)
+            if (commandElement is CommandParameterAst)
             {
+                var commandParameterAst = commandElement as CommandParameterAst;
                 return new CommandParameter(commandParameterAst.ParameterName, commandParameterAst.Argument);
             }
 
-            else if (stringConstantExpressionAst != null)
+            else if (commandElement is StringConstantExpressionAst)
             {
+                var stringConstantExpressionAst = commandElement as StringConstantExpressionAst;
                 return new CommandParameter(null, stringConstantExpressionAst.Value);
+            }
+
+            else if (commandElement is ArrayLiteralAst)
+            {
+                var arrayLiteralAst = commandElement as ArrayLiteralAst;
+                return new CommandParameter(null, EvaluateAst(arrayLiteralAst));
             }
 
             else throw new NotImplementedException();
@@ -484,15 +489,17 @@ namespace System.Management.Pash.Implementation
             throw new NotImplementedException(this.ToString());
         }
 
+        public override AstVisitAction VisitArrayLiteral(ArrayLiteralAst arrayLiteralAst)
+        {
+            _pipelineCommandRuntime.WriteObject(arrayLiteralAst.Elements.Select(EvaluateAst).ToArray());
+
+            return AstVisitAction.SkipChildren;
+        }
+
         #region  NYI
         public override AstVisitAction VisitArrayExpression(ArrayExpressionAst arrayExpressionAst)
         {
             throw new NotImplementedException(); //VisitArrayExpression(arrayExpressionAst);
-        }
-
-        public override AstVisitAction VisitArrayLiteral(ArrayLiteralAst arrayLiteralAst)
-        {
-            throw new NotImplementedException(); //VisitArrayLiteral(arrayLiteralAst);
         }
 
         public override AstVisitAction VisitAttribute(AttributeAst attributeAst)

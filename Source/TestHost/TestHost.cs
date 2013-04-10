@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Management.Automation.Host;
 using System.Management.Automation.Runspaces;
-using Extensions.String;
 
 namespace TestHost
 {
@@ -35,7 +34,7 @@ namespace TestHost
 
             if (errors.Any())
             {
-                var exceptionMessage = string.Join(Environment.NewLine, errors);
+                var exceptionMessage = errors.JoinString(Environment.NewLine);
                 throw new Exception(exceptionMessage);
             }
             return result;

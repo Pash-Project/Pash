@@ -196,7 +196,7 @@ namespace TestHost
             {
                 var result = TestHost.Execute("1..10");
 
-                var expected = string.Join(Environment.NewLine, Enumerable.Range(1, 10)) + Environment.NewLine;
+                var expected = Enumerable.Range(1, 10).JoinString(Environment.NewLine) + Environment.NewLine;
 
                 Assert.AreEqual(expected, result);
             }
@@ -242,6 +242,28 @@ namespace TestHost
             var result = TestHost.ExecuteWithZeroErrors("Get-ChildItem /");
 
             Assert.Greater(result.Length, 0);
+        }
+
+        [Test]
+        public void WriteHostArray()
+        {
+            var result = TestHost.ExecuteWithZeroErrors("Write-Host 1,aaa,$true");
+
+            Assert.AreEqual(
+                "1 aaa True" + Environment.NewLine,
+                result
+                );
+        }
+
+        [Test]
+        public void OutDefaultArray()
+        {
+            var result = TestHost.ExecuteWithZeroErrors("1,$true");
+
+            Assert.AreEqual(
+                "1" + Environment.NewLine + "True" + Environment.NewLine,
+                result
+                );
         }
     }
 }

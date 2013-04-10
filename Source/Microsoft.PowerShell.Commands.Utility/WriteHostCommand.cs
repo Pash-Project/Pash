@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Management.Automation;
-using Extensions.String;
 using System.Collections;
 
 namespace Microsoft.PowerShell.Commands.Utility
@@ -31,6 +30,10 @@ namespace Microsoft.PowerShell.Commands.Utility
             if (Object == null)
             {
                 writeAction(ForegroundColor, BackgroundColor, "");
+            }
+            else if (Object.BaseObject is Array)
+            {
+                Host.UI.WriteLine(ForegroundColor, BackgroundColor, string.Join(" ", (object[])Object.BaseObject));
             }
             else
             {

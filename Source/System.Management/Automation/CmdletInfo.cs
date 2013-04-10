@@ -47,7 +47,7 @@ namespace System.Management.Automation
                 StringBuilder str = new StringBuilder();
                 foreach (CommandParameterSetInfo pSet in ParameterSets)
                 {
-                    str.AppendLine(string.Format(string.Format("{0}-{1} {2}", Verb, Noun, pSet.ToString())));
+                    str.AppendLine(string.Format("{0}-{1} {2}", Verb, Noun, pSet));
                 }
 
                 return str.ToString();
