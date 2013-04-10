@@ -102,7 +102,6 @@ namespace Pash.ParserIntrinsics
 
         StatementBlockAst BuildStatementListAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.statement_list);
 
             IEnumerable<StatementAst> statements = parseTreeNode
@@ -121,7 +120,6 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildStatementAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.statement);
 
             parseTreeNode = parseTreeNode.ChildNodes.Single();
@@ -189,25 +187,21 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildFlowControlStatementAst(ParseTreeNode parseTreeNode)
         {
-
             throw new NotImplementedException();
         }
 
         StatementAst BuildTrapStatementAst(ParseTreeNode parseTreeNode)
         {
-
             throw new NotImplementedException();
         }
 
         StatementAst BuildTryStatementAst(ParseTreeNode parseTreeNode)
         {
-
             throw new NotImplementedException();
         }
 
         StatementAst BuildDataStatementAst(ParseTreeNode parseTreeNode)
         {
-
             throw new NotImplementedException();
         }
 
@@ -220,7 +214,6 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildLabeledStatementAst(ParseTreeNode parseTreeNode)
         {
-
             throw new NotImplementedException();
         }
 
@@ -398,7 +391,6 @@ namespace Pash.ParserIntrinsics
 
         IEnumerable<CommandBaseAst> GetPipelineTailsCommandList(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.pipeline_tails);
 
             return parseTreeNode.ChildNodes.Select(BuildPipelineTailAst).ToList();
@@ -974,7 +966,6 @@ namespace Pash.ParserIntrinsics
 
         HashtableAst BuildHashLiteralExpressionAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.hash_literal_expression);
 
             List<Tuple<ExpressionAst, StatementAst>> hashEntries = new List<Tuple<ExpressionAst, StatementAst>>();
@@ -1005,7 +996,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildKeyExpressionAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.key_expression);
 
             var childParseTreeNode = parseTreeNode.ChildNodes.Single();
@@ -1025,7 +1015,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildSimpleNameAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.simple_name);
             return new StringConstantExpressionAst(new ScriptExtent(parseTreeNode), parseTreeNode.Token.Text, StringConstantType.BareWord);
         }
@@ -1139,7 +1128,6 @@ namespace Pash.ParserIntrinsics
 
         CommandAst BuildCommandAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.command);
 
             parseTreeNode = parseTreeNode.ChildNodes.Single();
@@ -1195,7 +1183,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildCommandNameExprAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.command_name_expr);
 
             parseTreeNode = parseTreeNode.ChildNodes.Single();
@@ -1259,7 +1246,6 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildCommandArgumentAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.command_argument);
 
             return BuildCommandNameExprAst(parseTreeNode.ChildNodes.Single());
@@ -1267,7 +1253,6 @@ namespace Pash.ParserIntrinsics
 
         CommandParameterAst BuildCommandParameterAst(ParseTreeNode parseTreeNode)
         {
-
             VerifyTerm(parseTreeNode, this._grammar.command_parameter);
 
             var match = this._grammar.command_parameter.Expression.Match(parseTreeNode.Token.Text);
