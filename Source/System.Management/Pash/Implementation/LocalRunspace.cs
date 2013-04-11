@@ -147,7 +147,6 @@ namespace Pash.Implementation
         #region CloseXXX Runspace
         public override void Close()
         {
-            throw new NotImplementedException();
         }
 
         public override void CloseAsync()
