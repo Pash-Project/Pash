@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
+using System.Linq;
 
 namespace System.Management.Automation.Language
 {
@@ -41,5 +42,17 @@ namespace System.Management.Automation.Language
         // Method call works around a Mono C# compiler crash
         [System.Diagnostics.DebuggerStepThrough]
         private IEnumerable<Ast> privateGetChildren() { return base.Children; }
+
+        public override string ToString()
+        {
+            if (this.Statements.Any())
+            {
+                return "{0}: {{ {1} }}".FormatString(this.BlockKind, this.Statements.First());
+            }
+            else
+            {
+                return "{0}: {{ ... }}".FormatString(this.BlockKind);
+            }
+        }
     }
 }

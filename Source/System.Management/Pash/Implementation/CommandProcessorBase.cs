@@ -37,5 +37,10 @@ namespace Pash.Implementation
         {
             Parameters.Add(name, value);
         }
+
+        public override string ToString()
+        {
+            return this.CommandInfo.ToString();
+        }
     }
 }
