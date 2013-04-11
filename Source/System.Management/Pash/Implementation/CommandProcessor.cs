@@ -1,5 +1,6 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Management.Automation.Runspaces;
 using System.Reflection;
@@ -52,13 +53,10 @@ namespace System.Management.Automation
 
             if (obj != null)
             {
-                foreach (CommandParameterInfo paramInfo in paramSetInfo.Parameters)
-                {
-                    if (paramInfo.ValueFromPipeline)
-                    {
-                        BindArgument(paramInfo.Name, obj, paramInfo.ParameterType);
-                    }
-                }
+                var valueFromPipelineParameter = paramSetInfo.Parameters.Where(paramInfo => paramInfo.ValueFromPipeline).SingleOrDefault();
+
+                if (valueFromPipelineParameter != null)
+                    BindArgument(valueFromPipelineParameter.Name, obj, valueFromPipelineParameter.ParameterType);
             }
 
             if (Parameters.Count > 0)
