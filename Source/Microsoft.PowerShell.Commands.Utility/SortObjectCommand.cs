@@ -18,7 +18,8 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void EndProcessing()
         {
-            // TODO: do the sorting
+            InputObjects.Sort();
+
             foreach (PSObject obj in InputObjects)
             {
                 WriteObject(obj);
