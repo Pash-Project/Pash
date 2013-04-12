@@ -545,7 +545,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitArrayLiteral(ArrayLiteralAst arrayLiteralAst)
         {
-            _pipelineCommandRuntime.WriteObject(arrayLiteralAst.Elements.Select(EvaluateAst).ToArray());
+            _pipelineCommandRuntime.WriteObject(arrayLiteralAst.Elements.Select(EvaluateAst).ToArray(), true);
 
             return AstVisitAction.SkipChildren;
         }
