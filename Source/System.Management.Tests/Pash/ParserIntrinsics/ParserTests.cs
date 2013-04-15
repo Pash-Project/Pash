@@ -255,6 +255,12 @@ if ($true)
             AssertIsValidInput(@"echo (,2)");
         }
 
+        [Test]
+        public void BinaryOperatorTest()
+        {
+            AssertIsValidInput(@"$foo.bar -or $true");
+        }
+
         static void AssertIsValidInput(string input)
         {
             var parseTree = PowerShellGrammar.Parser.Parse(input);
