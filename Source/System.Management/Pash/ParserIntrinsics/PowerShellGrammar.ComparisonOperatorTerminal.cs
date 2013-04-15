@@ -9,17 +9,11 @@ namespace Pash.ParserIntrinsics
 {
     partial class PowerShellGrammar
     {
-        public class ComparisonOperatorTerminal : RegexBasedTerminal
+        public class ComparisonOperatorTerminal : BinaryOperatorTerminal
         {
-            public readonly string Operator;
-            public readonly TokenKind TokenKind;
-
             internal ComparisonOperatorTerminal(string @operator, TokenKind tokenKind)
-                : base("-" + @operator, "(?<_comparison_operator_" + @operator + ">" + dash_pattern + @operator + ")")
+                : base(@operator, tokenKind)
             {
-                this.Operator = @operator;
-                this.TokenKind = tokenKind;
-                Priority = TerminalPriority.ReservedWords;
             }
         }
 
