@@ -442,6 +442,7 @@
     <Compile Include="Pash\ParserIntrinsics\BacktickLineContinuationTerminal.cs" />
     <Compile Include="Pash\ParserIntrinsics\BinaryExpressionAst.cs" />
     <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammar.cs" />
+    <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.ComparisonOperatorTerminal.cs" />
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.cs" />
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.Terminals.cs" />
     <Compile Include="Pash\ParserIntrinsics\ScriptExtent.cs" />
