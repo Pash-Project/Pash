@@ -328,13 +328,19 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitAssignmentStatement(AssignmentStatementAst assignmentStatementAst)
         {
-            var variableExpressionAst = assignmentStatementAst.Left as VariableExpressionAst;
-            if (variableExpressionAst == null) throw new NotImplementedException(assignmentStatementAst.ToString());
+            var rightValue = EvaluateAst(assignmentStatementAst.Right);
 
-            var variable = this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, EvaluateAst(assignmentStatementAst.Right));
-            this._pipelineCommandRuntime.WriteObject(variable);
+            AssignVariable(assignmentStatementAst.Left, rightValue);
 
             return AstVisitAction.SkipChildren;
+        }
+
+        private void AssignVariable(ExpressionAst expressionAst, object rightValue)
+        {
+            var variableExpressionAst = expressionAst as VariableExpressionAst;
+            if (variableExpressionAst == null) throw new NotImplementedException(expressionAst.ToString());
+
+            this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, rightValue);
         }
 
         public override AstVisitAction VisitFunctionDefinition(FunctionDefinitionAst functionDefinitionAst)
@@ -611,8 +617,24 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitParenExpression(ParenExpressionAst parenExpressionAst)
         {
-            // just iterate over children
-            return base.VisitParenExpression(parenExpressionAst);
+            // Expressions with top-level side effects don't normally write their value to the pipeline, 
+            // unless they are parenthesized, which is why this is here.
+            //
+            // There's probably a general, clever way to do this but I'm not seeing it.
+            if (parenExpressionAst.Pipeline is AssignmentStatementAst)
+            {
+                var assignementStatementAst = (parenExpressionAst.Pipeline as AssignmentStatementAst);
+                var value = EvaluateAst(assignementStatementAst.Right);
+                AssignVariable(assignementStatementAst.Left, value);
+                this._pipelineCommandRuntime.WriteObject(value);
+
+                return AstVisitAction.SkipChildren;
+            }
+            else
+            {
+                // just iterate over children
+                return base.VisitParenExpression(parenExpressionAst);
+            }
         }
 
         public override AstVisitAction VisitReturnStatement(ReturnStatementAst returnStatementAst)
