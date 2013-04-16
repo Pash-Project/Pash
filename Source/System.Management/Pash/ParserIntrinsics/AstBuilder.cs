@@ -407,9 +407,24 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.logical_expression);
 
-            if (parseTreeNode.ChildNodes[0].Term == this._grammar.bitwise_expression)
+            if (parseTreeNode.ChildNodes.Count == 1)
             {
                 return BuildBitwiseExpressionAst(parseTreeNode.ChildNodes.Single());
+            }
+
+            else
+            {
+                var leftAst = BuildLogicalExpressionAst(parseTreeNode.ChildNodes[0]);
+                var binaryOperatorToken = GetBinaryOperatorTokenKind(parseTreeNode.ChildNodes[1]);
+                var rightAst = BuildBitwiseExpressionAst(parseTreeNode.ChildNodes[2]);
+
+                return new BinaryExpressionAst(
+                    new ScriptExtent(parseTreeNode),
+                    leftAst,
+                    binaryOperatorToken,
+                    rightAst,
+                    new ScriptExtent(parseTreeNode.ChildNodes[1])
+                    );
             }
 
             throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
@@ -441,17 +456,23 @@ namespace Pash.ParserIntrinsics
             return new BinaryExpressionAst(
                 new ScriptExtent(parseTreeNode),
                 BuildComparisonExpressionAst(parseTreeNode.ChildNodes[0]),
-                GetComparisonOperatorTokenKind(comparisonOperatorNode),
+                GetBinaryOperatorTokenKind(comparisonOperatorNode),
                 BuildAdditiveExpressionAst(parseTreeNode.ChildNodes[2]),
                 new ScriptExtent(parseTreeNode.ChildNodes[1])
                 );
         }
 
-        TokenKind GetComparisonOperatorTokenKind(ParseTreeNode parseTreeNode)
+        TokenKind GetBinaryOperatorTokenKind(ParseTreeNode parseTreeNode)
         {
-            VerifyTerm(parseTreeNode, this._grammar.comparison_operator);
+            VerifyTerm(parseTreeNode,
+                this._grammar.comparison_operator,
+                this._grammar._logical_expression_operator,
+                this._grammar._bitwise_expression_operator,
+                this._grammar._additive_expression_operator,
+                this._grammar._multiplicative_expression_operator
+                );
 
-            var comparisonOperatorTerminal = (PowerShellGrammar.ComparisonOperatorTerminal)(parseTreeNode.ChildNodes.Single().Term);
+            var comparisonOperatorTerminal = (PowerShellGrammar.BinaryOperatorTerminal)(parseTreeNode.ChildNodes.Single().Term);
 
             return comparisonOperatorTerminal.TokenKind;
         }
