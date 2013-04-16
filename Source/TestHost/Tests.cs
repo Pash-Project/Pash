@@ -65,8 +65,7 @@ namespace TestHost
                 @"if ($x.Length -ne 3) { write-host ""yyy"" }"
                 );
 
-            // the fact that it prints out `$x = hi` is a known bug
-            StringAssert.AreEqualIgnoringCase("$x = hi" + Environment.NewLine + "yyy" + Environment.NewLine, result);
+            StringAssert.AreEqualIgnoringCase("yyy" + Environment.NewLine, result);
         }
 
         [Test]
@@ -147,13 +146,29 @@ namespace TestHost
         [Test]
         public void WriteVariableTest()
         {
-            StringAssert.AreEqualIgnoringCase("$x = y" + Environment.NewLine + "y" + Environment.NewLine, TestHost.Execute("$x = 'y'", "$x"));
+            StringAssert.AreEqualIgnoringCase("y" + Environment.NewLine, TestHost.Execute("$x = 'y'", "$x"));
         }
 
-        [Test, Explicit("correct behavior")]
+        [Test]
         public void WriteVariableTestCorrect()
         {
-            StringAssert.AreEqualIgnoringCase(Environment.NewLine, TestHost.Execute("$x = 'y'"));
+            StringAssert.AreEqualIgnoringCase("", TestHost.Execute("$x = 'y'"));
+        }
+
+        [Test]
+        public void WriteVariableTestCorrect2()
+        {
+            StringAssert.AreEqualIgnoringCase("y" + Environment.NewLine, TestHost.Execute("($x = 'y')"));
+        }
+
+        [Test]
+        [TestCase(@"$a = $b = 0				# value not written to pipeline", "")]
+        [TestCase(@"$a = ($b = 0)			# value not written to pipeline", "")]
+        [TestCase(@"($a = ($b = 0))		# pipeline gets 0", "0")]
+        public void TopLevelSideEffects(string input, string expected)
+        {
+            var result = TestHost.Execute(input);
+            Assert.AreEqual(expected, result.Replace(Environment.NewLine, ""));
         }
 
         [Test]
