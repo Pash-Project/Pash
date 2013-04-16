@@ -33,7 +33,7 @@ namespace System.Management.Automation.Language
         {
             if (this.Statements.Any())
             {
-                return string.Format("{ {0} ... }", this.Statements.First());
+                return string.Format("{{ {0} ... }}", this.Statements.First());
             }
             else
             {
