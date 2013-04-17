@@ -44,7 +44,6 @@ namespace ParserTests
         [TestFixture]
         public class ConditionalTests
         {
-
             [Test]
             public void IfEmptyStatementTest()
             {
