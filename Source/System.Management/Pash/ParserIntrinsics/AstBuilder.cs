@@ -671,7 +671,13 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildPostIncrementExpressionAst(ParseTreeNode parseTreeNode)
         {
-            throw new NotImplementedException();
+            VerifyTerm(parseTreeNode, this._grammar.post_increment_expression);
+
+            return new UnaryExpressionAst(
+                new ScriptExtent(parseTreeNode),
+                TokenKind.PostfixPlusPlus,
+                BuildPrimaryExpressionAst(parseTreeNode.ChildNodes[0])
+                );
         }
 
         IndexExpressionAst BuildElementAccessAst(ParseTreeNode parseTreeNode)
