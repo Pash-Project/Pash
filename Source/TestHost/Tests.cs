@@ -280,5 +280,16 @@ namespace TestHost
                 result
                 );
         }
+
+        [Test]
+        public void ArrayIndex()
+        {
+            var result = TestHost.ExecuteWithZeroErrors("(10..12)[1]");
+
+            Assert.AreEqual(
+                "11" + Environment.NewLine,
+                result
+            );
+        }
     }
 }

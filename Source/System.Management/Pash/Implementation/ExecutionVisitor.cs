@@ -43,6 +43,9 @@ namespace System.Management.Pash.Implementation
             var leftOperand = EvaluateAst(binaryExpressionAst.Left);
             var rightOperand = EvaluateAst(binaryExpressionAst.Right);
 
+            if (leftOperand is PSObject) leftOperand = ((PSObject)leftOperand).BaseObject;
+            if (rightOperand is PSObject) rightOperand = ((PSObject)rightOperand).BaseObject;
+
             switch (binaryExpressionAst.Operator)
             {
                 case TokenKind.DotDot:
@@ -254,10 +257,10 @@ namespace System.Management.Pash.Implementation
         {
             var subVisitor = this.CloneSub();
             expressionAst.Visit(subVisitor);
-            var result = subVisitor._pipelineCommandRuntime.outputResults.Read().SingleOrDefault();
+            var result = subVisitor._pipelineCommandRuntime.outputResults.Read();
 
-            if (result is PSObject) return ((PSObject)result).BaseObject;
-            if (result is IEnumerable<PSObject>) return ((IEnumerable<PSObject>)result).Select(o => o.BaseObject);
+            if (result.Count == 0) return null;
+            if (result.Count == 1) return result.Single();
             return result;
         }
 
@@ -366,6 +369,12 @@ namespace System.Management.Pash.Implementation
                 this._pipelineCommandRuntime.WriteObject(result);
             }
 
+            else if (targetValue is IList)
+            {
+                var result = (targetValue as IList)[index];
+                this._pipelineCommandRuntime.WriteObject(result);
+            }
+
             else throw new NotImplementedException(indexExpressionAst.ToString() + " " + targetValue.GetType());
 
             return AstVisitAction.SkipChildren;
@@ -386,18 +395,22 @@ namespace System.Management.Pash.Implementation
             {
                 var condition = EvaluateAst(clause.Item1);
 
+                // null is false
                 if (condition == null) continue;
 
-                if (condition.GetType() == typeof(bool))
+                else if (condition is IList && ((IList)condition).Count == 0) continue;
+
+                else if (condition is PSObject)
                 {
-                    if ((bool)condition)
-                    {
-                        this._pipelineCommandRuntime.WriteObject(EvaluateAst(clause.Item2));
-                        return AstVisitAction.SkipChildren;
-                    }
+                    var baseObject = ((PSObject)condition).BaseObject;
+
+                    if (baseObject is bool && ((bool)baseObject) == false) continue;
                 }
 
-                else throw new NotImplementedException(ifStatementAst.ToString());
+                else throw new NotImplementedException(clause.Item1.ToString());
+
+                this._pipelineCommandRuntime.WriteObject(EvaluateAst(clause.Item2));
+                return AstVisitAction.SkipChildren;
             }
 
             if (ifStatementAst.ElseClause != null)
@@ -426,6 +439,7 @@ namespace System.Management.Pash.Implementation
             else
             {
                 obj = EvaluateAst(expression);
+                if (obj is PSObject) { obj = ((PSObject)obj).BaseObject; }
                 type = obj.GetType();
             }
 
@@ -458,6 +472,10 @@ namespace System.Management.Pash.Implementation
             else
             {
                 obj = EvaluateAst(expression);
+                if (obj is PSObject)
+                {
+                    obj = ((PSObject)obj).BaseObject;
+                }
                 type = obj.GetType();
             }
 
