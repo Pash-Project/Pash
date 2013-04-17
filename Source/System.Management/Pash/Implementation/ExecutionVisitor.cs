@@ -62,6 +62,22 @@ namespace System.Management.Pash.Implementation
                     if (leftOperand.GetType() == typeof(int)) return ((int)leftOperand) != ((int)rightOperand);
                     throw new NotImplementedException(binaryExpressionAst.ToString());
 
+                case TokenKind.Igt:
+                    if (leftOperand.GetType() == typeof(int)) return ((int)leftOperand) > ((int)rightOperand);
+                    throw new NotImplementedException(binaryExpressionAst.ToString());
+
+                case TokenKind.Or:
+                    if (leftOperand.GetType() == typeof(bool) && rightOperand.GetType() == typeof(bool)) return ((bool)leftOperand || (bool)rightOperand);
+                    throw new NotImplementedException(binaryExpressionAst.ToString());
+
+                case TokenKind.Xor:
+                    if (leftOperand.GetType() == typeof(bool) && rightOperand.GetType() == typeof(bool)) return ((bool)leftOperand != (bool)rightOperand);
+                    throw new NotImplementedException(binaryExpressionAst.ToString());
+
+                case TokenKind.And:
+                    if (leftOperand.GetType() == typeof(bool) && rightOperand.GetType() == typeof(bool)) return ((bool)leftOperand && (bool)rightOperand);
+                    throw new NotImplementedException(binaryExpressionAst.ToString());
+
                 case TokenKind.Multiply:
                 case TokenKind.Divide:
                 case TokenKind.Minus:
@@ -74,15 +90,11 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Format:
                 case TokenKind.Not:
                 case TokenKind.Bnot:
-                case TokenKind.And:
-                case TokenKind.Or:
-                case TokenKind.Xor:
                 case TokenKind.Band:
                 case TokenKind.Bor:
                 case TokenKind.Bxor:
                 case TokenKind.Join:
                 case TokenKind.Ige:
-                case TokenKind.Igt:
                 case TokenKind.Ilt:
                 case TokenKind.Ile:
                 case TokenKind.Ilike:
