@@ -46,7 +46,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.Commands.Management\Microsoft.Commands.Management.csproj">
+    <ProjectReference Include="..\Microsoft.PowerShell.Commands.Management\Microsoft.Commands.Management.csproj">
       <Project>{91225A72-A021-4B7D-BA56-5E1B7AC02F03}</Project>
       <Name>Microsoft.Commands.Management</Name>
     </ProjectReference>

@@ -54,7 +54,7 @@ namespace Pash.Implementation
                 foreach (var snapinTypeName in new[] { 
                     "System.Management.Automation.PSCorePSSnapIn, System.Management.Automation",
                     "Microsoft.PowerShell.PSUtilityPSSnapIn, Microsoft.PowerShell.Commands.Utility",
-                    "Microsoft.Commands.Management.PSManagementPSSnapIn, Microsoft.Commands.Management",
+                    "Microsoft.Commands.Management.PSManagementPSSnapIn, Microsoft.PowerShell.Commands.Management",
                 })
                 {
                     var tmpProviders = new Collection<SnapinProviderPair>();

@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.Commands.Management</RootNamespace>
-    <AssemblyName>Microsoft.Commands.Management</AssemblyName>
+    <AssemblyName>Microsoft.PowerShell.Commands.Management</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
