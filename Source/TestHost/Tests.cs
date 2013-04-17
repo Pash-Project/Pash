@@ -291,5 +291,21 @@ namespace TestHost
                 result
             );
         }
+
+        [Test]
+        [TestCase(@"$x++ ; $x", "2")]
+        [TestCase(@"$x++ ; $x++ ; $x", "3")]
+        public void IncrementDecrement(string input, string expected)
+        {
+            var result = TestHost.Execute(
+                "$x = 1",
+                input
+                );
+
+            Assert.AreEqual(
+                expected + Environment.NewLine,
+                result
+                );
+        }
     }
 }

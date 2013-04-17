@@ -948,5 +948,20 @@ ls
 
             Assert.AreEqual(TokenKind.Or, binaryExpressionAst.Operator);
         }
+
+        [Test]
+        public void PostIncrementExpression()
+        {
+            UnaryExpressionAst unaryExpressionAst = ParseInput("$x++")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression;
+
+            Assert.AreEqual(TokenKind.PostfixPlusPlus, unaryExpressionAst.TokenKind);
+
+            VariableExpressionAst variableExpressionAst = (VariableExpressionAst)unaryExpressionAst.Child;
+            Assert.AreEqual("x", variableExpressionAst.VariablePath.UserPath);
+        }
     }
 }
