@@ -37,6 +37,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 [assembly: InternalsVisibleTo("Microsoft.PowerShell.Commands.Utility")]
-[assembly: InternalsVisibleTo("Microsoft.Commands.Management")]
+[assembly: InternalsVisibleTo("Microsoft.PowerShell.Commands.Management")]
 [assembly: InternalsVisibleTo("System.Management.Tests")]
 [assembly: InternalsVisibleTo("ParserTests")]
