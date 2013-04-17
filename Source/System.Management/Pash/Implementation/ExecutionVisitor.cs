@@ -43,6 +43,9 @@ namespace System.Management.Pash.Implementation
             var leftOperand = EvaluateAst(binaryExpressionAst.Left);
             var rightOperand = EvaluateAst(binaryExpressionAst.Right);
 
+            if (leftOperand is PSObject) leftOperand = ((PSObject)leftOperand).BaseObject;
+            if (rightOperand is PSObject) rightOperand = ((PSObject)rightOperand).BaseObject;
+
             switch (binaryExpressionAst.Operator)
             {
                 case TokenKind.DotDot:
@@ -59,6 +62,22 @@ namespace System.Management.Pash.Implementation
                     if (leftOperand.GetType() == typeof(int)) return ((int)leftOperand) != ((int)rightOperand);
                     throw new NotImplementedException(binaryExpressionAst.ToString());
 
+                case TokenKind.Igt:
+                    if (leftOperand.GetType() == typeof(int)) return ((int)leftOperand) > ((int)rightOperand);
+                    throw new NotImplementedException(binaryExpressionAst.ToString());
+
+                case TokenKind.Or:
+                    if (leftOperand.GetType() == typeof(bool) && rightOperand.GetType() == typeof(bool)) return ((bool)leftOperand || (bool)rightOperand);
+                    throw new NotImplementedException(binaryExpressionAst.ToString());
+
+                case TokenKind.Xor:
+                    if (leftOperand.GetType() == typeof(bool) && rightOperand.GetType() == typeof(bool)) return ((bool)leftOperand != (bool)rightOperand);
+                    throw new NotImplementedException(binaryExpressionAst.ToString());
+
+                case TokenKind.And:
+                    if (leftOperand.GetType() == typeof(bool) && rightOperand.GetType() == typeof(bool)) return ((bool)leftOperand && (bool)rightOperand);
+                    throw new NotImplementedException(binaryExpressionAst.ToString());
+
                 case TokenKind.Multiply:
                 case TokenKind.Divide:
                 case TokenKind.Minus:
@@ -71,15 +90,11 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Format:
                 case TokenKind.Not:
                 case TokenKind.Bnot:
-                case TokenKind.And:
-                case TokenKind.Or:
-                case TokenKind.Xor:
                 case TokenKind.Band:
                 case TokenKind.Bor:
                 case TokenKind.Bxor:
                 case TokenKind.Join:
                 case TokenKind.Ige:
-                case TokenKind.Igt:
                 case TokenKind.Ilt:
                 case TokenKind.Ile:
                 case TokenKind.Ilike:
@@ -254,10 +269,10 @@ namespace System.Management.Pash.Implementation
         {
             var subVisitor = this.CloneSub();
             expressionAst.Visit(subVisitor);
-            var result = subVisitor._pipelineCommandRuntime.outputResults.Read().SingleOrDefault();
+            var result = subVisitor._pipelineCommandRuntime.outputResults.Read();
 
-            if (result is PSObject) return ((PSObject)result).BaseObject;
-            if (result is IEnumerable<PSObject>) return ((IEnumerable<PSObject>)result).Select(o => o.BaseObject);
+            if (result.Count == 0) return null;
+            if (result.Count == 1) return result.Single();
             return result;
         }
 
@@ -328,13 +343,19 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitAssignmentStatement(AssignmentStatementAst assignmentStatementAst)
         {
-            var variableExpressionAst = assignmentStatementAst.Left as VariableExpressionAst;
-            if (variableExpressionAst == null) throw new NotImplementedException(assignmentStatementAst.ToString());
+            var rightValue = EvaluateAst(assignmentStatementAst.Right);
 
-            var variable = this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, EvaluateAst(assignmentStatementAst.Right));
-            this._pipelineCommandRuntime.WriteObject(variable);
+            AssignVariable(assignmentStatementAst.Left, rightValue);
 
             return AstVisitAction.SkipChildren;
+        }
+
+        private void AssignVariable(ExpressionAst expressionAst, object rightValue)
+        {
+            var variableExpressionAst = expressionAst as VariableExpressionAst;
+            if (variableExpressionAst == null) throw new NotImplementedException(expressionAst.ToString());
+
+            this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, rightValue);
         }
 
         public override AstVisitAction VisitFunctionDefinition(FunctionDefinitionAst functionDefinitionAst)
@@ -360,6 +381,12 @@ namespace System.Management.Pash.Implementation
                 this._pipelineCommandRuntime.WriteObject(result);
             }
 
+            else if (targetValue is IList)
+            {
+                var result = (targetValue as IList)[index];
+                this._pipelineCommandRuntime.WriteObject(result);
+            }
+
             else throw new NotImplementedException(indexExpressionAst.ToString() + " " + targetValue.GetType());
 
             return AstVisitAction.SkipChildren;
@@ -380,18 +407,22 @@ namespace System.Management.Pash.Implementation
             {
                 var condition = EvaluateAst(clause.Item1);
 
+                // null is false
                 if (condition == null) continue;
 
-                if (condition.GetType() == typeof(bool))
+                else if (condition is IList && ((IList)condition).Count == 0) continue;
+
+                else if (condition is PSObject)
                 {
-                    if ((bool)condition)
-                    {
-                        this._pipelineCommandRuntime.WriteObject(EvaluateAst(clause.Item2));
-                        return AstVisitAction.SkipChildren;
-                    }
+                    var baseObject = ((PSObject)condition).BaseObject;
+
+                    if (baseObject is bool && ((bool)baseObject) == false) continue;
                 }
 
-                else throw new NotImplementedException(ifStatementAst.ToString());
+                else throw new NotImplementedException(clause.Item1.ToString());
+
+                this._pipelineCommandRuntime.WriteObject(EvaluateAst(clause.Item2));
+                return AstVisitAction.SkipChildren;
             }
 
             if (ifStatementAst.ElseClause != null)
@@ -420,6 +451,7 @@ namespace System.Management.Pash.Implementation
             else
             {
                 obj = EvaluateAst(expression);
+                if (obj is PSObject) { obj = ((PSObject)obj).BaseObject; }
                 type = obj.GetType();
             }
 
@@ -452,6 +484,10 @@ namespace System.Management.Pash.Implementation
             else
             {
                 obj = EvaluateAst(expression);
+                if (obj is PSObject)
+                {
+                    obj = ((PSObject)obj).BaseObject;
+                }
                 type = obj.GetType();
             }
 
@@ -492,6 +528,32 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitArrayLiteral(ArrayLiteralAst arrayLiteralAst)
         {
             _pipelineCommandRuntime.WriteObject(arrayLiteralAst.Elements.Select(EvaluateAst).ToArray());
+
+            return AstVisitAction.SkipChildren;
+        }
+
+        public override AstVisitAction VisitUnaryExpression(UnaryExpressionAst unaryExpressionAst)
+        {
+            var childVariableExpressionAst = unaryExpressionAst.Child as VariableExpressionAst;
+            var childVariable = childVariableExpressionAst == null ? null : GetVariable(childVariableExpressionAst);
+            var childVariableValue = childVariable == null ? null : childVariable.Value;
+
+            switch (unaryExpressionAst.TokenKind)
+            {
+                case TokenKind.PostfixPlusPlus:
+
+                    if (childVariable == null) throw new NotImplementedException(unaryExpressionAst.ToString());
+                    if (childVariableValue is PSObject)
+                    {
+                        childVariable.Value = PSObject.AsPSObject(((int)((PSObject)childVariableValue).BaseObject) + 1);
+                    }
+                    else throw new NotImplementedException(childVariableValue.ToString());
+
+                    break;
+
+                default:
+                    throw new NotImplementedException(unaryExpressionAst.ToString());
+            }
 
             return AstVisitAction.SkipChildren;
         }
@@ -611,8 +673,24 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitParenExpression(ParenExpressionAst parenExpressionAst)
         {
-            // just iterate over children
-            return base.VisitParenExpression(parenExpressionAst);
+            // Expressions with top-level side effects don't normally write their value to the pipeline, 
+            // unless they are parenthesized, which is why this is here.
+            //
+            // There's probably a general, clever way to do this but I'm not seeing it.
+            if (parenExpressionAst.Pipeline is AssignmentStatementAst)
+            {
+                var assignementStatementAst = (parenExpressionAst.Pipeline as AssignmentStatementAst);
+                var value = EvaluateAst(assignementStatementAst.Right);
+                AssignVariable(assignementStatementAst.Left, value);
+                this._pipelineCommandRuntime.WriteObject(value);
+
+                return AstVisitAction.SkipChildren;
+            }
+            else
+            {
+                // just iterate over children
+                return base.VisitParenExpression(parenExpressionAst);
+            }
         }
 
         public override AstVisitAction VisitReturnStatement(ReturnStatementAst returnStatementAst)
@@ -669,11 +747,6 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitTypeConstraint(TypeConstraintAst typeConstraintAst)
         {
             throw new NotImplementedException(); //VisitTypeConstraint(typeConstraintAst);
-        }
-
-        public override AstVisitAction VisitUnaryExpression(UnaryExpressionAst unaryExpressionAst)
-        {
-            throw new NotImplementedException(); //VisitUnaryExpression(unaryExpressionAst);
         }
 
         public override AstVisitAction VisitUsingExpression(UsingExpressionAst usingExpressionAst)

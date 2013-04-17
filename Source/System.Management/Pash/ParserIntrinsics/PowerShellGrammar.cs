@@ -985,7 +985,7 @@ namespace Pash.ParserIntrinsics
                 |
                 (logical_expression + _logical_expression_operator + bitwise_expression)
                 ;
-            _logical_expression_operator.Rule = ToTerm("-and") | "-or" | "-xor";
+            _logical_expression_operator.Rule = _operator_and | _operator_or | _operator_xor;
 
             ////        bitwise_expression:
             ////            comparison_expression
@@ -997,7 +997,7 @@ namespace Pash.ParserIntrinsics
                 |
                 (bitwise_expression + _bitwise_expression_operator + comparison_expression)
                 ;
-            _bitwise_expression_operator.Rule = ToTerm("-band") | "-bor" | "-bxor";
+            _bitwise_expression_operator.Rule = _operator_band | _operator_bor | _operator_bxor;
 
             ////        comparison_expression:
             ////            additive_expression
@@ -1082,11 +1082,11 @@ namespace Pash.ParserIntrinsics
             expression_with_unary_operator.Rule =
                 ("," + unary_expression)
                 |
-                ("-not" + unary_expression)
+                (_operator_not + unary_expression)
                 |
                 ("!" + unary_expression)
                 |
-                ("-bnot" + unary_expression)
+                (_operator_bnot + unary_expression)
                 |
                 (_additive_expression_operator + unary_expression)
                 |
