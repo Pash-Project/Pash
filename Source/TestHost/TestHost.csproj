@@ -108,5 +108,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup />
+  <ItemGroup>
+    <Compile Include="7.10 - Logical operators.cs" />
+  </ItemGroup>
 </Project>
