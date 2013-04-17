@@ -520,6 +520,32 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
+        public override AstVisitAction VisitUnaryExpression(UnaryExpressionAst unaryExpressionAst)
+        {
+            var childVariableExpressionAst = unaryExpressionAst.Child as VariableExpressionAst;
+            var childVariable = childVariableExpressionAst == null ? null : GetVariable(childVariableExpressionAst);
+            var childVariableValue = childVariable == null ? null : childVariable.Value;
+
+            switch (unaryExpressionAst.TokenKind)
+            {
+                case TokenKind.PostfixPlusPlus:
+
+                    if (childVariable == null) throw new NotImplementedException(unaryExpressionAst.ToString());
+                    if (childVariableValue is PSObject)
+                    {
+                        childVariable.Value = PSObject.AsPSObject(((int)((PSObject)childVariableValue).BaseObject) + 1);
+                    }
+                    else throw new NotImplementedException(childVariableValue.ToString());
+
+                    break;
+
+                default:
+                    throw new NotImplementedException(unaryExpressionAst.ToString());
+            }
+
+            return AstVisitAction.SkipChildren;
+        }
+
         #region  NYI
         public override AstVisitAction VisitArrayExpression(ArrayExpressionAst arrayExpressionAst)
         {
@@ -709,11 +735,6 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitTypeConstraint(TypeConstraintAst typeConstraintAst)
         {
             throw new NotImplementedException(); //VisitTypeConstraint(typeConstraintAst);
-        }
-
-        public override AstVisitAction VisitUnaryExpression(UnaryExpressionAst unaryExpressionAst)
-        {
-            throw new NotImplementedException(); //VisitUnaryExpression(unaryExpressionAst);
         }
 
         public override AstVisitAction VisitUsingExpression(UsingExpressionAst usingExpressionAst)
