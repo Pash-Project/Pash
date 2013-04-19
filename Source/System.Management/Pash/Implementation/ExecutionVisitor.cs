@@ -17,18 +17,21 @@ namespace System.Management.Pash.Implementation
     {
         readonly ExecutionContext _context;
         readonly PipelineCommandRuntime _pipelineCommandRuntime;
+        readonly bool _writeSideEffectsToPipeline;
 
-        public ExecutionVisitor(ExecutionContext context, PipelineCommandRuntime pipelineCommandRuntime)
+        public ExecutionVisitor(ExecutionContext context, PipelineCommandRuntime pipelineCommandRuntime, bool writeSideEffectsToPipeline = false)
         {
             this._context = context;
             this._pipelineCommandRuntime = pipelineCommandRuntime;
+            this._writeSideEffectsToPipeline = writeSideEffectsToPipeline;
         }
 
-        ExecutionVisitor CloneSub()
+        ExecutionVisitor CloneSub(bool writeSideEffectsToPipeline)
         {
             return new ExecutionVisitor(
                 this._context.CreateNestedContext(),
-                new PipelineCommandRuntime(this._pipelineCommandRuntime.pipelineProcessor)
+                new PipelineCommandRuntime(this._pipelineCommandRuntime.pipelineProcessor),
+                writeSideEffectsToPipeline
                 );
         }
 
@@ -267,7 +270,12 @@ namespace System.Management.Pash.Implementation
 
         object EvaluateAst(Ast expressionAst)
         {
-            var subVisitor = this.CloneSub();
+            return EvaluateAst(expressionAst, true);
+        }
+
+        object EvaluateAst(Ast expressionAst, bool writeSideEffectsToPipeline)
+        {
+            var subVisitor = this.CloneSub(writeSideEffectsToPipeline);
             expressionAst.Visit(subVisitor);
             var result = subVisitor._pipelineCommandRuntime.outputResults.Read();
 
@@ -304,7 +312,7 @@ namespace System.Management.Pash.Implementation
                 subRuntime = new PipelineCommandRuntime(this._pipelineCommandRuntime.pipelineProcessor);
                 subContext.inputStreamReader = subContext.inputStreamReader;
 
-                pipelineElement.Visit(new ExecutionVisitor(subContext, subRuntime));
+                pipelineElement.Visit(new ExecutionVisitor(subContext, subRuntime, this._writeSideEffectsToPipeline));
             }
 
             this._pipelineCommandRuntime.WriteObject(subRuntime.outputResults.Read(), true);
@@ -345,17 +353,15 @@ namespace System.Management.Pash.Implementation
         {
             var rightValue = EvaluateAst(assignmentStatementAst.Right);
 
-            AssignVariable(assignmentStatementAst.Left, rightValue);
-
-            return AstVisitAction.SkipChildren;
-        }
-
-        private void AssignVariable(ExpressionAst expressionAst, object rightValue)
-        {
+            ExpressionAst expressionAst = assignmentStatementAst.Left;
             var variableExpressionAst = expressionAst as VariableExpressionAst;
             if (variableExpressionAst == null) throw new NotImplementedException(expressionAst.ToString());
 
             this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, rightValue);
+
+            if (this._writeSideEffectsToPipeline) this._pipelineCommandRuntime.WriteObject(rightValue);
+
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitFunctionDefinition(FunctionDefinitionAst functionDefinitionAst)
@@ -673,24 +679,9 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitParenExpression(ParenExpressionAst parenExpressionAst)
         {
-            // Expressions with top-level side effects don't normally write their value to the pipeline, 
-            // unless they are parenthesized, which is why this is here.
-            //
-            // There's probably a general, clever way to do this but I'm not seeing it.
-            if (parenExpressionAst.Pipeline is AssignmentStatementAst)
-            {
-                var assignementStatementAst = (parenExpressionAst.Pipeline as AssignmentStatementAst);
-                var value = EvaluateAst(assignementStatementAst.Right);
-                AssignVariable(assignementStatementAst.Left, value);
-                this._pipelineCommandRuntime.WriteObject(value);
-
-                return AstVisitAction.SkipChildren;
-            }
-            else
-            {
-                // just iterate over children
-                return base.VisitParenExpression(parenExpressionAst);
-            }
+            var value = EvaluateAst(parenExpressionAst.Pipeline);
+            this._pipelineCommandRuntime.WriteObject(value, true);
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitReturnStatement(ReturnStatementAst returnStatementAst)

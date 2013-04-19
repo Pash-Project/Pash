@@ -41,7 +41,7 @@ namespace Pash.Implementation
 
             PipelineCommandRuntime pipelineCommandRuntime = (PipelineCommandRuntime)CommandRuntime;
 
-            this._scriptInfo.ScriptBlock.Ast.Visit(new ExecutionVisitor(context, pipelineCommandRuntime));
+            this._scriptInfo.ScriptBlock.Ast.Visit(new ExecutionVisitor(context, pipelineCommandRuntime, false));
         }
 
         internal override void Complete()
