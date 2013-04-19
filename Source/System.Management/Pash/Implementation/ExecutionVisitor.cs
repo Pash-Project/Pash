@@ -558,6 +558,18 @@ namespace System.Management.Pash.Implementation
 
                     break;
 
+                case TokenKind.PlusPlus:
+
+                    if (childVariable == null) throw new NotImplementedException(unaryExpressionAst.ToString());
+                    if (childVariableValue is PSObject)
+                    {
+                        childVariable.Value = PSObject.AsPSObject(((int)((PSObject)childVariableValue).BaseObject) + 1);
+                        if (this._writeSideEffectsToPipeline) this._pipelineCommandRuntime.WriteObject(childVariable.Value);
+                    }
+                    else throw new NotImplementedException(childVariableValue.ToString());
+
+                    break;
+
                 default:
                     throw new NotImplementedException(unaryExpressionAst.ToString());
             }

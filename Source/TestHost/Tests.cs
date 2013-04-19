@@ -296,6 +296,10 @@ namespace TestHost
         [TestCase(@"$x++ ; $x", "2")]
         [TestCase(@"$x++ ; $x++ ; $x", "3")]
         [TestCase(@"$y = $x++ ; $y", "1")]
+
+        [TestCase(@"++$x ; $x", "2")]
+        [TestCase(@"(++$x)", "2")]
+        [TestCase(@"$y = ++$x ; $y", "2")]
         public void IncrementDecrement(string input, string expected)
         {
             var result = TestHost.Execute(

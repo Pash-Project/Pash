@@ -612,6 +612,11 @@ namespace Pash.ParserIntrinsics
                 return BuildUnaryDashExpressionAst(childNode);
             }
 
+            else if (childNode.Term == this._grammar.pre_increment_expression)
+            {
+                return BuildPreIncrementExpressionAst(childNode);
+            }
+
             throw new NotImplementedException(parseTreeNode.ToString());
         }
 
@@ -634,6 +639,17 @@ namespace Pash.ParserIntrinsics
                     throw new NotImplementedException(parseTreeNode.ToString());
                 }
             }
+        }
+
+        ExpressionAst BuildPreIncrementExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.pre_increment_expression);
+
+            return new UnaryExpressionAst(
+                new ScriptExtent(parseTreeNode),
+                TokenKind.PlusPlus,
+                BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1])
+                );
         }
 
         ExpressionAst BuildPrimaryExpressionAst(ParseTreeNode parseTreeNode)
