@@ -49,6 +49,12 @@ namespace System.Management.Pash.Implementation
             if (leftOperand is PSObject) leftOperand = ((PSObject)leftOperand).BaseObject;
             if (rightOperand is PSObject) rightOperand = ((PSObject)rightOperand).BaseObject;
 
+            int? leftOperandInt = leftOperand is int ? ((int?)leftOperand) : null;
+            int? rightOperandInt = rightOperand is int ? ((int?)rightOperand) : null;
+
+            bool? leftOperandBool = leftOperand is bool ? ((bool?)leftOperand) : null;
+            bool? rightOperandBool = rightOperand is bool ? ((bool?)rightOperand) : null;
+
             switch (binaryExpressionAst.Operator)
             {
                 case TokenKind.DotDot:
@@ -58,27 +64,27 @@ namespace System.Management.Pash.Implementation
                     return Add(leftOperand, rightOperand);
 
                 case TokenKind.Ieq:
-                    if (leftOperand.GetType() == typeof(int)) return ((int)leftOperand) == ((int)rightOperand);
+                    if (leftOperandInt.HasValue) return leftOperandInt == rightOperandInt;
                     throw new NotImplementedException(binaryExpressionAst.ToString());
 
                 case TokenKind.Ine:
-                    if (leftOperand.GetType() == typeof(int)) return ((int)leftOperand) != ((int)rightOperand);
+                    if (leftOperandInt.HasValue) return leftOperandInt != rightOperandInt;
                     throw new NotImplementedException(binaryExpressionAst.ToString());
 
                 case TokenKind.Igt:
-                    if (leftOperand.GetType() == typeof(int)) return ((int)leftOperand) > ((int)rightOperand);
+                    if (leftOperandInt.HasValue) return leftOperandInt > rightOperandInt;
                     throw new NotImplementedException(binaryExpressionAst.ToString());
 
                 case TokenKind.Or:
-                    if (leftOperand.GetType() == typeof(bool) && rightOperand.GetType() == typeof(bool)) return ((bool)leftOperand || (bool)rightOperand);
+                    if (leftOperandBool.HasValue) return leftOperandBool.Value || rightOperandBool.Value;
                     throw new NotImplementedException(binaryExpressionAst.ToString());
 
                 case TokenKind.Xor:
-                    if (leftOperand.GetType() == typeof(bool) && rightOperand.GetType() == typeof(bool)) return ((bool)leftOperand != (bool)rightOperand);
+                    if (leftOperandBool.HasValue) return leftOperandBool != rightOperandBool;
                     throw new NotImplementedException(binaryExpressionAst.ToString());
 
                 case TokenKind.And:
-                    if (leftOperand.GetType() == typeof(bool) && rightOperand.GetType() == typeof(bool)) return ((bool)leftOperand && (bool)rightOperand);
+                    if (leftOperandBool.HasValue) return leftOperandBool.Value && rightOperandBool.Value;
                     throw new NotImplementedException(binaryExpressionAst.ToString());
 
                 case TokenKind.Multiply:
