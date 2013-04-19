@@ -1088,36 +1088,36 @@ namespace Pash.ParserIntrinsics
             ////            -split   new_lines_opt   unary_expression
             ////            -join   new_lines_opt   unary_expression
             expression_with_unary_operator.Rule =
-                (_unary_array_expression)
+                _unary_array_expression
                 |
-                (_unary_not_expression)
+                _unary_not_expression
                 |
-                (_unary_bang_expression)
+                _unary_bang_expression
                 |
-                (_unary_bnot_expression)
+                _unary_bnot_expression
                 |
-                (_unary_plus_expression)
+                _unary_plus_expression
                 |
-                (_unary_dash_expression)
+                _unary_dash_expression
                 |
-                (pre_increment_expression)
+                pre_increment_expression
                 |
-                (pre_decrement_expression)
+                pre_decrement_expression
                 |
-                (cast_expression)
+                cast_expression
                 |
-                (_unary_split_expression)
+                _unary_split_expression
                 |
-                (_unary_join_expression)
+                _unary_join_expression
                 ;
-            _unary_array_expression.Rule = ("," + unary_expression);
-            _unary_not_expression.Rule = (_operator_not + unary_expression);
-            _unary_bang_expression.Rule = ("!" + unary_expression);
-            _unary_bnot_expression.Rule = (_operator_bnot + unary_expression);
-            _unary_plus_expression.Rule = ("+" + unary_expression);
-            _unary_dash_expression.Rule = (dash + unary_expression);
-            _unary_split_expression.Rule = ("-split" + unary_expression);
-            _unary_join_expression.Rule = ("-join" + unary_expression);
+            _unary_array_expression.Rule = "," + unary_expression;
+            _unary_not_expression.Rule = _operator_not + unary_expression;
+            _unary_bang_expression.Rule = "!" + unary_expression;
+            _unary_bnot_expression.Rule = _operator_bnot + unary_expression;
+            _unary_plus_expression.Rule = "+" + unary_expression;
+            _unary_dash_expression.Rule = dash + unary_expression;
+            _unary_split_expression.Rule = "-split" + unary_expression;
+            _unary_join_expression.Rule = "-join" + unary_expression;
 
             ////        pre_increment_expression:
             ////            ++   new_lines_opt   unary_expression
