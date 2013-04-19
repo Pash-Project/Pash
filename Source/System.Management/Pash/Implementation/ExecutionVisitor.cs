@@ -551,6 +551,7 @@ namespace System.Management.Pash.Implementation
                     if (childVariable == null) throw new NotImplementedException(unaryExpressionAst.ToString());
                     if (childVariableValue is PSObject)
                     {
+                        if (this._writeSideEffectsToPipeline) this._pipelineCommandRuntime.WriteObject(childVariable.Value);
                         childVariable.Value = PSObject.AsPSObject(((int)((PSObject)childVariableValue).BaseObject) + 1);
                     }
                     else throw new NotImplementedException(childVariableValue.ToString());
