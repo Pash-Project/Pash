@@ -607,26 +607,31 @@ namespace Pash.ParserIntrinsics
 
             if (childNode.Term == this._grammar._unary_dash_expression)
             {
-                var expression = BuildUnaryExpressionAst(childNode.ChildNodes[1]);
-                ConstantExpressionAst constantExpressionAst = expression as ConstantExpressionAst;
-                if (constantExpressionAst == null)
-                {
-                    throw new NotImplementedException(childNode.ToString());
-                }
-                else
-                {
-                    if (constantExpressionAst.StaticType == typeof(int))
-                    {
-                        return new ConstantExpressionAst(new ScriptExtent(childNode), 0 - ((int)constantExpressionAst.Value));
-                    }
-                    else
-                    {
-                        throw new NotImplementedException(childNode.ToString());
-                    }
-                }
+                return BuildUnaryDashExpressionAst(childNode);
             }
 
             throw new NotImplementedException(parseTreeNode.ToString());
+        }
+
+        ExpressionAst BuildUnaryDashExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            var expression = BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1]);
+            ConstantExpressionAst constantExpressionAst = expression as ConstantExpressionAst;
+            if (constantExpressionAst == null)
+            {
+                throw new NotImplementedException(parseTreeNode.ToString());
+            }
+            else
+            {
+                if (constantExpressionAst.StaticType == typeof(int))
+                {
+                    return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0 - ((int)constantExpressionAst.Value));
+                }
+                else
+                {
+                    throw new NotImplementedException(parseTreeNode.ToString());
+                }
+            }
         }
 
         ExpressionAst BuildPrimaryExpressionAst(ParseTreeNode parseTreeNode)
