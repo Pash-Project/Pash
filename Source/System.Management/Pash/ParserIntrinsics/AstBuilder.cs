@@ -407,9 +407,24 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.logical_expression);
 
-            if (parseTreeNode.ChildNodes[0].Term == this._grammar.bitwise_expression)
+            if (parseTreeNode.ChildNodes.Count == 1)
             {
                 return BuildBitwiseExpressionAst(parseTreeNode.ChildNodes.Single());
+            }
+
+            else
+            {
+                var leftAst = BuildLogicalExpressionAst(parseTreeNode.ChildNodes[0]);
+                var binaryOperatorToken = GetBinaryOperatorTokenKind(parseTreeNode.ChildNodes[1]);
+                var rightAst = BuildBitwiseExpressionAst(parseTreeNode.ChildNodes[2]);
+
+                return new BinaryExpressionAst(
+                    new ScriptExtent(parseTreeNode),
+                    leftAst,
+                    binaryOperatorToken,
+                    rightAst,
+                    new ScriptExtent(parseTreeNode.ChildNodes[1])
+                    );
             }
 
             throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
@@ -441,17 +456,23 @@ namespace Pash.ParserIntrinsics
             return new BinaryExpressionAst(
                 new ScriptExtent(parseTreeNode),
                 BuildComparisonExpressionAst(parseTreeNode.ChildNodes[0]),
-                GetComparisonOperatorTokenKind(comparisonOperatorNode),
+                GetBinaryOperatorTokenKind(comparisonOperatorNode),
                 BuildAdditiveExpressionAst(parseTreeNode.ChildNodes[2]),
                 new ScriptExtent(parseTreeNode.ChildNodes[1])
                 );
         }
 
-        TokenKind GetComparisonOperatorTokenKind(ParseTreeNode parseTreeNode)
+        TokenKind GetBinaryOperatorTokenKind(ParseTreeNode parseTreeNode)
         {
-            VerifyTerm(parseTreeNode, this._grammar.comparison_operator);
+            VerifyTerm(parseTreeNode,
+                this._grammar.comparison_operator,
+                this._grammar._logical_expression_operator,
+                this._grammar._bitwise_expression_operator,
+                this._grammar._additive_expression_operator,
+                this._grammar._multiplicative_expression_operator
+                );
 
-            var comparisonOperatorTerminal = (PowerShellGrammar.ComparisonOperatorTerminal)(parseTreeNode.ChildNodes.Single().Term);
+            var comparisonOperatorTerminal = (PowerShellGrammar.BinaryOperatorTerminal)(parseTreeNode.ChildNodes.Single().Term);
 
             return comparisonOperatorTerminal.TokenKind;
         }
@@ -565,48 +586,70 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.unary_expression);
 
-            if (parseTreeNode.ChildNodes[0].Term == this._grammar.primary_expression)
+            var childNode = parseTreeNode.ChildNodes.Single();
+
+            if (childNode.Term == this._grammar.primary_expression)
             {
                 return BuildPrimaryExpressionAst(parseTreeNode.ChildNodes.Single());
             }
 
-            if (parseTreeNode.ChildNodes[0].Term == this._grammar.expression_with_unary_operator)
+            if (childNode.Term == this._grammar.expression_with_unary_operator)
             {
                 return BuildExpressionWithUnaryOperatorAst(parseTreeNode.ChildNodes.Single());
             }
 
-            throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+            throw new NotImplementedException(childNode.Term.Name);
         }
 
         ExpressionAst BuildExpressionWithUnaryOperatorAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.expression_with_unary_operator);
 
-            if (parseTreeNode.ChildNodes[0].Term == this._grammar._additive_expression_operator)
+            var childNode = parseTreeNode.ChildNodes.Single();
+
+            if (childNode.Term == this._grammar._unary_dash_expression)
             {
-                if (parseTreeNode.ChildNodes[0].ChildNodes.Single().Term == this._grammar.dash)
-                {
-                    var expression = BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1]);
-                    ConstantExpressionAst constantExpressionAst = expression as ConstantExpressionAst;
-                    if (constantExpressionAst == null)
-                    {
-                        throw new NotImplementedException(parseTreeNode.ToString());
-                    }
-                    else
-                    {
-                        if (constantExpressionAst.StaticType == typeof(int))
-                        {
-                            return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0 - ((int)constantExpressionAst.Value));
-                        }
-                        else
-                        {
-                            throw new NotImplementedException(parseTreeNode.ToString());
-                        }
-                    }
-                }
+                return BuildUnaryDashExpressionAst(childNode);
+            }
+
+            else if (childNode.Term == this._grammar.pre_increment_expression)
+            {
+                return BuildPreIncrementExpressionAst(childNode);
             }
 
             throw new NotImplementedException(parseTreeNode.ToString());
+        }
+
+        ExpressionAst BuildUnaryDashExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            var expression = BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1]);
+            ConstantExpressionAst constantExpressionAst = expression as ConstantExpressionAst;
+            if (constantExpressionAst == null)
+            {
+                throw new NotImplementedException(parseTreeNode.ToString());
+            }
+            else
+            {
+                if (constantExpressionAst.StaticType == typeof(int))
+                {
+                    return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0 - ((int)constantExpressionAst.Value));
+                }
+                else
+                {
+                    throw new NotImplementedException(parseTreeNode.ToString());
+                }
+            }
+        }
+
+        ExpressionAst BuildPreIncrementExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.pre_increment_expression);
+
+            return new UnaryExpressionAst(
+                new ScriptExtent(parseTreeNode),
+                TokenKind.PlusPlus,
+                BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1])
+                );
         }
 
         ExpressionAst BuildPrimaryExpressionAst(ParseTreeNode parseTreeNode)
@@ -650,7 +693,13 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildPostIncrementExpressionAst(ParseTreeNode parseTreeNode)
         {
-            throw new NotImplementedException();
+            VerifyTerm(parseTreeNode, this._grammar.post_increment_expression);
+
+            return new UnaryExpressionAst(
+                new ScriptExtent(parseTreeNode),
+                TokenKind.PostfixPlusPlus,
+                BuildPrimaryExpressionAst(parseTreeNode.ChildNodes[0])
+                );
         }
 
         IndexExpressionAst BuildElementAccessAst(ParseTreeNode parseTreeNode)

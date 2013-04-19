@@ -44,7 +44,6 @@ namespace ParserTests
         [TestFixture]
         public class ConditionalTests
         {
-
             [Test]
             public void IfEmptyStatementTest()
             {
@@ -936,6 +935,33 @@ ls
 
             VariableExpressionAst value1 = expressionAst.Elements[1];
             Assert.AreEqual("true", value1.VariablePath.UserPath);
+        }
+
+        [Test]
+        public void LogicalOperator()
+        {
+            BinaryExpressionAst binaryExpressionAst = ParseInput("($true) -or ($false)")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression;
+
+            Assert.AreEqual(TokenKind.Or, binaryExpressionAst.Operator);
+        }
+
+        [Test]
+        public void PostIncrementExpression()
+        {
+            UnaryExpressionAst unaryExpressionAst = ParseInput("$x++")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression;
+
+            Assert.AreEqual(TokenKind.PostfixPlusPlus, unaryExpressionAst.TokenKind);
+
+            VariableExpressionAst variableExpressionAst = (VariableExpressionAst)unaryExpressionAst.Child;
+            Assert.AreEqual("x", variableExpressionAst.VariablePath.UserPath);
         }
     }
 }
