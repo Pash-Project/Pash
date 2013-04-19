@@ -586,17 +586,19 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.unary_expression);
 
-            if (parseTreeNode.ChildNodes[0].Term == this._grammar.primary_expression)
+            var childNode = parseTreeNode.ChildNodes.Single();
+
+            if (childNode.Term == this._grammar.primary_expression)
             {
                 return BuildPrimaryExpressionAst(parseTreeNode.ChildNodes.Single());
             }
 
-            if (parseTreeNode.ChildNodes[0].Term == this._grammar.expression_with_unary_operator)
+            if (childNode.Term == this._grammar.expression_with_unary_operator)
             {
                 return BuildExpressionWithUnaryOperatorAst(parseTreeNode.ChildNodes.Single());
             }
 
-            throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+            throw new NotImplementedException(childNode.Term.Name);
         }
 
         ExpressionAst BuildExpressionWithUnaryOperatorAst(ParseTreeNode parseTreeNode)
