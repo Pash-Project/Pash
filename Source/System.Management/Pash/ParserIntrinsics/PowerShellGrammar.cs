@@ -182,6 +182,14 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal array_literal_expression = null; // Initialized by reflection.
         public readonly NonTerminal unary_expression = null; // Initialized by reflection.
         public readonly NonTerminal expression_with_unary_operator = null; // Initialized by reflection.
+        public readonly NonTerminal _unary_array_expression = null; // Initialized by reflection.
+        public readonly NonTerminal _unary_not_expression = null; // Initialized by reflection.
+        public readonly NonTerminal _unary_bang_expression = null; // Initialized by reflection.
+        public readonly NonTerminal _unary_bnot_expression = null; // Initialized by reflection.
+        public readonly NonTerminal _unary_plus_expression = null; // Initialized by reflection.
+        public readonly NonTerminal _unary_dash_expression = null; // Initialized by reflection.
+        public readonly NonTerminal _unary_split_expression = null; // Initialized by reflection.
+        public readonly NonTerminal _unary_join_expression = null; // Initialized by reflection.
         public readonly NonTerminal pre_increment_expression = null; // Initialized by reflection.
         public readonly NonTerminal pre_decrement_expression = null; // Initialized by reflection.
         public readonly NonTerminal cast_expression = null; // Initialized by reflection.
@@ -1080,15 +1088,17 @@ namespace Pash.ParserIntrinsics
             ////            -split   new_lines_opt   unary_expression
             ////            -join   new_lines_opt   unary_expression
             expression_with_unary_operator.Rule =
-                ("," + unary_expression)
+                (_unary_array_expression)
                 |
-                (_operator_not + unary_expression)
+                (_unary_not_expression)
                 |
-                ("!" + unary_expression)
+                (_unary_bang_expression)
                 |
-                (_operator_bnot + unary_expression)
+                (_unary_bnot_expression)
                 |
-                (_additive_expression_operator + unary_expression)
+                (_unary_plus_expression)
+                |
+                (_unary_dash_expression)
                 |
                 (pre_increment_expression)
                 |
@@ -1096,10 +1106,18 @@ namespace Pash.ParserIntrinsics
                 |
                 (cast_expression)
                 |
-                ("-split" + unary_expression)
+                (_unary_split_expression)
                 |
-                ("-join" + unary_expression)
+                (_unary_join_expression)
                 ;
+            _unary_array_expression.Rule = ("," + unary_expression);
+            _unary_not_expression.Rule = (_operator_not + unary_expression);
+            _unary_bang_expression.Rule = ("!" + unary_expression);
+            _unary_bnot_expression.Rule = (_operator_bnot + unary_expression);
+            _unary_plus_expression.Rule = ("+" + unary_expression);
+            _unary_dash_expression.Rule = (dash + unary_expression);
+            _unary_split_expression.Rule = ("-split" + unary_expression);
+            _unary_join_expression.Rule = ("-join" + unary_expression);
 
             ////        pre_increment_expression:
             ////            ++   new_lines_opt   unary_expression

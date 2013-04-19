@@ -603,26 +603,23 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.expression_with_unary_operator);
 
-            if (parseTreeNode.ChildNodes[0].Term == this._grammar._additive_expression_operator)
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar._unary_dash_expression)
             {
-                if (parseTreeNode.ChildNodes[0].ChildNodes.Single().Term == this._grammar.dash)
+                var expression = BuildUnaryExpressionAst(parseTreeNode.ChildNodes.Single().ChildNodes[1]);
+                ConstantExpressionAst constantExpressionAst = expression as ConstantExpressionAst;
+                if (constantExpressionAst == null)
                 {
-                    var expression = BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1]);
-                    ConstantExpressionAst constantExpressionAst = expression as ConstantExpressionAst;
-                    if (constantExpressionAst == null)
+                    throw new NotImplementedException(parseTreeNode.ToString());
+                }
+                else
+                {
+                    if (constantExpressionAst.StaticType == typeof(int))
                     {
-                        throw new NotImplementedException(parseTreeNode.ToString());
+                        return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0 - ((int)constantExpressionAst.Value));
                     }
                     else
                     {
-                        if (constantExpressionAst.StaticType == typeof(int))
-                        {
-                            return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0 - ((int)constantExpressionAst.Value));
-                        }
-                        else
-                        {
-                            throw new NotImplementedException(parseTreeNode.ToString());
-                        }
+                        throw new NotImplementedException(parseTreeNode.ToString());
                     }
                 }
             }
