@@ -603,23 +603,25 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.expression_with_unary_operator);
 
-            if (parseTreeNode.ChildNodes[0].Term == this._grammar._unary_dash_expression)
+            var childNode = parseTreeNode.ChildNodes.Single();
+
+            if (childNode.Term == this._grammar._unary_dash_expression)
             {
-                var expression = BuildUnaryExpressionAst(parseTreeNode.ChildNodes.Single().ChildNodes[1]);
+                var expression = BuildUnaryExpressionAst(childNode.ChildNodes[1]);
                 ConstantExpressionAst constantExpressionAst = expression as ConstantExpressionAst;
                 if (constantExpressionAst == null)
                 {
-                    throw new NotImplementedException(parseTreeNode.ToString());
+                    throw new NotImplementedException(childNode.ToString());
                 }
                 else
                 {
                     if (constantExpressionAst.StaticType == typeof(int))
                     {
-                        return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0 - ((int)constantExpressionAst.Value));
+                        return new ConstantExpressionAst(new ScriptExtent(childNode), 0 - ((int)constantExpressionAst.Value));
                     }
                     else
                     {
-                        throw new NotImplementedException(parseTreeNode.ToString());
+                        throw new NotImplementedException(childNode.ToString());
                     }
                 }
             }
