@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Management.Automation;
 using System.Collections;
+using Extensions.Enumerable;
 
 namespace Microsoft.PowerShell.Commands.Utility
 {
@@ -20,24 +21,31 @@ namespace Microsoft.PowerShell.Commands.Utility
         [Parameter]
         public Object Separator { get; set; }
 
+        delegate void WriteAction (ConsoleColor foregroundColor, ConsoleColor backgroundColor, string value);
+
         protected override void ProcessRecord()
         {
-            Action<ConsoleColor, ConsoleColor, string> writeAction;
+            WriteAction writeAction;
 
             if (NoNewline) writeAction = Host.UI.Write;
             else writeAction = Host.UI.WriteLine;
 
+            writeAction(this.ForegroundColor, this.BackgroundColor, Compose());
+        }
+
+        string Compose()
+        {
             if (Object == null)
             {
-                writeAction(ForegroundColor, BackgroundColor, "");
+                return "";
             }
             else if (Object.BaseObject is Array)
             {
-                Host.UI.WriteLine(ForegroundColor, BackgroundColor, string.Join(" ", (object[])Object.BaseObject));
+                return ((object[])Object.BaseObject).JoinString(" ");
             }
             else
             {
-                writeAction(ForegroundColor, BackgroundColor, Object.ToString());
+                return Object.ToString();
             }
         }
     }
