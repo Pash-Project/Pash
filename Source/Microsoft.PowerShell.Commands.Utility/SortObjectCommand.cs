@@ -1,4 +1,5 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using System;
 using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands
@@ -14,12 +15,22 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void EndProcessing()
         {
-            InputObjects.Sort();
+            InputObjects.Sort(Compare);
 
             foreach (PSObject obj in InputObjects)
             {
                 WriteObject(obj);
             }
+        }
+
+        int Compare(PSObject x, PSObject y)
+        {
+            if (this.Property == null)
+            {
+                return LanguagePrimitives.Compare(x, y);
+            }
+
+            else throw new NotImplementedException(this.ToString());
         }
     }
 }
