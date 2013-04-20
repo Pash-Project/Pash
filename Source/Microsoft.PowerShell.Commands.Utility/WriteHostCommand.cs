@@ -43,6 +43,10 @@ namespace Microsoft.PowerShell.Commands.Utility
             {
                 return ((object[])Object.BaseObject).JoinString(" ");
             }
+            else if (Object.BaseObject is IList)
+            {
+                return ((IEnumerable<object>)Object.BaseObject).JoinString(" ");
+            }
             else
             {
                 return Object.ToString();
