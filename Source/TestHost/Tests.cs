@@ -364,6 +364,18 @@ namespace TestHost
                     result
                 );
             }
+
+            [Test]
+            public void ByProperty()
+            {
+                var result = TestHost.Execute("Get-ChildItem | Sort-Object Name");
+            }
+
+            [Test]
+            public void ByPropertyLowercase()
+            {
+                var result = TestHost.Execute("Get-ChildItem | Sort-Object name");
+            }
         }
     }
 }
