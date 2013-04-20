@@ -131,7 +131,7 @@ namespace Pash.Implementation
             {
                 SetPipelineState(PipelineState.Failed, ex);
 
-                ((LocalRunspace)_runspace).PSHost.UI.WriteErrorLine(ex.Message);
+                ((LocalRunspace)_runspace).PSHost.UI.WriteErrorLine(ex.ToString());
             }
 
             // TODO: process Error results

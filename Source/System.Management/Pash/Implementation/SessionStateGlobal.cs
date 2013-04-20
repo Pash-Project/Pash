@@ -76,6 +76,7 @@ namespace Pash.Implementation
 
             SetVariable("true", true);
             SetVariable("false", false);
+            SetVariable("null", null);
         }
 
         internal SessionStateGlobal(ExecutionContext context)

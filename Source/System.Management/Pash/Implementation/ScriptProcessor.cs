@@ -48,5 +48,10 @@ namespace Pash.Implementation
         {
             // TODO: do a full cleanup
         }
+
+        public override string ToString()
+        {
+            return this._scriptInfo.ToString();
+        }
     }
 }

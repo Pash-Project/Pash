@@ -240,20 +240,23 @@ namespace System.Management.Automation
                 return 0;
             }
 
+            if (first is PSObject) first = (first as PSObject).BaseObject;
+            if (second is PSObject) second = (second as PSObject).BaseObject;
+
             // Int check
             //todo
-            /*
+
             if (first is int)
             {
                 if (second is int)
                 {
-                    return first - second;
+                    return (int)first - (int)second;
                 }
-                else 
+                else
                 {
                     throw new ArgumentException("Types are not comparable.");
                 }
-            }*/
+            }
 
             // Floating point check
             //todo
@@ -284,7 +287,7 @@ namespace System.Management.Automation
             }
 
             // Return 0 otherwise.
-            return 0;
+            throw new NotImplementedException();
         }
 
         #endregion

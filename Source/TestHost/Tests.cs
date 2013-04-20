@@ -233,6 +233,22 @@ namespace TestHost
             ////    "0xf".."0xa"        # descending range 15..10           
         }
 
+        [Test]
+        public void SequenceInPipeline()
+        {
+            //// 7.4 Range operator
+            //// Examples:
+            //// 
+            ////     1..10              # ascending range 1..10
+            {
+                var result = TestHost.Execute("1..10 | Write-Host");
+
+                var expected = Enumerable.Range(1, 10).JoinString(Environment.NewLine) + Environment.NewLine;
+
+                Assert.AreEqual(expected, result);
+            }
+        }
+
         [Test, Explicit("bug")]
         public void JaggedArrayTest()
         {
@@ -311,6 +327,55 @@ namespace TestHost
                 expected + Environment.NewLine,
                 result
                 );
+        }
+
+        [TestFixture]
+        class SortObjectTests
+        {
+            [Test]
+            public void IntArray()
+            {
+                var result = TestHost.ExecuteWithZeroErrors("2,4,3 | Sort-Object");
+
+                Assert.AreEqual(
+                    new[] { 2, 3, 4 }.JoinString(Environment.NewLine) + Environment.NewLine,
+                    result
+                );
+            }
+
+            [Test]
+            public void Singleton()
+            {
+                var result = TestHost.ExecuteWithZeroErrors("1 | Sort-Object");
+
+                Assert.AreEqual(
+                    "1" + Environment.NewLine,
+                    result
+                );
+            }
+
+            [Test]
+            public void Null()
+            {
+                var result = TestHost.ExecuteWithZeroErrors("$null | Sort-Object");
+
+                Assert.AreEqual(
+                    "",
+                    result
+                );
+            }
+
+            [Test]
+            public void ByProperty()
+            {
+                var result = TestHost.Execute("Get-ChildItem | Sort-Object Name");
+            }
+
+            [Test]
+            public void ByPropertyLowercase()
+            {
+                var result = TestHost.Execute("Get-ChildItem | Sort-Object name");
+            }
         }
     }
 }
