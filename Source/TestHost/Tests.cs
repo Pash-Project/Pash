@@ -329,37 +329,41 @@ namespace TestHost
                 );
         }
 
-        [Test]
-        public void SortObjectIntArray()
+        [TestFixture]
+        class SortObjectTests
         {
-            var result = TestHost.ExecuteWithZeroErrors("2,4,3 | Sort-Object");
+            [Test]
+            public void IntArray()
+            {
+                var result = TestHost.ExecuteWithZeroErrors("2,4,3 | Sort-Object");
 
-            Assert.AreEqual(
-                new[] { 2, 3, 4 }.JoinString(Environment.NewLine) + Environment.NewLine,
-                result
-            );
-        }
+                Assert.AreEqual(
+                    new[] { 2, 3, 4 }.JoinString(Environment.NewLine) + Environment.NewLine,
+                    result
+                );
+            }
 
-        [Test]
-        public void SortObjectSingleton()
-        {
-            var result = TestHost.ExecuteWithZeroErrors("1 | Sort-Object");
+            [Test]
+            public void Singleton()
+            {
+                var result = TestHost.ExecuteWithZeroErrors("1 | Sort-Object");
 
-            Assert.AreEqual(
-                "1" + Environment.NewLine,
-                result
-            );
-        }
+                Assert.AreEqual(
+                    "1" + Environment.NewLine,
+                    result
+                );
+            }
 
-        [Test]
-        public void SortObjectNull()
-        {
-            var result = TestHost.ExecuteWithZeroErrors("$null | Sort-Object");
+            [Test]
+            public void Null()
+            {
+                var result = TestHost.ExecuteWithZeroErrors("$null | Sort-Object");
 
-            Assert.AreEqual(
-                "",
-                result
-            );
+                Assert.AreEqual(
+                    "",
+                    result
+                );
+            }
         }
     }
 }
