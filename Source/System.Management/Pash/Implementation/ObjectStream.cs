@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Collections;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Pash.Implementation
 {
@@ -87,6 +88,11 @@ namespace Pash.Implementation
             {
                 return _objectsStream.Count;
             }
+        }
+
+        public override string ToString()
+        {
+            return "Count: " + this.Count;
         }
     }
 }

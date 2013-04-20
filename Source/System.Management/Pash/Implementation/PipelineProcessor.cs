@@ -37,10 +37,11 @@ namespace Pash.Implementation
         public Array Execute(ExecutionContext context)
         {
             PSObject psObjectCurrent = context.inputStreamReader.Read();
-            Collection<PSObject> dataCollection = new Collection<PSObject>() { psObjectCurrent };
+            Collection<PSObject> dataCollection;
 
             do
             {
+                dataCollection = new Collection<PSObject>() { psObjectCurrent };
                 foreach (CommandProcessorBase commandProcessor in commandsToExecute)
                 {
                     PipelineCommandRuntime commandRuntime = new PipelineCommandRuntime(this);
