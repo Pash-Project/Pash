@@ -12,10 +12,6 @@ namespace Microsoft.PowerShell.Commands
         [Parameter]
         public SwitchParameter Unique { get; set; }
 
-        public SortObjectCommand()
-        {
-        }
-
         protected override void EndProcessing()
         {
             InputObjects.Sort();
