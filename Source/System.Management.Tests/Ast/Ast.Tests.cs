@@ -649,7 +649,7 @@ ls
             Assert.AreEqual(1, rightValue.Value);
         }
 
-        [Test, Explicit("disabled because it requires an extension to Irony that is incompatable with Irony's GrammarExplorer")]
+        [Test]
         public void NewlineContinuationTest()
         {
             var expression = ParseInput(
