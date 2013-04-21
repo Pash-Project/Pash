@@ -649,7 +649,7 @@ ls
             Assert.AreEqual(1, rightValue.Value);
         }
 
-        [Test, Explicit("disabled because it requires an extension to Irony that is incompatable with Irony's GrammarExplorer")]
+        [Test]
         public void NewlineContinuationTest()
         {
             var expression = ParseInput(
@@ -828,7 +828,7 @@ ls
                 Assert.AreEqual(StringConstantType.BareWord, memberAst.StringConstantType);
             }
 
-            [Test, Explicit("Bug - https://github.com/Pash-Project/Pash/issues/9")]
+            [Test]
             public void BadMemberAccess()
             {
                 Assert.Throws<PowerShellGrammar.ParseException>(() =>
