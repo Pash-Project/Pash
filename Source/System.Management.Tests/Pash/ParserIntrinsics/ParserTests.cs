@@ -47,8 +47,8 @@ if ($true)
         [TestCase(@"if ($host.Name -ne ""Console"") {  }")]
         [TestCase(@"if ($true) {} else {}")]
         [TestCase(@"if ($true) {} elseif ($true) {} ")]
-        [TestCase(@"if ($true) {} elseif {$true) {} else {}", Explicit = true)]
-        [TestCase(@"if ($true) {} elseif ($true) {} elseif ($true) else {}", Explicit = true)]
+        [TestCase(@"if ($true) {} elseif ($true) {} else {}")]
+        [TestCase(@"if ($true) {} elseif ($true) {} elseif ($true) {} else {}")]
         public void IfElseSyntax(string input)
         {
             AssertIsValidInput(input);
