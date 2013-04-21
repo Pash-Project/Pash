@@ -124,13 +124,13 @@ if ($true)
         [TestCase(@"[math]::Sqrt(2) 				# convert 2 to 2.0 and call method")]
         [TestCase(@"[math]::Sqrt(2D) 				# convert 2D to 2.0 and call method")]
         [TestCase(@"[math]::Sqrt($true) 			# convert $true to 1.0 and call method")]
-        [TestCase(@"[math]::Sqrt(""20"") 			# convert ""20"" to 20 and call method", Explicit = true)]
+        [TestCase(@"[math]::Sqrt(""20"") 			# convert ""20"" to 20 and call method")]
         [TestCase(@"$a = [math]::Sqrt				# get method descriptor for Sqrt")]
         [TestCase(@"$a.Invoke(2.0)					# call Sqrt via the descriptor")]
-        [TestCase(@"$a = [math]::(""Sq""+""rt"")	# get method descriptor for Sqrt", Explicit = true)]
+        [TestCase(@"$a = [math]::(""Sq""+""rt"")	# get method descriptor for Sqrt")]
         [TestCase(@"$a.Invoke(2.0) 				# call Sqrt via the descriptor")]
         [TestCase(@"$a = [char]::ToLower			# get method descriptor for ToLower")]
-        [TestCase(@"$a.Invoke(""X"")					# call ToLower via the descriptor", Explicit = true)]
+        [TestCase(@"$a.Invoke(""X"")					# call ToLower via the descriptor")]
         public void Section7_1_3_InvocationExpressions(string input)
         {
             AssertIsValidInput(input);
@@ -142,15 +142,15 @@ if ($true)
         [TestCase(@"$a[-1]							# returns int 30, i.e., $a[$a.Length-1]")]
         [TestCase(@"$a[2] = 5						# changes int 30 to int 5")]
         [TestCase(@"$a[20] = 5						# implementation-defined behavior")]
-        [TestCase(@"$a = New-Object 'double[,]' 3,2", Explicit = true)]
+        [TestCase(@"$a = New-Object 'double[,]' 3,2")]
         [TestCase(@"$a[0,0] = 10.5					# changes 0.0 to 10.5")]
         [TestCase(@"$a[0,0]++						# changes 10.5 to 10.6")]
         [TestCase(@"$list = (""red"",$true,10),20,(1.2, ""yes""", Explicit = true)]
         [TestCase(@"$list[2][1]						# returns string ""yes""")]
         [TestCase(@"$a = @{ A = 10 },@{ B = $true },@{ C = 123.45 }")]
-        [TestCase(@"$a[1][""B""]						# $a[1] is a Hashtable, where B is a key", Explicit = true)]
+        [TestCase(@"$a[1][""B""]						# $a[1] is a Hashtable, where B is a key")]
         [TestCase(@"$a = ""red"",""green""")]
-        [TestCase(@"$a[1][4]							# returns string ""n"" from string in $a[1]", Explicit = true)]
+        [TestCase(@"$a[1][4]							# returns string ""n"" from string in $a[1]")]
         public void Section7_1_4_1_SubscriptingAnArray(string input)
         {
             AssertIsValidInput(input);
@@ -158,7 +158,7 @@ if ($true)
 
         [Test]
         [TestCase(@"$s = ""Hello""")]
-        [TestCase(@"$s = ""Hello""					# string, Length 5, positions 0-4", Explicit = true)]
+        [TestCase(@"$s = ""Hello""					# string, Length 5, positions 0-4")]
         [TestCase(@"$c = $s[1]						# returns ""e"" as a string")]
         [TestCase(@"$c = $s[20]						# no such position, returns $null")]
         [TestCase(@"$c = $s[-1]						# returns ""o"", i.e., $s[$s.Length-1]")]
@@ -177,7 +177,7 @@ if ($true)
         [TestCase(@"$a[,5]						# slice with Length 1")]
         [TestCase(@"$a[@()]						# slice with Length 0")]
         [TestCase(@"$a[-1..-3] 					# slice with Length 0, value 90,80,70")]
-        [TestCase(@"$a = New-Object 'int[,]' 3,2", Explicit = true)]
+        [TestCase(@"$a = New-Object 'int[,]' 3,2")]
         [TestCase(@"$a[0,0] = 10; $a[0,1] = 20; $a[1,0] = 30")]
         [TestCase(@"$a[1,1] = 40; $a[2,0] = 50; $a[2,1] = 60")]
         [TestCase(@"$a[(0,1),(1,0)]			# slice with Length 2, value 20,30, parens needed")]
