@@ -828,7 +828,7 @@ ls
                 Assert.AreEqual(StringConstantType.BareWord, memberAst.StringConstantType);
             }
 
-            [Test, Explicit("Bug - https://github.com/Pash-Project/Pash/issues/9")]
+            [Test]
             public void BadMemberAccess()
             {
                 Assert.Throws<PowerShellGrammar.ParseException>(() =>
