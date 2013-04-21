@@ -249,13 +249,13 @@ namespace TestHost
             }
         }
 
-        [Test, Explicit("bug")]
+        [Test]
         public void JaggedArrayTest()
         {
             // This should make a 2-element array, where the 2nd element is itself an array.
             var result = TestHost.Execute("$x = 1,2; (3,$x).Count");
 
-            Assert.AreEqual(2, result);
+            Assert.AreEqual(2 + Environment.NewLine, result);
         }
 
         [Test, Description("https://github.com/Pash-Project/Pash/issues/6")]
