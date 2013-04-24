@@ -159,6 +159,15 @@ namespace Microsoft.PowerShell.Commands
 
         protected override bool HasChildItems(Path path) { throw new NotImplementedException(); }
 
+        public static bool IsLinux
+        {
+            get
+            {
+            	int p = (int) Environment.OSVersion.Platform;
+            	return (p == 4) || (p == 6) || (p == 128);
+            }
+        }
+
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
             Collection<PSDriveInfo> collection = new Collection<PSDriveInfo>();
@@ -168,6 +177,18 @@ namespace Microsoft.PowerShell.Commands
             // TODO: Console.WriteLine("Mono: After GetDrives");
 
             System.Diagnostics.Debug.WriteLine("Number of drives: " + ((drives == null) ? "Null drives" : drives.Length.ToString()));
+
+			int driveCount = 0;
+
+            // TODO: Resolve hack to get around Mono bug where System.IO.DriveInfo.GetDrives() returns a single blank drive.
+            if ( drives.Length == 1 && IsLinux && drives[0].Name.Length == 0)
+            {
+                PSDriveInfo info = new PSDriveInfo("/", base.ProviderInfo, "/", "Root", null);
+                info.RemovableDrive = false;
+
+                collection.Add(info);
+                return collection;
+            }
 
             if (drives != null)
             {
@@ -199,6 +220,7 @@ namespace Microsoft.PowerShell.Commands
                     collection.Add(info);
                 }
             }
+
             return collection;
         }
 
