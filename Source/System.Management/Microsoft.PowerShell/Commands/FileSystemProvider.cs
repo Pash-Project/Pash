@@ -178,8 +178,6 @@ namespace Microsoft.PowerShell.Commands
 
             System.Diagnostics.Debug.WriteLine("Number of drives: " + ((drives == null) ? "Null drives" : drives.Length.ToString()));
 
-			int driveCount = 0;
-
             // TODO: Resolve hack to get around Mono bug where System.IO.DriveInfo.GetDrives() returns a single blank drive.
             if ( drives.Length == 1 && IsLinux && drives[0].Name.Length == 0)
             {
