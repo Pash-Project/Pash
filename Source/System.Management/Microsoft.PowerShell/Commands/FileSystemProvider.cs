@@ -179,7 +179,7 @@ namespace Microsoft.PowerShell.Commands
             System.Diagnostics.Debug.WriteLine("Number of drives: " + ((drives == null) ? "Null drives" : drives.Length.ToString()));
 
             // TODO: Resolve hack to get around Mono bug where System.IO.DriveInfo.GetDrives() returns a single blank drive.
-            if (drives.Length == 1 && IsLinux && drives[0].Name.Length == 0)
+            if (MonoHasBug11923())
             {
                 PSDriveInfo info = new PSDriveInfo("/", base.ProviderInfo, "/", "Root", null);
                 info.RemovableDrive = false;
@@ -220,6 +220,13 @@ namespace Microsoft.PowerShell.Commands
             }
 
             return collection;
+        }
+
+        // See: https://bugzilla.xamarin.com/show_bug.cgi?id=11923
+        static bool MonoHasBug11923()
+        {
+            var drives = System.IO.DriveInfo.GetDrives();
+            return drives.Length == 1 && IsLinux && drives[0].Name.Length == 0;
         }
 
         protected override void InvokeDefaultAction(Path path) { throw new NotImplementedException(); }
