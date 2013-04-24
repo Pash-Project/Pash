@@ -33,5 +33,12 @@ namespace Libraries.Tests
         {
             Assert.Fail("You are hitting Mono bug https://bugzilla.xamarin.com/show_bug.cgi?id=6541");
         }
+
+        [Test]
+        public void MonoGetDrivesBug11923()
+        {
+            var drives = System.IO.DriveInfo.GetDrives();
+            Assert.False(drives.Length == 1 && drives[0].Name.Length == 0, "You are hitting Mono bug https://bugzilla.xamarin.com/show_bug.cgi?id=11923");
+        }
     }
 }
