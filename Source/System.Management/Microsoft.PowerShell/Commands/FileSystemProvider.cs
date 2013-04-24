@@ -159,15 +159,6 @@ namespace Microsoft.PowerShell.Commands
 
         protected override bool HasChildItems(Path path) { throw new NotImplementedException(); }
 
-        public static bool IsLinux
-        {
-            get
-            {
-                int p = (int)Environment.OSVersion.Platform;
-                return (p == 4) || (p == 6) || (p == 128);
-            }
-        }
-
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
             Collection<PSDriveInfo> collection = new Collection<PSDriveInfo>();
@@ -226,7 +217,7 @@ namespace Microsoft.PowerShell.Commands
         static bool MonoHasBug11923()
         {
             var drives = System.IO.DriveInfo.GetDrives();
-            return drives.Length == 1 && IsLinux && drives[0].Name.Length == 0;
+            return drives.Length == 1 && drives[0].Name.Length == 0;
         }
 
         protected override void InvokeDefaultAction(Path path) { throw new NotImplementedException(); }
