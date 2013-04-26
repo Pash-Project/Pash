@@ -94,32 +94,29 @@ namespace System.Management.Automation
 
                 object[] attributes = filedInfo.GetCustomAttributes(false);
 
-                // Find if there are any [Parameter] attributes on the property
+                // Find all [Parameter] attributes on the property
                 ParameterAttribute paramAttr = null;
                 foreach (object attr in attributes)
                 {
                     if (attr is ParameterAttribute)
                     {
                         paramAttr = (ParameterAttribute)attr;
-                        break;
+
+                        // TODO: make sure that the PropertyInfo.GetAccessors() returns the appropriate set of accessors
+                        // TODO: ensure there are no duplicate named parameters inside scope of a single parameter set.
+
+                        CommandParameterInfo pi = new CommandParameterInfo(filedInfo.Name, filedInfo.PropertyType, paramAttr);
+
+                        string paramSetName = paramAttr.ParameterSetName ?? ParameterAttribute.AllParameterSets;
+
+                        if (!paramSets.ContainsKey(paramSetName))
+                        {
+                            paramSets.Add(paramSetName, new Collection<CommandParameterInfo>());
+                        }
+
+                        Collection<CommandParameterInfo> paramSet = paramSets[paramSetName];
+                        paramSet.Add(pi);
                     }
-                }
-
-                // TODO: make sure that the PropertyInfo.GetAccessors() returns the appropriate set of accessors
-
-                if (paramAttr != null)
-                {
-                    CommandParameterInfo pi = new CommandParameterInfo(filedInfo.Name, filedInfo.PropertyType, paramAttr);
-
-                    string paramSetName = paramAttr.ParameterSetName ?? ParameterAttribute.AllParameterSets;
-
-                    if (!paramSets.ContainsKey(paramSetName))
-                    {
-                        paramSets.Add(paramSetName, new Collection<CommandParameterInfo>());
-                    }
-
-                    Collection<CommandParameterInfo> paramSet = paramSets[paramSetName];
-                    paramSet.Add(pi);
                 }
             }
 
