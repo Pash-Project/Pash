@@ -137,6 +137,16 @@ namespace System.Management.Automation
                 bool bIsDefaultParamSet = paramSetName == strDefaultParameterSetName;
 
                 paramSetInfo.Add(new CommandParameterSetInfo(paramSetName, bIsDefaultParamSet, paramSets[paramSetName]));
+
+                // If a parameter set is not specified for a parmeter, then the parameter belongs to all the parameter sets,
+                // therefore if this is not the AllParameterSets Set then add all parameters from the AllParameterSets Set to it...
+                if ( string.Compare(paramSetName,ParameterAttribute.AllParameterSets) != 0 && paramSets.ContainsKey(ParameterAttribute.AllParameterSets) ) 
+                {
+                    foreach ( CommandParameterInfo cpi in paramSets[ParameterAttribute.AllParameterSets] )
+                    {
+                        paramSets[paramSetName].Add(cpi);
+                    }
+                }
             }
 
             return new ReadOnlyCollection<CommandParameterSetInfo>(paramSetInfo);
