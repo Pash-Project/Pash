@@ -246,7 +246,16 @@ namespace System.Management.Pash.Implementation
 
         Command GetCommand(CommandAst commandAst)
         {
-            return new Command(commandAst.GetCommandName());
+            if (commandAst.CommandElements.First() is ScriptBlockExpressionAst)
+            {
+                var scriptBlockAst = (commandAst.CommandElements.First() as ScriptBlockExpressionAst).ScriptBlock;
+                return new Command(scriptBlockAst);
+            }
+
+            else
+            {
+                return new Command(commandAst.GetCommandName());
+            }
         }
 
         public object Add(object leftValue, object rightValue)
@@ -709,15 +718,28 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
+        class ReturnException : Exception
+        {
+        }
+
         public override AstVisitAction VisitReturnStatement(ReturnStatementAst returnStatementAst)
         {
+            if (returnStatementAst.Pipeline == null) throw new ReturnException();
+
             throw new NotImplementedException(); //VisitReturnStatement(returnStatementAst);
         }
 
         public override AstVisitAction VisitScriptBlock(ScriptBlockAst scriptBlockAst)
         {
-            // just iterate over children
-            return base.VisitScriptBlock(scriptBlockAst);
+            try
+            {
+                scriptBlockAst.EndBlock.Visit(this);
+            }
+            catch (ReturnException)
+            {
+            }
+
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitScriptBlockExpression(ScriptBlockExpressionAst scriptBlockExpressionAst)

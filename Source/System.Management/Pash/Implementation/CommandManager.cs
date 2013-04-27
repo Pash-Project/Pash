@@ -128,6 +128,11 @@ namespace Pash.Implementation
 
             CommandInfo commandInfo = null;
 
+            if (command.CommandText == null)
+            {
+                commandInfo = new ScriptInfo("", command.ScriptBlockAst.GetScriptBlock());
+            }
+
             if (command.IsScript)
             {
                 // TODO: take care of the script commands
