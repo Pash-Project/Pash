@@ -376,6 +376,14 @@ namespace TestHost
             {
                 var result = TestHost.Execute("Get-ChildItem | Sort-Object name");
             }
+
+            [Test]
+            public void ScriptBlock()
+            {
+                var result = TestHost.Execute("& { 1 }");
+
+                Assert.AreEqual("1" + Environment.NewLine, result);
+            }
         }
     }
 }

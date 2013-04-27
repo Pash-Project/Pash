@@ -246,7 +246,16 @@ namespace System.Management.Pash.Implementation
 
         Command GetCommand(CommandAst commandAst)
         {
-            return new Command(commandAst.GetCommandName());
+            if (commandAst.CommandElements.First() is ScriptBlockExpressionAst)
+            {
+                var scriptBlockAst = (commandAst.CommandElements.First() as ScriptBlockExpressionAst).ScriptBlock;
+                return new Command(scriptBlockAst);
+            }
+
+            else
+            {
+                return new Command(commandAst.GetCommandName());
+            }
         }
 
         public object Add(object leftValue, object rightValue)

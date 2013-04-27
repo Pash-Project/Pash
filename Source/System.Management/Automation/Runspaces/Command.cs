@@ -1,12 +1,17 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using Pash.Implementation;
+using System.Management.Automation.Language;
 
 namespace System.Management.Automation.Runspaces
 {
     public sealed class Command
     {
-        public string CommandText { get; private set; }
+        internal readonly ScriptBlockAst ScriptBlockAst;
+
+        readonly string _commandText;
+        public string CommandText { get { return this._commandText; } }
+
         public bool IsScript { get; private set; }
         public bool UseLocalScope { get; private set; }
 
@@ -24,13 +29,25 @@ namespace System.Management.Automation.Runspaces
         }
 
         public Command(string command, bool isScript, bool useLocalScope)
+            : this()
         {
-            CommandText = command;
+            _commandText = command;
             IsScript = isScript;
             UseLocalScope = useLocalScope;
+        }
+
+        private Command()
+        {
             Parameters = new CommandParameterCollection();
             MergeMyResult = PipelineResultTypes.None;
             MergeToResult = PipelineResultTypes.None;
+        }
+
+        internal Command(ScriptBlockAst scriptBlockAst)
+            : this()
+        {
+            this.ScriptBlockAst = scriptBlockAst;
+            IsScript = false;
         }
 
         public void MergeMyResults(PipelineResultTypes myResult, PipelineResultTypes toResult)
