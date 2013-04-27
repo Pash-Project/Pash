@@ -376,14 +376,22 @@ namespace TestHost
             {
                 var result = TestHost.Execute("Get-ChildItem | Sort-Object name");
             }
+        }
 
-            [Test]
-            public void ScriptBlock()
-            {
-                var result = TestHost.Execute("& { 1 }");
+        [Test]
+        public void ScriptBlock()
+        {
+            var result = TestHost.Execute("& { 1 }");
 
-                Assert.AreEqual("1" + Environment.NewLine, result);
-            }
+            Assert.AreEqual("1" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void Return()
+        {
+            var result = TestHost.Execute("& { return; 1 } ; 2");
+
+            Assert.AreEqual("2" + Environment.NewLine, result);
         }
     }
 }

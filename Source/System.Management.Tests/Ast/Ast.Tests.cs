@@ -963,5 +963,20 @@ ls
             VariableExpressionAst variableExpressionAst = (VariableExpressionAst)unaryExpressionAst.Child;
             Assert.AreEqual("x", variableExpressionAst.VariablePath.UserPath);
         }
+
+        [Test]
+        public void Return()
+        {
+            ReturnStatementAst returnStatementAst = ParseInput("{ return }")
+                .EndBlock
+                .Statements[0]
+                .PipelineElements[0]
+                .Expression
+                .ScriptBlock
+                .EndBlock
+                .Statements[0];
+
+            Assert.Null(returnStatementAst.Pipeline);
+        }
     }
 }
