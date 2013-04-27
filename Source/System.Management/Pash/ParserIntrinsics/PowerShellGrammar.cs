@@ -71,8 +71,6 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal statement_list_opt = null; // Initialized by reflection.
         public readonly NonTerminal statement = null; // Initialized by reflection.
         public readonly NonTerminal _statement_labeled_statement = null; // Initialized by reflection.
-        public readonly NonTerminal _statement_flow_control_statement = null; // Initialized by reflection.
-        public readonly NonTerminal _statement_pipeline = null; // Initialized by reflection.
         public readonly NonTerminal statement_terminator = null; // Initialized by reflection.
         public readonly NonTerminal statement_terminators = null; // Initialized by reflection.
         public readonly NonTerminal statement_terminators_opt = null; // Initialized by reflection.
@@ -534,7 +532,8 @@ namespace Pash.ParserIntrinsics
                 |
                 function_statement
                 |
-                _statement_flow_control_statement
+                // See https://github.com/Pash-Project/Pash/issues/7
+                flow_control_statement /*+ statement_terminator_opt*/
                 |
                 trap_statement
                 |
@@ -542,7 +541,8 @@ namespace Pash.ParserIntrinsics
                 |
                 data_statement
                 |
-                _statement_pipeline
+                // See https://github.com/Pash-Project/Pash/issues/7
+                pipeline /*+ statement_terminator_opt*/
                 ;
 
             _statement_labeled_statement.Rule =
@@ -550,14 +550,6 @@ namespace Pash.ParserIntrinsics
                 |
                 labeled_statement
                 ;
-
-            // See https://github.com/Pash-Project/Pash/issues/7
-            _statement_flow_control_statement.Rule =
-                flow_control_statement /*+ statement_terminator_opt*/;
-
-            // See https://github.com/Pash-Project/Pash/issues/7
-            _statement_pipeline.Rule =
-                pipeline /*+ statement_terminator_opt*/;
 
             ////        statement_terminator:
             ////            ;

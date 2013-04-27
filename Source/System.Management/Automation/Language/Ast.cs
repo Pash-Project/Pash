@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Extensions.Queue;
 using Extensions.Reflection;
+using System.Reflection;
 
 namespace System.Management.Automation.Language
 {
@@ -30,7 +31,14 @@ namespace System.Management.Automation.Language
             // e.g., `StringConstantExpression` is also a `ConstantExpression`
             if (dispatchMethodInfos.Any())
             {
-                return (AstVisitAction)dispatchMethodInfos.First().Invoke(astVisitor, new[] { ast });
+                try
+                {
+                    return (AstVisitAction)dispatchMethodInfos.First().Invoke(astVisitor, new[] { ast });
+                }
+                catch (TargetInvocationException targetInvocationException)
+                {
+                    throw targetInvocationException.InnerException;
+                }
             }
 
             else throw new InvalidOperationException(ast.ToString());

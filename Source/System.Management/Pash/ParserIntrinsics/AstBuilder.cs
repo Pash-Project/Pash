@@ -139,7 +139,7 @@ namespace Pash.ParserIntrinsics
                 return BuildFunctionStatementAst(parseTreeNode);
             }
 
-            if (parseTreeNode.Term == this._grammar._statement_flow_control_statement)
+            if (parseTreeNode.Term == this._grammar.flow_control_statement)
             {
                 return BuildFlowControlStatementAst(parseTreeNode);
             }
@@ -159,9 +159,9 @@ namespace Pash.ParserIntrinsics
                 return BuildDataStatementAst(parseTreeNode);
             }
 
-            if (parseTreeNode.Term == this._grammar._statement_pipeline)
+            if (parseTreeNode.Term == this._grammar.pipeline)
             {
-                return BuildStatementPipelineAst(parseTreeNode);
+                return BuildPipelineAst(parseTreeNode);
             }
 
             throw new InvalidOperationException(parseTreeNode.ToString());
@@ -187,7 +187,40 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildFlowControlStatementAst(ParseTreeNode parseTreeNode)
         {
-            throw new NotImplementedException();
+            VerifyTerm(parseTreeNode, this._grammar.flow_control_statement);
+
+            var childNode = parseTreeNode.ChildNodes.Single();
+            if (childNode.Term == this._grammar._flow_control_statement_return)
+            {
+                return BuildReturnStatementAst(childNode);
+            }
+
+            throw new NotImplementedException(childNode.ToString());
+        }
+
+        private StatementAst BuildReturnStatementAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar._flow_control_statement_return);
+
+            PipelineBaseAst pipeline;
+
+            if (parseTreeNode.ChildNodes.Count == 1)
+            {
+                pipeline = null;
+            }
+
+            else if (parseTreeNode.ChildNodes.Count == 2)
+            {
+                pipeline = BuildPipelineAst(parseTreeNode.ChildNodes[1]);
+            }
+
+            else
+                throw new NotImplementedException(this.ToString());
+
+            return new ReturnStatementAst(
+                new ScriptExtent(parseTreeNode),
+                pipeline
+                );
         }
 
         StatementAst BuildTrapStatementAst(ParseTreeNode parseTreeNode)
@@ -203,13 +236,6 @@ namespace Pash.ParserIntrinsics
         StatementAst BuildDataStatementAst(ParseTreeNode parseTreeNode)
         {
             throw new NotImplementedException();
-        }
-
-        StatementAst BuildStatementPipelineAst(ParseTreeNode parseTreeNode)
-        {
-            VerifyTerm(parseTreeNode, this._grammar._statement_pipeline);
-
-            return BuildPipelineAst(parseTreeNode.ChildNodes.Single());
         }
 
         StatementAst BuildLabeledStatementAst(ParseTreeNode parseTreeNode)

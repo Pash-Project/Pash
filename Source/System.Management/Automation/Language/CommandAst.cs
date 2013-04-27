@@ -29,6 +29,11 @@ namespace System.Management.Automation.Language
                 return ((StringConstantExpressionAst)firstCommandElement).Value;
             }
 
+            else if (firstCommandElement is ScriptBlockExpressionAst)
+            {
+                return null;
+            }
+
             throw new NotImplementedException(this.ToString());
         }
 
