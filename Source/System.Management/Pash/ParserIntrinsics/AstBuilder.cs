@@ -1030,12 +1030,17 @@ namespace Pash.ParserIntrinsics
 
             if (typeNameNode.Term == this._grammar.type_name)
             {
-                return new TypeExpressionAst(new ScriptExtent(parseTreeNode), new TypeName(
-                    typeNameNode.Token.Text
-                    ));
+                return new TypeExpressionAst(new ScriptExtent(parseTreeNode), BuildTypeName(typeNameNode));
             }
 
             throw new NotImplementedException(typeNameNode.ToString());
+        }
+
+        TypeName BuildTypeName(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.type_name);
+
+            return new TypeName(parseTreeNode.Token.Text);
         }
 
         HashtableAst BuildHashLiteralExpressionAst(ParseTreeNode parseTreeNode)
