@@ -88,11 +88,17 @@ namespace System.Management.Automation
             }
             */
 
+            // TODO: ensure there are no duplicate named parameters inside scope of a single parameter set.
+
             foreach (PropertyInfo filedInfo in cmdletType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 System.Diagnostics.Debug.WriteLine(filedInfo.ToString());
 
                 object[] attributes = filedInfo.GetCustomAttributes(false);
+
+                // Get info for the setter and getter
+                MethodInfo getter = filedInfo.GetAccessors().FirstOrDefault(i => i.IsSpecialName && i.Name.StartsWith("get_"));
+                MethodInfo setter = filedInfo.GetSetMethod();
 
                 // Find all [Parameter] attributes on the property
                 ParameterAttribute paramAttr = null;
@@ -102,8 +108,17 @@ namespace System.Management.Automation
                     {
                         paramAttr = (ParameterAttribute)attr;
 
-                        // TODO: make sure that the PropertyInfo.GetAccessors() returns the appropriate set of accessors
-                        // TODO: ensure there are no duplicate named parameters inside scope of a single parameter set.
+                        // if ValueFromPipeline or ValueFromPipelineByPropertyName is specified the property must have a public getter
+                        if ( ( paramAttr.ValueFromPipeline || paramAttr.ValueFromPipelineByPropertyName ) && ( getter == null || !getter.IsPublic ))
+                        {
+                            break;
+                        }
+
+                        // The property must have a public setter
+                        if ( setter == null || !setter.IsPublic )
+                        {
+                            break;
+                        }
 
                         CommandParameterInfo pi = new CommandParameterInfo(filedInfo.Name, filedInfo.PropertyType, paramAttr);
 
