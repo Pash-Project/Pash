@@ -23,7 +23,8 @@ namespace System.Management.Automation.Language
         {
             var dispatchMethodInfos = from dmi in astVisitor.GetType().GetMethods()
                                       where dmi.Name.StartsWith("Visit")
-                                      where dmi.GetParameters().Single().ParameterType.IsAssignableFrom(ast)
+                                      let parameterType = dmi.GetParameters().Single().ParameterType
+                                      where parameterType.IsAssignableFrom(ast)
                                       select dmi;
 
             // TODO: Find out what PowerShell does when there's more than one match.
