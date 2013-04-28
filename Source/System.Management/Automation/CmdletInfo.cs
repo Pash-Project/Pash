@@ -80,16 +80,41 @@ namespace System.Management.Automation
         {
             Dictionary<string, Collection<CommandParameterInfo>> paramSets = new Dictionary<string, Collection<CommandParameterInfo>>(StringComparer.CurrentCultureIgnoreCase);
 
-            // Extract all the public parameters from the Cmdlet
-            /* TODO: gather all the field parameters
-            foreach(var filedInfo in cmdletType.GetFields(BindingFlags.Public | BindingFlags.Instance))
+            // TODO: ensure there are no duplicate named parameters inside scope of a single parameter set.
+            // TOOD: When using parameter sets, no parameter set should contain more than one positional parameter with the same position. 
+            // TODO: only one parameter in a set should declare ValueFromPipeline = true. Multiple parameters may define ValueFromPipelineByPropertyName = true.
+
+            // Add fields with ParameterAttribute
+            foreach (FieldInfo filedInfo in cmdletType.GetFields(BindingFlags.Public | BindingFlags.Instance))
             {
                 System.Diagnostics.Debug.WriteLine(filedInfo.ToString());
+
+                object[] attributes = filedInfo.GetCustomAttributes(false);
+
+                // Find all [Parameter] attributes on the property
+                ParameterAttribute paramAttr = null;
+                foreach (object attr in attributes)
+                {
+                    if (attr is ParameterAttribute)
+                    {
+                        paramAttr = (ParameterAttribute)attr;
+
+                        CommandParameterInfo pi = new CommandParameterInfo(filedInfo.Name, filedInfo.FieldType, paramAttr);
+
+                        string paramSetName = paramAttr.ParameterSetName ?? ParameterAttribute.AllParameterSets;
+
+                        if (!paramSets.ContainsKey(paramSetName))
+                        {
+                            paramSets.Add(paramSetName, new Collection<CommandParameterInfo>());
+                        }
+
+                        Collection<CommandParameterInfo> paramSet = paramSets[paramSetName];
+                        paramSet.Add(pi);
+                    }
+                }
             }
-            */
 
-            // TODO: ensure there are no duplicate named parameters inside scope of a single parameter set.
-
+            // Add properties with ParameterAttribute
             foreach (PropertyInfo filedInfo in cmdletType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 System.Diagnostics.Debug.WriteLine(filedInfo.ToString());
