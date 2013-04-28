@@ -18,5 +18,24 @@ namespace Extensions.Reflection
         {
             return @this.IsAssignableFrom(t.GetType());
         }
+
+        /// <summary>
+        /// If `t` is a base class, how many levels up is it?
+        /// </summary>
+        public static int GetDerivationRank<T>(this Type @this, T t)
+        {
+            int count = 0;
+
+            var tType = t.GetType();
+
+            while (@this != tType)
+            {
+                tType = tType.BaseType;
+                if (tType == null) throw new Exception();
+                count++;
+            }
+
+            return count;
+        }
     }
 }

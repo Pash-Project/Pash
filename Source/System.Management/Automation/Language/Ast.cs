@@ -25,11 +25,9 @@ namespace System.Management.Automation.Language
                                       where dmi.Name.StartsWith("Visit")
                                       let parameterType = dmi.GetParameters().Single().ParameterType
                                       where parameterType.IsAssignableFrom(ast)
+                                      orderby parameterType.GetDerivationRank(ast)
                                       select dmi;
 
-            // TODO: Find out what PowerShell does when there's more than one match.
-            //
-            // e.g., `StringConstantExpression` is also a `ConstantExpression`
             if (dispatchMethodInfos.Any())
             {
                 try

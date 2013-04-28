@@ -754,7 +754,8 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitStringConstantExpression(StringConstantExpressionAst stringConstantExpressionAst)
         {
-            throw new NotImplementedException(); //VisitStringConstantExpression(stringConstantExpressionAst);
+            this._pipelineCommandRuntime.outputResults.Write(stringConstantExpressionAst.Value);
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitSubExpression(SubExpressionAst subExpressionAst)
