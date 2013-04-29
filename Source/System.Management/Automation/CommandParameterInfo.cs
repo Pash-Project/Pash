@@ -1,5 +1,8 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Collections.ObjectModel;
 
 namespace System.Management.Automation
@@ -24,9 +27,9 @@ namespace System.Management.Automation
         // internals
         //internal CommandParameterInfo(System.Management.Automation.CompiledCommandParameter parameter, uint parameterSetFlag);
 
-        internal CommandParameterInfo(string name, Type paramType, ParameterAttribute paramAttr)
+        internal CommandParameterInfo(MemberInfo info, Type paramType, ParameterAttribute paramAttr)
         {
-            Name = name;
+            Name = info.Name;
             ParameterType = paramType;
             Position = paramAttr.Position;
             ValueFromPipeline = paramAttr.ValueFromPipeline;
@@ -34,7 +37,13 @@ namespace System.Management.Automation
             ValueFromRemainingArguments = paramAttr.ValueFromRemainingArguments;
             IsMandatory = paramAttr.Mandatory;
 
-            // TODO: fill in aliases
+            // Reflect Aliases from field/property
+            List<string> aliases = new List<string>();
+            foreach ( AliasAttribute a in info.GetCustomAttributes(false).Where(i => i is AliasAttribute) )
+            {
+                aliases.AddRange(a.AliasNames);
+            }
+            Aliases = new ReadOnlyCollection<string>(aliases);
         }
     }
 }
