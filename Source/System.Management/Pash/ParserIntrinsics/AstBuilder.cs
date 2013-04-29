@@ -643,7 +643,33 @@ namespace Pash.ParserIntrinsics
                 return BuildPreIncrementExpressionAst(childNode);
             }
 
+            else if (childNode.Term == this._grammar.cast_expression)
+            {
+                return BuildCastExpression(childNode);
+            }
+
             throw new NotImplementedException(parseTreeNode.ToString());
+        }
+
+        ExpressionAst BuildCastExpression(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.cast_expression);
+
+            return new ConvertExpressionAst(
+                new ScriptExtent(parseTreeNode),
+                BuildTypeConstraintAst(parseTreeNode.ChildNodes[0]),
+                BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1])
+                );
+        }
+
+        TypeConstraintAst BuildTypeConstraintAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.type_literal);
+
+            return new TypeConstraintAst(
+                new ScriptExtent(parseTreeNode),
+                BuildTypeName(parseTreeNode.ChildNodes[1].ChildNodes.Single())
+                );
         }
 
         ExpressionAst BuildUnaryDashExpressionAst(ParseTreeNode parseTreeNode)
@@ -1030,12 +1056,17 @@ namespace Pash.ParserIntrinsics
 
             if (typeNameNode.Term == this._grammar.type_name)
             {
-                return new TypeExpressionAst(new ScriptExtent(parseTreeNode), new TypeName(
-                    typeNameNode.Token.Text
-                    ));
+                return new TypeExpressionAst(new ScriptExtent(parseTreeNode), BuildTypeName(typeNameNode));
             }
 
             throw new NotImplementedException(typeNameNode.ToString());
+        }
+
+        TypeName BuildTypeName(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.type_name);
+
+            return new TypeName(parseTreeNode.Token.Text);
         }
 
         HashtableAst BuildHashLiteralExpressionAst(ParseTreeNode parseTreeNode)
