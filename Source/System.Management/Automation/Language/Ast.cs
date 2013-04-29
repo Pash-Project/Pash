@@ -23,12 +23,11 @@ namespace System.Management.Automation.Language
         {
             var dispatchMethodInfos = from dmi in astVisitor.GetType().GetMethods()
                                       where dmi.Name.StartsWith("Visit")
-                                      where dmi.GetParameters()[0].ParameterType.IsAssignableFrom(ast)
+                                      let parameterType = dmi.GetParameters().Single().ParameterType
+                                      where parameterType.IsAssignableFrom(ast)
+                                      orderby parameterType.GetDerivationRank(ast)
                                       select dmi;
 
-            // TODO: Find out what PowerShell does when there's more than one match.
-            //
-            // e.g., `StringConstantExpression` is also a `ConstantExpression`
             if (dispatchMethodInfos.Any())
             {
                 try

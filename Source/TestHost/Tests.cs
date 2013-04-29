@@ -393,5 +393,13 @@ namespace TestHost
 
             Assert.AreEqual("2" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void EnumParameter()
+        {
+            var result = TestHost.Execute("[Text.RegularExpressions.Regex]::IsMatch('FOO', 'foo', [Text.RegularExpressions.RegexOptions] 'IgnoreCase' )");
+
+            Assert.AreEqual("True" + Environment.NewLine, result);
+        }
     }
 }

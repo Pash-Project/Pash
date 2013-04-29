@@ -25,9 +25,7 @@ namespace ParserTests
         [Test, Description("Did this tokenize as 1 long string?")]
         public void TwoStrings()
         {
-            BinaryExpressionAst expressionAst = ParseInput(@"""a"" + ""b""")
-                .EndBlock
-                .Statements[0]
+            BinaryExpressionAst expressionAst = ParseStatement(@"""a"" + ""b""")
                 .PipelineElements[0]
                 .Expression
                 ;
@@ -47,10 +45,7 @@ namespace ParserTests
             [Test]
             public void IfEmptyStatementTest()
             {
-                IfStatementAst ifStatementAst = ParseInput("if ($true) {}")
-                    .EndBlock
-                    .Statements[0]
-                    ;
+                IfStatementAst ifStatementAst = ParseStatement("if ($true) {}");
 
                 CollectionAssert.IsEmpty(ifStatementAst.Clauses.Single().Item2.Statements);
                 Assert.IsNull(ifStatementAst.ElseClause);
@@ -59,10 +54,7 @@ namespace ParserTests
             [Test]
             public void IfWithStatementTest()
             {
-                IfStatementAst ifStatementAst = ParseInput("if ($true) { Get-ChildItem }")
-                    .EndBlock
-                    .Statements[0]
-                    ;
+                IfStatementAst ifStatementAst = ParseStatement("if ($true) { Get-ChildItem }");
 
                 Assert.AreEqual(1, ifStatementAst.Clauses.Single().Item2.Statements.Count);
                 Assert.IsNull(ifStatementAst.ElseClause);
@@ -71,10 +63,7 @@ namespace ParserTests
             [Test]
             public void IfElseTest()
             {
-                IfStatementAst ifStatementAst = ParseInput("if ($true) {} else {}")
-                    .EndBlock
-                    .Statements[0]
-                    ;
+                IfStatementAst ifStatementAst = ParseStatement("if ($true) {} else {}");
 
                 Assert.IsNotNull(ifStatementAst.ElseClause);
             }
@@ -82,10 +71,7 @@ namespace ParserTests
             [Test]
             public void IfElseifTest()
             {
-                IfStatementAst ifStatementAst = ParseInput("if ($true) {} elseif ($false) {}")
-                    .EndBlock
-                    .Statements[0]
-                    ;
+                IfStatementAst ifStatementAst = ParseStatement("if ($true) {} elseif ($false) {}");
 
                 Assert.IsNull(ifStatementAst.ElseClause);
                 Assert.AreEqual(2, ifStatementAst.Clauses.Count);
@@ -95,9 +81,7 @@ namespace ParserTests
         [Test]
         public void GreaterThatEqualTest()
         {
-            var binaryExpressionAst = ParseInput("10 -gt 1")
-                .EndBlock
-                .Statements[0]
+            var binaryExpressionAst = ParseStatement("10 -gt 1")
                 .PipelineElements[0]
                 .Expression
                 ;
@@ -382,9 +366,7 @@ ls
         [Test]
         public void IndexTest()
         {
-            var indexExpressionAst = ParseInput("'abc'[2]")
-                .EndBlock
-                .Statements[0]
+            var indexExpressionAst = ParseStatement("'abc'[2]")
                 .PipelineElements[0]
                 .Expression
                 ;
@@ -414,9 +396,7 @@ ls
         [Test]
         public void HashTable0()
         {
-            HashtableAst hashtableAst = ParseInput("@{ }")
-                    .EndBlock
-                    .Statements[0]
+            HashtableAst hashtableAst = ParseStatement("@{ }")
                     .PipelineElements[0]
                     .Expression;
 
@@ -426,9 +406,7 @@ ls
         [Test]
         public void HashTable1()
         {
-            HashtableAst hashtableAst = ParseInput("@{ 'a' = 'b' }")
-                    .EndBlock
-                    .Statements[0]
+            HashtableAst hashtableAst = ParseStatement("@{ 'a' = 'b' }")
                     .PipelineElements[0]
                     .Expression;
 
@@ -445,9 +423,7 @@ ls
         [Test]
         public void HashTable2()
         {
-            HashtableAst hashtableAst = ParseInput("@{ a = b ; c = d }")
-                    .EndBlock
-                    .Statements[0]
+            HashtableAst hashtableAst = ParseStatement("@{ a = b ; c = d }")
                     .PipelineElements[0]
                     .Expression;
 
@@ -457,9 +433,7 @@ ls
         [Test]
         public void HashTableIntegerKey()
         {
-            HashtableAst hashtableAst = ParseInput("@{ 10 = 'b' }")
-                    .EndBlock
-                    .Statements[0]
+            HashtableAst hashtableAst = ParseStatement("@{ 10 = 'b' }")
                     .PipelineElements[0]
                     .Expression;
 
@@ -471,9 +445,7 @@ ls
         [Test]
         public void HashTableUnquotedName()
         {
-            HashtableAst hashtableAst = ParseInput("@{ a = 'b' }")
-                    .EndBlock
-                    .Statements[0]
+            HashtableAst hashtableAst = ParseStatement("@{ a = 'b' }")
                     .PipelineElements[0]
                     .Expression;
 
@@ -510,9 +482,7 @@ ls
         [Test]
         public void SingleStatementInBlockTest()
         {
-            StringConstantExpressionAst command = ParseInput("{ Get-ChildItem }")
-                .EndBlock
-                .Statements[0]
+            StringConstantExpressionAst command = ParseStatement("{ Get-ChildItem }")
                 .PipelineElements[0]
                 .Expression
                 .ScriptBlock
@@ -533,9 +503,7 @@ ls
             [TestFixtureSetUp]
             public void Setup()
             {
-                this._commandExpressionAst = ParseInput("'PS> '")
-                    .EndBlock
-                    .Statements[0]
+                this._commandExpressionAst = ParseStatement("'PS> '")
                     .PipelineElements[0];
 
                 this._stringConstantExpressionAst = (StringConstantExpressionAst)this._commandExpressionAst.Expression;
@@ -581,9 +549,7 @@ ls
             [TestFixtureSetUp]
             public void Setup()
             {
-                this._constantExpressionAst = ParseInput("1")
-                    .EndBlock
-                    .Statements[0]
+                this._constantExpressionAst = ParseStatement("1")
                     .PipelineElements[0]
                     .Expression;
             }
@@ -610,9 +576,7 @@ ls
         [Test]
         public void HexIntegerLiteralTest()
         {
-            int value = ParseInput("0xa")
-                .EndBlock
-                .Statements[0]
+            int value = ParseStatement("0xa")
                 .PipelineElements[0]
                 .Expression
                 .Value;
@@ -622,9 +586,7 @@ ls
         [Test]
         public void ExpandableStringLiteralExpression()
         {
-            string value = ParseInput("\"PS> \"")
-                .EndBlock
-                .Statements[0]
+            string value = ParseStatement("\"PS> \"")
                 .PipelineElements[0]
                 .Expression
                 .Value;
@@ -635,9 +597,7 @@ ls
         [Test]
         public void AdditiveExpression_AddStringInt()
         {
-            var expression = ParseInput("'x' + 1")
-                .EndBlock
-                .Statements[0]
+            var expression = ParseStatement("'x' + 1")
                 .PipelineElements[0]
                 .Expression;
 
@@ -652,12 +612,10 @@ ls
         [Test]
         public void NewlineContinuationTest()
         {
-            var expression = ParseInput(
+            var expression = ParseStatement(
 @"'x' + `
 'y'"
                 )
-                .EndBlock
-                .Statements[0]
                 .PipelineElements[0]
                 .Expression;
         }
@@ -665,9 +623,7 @@ ls
         [Test]
         public void AdditiveExpression_AddStrings()
         {
-            var expression = ParseInput("'x' + 'y'")
-                .EndBlock
-                .Statements[0]
+            var expression = ParseStatement("'x' + 'y'")
                 .PipelineElements[0]
                 .Expression;
 
@@ -682,9 +638,7 @@ ls
         [Test]
         public void ParenthesizedExpression()
         {
-            string result = ParseInput("(Get-Location)")
-                .EndBlock
-                .Statements[0]
+            string result = ParseStatement("(Get-Location)")
                 .PipelineElements[0]
                 .Expression
                 .Pipeline
@@ -698,9 +652,7 @@ ls
         [Test]
         public void NegativeIntegerTest()
         {
-            int result = ParseInput("-1")
-                .EndBlock
-                .Statements[0]
+            int result = ParseStatement("-1")
                 .PipelineElements[0]
                 .Expression
                 .Value;
@@ -711,9 +663,7 @@ ls
         [Test]
         public void HexIntegerTest()
         {
-            var result = ParseInput("0xA")
-                .EndBlock
-                .Statements[0]
+            var result = ParseStatement("0xA")
                 .PipelineElements[0]
                 .Expression
                 .Value;
@@ -724,9 +674,7 @@ ls
         [Test]
         public void ArrayRangeTest()
         {
-            BinaryExpressionAst result = ParseInput("1..10")
-                .EndBlock
-                .Statements[0]
+            BinaryExpressionAst result = ParseStatement("1..10")
                 .PipelineElements[0]
                 .Expression;
 
@@ -754,9 +702,7 @@ ls
         [Test]
         public void ArrayLiteralTest()
         {
-            var result = ParseInput("1,3,3")
-                .EndBlock
-                .Statements[0]
+            var result = ParseStatement("1,3,3")
                 .PipelineElements[0]
                 .Expression
                 .Elements;
@@ -769,9 +715,7 @@ ls
         [Test]
         public void PipelineTest()
         {
-            var pipelineAst = ParseInput("x | y")
-                .EndBlock
-                .Statements[0];
+            var pipelineAst = ParseStatement("x | y");
 
             var firstCommand = pipelineAst.PipelineElements[0].CommandElements[0].Value;
             var secondCommand = pipelineAst.PipelineElements[1].CommandElements[0].Value;
@@ -783,9 +727,7 @@ ls
         [Test]
         public void Pipeline3Test()
         {
-            var pipelineAst = ParseInput("x | y | z")
-                .EndBlock
-                .Statements[0];
+            var pipelineAst = ParseStatement("x | y | z");
 
             var firstCommand = pipelineAst.PipelineElements[0].CommandElements[0].Value;
             var secondCommand = pipelineAst.PipelineElements[1].CommandElements[0].Value;
@@ -801,15 +743,20 @@ ls
             return PowerShellGrammar.ParseInteractiveInput(s);
         }
 
+        static dynamic ParseStatement(string input)
+        {
+            return ParseInput(input)
+                .EndBlock
+                .Statements[0];
+        }
+
         [TestFixture]
         public class MemberAccess
         {
             [Test]
             public void StaticProperty()
             {
-                MemberExpressionAst memberExpressionAst = ParseInput("[System.Int32]::MaxValue")
-                    .EndBlock
-                    .Statements[0]
+                MemberExpressionAst memberExpressionAst = ParseStatement("[System.Int32]::MaxValue")
                     .PipelineElements[0]
                     .Expression;
             }
@@ -817,7 +764,9 @@ ls
             [Test]
             public void InstanceProperty()
             {
-                var memberExpressionAst = ParseInput(@"'abc'.Length").EndBlock.Statements[0].PipelineElements[0].Expression;
+                var memberExpressionAst = ParseStatement(@"'abc'.Length")
+                    .PipelineElements[0]
+                    .Expression;
                 StringConstantExpressionAst expressionAst = memberExpressionAst.Expression;
                 StringConstantExpressionAst memberAst = memberExpressionAst.Member;
 
@@ -843,9 +792,7 @@ ls
             [Test]
             public void StaticMethodInvocation()
             {
-                InvokeMemberExpressionAst invokeMemberExpressionAst = ParseInput(@"[char]::IsUpper('a')")
-                    .EndBlock
-                    .Statements[0]
+                InvokeMemberExpressionAst invokeMemberExpressionAst = ParseStatement(@"[char]::IsUpper('a')")
                     .PipelineElements[0]
                     .Expression;
 
@@ -918,9 +865,7 @@ ls
         [Test]
         public void ArrayArgument()
         {
-            var commandElementAsts = ParseInput("Write-Host 3,$true")
-                .EndBlock
-                .Statements[0]
+            var commandElementAsts = ParseStatement("Write-Host 3,$true")
                 .PipelineElements[0]
                 .CommandElements;
 
@@ -940,9 +885,7 @@ ls
         [Test]
         public void LogicalOperator()
         {
-            BinaryExpressionAst binaryExpressionAst = ParseInput("($true) -or ($false)")
-                .EndBlock
-                .Statements[0]
+            BinaryExpressionAst binaryExpressionAst = ParseStatement("($true) -or ($false)")
                 .PipelineElements[0]
                 .Expression;
 
@@ -952,9 +895,7 @@ ls
         [Test]
         public void PostIncrementExpression()
         {
-            UnaryExpressionAst unaryExpressionAst = ParseInput("$x++")
-                .EndBlock
-                .Statements[0]
+            UnaryExpressionAst unaryExpressionAst = ParseStatement("$x++")
                 .PipelineElements[0]
                 .Expression;
 
@@ -967,9 +908,7 @@ ls
         [Test]
         public void Return()
         {
-            ReturnStatementAst returnStatementAst = ParseInput("{ return }")
-                .EndBlock
-                .Statements[0]
+            ReturnStatementAst returnStatementAst = ParseStatement("{ return }")
                 .PipelineElements[0]
                 .Expression
                 .ScriptBlock
@@ -977,6 +916,17 @@ ls
                 .Statements[0];
 
             Assert.Null(returnStatementAst.Pipeline);
+        }
+
+        [Test]
+        public void Cast()
+        {
+            ConvertExpressionAst convertExpressionAst = ParseStatement("[Text.RegularExpressions.RegexOptions] 'IgnoreCase'")
+                .PipelineElements[0]
+                .Expression;
+
+            Assert.AreEqual("Text.RegularExpressions.RegexOptions", convertExpressionAst.Type.TypeName.Name);
+            Assert.AreEqual("IgnoreCase", ((StringConstantExpressionAst)convertExpressionAst.Child).Value);
         }
     }
 }
