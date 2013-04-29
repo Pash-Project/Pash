@@ -38,6 +38,8 @@ namespace System.Management.Tests
         // Fields must be public so this should be skipped
         [Parameter]
         private int Age;
+        // To avoid generating warning CS0414
+        void Ignore() { this.Age++; }
 
         private CmdletInfo info = null;
 
