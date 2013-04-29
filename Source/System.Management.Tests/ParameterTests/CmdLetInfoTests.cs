@@ -10,10 +10,10 @@ using NUnit.Framework;
 
 namespace System.Management.Tests
 {
-	[TestFixture]
-	[Cmdlet("Test", "ParameterReflection")]
-	public sealed class CmdLetInfoTests : PSCmdlet
-	{
+    [TestFixture]
+    [Cmdlet("Test", "ParameterReflection")]
+    public sealed class CmdLetInfoTests : PSCmdlet
+    {
         [Alias(new string[] { "PSPath" }),
          Parameter(Mandatory = true, Position = 0, ParameterSetName = "File")]
         public string FilePath { get; set; }
@@ -44,7 +44,7 @@ namespace System.Management.Tests
         [SetUp]
         public void LoadCmdInfo()
         {
-			Age = 0;
+            Age = 0;
             info = new CmdletInfo("Test-ParameterReflectionCommand", this.GetType(), "", null, null);
         }
 
@@ -53,9 +53,9 @@ namespace System.Management.Tests
         {
             Assert.AreEqual(3, info.ParameterSets.Count);
 
-            CommandParameterSetInfo allSet = info.GetParameterSetByName(ParameterAttribute.AllParameterSets); 
-            CommandParameterSetInfo fileSet = info.GetParameterSetByName("File"); 
-            CommandParameterSetInfo variableSet = info.GetParameterSetByName("Variable"); 
+            CommandParameterSetInfo allSet = info.GetParameterSetByName(ParameterAttribute.AllParameterSets);
+            CommandParameterSetInfo fileSet = info.GetParameterSetByName("File");
+            CommandParameterSetInfo variableSet = info.GetParameterSetByName("Variable");
 
             Assert.AreEqual(2, allSet.Parameters.Count);
             Assert.AreEqual(3, fileSet.Parameters.Count);
@@ -107,7 +107,7 @@ namespace System.Management.Tests
         {
             Assert.AreEqual(info.ParameterSets.Count, 3);
 
-            CommandParameterSetInfo fileSet = info.GetParameterSetByName("File"); 
+            CommandParameterSetInfo fileSet = info.GetParameterSetByName("File");
 
             Assert.IsNotNull(fileSet);
 
@@ -117,5 +117,5 @@ namespace System.Management.Tests
             Assert.IsNotNull(filePathParam.Aliases);
             Assert.Contains("PSPath", filePathParam.Aliases);
         }
-	}
+    }
 }

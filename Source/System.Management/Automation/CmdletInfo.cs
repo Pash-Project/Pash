@@ -134,13 +134,13 @@ namespace System.Management.Automation
                         paramAttr = (ParameterAttribute)attr;
 
                         // if ValueFromPipeline or ValueFromPipelineByPropertyName is specified the property must have a public getter
-                        if ( ( paramAttr.ValueFromPipeline || paramAttr.ValueFromPipelineByPropertyName ) && ( getter == null || !getter.IsPublic ))
+                        if ((paramAttr.ValueFromPipeline || paramAttr.ValueFromPipelineByPropertyName) && (getter == null || !getter.IsPublic))
                         {
                             break;
                         }
 
                         // The property must have a public setter
-                        if ( setter == null || !setter.IsPublic )
+                        if (setter == null || !setter.IsPublic)
                         {
                             break;
                         }
@@ -177,9 +177,9 @@ namespace System.Management.Automation
 
                 // If a parameter set is not specified for a parmeter, then the parameter belongs to all the parameter sets,
                 // therefore if this is not the AllParameterSets Set then add all parameters from the AllParameterSets Set to it...
-                if ( string.Compare(paramSetName,ParameterAttribute.AllParameterSets) != 0 && paramSets.ContainsKey(ParameterAttribute.AllParameterSets) ) 
+                if (string.Compare(paramSetName, ParameterAttribute.AllParameterSets) != 0 && paramSets.ContainsKey(ParameterAttribute.AllParameterSets))
                 {
-                    foreach ( CommandParameterInfo cpi in paramSets[ParameterAttribute.AllParameterSets] )
+                    foreach (CommandParameterInfo cpi in paramSets[ParameterAttribute.AllParameterSets])
                     {
                         paramSets[paramSetName].Add(cpi);
                     }
