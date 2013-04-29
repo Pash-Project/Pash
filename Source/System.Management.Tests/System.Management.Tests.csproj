@@ -63,6 +63,7 @@
     <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammarTests.cs" />
     <Compile Include="ExtensionsTests.cs" />
     <Compile Include="Pash\ParserIntrinsics\ParserTests.cs" />
+    <Compile Include="ParameterTests\CmdLetInfoTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

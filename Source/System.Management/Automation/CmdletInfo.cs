@@ -80,46 +80,83 @@ namespace System.Management.Automation
         {
             Dictionary<string, Collection<CommandParameterInfo>> paramSets = new Dictionary<string, Collection<CommandParameterInfo>>(StringComparer.CurrentCultureIgnoreCase);
 
-            // Extract all the public parameters from the Cmdlet
-            /* TODO: gather all the field parameters
-            foreach(var filedInfo in cmdletType.GetFields(BindingFlags.Public | BindingFlags.Instance))
-            {
-                System.Diagnostics.Debug.WriteLine(filedInfo.ToString());
-            }
-            */
+            // TODO: ensure there are no duplicate named parameters inside scope of a single parameter set.
+            // TOOD: When using parameter sets, no parameter set should contain more than one positional parameter with the same position. 
+            // TODO: only one parameter in a set should declare ValueFromPipeline = true. Multiple parameters may define ValueFromPipelineByPropertyName = true.
 
-            foreach (PropertyInfo filedInfo in cmdletType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            // Add fields with ParameterAttribute
+            foreach (FieldInfo filedInfo in cmdletType.GetFields(BindingFlags.Public | BindingFlags.Instance))
             {
                 System.Diagnostics.Debug.WriteLine(filedInfo.ToString());
 
                 object[] attributes = filedInfo.GetCustomAttributes(false);
 
-                // Find if there are any [Parameter] attributes on the property
+                // Find all [Parameter] attributes on the property
                 ParameterAttribute paramAttr = null;
                 foreach (object attr in attributes)
                 {
                     if (attr is ParameterAttribute)
                     {
                         paramAttr = (ParameterAttribute)attr;
-                        break;
+
+                        CommandParameterInfo pi = new CommandParameterInfo(filedInfo.Name, filedInfo.FieldType, paramAttr);
+
+                        string paramSetName = paramAttr.ParameterSetName ?? ParameterAttribute.AllParameterSets;
+
+                        if (!paramSets.ContainsKey(paramSetName))
+                        {
+                            paramSets.Add(paramSetName, new Collection<CommandParameterInfo>());
+                        }
+
+                        Collection<CommandParameterInfo> paramSet = paramSets[paramSetName];
+                        paramSet.Add(pi);
                     }
                 }
+            }
 
-                // TODO: make sure that the PropertyInfo.GetAccessors() returns the appropriate set of accessors
+            // Add properties with ParameterAttribute
+            foreach (PropertyInfo filedInfo in cmdletType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                System.Diagnostics.Debug.WriteLine(filedInfo.ToString());
 
-                if (paramAttr != null)
+                object[] attributes = filedInfo.GetCustomAttributes(false);
+
+                // Get info for the setter and getter
+                MethodInfo getter = filedInfo.GetAccessors().FirstOrDefault(i => i.IsSpecialName && i.Name.StartsWith("get_"));
+                MethodInfo setter = filedInfo.GetSetMethod();
+
+                // Find all [Parameter] attributes on the property
+                ParameterAttribute paramAttr = null;
+                foreach (object attr in attributes)
                 {
-                    CommandParameterInfo pi = new CommandParameterInfo(filedInfo.Name, filedInfo.PropertyType, paramAttr);
-
-                    string paramSetName = paramAttr.ParameterSetName ?? ParameterAttribute.AllParameterSets;
-
-                    if (!paramSets.ContainsKey(paramSetName))
+                    if (attr is ParameterAttribute)
                     {
-                        paramSets.Add(paramSetName, new Collection<CommandParameterInfo>());
-                    }
+                        paramAttr = (ParameterAttribute)attr;
 
-                    Collection<CommandParameterInfo> paramSet = paramSets[paramSetName];
-                    paramSet.Add(pi);
+                        // if ValueFromPipeline or ValueFromPipelineByPropertyName is specified the property must have a public getter
+                        if ( ( paramAttr.ValueFromPipeline || paramAttr.ValueFromPipelineByPropertyName ) && ( getter == null || !getter.IsPublic ))
+                        {
+                            break;
+                        }
+
+                        // The property must have a public setter
+                        if ( setter == null || !setter.IsPublic )
+                        {
+                            break;
+                        }
+
+                        CommandParameterInfo pi = new CommandParameterInfo(filedInfo.Name, filedInfo.PropertyType, paramAttr);
+
+                        string paramSetName = paramAttr.ParameterSetName ?? ParameterAttribute.AllParameterSets;
+
+                        if (!paramSets.ContainsKey(paramSetName))
+                        {
+                            paramSets.Add(paramSetName, new Collection<CommandParameterInfo>());
+                        }
+
+                        Collection<CommandParameterInfo> paramSet = paramSets[paramSetName];
+                        paramSet.Add(pi);
+                    }
                 }
             }
 
@@ -137,6 +174,16 @@ namespace System.Management.Automation
                 bool bIsDefaultParamSet = paramSetName == strDefaultParameterSetName;
 
                 paramSetInfo.Add(new CommandParameterSetInfo(paramSetName, bIsDefaultParamSet, paramSets[paramSetName]));
+
+                // If a parameter set is not specified for a parmeter, then the parameter belongs to all the parameter sets,
+                // therefore if this is not the AllParameterSets Set then add all parameters from the AllParameterSets Set to it...
+                if ( string.Compare(paramSetName,ParameterAttribute.AllParameterSets) != 0 && paramSets.ContainsKey(ParameterAttribute.AllParameterSets) ) 
+                {
+                    foreach ( CommandParameterInfo cpi in paramSets[ParameterAttribute.AllParameterSets] )
+                    {
+                        paramSets[paramSetName].Add(cpi);
+                    }
+                }
             }
 
             return new ReadOnlyCollection<CommandParameterSetInfo>(paramSetInfo);
