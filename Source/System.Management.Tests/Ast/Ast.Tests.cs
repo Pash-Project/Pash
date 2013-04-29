@@ -917,5 +917,16 @@ ls
 
             Assert.Null(returnStatementAst.Pipeline);
         }
+
+        [Test]
+        public void Cast()
+        {
+            ConvertExpressionAst convertExpressionAst = ParseStatement("[Text.RegularExpressions.RegexOptions] 'IgnoreCase'")
+                .PipelineElements[0]
+                .Expression;
+
+            Assert.AreEqual("Text.RegularExpressions.RegexOptions", convertExpressionAst.Type.TypeName.Name);
+            Assert.AreEqual("IgnoreCase", ((StringConstantExpressionAst)convertExpressionAst.Child).Value);
+        }
     }
 }

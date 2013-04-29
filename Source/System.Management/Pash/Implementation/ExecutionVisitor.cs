@@ -482,7 +482,7 @@ namespace System.Management.Pash.Implementation
                 type = obj.GetType();
             }
 
-            var arguments = methodCallAst.Arguments.Select(EvaluateAst);
+            var arguments = methodCallAst.Arguments.Select(EvaluateAst).Select(o => o is PSObject ? ((PSObject)o).BaseObject : o);
 
             if (methodCallAst.Member is StringConstantExpressionAst)
             {
@@ -642,6 +642,18 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitConvertExpression(ConvertExpressionAst convertExpressionAst)
         {
+            Type type = convertExpressionAst.Type.TypeName.GetReflectionType();
+
+            var value = EvaluateAst(convertExpressionAst.Child);
+
+            if (type.IsEnum)
+            {
+                var result = Enum.Parse(type, (string)value);
+
+                this._pipelineCommandRuntime.WriteObject(result);
+                return AstVisitAction.SkipChildren;
+            }
+
             throw new NotImplementedException(); //VisitConvertExpression(convertExpressionAst);
         }
 
