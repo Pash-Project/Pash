@@ -99,7 +99,7 @@ namespace System.Management.Automation
                     {
                         paramAttr = (ParameterAttribute)attr;
 
-                        CommandParameterInfo pi = new CommandParameterInfo(filedInfo.Name, filedInfo.FieldType, paramAttr);
+                        CommandParameterInfo pi = new CommandParameterInfo(filedInfo, filedInfo.FieldType, paramAttr);
 
                         string paramSetName = paramAttr.ParameterSetName ?? ParameterAttribute.AllParameterSets;
 
@@ -145,7 +145,7 @@ namespace System.Management.Automation
                             break;
                         }
 
-                        CommandParameterInfo pi = new CommandParameterInfo(filedInfo.Name, filedInfo.PropertyType, paramAttr);
+                        CommandParameterInfo pi = new CommandParameterInfo(filedInfo, filedInfo.PropertyType, paramAttr);
 
                         string paramSetName = paramAttr.ParameterSetName ?? ParameterAttribute.AllParameterSets;
 

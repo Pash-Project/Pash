@@ -2,9 +2,9 @@
 
 //classtodo: Implement, may require runtime improvements.
 using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Management.Automation;
 using NUnit.Framework;
 
@@ -14,8 +14,7 @@ namespace System.Management.Tests
     [Cmdlet("Test", "ParameterReflection")]
     public sealed class CmdLetInfoTests : PSCmdlet
     {
-        [Alias(new string[] { "PSPath" }),
-         Parameter(Mandatory = true, Position = 0, ParameterSetName = "File")]
+        [Parameter(Mandatory = true, Position = 0, ParameterSetName = "File")]
         public string FilePath { get; set; }
 
         [Parameter(ValueFromPipeline = true)]
@@ -25,6 +24,7 @@ namespace System.Management.Tests
         public string Variable { get; set; }
 
         [Parameter]
+        [Alias(new string[] { "FullName","fn" })]
         public string Name;
 
         // ValueFromPipeline need public getter so this should be skipped
@@ -104,20 +104,41 @@ namespace System.Management.Tests
             Assert.AreEqual(false, nameParam.IsMandatory);
         }
 
-        [Test, Explicit("Scanning for aliases not yet implemented, see: CommandParameterInfo.CommandParameterInfo()")]
+        [Test]
         public void Aliases()
         {
             Assert.AreEqual(info.ParameterSets.Count, 3);
 
             CommandParameterSetInfo fileSet = info.GetParameterSetByName("File");
+            CommandParameterSetInfo allSet = info.GetParameterSetByName(ParameterAttribute.AllParameterSets);
 
-            Assert.IsNotNull(fileSet);
+            Assert.IsNotNull(allSet);
 
-            var filePathParam = fileSet.GetParameterByName("FilePath");
-            Assert.IsNotNull(filePathParam);
+            var nameParam = allSet.GetParameterByName("Name");
+            Assert.IsNotNull(nameParam);
 
-            Assert.IsNotNull(filePathParam.Aliases);
-            Assert.Contains("PSPath", filePathParam.Aliases);
+            Assert.IsNotNull(nameParam.Aliases);
+            Assert.AreEqual(2, nameParam.Aliases.Count);
+            Assert.Contains("FullName", nameParam.Aliases);
+            Assert.Contains("fn", nameParam.Aliases);
         }
-    }
+
+        [Test]
+        public void Attributes()
+        {
+            Assert.AreEqual(info.ParameterSets.Count, 3);
+
+            CommandParameterSetInfo allSet = info.GetParameterSetByName(ParameterAttribute.AllParameterSets);
+
+            Assert.IsNotNull(allSet);
+
+            var nameParam = allSet.GetParameterByName("Name");
+            Assert.IsNotNull(nameParam);
+
+            Assert.IsNotNull(nameParam.Aliases);
+            Assert.AreEqual(2, nameParam.Attributes.Count);
+            Assert.AreEqual(1, nameParam.Attributes.Where( a => a is AliasAttribute).Count());
+            Assert.AreEqual(1, nameParam.Attributes.Where( a => a is ParameterAttribute).Count());
+        }
+	}
 }
