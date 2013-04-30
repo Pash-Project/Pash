@@ -2,9 +2,9 @@
 
 //classtodo: Implement, may require runtime improvements.
 using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Management.Automation;
 using NUnit.Framework;
 
@@ -122,5 +122,23 @@ namespace System.Management.Tests
             Assert.Contains("FullName", nameParam.Aliases);
             Assert.Contains("fn", nameParam.Aliases);
         }
-    }
+
+        [Test,Explicit("Attributes collection not yet being populated, see: CommandParameterInfo.CommandParameterInfo()")]
+        public void Attributes()
+        {
+            Assert.AreEqual(info.ParameterSets.Count, 3);
+
+            CommandParameterSetInfo allSet = info.GetParameterSetByName(ParameterAttribute.AllParameterSets);
+
+            Assert.IsNotNull(allSet);
+
+            var nameParam = allSet.GetParameterByName("Name");
+            Assert.IsNotNull(nameParam);
+
+            Assert.IsNotNull(nameParam.Aliases);
+            Assert.AreEqual(2, nameParam.Attributes.Count);
+            Assert.AreEqual(1, nameParam.Attributes.Where( a => a is AliasAttribute).Count());
+            Assert.AreEqual(1, nameParam.Attributes.Where( a => a is ParameterAttribute).Count());
+        }
+	}
 }
