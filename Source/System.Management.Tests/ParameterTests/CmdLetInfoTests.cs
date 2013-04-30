@@ -8,7 +8,7 @@ using System.Text;
 using System.Management.Automation;
 using NUnit.Framework;
 
-namespace System.Management.Tests
+namespace System.Management.Tests.ParameterTests
 {
     [TestFixture]
     [Cmdlet("Test", "ParameterReflection")]
@@ -86,7 +86,6 @@ namespace System.Management.Tests
 
             CommandParameterInfo ageParam = fileSet.GetParameterByName("Age");
             Assert.IsNull(ageParam);
-
         }
 
         private void CheckForAllSetsParameters(CommandParameterSetInfo set)
@@ -139,6 +138,16 @@ namespace System.Management.Tests
             Assert.AreEqual(2, nameParam.Attributes.Count);
             Assert.AreEqual(1, nameParam.Attributes.Where( a => a is AliasAttribute).Count());
             Assert.AreEqual(1, nameParam.Attributes.Where( a => a is ParameterAttribute).Count());
+        }
+
+        [Test,Explicit]
+        public void Binding()
+        {
+            CommandProcessor cmdProc = new CommandProcessor(info);
+            cmdProc.Command = this;
+            cmdProc.AddParameter("Name","John");
+            cmdProc.BindArguments(null);
+            Assert.AreEqual("John",Name);
         }
 	}
 }
