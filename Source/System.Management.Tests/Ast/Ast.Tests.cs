@@ -928,5 +928,11 @@ ls
             Assert.AreEqual("Text.RegularExpressions.RegexOptions", convertExpressionAst.Type.TypeName.Name);
             Assert.AreEqual("IgnoreCase", ((StringConstantExpressionAst)convertExpressionAst.Child).Value);
         }
+
+        [Test]
+        public void For()
+        {
+            ForStatementAst forStatementAst = ParseStatement("for ($i = 0; $i -ile 10; $i++) {Write-Host $i}");
+        }
     }
 }

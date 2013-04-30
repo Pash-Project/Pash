@@ -401,5 +401,13 @@ namespace TestHost
 
             Assert.AreEqual("True" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void For()
+        {
+            var result = TestHost.Execute("for ($i = 0; $i -ile 10; $i++) {Write-Host $i}");
+
+            Assert.AreEqual(Enumerable.Range(0, 11).JoinString(Environment.NewLine) + Environment.NewLine, result);
+        }
     }
 }
