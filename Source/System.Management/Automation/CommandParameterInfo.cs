@@ -37,13 +37,19 @@ namespace System.Management.Automation
             ValueFromRemainingArguments = paramAttr.ValueFromRemainingArguments;
             IsMandatory = paramAttr.Mandatory;
 
+            List<Attribute> attributes = new List<Attribute>(1);
+            attributes.Add(paramAttr);
+
             // Reflect Aliases from field/property
             AliasAttribute aliasAttr = (AliasAttribute)info.GetCustomAttributes(false).Where(i => i is AliasAttribute).FirstOrDefault();
             if (aliasAttr != null)
             {
                 List<string> aliases = new List<string>(aliasAttr.AliasNames);
                 Aliases = new ReadOnlyCollection<string>(aliases);
+                attributes.Add(aliasAttr);
             }
+
+            Attributes = new ReadOnlyCollection<Attribute>(attributes);
         }
     }
 }
