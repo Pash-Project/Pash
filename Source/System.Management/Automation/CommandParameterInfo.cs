@@ -38,12 +38,12 @@ namespace System.Management.Automation
             IsMandatory = paramAttr.Mandatory;
 
             // Reflect Aliases from field/property
-            List<string> aliases = new List<string>();
-            foreach ( AliasAttribute a in info.GetCustomAttributes(false).Where(i => i is AliasAttribute) )
+            AliasAttribute aliasAttr = (AliasAttribute)info.GetCustomAttributes(false).Where(i => i is AliasAttribute).FirstOrDefault();
+            if (aliasAttr != null)
             {
-                aliases.AddRange(a.AliasNames);
+                List<string> aliases = new List<string>(aliasAttr.AliasNames);
+                Aliases = new ReadOnlyCollection<string>(aliases);
             }
-            Aliases = new ReadOnlyCollection<string>(aliases);
         }
     }
 }
