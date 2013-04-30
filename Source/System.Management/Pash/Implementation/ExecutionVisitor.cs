@@ -235,10 +235,9 @@ namespace System.Management.Pash.Implementation
                 return new CommandParameter(null, stringConstantExpressionAst.Value);
             }
 
-            else if (commandElement is ArrayLiteralAst)
+            else if (commandElement is ExpressionAst)
             {
-                var arrayLiteralAst = commandElement as ArrayLiteralAst;
-                return new CommandParameter(null, EvaluateAst(arrayLiteralAst));
+                return new CommandParameter(null, EvaluateAst(commandElement));
             }
 
             else throw new NotImplementedException();
@@ -694,7 +693,15 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitForStatement(ForStatementAst forStatementAst)
         {
-            throw new NotImplementedException(); //VisitForStatement(forStatementAst);
+            EvaluateAst(forStatementAst.Initializer);
+
+            while ((bool)((PSObject)EvaluateAst(forStatementAst.Condition)).BaseObject)
+            {
+                EvaluateAst(forStatementAst.Body);
+                EvaluateAst(forStatementAst.Iterator);
+            }
+
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitMergingRedirection(MergingRedirectionAst redirectionAst)

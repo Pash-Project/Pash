@@ -240,7 +240,39 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildLabeledStatementAst(ParseTreeNode parseTreeNode)
         {
+            VerifyTerm(parseTreeNode, this._grammar._statement_labeled_statement);
+
+            parseTreeNode = parseTreeNode.ChildNodes.Single();
+
+            VerifyTerm(parseTreeNode, this._grammar.labeled_statement);
+
+            parseTreeNode = parseTreeNode.ChildNodes.Single();
+
+            if (parseTreeNode.Term == this._grammar.for_statement)
+            {
+                return BuildForStatementAst(parseTreeNode);
+            }
+
             throw new NotImplementedException();
+        }
+
+        ForStatementAst BuildForStatementAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.for_statement);
+
+            var initializerAst = BuildPipelineAst(parseTreeNode.ChildNodes[2].ChildNodes[0]);
+            var conditionAst = BuildPipelineAst(parseTreeNode.ChildNodes[2].ChildNodes[1]);
+            var iteratorAst = BuildPipelineAst(parseTreeNode.ChildNodes[2].ChildNodes[2]);
+            var bodyAst = BuildStatementBlockAst(parseTreeNode.ChildNodes[4]);
+
+            return new ForStatementAst(
+                new ScriptExtent(parseTreeNode),
+                null,
+                initializerAst,
+                conditionAst,
+                iteratorAst,
+                bodyAst
+                );
         }
 
         IfStatementAst BuildIfStatementAst(ParseTreeNode parseTreeNode)
