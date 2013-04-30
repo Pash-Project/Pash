@@ -104,7 +104,7 @@ namespace System.Management.Tests
             Assert.AreEqual(false, nameParam.IsMandatory);
         }
 
-        [Test, Explicit("Scanning for aliases not yet implemented, see: CommandParameterInfo.CommandParameterInfo()")]
+        [Test]
         public void Aliases()
         {
             Assert.AreEqual(info.ParameterSets.Count, 3);
@@ -123,7 +123,7 @@ namespace System.Management.Tests
             Assert.Contains("fn", nameParam.Aliases);
         }
 
-        [Test,Explicit("Attributes collection not yet being populated, see: CommandParameterInfo.CommandParameterInfo()")]
+        [Test]
         public void Attributes()
         {
             Assert.AreEqual(info.ParameterSets.Count, 3);
