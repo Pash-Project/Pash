@@ -693,7 +693,15 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitForStatement(ForStatementAst forStatementAst)
         {
-            throw new NotImplementedException(); //VisitForStatement(forStatementAst);
+            EvaluateAst(forStatementAst.Initializer);
+
+            while ((bool)((PSObject)EvaluateAst(forStatementAst.Condition)).BaseObject)
+            {
+                EvaluateAst(forStatementAst.Body);
+                EvaluateAst(forStatementAst.Iterator);
+            }
+
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitMergingRedirection(MergingRedirectionAst redirectionAst)
