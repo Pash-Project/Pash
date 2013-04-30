@@ -235,10 +235,9 @@ namespace System.Management.Pash.Implementation
                 return new CommandParameter(null, stringConstantExpressionAst.Value);
             }
 
-            else if (commandElement is ArrayLiteralAst)
+            else if (commandElement is ExpressionAst)
             {
-                var arrayLiteralAst = commandElement as ArrayLiteralAst;
-                return new CommandParameter(null, EvaluateAst(arrayLiteralAst));
+                return new CommandParameter(null, EvaluateAst(commandElement));
             }
 
             else throw new NotImplementedException();
