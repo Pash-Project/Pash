@@ -206,6 +206,9 @@ namespace Pash.Implementation
             {
                 switch (commandInfo.CommandType)
                 {
+                    case CommandTypes.Application:
+                        return new ApplicationProcessor((ApplicationInfo)commandInfo);
+
                     case CommandTypes.Cmdlet:
                         return new CommandProcessor(commandInfo as CmdletInfo);
 
