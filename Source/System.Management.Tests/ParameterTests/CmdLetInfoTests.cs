@@ -11,57 +11,32 @@ using NUnit.Framework;
 namespace System.Management.Tests.ParameterTests
 {
     [TestFixture]
-    [Cmdlet("Test", "ParameterReflection")]
-    public sealed class CmdLetInfoTests : PSCmdlet
+    public sealed class CmdLetInfoTests 
     {
-        [Parameter(Mandatory = true, Position = 0, ParameterSetName = "File")]
-        public string FilePath { get; set; }
-
-        [Parameter(ValueFromPipeline = true)]
-        public PSObject InputObject { get; set; }
-
-        [Parameter(Mandatory = true, ParameterSetName = "Variable")]
-        public string Variable { get; set; }
-
-        [Parameter]
-        [Alias(new string[] { "FullName","fn" })]
-        public string Name;
-
-        // ValueFromPipeline need public getter so this should be skipped
-        [Parameter(ValueFromPipelineByPropertyName = true, ParameterSetName = "TheseShouldBeSkipped")]
-        public int Length { private get; set; }
-
-        // All properties require a public setter so this should be skipped
-        [Parameter(ParameterSetName = "TheseShouldBeSkipped")]
-        public int Height { get; private set; }
-
-        // Fields must be public so this should be skipped
-        [Parameter]
-        private int Age;
-        // To avoid generating warning CS0414
-        void Ignore() { this.Age++; }
-
         private CmdletInfo info = null;
 
         [SetUp]
         public void LoadCmdInfo()
         {
-            Age = 0;
-            info = new CmdletInfo("Test-ParameterReflectionCommand", this.GetType(), "", null, null);
+            info = TestParameterCommand.CreateCmdletInfo();
+        }
+
+        [Test]
+        public void ParameterSetCount()
+        {
+            Assert.AreEqual(3, info.ParameterSets.Count);
         }
 
         [Test]
         public void Parameters()
         {
-            Assert.AreEqual(3, info.ParameterSets.Count);
-
             CommandParameterSetInfo allSet = info.GetParameterSetByName(ParameterAttribute.AllParameterSets);
             CommandParameterSetInfo fileSet = info.GetParameterSetByName("File");
             CommandParameterSetInfo variableSet = info.GetParameterSetByName("Variable");
 
-            Assert.AreEqual(2, allSet.Parameters.Count);
-            Assert.AreEqual(3, fileSet.Parameters.Count);
-            Assert.AreEqual(3, variableSet.Parameters.Count);
+            Assert.AreEqual(3, allSet.Parameters.Count);
+            Assert.AreEqual(4, fileSet.Parameters.Count);
+            Assert.AreEqual(4, variableSet.Parameters.Count);
 
             Assert.IsNotNull(allSet);
             Assert.IsNotNull(fileSet);
@@ -101,14 +76,17 @@ namespace System.Management.Tests.ParameterTests
             Assert.AreEqual("Name", nameParam.Name);
             Assert.AreEqual(-1, nameParam.Position);
             Assert.AreEqual(false, nameParam.IsMandatory);
+
+            CommandParameterInfo recurseParam = set.GetParameterByName("Recurse");
+            Assert.IsNotNull(recurseParam);
+            Assert.AreEqual("Recurse", recurseParam.Name);
+            Assert.AreEqual(-1, recurseParam.Position);
+            Assert.AreEqual(false, recurseParam.IsMandatory);
         }
 
         [Test]
         public void Aliases()
         {
-            Assert.AreEqual(info.ParameterSets.Count, 3);
-
-            CommandParameterSetInfo fileSet = info.GetParameterSetByName("File");
             CommandParameterSetInfo allSet = info.GetParameterSetByName(ParameterAttribute.AllParameterSets);
 
             Assert.IsNotNull(allSet);
@@ -125,8 +103,6 @@ namespace System.Management.Tests.ParameterTests
         [Test]
         public void Attributes()
         {
-            Assert.AreEqual(info.ParameterSets.Count, 3);
-
             CommandParameterSetInfo allSet = info.GetParameterSetByName(ParameterAttribute.AllParameterSets);
 
             Assert.IsNotNull(allSet);
@@ -138,19 +114,6 @@ namespace System.Management.Tests.ParameterTests
             Assert.AreEqual(2, nameParam.Attributes.Count);
             Assert.AreEqual(1, nameParam.Attributes.Where( a => a is AliasAttribute).Count());
             Assert.AreEqual(1, nameParam.Attributes.Where( a => a is ParameterAttribute).Count());
-        }
-
-        [Test,Explicit]
-        public void Binding()
-        {
-            CommandProcessor cmdProc = new CommandProcessor(info);
-            CmdLetInfoTests cmdlet = new CmdLetInfoTests();
-            cmdProc.Command = cmdlet;
-
-            cmdProc.AddParameter("Name","John");
-            cmdProc.BindArguments(null);
-
-            Assert.AreEqual("John",Name);
         }
 	}
 }
