@@ -144,9 +144,12 @@ namespace System.Management.Tests.ParameterTests
         public void Binding()
         {
             CommandProcessor cmdProc = new CommandProcessor(info);
-            cmdProc.Command = this;
+            CmdLetInfoTests cmdlet = new CmdLetInfoTests();
+            cmdProc.Command = cmdlet;
+
             cmdProc.AddParameter("Name","John");
             cmdProc.BindArguments(null);
+
             Assert.AreEqual("John",Name);
         }
 	}
