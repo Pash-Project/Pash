@@ -84,9 +84,9 @@ namespace System.Management.Automation
                         if (paramInfo != null)
                         {
                             if (parameter.Value == null && paramInfo.ParameterType != typeof(SwitchParameter)
-                                && i < Parameters.Count - 1 && Parameters[i+1].Name == null)
+                                && i < Parameters.Count - 1 && Parameters[i + 1].Name == null)
                             {
-                                BindArgument(paramInfo.Name, Parameters[i+1].Value, paramInfo.ParameterType);
+                                BindArgument(paramInfo.Name, Parameters[i + 1].Value, paramInfo.ParameterType);
                                 i++;
                             }
                             else
@@ -118,7 +118,7 @@ namespace System.Management.Automation
                 }
                 else
                 {
-                    throw new Exception("Unable to get field or property named: "+name);
+                    throw new Exception("Unable to get field or property named: " + name);
                 }
             }
 
@@ -159,11 +159,11 @@ namespace System.Management.Automation
             }
         }
 
-        public static void SetValue(MemberInfo info, object targetObject, object value )
+        public static void SetValue(MemberInfo info, object targetObject, object value)
         {
-            if ( info.MemberType == MemberTypes.Field )
+            if (info.MemberType == MemberTypes.Field)
                 ((FieldInfo)info).SetValue(targetObject, value);
-            else if ( info.MemberType == MemberTypes.Property )
+            else if (info.MemberType == MemberTypes.Property)
                 ((PropertyInfo)info).SetValue(targetObject, value, null);
             else
                 throw new Exception("SetValue only implemented for fields and properties");
