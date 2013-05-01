@@ -64,6 +64,8 @@
     <Compile Include="ExtensionsTests.cs" />
     <Compile Include="Pash\ParserIntrinsics\ParserTests.cs" />
     <Compile Include="ParameterTests\CmdLetInfoTests.cs" />
+    <Compile Include="ParameterTests\BindingTests.cs" />
+    <Compile Include="ParameterTests\TestParameterCommand.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
