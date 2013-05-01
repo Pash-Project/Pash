@@ -94,6 +94,7 @@
     <Compile Include="TestHostUserInterface.cs" />
     <Compile Include="Tests.cs" />
     <Compile Include="System.Management\PathTests.cs" />
+    <Compile Include="System.Management\ParameterTests.cs" />
     <Compile Include="TestHelpers\NUnitSpecificationExtensions.cs" />
     <Compile Include="FileSystemTests\FileSystemTestBase.cs" />
     <Compile Include="FileSystemTests\FileSystemTestBaseTests.cs" />
