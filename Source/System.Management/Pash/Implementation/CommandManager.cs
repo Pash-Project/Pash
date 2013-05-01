@@ -168,15 +168,30 @@ namespace Pash.Implementation
                         if (commandAst.CommandElements.Count == 1 && commandAst.CommandElements.Single() is StringConstantExpressionAst)
                         {
                             var stringAst = commandAst.CommandElements.Single() as StringConstantExpressionAst;
+                            var path = stringAst.Value;
 
-                            if (File.Exists(stringAst.Value) && Path.GetExtension(stringAst.Value) == ".ps1")
+                            // TODO: Forbid to run executables and scripts from the current directory without a leading slash.
+                            // For example, if current directory contains a 'file.exe' file, a command 'file.exe' should not
+                            // execute, but './file.exe' should.
+                            if (File.Exists(path))
                             {
-                                // I think we should be using a ScriptFile parser, but this will do for now.
-                                commandInfo = new ScriptInfo(stringAst.Value, new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(File.ReadAllText(stringAst.Value))));
-                            }
+                                if (Path.GetExtension(path) == ".ps1")
+                                {
+                                    // I think we should be using a ScriptFile parser, but this will do for now.
+                                    commandInfo = new ScriptInfo(path, new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(File.ReadAllText(path))));
+                                }
+                                else
+                                {
+                                    var fullPath = Path.GetFullPath(path);
+                                    var commandName = Path.GetFileName(fullPath);
+                                    var extension = Path.GetExtension(path);
 
+                                    commandInfo = new ApplicationInfo(commandName, fullPath, extension);
+                                }
+                            }
                             else
                             {
+                                // TODO: Check executables on PATH variable.
                                 throw new Exception(string.Format("Command '{0}' not found.", cmdName));
                             }
                         }
