@@ -21,7 +21,7 @@ namespace System.Management.Tests.ParameterTests
             info = TestParameterCommand.CreateCmdletInfo();
         }
 
-        [Test,Explicit]
+        [Test]
         public void BindingField()
         {
             CommandProcessor cmdProc = new CommandProcessor(info);
@@ -35,7 +35,7 @@ namespace System.Management.Tests.ParameterTests
             Assert.AreEqual("John",cmdlet.Name);
         }
 
-        [Test,Explicit]
+        [Test]
         public void BindingParameter()
         {
             CommandProcessor cmdProc = new CommandProcessor(info);
@@ -49,7 +49,7 @@ namespace System.Management.Tests.ParameterTests
             Assert.AreEqual("10", cmdlet.InputObject.ToString());
         }
 
-        [Test,Explicit]
+        [Test]
         public void BindingNonSwitch()
         {
             CommandProcessor cmdProc = new CommandProcessor(info);
@@ -65,7 +65,7 @@ namespace System.Management.Tests.ParameterTests
             Assert.IsFalse(cmdlet.Recurse.ToBool());
         }
 
-        [Test,Explicit]
+        [Test]
         public void BindingCombinationAllSet()
         {
             CommandProcessor cmdProc = new CommandProcessor(info);

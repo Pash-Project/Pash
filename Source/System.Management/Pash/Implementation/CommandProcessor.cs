@@ -83,7 +83,14 @@ namespace System.Management.Automation
 
                         if (paramInfo != null)
                         {
-                            BindArgument(paramInfo.Name, parameter.Value, paramInfo.ParameterType);
+                            if (parameter.Value == null && paramInfo.ParameterType != typeof(SwitchParameter)
+                                && i < Parameters.Count - 1 && Parameters[i+1].Name == null)
+                            {
+                                BindArgument(paramInfo.Name, Parameters[i+1].Value, paramInfo.ParameterType);
+                                i++;
+                            }
+                            else
+                                BindArgument(paramInfo.Name, parameter.Value, paramInfo.ParameterType);
                         }
                     }
                 }
@@ -92,44 +99,74 @@ namespace System.Management.Automation
 
         private void BindArgument(string name, object value, Type type)
         {
-            // TODO: extract this into a method
-            PropertyInfo propertyInfo = Command.GetType().GetProperty(name, type);
+            Type memberType = null;
+
+            // Look for Property to bind to
+            MemberInfo memberInfo = Command.GetType().GetProperty(name, type);
+
+            if (memberInfo != null)
+            {
+                memberType = ((PropertyInfo)memberInfo).PropertyType;
+            }
+            else  // No property found try bind to field instead
+            {
+                memberInfo = Command.GetType().GetField(name);
+
+                if (memberInfo != null)
+                {
+                    memberType = ((FieldInfo)memberInfo).FieldType;
+                }
+                else
+                {
+                    throw new Exception("Unable to get field or property named: "+name);
+                }
+            }
 
             // TODO: make this generic
-            if (propertyInfo.PropertyType == typeof(PSObject[]))
+            if (memberType == typeof(PSObject[]))
             {
-                propertyInfo.SetValue(Command, new[] { PSObject.AsPSObject(value) }, null);
+                SetValue(memberInfo, Command, new[] { PSObject.AsPSObject(value) });
             }
 
-            else if (propertyInfo.PropertyType == typeof(String[]))
+            else if (memberType == typeof(String[]))
             {
-                propertyInfo.SetValue(Command, new[] { value.ToString() }, null);
+                SetValue(memberInfo, Command, new[] { value.ToString() });
             }
 
-            else if (propertyInfo.PropertyType == typeof(String))
+            else if (memberType == typeof(String))
             {
-                propertyInfo.SetValue(Command, value.ToString(), null);
+                SetValue(memberInfo, Command, value.ToString());
             }
 
-            else if (propertyInfo.PropertyType == typeof(PSObject))
+            else if (memberType == typeof(PSObject))
             {
-                propertyInfo.SetValue(Command, PSObject.AsPSObject(value), null);
+                SetValue(memberInfo, Command, PSObject.AsPSObject(value));
             }
 
-            else if (propertyInfo.PropertyType == typeof(SwitchParameter))
+            else if (memberType == typeof(SwitchParameter))
             {
-                propertyInfo.SetValue(Command, new SwitchParameter(true), null);
+                SetValue(memberInfo, Command, new SwitchParameter(true));
             }
 
-            else if (propertyInfo.PropertyType == typeof(Object[]))
+            else if (memberType == typeof(Object[]))
             {
-                propertyInfo.SetValue(Command, new[] { value }, null);
+                SetValue(memberInfo, Command, new[] { value });
             }
 
             else
             {
-                propertyInfo.SetValue(Command, value, null);
+                SetValue(memberInfo, Command, value);
             }
+        }
+
+        public static void SetValue(MemberInfo info, object targetObject, object value )
+        {
+            if ( info.MemberType == MemberTypes.Field )
+                ((FieldInfo)info).SetValue(targetObject, value);
+            else if ( info.MemberType == MemberTypes.Property )
+                ((PropertyInfo)info).SetValue(targetObject, value, null);
+            else
+                throw new Exception("SetValue only implemented for fields and properties");
         }
 
         internal override void Initialize()
