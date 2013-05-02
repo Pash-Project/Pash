@@ -405,9 +405,20 @@ namespace TestHost
         [Test]
         public void For()
         {
-            var result = TestHost.Execute("for ($i = 0; $i -ile 10; $i++) {Write-Host $i}");
+            var result = TestHost.Execute("for ($i = 0; $i -ile 10; $i++) { $i }");
 
             Assert.AreEqual(Enumerable.Range(0, 11).JoinString(Environment.NewLine) + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void ExpressionsAsParameters()
+        {
+            var result = TestHost.Execute(
+                "$x = 5",
+                "Write-Host $x"
+                );
+
+            Assert.AreEqual("5" + Environment.NewLine, result);
         }
     }
 }
