@@ -26,11 +26,11 @@ namespace System.Management.Tests.ParameterTests
             TestParameterCommand cmdlet = new TestParameterCommand();
             cmdProc.Command = cmdlet;
 
-            cmdProc.AddParameter("Name","John");
+            cmdProc.AddParameter("Name", "John");
 
             cmdProc.BindArguments(null);
 
-            Assert.AreEqual("John",cmdlet.Name);
+            Assert.AreEqual("John", cmdlet.Name);
         }
 
         [Test]
@@ -54,12 +54,12 @@ namespace System.Management.Tests.ParameterTests
             TestParameterCommand cmdlet = new TestParameterCommand();
             cmdProc.Command = cmdlet;
 
-            cmdProc.AddParameter("Name",null);
-            cmdProc.AddParameter(null,"John");
+            cmdProc.AddParameter("Name", null);
+            cmdProc.AddParameter(null, "John");
 
             cmdProc.BindArguments(null);
 
-            Assert.AreEqual("John",cmdlet.Name);
+            Assert.AreEqual("John", cmdlet.Name);
             Assert.IsFalse(cmdlet.Recurse.ToBool());
         }
 
@@ -70,79 +70,80 @@ namespace System.Management.Tests.ParameterTests
             TestParameterCommand cmdlet = new TestParameterCommand();
             cmdProc.Command = cmdlet;
 
-            cmdProc.AddParameter("Name",null);
-            cmdProc.AddParameter(null,"John");
-            cmdProc.AddParameter("Recurse",null);
+            cmdProc.AddParameter("Name", null);
+            cmdProc.AddParameter(null, "John");
+            cmdProc.AddParameter("Recurse", null);
 
             cmdProc.BindArguments(null);
 
-            Assert.AreEqual("John",cmdlet.Name);
+            Assert.AreEqual("John", cmdlet.Name);
             Assert.IsTrue(cmdlet.Recurse.ToBool());
         }
 
-        [Test,Explicit]
+        [Test, Explicit]
         public void BindingCombinationNonDefaultSet()
         {
             CommandProcessor cmdProc = new CommandProcessor(info);
             TestParameterCommand cmdlet = new TestParameterCommand();
             cmdProc.Command = cmdlet;
 
-            cmdProc.AddParameter("Name",null);
-            cmdProc.AddParameter(null,"John");
-            cmdProc.AddParameter("FilePath",null);
-            cmdProc.AddParameter(null,"a path");
-            cmdProc.AddParameter("Recurse",null);
+            cmdProc.AddParameter("Name", null);
+            cmdProc.AddParameter(null, "John");
+            cmdProc.AddParameter("FilePath", null);
+            cmdProc.AddParameter(null, "a path");
+            cmdProc.AddParameter("Recurse", null);
 
             cmdProc.BindArguments(null);
 
-            Assert.AreEqual("John",cmdlet.Name);
-            Assert.AreEqual("a path",cmdlet.FilePath);
+            Assert.AreEqual("John", cmdlet.Name);
+            Assert.AreEqual("a path", cmdlet.FilePath);
             Assert.IsTrue(cmdlet.Recurse.ToBool());
         }
 
-        [Test,Explicit]
+        [Test, Explicit]
         public void BindingParameterSetSelectionSingle()
         {
             CommandProcessor cmdProc = new CommandProcessor(info);
             TestParameterCommand cmdlet = new TestParameterCommand();
             cmdProc.Command = cmdlet;
 
-            cmdProc.AddParameter("FilePath",null);
-            cmdProc.AddParameter(null,"a path");
+            cmdProc.AddParameter("FilePath", null);
+            cmdProc.AddParameter(null, "a path");
 
             cmdProc.BindArguments(null);
 
-            Assert.AreEqual("File",cmdlet.ParameterSetName);
+            Assert.AreEqual("File", cmdlet.ParameterSetName);
         }
 
-        [Test,Explicit]
+        [Test, Explicit]
         public void BindingParameterSetSelectionSingleAlias()
         {
             CommandProcessor cmdProc = new CommandProcessor(info);
             TestParameterCommand cmdlet = new TestParameterCommand();
             cmdProc.Command = cmdlet;
 
-            cmdProc.AddParameter("PSPath",null);
-            cmdProc.AddParameter(null,"a path");
+            cmdProc.AddParameter("PSPath", null);
+            cmdProc.AddParameter(null, "a path");
 
             cmdProc.BindArguments(null);
 
-            Assert.AreEqual("File",cmdlet.ParameterSetName);
+            Assert.AreEqual("File", cmdlet.ParameterSetName);
         }
 
-        [Test,Explicit]
+        [Test, Explicit]
         public void BindingParameterSetSelectionDoubleShouldFail()
         {
             CommandProcessor cmdProc = new CommandProcessor(info);
             TestParameterCommand cmdlet = new TestParameterCommand();
             cmdProc.Command = cmdlet;
 
-            cmdProc.AddParameter("Variable",null);
-            cmdProc.AddParameter(null,"test");
-            cmdProc.AddParameter("FilePath",null);
-            cmdProc.AddParameter(null,"a path");
+            cmdProc.AddParameter("Variable", null);
+            cmdProc.AddParameter(null, "test");
+            cmdProc.AddParameter("FilePath", null);
+            cmdProc.AddParameter(null, "a path");
 
-            Assert.Throws(typeof(Exception), delegate() {
+            Assert.Throws(typeof(Exception), delegate()
+            {
                 cmdProc.BindArguments(null);
             });
         }

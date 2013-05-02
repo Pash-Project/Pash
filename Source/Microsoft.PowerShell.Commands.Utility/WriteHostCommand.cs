@@ -21,7 +21,7 @@ namespace Microsoft.PowerShell.Commands.Utility
         [Parameter]
         public Object Separator { get; set; }
 
-        delegate void WriteAction (ConsoleColor foregroundColor, ConsoleColor backgroundColor, string value);
+        delegate void WriteAction(ConsoleColor foregroundColor, ConsoleColor backgroundColor, string value);
 
         protected override void ProcessRecord()
         {
