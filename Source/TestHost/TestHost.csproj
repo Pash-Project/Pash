@@ -85,6 +85,7 @@
     </Compile>
     <Compile Include="Cmdlets\GetCommandTests.cs" />
     <Compile Include="Cmdlets\NewObjectCommandTests.cs" />
+    <Compile Include="7.1.7 - ArraySubexpressionOperator.cs" />
     <Compile Include="LiteralsTests.cs">
       <SubType>Code</SubType>
     </Compile>

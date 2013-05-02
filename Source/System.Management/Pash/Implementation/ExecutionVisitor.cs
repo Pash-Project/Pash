@@ -357,7 +357,7 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitVariableExpression(VariableExpressionAst variableExpressionAst)
         {
             var variable = GetVariable(variableExpressionAst);
-            this._pipelineCommandRuntime.WriteObject(variable.Value);
+            this._pipelineCommandRuntime.WriteObject(variable.Value, true);
 
             return AstVisitAction.SkipChildren;
         }
@@ -597,12 +597,18 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
-        #region  NYI
         public override AstVisitAction VisitArrayExpression(ArrayExpressionAst arrayExpressionAst)
         {
-            throw new NotImplementedException(); //VisitArrayExpression(arrayExpressionAst);
+            foreach (var statement in arrayExpressionAst.SubExpression.Statements)
+            {
+                var value = EvaluateAst(statement, false);
+                this._pipelineCommandRuntime.WriteObject(value, true);
+            }
+
+            return AstVisitAction.SkipChildren;
         }
 
+        #region  NYI
         public override AstVisitAction VisitAttribute(AttributeAst attributeAst)
         {
             throw new NotImplementedException(); //VisitAttribute(attributeAst);
