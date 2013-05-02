@@ -15,12 +15,14 @@ namespace System.Management.Automation.Runspaces
             }
         }
 
-        public TypeConfigurationEntry(string name, string fileName) : base(name)
+        public TypeConfigurationEntry(string name, string fileName)
+            : base(name)
         {
             this.filename = fileName;
         }
 
-        public TypeConfigurationEntry(string fileName) : base(fileName)
+        public TypeConfigurationEntry(string fileName)
+            : base(fileName)
         {
             this.filename = fileName;
         }

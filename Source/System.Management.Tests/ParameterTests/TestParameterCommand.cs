@@ -11,7 +11,7 @@ namespace System.Management.Tests.ParameterTests
     [Cmdlet("Test", "Parameter")]
     public sealed class TestParameterCommand : PSCmdlet
     {
-        [Alias(new string[] { "PSPath","Path" })]
+        [Alias(new string[] { "PSPath", "Path" })]
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "File")]
         public string FilePath { get; set; }
 
@@ -22,7 +22,7 @@ namespace System.Management.Tests.ParameterTests
         public string Variable { get; set; }
 
         [Parameter]
-        [Alias(new string[] { "FullName","fn" })]
+        [Alias(new string[] { "FullName", "fn" })]
         public string Name;
 
         [Parameter]
