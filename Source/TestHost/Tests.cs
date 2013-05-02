@@ -409,5 +409,16 @@ namespace TestHost
 
             Assert.AreEqual(Enumerable.Range(0, 11).JoinString(Environment.NewLine) + Environment.NewLine, result);
         }
+
+        [Test]
+        public void ExpressionsAsParameters()
+        {
+            var result = TestHost.Execute(
+                "$x = 5",
+                "Write-Host $x"
+                );
+
+            Assert.AreEqual("5" + Environment.NewLine, result);
+        }
     }
 }
