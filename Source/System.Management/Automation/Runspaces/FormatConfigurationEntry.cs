@@ -20,7 +20,7 @@ namespace System.Management.Automation.Runspaces
         {
             this.filename = fileName;
         }
-       
+
         public FormatConfigurationEntry(string fileName)
             : base(fileName)
         {
