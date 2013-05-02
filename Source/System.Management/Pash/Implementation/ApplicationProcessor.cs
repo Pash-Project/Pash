@@ -1,8 +1,7 @@
 // Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
-using System.Management.Automation;
 using System.Diagnostics;
-using System.Collections.Generic;
+using System.Management.Automation;
 using System.Text;
 
 namespace Pash.Implementation
@@ -48,7 +47,7 @@ namespace Pash.Implementation
         {
         }
 
-        internal override System.Management.Automation.ICommandRuntime CommandRuntime
+        internal override ICommandRuntime CommandRuntime
         {
             get;
             set;
@@ -64,19 +63,18 @@ namespace Pash.Implementation
 
         private Process StartProcess()
         {
-            var startInfo = new ProcessStartInfo(ApplicationInfo.Path);
-            startInfo.Arguments = PrepareArguments();
-            startInfo.UseShellExecute = false;
-            startInfo.RedirectStandardOutput = true;
-            
-            Console.WriteLine(
-                string.Format(
-                "Starting a process {0} with arguments: <{1}>",
-                startInfo.FileName, startInfo.Arguments));
-            
-            var process = new Process();
-            process.StartInfo = startInfo;
-            
+            var startInfo = new ProcessStartInfo(ApplicationInfo.Path)
+            {
+                Arguments = PrepareArguments(),
+                UseShellExecute = false,
+                RedirectStandardOutput = true
+            };
+
+            var process = new Process
+            {
+                StartInfo = startInfo
+            };
+
             if (!process.Start())
             {
                 throw new Exception("Cannot start process");
@@ -90,7 +88,7 @@ namespace Pash.Implementation
             var arguments = new StringBuilder();
             foreach (var parameter in Parameters)
             {
-                arguments.Append(parameter.Value.ToString());
+                arguments.Append(parameter.Value);
                 arguments.Append(' ');
             }
 
