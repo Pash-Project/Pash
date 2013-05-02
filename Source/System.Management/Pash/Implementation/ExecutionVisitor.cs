@@ -357,7 +357,7 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitVariableExpression(VariableExpressionAst variableExpressionAst)
         {
             var variable = GetVariable(variableExpressionAst);
-            this._pipelineCommandRuntime.WriteObject(variable.Value);
+            this._pipelineCommandRuntime.WriteObject(variable.Value, true);
 
             return AstVisitAction.SkipChildren;
         }
@@ -597,12 +597,18 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
-        #region  NYI
         public override AstVisitAction VisitArrayExpression(ArrayExpressionAst arrayExpressionAst)
         {
-            throw new NotImplementedException(); //VisitArrayExpression(arrayExpressionAst);
+            foreach (var statement in arrayExpressionAst.SubExpression.Statements)
+            {
+                var value = EvaluateAst(statement, false);
+                this._pipelineCommandRuntime.WriteObject(value, true);
+            }
+
+            return AstVisitAction.SkipChildren;
         }
 
+        #region  NYI
         public override AstVisitAction VisitAttribute(AttributeAst attributeAst)
         {
             throw new NotImplementedException(); //VisitAttribute(attributeAst);
@@ -693,11 +699,33 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitForStatement(ForStatementAst forStatementAst)
         {
+            /*
+             * The controlling expression for-condition must have type bool or 
+             * be implicitly convertible to that type. The loop body, which 
+             * consists of statement-block, is executed repeatedly while the 
+             * controlling expression tests True. The controlling expression 
+             * is evaluated before each execution of the loop body.
+             * 
+             * Expression for-initializer is evaluated before the first 
+             * evaluation of the controlling expression. Expression 
+             * for-initializer is evaluated for its side effects only; any 
+             * value it produces is discarded and is not written to the 
+             * pipeline.
+             * 
+             * Expression for-iterator is evaluated after each execution of 
+             * the loop body. Expression for-iterator is evaluated for its 
+             * side effects only; any value it produces is discarded and is 
+             * not written to the pipeline.
+             * 
+             * If expression for-condition is omitted, the controlling 
+             * expression tests True.
+             */
+
             EvaluateAst(forStatementAst.Initializer);
 
             while ((bool)((PSObject)EvaluateAst(forStatementAst.Condition)).BaseObject)
             {
-                EvaluateAst(forStatementAst.Body);
+                this._pipelineCommandRuntime.WriteObject(EvaluateAst(forStatementAst.Body), true);
                 EvaluateAst(forStatementAst.Iterator);
             }
 

@@ -934,5 +934,13 @@ ls
         {
             ForStatementAst forStatementAst = ParseStatement("for ($i = 0; $i -ile 10; $i++) {Write-Host $i}");
         }
+
+        [Test]
+        public void ArraySubexpression()
+        {
+            ArrayExpressionAst arrayExpressionAst = ParseStatement("@(1)").PipelineElements[0].Expression;
+
+            Assert.AreEqual(1, arrayExpressionAst.SubExpression.Statements.Count);
+        }
     }
 }
