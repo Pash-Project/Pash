@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace System.Management.Tests.ParameterTests
 {
     [TestFixture]
-    public sealed class CmdLetInfoTests 
+    public sealed class CmdLetInfoTests
     {
         private CmdletInfo info = null;
 
@@ -110,8 +110,8 @@ namespace System.Management.Tests.ParameterTests
 
             Assert.IsNotNull(nameParam.Aliases);
             Assert.AreEqual(2, nameParam.Attributes.Count);
-            Assert.AreEqual(1, nameParam.Attributes.Where( a => a is AliasAttribute).Count());
-            Assert.AreEqual(1, nameParam.Attributes.Where( a => a is ParameterAttribute).Count());
+            Assert.AreEqual(1, nameParam.Attributes.Where(a => a is AliasAttribute).Count());
+            Assert.AreEqual(1, nameParam.Attributes.Where(a => a is ParameterAttribute).Count());
         }
-	}
+    }
 }
