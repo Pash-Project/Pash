@@ -11,6 +11,8 @@ namespace Pash.Implementation
     /// </summary>
     internal class ApplicationProcessor : CommandProcessorBase
     {
+        private Process _process;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Pash.Implementation.ApplicationProcessor"/> class.
         /// </summary>
@@ -20,22 +22,30 @@ namespace Pash.Implementation
         {
         }
 
-        internal override void BindArguments(PSObject obj)
-        {
-        }
-
         internal override void Initialize()
         {
+            // TODO: If command was called not as part of another expression then we don't need to redirect input and output.
+            _process = StartProcess();
+        }
+
+        internal override void BindArguments(PSObject obj)
+        {
+            if (obj != null)
+            {
+                var inputObject = obj.ToString();
+                _process.StandardInput.WriteLine(inputObject);
+            }
         }
 
         internal override void ProcessRecord()
         {
-            // TODO: If command was called not as part of another expression then we don't need to redirect input and output.
-            var process = StartProcess();
-            var output = process.StandardOutput;
+            // Release GUI programs immediately.
+            if (ProcessHasGui())
+            {
+                return;
+            }
 
-            // TODO: If present, pass one object to standard input.
-
+            var output = _process.StandardOutput;
             while (!output.EndOfStream)
             {
                 var line = output.ReadLine();
@@ -47,7 +57,10 @@ namespace Pash.Implementation
         {
             // TODO: Should we set $LASTEXITCODE here?
             // TODO: Same for the $? variable.
-            // TODO: Dispose process maybe?
+            if (_process != null)
+            {
+                _process.Dispose();
+            }
         }
 
         internal override ICommandRuntime CommandRuntime
@@ -91,11 +104,41 @@ namespace Pash.Implementation
             var arguments = new StringBuilder();
             foreach (var parameter in Parameters)
             {
-                arguments.Append(parameter.Value);
+                // PowerShell quotes any arguments that contain spaces except the arguments that start with a quote.
+                var argument = parameter.Value.ToString();
+                if (argument.Contains(" ") && !argument.StartsWith("\""))
+                {
+                    arguments.AppendFormat("\"{0}\"", argument);
+                }
+                else
+                {
+                    arguments.Append(argument);
+                }
+
                 arguments.Append(' ');
             }
 
             return arguments.ToString();
+        }
+
+        /// <summary>
+        /// Checks if process represents a graphical application.
+        /// </summary>
+        /// <returns><c>true</c>, if a process represents a graphical application, <c>false</c> otherwise.</returns>
+        private bool ProcessHasGui()
+        {
+            bool hasGui;
+            try
+            {
+                hasGui = _process.WaitForInputIdle();
+            }
+            catch (InvalidOperationException)
+            {
+                // WaitForInputIdle throws this exception if a process haven't GUI.
+                hasGui = false;
+            }
+
+            return hasGui;
         }
     }
 }
