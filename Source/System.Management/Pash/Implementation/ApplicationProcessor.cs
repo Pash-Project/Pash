@@ -30,21 +30,24 @@ namespace Pash.Implementation
 
         internal override void ProcessRecord()
         {
+            // TODO: If command was called not as part of another expression then we don't need to redirect input and output.
             var process = StartProcess();
             var output = process.StandardOutput;
+
+            // TODO: If present, pass one object to standard input.
 
             while (!output.EndOfStream)
             {
                 var line = output.ReadLine();
                 CommandRuntime.WriteObject(line);
             }
-
-            // TODO: Should we set $LASTEXITCODE here?
-            // TODO: Same for the $? variable.
         }
 
         internal override void Complete()
         {
+            // TODO: Should we set $LASTEXITCODE here?
+            // TODO: Same for the $? variable.
+            // TODO: Dispose process maybe?
         }
 
         internal override ICommandRuntime CommandRuntime

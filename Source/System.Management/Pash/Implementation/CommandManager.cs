@@ -168,31 +168,23 @@ namespace Pash.Implementation
                         if (commandAst.CommandElements.Count == 1 && commandAst.CommandElements.Single() is StringConstantExpressionAst)
                         {
                             var stringAst = commandAst.CommandElements.Single() as StringConstantExpressionAst;
-                            var path = stringAst.Value;
-
-                            // TODO: Forbid to run executables and scripts from the current directory without a leading slash.
-                            // For example, if current directory contains a 'file.exe' file, a command 'file.exe' should not
-                            // execute, but './file.exe' should.
-                            if (File.Exists(path))
+                            var path = ResolveExecutablePath(stringAst.Value);
+                            if (path == null)
                             {
-                                if (Path.GetExtension(path) == ".ps1")
-                                {
-                                    // I think we should be using a ScriptFile parser, but this will do for now.
-                                    commandInfo = new ScriptInfo(path, new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(File.ReadAllText(path))));
-                                }
-                                else
-                                {
-                                    var fullPath = Path.GetFullPath(path);
-                                    var commandName = Path.GetFileName(fullPath);
-                                    var extension = Path.GetExtension(path);
+                                throw new Exception(string.Format("Command '{0}' not found.", cmdName));
+                            }
 
-                                    commandInfo = new ApplicationInfo(commandName, fullPath, extension);
-                                }
+                            if (Path.GetExtension(path) == ".ps1")
+                            {
+                                // I think we should be using a ScriptFile parser, but this will do for now.
+                                commandInfo = new ScriptInfo(path, new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(File.ReadAllText(path))));
                             }
                             else
                             {
-                                // TODO: Check executables on PATH variable.
-                                throw new Exception(string.Format("Command '{0}' not found.", cmdName));
+                                var commandName = Path.GetFileName(path);
+                                var extension = Path.GetExtension(path);
+
+                                commandInfo = new ApplicationInfo(commandName, path, extension);
                             }
                         }
                     }
@@ -291,6 +283,67 @@ namespace Pash.Implementation
         {
             this._scripts[functionInfo.Name] = functionInfo;
         }
-    }
 
+        /// <summary>
+        /// Resolves the path to the executable file.
+        /// </summary>
+        /// <param name="path">Relative path to the executable (with extension optionally omitted).</param>
+        /// <returns>Absolute path to the executable file.</returns>
+        private static string ResolveExecutablePath(string path)
+        {
+            // TODO: Forbid to run executables and scripts from the current directory without a leading slash.
+            // For example, if current directory contains a 'file.exe' file, a command 'file.exe' should not
+            // execute, but './file.exe' should.
+            if (File.Exists(path))
+            {
+                return Path.GetFullPath(path);
+            }
+
+            // TODO: If not, then try to search the relative path with known extensions.
+
+            // TODO: If path contains path separator (i.e. it pretends to be relative) and relative path not found, then
+            // give up.
+
+            return ResolveAbsolutePath(path);
+        }
+
+        /// <summary>
+        /// Searches for the executable through system-wide directories.
+        /// </summary>
+        /// <param name="path">Relative path to the executable (with extension optionally omitted).</param>
+        /// <returns>Absolute path to the executable file.</returns>
+        private static string ResolveAbsolutePath(string fileName)
+        {
+            // TODO: The following is Windows-specific. Change it for Unix-based OS.
+            var systemPath = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+            var directories = systemPath.Split(new[]
+            {
+                ';'
+            }, StringSplitOptions.RemoveEmptyEntries);
+
+            var pathExt = Environment.GetEnvironmentVariable("PATHEXT") ?? string.Empty;
+            var extensions = new[] { ".ps1" }.Concat(pathExt.Split(new[]
+            {
+                ';'
+            }, StringSplitOptions.RemoveEmptyEntries)); // TODO: Clarify the priority of the .ps1 extension.
+
+            if (extensions.Contains(Path.GetExtension(fileName)))
+            {
+                // If file extension means to be executable, try to search it without an extension:
+                var path = directories.Select(directory => Path.Combine(directory, fileName)).FirstOrDefault(File.Exists);
+                if (path != null)
+                {
+                    return path;
+                }
+            }
+
+            // Now search for file with an extensions:
+            var finalPath = extensions.Select(extension => fileName + extension)
+                .SelectMany(
+                    fileNameWithExtension => directories.Select(directory => Path.Combine(directory, fileNameWithExtension)))
+                .FirstOrDefault(File.Exists);
+
+            return finalPath;
+        }
+    }
 }
