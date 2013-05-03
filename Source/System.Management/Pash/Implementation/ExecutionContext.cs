@@ -94,7 +94,7 @@ namespace Pash.Implementation
             if (string.IsNullOrEmpty(name))
                 throw new NullReferenceException("Variable name can't be empty.");
 
-            throw new NotImplementedException();
+            return this.SessionState.PSVariable.Get(name);
         }
 
         internal void SetVariable(string name, object value)
@@ -102,8 +102,7 @@ namespace Pash.Implementation
             if (string.IsNullOrEmpty(name))
                 throw new NullReferenceException("Variable name can't be empty.");
 
-            throw new NotImplementedException();
+            this.SessionState.PSVariable.Set(name, value);
         }
-
     }
 }

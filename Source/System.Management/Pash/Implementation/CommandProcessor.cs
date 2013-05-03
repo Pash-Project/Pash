@@ -155,7 +155,7 @@ namespace System.Management.Automation
 
             else
             {
-                SetValue(memberInfo, Command, value);
+                SetValue(memberInfo, Command, value is PSObject ? ((PSObject)value).BaseObject : value);
             }
         }
 
