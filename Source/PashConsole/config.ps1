@@ -77,8 +77,8 @@ Set-Alias man help
 #      Set-Alias epcsv Export-Csv
 #      Set-Alias fc Format-Custom
 #      Set-Alias fl Format-List
-#      Set-Alias foreach ForEach-Object
-#      Set-Alias % ForEach-Object
+Set-Alias foreach ForEach-Object
+Set-Alias % ForEach-Object
 #      Set-Alias ft Format-Table
 #      Set-Alias fw Format-Wide
 #      Set-Alias gal Get-Alias
