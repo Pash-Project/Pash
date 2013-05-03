@@ -155,18 +155,25 @@ namespace System.Management.Automation
 
             else
             {
-                SetValue(memberInfo, Command, value);
+                SetValue(memberInfo, Command, value is PSObject ? ((PSObject)value).BaseObject : value);
             }
         }
 
         public static void SetValue(MemberInfo info, object targetObject, object value)
         {
             if (info.MemberType == MemberTypes.Field)
-                ((FieldInfo)info).SetValue(targetObject, value);
+            {
+                FieldInfo fieldInfo = info as FieldInfo;
+                fieldInfo.SetValue(targetObject, value);
+            }
+
             else if (info.MemberType == MemberTypes.Property)
-                ((PropertyInfo)info).SetValue(targetObject, value, null);
-            else
-                throw new Exception("SetValue only implemented for fields and properties");
+            {
+                PropertyInfo propertyInfo = info as PropertyInfo;
+                propertyInfo.SetValue(targetObject, value, null);
+            }
+
+            else throw new Exception("SetValue only implemented for fields and properties");
         }
 
         internal override void Initialize()

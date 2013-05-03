@@ -791,7 +791,9 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitScriptBlockExpression(ScriptBlockExpressionAst scriptBlockExpressionAst)
         {
-            throw new NotImplementedException(); //VisitScriptBlockExpression(scriptBlockExpressionAst);
+            this._pipelineCommandRuntime.WriteObject(new ScriptBlock(scriptBlockExpressionAst.ScriptBlock));
+
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitStatementBlock(StatementBlockAst statementBlockAst)
