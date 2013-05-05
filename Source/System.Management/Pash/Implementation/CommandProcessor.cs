@@ -44,12 +44,15 @@ namespace System.Management.Automation
         /// </remarks>
         internal override void BindArguments(PSObject obj)
         {
+            // TODO: Bind obj properties to ValueFromPipelinebyPropertyName parameters
+            // TODO: If parameter has ValueFromRemainingArguments any unmatched arguments should be bound to this parameter as an array
+            // TODO: If no parameter has ValueFromRemainingArguments any supplied parameters are unmatched then fail with exception
+
             if ((obj == null) && (Parameters.Count == 0))
                 return;
 
-            // TODO: bind the arguments to the parameters
+            // TODO: Perform analysis on passed arguments and obj to identify which parameter set to select for binding
             CommandParameterSetInfo paramSetInfo = _cmdletInfo.GetDefaultParameterSet();
-            // TODO: refer to the Command._ParameterSetName for a param set name
 
             if (obj != null)
             {
