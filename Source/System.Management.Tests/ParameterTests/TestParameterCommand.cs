@@ -8,7 +8,7 @@ using NUnit.Framework;
 
 namespace System.Management.Tests.ParameterTests
 {
-    [Cmdlet("Test", "Parameter")]
+    [Cmdlet("Test", "Parameter", DefaultParameterSetName = "File")]
     public sealed class TestParameterCommand : PSCmdlet
     {
         [Alias(new string[] { "PSPath", "Path" })]
@@ -22,7 +22,7 @@ namespace System.Management.Tests.ParameterTests
         public string Variable { get; set; }
 
         [Parameter]
-        [Alias(new string[] { "FullName", "fn" })]
+        [Alias(new string[] { "FullName", "fn", "identity" })]
         public string Name;
 
         [Parameter]
