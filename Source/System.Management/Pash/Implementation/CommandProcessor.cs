@@ -82,7 +82,7 @@ namespace System.Management.Automation
                     }
                     else
                     {
-                        paramInfo = paramSetInfo.GetParameterByName(parameter.Name);
+                        paramInfo = paramSetInfo.LookupParameter(parameter.Name);
 
                         if (paramInfo != null)
                         {
