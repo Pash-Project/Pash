@@ -52,7 +52,7 @@ namespace TestHost
             });
         }
 
-        [Test, Explicit]
+        [Test]
         [ExpectedException]
         public void ParametersInvalid()
         {

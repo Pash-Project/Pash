@@ -95,6 +95,11 @@ namespace System.Management.Automation
                             else
                                 BindArgument(paramInfo.Name, parameter.Value, paramInfo.ParameterType);
                         }
+                        else
+                        {
+                            //TODO: Throw ParameterBindingException when implemented
+                            throw(new Exception("No parameter found matching '" + parameter.Name + "'"));
+                        }
                     }
                 }
             }
