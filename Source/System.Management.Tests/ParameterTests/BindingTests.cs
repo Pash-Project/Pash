@@ -33,6 +33,20 @@ namespace System.Management.Tests.ParameterTests
             Assert.AreEqual("John", cmdlet.Name);
         }
 
+        [Test, Explicit]
+        public void BindingFieldAlias()
+        {
+            CommandProcessor cmdProc = new CommandProcessor(info);
+            TestParameterCommand cmdlet = new TestParameterCommand();
+            cmdProc.Command = cmdlet;
+
+            cmdProc.AddParameter("fn", "John");
+
+            cmdProc.BindArguments(null);
+
+            Assert.AreEqual("John", cmdlet.Name);
+        }
+
         [Test]
         public void BindingParameter()
         {
@@ -45,6 +59,34 @@ namespace System.Management.Tests.ParameterTests
             cmdProc.BindArguments(null);
 
             Assert.AreEqual("10", cmdlet.InputObject.ToString());
+        }
+
+        [Test, Explicit]
+        public void BindingParameterAlias()
+        {
+            CommandProcessor cmdProc = new CommandProcessor(info);
+            TestParameterCommand cmdlet = new TestParameterCommand();
+            cmdProc.Command = cmdlet;
+
+            cmdProc.AddParameter("Path", "a path");
+
+            cmdProc.BindArguments(null);
+
+            Assert.AreEqual("a path", cmdlet.FilePath.ToString());
+        }
+
+        [Test, Explicit]
+        public void BindingAmbiguous()
+        {
+            CommandProcessor cmdProc = new CommandProcessor(info);
+            TestParameterCommand cmdlet = new TestParameterCommand();
+            cmdProc.Command = cmdlet;
+
+            cmdProc.AddParameter("i", 10);
+
+            Assert.Throws(typeof(ArgumentException), delegate() {
+                cmdProc.BindArguments(null);
+            });
         }
 
         [Test]

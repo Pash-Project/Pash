@@ -93,9 +93,10 @@ namespace System.Management.Tests.ParameterTests
             Assert.IsNotNull(nameParam);
 
             Assert.IsNotNull(nameParam.Aliases);
-            Assert.AreEqual(2, nameParam.Aliases.Count);
+            Assert.AreEqual(3, nameParam.Aliases.Count);
             Assert.Contains("FullName", nameParam.Aliases);
             Assert.Contains("fn", nameParam.Aliases);
+            Assert.Contains("identity", nameParam.Aliases);
         }
 
         [Test]
