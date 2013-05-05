@@ -33,7 +33,7 @@ namespace System.Management.Tests.ParameterTests
             Assert.AreEqual("John", cmdlet.Name);
         }
 
-        [Test, Explicit]
+        [Test]
         public void BindingFieldAlias()
         {
             CommandProcessor cmdProc = new CommandProcessor(info);
@@ -61,7 +61,7 @@ namespace System.Management.Tests.ParameterTests
             Assert.AreEqual("10", cmdlet.InputObject.ToString());
         }
 
-        [Test, Explicit]
+        [Test]
         public void BindingParameterAlias()
         {
             CommandProcessor cmdProc = new CommandProcessor(info);
@@ -75,7 +75,7 @@ namespace System.Management.Tests.ParameterTests
             Assert.AreEqual("a path", cmdlet.FilePath.ToString());
         }
 
-        [Test, Explicit]
+        [Test]
         public void BindingAmbiguous()
         {
             CommandProcessor cmdProc = new CommandProcessor(info);
@@ -129,10 +129,7 @@ namespace System.Management.Tests.ParameterTests
             TestParameterCommand cmdlet = new TestParameterCommand();
             cmdProc.Command = cmdlet;
 
-            cmdProc.AddParameter("Name", null);
-            cmdProc.AddParameter(null, "John");
-            cmdProc.AddParameter("FilePath", null);
-            cmdProc.AddParameter(null, "a path");
+            cmdProc.AddParameter("Variable", "a");
             cmdProc.AddParameter("Recurse", null);
 
             cmdProc.BindArguments(null);
@@ -172,7 +169,7 @@ namespace System.Management.Tests.ParameterTests
             Assert.AreEqual("File", cmdlet.ParameterSetName);
         }
 
-        [Test, Explicit]
+        [Test, Explicit("This is currently does pass, but not for the right reason (missing parameter set selection logic)")]
         public void BindingParameterSetSelectionDoubleShouldFail()
         {
             CommandProcessor cmdProc = new CommandProcessor(info);

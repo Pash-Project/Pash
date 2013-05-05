@@ -28,7 +28,7 @@ namespace TestHost
             Assert.AreEqual(result1, result2);
         }
 
-        [Test, Explicit]
+        [Test]
         public void ParametersByPrefix()
         {
             var results = TestHost.Execute("$a = 10; Get-Variable -Nam a");
@@ -36,7 +36,7 @@ namespace TestHost
             Assert.AreEqual("$a = 10" + Environment.NewLine, results);
         }
 
-        [Test, Explicit]
+        [Test]
         public void ParametersByAlias()
         {
             Assert.DoesNotThrow(delegate() {
@@ -44,7 +44,7 @@ namespace TestHost
             });
         }
 
-        [Test, Explicit]
+        [Test]
         public void ParametersByAliasPrefix()
         {
             Assert.DoesNotThrow(delegate() {

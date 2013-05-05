@@ -26,7 +26,7 @@ namespace System.Management.Tests.ParameterTests
         }
 
         [Test]
-        public void Parameters()
+        public void ReflectionParameters()
         {
             CommandParameterSetInfo allSet = info.GetParameterSetByName(ParameterAttribute.AllParameterSets);
             CommandParameterSetInfo fileSet = info.GetParameterSetByName("File");
@@ -83,7 +83,7 @@ namespace System.Management.Tests.ParameterTests
         }
 
         [Test]
-        public void Aliases()
+        public void ReflectionAliases()
         {
             CommandParameterSetInfo allSet = info.GetParameterSetByName(ParameterAttribute.AllParameterSets);
 
@@ -100,7 +100,7 @@ namespace System.Management.Tests.ParameterTests
         }
 
         [Test]
-        public void Attributes()
+        public void ReflectionAttributes()
         {
             CommandParameterSetInfo allSet = info.GetParameterSetByName(ParameterAttribute.AllParameterSets);
 
