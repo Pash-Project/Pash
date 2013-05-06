@@ -1,5 +1,6 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -47,6 +48,27 @@ namespace System.Management.Automation
             }
 
             return null;
+        }
+
+        internal CommandParameterInfo LookupParameter(string name)
+        {
+            CommandParameterInfo found = null;
+            foreach (CommandParameterInfo parameter in Parameters)
+            {
+                if (parameter.Name.StartsWith(name, StringComparison.CurrentCultureIgnoreCase) ||
+                    (parameter.Aliases != null && parameter.Aliases.Where(a => a.StartsWith(name, StringComparison.CurrentCultureIgnoreCase)).Count() > 0))
+                {
+                    // If match already found, name is ambiguous
+                    if (found != null)
+                    {
+                        //TODO: Throw ParameterBindingException when implemented
+                        throw new ArgumentException("Supplied parmameter '" + name + "' is ambiguous, possibilities include '" + found.Name + "' and '" + parameter.Name + "'" );
+                    }
+                    found = parameter;
+                }
+            }
+
+            return found;
         }
     }
 }

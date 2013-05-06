@@ -1,4 +1,4 @@
-﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -80,9 +80,12 @@ namespace System.Management.Automation
         {
             Dictionary<string, Collection<CommandParameterInfo>> paramSets = new Dictionary<string, Collection<CommandParameterInfo>>(StringComparer.CurrentCultureIgnoreCase);
 
-            // TODO: ensure there are no duplicate named parameters inside scope of a single parameter set.
-            // TOOD: When using parameter sets, no parameter set should contain more than one positional parameter with the same position. 
-            // TODO: only one parameter in a set should declare ValueFromPipeline = true. Multiple parameters may define ValueFromPipelineByPropertyName = true.
+            // TODO: Ensure there are no duplicate named or aliased parameters inside scope of a single parameter set.
+            // TODO: When using parameter sets, no parameter set should contain more than one positional parameter with the same position. 
+            // TODO: If not parameters have a position declared then positions for all the parameters should be automatically declaredin the order they are specified
+            // TODO: Only one parameter in a set should declare ValueFromRemainingArguments = true
+            // TODO: Only one parameter in a set should declare ValueFromPipeline = true. Multiple parameters may define ValueFromPipelineByPropertyName = true.
+            // TODO: Currently due to the way parameters are loaded into sets from all set at the end the parameter end up in incorrect order.
 
             // Add fields with ParameterAttribute
             foreach (FieldInfo filedInfo in cmdletType.GetFields(BindingFlags.Public | BindingFlags.Instance))

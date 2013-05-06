@@ -26,7 +26,7 @@ namespace System.Management.Tests.ParameterTests
         }
 
         [Test]
-        public void Parameters()
+        public void ReflectionParameters()
         {
             CommandParameterSetInfo allSet = info.GetParameterSetByName(ParameterAttribute.AllParameterSets);
             CommandParameterSetInfo fileSet = info.GetParameterSetByName("File");
@@ -83,7 +83,7 @@ namespace System.Management.Tests.ParameterTests
         }
 
         [Test]
-        public void Aliases()
+        public void ReflectionAliases()
         {
             CommandParameterSetInfo allSet = info.GetParameterSetByName(ParameterAttribute.AllParameterSets);
 
@@ -93,13 +93,14 @@ namespace System.Management.Tests.ParameterTests
             Assert.IsNotNull(nameParam);
 
             Assert.IsNotNull(nameParam.Aliases);
-            Assert.AreEqual(2, nameParam.Aliases.Count);
+            Assert.AreEqual(3, nameParam.Aliases.Count);
             Assert.Contains("FullName", nameParam.Aliases);
             Assert.Contains("fn", nameParam.Aliases);
+            Assert.Contains("identity", nameParam.Aliases);
         }
 
         [Test]
-        public void Attributes()
+        public void ReflectionAttributes()
         {
             CommandParameterSetInfo allSet = info.GetParameterSetByName(ParameterAttribute.AllParameterSets);
 
