@@ -24,8 +24,15 @@ namespace Microsoft.PowerShell.Commands
             }
         }
 
-        int Compare(PSObject x, PSObject y)
+        int Compare(PSObject a, PSObject b)
         {
+            PSObject x = a, y = b;
+            if (Descending.ToBool())
+            {
+                x = b;
+                y = a;
+            }
+
             if (this.Property == null)
             {
                 return LanguagePrimitives.Compare(x, y);
