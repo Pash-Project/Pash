@@ -24,13 +24,13 @@ namespace Microsoft.PowerShell.Commands
             }
         }
 
-        int Compare(PSObject a, PSObject b)
+        int Compare(PSObject x, PSObject y)
         {
-            PSObject x = a, y = b;
             if (Descending.ToBool())
             {
-                x = b;
-                y = a;
+                var temp = x;
+                x = y;
+                y = temp;
             }
 
             if (this.Property == null)
