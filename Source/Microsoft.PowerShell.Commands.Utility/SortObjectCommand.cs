@@ -26,6 +26,13 @@ namespace Microsoft.PowerShell.Commands
 
         int Compare(PSObject x, PSObject y)
         {
+            if (Descending.ToBool())
+            {
+                var temp = x;
+                x = y;
+                y = temp;
+            }
+
             if (this.Property == null)
             {
                 return LanguagePrimitives.Compare(x, y);
