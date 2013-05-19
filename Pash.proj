@@ -6,6 +6,15 @@
     <MSBuild Projects="Source\Pash.sln" />
   </Target>
 
+  <Target Name="Clean">
+    <MSBuild Projects="Source\Pash.sln" Targets="Clean" />
+  </Target>
+
+  <Target Name="Rebuild">
+    <MSBuild Projects="Source\Pash.sln" Targets="Rebuild" />
+  </Target>
+
+
   <!--=====================================================================-->
   <Target Name="Test"
           DependsOnTargets="Build"
