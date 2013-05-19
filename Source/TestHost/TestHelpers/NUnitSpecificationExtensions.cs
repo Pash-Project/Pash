@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using NUnit.Framework;
+using System.Text.RegularExpressions;
 
 public delegate void MethodThatThrows();
 
@@ -234,8 +235,8 @@ public static class NUnitSpecificationExtensions
     [Obsolete("We need to find a way to run distinct tests per OS (or at least windows/unix). This function is a hack to get tests to run in both places")]
     public static string PathShouldEqual(this string actual, string expected, string message = null)
     {
-        expected = expected.Replace("C:\\", "/").Replace(System.IO.Path.AltDirectorySeparatorChar, System.IO.Path.DirectorySeparatorChar);
-        actual = actual.Replace("C:\\", "/").Replace(System.IO.Path.AltDirectorySeparatorChar, System.IO.Path.DirectorySeparatorChar);
+        expected = Regex.Replace(expected, @"[a-zA-Z]:\\", "/").Replace(System.IO.Path.AltDirectorySeparatorChar, System.IO.Path.DirectorySeparatorChar);
+        actual = Regex.Replace(actual, @"[a-zA-Z]:\\", "/").Replace(System.IO.Path.AltDirectorySeparatorChar, System.IO.Path.DirectorySeparatorChar);
         return ShouldEqual(actual, expected, message);
     }
 
