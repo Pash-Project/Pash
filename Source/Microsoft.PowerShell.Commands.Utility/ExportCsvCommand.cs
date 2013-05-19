@@ -15,7 +15,7 @@ namespace Microsoft.PowerShell.Commands
     ///   Export-Csv
     /// 
     /// DESCRIPTION
-    ///   Exports the input object to a comma deliminated file.
+    ///   Exports the input object to a comma delimited file.
     /// 
     /// RELATED PASH COMMANDS
     ///   Import-Csv

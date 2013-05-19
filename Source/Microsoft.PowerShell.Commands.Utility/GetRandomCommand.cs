@@ -10,7 +10,7 @@ namespace Microsoft.PowerShell.Commands
     ///   Get-Random
     /// 
     /// DESCRIPTION
-    ///   Retrevies a random number.
+    ///   Retrieves a random number.
     ///   
     /// RELATED POSIX COMMANDS
     ///   /dev/random 

@@ -15,7 +15,7 @@ namespace Microsoft.PowerShell.Commands
     ///   Import-Csv
     /// 
     /// DESCRIPTION
-    ///   Imports the from a comma deliminated file to an object.
+    ///   Imports the data from a comma delimited file to an object.
     /// 
     /// RELATED PASH COMMANDS
     ///   Export-Csv

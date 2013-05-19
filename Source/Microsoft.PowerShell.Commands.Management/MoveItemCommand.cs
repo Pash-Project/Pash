@@ -10,7 +10,7 @@ namespace Microsoft.PowerShell.Commands
     ///   Move-Item
     /// 
     /// DESCRIPTION
-    ///   Moves a item from one path to another. The behavior depends on the provider you have loaded, but for the Filesystem provider this means moving files or folders.
+    ///   Moves an item from one path to another. The behavior depends on the provider you have loaded, but for the Filesystem provider this means moving files or folders.
     /// 
     /// RELATED PASH COMMANDS
     ///   Get-ChildItem
