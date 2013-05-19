@@ -485,8 +485,9 @@ namespace System.Management.Pash.Implementation
 
             if (methodCallAst.Member is StringConstantExpressionAst)
             {
+                BindingFlags bindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
                 var name = (methodCallAst.Member as StringConstantExpressionAst).Value;
-                var method = type.GetMethod(name, arguments.Select(a => a.GetType()).ToArray());
+                var method = type.GetMethod(name, bindingFlags, null, arguments.Select(a => a.GetType()).ToArray(), null);
                 var result = method.Invoke(obj, arguments.ToArray());
 
                 _pipelineCommandRuntime.WriteObject(result);

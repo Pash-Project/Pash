@@ -55,6 +55,14 @@ $a.Length
         }
 
         [Test]
+        public void StaticMethodAccessIsCaseInsensitive()
+        {
+            var result = TestHost.Execute(true, @"[Math]::abs(-15)");
+
+            Assert.AreEqual("15" + Environment.NewLine, result);
+        }
+
+        [Test]
         public void TwoParameters()
         {
             var result = TestHost.Execute(@"[char]::IsUpper(""AbC"", 1)");
