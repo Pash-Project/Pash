@@ -405,9 +405,61 @@ namespace TestHost
         [Test]
         public void For()
         {
-            var result = TestHost.Execute("for ($i = 0; $i -ile 10; $i++) {Write-Host $i}");
+            var result = TestHost.Execute("for ($i = 0; $i -ile 10; $i++) { $i }");
 
             Assert.AreEqual(Enumerable.Range(0, 11).JoinString(Environment.NewLine) + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void ExpressionsAsParameters()
+        {
+            var result = TestHost.Execute(
+                "$x = 5",
+                "Write-Host $x"
+                );
+
+            Assert.AreEqual("5" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void ForeachObjectCmdlet()
+        {
+            var result = TestHost.Execute(
+                "1,2,3 | ForEach-Object { $_ }"
+                );
+
+            Assert.AreEqual(
+                "1" + Environment.NewLine +
+                "2" + Environment.NewLine +
+                "3" + Environment.NewLine,
+                result
+                );
+        }
+
+        [Test]
+        [Explicit]
+        [Description("`ForEach-Object` can take many script blocks. The first one runs **once** before everything else; the last one runs **once** after everything else; the rest run once for each input")]
+        // I changed `ForEachObjectCommand.Process` from `ScriptBlock[]` to `ScriptBlock`, to work around a limitation in `CommandProcessor.BindArgument()`. Once that is fixed, this test can be reenabled.
+        public void ForeachObjectCmdletManyScriptBlocks()
+        {
+            var result = TestHost.Execute(
+                "1..3 | % { 'a' + $_ } { 'b' + $_ } { 'c' + $_ } { 'd' + $_ } { 'e' + $_ }"
+                );
+
+            Assert.AreEqual(
+                "a" + Environment.NewLine +
+                "b1" + Environment.NewLine +
+                "c1" + Environment.NewLine +
+                "d1" + Environment.NewLine +
+                "b2" + Environment.NewLine +
+                "c2" + Environment.NewLine +
+                "d2" + Environment.NewLine +
+                "b3" + Environment.NewLine +
+                "c3" + Environment.NewLine +
+                "d3" + Environment.NewLine +
+                "e" + Environment.NewLine,
+                result
+                );
         }
     }
 }

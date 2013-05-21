@@ -32,7 +32,7 @@ namespace TestHost
         {
             var result = TestHost.Execute(true, @"
 $a = 10,20,30
-a.Length
+$a.Length
 ");
 
             Assert.AreEqual("3" + Environment.NewLine, result);
@@ -52,6 +52,14 @@ a.Length
             var result = TestHost.Execute(true, @"[int]::Parse('7')");
 
             Assert.AreEqual("7" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void StaticMethodAccessIsCaseInsensitive()
+        {
+            var result = TestHost.Execute(true, @"[Math]::abs(-15)");
+
+            Assert.AreEqual("15" + Environment.NewLine, result);
         }
 
         [Test]

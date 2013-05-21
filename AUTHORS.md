@@ -17,3 +17,4 @@ Jason Jarrett              | [@staxmanade](http://github.com/staxmanade)        
 Friedrich von Never        | [@ForNeVeR](http://github.com/ForNeVeR)                | <neverthness@gmail.com>       | 
 Jonathan Ben-Joseph        |                                                        | <jbenjos@gmail.com>           | Mono Summer of Code 2008
 Alistair Hughes            | [alesliehughes](https://github.com/alesliehughes)      |                               | 
+Johannes Rössel            | [@ygra](https://github.com/ygra)                       | <pash@hypftier.de>            | 

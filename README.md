@@ -5,6 +5,7 @@ An Open Source reimplementation of Windows PowerShell.
 
 Follow [@pashproject](http://twitter.com/pashproject)
 
+Join http://groups.google.com/group/pash-project.
 
 Status
 ------

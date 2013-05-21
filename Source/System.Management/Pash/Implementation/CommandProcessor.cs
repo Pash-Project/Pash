@@ -44,12 +44,15 @@ namespace System.Management.Automation
         /// </remarks>
         internal override void BindArguments(PSObject obj)
         {
+            // TODO: Bind obj properties to ValueFromPipelinebyPropertyName parameters
+            // TODO: If parameter has ValueFromRemainingArguments any unmatched arguments should be bound to this parameter as an array
+            // TODO: If no parameter has ValueFromRemainingArguments any supplied parameters are unmatched then fail with exception
+
             if ((obj == null) && (Parameters.Count == 0))
                 return;
 
-            // TODO: bind the arguments to the parameters
+            // TODO: Perform analysis on passed arguments and obj to identify which parameter set to select for binding
             CommandParameterSetInfo paramSetInfo = _cmdletInfo.GetDefaultParameterSet();
-            // TODO: refer to the Command._ParameterSetName for a param set name
 
             if (obj != null)
             {
@@ -79,7 +82,7 @@ namespace System.Management.Automation
                     }
                     else
                     {
-                        paramInfo = paramSetInfo.GetParameterByName(parameter.Name);
+                        paramInfo = paramSetInfo.LookupParameter(parameter.Name);
 
                         if (paramInfo != null)
                         {
@@ -91,6 +94,11 @@ namespace System.Management.Automation
                             }
                             else
                                 BindArgument(paramInfo.Name, parameter.Value, paramInfo.ParameterType);
+                        }
+                        else
+                        {
+                            //TODO: Throw ParameterBindingException when implemented
+                            throw(new Exception("No parameter found matching '" + parameter.Name + "'"));
                         }
                     }
                 }
@@ -155,18 +163,25 @@ namespace System.Management.Automation
 
             else
             {
-                SetValue(memberInfo, Command, value);
+                SetValue(memberInfo, Command, value is PSObject ? ((PSObject)value).BaseObject : value);
             }
         }
 
         public static void SetValue(MemberInfo info, object targetObject, object value)
         {
             if (info.MemberType == MemberTypes.Field)
-                ((FieldInfo)info).SetValue(targetObject, value);
+            {
+                FieldInfo fieldInfo = info as FieldInfo;
+                fieldInfo.SetValue(targetObject, value);
+            }
+
             else if (info.MemberType == MemberTypes.Property)
-                ((PropertyInfo)info).SetValue(targetObject, value, null);
-            else
-                throw new Exception("SetValue only implemented for fields and properties");
+            {
+                PropertyInfo propertyInfo = info as PropertyInfo;
+                propertyInfo.SetValue(targetObject, value, null);
+            }
+
+            else throw new Exception("SetValue only implemented for fields and properties");
         }
 
         internal override void Initialize()
