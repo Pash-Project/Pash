@@ -263,7 +263,7 @@ namespace Pash.Implementation
             foreach (var drive in fileSystemProvider.Drives)
             {
                 Path currentDir = System.Environment.CurrentDirectory;
-                if (drive.Name == currentDir.GetDrive())
+                if (string.Equals(drive.Name, currentDir.GetDrive(), StringComparison.OrdinalIgnoreCase))
                 {
                     drive.CurrentLocation = currentDir;
                     _currentDrive = drive;
