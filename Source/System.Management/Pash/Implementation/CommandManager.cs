@@ -2,17 +2,15 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Management.Automation.Provider;
-using System.Reflection;
-using System.Management.Automation.Runspaces;
-using System.Management.Automation;
-using Pash.Implementation;
-using Pash.ParserIntrinsics;
-using Irony.Parsing;
 using System.IO;
+using System.Linq;
+using System.Management.Automation;
 using System.Management.Automation.Language;
+using System.Management.Automation.Provider;
+using System.Management.Automation.Runspaces;
+using System.Reflection;
 using Extensions.Enumerable;
+using Pash.ParserIntrinsics;
 
 namespace Pash.Implementation
 {
@@ -310,24 +308,20 @@ namespace Pash.Implementation
         /// <summary>
         /// Searches for the executable through system-wide directories.
         /// </summary>
-        /// <param name="path">Relative path to the executable (with extension optionally omitted).</param>
+        /// <param name="fileName">
+        /// Absolute path to the executable (with extension optionally omitted). May be also from the PATH environment variable.
+        /// </param>
         /// <returns>Absolute path to the executable file.</returns>
         private static string ResolveAbsolutePath(string fileName)
         {
-            // TODO: The following is Windows-specific. Change it for Unix-based OS.
             var systemPath = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
-            var directories = systemPath.Split(new[]
-            {
-                ';'
-            }, StringSplitOptions.RemoveEmptyEntries);
+            var directories = SplitPaths(systemPath);
 
+            // TODO: The following is Windows-specific. Change it for Unix-based OS.
             var pathExt = Environment.GetEnvironmentVariable("PATHEXT") ?? string.Empty;
-            var extensions = new[] { ".ps1" }.Concat(pathExt.Split(new[]
-            {
-                ';'
-            }, StringSplitOptions.RemoveEmptyEntries)); // TODO: Clarify the priority of the .ps1 extension.
+            var extensions = new[] { ".ps1" }.Concat(SplitPaths(pathExt)).ToList(); // TODO: Clarify the priority of the .ps1 extension.
 
-            if (extensions.Contains(Path.GetExtension(fileName)))
+            if (extensions.Contains(Path.GetExtension(fileName), StringComparer.OrdinalIgnoreCase))
             {
                 // If file extension means to be executable, try to search it without an extension:
                 var path = directories.Select(directory => Path.Combine(directory, fileName)).FirstOrDefault(File.Exists);
@@ -344,6 +338,19 @@ namespace Pash.Implementation
                 .FirstOrDefault(File.Exists);
 
             return finalPath;
+        }
+
+        /// <summary>
+        /// Splits the combined path string using the <see cref="Path.PathSeparator"/> character.
+        /// </summary>
+        /// <param name="pathString">Path string.</param>
+        /// <returns>Paths.</returns>
+        private static string[] SplitPaths(string pathString)
+        {
+            return pathString.Split(new[]
+            {
+                Path.PathSeparator
+            }, StringSplitOptions.RemoveEmptyEntries);
         }
     }
 }
