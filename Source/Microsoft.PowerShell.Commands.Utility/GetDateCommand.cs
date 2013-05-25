@@ -10,7 +10,7 @@ namespace Microsoft.PowerShell.Commands
     ///   Get-Date
     /// 
     /// DESCRIPTION
-    ///   Retrevies the current date and time and contains other date and time related functionality.
+    ///   Retrieves the current date and time and contains other date and time related functionality.
     ///   
     /// RELATED POSIX COMMANDS
     ///   date 
