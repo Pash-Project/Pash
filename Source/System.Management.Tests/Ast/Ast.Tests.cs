@@ -189,9 +189,17 @@ ls
         public class VariableExpressionAstTests
         {
             [Test]
-            public void Simple()
+            [TestCase("x", "Latin")]
+            [TestCase("Ⴉ", "Category Lu")]
+            [TestCase("ζ", "Category Ll")]
+            [TestCase("ᾮ", "Category Lt")]
+            [TestCase("ʱ", "Category Lm")]
+            [TestCase("מ", "Category Lo")]
+            [TestCase("1", "Category Nd, arabic numeral")]
+            [TestCase("७", "Category Nd, other Unicode numeral")]
+            public void Simple(string variableName, string message)
             {
-                VariableExpressionAst variableExpressionAst = ParseInput("$x").
+                VariableExpressionAst variableExpressionAst = ParseInput("$" + variableName).
                     EndBlock.
                     Statements[0].
                     PipelineElements[0]
@@ -202,33 +210,7 @@ ls
 
                 var variablePath = variableExpressionAst.VariablePath;
 
-                Assert.AreEqual("x", variablePath.UserPath);
-                Assert.False(variablePath.IsGlobal);
-                Assert.False(variablePath.IsLocal);
-                Assert.False(variablePath.IsPrivate);
-                Assert.False(variablePath.IsScript);
-                Assert.True(variablePath.IsUnqualified);
-                Assert.True(variablePath.IsUnscopedVariable);
-                Assert.True(variablePath.IsVariable);
-                Assert.False(variablePath.IsDriveQualified);
-                Assert.IsNull(variablePath.DriveName);
-            }
-
-            [Test]
-            public void SimpleUnicode()
-            {
-                VariableExpressionAst variableExpressionAst = ParseInput("$λ").
-                    EndBlock.
-                    Statements[0].
-                    PipelineElements[0]
-                    .Expression;
-
-                Assert.False(variableExpressionAst.Splatted);
-                Assert.AreEqual(typeof(object), variableExpressionAst.StaticType);
-
-                var variablePath = variableExpressionAst.VariablePath;
-
-                Assert.AreEqual("λ", variablePath.UserPath);
+                Assert.AreEqual(variableName, variablePath.UserPath, message);
                 Assert.False(variablePath.IsGlobal);
                 Assert.False(variablePath.IsLocal);
                 Assert.False(variablePath.IsPrivate);
