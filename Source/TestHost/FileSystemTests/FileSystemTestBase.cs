@@ -90,7 +90,14 @@ namespace TestHost.FileSystemTests
         /// <returns>Test environment root path.</returns>
         protected string SetupExecutableWithResult(string fileName, string result)
         {
-            var root = SetupFileSystemWithStructure(Enumerable.Empty<string>());
+            var directory = System.IO.Path.GetDirectoryName(fileName);
+            var subPath = string.IsNullOrEmpty(directory)
+                ? Enumerable.Empty<string>()
+                : new[]
+                {
+                    System.IO.Path.DirectorySeparatorChar + directory + System.IO.Path.DirectorySeparatorChar
+                };
+            var root = SetupFileSystemWithStructure(subPath);
             var filePath = System.IO.Path.Combine(root, fileName);
             File.WriteAllText(filePath, string.Format(@"
 @echo off
