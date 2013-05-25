@@ -24,7 +24,6 @@ namespace Pash.Implementation
 
         internal override void Initialize()
         {
-            // TODO: If command was called not as part of another expression then we don't need to redirect input and output.
             _process = StartProcess();
         }
 
@@ -42,6 +41,13 @@ namespace Pash.Implementation
             // Release GUI programs immediately.
             if (ProcessHasGui())
             {
+                return;
+            }
+
+            if (!ExecutionContext.WriteSideEffectsToPipeline)
+            {
+                // TODO: Ctrl-C cancellation?
+                _process.WaitForExit();
                 return;
             }
 
@@ -83,7 +89,7 @@ namespace Pash.Implementation
             {
                 Arguments = PrepareArguments(),
                 UseShellExecute = false,
-                RedirectStandardOutput = true
+                RedirectStandardOutput = ExecutionContext.WriteSideEffectsToPipeline
             };
 
             var process = new Process
@@ -134,7 +140,7 @@ namespace Pash.Implementation
             }
             catch (InvalidOperationException)
             {
-                // WaitForInputIdle throws this exception if a process haven't GUI.
+                // WaitForInputIdle throws this exception if a process have no GUI.
                 hasGui = false;
             }
 
