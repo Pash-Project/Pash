@@ -8,17 +8,18 @@ namespace TestHost.FileSystemTests
     class ShellExecutionTest : FileSystemTestBase
     {
         [Test]
+        [Platform("Win")]
         [TestCase("file.bat", "123")]
         public void FileShouldBeExecutedByAbsolutePath(string executableName, string executableResult)
         {
             var root = SetupExecutableWithResult(executableName, executableResult);
             var absolutePath = Path.Combine(Path.GetFullPath(root), executableName);
 
-            var result = TestHost.ExecuteWithZeroErrors(absolutePath);
-            result.Trim().ShouldEqual(executableResult);
+            CatchCommandResult(absolutePath).Trim().ShouldEqual(executableResult);
         }
 
         [Test]
+        [Platform("Win")]
         [TestCase("file.bat", "123", @".\file.bat", Ignore = true, IgnoreReason = "Ignored because of bug in command parser.")]
         [TestCase(@"directory\file.bat", "123", @"directory\file.bat")]
         [TestCase(@"directory\file.bat", "123", @"directory\file.bat 127.0.0.1", Ignore = true, IgnoreReason = "Ignored because of bug in argument parser.")]
@@ -27,11 +28,11 @@ namespace TestHost.FileSystemTests
             var root = SetupExecutableWithResult(executableName, executableResult);
             Environment.CurrentDirectory = root;
             
-            var result = TestHost.ExecuteWithZeroErrors(command);
-            result.Trim().ShouldEqual(executableResult);
+            CatchCommandResult(command).Trim().ShouldEqual(executableResult);
         }
 
         [Test]
+        [Platform("Win")]
         [TestCase("file.bat", "123", "file.bat")]
         [TestCase("file.bat", "123", "file")]
         public void FileShouldBeExecutedFromSystemPath(string executableName, string executableResult, string command)
@@ -40,8 +41,18 @@ namespace TestHost.FileSystemTests
             var path = String.Format("{0}{1}{2}", root, Path.PathSeparator, Environment.GetEnvironmentVariable("PATH"));
             Environment.SetEnvironmentVariable("PATH", path);
 
-            var result = TestHost.ExecuteWithZeroErrors(command);
-            result.Trim().ShouldEqual(executableResult);
+            CatchCommandResult(command).Trim().ShouldEqual(executableResult);
+        }
+
+        /// <summary>
+        /// Catches the executable result and echoes it to the output.
+        /// </summary>
+        /// <param name="command">Execution command.</param>
+        /// <returns>Executed command result.</returns>
+        private static string CatchCommandResult(string command)
+        {
+            var result = TestHost.ExecuteWithZeroErrors(string.Format("$result = ({0})", command), "$result");
+            return result;
         }
     }
 }
