@@ -2,17 +2,15 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Management.Automation.Provider;
-using System.Reflection;
-using System.Management.Automation.Runspaces;
-using System.Management.Automation;
-using Pash.Implementation;
-using Pash.ParserIntrinsics;
-using Irony.Parsing;
 using System.IO;
+using System.Linq;
+using System.Management.Automation;
 using System.Management.Automation.Language;
+using System.Management.Automation.Provider;
+using System.Management.Automation.Runspaces;
+using System.Reflection;
 using Extensions.Enumerable;
+using Pash.ParserIntrinsics;
 
 namespace Pash.Implementation
 {
@@ -168,16 +166,23 @@ namespace Pash.Implementation
                         if (commandAst.CommandElements.Count == 1 && commandAst.CommandElements.Single() is StringConstantExpressionAst)
                         {
                             var stringAst = commandAst.CommandElements.Single() as StringConstantExpressionAst;
-
-                            if (File.Exists(stringAst.Value) && Path.GetExtension(stringAst.Value) == ".ps1")
-                            {
-                                // I think we should be using a ScriptFile parser, but this will do for now.
-                                commandInfo = new ScriptInfo(stringAst.Value, new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(File.ReadAllText(stringAst.Value))));
-                            }
-
-                            else
+                            var path = ResolveExecutablePath(stringAst.Value);
+                            if (path == null)
                             {
                                 throw new Exception(string.Format("Command '{0}' not found.", cmdName));
+                            }
+
+                            if (Path.GetExtension(path) == ".ps1")
+                            {
+                                // I think we should be using a ScriptFile parser, but this will do for now.
+                                commandInfo = new ScriptInfo(path, new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(File.ReadAllText(path))));
+                            }
+                            else
+                            {
+                                var commandName = Path.GetFileName(path);
+                                var extension = Path.GetExtension(path);
+
+                                commandInfo = new ApplicationInfo(commandName, path, extension);
                             }
                         }
                     }
@@ -191,6 +196,9 @@ namespace Pash.Implementation
             {
                 switch (commandInfo.CommandType)
                 {
+                    case CommandTypes.Application:
+                        return new ApplicationProcessor((ApplicationInfo)commandInfo);
+
                     case CommandTypes.Cmdlet:
                         return new CommandProcessor(commandInfo as CmdletInfo);
 
@@ -273,6 +281,76 @@ namespace Pash.Implementation
         {
             this._scripts[functionInfo.Name] = functionInfo;
         }
-    }
 
+        /// <summary>
+        /// Resolves the path to the executable file.
+        /// </summary>
+        /// <param name="path">Relative path to the executable (with extension optionally omitted).</param>
+        /// <returns>Absolute path to the executable file.</returns>
+        private static string ResolveExecutablePath(string path)
+        {
+            // TODO: Forbid to run executables and scripts from the current directory without a leading slash.
+            // For example, if current directory contains a 'file.exe' file, a command 'file.exe' should not
+            // execute, but './file.exe' should.
+            if (File.Exists(path))
+            {
+                return Path.GetFullPath(path);
+            }
+
+            // TODO: If not, then try to search the relative path with known extensions.
+
+            // TODO: If path contains path separator (i.e. it pretends to be relative) and relative path not found, then
+            // give up.
+
+            return ResolveAbsolutePath(path);
+        }
+
+        /// <summary>
+        /// Searches for the executable through system-wide directories.
+        /// </summary>
+        /// <param name="fileName">
+        /// Absolute path to the executable (with extension optionally omitted). May be also from the PATH environment variable.
+        /// </param>
+        /// <returns>Absolute path to the executable file.</returns>
+        private static string ResolveAbsolutePath(string fileName)
+        {
+            var systemPath = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+            var directories = SplitPaths(systemPath);
+
+            // TODO: The following is Windows-specific. Change it for Unix-based OS.
+            var pathExt = Environment.GetEnvironmentVariable("PATHEXT") ?? string.Empty;
+            var extensions = new[] { ".ps1" }.Concat(SplitPaths(pathExt)).ToList(); // TODO: Clarify the priority of the .ps1 extension.
+
+            if (extensions.Contains(Path.GetExtension(fileName), StringComparer.OrdinalIgnoreCase))
+            {
+                // If file extension means to be executable, try to search it without an extension:
+                var path = directories.Select(directory => Path.Combine(directory, fileName)).FirstOrDefault(File.Exists);
+                if (path != null)
+                {
+                    return path;
+                }
+            }
+
+            // Now search for file with an extensions:
+            var finalPath = extensions.Select(extension => fileName + extension)
+                .SelectMany(
+                    fileNameWithExtension => directories.Select(directory => Path.Combine(directory, fileNameWithExtension)))
+                .FirstOrDefault(File.Exists);
+
+            return finalPath;
+        }
+
+        /// <summary>
+        /// Splits the combined path string using the <see cref="Path.PathSeparator"/> character.
+        /// </summary>
+        /// <param name="pathString">Path string.</param>
+        /// <returns>Paths.</returns>
+        private static string[] SplitPaths(string pathString)
+        {
+            return pathString.Split(new[]
+            {
+                Path.PathSeparator
+            }, StringSplitOptions.RemoveEmptyEntries);
+        }
+    }
 }

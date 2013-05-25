@@ -1,20 +1,31 @@
 // Copyright (C) Pash Contributors. License GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
-using System.Management;
+using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
+using Path = System.Management.Path;
 
 namespace TestHost.FileSystemTests
 {
     public class FileSystemTestBase
     {
         List<Path> _pathsCreated = new List<Path>();
+        private readonly List<Path> _filesCreated = new List<Path>();
 
         [TearDown]
         public void CleanupTempFiles()
         {
             try
             {
+                foreach (var fileName in _filesCreated)
+                {
+                    if (File.Exists(fileName))
+                    {
+                        File.Delete(fileName);
+                    }
+                }
+
                 foreach (var path in _pathsCreated)
                 {
                     if (System.IO.Directory.Exists(path))
@@ -69,6 +80,32 @@ namespace TestHost.FileSystemTests
             }
 
             return rootPath;
+        }
+
+        /// <summary>
+        /// Set up the executable file with specified name. When invoked, it will echo the specified result string.
+        /// </summary>
+        /// <param name="fileName">Executable file name relative to test environment root.</param>
+        /// <param name="result">Result string.</param>
+        /// <returns>Test environment root path.</returns>
+        protected string SetupExecutableWithResult(string fileName, string result)
+        {
+            var directory = System.IO.Path.GetDirectoryName(fileName);
+            var subPath = string.IsNullOrEmpty(directory)
+                ? Enumerable.Empty<string>()
+                : new[]
+                {
+                    System.IO.Path.DirectorySeparatorChar + directory + System.IO.Path.DirectorySeparatorChar
+                };
+            var root = SetupFileSystemWithStructure(subPath);
+            var filePath = System.IO.Path.Combine(root, fileName);
+            File.WriteAllText(filePath, string.Format(@"
+@echo off
+echo {0}
+", result));
+            // TODO: make executable for Linux
+            _filesCreated.Add(filePath);
+            return root;
         }
     }
 }
