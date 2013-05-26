@@ -189,33 +189,44 @@ namespace System.Management.Pash.Implementation
         {
             if (commandAst.InvocationOperator == TokenKind.Dot) throw new NotImplementedException(commandAst.ToString());
 
-            Pipeline pipeline = this._context.CurrentRunspace.CreateNestedPipeline();
-
-            pipeline.Input.Write(this._context.inputStreamReader.ReadToEnd(), true);
-
-            var command = GetCommand(commandAst);
-
-            commandAst.CommandElements
-                // the first CommandElements is the command itself. The rest are parameters/arguments
-                .Skip(1)
-                .Select(ConvertCommandElementToCommandParameter)
-                .ForEach(command.Parameters.Add);
-
-            pipeline.Commands.Add(command);
-
-            this._context.PushPipeline(pipeline);
+            // Pipeline uses global execution context, so we should set its WriteSideEffects flag, and restore it to previous value after.
+            var pipeLineContext = _context.CurrentRunspace.ExecutionContext;
+            bool writeSideEffects = pipeLineContext.WriteSideEffectsToPipeline;
             try
             {
-                // TODO: develop a rational model for null/singleton/collection
-                var result = pipeline.Invoke();
-                if (result.Any())
+                pipeLineContext.WriteSideEffectsToPipeline = _writeSideEffectsToPipeline;
+                var pipeline = _context.CurrentRunspace.CreateNestedPipeline();
+
+                pipeline.Input.Write(_context.inputStreamReader.ReadToEnd(), true);
+
+                var command = GetCommand(commandAst);
+
+                commandAst.CommandElements
+                    // the first CommandElements is the command itself. The rest are parameters/arguments
+                    .Skip(1)
+                    .Select(ConvertCommandElementToCommandParameter)
+                    .ForEach(command.Parameters.Add);
+
+                pipeline.Commands.Add(command);
+
+                _context.PushPipeline(pipeline);
+                try
                 {
-                    this._pipelineCommandRuntime.WriteObject(result, true);
+                    // TODO: develop a rational model for null/singleton/collection
+                    var result = pipeline.Invoke();
+                    if (result.Any())
+                    {
+                        _pipelineCommandRuntime.WriteObject(result, true);
+                    }
+                }
+                finally
+                {
+                    _context.PopPipeline();
                 }
             }
             finally
             {
-                this._context.PopPipeline();
+                pipeLineContext.WriteSideEffectsToPipeline = writeSideEffects;
             }
 
             return AstVisitAction.SkipChildren;

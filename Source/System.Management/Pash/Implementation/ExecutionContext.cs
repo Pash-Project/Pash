@@ -1,10 +1,9 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Collections.Generic;
-using System.Management.Automation.Host;
-using System.Text;
-using System.Management.Automation.Runspaces;
 using System.Management.Automation;
+using System.Management.Automation.Host;
+using System.Management.Automation.Runspaces;
 
 namespace Pash.Implementation
 {
@@ -42,12 +41,15 @@ namespace Pash.Implementation
 
         public ExecutionContext Clone()
         {
-            ExecutionContext context = new ExecutionContext();
-            context.inputStreamReader = inputStreamReader;
-            context.outputStreamWriter = outputStreamWriter;
-            context.errorStreamWriter = errorStreamWriter;
-            context.CurrentRunspace = CurrentRunspace;
-            context.LocalHost = this.LocalHost;
+            var context = new ExecutionContext
+            {
+                inputStreamReader = inputStreamReader,
+                outputStreamWriter = outputStreamWriter,
+                errorStreamWriter = errorStreamWriter,
+                CurrentRunspace = CurrentRunspace,
+                LocalHost = LocalHost,
+                WriteSideEffectsToPipeline = WriteSideEffectsToPipeline
+            };
 
             // TODO: copy (not reference) all the variables to allow nested context
 
@@ -104,5 +106,7 @@ namespace Pash.Implementation
 
             this.SessionState.PSVariable.Set(name, value);
         }
+
+        internal bool WriteSideEffectsToPipeline { get; set; }
     }
 }
