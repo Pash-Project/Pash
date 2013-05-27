@@ -421,13 +421,94 @@ ls
         }
 
         [Test]
-        public void HashTable2()
+        [TestCase("@{ a = b ; c = d }", "Key-Value pairs separated by semicolon")]
+        [TestCase("@{ a = b \n c = d }", "Key-Value pairs separated by line break")]
+        public void HashTable2(string input, string message)
         {
-            HashtableAst hashtableAst = ParseStatement("@{ a = b ; c = d }")
+            // hash-entry:
+            //     key-expression = new-lines_opt statement
+            // statement-terminator:
+            //     ;
+            //     new-line-character
+
+            HashtableAst hashtableAst = ParseStatement(input)
                     .PipelineElements[0]
                     .Expression;
 
-            Assert.AreEqual(2, hashtableAst.KeyValuePairs.Count);
+            Assert.AreEqual(2, hashtableAst.KeyValuePairs.Count, message);
+        }
+
+        [Test, Explicit]
+        [TestCase("@{\n\n}", 0)]
+        [TestCase("@{\r\n}", 0)]
+        [TestCase("@{\r\r}", 0)]
+        [TestCase("@{\na = b}", 1)]
+        [TestCase("@{\ra = b}", 1)]
+        [TestCase("@{\r\na = b}", 1)]
+        [TestCase("@{a = b\n}", 1)]
+        [TestCase("@{a = b\r}", 1)]
+        [TestCase("@{a = b\r\n}", 1)]
+        [TestCase("@{\na = b\n}", 1)]
+        [TestCase("@{\ra = b\n}", 1)]
+        [TestCase("@{\na = b\r}", 1)]
+        [TestCase("@{\r\na = b\n}", 1)]
+        [TestCase("@{\na = b\r\n}", 1)]
+        [TestCase("@{\na = b\nb = c}", 2)]
+        [TestCase("@{a = b\nb = c\n}", 2)]
+        public void HashTableAcceptsLeadingAndTrailingLineBreaks(string input, int expectedCount)
+        {
+            // hash-literal-expression:
+            //     @{ new-lines_opt hash-literal-body_opt new-lines_opt }            
+
+            HashtableAst hashtableAst = ParseStatement(input)
+                    .PipelineElements[0]
+                    .Expression;
+
+            Assert.AreEqual(expectedCount, hashtableAst.KeyValuePairs.Count);
+        }
+
+        [Test]
+        [TestCase("@{a=\nb}")]
+        [TestCase("@{a=\rb}")]
+        [TestCase("@{a=\r\nb}")]
+        [TestCase("@{a=\n\nb}")]
+        [TestCase("@{a=\r\rb}")]
+        [TestCase("@{a=\r\n\r\nb}")]
+        public void HashTableAcceptsLineBreaksAfterEquals(string input)
+        {
+            // hash-entry:
+            //     key-expression = new-lines_opt statement
+
+            HashtableAst hashtableAst = ParseStatement(input)
+                    .PipelineElements[0]
+                    .Expression;
+
+            Assert.AreEqual(1, hashtableAst.KeyValuePairs.Count);
+        }
+
+        [Test, Explicit]
+        [TestCase("@{a = b ; ; ; }", 1)]
+        [TestCase("@{a = b ; \n ; }", 1)]
+        [TestCase("@{a = b ; \r\n ; }", 1)]
+        [TestCase("@{a = b ; ; ; \r\n ; ; ; }", 1)]
+        [TestCase("@{a = b ; ; ; b = c}", 2)]
+        [TestCase("@{a = b ;\r\n b = c}", 2)]
+        [TestCase("@{a = b ;\n b = c}", 2)]
+        [TestCase("@{a = b ;\r\n ; ; b = c}", 2)]
+        public void HashTableAcceptsMultipleStatementTerminators(string input, int expectedCount)
+        {
+            // statement-terminators:
+            //     statement-terminator
+            //     statement-terminators statement-terminator
+            // statement-terminator:
+            //     ;
+            //     new-line-character
+
+            HashtableAst hashtableAst = ParseStatement(input)
+                    .PipelineElements[0]
+                    .Expression;
+
+            Assert.AreEqual(expectedCount, hashtableAst.KeyValuePairs.Count);
         }
 
         [Test]
