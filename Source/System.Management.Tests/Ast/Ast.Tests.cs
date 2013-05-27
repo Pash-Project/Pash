@@ -189,9 +189,17 @@ ls
         public class VariableExpressionAstTests
         {
             [Test]
-            public void Simple()
+            [TestCase("x", "Latin")]
+            [TestCase("Ⴉ", "Category Lu")]
+            [TestCase("ζ", "Category Ll")]
+            [TestCase("ᾮ", "Category Lt")]
+            [TestCase("ʱ", "Category Lm")]
+            [TestCase("מ", "Category Lo")]
+            [TestCase("1", "Category Nd, arabic numeral")]
+            [TestCase("७", "Category Nd, other Unicode numeral")]
+            public void Simple(string variableName, string message)
             {
-                VariableExpressionAst variableExpressionAst = ParseInput("$x").
+                VariableExpressionAst variableExpressionAst = ParseInput("$" + variableName).
                     EndBlock.
                     Statements[0].
                     PipelineElements[0]
@@ -202,7 +210,7 @@ ls
 
                 var variablePath = variableExpressionAst.VariablePath;
 
-                Assert.AreEqual("x", variablePath.UserPath);
+                Assert.AreEqual(variableName, variablePath.UserPath, message);
                 Assert.False(variablePath.IsGlobal);
                 Assert.False(variablePath.IsLocal);
                 Assert.False(variablePath.IsPrivate);
@@ -300,6 +308,138 @@ ls
                 Assert.True(variablePath.IsVariable);
                 Assert.False(variablePath.IsDriveQualified);
                 Assert.IsNull(variablePath.DriveName);
+            }
+
+            [Test, Explicit]
+            public void Caret()
+            {
+                VariablePath variablePath = ParseInput("$^").
+                    EndBlock.
+                    Statements[0].
+                    PipelineElements[0]
+                    .Expression
+                    .VariablePath;
+
+                Assert.AreEqual("^", variablePath.UserPath);
+                Assert.False(variablePath.IsGlobal);
+                Assert.False(variablePath.IsLocal);
+                Assert.False(variablePath.IsPrivate);
+                Assert.False(variablePath.IsScript);
+                Assert.True(variablePath.IsUnqualified);
+                Assert.True(variablePath.IsUnscopedVariable);
+                Assert.True(variablePath.IsVariable);
+                Assert.False(variablePath.IsDriveQualified);
+                Assert.IsNull(variablePath.DriveName);
+            }
+
+            [Test, Explicit]
+            public void QuestionMark()
+            {
+                VariablePath variablePath = ParseInput("$?").
+                    EndBlock.
+                    Statements[0].
+                    PipelineElements[0]
+                    .Expression
+                    .VariablePath;
+
+                Assert.AreEqual("?", variablePath.UserPath);
+                Assert.False(variablePath.IsGlobal);
+                Assert.False(variablePath.IsLocal);
+                Assert.False(variablePath.IsPrivate);
+                Assert.False(variablePath.IsScript);
+                Assert.True(variablePath.IsUnqualified);
+                Assert.True(variablePath.IsUnscopedVariable);
+                Assert.True(variablePath.IsVariable);
+                Assert.False(variablePath.IsDriveQualified);
+                Assert.IsNull(variablePath.DriveName);
+            }
+
+            [Test]
+            public void Underscore()
+            {
+                VariablePath variablePath = ParseInput("$_").
+                    EndBlock.
+                    Statements[0].
+                    PipelineElements[0]
+                    .Expression
+                    .VariablePath;
+
+                Assert.AreEqual("_", variablePath.UserPath);
+                Assert.False(variablePath.IsGlobal);
+                Assert.False(variablePath.IsLocal);
+                Assert.False(variablePath.IsPrivate);
+                Assert.False(variablePath.IsScript);
+                Assert.True(variablePath.IsUnqualified);
+                Assert.True(variablePath.IsUnscopedVariable);
+                Assert.True(variablePath.IsVariable);
+                Assert.False(variablePath.IsDriveQualified);
+                Assert.IsNull(variablePath.DriveName);
+            }
+
+            [Test, Explicit]
+            public void BracedVariableSimple()
+            {
+                VariablePath variablePath = ParseInput("${a}").
+                    EndBlock.
+                    Statements[0].
+                    PipelineElements[0]
+                    .Expression
+                    .VariablePath;
+
+                Assert.AreEqual("a", variablePath.UserPath);
+                Assert.False(variablePath.IsGlobal);
+                Assert.False(variablePath.IsLocal);
+                Assert.False(variablePath.IsPrivate);
+                Assert.False(variablePath.IsScript);
+                Assert.True(variablePath.IsUnqualified);
+                Assert.True(variablePath.IsUnscopedVariable);
+                Assert.True(variablePath.IsVariable);
+                Assert.False(variablePath.IsDriveQualified);
+                Assert.IsNull(variablePath.DriveName);
+            }
+
+            [Test, Explicit]
+            public void BracedVariableArbitraryUnicode()
+            {
+                VariablePath variablePath = ParseInput("${➠▦⍥}").
+                    EndBlock.
+                    Statements[0].
+                    PipelineElements[0]
+                    .Expression
+                    .VariablePath;
+
+                Assert.AreEqual("➠▦⍥", variablePath.UserPath);
+                Assert.False(variablePath.IsGlobal);
+                Assert.False(variablePath.IsLocal);
+                Assert.False(variablePath.IsPrivate);
+                Assert.False(variablePath.IsScript);
+                Assert.True(variablePath.IsUnqualified);
+                Assert.True(variablePath.IsUnscopedVariable);
+                Assert.True(variablePath.IsVariable);
+                Assert.False(variablePath.IsDriveQualified);
+                Assert.IsNull(variablePath.DriveName);
+            }
+
+            [Test, Explicit]
+            public void BracedVariablePath()
+            {
+                VariablePath variablePath = ParseInput(@"${E:\File.txt}").
+                    EndBlock.
+                    Statements[0].
+                    PipelineElements[0]
+                    .Expression
+                    .VariablePath;
+
+                Assert.AreEqual(@"E:\File.txt", variablePath.UserPath);
+                Assert.False(variablePath.IsGlobal);
+                Assert.False(variablePath.IsLocal);
+                Assert.False(variablePath.IsPrivate);
+                Assert.False(variablePath.IsScript);
+                Assert.True(variablePath.IsUnqualified);
+                Assert.True(variablePath.IsUnscopedVariable);
+                Assert.False(variablePath.IsVariable);
+                Assert.True(variablePath.IsDriveQualified);
+                Assert.AreEqual("E:", variablePath.DriveName);
             }
         }
 
