@@ -53,6 +53,14 @@ namespace TestHost
         }
 
         [Test]
+        public void ParametersBySingleCharacterPrefix()
+        {
+            Assert.DoesNotThrow(delegate() {
+                TestHost.Execute("Start-Sleep -S 0");
+            });
+        }
+
+        [Test]
         [ExpectedException]
         public void ParametersInvalid()
         {
