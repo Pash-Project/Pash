@@ -18,6 +18,7 @@ namespace Pash
 
             var parser = new CommandLine.Parser(settings => {
                 settings.HelpWriter = null;
+                settings.CaseSensitive = false;
             });
             if (parser.ParseArguments(args, options))
             {
