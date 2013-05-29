@@ -41,7 +41,8 @@ namespace Microsoft.PowerShell.Commands
         /// <summary>
         /// Return a process that has the given ID.
         /// </summary>
-        [Parameter(
+        [Alias(new string[] { "PID" }),
+        Parameter(
             ParameterSetName = "Id",
             Mandatory = true,
             ValueFromPipelineByPropertyName = true)]
