@@ -433,6 +433,7 @@
     <Compile Include="Pash\Implementation\LocalPipeline.cs" />
     <Compile Include="Pash\Implementation\LocalRunspace.cs" />
     <Compile Include="Pash\Implementation\LocalRunspaceConfiguration.cs" />
+    <Compile Include="Pash\Implementation\Native\Shell32.cs" />
     <Compile Include="Pash\Implementation\ObjectPipelineReader.cs" />
     <Compile Include="Pash\Implementation\ObjectStream.cs" />
     <Compile Include="Pash\Implementation\ObjectStreamWriter.cs" />

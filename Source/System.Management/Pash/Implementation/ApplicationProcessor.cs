@@ -2,7 +2,9 @@
 using System;
 using System.Diagnostics;
 using System.Management.Automation;
+using System.Runtime.InteropServices;
 using System.Text;
+using Pash.Implementation.Native;
 
 namespace Pash.Implementation
 {
@@ -12,6 +14,7 @@ namespace Pash.Implementation
     internal class ApplicationProcessor : CommandProcessorBase
     {
         private Process _process;
+        private bool _shouldBlock;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Pash.Implementation.ApplicationProcessor"/> class.
@@ -24,6 +27,7 @@ namespace Pash.Implementation
 
         internal override void Initialize()
         {
+            _shouldBlock = ShouldBlock();
             _process = StartProcess();
         }
 
@@ -38,8 +42,7 @@ namespace Pash.Implementation
 
         internal override void ProcessRecord()
         {
-            // Release GUI programs immediately.
-            if (ProcessHasGui())
+            if (!_shouldBlock)
             {
                 return;
             }
@@ -128,23 +131,37 @@ namespace Pash.Implementation
         }
 
         /// <summary>
-        /// Checks if process represents a graphical application.
+        /// Checks if thread should be blocked by the process execution.
         /// </summary>
-        /// <returns><c>true</c>, if a process represents a graphical application, <c>false</c> otherwise.</returns>
-        private bool ProcessHasGui()
+        /// <returns><c>true</c>, if current thread should be blocked, <c>false</c> otherwise.</returns>
+        /// <remarks>
+        /// In Windows environment, only application with console subsystem should block execution. In Unix, any
+        /// application is effectively "console", so any application blocks.
+        /// </remarks>
+        private bool ShouldBlock()
         {
-            bool hasGui;
-            try
-            {
-                hasGui = _process.WaitForInputIdle();
-            }
-            catch (InvalidOperationException)
-            {
-                // WaitForInputIdle throws this exception if a process have no GUI.
-                hasGui = false;
-            }
+            return Environment.OSVersion.Platform == PlatformID.Win32NT && IsConsoleSubsystem(ApplicationInfo.Path);
+        }
 
-            return hasGui;
+        /// <summary>
+        /// Checks if the Windows executable is a console application.
+        /// </summary>
+        /// <param name="path">Full path to file.</param>
+        /// <returns><c>true</c> if application uses console subsystem.</returns>
+        private static bool IsConsoleSubsystem(string path)
+        {
+            const int MZ = 'M' << 8 + 'Z';
+            const int PE = 'P' << 8 + 'E';
+
+            var info = new Shell32.SHFILEINFO();
+            switch ((uint)Shell32.SHGetFileInfo(path, 0u, ref info, (uint)Marshal.SizeOf(info), Shell32.SHGFI_EXETYPE))
+            {
+                case MZ:
+                case PE:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }
