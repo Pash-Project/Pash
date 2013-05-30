@@ -18,3 +18,4 @@ Friedrich von Never        | [@ForNeVeR](http://github.com/ForNeVeR)            
 Jonathan Ben-Joseph        |                                                        | <jbenjos@gmail.com>           | Mono Summer of Code 2008
 Alistair Hughes            | [alesliehughes](https://github.com/alesliehughes)      |                               | 
 Johannes Rössel            | [@ygra](https://github.com/ygra)                       | <pash@hypftier.de>            | 
+Alexander Sturm            | [@Ventero](https://github.com/Ventero)                 | <pash@ventero.de>             | 
