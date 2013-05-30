@@ -17,7 +17,7 @@ namespace PashConsole.Tests.PashConsole
         [Platform("Mono")]
         public void TestCase(string arguments)
         {
-            System.IO.File.WriteAllText("./HelloWorld.ps1", "\"Hello World!\"");
+            System.IO.File.WriteAllText("HelloWorld.ps1", "\"Hello World!\"");
 
             PashConsoleTestHelper.ExecutePash(arguments)
                 .ShouldEqual("Hello World!" + Environment.NewLine + Environment.NewLine, "input arguments[" + arguments + "]");
