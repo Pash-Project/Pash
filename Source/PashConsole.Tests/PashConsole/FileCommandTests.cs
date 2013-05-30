@@ -12,7 +12,7 @@ namespace PashConsole.Tests.PashConsole
         [TestCase("-F HelloWorld.ps1")]
         //[TestCase("-File HelloWorld.ps1")] // NOTE: this doesn't work with the current CommandLineParser
         //[TestCase("-FILE HelloWorld.ps1")] // NOTE: this doesn't work with the current CommandLineParser
-        [TestCase("--File HelloWorld.ps1")]     // NOTE: this DOES work but the Powershell on windows doesn't support this syntax (which is strange since very other command-line out there does...)
+        [TestCase("--File HelloWorld.ps1")]     // NOTE: this DOES work but the Powershell on windows doesn't support this syntax
         [TestCase("--FILE HelloWorld.ps1")]
         [Platform("Mono")]
 		public void TestCase(string arguments)
