@@ -7,12 +7,11 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("PashConsole.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("")]
-[assembly: AssemblyCopyright("jasonjarrett")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-
+[assembly: AssemblyCompany("Pash Contributors")]
+[assembly: AssemblyProduct("Pash - https://github.com/Pash-Project/Pash/")]
+[assembly: AssemblyCopyright("Copyright © 2013 - License: GPL/BSD")]
 // The assembly version has the format "{Major}.{Minor}.{Build}.{Revision}".
 // The form "{Major}.{Minor}.*" will automatically update the build and revision,
 // and "{Major}.{Minor}.{Build}.*" will update just the revision.
