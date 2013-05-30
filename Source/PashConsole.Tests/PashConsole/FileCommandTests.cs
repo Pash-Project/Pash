@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace PashConsole.Tests.PashConsole
 {
     [TestFixture]
-	public class FileCommandTests
+    public class FileCommandTests
     {
         [Test]
         [TestCase("-f HelloWorld.ps1")]
@@ -15,12 +15,12 @@ namespace PashConsole.Tests.PashConsole
         [TestCase("--File HelloWorld.ps1")]     // NOTE: this DOES work but the Powershell on windows doesn't support this syntax
         [TestCase("--FILE HelloWorld.ps1")]
         [Platform("Mono")]
-		public void TestCase(string arguments)
+        public void TestCase(string arguments)
         {
             System.IO.File.WriteAllText("./HelloWorld.ps1", "\"Hello World!\"");
 
             PashConsoleTestHelper.ExecutePash(arguments)
-                .ShouldEqual("Hello World!" + Environment.NewLine + Environment.NewLine, "input arguments[" + arguments +"]");
+                .ShouldEqual("Hello World!" + Environment.NewLine + Environment.NewLine, "input arguments[" + arguments + "]");
         }
     }
 }

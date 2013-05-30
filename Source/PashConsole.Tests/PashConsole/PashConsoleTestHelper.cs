@@ -23,9 +23,10 @@ namespace PashConsole.Tests.PashConsole
                 // if waitFor not specified - default to 10 seconds or the process has executed.
                 if (waitFor == null)
                 {
-                    waitFor = (proccess, StringBuilder) => {
+                    waitFor = (proccess, StringBuilder) =>
+                    {
                         int i = 0;
-                        while (++i<10 && !p.HasExited)
+                        while (++i < 10 && !p.HasExited)
                         {
                             // Evil!
                             System.Threading.Thread.Sleep(1000);
