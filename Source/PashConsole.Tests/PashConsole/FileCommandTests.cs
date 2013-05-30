@@ -14,6 +14,7 @@ namespace PashConsole.Tests.PashConsole
         //[TestCase("-FILE HelloWorld.ps1")] // NOTE: this doesn't work with the current CommandLineParser
         [TestCase("--File HelloWorld.ps1")]     // NOTE: this DOES work but the Powershell on windows doesn't support this syntax (which is strange since very other command-line out there does...)
         [TestCase("--FILE HelloWorld.ps1")]
+        [Platform("Mono")]
 		public void TestCase(string arguments)
         {
             System.IO.File.WriteAllText("./HelloWorld.ps1", "\"Hello World!\"");
