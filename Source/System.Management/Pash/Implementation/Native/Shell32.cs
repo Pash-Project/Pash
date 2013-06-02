@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Pash.Implementation.Native
 {
@@ -19,6 +20,16 @@ namespace Pash.Implementation.Native
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 80)]
             public string szTypeName;
         }
+
+        /// <summary>
+        /// String constant <c>"MZ"</c>, packed into lowest word of <see cref="Int32"/>.
+        /// </summary>
+        public static readonly ushort MZ = BitConverter.ToUInt16(Encoding.ASCII.GetBytes("MZ"), 0);
+
+        /// <summary>
+        /// String constant <c>"PE"</c>, packed into lowest word of <see cref="Int16"/>.
+        /// </summary>
+        public static readonly ushort PE = BitConverter.ToUInt16(Encoding.ASCII.GetBytes("PE"), 0);
 
         [DllImport("Shell32.dll", CharSet = CharSet.Auto)]
         public static extern IntPtr SHGetFileInfo(string pszPath, uint dwFileAttributes, ref Shell32.SHFILEINFO psfi, uint cbFileInfo, uint uFlags);

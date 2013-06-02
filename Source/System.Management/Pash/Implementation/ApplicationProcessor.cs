@@ -27,7 +27,7 @@ namespace Pash.Implementation
 
         internal override void Initialize()
         {
-            _shouldBlock = ShouldBlock();
+            _shouldBlock = IsConsoleSubsystem(ApplicationInfo.Path);
             _process = StartProcess();
         }
 
@@ -131,37 +131,22 @@ namespace Pash.Implementation
         }
 
         /// <summary>
-        /// Checks if thread should be blocked by the process execution.
-        /// </summary>
-        /// <returns><c>true</c>, if current thread should be blocked, <c>false</c> otherwise.</returns>
-        /// <remarks>
-        /// In Windows environment, only application with console subsystem should block execution. In Unix, any
-        /// application is effectively "console", so any application blocks.
-        /// </remarks>
-        private bool ShouldBlock()
-        {
-            return Environment.OSVersion.Platform == PlatformID.Win32NT && IsConsoleSubsystem(ApplicationInfo.Path);
-        }
-
-        /// <summary>
-        /// Checks if the Windows executable is a console application.
+        /// Checks if the executable represents a console application.
         /// </summary>
         /// <param name="path">Full path to file.</param>
         /// <returns><c>true</c> if application uses console subsystem.</returns>
+        /// <remarks>Uses <see cref="Shell32.SHGetFileInfo"/> function under Windows (it is consistent with cmd.exe and PowerShell behavior).</remarks>
         private static bool IsConsoleSubsystem(string path)
         {
-            const int MZ = 'M' << 8 + 'Z';
-            const int PE = 'P' << 8 + 'E';
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+            {
+                // Under UNIX all applications are effectively console.
+                return true;
+            }
 
             var info = new Shell32.SHFILEINFO();
-            switch ((uint)Shell32.SHGetFileInfo(path, 0u, ref info, (uint)Marshal.SizeOf(info), Shell32.SHGFI_EXETYPE))
-            {
-                case MZ:
-                case PE:
-                    return true;
-                default:
-                    return false;
-            }
+            var executableType = (uint)Shell32.SHGetFileInfo(path, 0u, ref info, (uint)Marshal.SizeOf(info), Shell32.SHGFI_EXETYPE);
+            return executableType == Shell32.MZ || executableType == Shell32.PE;
         }
     }
 }
