@@ -1,6 +1,6 @@
-﻿using System;
+﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using System;
 using System.IO;
-using System.Management.Automation;
 using NUnit.Framework;
 using Pash.Implementation;
 
