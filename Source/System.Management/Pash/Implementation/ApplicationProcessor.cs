@@ -11,7 +11,7 @@ namespace Pash.Implementation
     /// <summary>
     /// Command processor for the application command. This is command for executing external file.
     /// </summary>
-    internal class ApplicationProcessor : CommandProcessorBase
+    public class ApplicationProcessor : CommandProcessorBase
     {
         private Process _process;
         private bool _shouldBlock;
@@ -25,9 +25,41 @@ namespace Pash.Implementation
         {
         }
 
+        /// <summary>
+        /// Checks if Pash should wait for process' exit.
+        /// </summary>
+        /// <param name="forceSynchronize">Current value of PSForceSynchronizeProcessOutput flag.</param>
+        /// <param name="path">Path to process executable.</param>
+        /// <returns><c>true</c> if Pash should wait for process' execution.</returns>
+        /// <remarks>This method also takes into account user-defined flag PSForceSynchronizeProcessOutput.</remarks>
+        public static bool NeedWaitForProcess(bool? forceSynchronize, string path)
+        {
+            return (forceSynchronize ?? false) || IsConsoleSubsystem(path);
+        }
+
+        /// <summary>
+        /// Checks if the executable represents a console application.
+        /// </summary>
+        /// <param name="path">Full path to file.</param>
+        /// <returns><c>true</c> if application uses console subsystem.</returns>
+        /// <remarks>Uses <see cref="Shell32.SHGetFileInfo"/> function under Windows (it is consistent with cmd.exe and PowerShell behavior).</remarks>
+        public static bool IsConsoleSubsystem(string path)
+        {
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+            {
+                // Under UNIX all applications are effectively console.
+                return true;
+            }
+
+            var info = new Shell32.SHFILEINFO();
+            var executableType = (uint)Shell32.SHGetFileInfo(path, 0u, ref info, (uint)Marshal.SizeOf(info), Shell32.SHGFI_EXETYPE);
+            return executableType == Shell32.MZ || executableType == Shell32.PE;
+        }
+
         internal override void Initialize()
         {
-            _shouldBlock = IsConsoleSubsystem(ApplicationInfo.Path);
+            var flag = GetPSForceSynchronizeProcessOutput();
+            _shouldBlock = NeedWaitForProcess(flag, ApplicationInfo.Path);
             _process = StartProcess();
         }
 
@@ -86,6 +118,26 @@ namespace Pash.Implementation
             }
         }
 
+        private bool? GetPSForceSynchronizeProcessOutput()
+        {
+            var variable = ExecutionContext.GetVariable("PSForceSynchronizeProcessOutput") as PSVariable;
+            if (variable == null)
+            {
+                return null;
+            }
+
+            var value = variable.Value;
+            var psObject = value as PSObject;
+            if (psObject == null)
+            {
+                return value as bool?;
+            }
+            else
+            {
+                return psObject.BaseObject as bool?;
+            }
+        }
+
         private Process StartProcess()
         {
             var startInfo = new ProcessStartInfo(ApplicationInfo.Path)
@@ -128,25 +180,6 @@ namespace Pash.Implementation
             }
 
             return arguments.ToString();
-        }
-
-        /// <summary>
-        /// Checks if the executable represents a console application.
-        /// </summary>
-        /// <param name="path">Full path to file.</param>
-        /// <returns><c>true</c> if application uses console subsystem.</returns>
-        /// <remarks>Uses <see cref="Shell32.SHGetFileInfo"/> function under Windows (it is consistent with cmd.exe and PowerShell behavior).</remarks>
-        private static bool IsConsoleSubsystem(string path)
-        {
-            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
-            {
-                // Under UNIX all applications are effectively console.
-                return true;
-            }
-
-            var info = new Shell32.SHFILEINFO();
-            var executableType = (uint)Shell32.SHGetFileInfo(path, 0u, ref info, (uint)Marshal.SizeOf(info), Shell32.SHGFI_EXETYPE);
-            return executableType == Shell32.MZ || executableType == Shell32.PE;
         }
     }
 }
