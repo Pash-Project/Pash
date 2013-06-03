@@ -2,7 +2,7 @@ Pash Variables
 ==============
 This file documents special Pash variables.
 
-## PSForceSynchronizeProcessOutput
+## PASHForceSynchronizeProcessOutput
 This variable control process execution. Possible values:
 
 * `$false` *(default)* - when starting a new process via _call operator `&`_ or directly, application

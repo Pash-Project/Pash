@@ -453,6 +453,7 @@
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.Terminals.cs" />
     <Compile Include="Pash\ParserIntrinsics\ScriptExtent.cs" />
     <Compile Include="Pash\ParserIntrinsics\SkippedTerminal.cs" />
+    <Compile Include="Pash\PashVariables.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Pash\Path.cs" />
     <Compile Include="Pash\PathNavigation.cs" />

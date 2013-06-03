@@ -103,7 +103,7 @@ namespace Pash.Implementation
 
         private bool? GetPSForceSynchronizeProcessOutput()
         {
-            var variable = ExecutionContext.GetVariable("PSForceSynchronizeProcessOutput") as PSVariable;
+            var variable = ExecutionContext.GetVariable(PashVariables.ForceSynchronizeProcessOutput) as PSVariable;
             if (variable == null)
             {
                 return null;
