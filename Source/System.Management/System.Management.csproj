@@ -433,6 +433,7 @@
     <Compile Include="Pash\Implementation\LocalPipeline.cs" />
     <Compile Include="Pash\Implementation\LocalRunspace.cs" />
     <Compile Include="Pash\Implementation\LocalRunspaceConfiguration.cs" />
+    <Compile Include="Pash\Implementation\Native\Shell32.cs" />
     <Compile Include="Pash\Implementation\ObjectPipelineReader.cs" />
     <Compile Include="Pash\Implementation\ObjectStream.cs" />
     <Compile Include="Pash\Implementation\ObjectStreamWriter.cs" />
@@ -452,6 +453,7 @@
     <Compile Include="Pash\ParserIntrinsics\PowerShellGrammar.Terminals.cs" />
     <Compile Include="Pash\ParserIntrinsics\ScriptExtent.cs" />
     <Compile Include="Pash\ParserIntrinsics\SkippedTerminal.cs" />
+    <Compile Include="Pash\PashVariables.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Pash\Path.cs" />
     <Compile Include="Pash\PathNavigation.cs" />
