@@ -11,7 +11,7 @@ namespace Pash.Implementation
     /// <summary>
     /// Command processor for the application command. This is command for executing external file.
     /// </summary>
-    public class ApplicationProcessor : CommandProcessorBase
+    internal class ApplicationProcessor : CommandProcessorBase
     {
         private Process _process;
         private bool _shouldBlock;

@@ -4,7 +4,7 @@ using System.Management.Automation;
 
 namespace Pash.Implementation
 {
-    public abstract class CommandProcessorBase
+    internal abstract class CommandProcessorBase
     {
         // parameters collection (addParameter)
 
