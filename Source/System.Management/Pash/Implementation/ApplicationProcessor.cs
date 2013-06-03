@@ -16,34 +16,17 @@ namespace Pash.Implementation
         private Process _process;
         private bool _shouldBlock;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Pash.Implementation.ApplicationProcessor"/> class.
-        /// </summary>
-        /// <param name="commandInfo">Command info.</param>
         public ApplicationProcessor(ApplicationInfo commandInfo)
             : base(commandInfo)
         {
         }
 
-        /// <summary>
-        /// Checks if Pash should wait for process' exit.
-        /// </summary>
-        /// <param name="forceSynchronize">Current value of PSForceSynchronizeProcessOutput flag.</param>
-        /// <param name="path">Path to process executable.</param>
-        /// <returns><c>true</c> if Pash should wait for process' execution.</returns>
-        /// <remarks>This method also takes into account user-defined flag PSForceSynchronizeProcessOutput.</remarks>
-        public static bool NeedWaitForProcess(bool? forceSynchronize, string path)
+        public static bool NeedWaitForProcess(bool? forceSynchronize, string executablePath)
         {
-            return (forceSynchronize ?? false) || IsConsoleSubsystem(path);
+            return (forceSynchronize ?? false) || IsConsoleSubsystem(executablePath);
         }
 
-        /// <summary>
-        /// Checks if the executable represents a console application.
-        /// </summary>
-        /// <param name="path">Full path to file.</param>
-        /// <returns><c>true</c> if application uses console subsystem.</returns>
-        /// <remarks>Uses <see cref="Shell32.SHGetFileInfo"/> function under Windows (it is consistent with cmd.exe and PowerShell behavior).</remarks>
-        public static bool IsConsoleSubsystem(string path)
+        public static bool IsConsoleSubsystem(string executablePath)
         {
             if (Environment.OSVersion.Platform != PlatformID.Win32NT)
             {
@@ -52,7 +35,7 @@ namespace Pash.Implementation
             }
 
             var info = new Shell32.SHFILEINFO();
-            var executableType = (uint)Shell32.SHGetFileInfo(path, 0u, ref info, (uint)Marshal.SizeOf(info), Shell32.SHGFI_EXETYPE);
+            var executableType = (uint)Shell32.SHGetFileInfo(executablePath, 0u, ref info, (uint)Marshal.SizeOf(info), Shell32.SHGFI_EXETYPE);
             return executableType == Shell32.MZ || executableType == Shell32.PE;
         }
 
