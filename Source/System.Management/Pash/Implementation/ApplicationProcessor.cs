@@ -2,7 +2,9 @@
 using System;
 using System.Diagnostics;
 using System.Management.Automation;
+using System.Runtime.InteropServices;
 using System.Text;
+using Pash.Implementation.Native;
 
 namespace Pash.Implementation
 {
@@ -12,18 +14,35 @@ namespace Pash.Implementation
     internal class ApplicationProcessor : CommandProcessorBase
     {
         private Process _process;
+        private bool _shouldBlock;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Pash.Implementation.ApplicationProcessor"/> class.
-        /// </summary>
-        /// <param name="commandInfo">Command info.</param>
         public ApplicationProcessor(ApplicationInfo commandInfo)
             : base(commandInfo)
         {
         }
 
+        public static bool NeedWaitForProcess(bool? forceSynchronize, string executablePath)
+        {
+            return (forceSynchronize ?? false) || IsConsoleSubsystem(executablePath);
+        }
+
+        public static bool IsConsoleSubsystem(string executablePath)
+        {
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+            {
+                // Under UNIX all applications are effectively console.
+                return true;
+            }
+
+            var info = new Shell32.SHFILEINFO();
+            var executableType = (uint)Shell32.SHGetFileInfo(executablePath, 0u, ref info, (uint)Marshal.SizeOf(info), Shell32.SHGFI_EXETYPE);
+            return executableType == Shell32.MZ || executableType == Shell32.PE;
+        }
+
         internal override void Initialize()
         {
+            var flag = GetPSForceSynchronizeProcessOutput();
+            _shouldBlock = NeedWaitForProcess(flag, ApplicationInfo.Path);
             _process = StartProcess();
         }
 
@@ -38,8 +57,7 @@ namespace Pash.Implementation
 
         internal override void ProcessRecord()
         {
-            // Release GUI programs immediately.
-            if (ProcessHasGui())
+            if (!_shouldBlock)
             {
                 return;
             }
@@ -80,6 +98,26 @@ namespace Pash.Implementation
             get
             {
                 return (ApplicationInfo)CommandInfo;
+            }
+        }
+
+        private bool? GetPSForceSynchronizeProcessOutput()
+        {
+            var variable = ExecutionContext.GetVariable(PashVariables.ForceSynchronizeProcessOutput) as PSVariable;
+            if (variable == null)
+            {
+                return null;
+            }
+
+            var value = variable.Value;
+            var psObject = value as PSObject;
+            if (psObject == null)
+            {
+                return value as bool?;
+            }
+            else
+            {
+                return psObject.BaseObject as bool?;
             }
         }
 
@@ -125,26 +163,6 @@ namespace Pash.Implementation
             }
 
             return arguments.ToString();
-        }
-
-        /// <summary>
-        /// Checks if process represents a graphical application.
-        /// </summary>
-        /// <returns><c>true</c>, if a process represents a graphical application, <c>false</c> otherwise.</returns>
-        private bool ProcessHasGui()
-        {
-            bool hasGui;
-            try
-            {
-                hasGui = _process.WaitForInputIdle();
-            }
-            catch (InvalidOperationException)
-            {
-                // WaitForInputIdle throws this exception if a process have no GUI.
-                hasGui = false;
-            }
-
-            return hasGui;
         }
     }
 }
