@@ -40,3 +40,4 @@ using System.Runtime.InteropServices;
 [assembly: InternalsVisibleTo("Microsoft.PowerShell.Commands.Management")]
 [assembly: InternalsVisibleTo("System.Management.Tests")]
 [assembly: InternalsVisibleTo("ParserTests")]
+[assembly: InternalsVisibleTo("TestHost")]

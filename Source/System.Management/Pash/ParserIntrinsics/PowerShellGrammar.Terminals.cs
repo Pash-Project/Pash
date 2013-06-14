@@ -352,8 +352,12 @@ namespace Pash.ParserIntrinsics
         ////        parameter_chars:
         ////            parameter_char
         ////            parameter_chars   parameter_char
+        // The grammar explicitly calls for at least one character in
+        // parameter_chars_pattern. However, this prohibits single-character
+        // parameter prefixes such as -s. PowerShell deviates from the grammar
+        // in this point as well.
         public readonly RegexBasedTerminal parameter_chars = null; // Initialized by reflection
-        const string parameter_chars_pattern = "(?<parameter_chars>" + parameter_char_pattern + "+" + ")";
+        const string parameter_chars_pattern = "(?<parameter_chars>" + parameter_char_pattern + "*" + ")";
 
         ////        parameter_char:
         ////            Any Unicode character except

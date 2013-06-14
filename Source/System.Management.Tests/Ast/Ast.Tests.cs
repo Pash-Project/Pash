@@ -92,13 +92,60 @@ namespace ParserTests
         }
 
         [Test]
-        public void CommentTest()
+        [TestCase("# a comment\n9")]
+        [TestCase("9\n# a comment")]
+        [TestCase("9 # a comment")]
+        public void SingleLineCommentTestSimple(string input)
         {
-            ScriptBlockAst scriptBlockAst = ParseInput(
-@"
-# a comment
-9
-");
+            ScriptBlockAst scriptBlockAst = ParseInput(input);
+
+            Assert.AreEqual(1, scriptBlockAst.EndBlock.Statements.Count);
+            Assert.AreEqual("9", scriptBlockAst.EndBlock.Statements[0].ToString());
+        }
+
+        [Test, Combinatorial]
+        public void CommentTestCommentAdjacentToToken(
+            [Values("'a'", "\"a\"", "(ls)", "$a[1]", "$a", "1;", "&{gci}", "1" /* , "1.", "1.0", ".2", "[int]" */)]
+            string statement,
+            [Values("#foo" /*, "<# foo #>" */)]
+            string comment)
+        {
+            // “A character sequence is only recognized as a comment if that
+            // sequence begins with # or <#. For example, hello#there is
+            // considered a single token whereas hello #there is considered the
+            // token hello followed by a single-line comment. As well as following
+            // white space, the comment start sequence can also be preceded by any
+            // expression-terminating or statement-terminating character
+            // (such as ), }, ], ', ", or ;).”
+
+            // Furthermore:
+            // “A token is the smallest lexical element within the PowerShell
+            // language. Tokens can be separated by new-lines, comments, white
+            // space, or any combination thereof.”
+
+            // This means that 42#foo is a valid statement (42) and a comment
+            // because the comment terminates the token (it doesn't for a#b,
+            // though).
+
+            ScriptBlockAst scriptBlockAst = ParseInput(statement + comment);
+
+            Assert.AreEqual(1, scriptBlockAst.EndBlock.Statements.Count);
+            // If the comment would have been parsed as part of the statement
+            // the `#` would appear here. It shouldn't.
+            StringAssert.DoesNotContain("#", scriptBlockAst.EndBlock.Statements[0].ToString());
+        }
+
+        [Test, Explicit]
+        [TestCase("<##>9")]
+        [TestCase("<##> 9")]
+        [TestCase("9 <##>")]
+        [TestCase("<# a comment #> 9")]
+        [TestCase("9 <# a comment #>")]
+        [TestCase("<# a \n comment #> 9")]
+        [TestCase("9 <# a \n comment #>")]
+        public void DelimitedCommentTest(string input)
+        {
+            ScriptBlockAst scriptBlockAst = ParseInput(input);
 
             Assert.AreEqual(1, scriptBlockAst.EndBlock.Statements.Count);
         }
