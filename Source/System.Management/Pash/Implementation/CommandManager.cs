@@ -376,18 +376,19 @@ namespace Pash.Implementation
                 return false;
             }
             
-            // Use reflection so it compile under .NET
+            // Here we use reflection for dynamic loading of Mono.Posix assembly and invocation of
+            // the native access call. Reflection is used for cross-platform compatibility of
+            // System.Management assembly. Once compiled, it'll use native API only when run on
+            // Unix platform.
             var posix = Assembly.Load("Mono.Posix");
             var syscall = posix.GetType("Mono.Unix.Native.Syscall");
+            var accessModes = posix.GetType("Mono.Unix.Native.AccessModes");
             
-            var method = syscall.GetMethod("stat");
-            var parameters = new object[] { null };
-            method.Invoke(null, parameters);
-            
-            var stat = parameters[0];
-            var field = stat.GetType().GetField("st_mode");
-            var mode = field.GetValue(stat);
-            return !mode.Equals(0); // TODO: Check actual FilePermissions value.
+            var access = syscall.GetMethod("access");
+            var x_ok = accessModes.GetField("X_OK");
+
+            var result = access.Invoke(null, new[] { path, x_ok.GetRawConstantValue() });
+            return result.Equals(0);
         }
     }
 }
