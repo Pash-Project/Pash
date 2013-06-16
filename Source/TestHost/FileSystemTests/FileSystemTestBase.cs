@@ -1,7 +1,8 @@
 // Copyright (C) Pash Contributors. License GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using Path = System.Management.Path;
@@ -99,12 +100,23 @@ namespace TestHost.FileSystemTests
                 };
             var root = SetupFileSystemWithStructure(subPath);
             var filePath = System.IO.Path.Combine(root, fileName);
-            File.WriteAllText(filePath, string.Format(@"
-@echo off
-echo {0}
-", result));
-            // TODO: make executable for Linux
+            
+            var platform = Environment.OSVersion.Platform;
+            var isWindows = platform == PlatformID.Win32NT
+                || platform == PlatformID.Win32Windows
+                || platform == PlatformID.WinCE;
+            
+            var text = string.Format(
+                isWindows ? "@echo off\necho {0}\n" : "#!/bin/sh\necho {0}\n",
+                result);			
+            File.WriteAllText(filePath, text);			
             _filesCreated.Add(filePath);
+            
+            if (!isWindows)
+            {
+                Process.Start("chmod", string.Format("+x \"{0}\"", filePath)).WaitForExit();
+            }
+            
             return root;
         }
     }

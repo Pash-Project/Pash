@@ -317,13 +317,21 @@ namespace Pash.Implementation
             var systemPath = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
             var directories = SplitPaths(systemPath);
 
-            // TODO: The following is Windows-specific. Change it for Unix-based OS.
-            var pathExt = Environment.GetEnvironmentVariable("PATHEXT") ?? string.Empty;
-            var extensions = new[] { ".ps1" }.Concat(SplitPaths(pathExt)).ToList(); // TODO: Clarify the priority of the .ps1 extension.
-
-            if (extensions.Contains(Path.GetExtension(fileName), StringComparer.OrdinalIgnoreCase))
+            var extensions = new List<string>{ ".ps1" }; // TODO: Clarify the priority of the .ps1 extension.
+            
+            var platform = Environment.OSVersion.Platform;
+            bool isWindows = platform == PlatformID.Win32NT
+                || platform == PlatformID.Win32Windows
+                || platform == PlatformID.WinCE;
+            if (isWindows)
             {
-                // If file extension means to be executable, try to search it without an extension:
+                var pathExt = Environment.GetEnvironmentVariable("PATHEXT") ?? string.Empty;
+                extensions.AddRange(SplitPaths(pathExt));
+            }
+
+            if (!isWindows || extensions.Contains(Path.GetExtension(fileName), StringComparer.OrdinalIgnoreCase))
+            {
+                // If file means to be executable without adding an extension, check it:
                 var path = directories.Select(directory => Path.Combine(directory, fileName)).FirstOrDefault(File.Exists);
                 if (path != null)
                 {
@@ -331,7 +339,7 @@ namespace Pash.Implementation
                 }
             }
 
-            // Now search for file with an extensions:
+            // Now search for file adding all extensions:
             var finalPath = extensions.Select(extension => fileName + extension)
                 .SelectMany(
                     fileNameWithExtension => directories.Select(directory => Path.Combine(directory, fileNameWithExtension)))
@@ -351,6 +359,35 @@ namespace Pash.Implementation
             {
                 Path.PathSeparator
             }, StringSplitOptions.RemoveEmptyEntries);
+        }
+        
+        private static bool IsExecutable(string path)
+        {
+            return File.Exists(path)
+                && (string.Equals(Path.GetExtension(path), ".ps1", StringComparison.OrdinalIgnoreCase)
+                    || IsUnixExecutable(path));
+        }
+        
+        private static bool IsUnixExecutable(string path)
+        {
+            var platform = Environment.OSVersion.Platform;
+            if (platform != PlatformID.Unix && platform != PlatformID.MacOSX)
+            {
+                return false;
+            }
+            
+            // Use reflection so it compile under .NET
+            var posix = Assembly.Load("Mono.Posix");
+            var syscall = posix.GetType("Mono.Unix.Native.Syscall");
+            
+            var method = syscall.GetMethod("stat");
+            var parameters = new object[] { null };
+            method.Invoke(null, parameters);
+            
+            var stat = parameters[0];
+            var field = stat.GetType().GetField("st_mode");
+            var mode = field.GetValue(stat);
+            return !mode.Equals(0); // TODO: Check actual FilePermissions value.
         }
     }
 }
