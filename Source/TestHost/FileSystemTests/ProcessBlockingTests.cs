@@ -9,6 +9,7 @@ namespace TestHost.FileSystemTests
     /// <summary>
     /// Tests for process execution blocking.
     /// </summary>
+    [TestFixture]
     public class ProcessBlockingTests : FileSystemTestBase
     {
         [Test]

@@ -5,37 +5,79 @@ using NUnit.Framework;
 
 namespace TestHost.FileSystemTests
 {
-    class ShellExecutionTest : FileSystemTestBase
+    [TestFixture]
+    public class ShellExecutionTest : FileSystemTestBase
     {
+        [Test]
+        [Platform("Unix")]
+        [TestCase("file.sh", "123")]
+        public void UnixFileShouldBeExecutedByAbsolutePath(string executableName, string executableResult)
+        {
+            FileShouldBeExecutedByAbsolutePath(executableName, executableResult);
+        }
+        
+        [Test]
+        [Platform("Unix")]
+        [TestCase("file.sh", "123", "./file.sh", Ignore = true, IgnoreReason = "Ignored because of bug in command parser.")]
+        [TestCase("directory/file.sh", "123", "directory/file.sh")]
+        [TestCase("directory/file.sh", "123", "directory/file.sh 127.0.0.1", Ignore = true, IgnoreReason = "Ignored because of bug in argument parser.")]
+        public void UnixFileShouldBeExecutedByRelativePath(string executableName, string executableResult, string command)
+        {
+            FileShouldBeExecutedByRelativePath(executableName, executableResult, command);
+        }
+        
+        [Test]
+        [Platform("Unix")]
+        [TestCase("file.sh", "123", "file.sh")]
+        public void UnixFileShouldBeExecutedFromSystemPath(string executableName, string executableResult, string command)
+        {
+            FileShouldBeExecutedFromSystemPath(executableName, executableResult, command);
+        }
+        
         [Test]
         [Platform("Win")]
         [TestCase("file.bat", "123")]
-        public void FileShouldBeExecutedByAbsolutePath(string executableName, string executableResult)
+        public void WinFileShouldBeExecutedByAbsolutePath(string executableName, string executableResult)
         {
-            var root = SetupExecutableWithResult(executableName, executableResult);
-            var absolutePath = Path.Combine(Path.GetFullPath(root), executableName);
-
-            CatchCommandResult(absolutePath).Trim().ShouldEqual(executableResult);
+            FileShouldBeExecutedByAbsolutePath(executableName, executableResult);
         }
-
+        
         [Test]
         [Platform("Win")]
         [TestCase("file.bat", "123", @".\file.bat", Ignore = true, IgnoreReason = "Ignored because of bug in command parser.")]
         [TestCase(@"directory\file.bat", "123", @"directory\file.bat")]
         [TestCase(@"directory\file.bat", "123", @"directory\file.bat 127.0.0.1", Ignore = true, IgnoreReason = "Ignored because of bug in argument parser.")]
-        public void FileShouldBeExecutedByRelativePath(string executableName, string executableResult, string command)
+        public void WinFileShouldBeExecutedByRelativePath(string executableName, string executableResult, string command)
         {
-            var root = SetupExecutableWithResult(executableName, executableResult);
-            Environment.CurrentDirectory = root;
-            
-            CatchCommandResult(command).Trim().ShouldEqual(executableResult);
+            FileShouldBeExecutedByRelativePath(executableName, executableResult, command);
         }
 
         [Test]
         [Platform("Win")]
         [TestCase("file.bat", "123", "file.bat")]
         [TestCase("file.bat", "123", "file")]
-        public void FileShouldBeExecutedFromSystemPath(string executableName, string executableResult, string command)
+        public void WinFileShouldBeExecutedFromSystemPath(string executableName, string executableResult, string command)
+        {
+            FileShouldBeExecutedFromSystemPath(executableName, executableResult, command);
+        }
+        
+        private void FileShouldBeExecutedByAbsolutePath(string executableName, string executableResult)
+        {
+            var root = SetupExecutableWithResult(executableName, executableResult);
+            var absolutePath = Path.Combine(Path.GetFullPath(root), executableName);
+
+            CatchCommandResult(absolutePath).Trim().ShouldEqual(executableResult);
+        }
+        
+        private void FileShouldBeExecutedByRelativePath(string executableName, string executableResult, string command)
+        {
+            var root = SetupExecutableWithResult(executableName, executableResult);
+            Environment.CurrentDirectory = root;
+            
+            CatchCommandResult(command).Trim().ShouldEqual(executableResult);
+        }
+        
+        private void FileShouldBeExecutedFromSystemPath(string executableName, string executableResult, string command)
         {
             var root = SetupExecutableWithResult(executableName, executableResult);
             var path = String.Format("{0}{1}{2}", root, Path.PathSeparator, Environment.GetEnvironmentVariable("PATH"));
