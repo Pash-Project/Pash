@@ -101,10 +101,7 @@ namespace TestHost.FileSystemTests
             var root = SetupFileSystemWithStructure(subPath);
             var filePath = System.IO.Path.Combine(root, fileName);
             
-            var platform = Environment.OSVersion.Platform;
-            var isWindows = platform == PlatformID.Win32NT
-                || platform == PlatformID.Win32Windows
-                || platform == PlatformID.WinCE;
+            var isWindows = Environment.OSVersion.Platform == PlatformID.Win32NT;
             
             var text = string.Format(
                 isWindows ? "@echo off\necho {0}\n" : "#!/bin/sh\necho {0}\n",

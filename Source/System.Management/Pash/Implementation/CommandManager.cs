@@ -319,10 +319,7 @@ namespace Pash.Implementation
 
             var extensions = new List<string>{ ".ps1" }; // TODO: Clarify the priority of the .ps1 extension.
             
-            var platform = Environment.OSVersion.Platform;
-            bool isWindows = platform == PlatformID.Win32NT
-                || platform == PlatformID.Win32Windows
-                || platform == PlatformID.WinCE;
+            bool isWindows = Environment.OSVersion.Platform == PlatformID.Win32NT;
             if (isWindows)
             {
                 var pathExt = Environment.GetEnvironmentVariable("PATHEXT") ?? string.Empty;
