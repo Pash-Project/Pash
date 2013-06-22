@@ -10,6 +10,7 @@ using System.Management.Automation.Provider;
 using System.Management.Automation.Runspaces;
 using System.Reflection;
 using Extensions.Enumerable;
+using Pash.Implementation.Native;
 using Pash.ParserIntrinsics;
 
 namespace Pash.Implementation
@@ -372,20 +373,8 @@ namespace Pash.Implementation
             {
                 return false;
             }
-            
-            // Here we use reflection for dynamic loading of Mono.Posix assembly and invocation of
-            // the native access call. Reflection is used for cross-platform compatibility of
-            // System.Management assembly. Once compiled, it'll use native API only when run on
-            // Unix platform.
-            var posix = Assembly.Load("Mono.Posix");
-            var syscall = posix.GetType("Mono.Unix.Native.Syscall");
-            var accessModes = posix.GetType("Mono.Unix.Native.AccessModes");
-            
-            var access = syscall.GetMethod("access");
-            var x_ok = accessModes.GetField("X_OK");
 
-            var result = access.Invoke(null, new[] { path, x_ok.GetRawConstantValue() });
-            return result.Equals(0);
+            return Posix.access(path, Posix.X_OK) == 0;
         }
     }
 }
