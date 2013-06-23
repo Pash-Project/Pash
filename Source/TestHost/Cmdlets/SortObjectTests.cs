@@ -23,5 +23,19 @@ namespace TestHost.Cmdlets
             var results = TestHost.Execute("3,1,9 | Sort-Object -Desc");
             Assert.AreEqual(string.Format("9{0}3{0}1{0}", Environment.NewLine), results);
         }
+
+        [Test]
+        public void SortObjectSortsAscendingWithProperty()
+        {
+            var results = TestHost.Execute("'abcd','abcdefghi','a','ab' | Sort-Object Length");
+            Assert.AreEqual(string.Format("a{0}ab{0}abcd{0}abcdefghi{0}", Environment.NewLine), results);
+        }
+
+        [Test]
+        public void SortObjectSortsDescendingWithProperty()
+        {
+            var results = TestHost.Execute("'abcd','abcdefghi','a','ab' | Sort-Object -Desc Length");
+            Assert.AreEqual(string.Format("abcdefghi{0}abcd{0}ab{0}a{0}", Environment.NewLine), results);
+        }
     }
 }
