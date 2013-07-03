@@ -12,6 +12,7 @@ namespace System.Management.Automation.Runspaces
 		private RunspaceConfigurationEntryCollection<FormatConfigurationEntry> formats;
 		private RunspaceConfigurationEntryCollection<ScriptConfigurationEntry> scripts;
 		private RunspaceConfigurationEntryCollection<ScriptConfigurationEntry> initializationScripts;
+		private RunspaceConfigurationEntryCollection<AssemblyConfigurationEntry> assemblies;
 
 		public abstract string ShellId {
 			get;
@@ -90,7 +91,11 @@ namespace System.Management.Automation.Runspaces
 
 		public virtual RunspaceConfigurationEntryCollection<AssemblyConfigurationEntry> Assemblies {
 			get {
-				throw new NotImplementedException ();
+				if (this.assemblies == null) {
+					this.assemblies = new RunspaceConfigurationEntryCollection<AssemblyConfigurationEntry> ();
+				}
+
+				return this.assemblies;
 			}
 		}
 
