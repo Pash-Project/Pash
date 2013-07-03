@@ -10,6 +10,7 @@ namespace System.Management.Automation.Runspaces
 		private RunspaceConfigurationEntryCollection<ProviderConfigurationEntry> providers;
 		private RunspaceConfigurationEntryCollection<TypeConfigurationEntry> types;
 		private RunspaceConfigurationEntryCollection<FormatConfigurationEntry> formats;
+		private RunspaceConfigurationEntryCollection<ScriptConfigurationEntry> scripts;
 
 		public abstract string ShellId {
 			get;
@@ -68,7 +69,11 @@ namespace System.Management.Automation.Runspaces
 
 		public virtual RunspaceConfigurationEntryCollection<ScriptConfigurationEntry> Scripts {
 			get {
-				throw new NotImplementedException ();
+				if (this.scripts == null) {
+					this.scripts = new RunspaceConfigurationEntryCollection<ScriptConfigurationEntry> ();
+				}
+
+				return this.scripts;
 			}
 		}
 
