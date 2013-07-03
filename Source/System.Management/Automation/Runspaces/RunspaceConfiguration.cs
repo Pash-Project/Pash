@@ -9,6 +9,7 @@ namespace System.Management.Automation.Runspaces
 		private RunspaceConfigurationEntryCollection<CmdletConfigurationEntry> cmdlets;
 		private RunspaceConfigurationEntryCollection<ProviderConfigurationEntry> providers;
 		private RunspaceConfigurationEntryCollection<TypeConfigurationEntry> types;
+		private RunspaceConfigurationEntryCollection<FormatConfigurationEntry> formats;
 
 		public abstract string ShellId {
 			get;
@@ -57,7 +58,11 @@ namespace System.Management.Automation.Runspaces
 
 		public virtual RunspaceConfigurationEntryCollection<FormatConfigurationEntry> Formats {
 			get {
-				throw new NotImplementedException ();
+				if (this.formats == null) {
+					this.formats = new RunspaceConfigurationEntryCollection<FormatConfigurationEntry> ();
+				}
+
+				return this.formats;
 			}
 		}
 
