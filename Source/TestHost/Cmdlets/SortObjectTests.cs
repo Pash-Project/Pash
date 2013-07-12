@@ -51,5 +51,19 @@ namespace TestHost.Cmdlets
             var results = TestHost.Execute("4,7,12,3,9,1,4,3 | Sort-Object -Unique -Desc");
             Assert.AreEqual(string.Format("12{0}9{0}7{0}4{0}3{0}1{0}", Environment.NewLine), results);
         }
+
+        [Test]
+        public void SortObjectUniqueAscendingWithProperty()
+        {
+            var results = TestHost.Execute("'a','ab','de','def','c' | Sort-Object Length -Unique");
+            StringAssert.IsMatch(string.Format(@"[ac]{0}(ab|de){0}def{0}", Environment.NewLine), results);
+        }
+
+        [Test]
+        public void SortObjectUniqueDescendingWithProperty()
+        {
+            var results = TestHost.Execute("'a','ab','def','de','c' | Sort-Object Length -Unique -Desc");
+            StringAssert.IsMatch(string.Format(@"def{0}(ab|de){0}[ac]{0}", Environment.NewLine), results);
+        }
     }
 }
