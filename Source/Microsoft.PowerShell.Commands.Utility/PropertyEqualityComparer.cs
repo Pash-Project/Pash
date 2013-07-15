@@ -9,14 +9,34 @@ using System.Text;
 namespace Microsoft.PowerShell.Commands.Utility
 {
     /// <summary>
-    ///     Helper class for easily implementing -Unique on cmdlets like
-    ///     Sort-Object or Select-Object.
+    /// Helper class for easily implementing -Unique on cmdlets like
+    /// Sort-Object and Select-Object. This basically allows to equate
+    /// two objects based on a subset of their properties.
     /// </summary>
     internal class PropertyEqualityComparer : EqualityComparer<PSObject>
     {
-        public List<string> Properties { get; set; }
+        ISet<string> properties;
 
-        public PropertyEqualityComparer(List<string> properties)
+        /// <summary>
+        /// The properties which are relevant for equality comparison.
+        /// </summary>
+        public IEnumerable<string> Properties
+        {
+            get { return properties; }
+            set
+            {
+                properties = new HashSet<string>(value ?? new string[] { });
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance that uses the given list of properties
+        /// to determine equality of objects.
+        /// </summary>
+        /// <param name="properties">
+        /// A set of properties that will be used to determine equality.
+        /// </param>
+        public PropertyEqualityComparer(IEnumerable<string> properties)
         {
             this.Properties = properties;
         }
@@ -25,7 +45,7 @@ namespace Microsoft.PowerShell.Commands.Utility
         {
             if (x == null && y == null) return true;
             if (x == null || y == null) return false;
-            if (Properties == null)
+            if (Properties == null || !Properties.Any())
                 return x.BaseObject.Equals(y.BaseObject);
 
             foreach (var property in this.Properties)
