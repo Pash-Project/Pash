@@ -308,7 +308,6 @@
     <Compile Include="Automation\Runspaces\CmdletConfigurationEntry.cs" />
     <Compile Include="Automation\Runspaces\Command.cs" />
     <Compile Include="Automation\Runspaces\CommandCollection.cs" />
-    <Compile Include="Automation\Runspaces\CommandOrigin.cs" />
     <Compile Include="Automation\Runspaces\CommandParameter.cs" />
     <Compile Include="Automation\Runspaces\CommandParameterCollection.cs" />
     <Compile Include="Automation\Runspaces\ConstrainedSessionStateEntry.cs" />
