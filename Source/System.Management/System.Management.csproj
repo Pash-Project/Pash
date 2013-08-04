@@ -261,7 +261,6 @@
     <Compile Include="Automation\ProxyCommand.cs" />
     <Compile Include="Automation\PSCmdlet.cs" />
     <Compile Include="Automation\PSCommand.cs" />
-    <Compile Include="Automation\PSCorePSSnapIn.cs" />
     <Compile Include="Automation\PSCredential.cs" />
     <Compile Include="Automation\PSCredentialTypes.cs" />
     <Compile Include="Automation\PSCredentialUIOptions.cs" />
@@ -304,11 +303,9 @@
     <Compile Include="Automation\ReturnContainers.cs" />
     <Compile Include="Automation\RunspacePoolStateInfo.cs" />
     <Compile Include="Automation\Runspaces\AuthenticationMechanism.cs" />
-    <Compile Include="Automation\Runspaces\AuthorizationManager.cs" />
     <Compile Include="Automation\Runspaces\CmdletConfigurationEntry.cs" />
     <Compile Include="Automation\Runspaces\Command.cs" />
     <Compile Include="Automation\Runspaces\CommandCollection.cs" />
-    <Compile Include="Automation\Runspaces\CommandOrigin.cs" />
     <Compile Include="Automation\Runspaces\CommandParameter.cs" />
     <Compile Include="Automation\Runspaces\CommandParameterCollection.cs" />
     <Compile Include="Automation\Runspaces\ConstrainedSessionStateEntry.cs" />
@@ -422,6 +419,7 @@
     <Compile Include="Microsoft.PowerShell\ModuleSpecification.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Microsoft.PowerShell\PSCorePSSnapIn.cs" />
     <Compile Include="Pash\Implementation\CommandManager.cs" />
     <Compile Include="Pash\Implementation\CommandProcessor.cs" />
     <Compile Include="Pash\Implementation\CommandProcessorBase.cs" />
