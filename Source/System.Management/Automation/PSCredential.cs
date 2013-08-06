@@ -1,31 +1,53 @@
-﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Net;
+using System.Security;
 
 namespace System.Management.Automation
 {
     public sealed class PSCredential
     {
-        /*
-        public PSCredential(string userName, SecureString password)
-        {
-            throw new NotImplementedException();
-        }
+		string username;
+		SecureString password;
 
-        public static explicit operator NetworkCredential(PSCredential credential)
-        {
-            throw new NotImplementedException();
-        }
+		public string UserName
+		{
+			get
+			{
+				return this.username;
+			}
+		}
 
-        public static PSCredential Empty { get; }
-        public SecureString Password { get; }
-        public string UserName { get; }
+		public SecureString Password
+		{
+			get
+			{
+				return this.password;
+			}
+		}
 
-        public NetworkCredential GetNetworkCredential()
-        {
-            throw new NotImplementedException();
-        }
-        */
+		public static PSCredential Empty
+		{
+			get
+			{
+				throw new NotImplementedException ();
+			}
+		}
+
+		public PSCredential(string userName, SecureString password)
+		{
+			this.username = userName;
+			this.password = password;
+		}
+
+		public NetworkCredential GetNetworkCredential()
+		{
+			throw new NotImplementedException ();
+		}
+
+		public static explicit operator NetworkCredential(PSCredential credential)
+		{
+			throw new NotImplementedException ();
+		}
     }
 }
