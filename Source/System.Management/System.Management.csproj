@@ -68,6 +68,7 @@
     <Compile Include="Automation\ActionPreferenceStopException.cs" />
     <Compile Include="Automation\AliasAttribute.cs" />
     <Compile Include="Automation\AliasInfo.cs" />
+    <Compile Include="Automation\Alignment.cs" />
     <Compile Include="Automation\AllowEmptyCollectionAttribute.cs" />
     <Compile Include="Automation\AllowEmptyStringAttribute.cs" />
     <Compile Include="Automation\AllowNullAttribute.cs" />
