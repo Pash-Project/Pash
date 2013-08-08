@@ -1,8 +1,5 @@
 // Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 
-//classtodo: Needs implementations of Runspaces.CmdletConfigurationEntry, Runspaces.FormatConfigurationEntry, Runspaces.TypeConfigurationEntry
-
-/*
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,7 +12,11 @@ namespace System.Management.Automation
     /// </summary>
     public abstract class CustomPSSnapIn : PSSnapInInstaller
     {
-        public virtual Collection<CmdletConfigurationEntry> Cmdlets { get; private set; }
+	protected CustomPSSnapIn()
+	{
+		}
+
+		public virtual Collection<CmdletConfigurationEntry> Cmdlets { get; private set; }
 
         public virtual Collection<FormatConfigurationEntry> Formats { get; private set; }
 
@@ -23,5 +24,5 @@ namespace System.Management.Automation
 
         public virtual Collection<TypeConfigurationEntry> Types { get; private set; }
     }
-}*/
+}
 
