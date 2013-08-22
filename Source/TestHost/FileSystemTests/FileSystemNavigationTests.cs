@@ -83,6 +83,46 @@ namespace TestHost.FileSystemTests
         }
 
         [Test]
+        public void CDToTildeShouldNotThrowException()
+        {
+            var rootPath = base.SetupFileSystemWithStructure(new[] { "/~/x" });
+
+            var output = ("Set-Location " + rootPath + "; Set-Location ~").Exec();
+            Assert.IsEmpty(output);
+        }
+
+        [Test]
+        public void CDToTildeShouldNotChangeIntoTildeDirectory()
+        {
+            var rootPath = base.SetupFileSystemWithStructure(new[] { "/~/x" });
+            var currentLocation = ("Set-Location " + rootPath + "; Set-Location ~; Get-Location").Exec();
+            StringAssert.DoesNotStartWith(rootPath, currentLocation);
+        }
+
+        [Test]
+        public void CDToTildeShouldChangeIntoHomeDirectory()
+        {
+            var rootPath = base.SetupFileSystemWithStructure(new[] { "/~/x" });
+            var currentLocation = ("Set-Location " + rootPath + "; Set-Location ~; Get-Location").Exec();
+
+            var userHome = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            // HACK: Due to Mono Bug 2873. See equivalent hack in
+            // SessionStateGlobal.SetLocation for explanation.
+            if (userHome == "")
+                userHome = Environment.GetEnvironmentVariable("HOME");
+
+            currentLocation.PathShouldEqual(userHome);
+        }
+
+        [Test]
+        public void CDToDotSlashTildeShouldChangeIntoTildeDirectory()
+        {
+            var rootPath = base.SetupFileSystemWithStructure(new[] { "/~/x" });
+            var currentLocation = ("Set-Location " + rootPath + "; Set-Location ./~; Get-Location").Exec();
+            currentLocation.PathShouldEqual(rootPath + "/~");
+        }
+
+        [Test]
         [TestCase("/", "root should be root")]
         [TestCase("..", "one up from root should still be root")]
         [TestCase("../..", "two up from root should still be root")]
