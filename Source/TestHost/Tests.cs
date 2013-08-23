@@ -95,11 +95,13 @@ namespace TestHost
         [Test]
         public void ExecuteScriptTest()
         {
-            string scriptPath = Path.GetTempFileName();
+            string scriptPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             scriptPath += ".ps1";
             File.WriteAllText(scriptPath, "'xxx'");
 
             StringAssert.AreEqualIgnoringCase("xxx" + Environment.NewLine, TestHost.Execute("& " + scriptPath));
+
+            File.Delete(scriptPath);
         }
 
         [Test]
