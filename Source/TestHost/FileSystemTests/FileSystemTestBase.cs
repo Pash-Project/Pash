@@ -17,6 +17,11 @@ namespace TestHost.FileSystemTests
         [TearDown]
         public void CleanupTempFiles()
         {
+            // We could still be in one of the created directories, so that it
+            // cannot be deleted, at least on Windows. Thus, change the
+            // current directory to somewhere entirely else.
+            Environment.CurrentDirectory = "/";
+
             try
             {
                 foreach (var fileName in _filesCreated)
@@ -31,7 +36,7 @@ namespace TestHost.FileSystemTests
                 {
                     if (System.IO.Directory.Exists(path))
                     {
-                        System.IO.Directory.Delete(path);
+                        System.IO.Directory.Delete(path, true);
                     }
                 }
             }
@@ -76,7 +81,7 @@ namespace TestHost.FileSystemTests
                 }
                 else
                 {
-                    System.IO.File.CreateText(fullPath);
+                    System.IO.File.WriteAllText(fullPath, "");
                 }
             }
 
@@ -100,20 +105,20 @@ namespace TestHost.FileSystemTests
                 };
             var root = SetupFileSystemWithStructure(subPath);
             var filePath = System.IO.Path.Combine(root, fileName);
-            
+
             var isWindows = Environment.OSVersion.Platform == PlatformID.Win32NT;
-            
+
             var text = string.Format(
                 isWindows ? "@echo off\necho {0}\n" : "#!/bin/sh\necho {0}\n",
-                result);			
-            File.WriteAllText(filePath, text);			
+                result);
+            File.WriteAllText(filePath, text);
             _filesCreated.Add(filePath);
-            
+
             if (!isWindows)
             {
                 Process.Start("chmod", string.Format("+x \"{0}\"", filePath)).WaitForExit();
             }
-            
+
             return root;
         }
     }
