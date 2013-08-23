@@ -105,20 +105,20 @@ namespace TestHost.FileSystemTests
                 };
             var root = SetupFileSystemWithStructure(subPath);
             var filePath = System.IO.Path.Combine(root, fileName);
-            
+
             var isWindows = Environment.OSVersion.Platform == PlatformID.Win32NT;
-            
+
             var text = string.Format(
                 isWindows ? "@echo off\necho {0}\n" : "#!/bin/sh\necho {0}\n",
-                result);			
-            File.WriteAllText(filePath, text);			
+                result);
+            File.WriteAllText(filePath, text);
             _filesCreated.Add(filePath);
-            
+
             if (!isWindows)
             {
                 Process.Start("chmod", string.Format("+x \"{0}\"", filePath)).WaitForExit();
             }
-            
+
             return root;
         }
     }
