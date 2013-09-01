@@ -59,6 +59,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Ast\Ast.Tests.cs" />
+    <Compile Include="ErrorReportingTests\ErrorRecordTests.cs" />
     <Compile Include="ExtensionsTests\StringExtensionsTests.cs" />
     <Compile Include="HostTests\SizeTests.cs" />
     <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammarTests.cs" />

@@ -7,6 +7,15 @@ namespace System.Management.Automation
 {
     public class ErrorCategoryInfo
     {
+        internal ErrorCategoryInfo(Exception exception, ErrorCategory category)
+        {
+            this.Category = category;
+            this.Activity = string.Empty;
+            this.Reason = exception.GetType().Name;
+            this.TargetName = string.Empty;
+            this.TargetType = string.Empty;
+        }
+
         public string Activity { get; set; }
         public ErrorCategory Category { get; private set; }
         public string Reason { get; set; }
