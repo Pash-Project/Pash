@@ -29,5 +29,11 @@ namespace System.Management.Automation
         WriteError = 23,
         FromStdErr = 24,
         SecurityError = 25,
+        ProtocolError = 26,
+        ConnectionError = 27,
+        AuthenticationError = 28,
+        LimitsExceeded = 29,
+        QuotaExceeded = 30,
+        NotEnabled = 31,
     }
 }
