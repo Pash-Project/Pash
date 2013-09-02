@@ -14,12 +14,14 @@ namespace System.Management.Automation.Runspaces
         PSLanguageMode langmode;
         InitialSessionStateEntryCollection<SessionStateCommandEntry> sessionstatentry;
         InitialSessionStateEntryCollection<SessionStateProviderEntry> sessionstatprovider;
+        InitialSessionStateEntryCollection<SessionStateVariableEntry> variables;
         List<ModuleSpecification> modules = new List<ModuleSpecification>();
 
         protected InitialSessionState()
         {
             sessionstatentry = new InitialSessionStateEntryCollection<SessionStateCommandEntry>();
             sessionstatprovider = new InitialSessionStateEntryCollection<SessionStateProviderEntry>();
+            variables = new InitialSessionStateEntryCollection<SessionStateVariableEntry>();
         }
 
         #region Properties
@@ -159,7 +161,7 @@ namespace System.Management.Automation.Runspaces
         {
             get
             {
-                throw new NotImplementedException();
+                return variables;
             }
         }
 
