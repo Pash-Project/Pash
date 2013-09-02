@@ -1,5 +1,8 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using Microsoft.PowerShell.Commands.Utility;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
 using System.Reflection;
 
@@ -18,9 +21,28 @@ namespace Microsoft.PowerShell.Commands
         {
             InputObjects.Sort(Compare);
 
-            foreach (PSObject obj in InputObjects)
+            IEnumerable<PSObject> outputObjects = InputObjects;
+
+            if (Unique.ToBool())
             {
-                WriteObject(obj);
+                PropertyEqualityComparer comparer = new PropertyEqualityComparer(null);
+                if (Property != null)
+                    comparer.Properties = Property.Select(p => p.ToString()).ToList();
+
+                PSObject prevObj = null;
+                foreach (PSObject obj in InputObjects)
+                {
+                    if (!comparer.Equals(obj, prevObj))
+                        WriteObject(obj);
+                    prevObj = obj;
+                }
+            }
+            else
+            {
+                foreach (PSObject obj in InputObjects)
+                {
+                    WriteObject(obj);
+                }
             }
         }
 
