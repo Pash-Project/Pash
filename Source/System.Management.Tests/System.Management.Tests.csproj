@@ -62,6 +62,7 @@
     <Compile Include="ErrorReportingTests\ErrorRecordTests.cs" />
     <Compile Include="ExtensionsTests\StringExtensionsTests.cs" />
     <Compile Include="HostTests\InitialSessionStateTests.cs" />
+    <Compile Include="HostTests\SessionStateVariableEntryTests.cs" />
     <Compile Include="HostTests\SizeTests.cs" />
     <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammarTests.cs" />
     <Compile Include="ExtensionsTests.cs" />
