@@ -93,6 +93,7 @@
     <Compile Include="StartSleepCommand.cs" />
     <Compile Include="StyleInfo.cs" />
     <Compile Include="TeeObjectCommand.cs" />
+    <Compile Include="PropertyEqualityComparer.cs" />
     <Compile Include="WriteDebugCommand.cs" />
     <Compile Include="WriteErrorCommand.cs" />
     <Compile Include="WriteHostCommand.cs" />
