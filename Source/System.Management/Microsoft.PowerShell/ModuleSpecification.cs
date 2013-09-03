@@ -11,7 +11,7 @@ namespace Microsoft.PowerShell.Commands
 
         public ModuleSpecification(string moduleName)
         {
-            throw new NotImplementedException();
+            this.Name = moduleName;
         }
 
         public ModuleSpecification(Hashtable moduleSpecification)
@@ -19,5 +19,6 @@ namespace Microsoft.PowerShell.Commands
             throw new NotImplementedException();
         }
 
+        public string Name { get; private set; }
     }
 }

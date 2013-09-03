@@ -1,6 +1,7 @@
 // Copyright (C) Pash Contributors. License GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Collections.ObjectModel;
@@ -13,11 +14,14 @@ namespace System.Management.Automation.Runspaces
         PSLanguageMode langmode;
         InitialSessionStateEntryCollection<SessionStateCommandEntry> sessionstatentry;
         InitialSessionStateEntryCollection<SessionStateProviderEntry> sessionstatprovider;
+        InitialSessionStateEntryCollection<SessionStateVariableEntry> variables;
+        List<ModuleSpecification> modules = new List<ModuleSpecification>();
 
         protected InitialSessionState()
         {
             sessionstatentry = new InitialSessionStateEntryCollection<SessionStateCommandEntry>();
             sessionstatprovider = new InitialSessionStateEntryCollection<SessionStateProviderEntry>();
+            variables = new InitialSessionStateEntryCollection<SessionStateVariableEntry>();
         }
 
         #region Properties
@@ -98,7 +102,7 @@ namespace System.Management.Automation.Runspaces
         {
             get
             {
-                throw new NotImplementedException();
+                return modules.AsReadOnly();
             }
         }
 
@@ -157,7 +161,7 @@ namespace System.Management.Automation.Runspaces
         {
             get
             {
-                throw new NotImplementedException();
+                return variables;
             }
         }
 
@@ -408,7 +412,10 @@ namespace System.Management.Automation.Runspaces
 
         public void ImportPSModule(string[] name)
         {
-            throw new NotImplementedException();
+            var specifications = from string moduleName in name
+                                select new ModuleSpecification(moduleName);
+
+            modules.AddRange(specifications);
         }
 
         public void ImportPSModulesFromPath(string path)

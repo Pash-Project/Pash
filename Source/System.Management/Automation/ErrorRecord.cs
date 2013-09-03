@@ -20,6 +20,7 @@ namespace System.Management.Automation
             Exception = exception;
             FullyQualifiedErrorId = errorId;
             TargetObject = targetObject;
+            CategoryInfo = new ErrorCategoryInfo(exception, errorCategory);
         }
 
         internal ErrorRecord(ErrorRecord errorRecord, Exception exception)
