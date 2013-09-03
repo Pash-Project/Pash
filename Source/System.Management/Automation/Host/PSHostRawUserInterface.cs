@@ -5,7 +5,7 @@ namespace System.Management.Automation.Host
 {
     public abstract class PSHostRawUserInterface
     {
-        protected PSHostRawUserInterface() { throw new NotImplementedException(); }
+        protected PSHostRawUserInterface() { }
 
         public abstract ConsoleColor BackgroundColor { get; set; }
         public abstract Size BufferSize { get; set; }

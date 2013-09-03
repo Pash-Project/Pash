@@ -8,57 +8,34 @@ namespace System.Management.Automation.Runspaces
 {
     public sealed class SessionStateVariableEntry : ConstrainedSessionStateEntry
     {
-        public object Value
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-        public string Description
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-        public ScopedItemOptions Options
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-        public Collection<Attribute> Attributes
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public object Value { get; private set; }
+        public string Description { get; private set; }
+        public ScopedItemOptions Options { get; private set; }
+        public Collection<Attribute> Attributes { get; private set; }
 
         public SessionStateVariableEntry(string name, object value, string description)
-            : base(name, SessionStateEntryVisibility.Public)
+            : this(name, value, description, ScopedItemOptions.None)
         {
-            throw new NotImplementedException();
         }
 
         public SessionStateVariableEntry(string name, object value, string description, ScopedItemOptions options)
-            : base(name, SessionStateEntryVisibility.Public)
+            : this(name, value, description, options, new Collection<Attribute>())
         {
-            throw new NotImplementedException();
         }
 
         public SessionStateVariableEntry(string name, object value, string description, ScopedItemOptions options, Collection<Attribute> attributes)
             : base(name, SessionStateEntryVisibility.Public)
         {
-            throw new NotImplementedException();
+            this.Options = options;
+            this.Description = description;
+            this.Value = value;
+            this.Attributes = attributes;
         }
 
         public SessionStateVariableEntry(string name, object value, string description, ScopedItemOptions options, Attribute attribute)
-            : base(name, SessionStateEntryVisibility.Public)
+            : this(name, value, description, options)
         {
-            throw new NotImplementedException();
+            this.Attributes.Add(attribute);
         }
 
         public override InitialSessionStateEntry Clone()

@@ -11,7 +11,7 @@ namespace System.Management.Automation.Internal
         internal PSHost PSHostInternal { get; private set; }
         internal PSObject CurrentPipelineObject { get; set; }
         internal SessionState State { get; private set; }
-        internal ICommandRuntime CommandRuntime { get; set; }
+        public ICommandRuntime CommandRuntime { get; set; }
 
         private ExecutionContext _executionContext;
         internal ExecutionContext ExecutionContext
