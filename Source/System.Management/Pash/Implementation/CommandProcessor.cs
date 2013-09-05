@@ -145,6 +145,10 @@ namespace System.Management.Automation
             {
                 SetValue(memberInfo, Command, value.ToString());
             }
+            
+            else if (memberType.IsEnum) {
+                  SetValue (memberInfo, Command, Enum.Parse (type, value.ToString(), true));
+            }
 
             else if (memberType == typeof(PSObject))
             {
