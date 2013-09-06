@@ -1129,6 +1129,11 @@ namespace Pash.ParserIntrinsics
                 {
                     var hashEntryParseTreeNode = hashLiteralBodyParseTreeNode.ChildNodes[i];
 
+                    if (hashEntryParseTreeNode.Term == _grammar.statement_terminators)
+                    {
+                        continue;
+                    }
+
                     VerifyTerm(hashEntryParseTreeNode, this._grammar.hash_entry);
 
                     var keyExpressionAst = BuildKeyExpressionAst(hashEntryParseTreeNode.ChildNodes[0]);
