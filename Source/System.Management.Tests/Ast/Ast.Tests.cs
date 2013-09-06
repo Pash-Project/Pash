@@ -625,7 +625,7 @@ ls
             Assert.AreEqual(2, hashtableAst.KeyValuePairs.Count, message);
         }
 
-        [Test, Explicit]
+        [Test]
         [TestCase("@{\n\n}", 0)]
         [TestCase("@{\r\n}", 0)]
         [TestCase("@{\r\r}", 0)]
@@ -673,7 +673,7 @@ ls
             Assert.AreEqual(1, hashtableAst.KeyValuePairs.Count);
         }
 
-        [Test, Explicit]
+        [Test]
         [TestCase("@{a = b ; ; ; }", 1)]
         [TestCase("@{a = b ; \n ; }", 1)]
         [TestCase("@{a = b ; \r\n ; }", 1)]
