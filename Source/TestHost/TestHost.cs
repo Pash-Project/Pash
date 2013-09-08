@@ -12,6 +12,8 @@ namespace TestHost
     {
         readonly PSHostUserInterface _ui = new TestHostUserInterface();
 
+        public static InitialSessionState InitialSessionState { get; set; }
+
         public static string Execute(params string[] statements)
         {
             return Execute(false, error => {/* do nothing with error? weird? */}, statements);
@@ -48,7 +50,7 @@ namespace TestHost
                 ui.OnWriteErrorLineString = s => ui.Log.Append(s);
 
             TestHost host = new TestHost(ui);
-            var myRunSpace = RunspaceFactory.CreateRunspace(host);
+            var myRunSpace = CreateRunspace(host);
             myRunSpace.Open();
 
             foreach (var statement in statements)
@@ -62,6 +64,15 @@ namespace TestHost
             }
 
             return ui.Log.ToString();
+        }
+
+        private static Runspace CreateRunspace(PSHost host)
+        {
+            if (InitialSessionState != null)
+            {
+                return RunspaceFactory.CreateRunspace(host, InitialSessionState);
+            }
+            return RunspaceFactory.CreateRunspace(host);
         }
 
         public TestHost(TestHostUserInterface ui)
