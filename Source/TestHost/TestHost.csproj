@@ -73,6 +73,7 @@
     <Compile Include="Cmdlets\NewObjectCommandTests.cs" />
     <Compile Include="7.1.7 - ArraySubexpressionOperator.cs" />
     <Compile Include="FileSystemTests\ShellExecutionTest.cs" />
+    <Compile Include="InitialSessionStateTests.cs" />
     <Compile Include="LiteralsTests.cs">
       <SubType>Code</SubType>
     </Compile>
