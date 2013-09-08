@@ -135,6 +135,7 @@ namespace Pash.Implementation
         public override void Open()
         {
             CommandManager = new CommandManager();
+            InitializeSession();
             InitializeProviders();
         }
 
@@ -160,6 +161,23 @@ namespace Pash.Implementation
         {
             ExecutionContext.SessionState.SessionStateGlobal.LoadProviders();
             ExecutionContext.SessionState.SessionStateGlobal.SetCurrentDrive();
+        }
+
+        private void InitializeSession()
+        {
+            if (_initialSessionState == null)
+                return;
+
+            AddInitialSessionVariables();
+            CommandManager.ImportModules(_initialSessionState.Modules);
+        }
+
+        private void AddInitialSessionVariables()
+        {
+            foreach (SessionStateVariableEntry variableEntry in _initialSessionState.Variables)
+            {
+                SetVariable(variableEntry.Name, variableEntry.Value);
+            }
         }
     }
 }

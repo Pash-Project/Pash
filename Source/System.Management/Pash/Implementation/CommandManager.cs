@@ -12,6 +12,7 @@ using System.Reflection;
 using Extensions.Enumerable;
 using Pash.Implementation.Native;
 using Pash.ParserIntrinsics;
+using Microsoft.PowerShell.Commands;
 
 namespace Pash.Implementation
 {
@@ -67,18 +68,7 @@ namespace Pash.Implementation
                             _snapins.Add(cmdLetInfo.PSSnapIn.Name, cmdLetInfo.PSSnapIn);
                         }
 
-                        // Copy all the found Cmdlets
-                        List<CmdletInfo> cmdletList = null;
-                        if (_cmdLets.ContainsKey(cmdLetInfo.Name))
-                        {
-                            cmdletList = _cmdLets[cmdLetInfo.Name];
-                        }
-                        else
-                        {
-                            cmdletList = new List<CmdletInfo>();
-                            _cmdLets.Add(cmdLetInfo.Name, cmdletList);
-                        }
-                        cmdletList.Add(cmdLetInfo);
+                        RegisterCmdlet(cmdLetInfo);
                     }
 
                     foreach (SnapinProviderPair providerTypePair in tmpProviders)
@@ -87,6 +77,21 @@ namespace Pash.Implementation
                     }
                 }
             }
+        }
+
+        private void RegisterCmdlet(CmdletInfo cmdLetInfo)
+        {
+            List<CmdletInfo> cmdletList = null;
+            if (_cmdLets.ContainsKey(cmdLetInfo.Name))
+            {
+                cmdletList = _cmdLets[cmdLetInfo.Name];
+            }
+            else
+            {
+                cmdletList = new List<CmdletInfo>();
+                _cmdLets.Add(cmdLetInfo.Name, cmdletList);
+            }
+            cmdletList.Add(cmdLetInfo);
         }
 
         public void SetAlias(string name, string definition)
@@ -269,12 +274,33 @@ namespace Pash.Implementation
 
             providers = snapinProviderPairs.ToCollection();
 
-            var cmdletInfos = from Type type in assembly.GetTypes()
-                              where type.IsSubclassOf(typeof(Cmdlet))
-                              from CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof(CmdletAttribute), true)
-                              select new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, _context);
+            return LoadCmdletsFromAssembly(assembly, snapinInfo).ToCollection();
+        }
 
-            return cmdletInfos.ToCollection();
+        private IEnumerable<CmdletInfo> LoadCmdletsFromAssembly(Assembly assembly, PSSnapInInfo snapinInfo = null)
+        {
+            return from Type type in assembly.GetTypes()
+                   where type.IsSubclassOf(typeof(Cmdlet))
+                   from CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof(CmdletAttribute), true)
+                   select new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, _context);
+        }
+
+        private IEnumerable<CmdletInfo> LoadCmdletsFromAssemblies(IEnumerable<Assembly> assemblies)
+        {
+            return from Assembly assembly in assemblies
+                   from CmdletInfo cmdletInfo in LoadCmdletsFromAssembly(assembly)
+                   select cmdletInfo;
+        }
+
+        internal void ImportModules(IEnumerable<ModuleSpecification> modules)
+        {
+            var assemblies = from ModuleSpecification module in modules
+                             select Assembly.LoadFile(module.Name);
+
+            foreach (CmdletInfo cmdletInfo in LoadCmdletsFromAssemblies(assemblies))
+            {
+                RegisterCmdlet(cmdletInfo);
+            }
         }
 
         // HACK: all functions are currently stored as scripts. But I'm confused, so I don't know how to fix it.
