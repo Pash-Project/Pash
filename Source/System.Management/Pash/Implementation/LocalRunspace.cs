@@ -169,6 +169,7 @@ namespace Pash.Implementation
                 return;
 
             AddInitialSessionVariables();
+            CommandManager.ImportModules(_initialSessionState.Modules);
         }
 
         private void AddInitialSessionVariables()

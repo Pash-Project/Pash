@@ -22,5 +22,18 @@ namespace TestHost
 
             Assert.AreEqual(variableValue + Environment.NewLine, output);
         }
+
+        [Test]
+        public void ImportPSModuleByFileNameAllowsCmdletInModuleToBeUsed()
+        {
+            InitialSessionState sessionState = InitialSessionState.Create();
+            string fileName = typeof(InitialSessionStateTests).Assembly.Location;
+            sessionState.ImportPSModule(new string[] { fileName });
+            TestHost.InitialSessionState = sessionState;
+
+            string output = TestHost.Execute("Invoke-Test -Parameter ParameterValue");
+
+            Assert.AreEqual("Parameter='ParameterValue'" + Environment.NewLine, output);
+        }
     }
 }

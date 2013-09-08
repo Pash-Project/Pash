@@ -12,6 +12,7 @@ using System.Reflection;
 using Extensions.Enumerable;
 using Pash.Implementation.Native;
 using Pash.ParserIntrinsics;
+using Microsoft.PowerShell.Commands;
 
 namespace Pash.Implementation
 {
@@ -275,6 +276,33 @@ namespace Pash.Implementation
                               select new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, _context);
 
             return cmdletInfos.ToCollection();
+        }
+
+        internal void ImportModules(IEnumerable<ModuleSpecification> modules)
+        {
+            var assemblies = from ModuleSpecification module in modules
+                             select Assembly.LoadFile(module.Name);
+
+            var cmdletInfos = from Assembly assembly in assemblies
+                              from Type type in assembly.GetTypes()
+                              where type.IsSubclassOf(typeof(Cmdlet))
+                              from CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof(CmdletAttribute), true)
+                              select new CmdletInfo(cmdletAttribute.FullName, type, null, null, _context);
+
+            foreach (CmdletInfo cmdletInfo in cmdletInfos)
+            {
+                List<CmdletInfo> cmdletList = null;
+                if (_cmdLets.ContainsKey(cmdletInfo.Name))
+                {
+                    cmdletList = _cmdLets[cmdletInfo.Name];
+                }
+                else
+                {
+                    cmdletList = new List<CmdletInfo>();
+                    _cmdLets.Add(cmdletInfo.Name, cmdletList);
+                }
+                cmdletList.Add(cmdletInfo);
+            }
         }
 
         // HACK: all functions are currently stored as scripts. But I'm confused, so I don't know how to fix it.
