@@ -19,11 +19,17 @@ namespace System.Management.Automation
             }
         }
 
+        private CommandInvocationIntrinsics _invokeCommand;
+
         public CommandInvocationIntrinsics InvokeCommand
         {
             get
             {
-                throw new NotImplementedException();
+                if (_invokeCommand == null)
+                {
+                    _invokeCommand = new CommandInvocationIntrinsics(ExecutionContext, (PipelineCommandRuntime)CommandRuntime);
+                }
+                return _invokeCommand;
             }
         }
 
