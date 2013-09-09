@@ -1210,5 +1210,29 @@ ls
 
             Assert.AreEqual(1, arrayExpressionAst.SubExpression.Statements.Count);
         }
+
+        [Test]
+        public void ParamBlockWithOneParameterTest()
+        {
+            ParamBlockAst result = ParseInput("param($path)")
+                .ParamBlock;
+
+            ParameterAst parameter = result.Parameters.FirstOrDefault();
+            Assert.AreEqual(1, result.Parameters.Count);
+            Assert.AreEqual("path", parameter.Name.VariablePath.UserPath);
+        }
+
+        [Test]
+        public void ParamBlockWithTwoParametersTest()
+        {
+            ParamBlockAst result = ParseInput("param($first, $second)")
+                .ParamBlock;
+
+            ParameterAst firstParameter = result.Parameters.FirstOrDefault();
+            ParameterAst secondParameter = result.Parameters.LastOrDefault();
+            Assert.AreEqual(2, result.Parameters.Count);
+            Assert.AreEqual("first", firstParameter.Name.VariablePath.UserPath);
+            Assert.AreEqual("second", secondParameter.Name.VariablePath.UserPath);
+        }
     }
 }

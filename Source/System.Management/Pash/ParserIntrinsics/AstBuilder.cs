@@ -66,7 +66,32 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.param_block);
 
-            throw new NotImplementedException(parseTreeNode.ToString());
+            IEnumerable<ParameterAst> parameters = BuildParameterListAst(parseTreeNode.ChildNodes[2]);
+
+            return new ParamBlockAst(
+                new ScriptExtent(parseTreeNode),
+                new AttributeAst[0],
+                parameters);
+        }
+
+        private IEnumerable<ParameterAst> BuildParameterListAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.parameter_list);
+
+            return from ParseTreeNode parameter in parseTreeNode.ChildNodes
+                   where parameter.Term == this._grammar.script_parameter
+                   select BuildParameterAst(parameter);
+        }
+
+        private ParameterAst BuildParameterAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.script_parameter);
+
+            return new ParameterAst(
+                new ScriptExtent(parseTreeNode),
+                BuildVariableAst(parseTreeNode.ChildNodes[0]),
+                new AttributeAst[0],
+                null);
         }
 
         ScriptBlockExpressionAst BuildScriptBlockExpressionAst(ParseTreeNode parseTreeNode)

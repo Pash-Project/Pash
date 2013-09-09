@@ -11,6 +11,7 @@ namespace System.Management.Automation.Language
         public ScriptBlockAst(IScriptExtent extent, ParamBlockAst paramBlock, StatementBlockAst statements, bool isFilter)
             : base(extent)
         {
+            this.ParamBlock = paramBlock;
             this.EndBlock = new NamedBlockAst(extent, TokenKind.End, statements, true);
             if (isFilter) throw new NotImplementedException(this.ToString());
         }
