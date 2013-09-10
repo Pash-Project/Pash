@@ -87,11 +87,25 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.script_parameter);
 
+            ExpressionAst defaultValueExpression = null;
+
+            if (parseTreeNode.ChildNodes.Last().Term == this._grammar.script_parameter_default)
+            {
+                defaultValueExpression = BuildParameterDefaultExpressionAst(parseTreeNode.ChildNodes.Last());
+            }
+
             return new ParameterAst(
                 new ScriptExtent(parseTreeNode),
                 BuildVariableAst(parseTreeNode.ChildNodes[0]),
                 new AttributeAst[0],
-                null);
+                defaultValueExpression);
+        }
+
+        private ExpressionAst BuildParameterDefaultExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.script_parameter_default);
+
+            return BuildExpressionAst(parseTreeNode.ChildNodes[1]);
         }
 
         ScriptBlockExpressionAst BuildScriptBlockExpressionAst(ParseTreeNode parseTreeNode)

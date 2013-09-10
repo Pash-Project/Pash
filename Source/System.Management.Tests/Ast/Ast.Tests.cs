@@ -1234,5 +1234,16 @@ ls
             Assert.AreEqual("first", firstParameter.Name.VariablePath.UserPath);
             Assert.AreEqual("second", secondParameter.Name.VariablePath.UserPath);
         }
+        
+        [Test]
+        public void ParamBlockWithOneParameterWithDefaultIntegerValueTest()
+        {
+            ParamBlockAst result = ParseInput("param($first = 2)")
+                .ParamBlock;
+
+            ParameterAst parameter = result.Parameters.FirstOrDefault();
+            var constantValue = (ConstantExpressionAst)parameter.DefaultValue;
+            Assert.AreEqual(2, constantValue.Value);
+        }
     }
 }
