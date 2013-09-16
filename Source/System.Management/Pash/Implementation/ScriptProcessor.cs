@@ -2,12 +2,14 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 using Pash.Implementation;
 using System.Management.Automation;
 using Pash.ParserIntrinsics;
 using Irony.Parsing;
 using System.Management.Automation.Language;
+using System.Management.Automation.Runspaces;
 using System.Management.Pash.Implementation;
 
 namespace Pash.Implementation
@@ -27,7 +29,15 @@ namespace Pash.Implementation
 
         internal override void BindArguments(PSObject obj)
         {
-            // TODO: bind arguments to "param" statement
+            ReadOnlyCollection<ParameterAst> scriptParameters = _scriptInfo.GetParameters();
+
+            for (int i = 0; i < scriptParameters.Count; ++i)
+            {
+                ParameterAst scriptParameter = scriptParameters[i];
+                CommandParameter parameter = Parameters[i];
+
+                ExecutionContext.SetVariable(scriptParameter.Name.VariablePath.UserPath, parameter.Value);
+            }
         }
 
         internal override void Initialize()
