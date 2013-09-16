@@ -34,10 +34,39 @@ namespace Pash.Implementation
             for (int i = 0; i < scriptParameters.Count; ++i)
             {
                 ParameterAst scriptParameter = scriptParameters[i];
-                CommandParameter parameter = Parameters[i];
+                CommandParameter parameter = GetParameterByPosition(i);
+                object parameterValue = GetParameterValue(scriptParameter, parameter);
 
-                ExecutionContext.SetVariable(scriptParameter.Name.VariablePath.UserPath, parameter.Value);
+                ExecutionContext.SetVariable(scriptParameter.Name.VariablePath.UserPath, parameterValue);
             }
+        }
+
+        private object GetParameterValue(ParameterAst scriptParameter, CommandParameter parameter)
+        {
+            if (parameter != null)
+            {
+                return parameter.Value;
+            }
+            return GetDefaultParameterValue(scriptParameter);
+        }
+
+        private CommandParameter GetParameterByPosition(int position)
+        {
+            if (Parameters.Count > position)
+            {
+                return Parameters[position];
+            }
+            return null;
+        }
+
+        private object GetDefaultParameterValue(ParameterAst scriptParameter)
+        {
+            var constantExpression = scriptParameter.DefaultValue as ConstantExpressionAst;
+            if (constantExpression != null)
+            {
+                return constantExpression.Value;
+            }
+            return null;
         }
 
         internal override void Initialize()

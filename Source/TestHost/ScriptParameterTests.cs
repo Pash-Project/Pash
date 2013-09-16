@@ -51,5 +51,16 @@ Write-Host $param1");
 
             Assert.AreEqual(result, string.Format("test{0}", Environment.NewLine));
         }
+
+        [Test]
+        public void NoParametersPassedToScriptThatTakesOneParameterWithDefaultConstantValueCausesDefaultValueToBePassedAsParameter()
+        {
+            string fileName = CreateScript(@"param($param1='defaultValue') Write-Host $param1");
+            string statement = string.Format("& '{0}'", fileName);
+
+            string result = TestHost.Execute(statement);
+
+            Assert.AreEqual(result, string.Format("defaultValue{0}", Environment.NewLine));
+        }
     }
 }
