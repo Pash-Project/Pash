@@ -489,7 +489,7 @@ namespace System.Management.Pash.Implementation
             {
                 obj = EvaluateAst(expression);
                 if (obj is PSObject) { obj = ((PSObject)obj).BaseObject; }
-                type = obj.GetType();
+                type = GetObjectType(obj);
             }
 
             var arguments = methodCallAst.Arguments.Select(EvaluateAst).Select(o => o is PSObject ? ((PSObject)o).BaseObject : o);
@@ -506,6 +506,14 @@ namespace System.Management.Pash.Implementation
             }
 
             throw new NotImplementedException(this.ToString());
+        }
+
+        private Type GetObjectType(object obj)
+        {
+            if (obj is Type)
+                return (Type)obj;
+
+            return obj.GetType();
         }
 
         public override AstVisitAction VisitMemberExpression(MemberExpressionAst memberExpressionAst)
@@ -526,7 +534,7 @@ namespace System.Management.Pash.Implementation
                 {
                     obj = ((PSObject)obj).BaseObject;
                 }
-                type = obj.GetType();
+                type = GetObjectType(obj);
             }
 
             if (memberExpressionAst.Member is StringConstantExpressionAst)
@@ -861,7 +869,8 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitTypeExpression(TypeExpressionAst typeExpressionAst)
         {
-            throw new NotImplementedException(typeExpressionAst.ToString());
+            this._pipelineCommandRuntime.outputResults.Write(typeExpressionAst.TypeName.GetReflectionType());
+            return AstVisitAction.SkipChildren;
         }
         #endregion
     }

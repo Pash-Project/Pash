@@ -63,6 +63,17 @@ $a.Length
         }
 
         [Test]
+        public void StaticMethodCalledOnTypeReferencedByVariable()
+        {
+            var result = TestHost.Execute(true, @"
+$path = [System.IO.Path]
+$path::GetExtension('test.txt')
+");
+
+            Assert.AreEqual(".txt" + Environment.NewLine, result);
+        }
+
+        [Test]
         public void TwoParameters()
         {
             var result = TestHost.Execute(@"[char]::IsUpper(""AbC"", 1)");
@@ -165,6 +176,17 @@ foreach ($t in [byte],[int],[long])
 ");
 
             Assert.AreEqual("3" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void StaticPropertyOnTypeReferencedByVariable()
+        {
+            var result = TestHost.Execute(true, @"
+$test = [Environment]
+$test::Version.ToString()
+");
+
+            Assert.AreEqual(Environment.Version.ToString() + Environment.NewLine, result);
         }
 
         [Test, Explicit]
