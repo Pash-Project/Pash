@@ -478,19 +478,7 @@ namespace System.Management.Pash.Implementation
         {
             var expression = methodCallAst.Expression;
 
-            Type type;
-            object obj;
-            if (expression is TypeExpressionAst)
-            {
-                obj = null;
-                type = ((TypeExpressionAst)expression).TypeName.GetReflectionType();
-            }
-            else
-            {
-                obj = EvaluateAst(expression);
-                if (obj is PSObject) { obj = ((PSObject)obj).BaseObject; }
-                type = GetObjectType(obj);
-            }
+            ObjectInfo objectInfo = GetObjectInfo(expression);
 
             var arguments = methodCallAst.Arguments.Select(EvaluateAst).Select(o => o is PSObject ? ((PSObject)o).BaseObject : o);
 
@@ -498,8 +486,8 @@ namespace System.Management.Pash.Implementation
             {
                 BindingFlags bindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
                 var name = (methodCallAst.Member as StringConstantExpressionAst).Value;
-                var method = type.GetMethod(name, bindingFlags, null, arguments.Select(a => a.GetType()).ToArray(), null);
-                var result = method.Invoke(obj, arguments.ToArray());
+                var method = objectInfo.Type.GetMethod(name, bindingFlags, null, arguments.Select(a => a.GetType()).ToArray(), null);
+                var result = method.Invoke(objectInfo.Object, arguments.ToArray());
 
                 _pipelineCommandRuntime.WriteObject(result);
                 return AstVisitAction.SkipChildren;
@@ -508,34 +496,19 @@ namespace System.Management.Pash.Implementation
             throw new NotImplementedException(this.ToString());
         }
 
-        private Type GetObjectType(object obj)
+        private ObjectInfo GetObjectInfo(ExpressionAst expression)
         {
-            if (obj is Type)
-                return (Type)obj;
+            if (expression is TypeExpressionAst)
+                return new ObjectInfo(((TypeExpressionAst)expression).TypeName.GetReflectionType());
 
-            return obj.GetType();
+            return new ObjectInfo(EvaluateAst(expression));
         }
 
         public override AstVisitAction VisitMemberExpression(MemberExpressionAst memberExpressionAst)
         {
             var expression = memberExpressionAst.Expression;
 
-            Type type;
-            object obj;
-            if (expression is TypeExpressionAst)
-            {
-                obj = null;
-                type = ((TypeExpressionAst)expression).TypeName.GetReflectionType();
-            }
-            else
-            {
-                obj = EvaluateAst(expression);
-                if (obj is PSObject)
-                {
-                    obj = ((PSObject)obj).BaseObject;
-                }
-                type = GetObjectType(obj);
-            }
+            ObjectInfo objectInfo = GetObjectInfo(expression);
 
             if (memberExpressionAst.Member is StringConstantExpressionAst)
             {
@@ -545,18 +518,18 @@ namespace System.Management.Pash.Implementation
                 BindingFlags bindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
 
                 // TODO: Single() is a problem for overloaded methods
-                var memberInfo = type.GetMember(name, bindingFlags).Single();
+                var memberInfo = objectInfo.Type.GetMember(name, bindingFlags).Single();
 
                 if (memberInfo != null)
                 {
                     switch (memberInfo.MemberType)
                     {
                         case MemberTypes.Field:
-                            result = ((FieldInfo)memberInfo).GetValue(obj);
+                            result = ((FieldInfo)memberInfo).GetValue(objectInfo.Object);
                             break;
 
                         case MemberTypes.Property:
-                            result = ((PropertyInfo)memberInfo).GetValue(obj, null);
+                            result = ((PropertyInfo)memberInfo).GetValue(objectInfo.Object, null);
                             break;
 
                         default:
