@@ -81,6 +81,13 @@ namespace TestHost
         }
 
         [TestCase(@"1 -eq 1", "True")]
+        [TestCase(@"1 -eq 2", "False")]
+        [TestCase(@"'abc' -eq 'abc'", "True")]
+        [TestCase(@"'abc' -eq 'ghi'", "False")]
+        [TestCase(@"$true -eq $true", "True")]
+        [TestCase(@"$true -eq $false", "False")]
+        [TestCase(@"$test = $null; $test -eq $null", "True")]
+        [TestCase(@"'abc' -eq $null", "False")]
         public void ComparisonTest(string input, string expected)
         {
             string result = TestHost.Execute(input);

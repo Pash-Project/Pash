@@ -64,8 +64,7 @@ namespace System.Management.Pash.Implementation
                     return Add(leftOperand, rightOperand);
 
                 case TokenKind.Ieq:
-                    if (leftOperandInt.HasValue) return leftOperandInt == rightOperandInt;
-                    throw new NotImplementedException(binaryExpressionAst.ToString());
+                    return Object.Equals(leftOperand, rightOperand);
 
                 case TokenKind.Ine:
                     if (leftOperandInt.HasValue) return leftOperandInt != rightOperandInt;
