@@ -80,10 +80,12 @@ namespace TestHost
             StringAssert.AreEqualIgnoringCase("yyy" + Environment.NewLine, TestHost.Execute("if (1 -eq 2) { 'xxx' } else { 'yyy' }"));
         }
 
-        [Test]
-        public void ComparisonTest()
+        [TestCase(@"1 -eq 1", "True")]
+        public void ComparisonTest(string input, string expected)
         {
-            StringAssert.AreEqualIgnoringCase("True" + Environment.NewLine, TestHost.Execute("1 -eq 1"));
+            string result = TestHost.Execute(input);
+
+            StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
         }
 
         [Test]
