@@ -64,6 +64,8 @@ namespace System.Management.Pash.Implementation
                     return Add(leftOperand, rightOperand);
 
                 case TokenKind.Ieq:
+                    if (leftOperand is string)
+                        return String.Equals(leftOperand as string, rightOperand as string, StringComparison.InvariantCultureIgnoreCase);
                     return Object.Equals(leftOperand, rightOperand);
 
                 case TokenKind.Ine:
