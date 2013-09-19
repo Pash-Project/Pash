@@ -473,5 +473,16 @@ namespace TestHost
                 result
                 );
         }
+
+        [TestCase(@"8 -ge 8", "True")]
+        [TestCase(@"8 -ge 7", "True")]
+        [TestCase(@"8 -ge 9", "False")]
+        public void GreaterOrEqualToTest(string input, string expected)
+        {
+            string result = TestHost.Execute(input);
+
+            StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
+        }
+
     }
 }

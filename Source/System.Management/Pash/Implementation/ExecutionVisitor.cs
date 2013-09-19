@@ -76,6 +76,10 @@ namespace System.Management.Pash.Implementation
                     if (leftOperandInt.HasValue) return leftOperandInt > rightOperandInt;
                     throw new NotImplementedException(binaryExpressionAst.ToString());
 
+                case TokenKind.Ige:
+                    if (leftOperandInt.HasValue) return leftOperandInt >= rightOperandInt;
+                    throw new NotImplementedException(binaryExpressionAst.ToString());
+
                 case TokenKind.Or:
                     if (leftOperandBool.HasValue) return leftOperandBool.Value || rightOperandBool.Value;
                     throw new NotImplementedException(binaryExpressionAst.ToString());
@@ -112,7 +116,6 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Bor:
                 case TokenKind.Bxor:
                 case TokenKind.Join:
-                case TokenKind.Ige:
                 case TokenKind.Ilike:
                 case TokenKind.Inotlike:
                 case TokenKind.Imatch:
