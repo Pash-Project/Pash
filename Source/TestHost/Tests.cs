@@ -506,5 +506,15 @@ namespace TestHost
 
             StringAssert.AreEqualIgnoringCase("value" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void Exit()
+        {
+            string result = TestHost.Execute(
+                @"& { Write-Host 'before'; exit; Write-Host 'after' }"
+            );
+
+            StringAssert.AreEqualIgnoringCase("before" + Environment.NewLine, result);
+        }
     }
 }

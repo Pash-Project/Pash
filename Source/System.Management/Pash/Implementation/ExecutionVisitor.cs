@@ -727,6 +727,8 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitExitStatement(ExitStatementAst exitStatementAst)
         {
+            if (exitStatementAst.Pipeline == null) throw new ReturnException();
+
             throw new NotImplementedException(); //VisitExitStatement(exitStatementAst);
         }
 

@@ -234,6 +234,11 @@ namespace Pash.ParserIntrinsics
                 return BuildReturnStatementAst(childNode);
             }
 
+            else if (childNode.Term == this._grammar._flow_control_statement_exit)
+            {
+                return BuildExitStatementAst(childNode);
+            }
+
             throw new NotImplementedException(childNode.ToString());
         }
 
@@ -259,6 +264,14 @@ namespace Pash.ParserIntrinsics
             return new ReturnStatementAst(
                 new ScriptExtent(parseTreeNode),
                 pipeline
+                );
+        }
+
+        private StatementAst BuildExitStatementAst(ParseTreeNode parseTreeNode)
+        {
+            return new ExitStatementAst(
+                new ScriptExtent(parseTreeNode),
+                null
                 );
         }
 

@@ -1199,6 +1199,19 @@ ls
         }
 
         [Test]
+        public void Exit()
+        {
+            ExitStatementAst exitStatementAst = ParseStatement("{ exit }")
+                .PipelineElements[0]
+                .Expression
+                .ScriptBlock
+                .EndBlock
+                .Statements[0];
+
+            Assert.Null(exitStatementAst.Pipeline);
+        }
+
+        [Test]
         public void Cast()
         {
             ConvertExpressionAst convertExpressionAst = ParseStatement("[Text.RegularExpressions.RegexOptions] 'IgnoreCase'")
