@@ -484,5 +484,27 @@ namespace TestHost
             StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
         }
 
+        [Test]
+        public void HashTableIntegerIndexer()
+        {
+            string result = TestHost.Execute(
+                "$test = new-object System.Collections.Hashtable",
+                "$test.Add(0, 'value')",
+                "$test[0]");
+
+            StringAssert.AreEqualIgnoringCase("value" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void HashTableStringIndexer()
+        {
+            string result = TestHost.Execute(
+                "$test = new-object System.Collections.Hashtable",
+                "$test.Add('name', 'value')",
+                "$test['name']"
+               );
+
+            StringAssert.AreEqualIgnoringCase("value" + Environment.NewLine, result);
+        }
     }
 }

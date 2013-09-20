@@ -425,18 +425,26 @@ namespace System.Management.Pash.Implementation
         {
             var targetValue = EvaluateAst(indexExpressionAst.Target);
 
-            int index = (int)EvaluateAst(indexExpressionAst.Index);
+            object index = EvaluateAst(indexExpressionAst.Index);
+
+            if (targetValue is PSObject) targetValue = ((PSObject)targetValue).BaseObject;
 
             var stringTargetValue = targetValue as string;
             if (stringTargetValue != null)
             {
-                var result = stringTargetValue[index];
+                var result = stringTargetValue[(int)index];
                 this._pipelineCommandRuntime.WriteObject(result);
             }
 
             else if (targetValue is IList)
             {
-                var result = (targetValue as IList)[index];
+                var result = (targetValue as IList)[(int)index];
+                this._pipelineCommandRuntime.WriteObject(result);
+            }
+
+            else if (targetValue is IDictionary)
+            {
+                var result = (targetValue as IDictionary)[index];
                 this._pipelineCommandRuntime.WriteObject(result);
             }
 
