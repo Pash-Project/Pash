@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Management.Automation.Runspaces;
 using System.Collections;
 using Extensions.Enumerable;
+using System.Text.RegularExpressions;
 
 namespace System.Management.Pash.Implementation
 {
@@ -119,6 +120,8 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Ilike:
                 case TokenKind.Inotlike:
                 case TokenKind.Imatch:
+                    return Match(leftOperand, rightOperand);
+
                 case TokenKind.Inotmatch:
                 case TokenKind.Ireplace:
                 case TokenKind.Icontains:
@@ -152,6 +155,15 @@ namespace System.Management.Pash.Implementation
                 default:
                     throw new InvalidOperationException(binaryExpressionAst.ToString());
             }
+        }
+
+        private bool Match(object leftOperand, object rightOperand)
+        {
+            if (!(leftOperand is string) || !(rightOperand is string))
+                throw new NotImplementedException(string.Format("{0} -match {1}", leftOperand, rightOperand));
+
+            Match match = Regex.Match((string)leftOperand, (string)rightOperand, RegexOptions.IgnoreCase);
+            return match.Success;
         }
 
         IEnumerable<int> Range(int start, int end)

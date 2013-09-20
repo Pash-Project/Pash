@@ -78,6 +78,7 @@
     <Compile Include="LiteralsTests.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="7.8.4 - Pattern Matching.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FileSystemTests\ProcessBlockingTests.cs" />
