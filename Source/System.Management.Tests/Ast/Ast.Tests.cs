@@ -223,6 +223,31 @@ ls
         }
 
         [Test]
+        public void FunctionWithOneParameter()
+        {
+            FunctionDefinitionAst functionDefinitionAst = ParseInput("function Update-File($file) { 'x' }").
+                   EndBlock.
+                   Statements[0];
+
+            Assert.AreEqual("Update-File", functionDefinitionAst.Name);
+            Assert.AreEqual(1, functionDefinitionAst.Parameters.Count);
+            Assert.AreEqual("file", functionDefinitionAst.Parameters[0].Name.VariablePath.UserPath);
+        }
+
+        [Test]
+        public void FunctionWithTwoParameters()
+        {
+            FunctionDefinitionAst functionDefinitionAst = ParseInput("function Update-File($param1, $param2) { 'x' }").
+                   EndBlock.
+                   Statements[0];
+
+            Assert.AreEqual("Update-File", functionDefinitionAst.Name);
+            Assert.AreEqual(2, functionDefinitionAst.Parameters.Count);
+            Assert.AreEqual("param1", functionDefinitionAst.Parameters[0].Name.VariablePath.UserPath);
+            Assert.AreEqual("param2", functionDefinitionAst.Parameters[1].Name.VariablePath.UserPath);
+        }
+
+        [Test]
         public void AssignmentTest()
         {
             AssignmentStatementAst assignmentStatementAst = ParseInput("$x = 'y'").

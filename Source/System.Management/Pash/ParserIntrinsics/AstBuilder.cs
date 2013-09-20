@@ -214,13 +214,26 @@ namespace Pash.ParserIntrinsics
 
             bool isFilter = functionOrFilterTerm.ChildNodes.Single().Token.Text == "filter";
 
+            ScriptBlockAst scriptBlock = null;
+            IEnumerable<ParameterAst> parameters = null;
+
+            if (parseTreeNode.ChildNodes.Count == 6)
+            {
+                parameters = BuildParameterListAst(parseTreeNode.ChildNodes[2].ChildNodes[1]);
+                scriptBlock = BuildScriptBlockAst(parseTreeNode.ChildNodes[4]);
+            }
+            else
+            {
+                scriptBlock = BuildScriptBlockAst(parseTreeNode.ChildNodes[3]);
+            }
+
             return new FunctionDefinitionAst(
                 new ScriptExtent(parseTreeNode),
                 isFilter,
                 false,
                 parseTreeNode.ChildNodes[1].FindTokenAndGetText(),
-                null,
-                BuildScriptBlockAst(parseTreeNode.ChildNodes[3])
+                parameters,
+                scriptBlock
                 );
         }
 
