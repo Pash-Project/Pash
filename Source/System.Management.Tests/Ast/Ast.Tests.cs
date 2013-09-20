@@ -1161,6 +1161,18 @@ ls
         }
 
         [Test]
+        public void NotOperator()
+        {
+            UnaryExpressionAst unaryExpressionAst = ParseStatement("-not $true")
+                .PipelineElements[0]
+                .Expression;
+
+            Assert.AreEqual(TokenKind.Not, unaryExpressionAst.TokenKind);
+            VariableExpressionAst variableExpressionAst = (VariableExpressionAst)unaryExpressionAst.Child;
+            Assert.AreEqual("true", variableExpressionAst.VariablePath.UserPath);
+        }
+
+        [Test]
         public void PostIncrementExpression()
         {
             UnaryExpressionAst unaryExpressionAst = ParseStatement("$x++")

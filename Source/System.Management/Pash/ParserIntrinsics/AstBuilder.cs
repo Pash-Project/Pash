@@ -719,6 +719,11 @@ namespace Pash.ParserIntrinsics
                 return BuildCastExpression(childNode);
             }
 
+            else if (childNode.Term == this._grammar._unary_not_expression)
+            {
+                return BuildUnaryNotExpressionAst(childNode);
+            }
+
             throw new NotImplementedException(parseTreeNode.ToString());
         }
 
@@ -771,6 +776,15 @@ namespace Pash.ParserIntrinsics
             return new UnaryExpressionAst(
                 new ScriptExtent(parseTreeNode),
                 TokenKind.PlusPlus,
+                BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1])
+                );
+        }
+
+        ExpressionAst BuildUnaryNotExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            return new UnaryExpressionAst(
+                new ScriptExtent(parseTreeNode),
+                TokenKind.Not,
                 BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1])
                 );
         }

@@ -587,11 +587,29 @@ namespace System.Management.Pash.Implementation
 
                     break;
 
+                case TokenKind.Not:
+
+                    if (childVariable == null) throw new NotImplementedException(unaryExpressionAst.ToString());
+
+                    VisitUnaryNotVariableExpression(childVariable);
+
+                    break;
+
                 default:
                     throw new NotImplementedException(unaryExpressionAst.ToString());
             }
 
             return AstVisitAction.SkipChildren;
+        }
+
+        private void VisitUnaryNotVariableExpression(PSVariable childVariable)
+        {
+            object childVariableValue = childVariable.GetBaseObjectValue();
+            if (childVariableValue is bool)
+            {
+                this._pipelineCommandRuntime.WriteObject(!(bool)childVariableValue);
+            }
+            else throw new NotImplementedException(childVariable.Value.ToString());
         }
 
         public override AstVisitAction VisitArrayExpression(ArrayExpressionAst arrayExpressionAst)

@@ -80,5 +80,15 @@ namespace System.Management.Automation
 
             return sb.ToString();
         }
+
+        internal object GetBaseObjectValue()
+        {
+            if (Value is PSObject)
+            {
+                return ((PSObject)Value).BaseObject;
+            }
+
+            return Value;
+        }
     }
 }
