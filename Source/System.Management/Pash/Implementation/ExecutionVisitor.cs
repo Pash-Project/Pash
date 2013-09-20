@@ -163,7 +163,20 @@ namespace System.Management.Pash.Implementation
                 throw new NotImplementedException(string.Format("{0} -match {1}", leftOperand, rightOperand));
 
             Match match = Regex.Match((string)leftOperand, (string)rightOperand, RegexOptions.IgnoreCase);
+
+            SetMatchesVariable(match);
+
             return match.Success;
+        }
+
+        private void SetMatchesVariable(Match match)
+        {
+            var matches = new Hashtable();
+            for (int i = 0; i < match.Groups.Count; ++i)
+            {
+                matches.Add(i, match.Groups[i].Value);
+            }
+            _context.SetVariable("matches", PSObject.AsPSObject(matches));
         }
 
         IEnumerable<int> Range(int start, int end)
