@@ -174,19 +174,20 @@ namespace System.Management.Pash.Implementation
         {
             var matches = new Hashtable();
             var groupNames = from name in regex.GetGroupNames()
-                             where match.Groups[name].Success && name != "0"
+                             where match.Groups[name].Success
                              select name;
-            var groupNumbers = from num in regex.GetGroupNumbers()
-                               where match.Groups[num].Success
-                               select num;
 
             foreach (string name in groupNames)
             {
-                matches.Add(name, match.Groups[name].Value);
-            }
-            foreach (int num in groupNumbers)
-            {
-                matches.Add(num, match.Groups[num].Value);
+                int num;
+                if (int.TryParse(name, out num))
+                {
+                    matches.Add(num, match.Groups[num].Value);
+                }
+                else
+                {
+                    matches.Add(name, match.Groups[name].Value);
+                }
             }
 
             _context.SetVariable("Matches", PSObject.AsPSObject(matches));
