@@ -516,5 +516,41 @@ namespace TestHost
 
             StringAssert.AreEqualIgnoringCase("before" + Environment.NewLine, result);
         }
+
+        [TestFixture]
+        class TryCatchTests
+        {
+            [Test]
+            public void TryBlockStatementIsExecuted()
+            {
+                string result = TestHost.Execute(@"try { Write-Host 'try' } catch { }");
+
+                StringAssert.AreEqualIgnoringCase("try" + Environment.NewLine, result);
+            }
+
+            [Test]
+            public void TryBlockThrowsExceptionAndSingleStatementInCatchBlockIsExecuted()
+            {
+                string result = TestHost.Execute(@"try { $null.GetType() } catch { Write-Host 'catch' }");
+
+                StringAssert.AreEqualIgnoringCase("catch" + Environment.NewLine, result);
+            }
+
+            [Test]
+            public void TryBlockReturnsAndSingleStatementInCatchBlockIsNotExecuted()
+            {
+                string result = TestHost.Execute(@"try { Write-Host 'exiting'; return } catch { Write-Host 'catch' }");
+
+                StringAssert.AreEqualIgnoringCase("exiting" + Environment.NewLine, result);
+            }
+
+            [Test]
+            public void TryBlockThrowsExceptionAndErrorRecordAvailableInCatchBlock()
+            {
+                string result = TestHost.Execute(@"try { 'abc'.Substring(-1) } catch { Write-Host $_.GetType() }");
+
+                StringAssert.AreEqualIgnoringCase("System.Management.Automation.ErrorRecord" + Environment.NewLine, result);
+            }
+        }
     }
 }

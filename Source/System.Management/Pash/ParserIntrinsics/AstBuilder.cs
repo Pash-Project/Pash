@@ -295,7 +295,32 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildTryStatementAst(ParseTreeNode parseTreeNode)
         {
-            throw new NotImplementedException();
+            return new TryStatementAst(
+                new ScriptExtent(parseTreeNode),
+                BuildStatementBlockAst(parseTreeNode.ChildNodes[0].ChildNodes[1]),
+                BuildCatchClausesAst(parseTreeNode.ChildNodes[0].ChildNodes[2]),
+                null
+                );
+        }
+
+        private IEnumerable<CatchClauseAst> BuildCatchClausesAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.catch_clauses);
+
+            return from ParseTreeNode catchClause in parseTreeNode.ChildNodes
+                   where catchClause.Term == this._grammar.catch_clause
+                   select BuildCatchClauseAst(catchClause);
+        }
+
+        private CatchClauseAst BuildCatchClauseAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.catch_clause);
+
+            return new CatchClauseAst(
+                new ScriptExtent(parseTreeNode),
+                new TypeConstraintAst[0],
+                BuildStatementBlockAst(parseTreeNode.ChildNodes[1])
+                );
         }
 
         StatementAst BuildDataStatementAst(ParseTreeNode parseTreeNode)

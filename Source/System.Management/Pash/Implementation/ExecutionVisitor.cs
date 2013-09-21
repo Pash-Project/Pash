@@ -879,7 +879,23 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitTryStatement(TryStatementAst tryStatementAst)
         {
-            throw new NotImplementedException(); //VisitTryStatement(tryStatementAst);
+            try
+            {
+                tryStatementAst.Body.Visit(this);
+            }
+            catch (ReturnException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var error = new ErrorRecord(ex, "", ErrorCategory.InvalidOperation, null);
+                _context.SetVariable("_", error);
+
+                tryStatementAst.CatchClauses.Last().Body.Visit(this);
+            }
+
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitTypeConstraint(TypeConstraintAst typeConstraintAst)

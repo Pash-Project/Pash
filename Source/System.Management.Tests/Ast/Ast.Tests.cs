@@ -1295,5 +1295,28 @@ ls
             var constantValue = (ConstantExpressionAst)parameter.DefaultValue;
             Assert.AreEqual(2, constantValue.Value);
         }
+
+        [TestFixture]
+        public class TryCatchTests
+        {
+            [Test]
+            public void TryCatchAll()
+            {
+                TryStatementAst tryStatementAst = ParseStatement("try { } catch { }");
+
+                Assert.AreEqual(1, tryStatementAst.CatchClauses.Count);
+                CollectionAssert.IsEmpty(tryStatementAst.Body.Statements);
+                CollectionAssert.IsEmpty(tryStatementAst.CatchClauses.Single().Body.Statements);
+            }
+            
+            [Test]
+            public void TryCatchWithSingleStatements()
+            {
+                TryStatementAst tryStatementAst = ParseStatement("try { Get-ChildItem } catch { Write-Host 'failed' }");
+
+                Assert.AreEqual(1, tryStatementAst.Body.Statements.Count);
+                Assert.AreEqual(1, tryStatementAst.CatchClauses.Single().Body.Statements.Count);
+            }
+        }
     }
 }
