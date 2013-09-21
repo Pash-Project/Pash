@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Management.Automation.Runspaces;
 using System.Collections;
 using Extensions.Enumerable;
+using System.Text.RegularExpressions;
 
 namespace System.Management.Pash.Implementation
 {
@@ -64,8 +65,9 @@ namespace System.Management.Pash.Implementation
                     return Add(leftOperand, rightOperand);
 
                 case TokenKind.Ieq:
-                    if (leftOperandInt.HasValue) return leftOperandInt == rightOperandInt;
-                    throw new NotImplementedException(binaryExpressionAst.ToString());
+                    if (leftOperand is string)
+                        return String.Equals(leftOperand as string, rightOperand as string, StringComparison.InvariantCultureIgnoreCase);
+                    return Object.Equals(leftOperand, rightOperand);
 
                 case TokenKind.Ine:
                     if (leftOperandInt.HasValue) return leftOperandInt != rightOperandInt;
@@ -73,6 +75,10 @@ namespace System.Management.Pash.Implementation
 
                 case TokenKind.Igt:
                     if (leftOperandInt.HasValue) return leftOperandInt > rightOperandInt;
+                    throw new NotImplementedException(binaryExpressionAst.ToString());
+
+                case TokenKind.Ige:
+                    if (leftOperandInt.HasValue) return leftOperandInt >= rightOperandInt;
                     throw new NotImplementedException(binaryExpressionAst.ToString());
 
                 case TokenKind.Or:
@@ -111,10 +117,11 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Bor:
                 case TokenKind.Bxor:
                 case TokenKind.Join:
-                case TokenKind.Ige:
                 case TokenKind.Ilike:
                 case TokenKind.Inotlike:
                 case TokenKind.Imatch:
+                    return Match(leftOperand, rightOperand);
+
                 case TokenKind.Inotmatch:
                 case TokenKind.Ireplace:
                 case TokenKind.Icontains:
@@ -148,6 +155,28 @@ namespace System.Management.Pash.Implementation
                 default:
                     throw new InvalidOperationException(binaryExpressionAst.ToString());
             }
+        }
+
+        private bool Match(object leftOperand, object rightOperand)
+        {
+            if (!(leftOperand is string) || !(rightOperand is string))
+                throw new NotImplementedException(string.Format("{0} -match {1}", leftOperand, rightOperand));
+
+            Match match = Regex.Match((string)leftOperand, (string)rightOperand, RegexOptions.IgnoreCase);
+
+            SetMatchesVariable(match);
+
+            return match.Success;
+        }
+
+        private void SetMatchesVariable(Match match)
+        {
+            var matches = new Hashtable();
+            for (int i = 0; i < match.Groups.Count; ++i)
+            {
+                matches.Add(i, match.Groups[i].Value);
+            }
+            _context.SetVariable("matches", PSObject.AsPSObject(matches));
         }
 
         IEnumerable<int> Range(int start, int end)
@@ -409,18 +438,26 @@ namespace System.Management.Pash.Implementation
         {
             var targetValue = EvaluateAst(indexExpressionAst.Target);
 
-            int index = (int)EvaluateAst(indexExpressionAst.Index);
+            object index = EvaluateAst(indexExpressionAst.Index);
+
+            if (targetValue is PSObject) targetValue = ((PSObject)targetValue).BaseObject;
 
             var stringTargetValue = targetValue as string;
             if (stringTargetValue != null)
             {
-                var result = stringTargetValue[index];
+                var result = stringTargetValue[(int)index];
                 this._pipelineCommandRuntime.WriteObject(result);
             }
 
             else if (targetValue is IList)
             {
-                var result = (targetValue as IList)[index];
+                var result = (targetValue as IList)[(int)index];
+                this._pipelineCommandRuntime.WriteObject(result);
+            }
+
+            else if (targetValue is IDictionary)
+            {
+                var result = (targetValue as IDictionary)[index];
                 this._pipelineCommandRuntime.WriteObject(result);
             }
 
@@ -478,19 +515,7 @@ namespace System.Management.Pash.Implementation
         {
             var expression = methodCallAst.Expression;
 
-            Type type;
-            object obj;
-            if (expression is TypeExpressionAst)
-            {
-                obj = null;
-                type = ((TypeExpressionAst)expression).TypeName.GetReflectionType();
-            }
-            else
-            {
-                obj = EvaluateAst(expression);
-                if (obj is PSObject) { obj = ((PSObject)obj).BaseObject; }
-                type = obj.GetType();
-            }
+            ObjectInfo objectInfo = GetObjectInfo(expression);
 
             var arguments = methodCallAst.Arguments.Select(EvaluateAst).Select(o => o is PSObject ? ((PSObject)o).BaseObject : o);
 
@@ -498,8 +523,8 @@ namespace System.Management.Pash.Implementation
             {
                 BindingFlags bindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
                 var name = (methodCallAst.Member as StringConstantExpressionAst).Value;
-                var method = type.GetMethod(name, bindingFlags, null, arguments.Select(a => a.GetType()).ToArray(), null);
-                var result = method.Invoke(obj, arguments.ToArray());
+                var method = objectInfo.Type.GetMethod(name, bindingFlags, null, arguments.Select(a => a.GetType()).ToArray(), null);
+                var result = method.Invoke(objectInfo.Object, arguments.ToArray());
 
                 _pipelineCommandRuntime.WriteObject(result);
                 return AstVisitAction.SkipChildren;
@@ -508,26 +533,19 @@ namespace System.Management.Pash.Implementation
             throw new NotImplementedException(this.ToString());
         }
 
+        private ObjectInfo GetObjectInfo(ExpressionAst expression)
+        {
+            if (expression is TypeExpressionAst)
+                return new ObjectInfo(((TypeExpressionAst)expression).TypeName.GetReflectionType());
+
+            return new ObjectInfo(EvaluateAst(expression));
+        }
+
         public override AstVisitAction VisitMemberExpression(MemberExpressionAst memberExpressionAst)
         {
             var expression = memberExpressionAst.Expression;
 
-            Type type;
-            object obj;
-            if (expression is TypeExpressionAst)
-            {
-                obj = null;
-                type = ((TypeExpressionAst)expression).TypeName.GetReflectionType();
-            }
-            else
-            {
-                obj = EvaluateAst(expression);
-                if (obj is PSObject)
-                {
-                    obj = ((PSObject)obj).BaseObject;
-                }
-                type = obj.GetType();
-            }
+            ObjectInfo objectInfo = GetObjectInfo(expression);
 
             if (memberExpressionAst.Member is StringConstantExpressionAst)
             {
@@ -537,18 +555,18 @@ namespace System.Management.Pash.Implementation
                 BindingFlags bindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
 
                 // TODO: Single() is a problem for overloaded methods
-                var memberInfo = type.GetMember(name, bindingFlags).Single();
+                var memberInfo = objectInfo.Type.GetMember(name, bindingFlags).Single();
 
                 if (memberInfo != null)
                 {
                     switch (memberInfo.MemberType)
                     {
                         case MemberTypes.Field:
-                            result = ((FieldInfo)memberInfo).GetValue(obj);
+                            result = ((FieldInfo)memberInfo).GetValue(objectInfo.Object);
                             break;
 
                         case MemberTypes.Property:
-                            result = ((PropertyInfo)memberInfo).GetValue(obj, null);
+                            result = ((PropertyInfo)memberInfo).GetValue(objectInfo.Object, null);
                             break;
 
                         default:
@@ -602,11 +620,29 @@ namespace System.Management.Pash.Implementation
 
                     break;
 
+                case TokenKind.Not:
+
+                    if (childVariable == null) throw new NotImplementedException(unaryExpressionAst.ToString());
+
+                    VisitUnaryNotVariableExpression(childVariable);
+
+                    break;
+
                 default:
                     throw new NotImplementedException(unaryExpressionAst.ToString());
             }
 
             return AstVisitAction.SkipChildren;
+        }
+
+        private void VisitUnaryNotVariableExpression(PSVariable childVariable)
+        {
+            object childVariableValue = childVariable.GetBaseObjectValue();
+            if (childVariableValue is bool)
+            {
+                this._pipelineCommandRuntime.WriteObject(!(bool)childVariableValue);
+            }
+            else throw new NotImplementedException(childVariable.Value.ToString());
         }
 
         public override AstVisitAction VisitArrayExpression(ArrayExpressionAst arrayExpressionAst)
@@ -691,6 +727,8 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitExitStatement(ExitStatementAst exitStatementAst)
         {
+            if (exitStatementAst.Pipeline == null) throw new ReturnException();
+
             throw new NotImplementedException(); //VisitExitStatement(exitStatementAst);
         }
 
@@ -841,7 +879,23 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitTryStatement(TryStatementAst tryStatementAst)
         {
-            throw new NotImplementedException(); //VisitTryStatement(tryStatementAst);
+            try
+            {
+                tryStatementAst.Body.Visit(this);
+            }
+            catch (ReturnException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var error = new ErrorRecord(ex, "", ErrorCategory.InvalidOperation, null);
+                _context.SetVariable("_", error);
+
+                tryStatementAst.CatchClauses.Last().Body.Visit(this);
+            }
+
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitTypeConstraint(TypeConstraintAst typeConstraintAst)
@@ -861,7 +915,8 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitTypeExpression(TypeExpressionAst typeExpressionAst)
         {
-            throw new NotImplementedException(typeExpressionAst.ToString());
+            this._pipelineCommandRuntime.outputResults.Write(typeExpressionAst.TypeName.GetReflectionType());
+            return AstVisitAction.SkipChildren;
         }
         #endregion
     }

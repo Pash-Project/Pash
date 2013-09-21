@@ -80,10 +80,20 @@ namespace TestHost
             StringAssert.AreEqualIgnoringCase("yyy" + Environment.NewLine, TestHost.Execute("if (1 -eq 2) { 'xxx' } else { 'yyy' }"));
         }
 
-        [Test]
-        public void ComparisonTest()
+        [TestCase(@"1 -eq 1", "True")]
+        [TestCase(@"1 -eq 2", "False")]
+        [TestCase(@"'abc' -eq 'abc'", "True")]
+        [TestCase(@"'abc' -eq 'ghi'", "False")]
+        [TestCase(@"$true -eq $true", "True")]
+        [TestCase(@"$true -eq $false", "False")]
+        [TestCase(@"$test = $null; $test -eq $null", "True")]
+        [TestCase(@"'abc' -eq $null", "False")]
+        [TestCase(@"'abc' -eq 'ABC'", "True")]
+        public void ComparisonTest(string input, string expected)
         {
-            StringAssert.AreEqualIgnoringCase("True" + Environment.NewLine, TestHost.Execute("1 -eq 1"));
+            string result = TestHost.Execute(input);
+
+            StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
         }
 
         [Test]
@@ -462,6 +472,85 @@ namespace TestHost
                 "e" + Environment.NewLine,
                 result
                 );
+        }
+
+        [TestCase(@"8 -ge 8", "True")]
+        [TestCase(@"8 -ge 7", "True")]
+        [TestCase(@"8 -ge 9", "False")]
+        public void GreaterOrEqualToTest(string input, string expected)
+        {
+            string result = TestHost.Execute(input);
+
+            StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void HashTableIntegerIndexer()
+        {
+            string result = TestHost.Execute(
+                "$test = new-object System.Collections.Hashtable",
+                "$test.Add(0, 'value')",
+                "$test[0]");
+
+            StringAssert.AreEqualIgnoringCase("value" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void HashTableStringIndexer()
+        {
+            string result = TestHost.Execute(
+                "$test = new-object System.Collections.Hashtable",
+                "$test.Add('name', 'value')",
+                "$test['name']"
+               );
+
+            StringAssert.AreEqualIgnoringCase("value" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void Exit()
+        {
+            string result = TestHost.Execute(
+                @"& { Write-Host 'before'; exit; Write-Host 'after' }"
+            );
+
+            StringAssert.AreEqualIgnoringCase("before" + Environment.NewLine, result);
+        }
+
+        [TestFixture]
+        class TryCatchTests
+        {
+            [Test]
+            public void TryBlockStatementIsExecuted()
+            {
+                string result = TestHost.Execute(@"try { Write-Host 'try' } catch { }");
+
+                StringAssert.AreEqualIgnoringCase("try" + Environment.NewLine, result);
+            }
+
+            [Test]
+            public void TryBlockThrowsExceptionAndSingleStatementInCatchBlockIsExecuted()
+            {
+                string result = TestHost.Execute(@"try { $null.GetType() } catch { Write-Host 'catch' }");
+
+                StringAssert.AreEqualIgnoringCase("catch" + Environment.NewLine, result);
+            }
+
+            [Test]
+            public void TryBlockReturnsAndSingleStatementInCatchBlockIsNotExecuted()
+            {
+                string result = TestHost.Execute(@"try { Write-Host 'exiting'; return } catch { Write-Host 'catch' }");
+
+                StringAssert.AreEqualIgnoringCase("exiting" + Environment.NewLine, result);
+            }
+
+            [Test]
+            public void TryBlockThrowsExceptionAndErrorRecordAvailableInCatchBlock()
+            {
+                string result = TestHost.Execute(@"try { 'abc'.Substring(-1) } catch { Write-Host $_.GetType() }");
+
+                StringAssert.AreEqualIgnoringCase("System.Management.Automation.ErrorRecord" + Environment.NewLine, result);
+            }
         }
     }
 }
