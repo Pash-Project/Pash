@@ -162,21 +162,34 @@ namespace System.Management.Pash.Implementation
             if (!(leftOperand is string) || !(rightOperand is string))
                 throw new NotImplementedException(string.Format("{0} -match {1}", leftOperand, rightOperand));
 
-            Match match = Regex.Match((string)leftOperand, (string)rightOperand, RegexOptions.IgnoreCase);
+            Regex regex = new Regex((string)rightOperand, RegexOptions.IgnoreCase);
+            Match match = regex.Match((string)leftOperand);
 
-            SetMatchesVariable(match);
+            SetMatchesVariable(regex, match);
 
             return match.Success;
         }
 
-        private void SetMatchesVariable(Match match)
+        private void SetMatchesVariable(Regex regex, Match match)
         {
             var matches = new Hashtable();
-            for (int i = 0; i < match.Groups.Count; ++i)
+            var groupNames = from name in regex.GetGroupNames()
+                             where match.Groups[name].Success && name != "0"
+                             select name;
+            var groupNumbers = from num in regex.GetGroupNumbers()
+                               where match.Groups[num].Success
+                               select num;
+
+            foreach (string name in groupNames)
             {
-                matches.Add(i, match.Groups[i].Value);
+                matches.Add(name, match.Groups[name].Value);
             }
-            _context.SetVariable("matches", PSObject.AsPSObject(matches));
+            foreach (int num in groupNumbers)
+            {
+                matches.Add(num, match.Groups[num].Value);
+            }
+
+            _context.SetVariable("Matches", PSObject.AsPSObject(matches));
         }
 
         IEnumerable<int> Range(int start, int end)

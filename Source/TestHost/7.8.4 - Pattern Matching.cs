@@ -20,6 +20,7 @@ namespace TestHost
         [TestCase(@"'Monday' -match 'mon' | out-null; $matches[0]", "Mon")]
         [TestCase(@"'Tuesday' -match 'tue' | out-null; $matches[0]", "Tue")]
         [TestCase(@"'01/02/2000 Desc' -match '(.*) (.*)' | out-null; $matches[1]", "01/02/2000")]
+        [TestCase(@"'Monday' -match '(?<word>[a-z]+)' | out-null; $matches['word']", "Monday")]
         public void Matches(string input, string expected)
         {
             string result = TestHost.Execute(input);
