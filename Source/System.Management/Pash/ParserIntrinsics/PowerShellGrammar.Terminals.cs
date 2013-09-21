@@ -1,4 +1,4 @@
-﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -95,25 +95,29 @@ namespace Pash.ParserIntrinsics
             ////            Any Unicode character except a new_line_character
             CommentTerminal comment = new CommentTerminal("comment", "#", "\r", "\n", "\r\n");
             NonGrammarTerminals.Add(comment);
+
+            ////        delimited_comment:
+            ////            <#   delimited_comment_text_opt   hashes   >
+            ////        delimited_comment_text:
+            ////            delimited_comment_section
+            ////            delimited_comment_text   delimited_comment_section
+            ////        delimited_comment_section:
+            ////            >
+            ////            hashes_opt   not_greater_than_or_hash
+            ////        hashes:
+            ////            #
+            ////            hashes   #
+            ////        not_greater_than_or_hash:
+            ////            Any Unicode character except > or #
+
+            CommentTerminal delimited_comment = new CommentTerminal("delimited_comment", "<#", "#>");
+            NonGrammarTerminals.Add(delimited_comment);
         }
 
 
         ////        requires_comment:
         ////            #requires   whitespace   command_arguments
 
-        ////        delimited_comment:
-        ////            <#   delimited_comment_text_opt   hashes   >
-        ////        delimited_comment_text:
-        ////            delimited_comment_section
-        ////            delimited_comment_text   delimited_comment_section
-        ////        delimited_comment_section:
-        ////            >
-        ////            hashes_opt   not_greater_than_or_hash
-        ////        hashes:
-        ////            #
-        ////            hashes   #
-        ////        not_greater_than_or_hash:
-        ////            Any Unicode character except > or #
         #endregion
 
         #region B.1.? dashes

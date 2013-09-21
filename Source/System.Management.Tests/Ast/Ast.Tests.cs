@@ -135,7 +135,7 @@ namespace ParserTests
             StringAssert.DoesNotContain("#", scriptBlockAst.EndBlock.Statements[0].ToString());
         }
 
-        [Test, Explicit]
+        [Test]
         [TestCase("<##>9")]
         [TestCase("<##> 9")]
         [TestCase("9 <##>")]
