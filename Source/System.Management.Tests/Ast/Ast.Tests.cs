@@ -223,6 +223,31 @@ ls
         }
 
         [Test]
+        public void FunctionWithOneParameter()
+        {
+            FunctionDefinitionAst functionDefinitionAst = ParseInput("function Update-File($file) { 'x' }").
+                   EndBlock.
+                   Statements[0];
+
+            Assert.AreEqual("Update-File", functionDefinitionAst.Name);
+            Assert.AreEqual(1, functionDefinitionAst.Parameters.Count);
+            Assert.AreEqual("file", functionDefinitionAst.Parameters[0].Name.VariablePath.UserPath);
+        }
+
+        [Test]
+        public void FunctionWithTwoParameters()
+        {
+            FunctionDefinitionAst functionDefinitionAst = ParseInput("function Update-File($param1, $param2) { 'x' }").
+                   EndBlock.
+                   Statements[0];
+
+            Assert.AreEqual("Update-File", functionDefinitionAst.Name);
+            Assert.AreEqual(2, functionDefinitionAst.Parameters.Count);
+            Assert.AreEqual("param1", functionDefinitionAst.Parameters[0].Name.VariablePath.UserPath);
+            Assert.AreEqual("param2", functionDefinitionAst.Parameters[1].Name.VariablePath.UserPath);
+        }
+
+        [Test]
         public void AssignmentTest()
         {
             AssignmentStatementAst assignmentStatementAst = ParseInput("$x = 'y'").
@@ -1161,6 +1186,18 @@ ls
         }
 
         [Test]
+        public void NotOperator()
+        {
+            UnaryExpressionAst unaryExpressionAst = ParseStatement("-not $true")
+                .PipelineElements[0]
+                .Expression;
+
+            Assert.AreEqual(TokenKind.Not, unaryExpressionAst.TokenKind);
+            VariableExpressionAst variableExpressionAst = (VariableExpressionAst)unaryExpressionAst.Child;
+            Assert.AreEqual("true", variableExpressionAst.VariablePath.UserPath);
+        }
+
+        [Test]
         public void PostIncrementExpression()
         {
             UnaryExpressionAst unaryExpressionAst = ParseStatement("$x++")
@@ -1184,6 +1221,19 @@ ls
                 .Statements[0];
 
             Assert.Null(returnStatementAst.Pipeline);
+        }
+
+        [Test]
+        public void Exit()
+        {
+            ExitStatementAst exitStatementAst = ParseStatement("{ exit }")
+                .PipelineElements[0]
+                .Expression
+                .ScriptBlock
+                .EndBlock
+                .Statements[0];
+
+            Assert.Null(exitStatementAst.Pipeline);
         }
 
         [Test]
@@ -1244,6 +1294,29 @@ ls
             ParameterAst parameter = result.Parameters.FirstOrDefault();
             var constantValue = (ConstantExpressionAst)parameter.DefaultValue;
             Assert.AreEqual(2, constantValue.Value);
+        }
+
+        [TestFixture]
+        public class TryCatchTests
+        {
+            [Test]
+            public void TryCatchAll()
+            {
+                TryStatementAst tryStatementAst = ParseStatement("try { } catch { }");
+
+                Assert.AreEqual(1, tryStatementAst.CatchClauses.Count);
+                CollectionAssert.IsEmpty(tryStatementAst.Body.Statements);
+                CollectionAssert.IsEmpty(tryStatementAst.CatchClauses.Single().Body.Statements);
+            }
+            
+            [Test]
+            public void TryCatchWithSingleStatements()
+            {
+                TryStatementAst tryStatementAst = ParseStatement("try { Get-ChildItem } catch { Write-Host 'failed' }");
+
+                Assert.AreEqual(1, tryStatementAst.Body.Statements.Count);
+                Assert.AreEqual(1, tryStatementAst.CatchClauses.Single().Body.Statements.Count);
+            }
         }
     }
 }

@@ -59,5 +59,16 @@ namespace TestHost
 
             Assert.AreEqual(expected + Environment.NewLine, result);
         }
+
+        [TestCase(@"-not $true", "False")]
+        [TestCase(@"-not $false", "True")]
+        [TestCase(@"$test = $true; -not $test", "False")]
+        [TestCase(@"$test = $false; -not $test", "True")]
+        public void Not(string input, string expected)
+        {
+            string result = TestHost.Execute(input);
+
+            Assert.AreEqual(expected + Environment.NewLine, result);
+        }
     }
 }

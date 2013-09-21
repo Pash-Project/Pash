@@ -214,13 +214,26 @@ namespace Pash.ParserIntrinsics
 
             bool isFilter = functionOrFilterTerm.ChildNodes.Single().Token.Text == "filter";
 
+            ScriptBlockAst scriptBlock = null;
+            IEnumerable<ParameterAst> parameters = null;
+
+            if (parseTreeNode.ChildNodes.Count == 6)
+            {
+                parameters = BuildParameterListAst(parseTreeNode.ChildNodes[2].ChildNodes[1]);
+                scriptBlock = BuildScriptBlockAst(parseTreeNode.ChildNodes[4]);
+            }
+            else
+            {
+                scriptBlock = BuildScriptBlockAst(parseTreeNode.ChildNodes[3]);
+            }
+
             return new FunctionDefinitionAst(
                 new ScriptExtent(parseTreeNode),
                 isFilter,
                 false,
                 parseTreeNode.ChildNodes[1].FindTokenAndGetText(),
-                null,
-                BuildScriptBlockAst(parseTreeNode.ChildNodes[3])
+                parameters,
+                scriptBlock
                 );
         }
 
@@ -232,6 +245,11 @@ namespace Pash.ParserIntrinsics
             if (childNode.Term == this._grammar._flow_control_statement_return)
             {
                 return BuildReturnStatementAst(childNode);
+            }
+
+            else if (childNode.Term == this._grammar._flow_control_statement_exit)
+            {
+                return BuildExitStatementAst(childNode);
             }
 
             throw new NotImplementedException(childNode.ToString());
@@ -262,6 +280,14 @@ namespace Pash.ParserIntrinsics
                 );
         }
 
+        private StatementAst BuildExitStatementAst(ParseTreeNode parseTreeNode)
+        {
+            return new ExitStatementAst(
+                new ScriptExtent(parseTreeNode),
+                null
+                );
+        }
+
         StatementAst BuildTrapStatementAst(ParseTreeNode parseTreeNode)
         {
             throw new NotImplementedException();
@@ -269,7 +295,32 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildTryStatementAst(ParseTreeNode parseTreeNode)
         {
-            throw new NotImplementedException();
+            return new TryStatementAst(
+                new ScriptExtent(parseTreeNode),
+                BuildStatementBlockAst(parseTreeNode.ChildNodes[0].ChildNodes[1]),
+                BuildCatchClausesAst(parseTreeNode.ChildNodes[0].ChildNodes[2]),
+                null
+                );
+        }
+
+        private IEnumerable<CatchClauseAst> BuildCatchClausesAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.catch_clauses);
+
+            return from ParseTreeNode catchClause in parseTreeNode.ChildNodes
+                   where catchClause.Term == this._grammar.catch_clause
+                   select BuildCatchClauseAst(catchClause);
+        }
+
+        private CatchClauseAst BuildCatchClauseAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.catch_clause);
+
+            return new CatchClauseAst(
+                new ScriptExtent(parseTreeNode),
+                new TypeConstraintAst[0],
+                BuildStatementBlockAst(parseTreeNode.ChildNodes[1])
+                );
         }
 
         StatementAst BuildDataStatementAst(ParseTreeNode parseTreeNode)
@@ -719,6 +770,11 @@ namespace Pash.ParserIntrinsics
                 return BuildCastExpression(childNode);
             }
 
+            else if (childNode.Term == this._grammar._unary_not_expression)
+            {
+                return BuildUnaryNotExpressionAst(childNode);
+            }
+
             throw new NotImplementedException(parseTreeNode.ToString());
         }
 
@@ -771,6 +827,15 @@ namespace Pash.ParserIntrinsics
             return new UnaryExpressionAst(
                 new ScriptExtent(parseTreeNode),
                 TokenKind.PlusPlus,
+                BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1])
+                );
+        }
+
+        ExpressionAst BuildUnaryNotExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            return new UnaryExpressionAst(
+                new ScriptExtent(parseTreeNode),
+                TokenKind.Not,
                 BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1])
                 );
         }
