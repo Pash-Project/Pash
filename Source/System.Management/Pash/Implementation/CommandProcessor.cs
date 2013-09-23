@@ -1,6 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using System.Management.Automation.Runspaces;
 using System.Reflection;
@@ -138,7 +139,7 @@ namespace System.Management.Automation
 
             else if (memberType == typeof(String[]))
             {
-                SetValue(memberInfo, Command, new[] { value.ToString() });
+                SetValue(memberInfo, Command, ConvertToStringArray(value));
             }
 
             else if (memberType == typeof(String))
@@ -168,6 +169,19 @@ namespace System.Management.Automation
             else
             {
                 SetValue(memberInfo, Command, value is PSObject ? ((PSObject)value).BaseObject : value);
+            }
+        }
+
+        private object ConvertToStringArray(object value)
+        {
+            if ((value is IEnumerable) && !(value is string))
+            {
+                return (from object item in (IEnumerable)value
+                        select item.ToString()).ToArray();
+            }
+            else
+            {
+                return new[] { value.ToString() };
             }
         }
 
