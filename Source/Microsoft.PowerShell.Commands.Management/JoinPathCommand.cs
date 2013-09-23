@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.ObjectModel;
+using System.Management;
 using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands
@@ -13,6 +14,10 @@ namespace Microsoft.PowerShell.Commands
     {
         protected override void ProcessRecord()
         {
+            foreach (Path parentPath in Path)
+            {
+                WriteObject(parentPath.Combine(ChildPath));
+            }
         }
 
         [Parameter(
