@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cmdlets\JoinPathTests.cs" />
     <Compile Include="Cmdlets\SortObjectTests.cs" />
     <Compile Include="Cmdlets\GetCommandTests.cs" />
     <Compile Include="Cmdlets\NewObjectCommandTests.cs" />
