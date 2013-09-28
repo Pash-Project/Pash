@@ -11,6 +11,8 @@ using System.Management.Automation.Runspaces;
 using System.Collections;
 using Extensions.Enumerable;
 using System.Text.RegularExpressions;
+using Pash.ParserIntrinsics;
+using System.IO;
 
 namespace System.Management.Pash.Implementation
 {
@@ -230,7 +232,8 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitCommand(CommandAst commandAst)
         {
-            if (commandAst.InvocationOperator == TokenKind.Dot) throw new NotImplementedException(commandAst.ToString());
+            if (commandAst.InvocationOperator == TokenKind.Dot)
+                return VisitDotSourceCommand(commandAst);
 
             // Pipeline uses global execution context, so we should set its WriteSideEffects flag, and restore it to previous value after.
             var pipeLineContext = _context.CurrentRunspace.ExecutionContext;
@@ -271,6 +274,15 @@ namespace System.Management.Pash.Implementation
             {
                 pipeLineContext.WriteSideEffectsToPipeline = writeSideEffects;
             }
+
+            return AstVisitAction.SkipChildren;
+        }
+
+        private AstVisitAction VisitDotSourceCommand(CommandAst commandAst)
+        {
+            object scriptFileName = EvaluateAst(commandAst.Children.First());
+            ScriptBlockAst ast = PowerShellGrammar.ParseInteractiveInput(File.ReadAllText(scriptFileName.ToString()));
+            ast.Visit(this);
 
             return AstVisitAction.SkipChildren;
         }
