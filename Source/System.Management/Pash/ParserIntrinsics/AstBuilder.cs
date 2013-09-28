@@ -343,6 +343,11 @@ namespace Pash.ParserIntrinsics
                 return BuildForStatementAst(parseTreeNode);
             }
 
+            else if (parseTreeNode.Term == this._grammar.foreach_statement)
+            {
+                return BuildForEachStatementAst(parseTreeNode);
+            }
+
             throw new NotImplementedException();
         }
 
@@ -361,6 +366,24 @@ namespace Pash.ParserIntrinsics
                 initializerAst,
                 conditionAst,
                 iteratorAst,
+                bodyAst
+                );
+        }
+
+        ForEachStatementAst BuildForEachStatementAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.foreach_statement);
+
+            var variableAst = BuildVariableAst(parseTreeNode.ChildNodes[2]);
+            var enumerableExpression = BuildPipelineAst(parseTreeNode.ChildNodes[4]);
+            var bodyAst = BuildStatementBlockAst(parseTreeNode.ChildNodes[6]);
+
+            return new ForEachStatementAst(
+                new ScriptExtent(parseTreeNode),
+                null,
+                ForEachFlags.None,
+                variableAst,
+                enumerableExpression,
                 bodyAst
                 );
         }

@@ -423,6 +423,22 @@ namespace TestHost
         }
 
         [Test]
+        public void ForEach()
+        {
+            string result = TestHost.Execute("foreach ($i in (0..10)) { $i }");
+
+            Assert.AreEqual(Enumerable.Range(0, 11).JoinString(Environment.NewLine) + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void ForEachCharacterInString()
+        {
+            string result = TestHost.Execute("foreach ($char in 'abc') { $char }");
+
+            Assert.AreEqual(string.Format("a{0}b{0}c{0}", Environment.NewLine), result);
+        }
+
+        [Test]
         public void ExpressionsAsParameters()
         {
             var result = TestHost.Execute(

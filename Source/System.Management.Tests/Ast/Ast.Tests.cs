@@ -1254,6 +1254,14 @@ ls
         }
 
         [Test]
+        public void ForEach()
+        {
+            ForEachStatementAst foreachStatementAst = ParseStatement("foreach ($i in (0..10)) {Write-Host $i}");
+
+            Assert.AreEqual("i", foreachStatementAst.Variable.VariablePath.UserPath);
+        }
+
+        [Test]
         public void ArraySubexpression()
         {
             ArrayExpressionAst arrayExpressionAst = ParseStatement("@(1)").PipelineElements[0].Expression;
