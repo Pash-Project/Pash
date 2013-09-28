@@ -129,7 +129,7 @@ namespace System.Management.Automation
 
         #endregion
 
-        private IEnumerator GetEnumerator(object obj)
+        internal IEnumerator GetEnumerator(object obj)
         {
             IEnumerable enumerable = obj as IEnumerable;
             if (enumerable != null)

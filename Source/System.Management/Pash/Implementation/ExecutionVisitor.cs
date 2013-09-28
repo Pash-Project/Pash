@@ -770,7 +770,26 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitForEachStatement(ForEachStatementAst forEachStatementAst)
         {
-            throw new NotImplementedException(); //VisitForEachStatement(forEachStatementAst);
+            object enumerable = EvaluateAst(forEachStatementAst.Condition);
+            IEnumerator enumerator = GetEnumerator(enumerable);
+
+            while (enumerator.MoveNext())
+            {
+                this._context.SessionState.PSVariable.Set(forEachStatementAst.Variable.VariablePath.UserPath, enumerator.Current);
+                _pipelineCommandRuntime.WriteObject(EvaluateAst(forEachStatementAst.Body), true);
+            }
+
+            return AstVisitAction.SkipChildren;
+        }
+
+        private IEnumerator GetEnumerator(object obj)
+        {
+            if (obj is PSObject)
+            {
+                obj = ((PSObject)obj).BaseObject;
+            }
+
+            return _pipelineCommandRuntime.GetEnumerator(obj);
         }
 
         public override AstVisitAction VisitForStatement(ForStatementAst forStatementAst)
