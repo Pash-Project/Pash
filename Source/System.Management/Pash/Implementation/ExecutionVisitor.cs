@@ -443,7 +443,18 @@ namespace System.Management.Pash.Implementation
             var variableExpressionAst = expressionAst as VariableExpressionAst;
             if (variableExpressionAst == null) throw new NotImplementedException(expressionAst.ToString());
 
-            this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, rightValue);
+            if (assignmentStatementAst.Operator == TokenKind.Equals)
+            {
+                this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, rightValue);
+            }
+
+            else if (assignmentStatementAst.Operator == TokenKind.PlusEquals)
+            {
+                dynamic currentValue = this._context.SessionState.SessionStateGlobal.GetVariable(variableExpressionAst.VariablePath.UserPath).GetBaseObjectValue();
+                dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
+                object newValue = currentValue + assignmentValue;
+                this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
+            }
 
             if (this._writeSideEffectsToPipeline) this._pipelineCommandRuntime.WriteObject(rightValue);
 
