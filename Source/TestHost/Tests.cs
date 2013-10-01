@@ -568,5 +568,14 @@ namespace TestHost
                 StringAssert.AreEqualIgnoringCase("System.Management.Automation.ErrorRecord" + Environment.NewLine, result);
             }
         }
+
+        [TestCase(@"$i = 1; $i += 10; Write-Host $i", "11")]
+        [TestCase(@"$x = 'a'; $x += 'b'; Write-Host $x", "ab")]
+        public void AssignmentByAdditionOperator(string input, string expected)
+        {
+            string result = TestHost.Execute(input);
+
+            StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
+        }
     }
 }
