@@ -1326,5 +1326,18 @@ ls
                 Assert.AreEqual(1, tryStatementAst.CatchClauses.Single().Body.Statements.Count);
             }
         }
+
+        [Test]
+        public void AssignmentByAdditionOperator()
+        {
+            AssignmentStatementAst assignmentStatementAst = ParseStatement("$i += 10");
+
+            var variableAst = (VariableExpressionAst)assignmentStatementAst.Left;
+            var commandAst = (CommandExpressionAst)assignmentStatementAst.Right.Children.First();
+            var constantAst = (ConstantExpressionAst)commandAst.Expression;
+            Assert.AreEqual("i", variableAst.VariablePath.UserPath);
+            Assert.AreEqual(TokenKind.PlusEquals, assignmentStatementAst.Operator);
+            Assert.AreEqual(10, constantAst.Value);
+        }
     }
 }
