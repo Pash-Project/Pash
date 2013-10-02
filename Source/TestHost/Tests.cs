@@ -601,5 +601,13 @@ namespace TestHost
 
             StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
         }
+
+        [TestCase(@"$i = 7; $i %= 4; Write-Host $i", "3")]
+        public void AssignmentByModulusOperator(string input, string expected)
+        {
+            string result = TestHost.Execute(input);
+
+            StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
+        }
     }
 }

@@ -521,6 +521,9 @@ namespace Pash.ParserIntrinsics
                 case "/=":
                     return TokenKind.DivideEquals;
 
+                case "%=":
+                    return TokenKind.RemainderEquals;
+
                 default:
                     throw new NotImplementedException(parseTreeNode.ToString());
             }

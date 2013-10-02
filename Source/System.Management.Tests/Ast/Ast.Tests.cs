@@ -1378,5 +1378,18 @@ ls
             Assert.AreEqual(TokenKind.DivideEquals, assignmentStatementAst.Operator);
             Assert.AreEqual(2, constantAst.Value);
         }
+
+        [Test]
+        public void AssignmentByModulusOperator()
+        {
+            AssignmentStatementAst assignmentStatementAst = ParseStatement("$i %= 4");
+
+            var variableAst = (VariableExpressionAst)assignmentStatementAst.Left;
+            var commandAst = (CommandExpressionAst)assignmentStatementAst.Right.Children.First();
+            var constantAst = (ConstantExpressionAst)commandAst.Expression;
+            Assert.AreEqual("i", variableAst.VariablePath.UserPath);
+            Assert.AreEqual(TokenKind.RemainderEquals, assignmentStatementAst.Operator);
+            Assert.AreEqual(4, constantAst.Value);
+        }
     }
 }
