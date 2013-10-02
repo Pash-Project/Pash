@@ -585,5 +585,13 @@ namespace TestHost
 
             StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
         }
+
+        [TestCase(@"$i = 2; $i *= 10; Write-Host $i", "20")]
+        public void AssignmentByMultiplicationOperator(string input, string expected)
+        {
+            string result = TestHost.Execute(input);
+
+            StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
+        }
     }
 }
