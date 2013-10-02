@@ -438,6 +438,7 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitAssignmentStatement(AssignmentStatementAst assignmentStatementAst)
         {
             var rightValue = EvaluateAst(assignmentStatementAst.Right);
+            object newValue = rightValue;
 
             ExpressionAst expressionAst = assignmentStatementAst.Left;
             var variableExpressionAst = expressionAst as VariableExpressionAst;
@@ -452,7 +453,7 @@ namespace System.Management.Pash.Implementation
             {
                 dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
                 dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
-                object newValue = currentValue + assignmentValue;
+                newValue = currentValue + assignmentValue;
                 _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
             }
 
@@ -460,7 +461,7 @@ namespace System.Management.Pash.Implementation
             {
                 dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
                 dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
-                object newValue = currentValue - assignmentValue;
+                newValue = currentValue - assignmentValue;
                 _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
             }
 
@@ -468,7 +469,7 @@ namespace System.Management.Pash.Implementation
             {
                 dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
                 dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
-                object newValue = currentValue * assignmentValue;
+                newValue = currentValue * assignmentValue;
                 _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
             }
 
@@ -476,7 +477,7 @@ namespace System.Management.Pash.Implementation
             {
                 dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
                 dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
-                object newValue = currentValue / assignmentValue;
+                newValue = currentValue / assignmentValue;
                 _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
             }
 
@@ -484,11 +485,11 @@ namespace System.Management.Pash.Implementation
             {
                 dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
                 dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
-                object newValue = currentValue % assignmentValue;
+                newValue = currentValue % assignmentValue;
                 _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
             }
 
-            if (this._writeSideEffectsToPipeline) this._pipelineCommandRuntime.WriteObject(rightValue);
+            if (this._writeSideEffectsToPipeline) this._pipelineCommandRuntime.WriteObject(newValue);
 
             return AstVisitAction.SkipChildren;
         }
