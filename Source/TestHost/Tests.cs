@@ -593,5 +593,13 @@ namespace TestHost
 
             StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
         }
+
+        [TestCase(@"$i = 6; $i /= 2; Write-Host $i", "3")]
+        public void AssignmentByDivisionOperator(string input, string expected)
+        {
+            string result = TestHost.Execute(input);
+
+            StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
+        }
     }
 }

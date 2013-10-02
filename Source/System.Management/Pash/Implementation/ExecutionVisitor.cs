@@ -472,6 +472,14 @@ namespace System.Management.Pash.Implementation
                 _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
             }
 
+            else if (assignmentStatementAst.Operator == TokenKind.DivideEquals)
+            {
+                dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
+                dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
+                object newValue = currentValue / assignmentValue;
+                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
+            }
+
             if (this._writeSideEffectsToPipeline) this._pipelineCommandRuntime.WriteObject(rightValue);
 
             return AstVisitAction.SkipChildren;
