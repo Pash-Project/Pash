@@ -438,6 +438,7 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitAssignmentStatement(AssignmentStatementAst assignmentStatementAst)
         {
             var rightValue = EvaluateAst(assignmentStatementAst.Right);
+            object newValue = rightValue;
 
             ExpressionAst expressionAst = assignmentStatementAst.Left;
             var variableExpressionAst = expressionAst as VariableExpressionAst;
@@ -445,18 +446,50 @@ namespace System.Management.Pash.Implementation
 
             if (assignmentStatementAst.Operator == TokenKind.Equals)
             {
-                this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, rightValue);
+                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, rightValue);
             }
 
             else if (assignmentStatementAst.Operator == TokenKind.PlusEquals)
             {
-                dynamic currentValue = this._context.SessionState.SessionStateGlobal.GetVariable(variableExpressionAst.VariablePath.UserPath).GetBaseObjectValue();
+                dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
                 dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
-                object newValue = currentValue + assignmentValue;
-                this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
+                newValue = currentValue + assignmentValue;
+                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
             }
 
-            if (this._writeSideEffectsToPipeline) this._pipelineCommandRuntime.WriteObject(rightValue);
+            else if (assignmentStatementAst.Operator == TokenKind.MinusEquals)
+            {
+                dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
+                dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
+                newValue = currentValue - assignmentValue;
+                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
+            }
+
+            else if (assignmentStatementAst.Operator == TokenKind.MultiplyEquals)
+            {
+                dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
+                dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
+                newValue = currentValue * assignmentValue;
+                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
+            }
+
+            else if (assignmentStatementAst.Operator == TokenKind.DivideEquals)
+            {
+                dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
+                dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
+                newValue = currentValue / assignmentValue;
+                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
+            }
+
+            else if (assignmentStatementAst.Operator == TokenKind.RemainderEquals)
+            {
+                dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
+                dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
+                newValue = currentValue % assignmentValue;
+                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
+            }
+
+            if (this._writeSideEffectsToPipeline) this._pipelineCommandRuntime.WriteObject(newValue);
 
             return AstVisitAction.SkipChildren;
         }

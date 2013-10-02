@@ -571,7 +571,44 @@ namespace TestHost
 
         [TestCase(@"$i = 1; $i += 10; Write-Host $i", "11")]
         [TestCase(@"$x = 'a'; $x += 'b'; Write-Host $x", "ab")]
+        [TestCase(@"$i = 1; ($i += 10)", "11")]
         public void AssignmentByAdditionOperator(string input, string expected)
+        {
+            string result = TestHost.Execute(input);
+
+            StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
+        }
+        
+        [TestCase(@"$i = 11; $i -= 10; Write-Host $i", "1")]
+        [TestCase(@"$i = 11; ($i -= 10)", "1")]
+        public void AssignmentBySubtractionOperator(string input, string expected)
+        {
+            string result = TestHost.Execute(input);
+
+            StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
+        }
+
+        [TestCase(@"$i = 2; $i *= 10; Write-Host $i", "20")]
+        [TestCase(@"$i = 2; ($i *= 10)", "20")]
+        public void AssignmentByMultiplicationOperator(string input, string expected)
+        {
+            string result = TestHost.Execute(input);
+
+            StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
+        }
+
+        [TestCase(@"$i = 6; $i /= 2; Write-Host $i", "3")]
+        [TestCase(@"$i = 6; ($i /= 2)", "3")]
+        public void AssignmentByDivisionOperator(string input, string expected)
+        {
+            string result = TestHost.Execute(input);
+
+            StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
+        }
+
+        [TestCase(@"$i = 7; $i %= 4; Write-Host $i", "3")]
+        [TestCase(@"$i = 7; ($i %= 4)", "3")]
+        public void AssignmentByModulusOperator(string input, string expected)
         {
             string result = TestHost.Execute(input);
 

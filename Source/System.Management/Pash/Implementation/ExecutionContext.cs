@@ -99,6 +99,11 @@ namespace Pash.Implementation
             return this.SessionState.PSVariable.Get(name);
         }
 
+        internal object GetVariableValue(string name)
+        {
+            return ((PSVariable)GetVariable(name)).GetBaseObjectValue();
+        }
+
         internal void SetVariable(string name, object value)
         {
             if (string.IsNullOrEmpty(name))
