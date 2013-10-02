@@ -445,23 +445,23 @@ namespace System.Management.Pash.Implementation
 
             if (assignmentStatementAst.Operator == TokenKind.Equals)
             {
-                this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, rightValue);
+                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, rightValue);
             }
 
             else if (assignmentStatementAst.Operator == TokenKind.PlusEquals)
             {
-                dynamic currentValue = this._context.SessionState.SessionStateGlobal.GetVariable(variableExpressionAst.VariablePath.UserPath).GetBaseObjectValue();
+                dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
                 dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
                 object newValue = currentValue + assignmentValue;
-                this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
+                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
             }
 
             else if (assignmentStatementAst.Operator == TokenKind.MinusEquals)
             {
-                dynamic currentValue = this._context.SessionState.SessionStateGlobal.GetVariable(variableExpressionAst.VariablePath.UserPath).GetBaseObjectValue();
+                dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
                 dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
                 object newValue = currentValue - assignmentValue;
-                this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
+                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
             }
 
             if (this._writeSideEffectsToPipeline) this._pipelineCommandRuntime.WriteObject(rightValue);
