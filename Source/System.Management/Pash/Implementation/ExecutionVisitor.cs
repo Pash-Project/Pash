@@ -456,6 +456,14 @@ namespace System.Management.Pash.Implementation
                 this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
             }
 
+            else if (assignmentStatementAst.Operator == TokenKind.MinusEquals)
+            {
+                dynamic currentValue = this._context.SessionState.SessionStateGlobal.GetVariable(variableExpressionAst.VariablePath.UserPath).GetBaseObjectValue();
+                dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
+                object newValue = currentValue - assignmentValue;
+                this._context.SessionState.SessionStateGlobal.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
+            }
+
             if (this._writeSideEffectsToPipeline) this._pipelineCommandRuntime.WriteObject(rightValue);
 
             return AstVisitAction.SkipChildren;

@@ -512,6 +512,9 @@ namespace Pash.ParserIntrinsics
                 case "+=":
                     return TokenKind.PlusEquals;
 
+                case "-=":
+                    return TokenKind.MinusEquals;
+
                 default:
                     throw new NotImplementedException(parseTreeNode.ToString());
             }

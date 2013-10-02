@@ -577,5 +577,13 @@ namespace TestHost
 
             StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
         }
+        
+        [TestCase(@"$i = 11; $i -= 10; Write-Host $i", "1")]
+        public void AssignmentBySubtractionOperator(string input, string expected)
+        {
+            string result = TestHost.Execute(input);
+
+            StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
+        }
     }
 }
