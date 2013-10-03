@@ -423,6 +423,14 @@ namespace TestHost
         }
 
         [Test]
+        public void ForLoopWithAssignmentStatementAsBodyShouldNotOutputAssignmentResultOnEachIteration()
+        {
+            string result = TestHost.Execute("$j = 0; for ($i = 0; $i -ile 10; $i++) { $j++ }; $j");
+
+            Assert.AreEqual("11" + Environment.NewLine, result);
+        }
+
+        [Test]
         public void ForEach()
         {
             string result = TestHost.Execute("foreach ($i in (0..10)) { $i }");

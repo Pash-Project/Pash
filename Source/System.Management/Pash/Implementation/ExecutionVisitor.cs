@@ -864,7 +864,7 @@ namespace System.Management.Pash.Implementation
 
             while ((bool)((PSObject)EvaluateAst(forStatementAst.Condition)).BaseObject)
             {
-                this._pipelineCommandRuntime.WriteObject(EvaluateAst(forStatementAst.Body), true);
+                this._pipelineCommandRuntime.WriteObject(EvaluateAst(forStatementAst.Body, false), true);
                 EvaluateAst(forStatementAst.Iterator);
             }
 
