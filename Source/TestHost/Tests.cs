@@ -431,6 +431,14 @@ namespace TestHost
         }
 
         [Test]
+        public void ForEachWithAssignmentStatementAsBodyShouldNotOutputAssignmentResultOnEachIteration()
+        {
+            string result = TestHost.Execute("$j = 0; foreach ($i in 0..10) { $j++ }; $j");
+
+            Assert.AreEqual("11" + Environment.NewLine, result);
+        }
+
+        [Test]
         [Explicit("Does not currently work")]
         public void ForEachCharacterInString()
         {

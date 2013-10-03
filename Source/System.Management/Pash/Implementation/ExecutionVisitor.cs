@@ -820,7 +820,7 @@ namespace System.Management.Pash.Implementation
             while (enumerator.MoveNext())
             {
                 this._context.SessionState.PSVariable.Set(forEachStatementAst.Variable.VariablePath.UserPath, enumerator.Current);
-                _pipelineCommandRuntime.WriteObject(EvaluateAst(forEachStatementAst.Body), true);
+                _pipelineCommandRuntime.WriteObject(EvaluateAst(forEachStatementAst.Body, false), true);
             }
 
             return AstVisitAction.SkipChildren;
