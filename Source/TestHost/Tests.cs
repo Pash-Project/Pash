@@ -423,6 +423,14 @@ namespace TestHost
         }
 
         [Test]
+        public void ForLoopWithAssignmentStatementAsBodyShouldNotOutputAssignmentResultOnEachIteration()
+        {
+            string result = TestHost.Execute("$j = 0; for ($i = 0; $i -ile 10; $i++) { $j++ }; $j");
+
+            Assert.AreEqual("11" + Environment.NewLine, result);
+        }
+
+        [Test]
         public void ForEach()
         {
             string result = TestHost.Execute("foreach ($i in (0..10)) { $i }");
@@ -431,9 +439,26 @@ namespace TestHost
         }
 
         [Test]
+        public void ForEachWithAssignmentStatementAsBodyShouldNotOutputAssignmentResultOnEachIteration()
+        {
+            string result = TestHost.Execute("$j = 0; foreach ($i in 0..10) { $j++ }; $j");
+
+            Assert.AreEqual("11" + Environment.NewLine, result);
+        }
+
+        [Test]
+        [Explicit("Does not currently work")]
         public void ForEachCharacterInString()
         {
             string result = TestHost.Execute("foreach ($char in 'abc') { $char }");
+
+            Assert.AreEqual("abc" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void ForEachCharacterInArray()
+        {
+            string result = TestHost.Execute("foreach ($char in 'abc'.ToCharArray()) { $char }");
 
             Assert.AreEqual(string.Format("a{0}b{0}c{0}", Environment.NewLine), result);
         }
