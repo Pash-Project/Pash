@@ -591,9 +591,9 @@ namespace System.Management.Pash.Implementation
 
             if (methodCallAst.Member is StringConstantExpressionAst)
             {
-                BindingFlags bindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
                 var name = (methodCallAst.Member as StringConstantExpressionAst).Value;
-                var method = objectInfo.Type.GetMethod(name, bindingFlags, null, arguments.Select(a => a.GetType()).ToArray(), null);
+                var method = objectInfo.GetMethod(name, arguments, methodCallAst.Static);
+
                 var result = method.Invoke(objectInfo.Object, arguments.ToArray());
 
                 _pipelineCommandRuntime.WriteObject(result);
@@ -605,9 +605,6 @@ namespace System.Management.Pash.Implementation
 
         private ObjectInfo GetObjectInfo(ExpressionAst expression)
         {
-            if (expression is TypeExpressionAst)
-                return new ObjectInfo(((TypeExpressionAst)expression).TypeName.GetReflectionType());
-
             return new ObjectInfo(EvaluateAst(expression));
         }
 
@@ -622,10 +619,7 @@ namespace System.Management.Pash.Implementation
                 object result = null;
                 var name = (memberExpressionAst.Member as StringConstantExpressionAst).Value;
 
-                BindingFlags bindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
-
-                // TODO: Single() is a problem for overloaded methods
-                var memberInfo = objectInfo.Type.GetMember(name, bindingFlags).Single();
+                var memberInfo = objectInfo.GetMember(name, memberExpressionAst.Static);
 
                 if (memberInfo != null)
                 {
@@ -958,7 +952,37 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitThrowStatement(ThrowStatementAst throwStatementAst)
         {
-            throw new NotImplementedException(); //VisitThrowStatement(throwStatementAst);
+            object targetObject = GetTargetObject(throwStatementAst);
+            if (targetObject is Exception)
+            {
+                throw (Exception)targetObject;
+            }
+
+            string errorMessage = GetErrorMessageForThrowStatement(targetObject);
+            throw new RuntimeException(errorMessage);
+        }
+
+        private object GetTargetObject(ThrowStatementAst throwStatementAst)
+        {
+            if (throwStatementAst.Pipeline != null)
+            {
+                object targetObject = EvaluateAst(throwStatementAst.Pipeline, false);
+                if (targetObject is PSObject)
+                {
+                    return ((PSObject)targetObject).BaseObject;
+                }
+                return targetObject;
+            }
+            return null;
+        }
+
+        private string GetErrorMessageForThrowStatement(object targetObject)
+        {
+            if (targetObject != null)
+            {
+                return targetObject.ToString();
+            }
+            return "ScriptHalted";
         }
 
         public override AstVisitAction VisitTrap(TrapStatementAst trapStatementAst)
