@@ -591,9 +591,9 @@ namespace System.Management.Pash.Implementation
 
             if (methodCallAst.Member is StringConstantExpressionAst)
             {
-                BindingFlags bindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
                 var name = (methodCallAst.Member as StringConstantExpressionAst).Value;
-                var method = objectInfo.Type.GetMethod(name, bindingFlags, null, arguments.Select(a => a.GetType()).ToArray(), null);
+                var method = objectInfo.GetMethod(name, arguments, methodCallAst.Static);
+
                 var result = method.Invoke(objectInfo.Object, arguments.ToArray());
 
                 _pipelineCommandRuntime.WriteObject(result);
@@ -619,19 +619,7 @@ namespace System.Management.Pash.Implementation
                 object result = null;
                 var name = (memberExpressionAst.Member as StringConstantExpressionAst).Value;
 
-                BindingFlags bindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
-
-                // TODO: Single() is a problem for overloaded methods
-                MemberInfo memberInfo = null;
-
-                if (memberExpressionAst.Static)
-                {
-                    memberInfo = objectInfo.Type.GetMember(name, bindingFlags).Single();
-                }
-                else
-                {
-                    memberInfo = objectInfo.Object.GetType().GetMember(name, bindingFlags).Single();
-                }
+                var memberInfo = objectInfo.GetMember(name, memberExpressionAst.Static);
 
                 if (memberInfo != null)
                 {
