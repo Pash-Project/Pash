@@ -952,18 +952,36 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitThrowStatement(ThrowStatementAst throwStatementAst)
         {
-            string errorMessage = GetErrorMessage(throwStatementAst);
+            object targetObject = GetTargetObject(throwStatementAst);
+            if (targetObject is Exception)
+            {
+                throw (Exception)targetObject;
+            }
+
+            string errorMessage = GetErrorMessageForThrowStatement(targetObject);
             throw new RuntimeException(errorMessage);
         }
 
-        private string GetErrorMessage(ThrowStatementAst throwStatementAst)
+        private object GetTargetObject(ThrowStatementAst throwStatementAst)
         {
             if (throwStatementAst.Pipeline != null)
             {
-                object value = EvaluateAst(throwStatementAst.Pipeline, false);
-                return value.ToString();
+                object targetObject = EvaluateAst(throwStatementAst.Pipeline, false);
+                if (targetObject is PSObject)
+                {
+                    return ((PSObject)targetObject).BaseObject;
+                }
+                return targetObject;
             }
+            return null;
+        }
 
+        private string GetErrorMessageForThrowStatement(object targetObject)
+        {
+            if (targetObject != null)
+            {
+                return targetObject.ToString();
+            }
             return "ScriptHalted";
         }
 

@@ -639,6 +639,8 @@ namespace TestHost
             }
 
             [TestCase("new-object Version '1.2.3.4'", "$_.Exception.Message", "1.2.3.4")]
+            [TestCase("new-object System.FormatException", "$_.Exception.GetType().FullName", "System.FormatException")]
+            [TestCase("new-object System.FormatException", "$_.Exception.GetType().FullName", "System.FormatException")]
             public void ThrowObject(string throwStatement, string catchStatement, string expected)
             {
                 string input = string.Format(@"try {{ throw {0} }} catch {{ {1} }}", throwStatement, catchStatement);
