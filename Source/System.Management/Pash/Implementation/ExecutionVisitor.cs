@@ -605,9 +605,6 @@ namespace System.Management.Pash.Implementation
 
         private ObjectInfo GetObjectInfo(ExpressionAst expression)
         {
-            if (expression is TypeExpressionAst)
-                return new ObjectInfo(((TypeExpressionAst)expression).TypeName.GetReflectionType());
-
             return new ObjectInfo(EvaluateAst(expression));
         }
 
@@ -625,7 +622,16 @@ namespace System.Management.Pash.Implementation
                 BindingFlags bindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
 
                 // TODO: Single() is a problem for overloaded methods
-                var memberInfo = objectInfo.Type.GetMember(name, bindingFlags).Single();
+                MemberInfo memberInfo = null;
+
+                if (memberExpressionAst.Static)
+                {
+                    memberInfo = objectInfo.Type.GetMember(name, bindingFlags).Single();
+                }
+                else
+                {
+                    memberInfo = objectInfo.Object.GetType().GetMember(name, bindingFlags).Single();
+                }
 
                 if (memberInfo != null)
                 {

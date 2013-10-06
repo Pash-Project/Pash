@@ -5,11 +5,6 @@ namespace Pash.Implementation
 {
     internal class ObjectInfo
     {
-        internal ObjectInfo(Type type)
-        {
-            this.Type = type;
-        }
-
         internal ObjectInfo(object obj)
         {
             this.Object = GetObject(obj);
