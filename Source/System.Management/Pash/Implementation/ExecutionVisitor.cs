@@ -952,7 +952,19 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitThrowStatement(ThrowStatementAst throwStatementAst)
         {
-            throw new NotImplementedException(); //VisitThrowStatement(throwStatementAst);
+            string errorMessage = GetErrorMessage(throwStatementAst);
+            throw new RuntimeException(errorMessage);
+        }
+
+        private string GetErrorMessage(ThrowStatementAst throwStatementAst)
+        {
+            if (throwStatementAst.Pipeline != null)
+            {
+                object value = EvaluateAst(throwStatementAst.Pipeline, false);
+                return value.ToString();
+            }
+
+            return "ScriptHalted";
         }
 
         public override AstVisitAction VisitTrap(TrapStatementAst trapStatementAst)

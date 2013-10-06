@@ -7,11 +7,17 @@ namespace System.Management.Automation
     [Serializable]
     public class RuntimeException : SystemException, IContainsErrorRecord
     {
-        public RuntimeException() { throw new NotImplementedException(); }
+        public RuntimeException() { }
 
-        public RuntimeException(string message) { throw new NotImplementedException(); }
+        public RuntimeException(string message)
+            : this(message, null)
+        {
+        }
 
-        public RuntimeException(string message, Exception innerException) { throw new NotImplementedException(); }
+        public RuntimeException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
 
         public virtual ErrorRecord ErrorRecord { get; set; }
 

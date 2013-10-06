@@ -252,6 +252,11 @@ namespace Pash.ParserIntrinsics
                 return BuildExitStatementAst(childNode);
             }
 
+            else if (childNode.Term == this._grammar._flow_control_statement_throw)
+            {
+                return BuildThrowStatementAst(childNode);
+            }
+
             throw new NotImplementedException(childNode.ToString());
         }
 
@@ -285,6 +290,20 @@ namespace Pash.ParserIntrinsics
             return new ExitStatementAst(
                 new ScriptExtent(parseTreeNode),
                 null
+                );
+        }
+
+        private StatementAst BuildThrowStatementAst(ParseTreeNode parseTreeNode)
+        {
+            PipelineBaseAst pipeline = null;
+            if (parseTreeNode.ChildNodes.Count == 2)
+            {
+                pipeline = BuildPipelineAst(parseTreeNode.ChildNodes[1]);
+            }
+
+            return new ThrowStatementAst(
+                new ScriptExtent(parseTreeNode),
+                pipeline
                 );
         }
 
