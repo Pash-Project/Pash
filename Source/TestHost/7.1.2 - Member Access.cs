@@ -209,11 +209,21 @@ $a.ID									# get ID from each element in the array
         }
 
         [Test]
-        public void CallGetTypeOnType()
+        [Platform("Win")]
+        public void CallGetTypeOnTypeOnWindows()
         {
             string result = TestHost.Execute("'abc'.GetType().GetType().FullName");
 
             Assert.AreEqual("System.RuntimeType" + Environment.NewLine, result);
+        }
+
+        [Test]
+        [Platform("Unix")]
+        public void CallGetTypeOnTypeOnUnix()
+        {
+            string result = TestHost.Execute("'abc'.GetType().GetType().FullName");
+
+            Assert.AreEqual("System.MonoType" + Environment.NewLine, result);
         }
 
         [Test]
@@ -225,11 +235,21 @@ $a.ID									# get ID from each element in the array
         }
 
         [Test]
-        public void CallGetTypeMethodOnSystemEnvironment()
+        [Platform("Win")]
+        public void CallGetTypeMethodOnSystemEnvironmentOnWindows()
         {
             string result = TestHost.Execute("[Environment].GetType().FullName");
 
             Assert.AreEqual("System.RuntimeType" + Environment.NewLine, result);
+        }
+
+        [Test]
+        [Platform("Unix")]
+        public void CallGetTypeMethodOnSystemEnvironmentOnUnix()
+        {
+            string result = TestHost.Execute("[Environment].GetType().FullName");
+
+            Assert.AreEqual("System.MonoType" + Environment.NewLine, result);
         }
 
         [Test]
@@ -244,7 +264,8 @@ $path.FullName
         }
 
         [Test]
-        public void CallGetTypeOnTypeReferencedByVariable()
+        [Platform("Win")]
+        public void CallGetTypeOnTypeReferencedByVariableOnWindows()
         {
             var result = TestHost.Execute(true, @"
 $path = [System.IO.Path]
@@ -252,6 +273,18 @@ $path.GetType().FullName
 ");
 
             Assert.AreEqual("System.RuntimeType" + Environment.NewLine, result);
+        }
+
+        [Test]
+        [Platform("Unix")]
+        public void CallGetTypeOnTypeReferencedByVariableOnUnix()
+        {
+            var result = TestHost.Execute(true, @"
+$path = [System.IO.Path]
+$path.GetType().FullName
+");
+
+            Assert.AreEqual("System.MonoType" + Environment.NewLine, result);
         }
     }
 }
