@@ -1391,5 +1391,31 @@ ls
             Assert.AreEqual(TokenKind.RemainderEquals, assignmentStatementAst.Operator);
             Assert.AreEqual(4, constantAst.Value);
         }
+
+        [Test]
+        public void Throw()
+        {
+            ThrowStatementAst throwStatementAst = ParseStatement("{ throw }")
+                .PipelineElements[0]
+                .Expression
+                .ScriptBlock
+                .EndBlock
+                .Statements[0];
+
+            Assert.IsNull(throwStatementAst.Pipeline);
+        }
+
+        [Test]
+        public void ThrowString()
+        {
+            ThrowStatementAst throwStatementAst = ParseStatement("{ throw 'error' }")
+                .PipelineElements[0]
+                .Expression
+                .ScriptBlock
+                .EndBlock
+                .Statements[0];
+
+            Assert.IsNotNull(throwStatementAst.Pipeline);
+        }
     }
 }
