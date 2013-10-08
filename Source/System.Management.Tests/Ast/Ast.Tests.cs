@@ -1417,5 +1417,34 @@ ls
 
             Assert.IsNotNull(throwStatementAst.Pipeline);
         }
+
+        [Test]
+        public void Trap()
+        {
+            NamedBlockAst namedBlockAst = ParseInput("trap {}")
+                .EndBlock;
+
+            var trapStatementAst = namedBlockAst.Traps.First();
+            Assert.IsNull(trapStatementAst.TrapType);
+            Assert.AreEqual(0, trapStatementAst.Body.Statements.Count);
+            Assert.AreEqual(1, namedBlockAst.Traps.Count);
+            Assert.AreEqual(0, namedBlockAst.Statements.Count);
+        }
+
+        [Test]
+        public void Continue()
+        {
+            ContinueStatementAst continueStatementAst = ParseStatement("continue");
+
+            Assert.IsNull(continueStatementAst.Label);
+        }
+
+        [Test]
+        public void Break()
+        {
+            BreakStatementAst breakStatementAst = ParseStatement("break");
+
+            Assert.IsNull(breakStatementAst.Label);
+        }
     }
 }

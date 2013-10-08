@@ -143,13 +143,17 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.statement_list);
 
-            IEnumerable<StatementAst> statements = parseTreeNode
+            List<StatementAst> statements = parseTreeNode
                 .ChildNodes
                 .Where(node => node.Term != this._grammar.statement_terminators)
                 .Select(BuildStatementAst)
+                .ToList()
                 ;
 
-            return new StatementBlockAst(new ScriptExtent(parseTreeNode), statements, new TrapStatementAst[] { });
+            return new StatementBlockAst(
+                new ScriptExtent(parseTreeNode),
+                statements.Where(statement => !(statement is TrapStatementAst)),
+                statements.OfType<TrapStatementAst>());
         }
 
         StatementBlockAst BuildNamedBlockListAst(ParseTreeNode parseTreeNode)
@@ -257,6 +261,16 @@ namespace Pash.ParserIntrinsics
                 return BuildThrowStatementAst(childNode);
             }
 
+            else if (childNode.Term == this._grammar._flow_control_statement_continue)
+            {
+                return BuildContinueStatementAst(childNode);
+            }
+
+            else if (childNode.Term == this._grammar._flow_control_statement_break)
+            {
+                return BuildBreakStatementAst(childNode);
+            }
+
             throw new NotImplementedException(childNode.ToString());
         }
 
@@ -309,7 +323,20 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildTrapStatementAst(ParseTreeNode parseTreeNode)
         {
-            throw new NotImplementedException();
+            return new TrapStatementAst(
+                new ScriptExtent(parseTreeNode),
+                null,
+                BuildStatementBlockAst(parseTreeNode.ChildNodes[1]));
+        }
+
+        private StatementAst BuildContinueStatementAst(ParseTreeNode parseTreeNode)
+        {
+            return new ContinueStatementAst(new ScriptExtent(parseTreeNode), null);
+        }
+
+        private StatementAst BuildBreakStatementAst(ParseTreeNode parseTreeNode)
+        {
+            return new BreakStatementAst(new ScriptExtent(parseTreeNode), null);
         }
 
         StatementAst BuildTryStatementAst(ParseTreeNode parseTreeNode)

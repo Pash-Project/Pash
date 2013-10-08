@@ -674,5 +674,128 @@ namespace TestHost
                 Assert.AreEqual(expected + Environment.NewLine, result);
             }
         }
+
+        [TestFixture]
+        class TrapTests
+        {
+            [Test]
+            public void TrapWithContinueStatement()
+            {
+                string result = TestHost.Execute("throw 'Error'; trap { 'Trapped'; continue }");
+
+                Assert.AreEqual("Trapped" + Environment.NewLine, result);
+            }
+
+            [Test]
+            public void TrapWithContinueStatementContinuesAfterThrowStatement()
+            {
+                string result = TestHost.Execute(@"
+throw 'Error' 
+Write-Host 'After throw'
+
+trap { 
+  Write-Host 'Trapped' 
+  continue
+}
+");
+                Assert.AreEqual(string.Format("Trapped{0}After throw{0}", Environment.NewLine), result);
+            }
+
+            [Test]
+            public void TrapWithContinueStatementShouldNotExecuteStatementsAfterContinue()
+            {
+                string result = TestHost.Execute(@"
+throw 'Error' 
+Write-Host 'After throw'
+
+trap { 
+  Write-Host 'Trapped' 
+  continue
+  Write-Host 'Should not be output'
+}
+");
+                Assert.AreEqual(string.Format("Trapped{0}After throw{0}", Environment.NewLine), result);  
+            }
+
+            [Test]
+            public void TrapDisplayingErrorRecordExceptionMessage()
+            {
+                string result = TestHost.Execute(@"
+throw 'Error'; 
+trap {
+  $_.Exception.Message;
+  continue
+}
+");
+                Assert.AreEqual("Error" + Environment.NewLine, result);
+            }
+
+            // Currently the error record is being written to the output stream
+            // which is incorrect. The error stream is not currently written
+            // to the host.
+            //
+            // http://technet.microsoft.com/en-us/library/hh847742.aspx
+            [Test]
+            public void TrapWithNoContinueWritesErrorRecordToOutputStream()
+            {
+                string result = TestHost.Execute("throw 'Error'; trap { 'Trapped' }");
+
+                StringAssert.StartsWith("Trapped" + Environment.NewLine, result);
+                StringAssert.Contains("Error", result);
+            }
+
+            [Test]
+            public void TrapWithNoContinueStatementContinuesAfterThrowStatement()
+            {
+                string result = TestHost.Execute(@"
+throw 'Error'
+'After throw'
+trap {
+   'Trapped'
+}");
+
+                StringAssert.StartsWith("Trapped" + Environment.NewLine, result);
+                StringAssert.Contains("Error", result);
+                StringAssert.EndsWith("After throw" + Environment.NewLine, result);
+            }
+
+            [Test]
+            public void TrapDoesNotTrapExitStatement()
+            {
+                string result = TestHost.Execute("Write-Host 'Exiting'; exit; trap { 'Trapped' }");
+
+                Assert.AreEqual("Exiting" + Environment.NewLine, result);
+            }
+
+            [Test]
+            public void TrapWithBreakStatementOutputsErrorRecordAndDoesNotContinueExecutingStatements()
+            {
+                string result = TestHost.Execute(@"
+throw 'Error'
+'Should not display this'
+trap {
+   'Trapped'
+   break
+}");
+
+                StringAssert.Contains("Error", result);
+                StringAssert.StartsWith("Trapped" + Environment.NewLine, result);
+                StringAssert.DoesNotContain("Should not display this", result);
+            }
+
+            [Test]
+            public void TrapWithBreakStatementShouldNotExecuteStatementAfterBreak()
+            {
+                string result = TestHost.Execute(@"
+throw 'Error'
+trap {
+   'Trapped'
+   break
+   'Should not display this'
+}");
+
+                StringAssert.DoesNotContain("Should not display this", result);
+            }
+        }
     }
 }
