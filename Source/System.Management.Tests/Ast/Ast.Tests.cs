@@ -1432,6 +1432,16 @@ ls
         }
 
         [Test]
+        public void TrapWithTypeConstraint()
+        {
+            NamedBlockAst namedBlockAst = ParseInput("trap [System.FormatException] {}")
+                .EndBlock;
+
+            var trapStatementAst = namedBlockAst.Traps.First();
+            Assert.AreEqual("System.FormatException", trapStatementAst.TrapType.TypeName.Name);
+        }
+
+        [Test]
         public void Continue()
         {
             ContinueStatementAst continueStatementAst = ParseStatement("continue");

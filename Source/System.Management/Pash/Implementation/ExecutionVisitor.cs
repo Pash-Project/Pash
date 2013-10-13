@@ -13,6 +13,7 @@ using Extensions.Enumerable;
 using System.Text.RegularExpressions;
 using Pash.ParserIntrinsics;
 using System.IO;
+using System.Collections.ObjectModel;
 
 namespace System.Management.Pash.Implementation
 {
@@ -900,8 +901,14 @@ namespace System.Management.Pash.Implementation
                 }
                 catch (Exception ex)
                 {
+                    TrapStatementAst trapStatementAst = FindMatchingTrapStatement(namedBlockAst.Traps, ex);
+                    if (trapStatementAst == null)
+                    {
+                        throw;
+                    }
+
                     SetUnderscoreVariable(ex);
-                    AstVisitAction visitAction = VisitTrapBody(namedBlockAst.Traps.Last());
+                    AstVisitAction visitAction = VisitTrapBody(trapStatementAst);
 
                     if (visitAction != AstVisitAction.Continue)
                     {
@@ -911,6 +918,26 @@ namespace System.Management.Pash.Implementation
             }
 
             return AstVisitAction.SkipChildren;
+        }
+
+        private TrapStatementAst FindMatchingTrapStatement(ReadOnlyCollection<TrapStatementAst> trapStatements, Exception ex)
+        {
+            TrapStatementAst trapStatementAst = (from statement in trapStatements
+                                                 where IsMatch(statement.TrapType, ex)
+                                                 select statement).FirstOrDefault();
+            if (trapStatementAst != null)
+            {
+                return trapStatementAst;
+            }
+
+            return (from statement in trapStatements
+                    where statement.TrapType == null
+                    select statement).FirstOrDefault();
+        }
+
+        private bool IsMatch(TypeConstraintAst typeConstraintAst, Exception ex)
+        {
+            return (typeConstraintAst != null) && (ex.GetType() == typeConstraintAst.TypeName.GetReflectionType());
         }
 
         private AstVisitAction VisitTrapBody(TrapStatementAst trapStatement)

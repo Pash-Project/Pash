@@ -323,10 +323,23 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildTrapStatementAst(ParseTreeNode parseTreeNode)
         {
+            TypeConstraintAst typeConstraint = null;
+            StatementBlockAst statementBlock = null;
+
+            if (parseTreeNode.ChildNodes.Count == 3)
+            {
+                typeConstraint = BuildTypeConstraintAst(parseTreeNode.ChildNodes[1]);
+                statementBlock = BuildStatementBlockAst(parseTreeNode.ChildNodes[2]);
+            }
+            else
+            {
+                statementBlock = BuildStatementBlockAst(parseTreeNode.ChildNodes[1]);
+            }
+
             return new TrapStatementAst(
                 new ScriptExtent(parseTreeNode),
-                null,
-                BuildStatementBlockAst(parseTreeNode.ChildNodes[1]));
+                typeConstraint,
+                statementBlock);
         }
 
         private StatementAst BuildContinueStatementAst(ParseTreeNode parseTreeNode)

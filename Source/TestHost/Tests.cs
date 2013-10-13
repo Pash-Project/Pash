@@ -796,6 +796,74 @@ trap {
 
                 StringAssert.DoesNotContain("Should not display this", result);
             }
+
+            [Test]
+            public void TrapWithTypeConstraint()
+            {
+                string result = TestHost.Execute(@"
+throw new-object System.FormatException
+
+trap [System.FormatException] {
+    'FormatException trapped'
+    continue
+}
+
+trap {
+    'Should not display this'
+    continue
+}
+
+'End'");
+                Assert.AreEqual(string.Format("FormatException trapped{0}End{0}", Environment.NewLine), result);
+            }
+
+            [Test]
+            public void TrapWithNoTypeConstraintExecutedWhenNoMatchForException()
+            {
+                string result = TestHost.Execute(@"
+throw new-object System.FormatException
+
+trap {
+    'Error trapped'
+    continue
+}
+
+trap [System.InvalidOperationException] {
+    'Should not display this'
+    continue
+}
+");
+                Assert.AreEqual("Error trapped" + Environment.NewLine, result);
+            }
+
+            [Test]
+            public void NoMatchingTrapsForExceptionSoExceptionIsUnhandled()
+            {
+                string result = TestHost.Execute(true, @"
+throw new-object System.FormatException
+
+trap [System.InvalidOperationException] {
+    'Error trapped'
+    continue
+}
+");
+                StringAssert.DoesNotContain("Error trapped", result);
+                StringAssert.Contains(new FormatException().Message, result);
+            }
+        }
+
+        [Test]
+        public void TrapWithTypeConstraintWithoutNamespaceAndDifferentCaseStillMatchesExceptionThrown()
+        {
+            string result = TestHost.Execute(@"
+throw new-object System.FormatException
+
+trap [formatexception] {
+    'FormatException trapped'
+    continue
+}
+");
+            Assert.AreEqual("FormatException trapped" + Environment.NewLine, result);
         }
     }
 }
