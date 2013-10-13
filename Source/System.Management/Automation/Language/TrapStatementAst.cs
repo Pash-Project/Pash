@@ -28,7 +28,7 @@ namespace System.Management.Automation.Language
 
         public override string ToString()
         {
-            return string.Format("trap [0]", this.TrapType);
+            return string.Format("trap {0}", this.TrapType);
         }
     }
 }

@@ -13,6 +13,7 @@ using Extensions.Enumerable;
 using System.Text.RegularExpressions;
 using Pash.ParserIntrinsics;
 using System.IO;
+using System.Collections.ObjectModel;
 
 namespace System.Management.Pash.Implementation
 {
@@ -733,7 +734,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitBreakStatement(BreakStatementAst breakStatementAst)
         {
-            throw new NotImplementedException(); //VisitBreakStatement(breakStatementAst);
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitCatchClause(CatchClauseAst catchClauseAst)
@@ -754,7 +755,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitContinueStatement(ContinueStatementAst continueStatementAst)
         {
-            throw new NotImplementedException(); //VisitContinueStatement(continueStatementAst);
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitConvertExpression(ConvertExpressionAst convertExpressionAst)
@@ -877,8 +878,107 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitNamedBlock(NamedBlockAst namedBlockAst)
         {
+            if (namedBlockAst.Traps.Any())
+            {
+                return VisitNamedBlockWithTraps(namedBlockAst);
+            }
+
             // just iterate over children
             return base.VisitNamedBlock(namedBlockAst);
+        }
+
+        private AstVisitAction VisitNamedBlockWithTraps(NamedBlockAst namedBlockAst)
+        {
+            foreach (StatementAst statement in namedBlockAst.Statements)
+            {
+                try
+                {
+                    statement.Visit(this);
+                }
+                catch (ReturnException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    TrapStatementAst trapStatementAst = FindMatchingTrapStatement(namedBlockAst.Traps, ex);
+                    if (trapStatementAst == null)
+                    {
+                        throw;
+                    }
+
+                    SetUnderscoreVariable(ex);
+                    AstVisitAction visitAction = VisitTrapBody(trapStatementAst);
+
+                    if (visitAction != AstVisitAction.Continue)
+                    {
+                        return AstVisitAction.SkipChildren;
+                    }
+                }
+            }
+
+            return AstVisitAction.SkipChildren;
+        }
+
+        private TrapStatementAst FindMatchingTrapStatement(ReadOnlyCollection<TrapStatementAst> trapStatements, Exception ex)
+        {
+            TrapStatementAst trapStatementAst = (from statement in trapStatements
+                                                 where IsExactMatch(statement.TrapType, ex)
+                                                 select statement).FirstOrDefault();
+            if (trapStatementAst != null)
+            {
+                return trapStatementAst;
+            }
+
+            trapStatementAst = (from statement in trapStatements
+                                where IsInheritedMatch(statement.TrapType, ex)
+                                select statement).FirstOrDefault();
+
+            if (trapStatementAst != null)
+            {
+                return trapStatementAst;
+            }
+
+            return (from statement in trapStatements
+                    where statement.TrapType == null
+                    select statement).FirstOrDefault();
+        }
+
+        private bool IsExactMatch(TypeConstraintAst typeConstraintAst, Exception ex)
+        {
+            return (typeConstraintAst != null) && (ex.GetType() == typeConstraintAst.TypeName.GetReflectionType());
+        }
+
+        private bool IsInheritedMatch(TypeConstraintAst typeConstraintAst, Exception ex)
+        {
+            return (typeConstraintAst != null) && (typeConstraintAst.TypeName.GetReflectionType().IsInstanceOfType(ex));
+        }
+
+        private AstVisitAction VisitTrapBody(TrapStatementAst trapStatement)
+        {
+            foreach (StatementAst statement in trapStatement.Body.Statements)
+            {
+                statement.Visit(this);
+
+                if (statement is ContinueStatementAst)
+                {
+                    return AstVisitAction.Continue;
+                }
+                else if (statement is BreakStatementAst)
+                {
+                    WriteErrorRecord();
+                    return AstVisitAction.SkipChildren;
+                }
+            }
+
+            WriteErrorRecord();
+            return AstVisitAction.Continue;
+        }
+
+        private void WriteErrorRecord()
+        {
+            object error = _context.GetVariableValue("_");
+            _pipelineCommandRuntime.WriteObject(error);
         }
 
         public override AstVisitAction VisitParamBlock(ParamBlockAst paramBlockAst)
@@ -987,7 +1087,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitTrap(TrapStatementAst trapStatementAst)
         {
-            throw new NotImplementedException(); //VisitTrap(trapStatementAst);
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitTryStatement(TryStatementAst tryStatementAst)
@@ -1002,13 +1102,18 @@ namespace System.Management.Pash.Implementation
             }
             catch (Exception ex)
             {
-                var error = new ErrorRecord(ex, "", ErrorCategory.InvalidOperation, null);
-                _context.SetVariable("_", error);
+                SetUnderscoreVariable(ex);
 
                 tryStatementAst.CatchClauses.Last().Body.Visit(this);
             }
 
             return AstVisitAction.SkipChildren;
+        }
+
+        private void SetUnderscoreVariable(Exception ex)
+        {
+            var error = new ErrorRecord(ex, "", ErrorCategory.InvalidOperation, null);
+            _context.SetVariable("_", error);
         }
 
         public override AstVisitAction VisitTypeConstraint(TypeConstraintAst typeConstraintAst)
