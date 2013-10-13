@@ -923,8 +923,17 @@ namespace System.Management.Pash.Implementation
         private TrapStatementAst FindMatchingTrapStatement(ReadOnlyCollection<TrapStatementAst> trapStatements, Exception ex)
         {
             TrapStatementAst trapStatementAst = (from statement in trapStatements
-                                                 where IsMatch(statement.TrapType, ex)
+                                                 where IsExactMatch(statement.TrapType, ex)
                                                  select statement).FirstOrDefault();
+            if (trapStatementAst != null)
+            {
+                return trapStatementAst;
+            }
+
+            trapStatementAst = (from statement in trapStatements
+                                where IsInheritedMatch(statement.TrapType, ex)
+                                select statement).FirstOrDefault();
+
             if (trapStatementAst != null)
             {
                 return trapStatementAst;
@@ -935,9 +944,14 @@ namespace System.Management.Pash.Implementation
                     select statement).FirstOrDefault();
         }
 
-        private bool IsMatch(TypeConstraintAst typeConstraintAst, Exception ex)
+        private bool IsExactMatch(TypeConstraintAst typeConstraintAst, Exception ex)
         {
             return (typeConstraintAst != null) && (ex.GetType() == typeConstraintAst.TypeName.GetReflectionType());
+        }
+
+        private bool IsInheritedMatch(TypeConstraintAst typeConstraintAst, Exception ex)
+        {
+            return (typeConstraintAst != null) && (typeConstraintAst.TypeName.GetReflectionType().IsInstanceOfType(ex));
         }
 
         private AstVisitAction VisitTrapBody(TrapStatementAst trapStatement)

@@ -865,5 +865,38 @@ trap [formatexception] {
 ");
             Assert.AreEqual("FormatException trapped" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void TrapWithTypeConstraintThatMatchesExceptionBaseClassCatchesDerivedException()
+        {
+            string result = TestHost.Execute(@"
+throw new-object System.FormatException
+
+trap [Exception] {
+    'FormatException trapped'
+    continue
+}
+");
+            Assert.AreEqual("FormatException trapped" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void TwoTrapsWithMatchingTypesMatchesExactExceptionMatch()
+        {
+            string result = TestHost.Execute(@"
+throw new-object System.FormatException
+
+trap [Exception] {
+    'Should not display this'
+    continue
+}
+
+trap [FormatException] {
+    'FormatException trapped'
+    continue
+}
+");
+            Assert.AreEqual("FormatException trapped" + Environment.NewLine, result);
+        }
     }
 }
