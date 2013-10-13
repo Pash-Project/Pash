@@ -17,17 +17,19 @@ namespace System.Management.Automation.Language
             if (statementBlock == null)
             {
                 this.Statements = new ReadOnlyCollection<StatementAst>(new StatementAst[] { });
+                this.Traps = new ReadOnlyCollection<TrapStatementAst>(new TrapStatementAst[] { });
             }
             else
             {
                 this.Statements = statementBlock.Statements;
+                this.Traps = statementBlock.Traps;
             }
             this.Unnamed = unnamed;
         }
 
         public TokenKind BlockKind { get; private set; }
         public ReadOnlyCollection<StatementAst> Statements { get; private set; }
-        //TODO: public ReadOnlyCollection<TrapStatementAst> Traps { get { throw new NotImplementedException(this.ToString()); } }
+        public ReadOnlyCollection<TrapStatementAst> Traps { get; private set; }
         public bool Unnamed { get; private set; }
 
         internal override IEnumerable<Ast> Children

@@ -674,5 +674,229 @@ namespace TestHost
                 Assert.AreEqual(expected + Environment.NewLine, result);
             }
         }
+
+        [TestFixture]
+        class TrapTests
+        {
+            [Test]
+            public void TrapWithContinueStatement()
+            {
+                string result = TestHost.Execute("throw 'Error'; trap { 'Trapped'; continue }");
+
+                Assert.AreEqual("Trapped" + Environment.NewLine, result);
+            }
+
+            [Test]
+            public void TrapWithContinueStatementContinuesAfterThrowStatement()
+            {
+                string result = TestHost.Execute(@"
+throw 'Error' 
+Write-Host 'After throw'
+
+trap { 
+  Write-Host 'Trapped' 
+  continue
+}
+");
+                Assert.AreEqual(string.Format("Trapped{0}After throw{0}", Environment.NewLine), result);
+            }
+
+            [Test]
+            public void TrapWithContinueStatementShouldNotExecuteStatementsAfterContinue()
+            {
+                string result = TestHost.Execute(@"
+throw 'Error' 
+Write-Host 'After throw'
+
+trap { 
+  Write-Host 'Trapped' 
+  continue
+  Write-Host 'Should not be output'
+}
+");
+                Assert.AreEqual(string.Format("Trapped{0}After throw{0}", Environment.NewLine), result);  
+            }
+
+            [Test]
+            public void TrapDisplayingErrorRecordExceptionMessage()
+            {
+                string result = TestHost.Execute(@"
+throw 'Error'; 
+trap {
+  $_.Exception.Message;
+  continue
+}
+");
+                Assert.AreEqual("Error" + Environment.NewLine, result);
+            }
+
+            // Currently the error record is being written to the output stream
+            // which is incorrect. The error stream is not currently written
+            // to the host.
+            //
+            // http://technet.microsoft.com/en-us/library/hh847742.aspx
+            [Test]
+            public void TrapWithNoContinueWritesErrorRecordToOutputStream()
+            {
+                string result = TestHost.Execute("throw 'Error'; trap { 'Trapped' }");
+
+                StringAssert.StartsWith("Trapped" + Environment.NewLine, result);
+                StringAssert.Contains("Error", result);
+            }
+
+            [Test]
+            public void TrapWithNoContinueStatementContinuesAfterThrowStatement()
+            {
+                string result = TestHost.Execute(@"
+throw 'Error'
+'After throw'
+trap {
+   'Trapped'
+}");
+
+                StringAssert.StartsWith("Trapped" + Environment.NewLine, result);
+                StringAssert.Contains("Error", result);
+                StringAssert.EndsWith("After throw" + Environment.NewLine, result);
+            }
+
+            [Test]
+            public void TrapDoesNotTrapExitStatement()
+            {
+                string result = TestHost.Execute("Write-Host 'Exiting'; exit; trap { 'Trapped' }");
+
+                Assert.AreEqual("Exiting" + Environment.NewLine, result);
+            }
+
+            [Test]
+            public void TrapWithBreakStatementOutputsErrorRecordAndDoesNotContinueExecutingStatements()
+            {
+                string result = TestHost.Execute(@"
+throw 'Error'
+'Should not display this'
+trap {
+   'Trapped'
+   break
+}");
+
+                StringAssert.Contains("Error", result);
+                StringAssert.StartsWith("Trapped" + Environment.NewLine, result);
+                StringAssert.DoesNotContain("Should not display this", result);
+            }
+
+            [Test]
+            public void TrapWithBreakStatementShouldNotExecuteStatementAfterBreak()
+            {
+                string result = TestHost.Execute(@"
+throw 'Error'
+trap {
+   'Trapped'
+   break
+   'Should not display this'
+}");
+
+                StringAssert.DoesNotContain("Should not display this", result);
+            }
+
+            [Test]
+            public void TrapWithTypeConstraint()
+            {
+                string result = TestHost.Execute(@"
+throw new-object System.FormatException
+
+trap [System.FormatException] {
+    'FormatException trapped'
+    continue
+}
+
+trap {
+    'Should not display this'
+    continue
+}
+
+'End'");
+                Assert.AreEqual(string.Format("FormatException trapped{0}End{0}", Environment.NewLine), result);
+            }
+
+            [Test]
+            public void TrapWithNoTypeConstraintExecutedWhenNoMatchForException()
+            {
+                string result = TestHost.Execute(@"
+throw new-object System.FormatException
+
+trap {
+    'Error trapped'
+    continue
+}
+
+trap [System.InvalidOperationException] {
+    'Should not display this'
+    continue
+}
+");
+                Assert.AreEqual("Error trapped" + Environment.NewLine, result);
+            }
+
+            [Test]
+            public void NoMatchingTrapsForExceptionSoExceptionIsUnhandled()
+            {
+                string result = TestHost.Execute(true, @"
+throw new-object System.FormatException
+
+trap [System.InvalidOperationException] {
+    'Error trapped'
+    continue
+}
+");
+                StringAssert.DoesNotContain("Error trapped", result);
+                StringAssert.Contains(new FormatException().Message, result);
+            }
+        }
+
+        [Test]
+        public void TrapWithTypeConstraintWithoutNamespaceAndDifferentCaseStillMatchesExceptionThrown()
+        {
+            string result = TestHost.Execute(@"
+throw new-object System.FormatException
+
+trap [formatexception] {
+    'FormatException trapped'
+    continue
+}
+");
+            Assert.AreEqual("FormatException trapped" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void TrapWithTypeConstraintThatMatchesExceptionBaseClassCatchesDerivedException()
+        {
+            string result = TestHost.Execute(@"
+throw new-object System.FormatException
+
+trap [Exception] {
+    'FormatException trapped'
+    continue
+}
+");
+            Assert.AreEqual("FormatException trapped" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void TwoTrapsWithMatchingTypesMatchesExactExceptionMatch()
+        {
+            string result = TestHost.Execute(@"
+throw new-object System.FormatException
+
+trap [Exception] {
+    'Should not display this'
+    continue
+}
+
+trap [FormatException] {
+    'FormatException trapped'
+    continue
+}
+");
+            Assert.AreEqual("FormatException trapped" + Environment.NewLine, result);
+        }
     }
 }
