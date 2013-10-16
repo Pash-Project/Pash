@@ -407,6 +407,11 @@ namespace Pash.ParserIntrinsics
                 return BuildForEachStatementAst(parseTreeNode);
             }
 
+            else if (parseTreeNode.Term == this._grammar.while_statement)
+            {
+                return BuildWhileStatementAst(parseTreeNode);
+            }
+
             throw new NotImplementedException();
         }
 
@@ -446,6 +451,21 @@ namespace Pash.ParserIntrinsics
                 bodyAst
                 );
         }
+
+        WhileStatementAst BuildWhileStatementAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.while_statement);
+            var conditionAst = BuildPipelineAst(parseTreeNode.ChildNodes[2].ChildNodes[0]);
+            var bodyAst = BuildStatementBlockAst(parseTreeNode.ChildNodes[4]);
+
+            return new WhileStatementAst(
+                new ScriptExtent(parseTreeNode),
+                null,
+                conditionAst,
+                bodyAst
+                );
+        }
+
 
         IfStatementAst BuildIfStatementAst(ParseTreeNode parseTreeNode)
         {
