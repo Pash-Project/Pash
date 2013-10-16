@@ -1128,7 +1128,18 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitWhileStatement(WhileStatementAst whileStatementAst)
         {
-            throw new NotImplementedException(); //VisitWhileStatement(whileStatementAst);
+            /* The controlling expression while-condition must have type bool or
+             * be implicitly convertible to that type. The loop body, which
+             * consists of statement-block, is executed repeatedly while the
+             * controlling expression tests True. The controlling expression
+             * is evaluated before each execution of the loop body.
+             */
+            while ((bool)((PSObject)EvaluateAst(whileStatementAst.Condition)).BaseObject)
+            {
+                this._pipelineCommandRuntime.WriteObject(EvaluateAst(whileStatementAst.Body, false), true);
+            }
+
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitTypeExpression(TypeExpressionAst typeExpressionAst)

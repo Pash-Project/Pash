@@ -423,6 +423,15 @@ namespace TestHost
         }
 
         [Test]
+        public void While()
+        {
+            /* Should behave exactly like the for-loop */
+            var result = TestHost.Execute("$i = 0; while ($i -ile 10) { $i; $i++ }");
+
+            Assert.AreEqual(Enumerable.Range(0, 11).JoinString(Environment.NewLine) + Environment.NewLine, result);
+        }
+
+        [Test]
         public void ForLoopWithAssignmentStatementAsBodyShouldNotOutputAssignmentResultOnEachIteration()
         {
             string result = TestHost.Execute("$j = 0; for ($i = 0; $i -ile 10; $i++) { $j++ }; $j");
