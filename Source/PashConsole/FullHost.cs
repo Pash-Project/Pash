@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using Pash.Implementation;
 using System.Reflection;
 using System.IO;
+using Mono.Terminal;
 
 namespace Pash
 {
@@ -110,6 +111,20 @@ namespace Pash
 
         public void Run()
         {
+            /* We use getline instead of Console.ReadLine() if the system doesn't provide a feature-rich terminal
+             * emulator. If this functionality gets expanded, it should be put in a separate class which handles
+             * the different platforms itself and provides common functions to be used here.
+             */
+            bool isWindows = Environment.OSVersion.Platform == System.PlatformID.Win32NT;
+            bool? useUnixLikeConsole = GetBoolVariable(PashVariables.UseUnixLikeConsole);
+            if (useUnixLikeConsole == null)
+                useUnixLikeConsole = !isWindows;
+            LineEditor getlineEditor = null;
+            if ((bool) useUnixLikeConsole)
+            {
+                getlineEditor = new LineEditor("Pash");
+            }
+
             // Set up the control-C handler.
             Console.CancelKeyPress += new ConsoleCancelEventHandler(HandleControlC);
             Console.TreatControlCAsInput = false;
@@ -121,9 +136,19 @@ namespace Pash
             // the user calling "exit".
             while (!myHost.ShouldExit)
             {
-                Prompt();
+                string prompt = Prompt();
+                string cmd;
 
-                string cmd = Console.ReadLine();
+                // TODO: design this nicer (e.g. separate class(es)) as it gets more evolved
+                if ((bool) useUnixLikeConsole)
+                {
+                    cmd = getlineEditor.Edit(prompt, "");
+                }
+                else
+                {
+                    Console.Write(prompt);
+                    cmd = Console.ReadLine();
+                }
 
                 if (cmd == null)
                     continue;
@@ -140,17 +165,52 @@ namespace Pash
             Environment.Exit(myHost.ExitCode);
         }
 
-        internal void Prompt()
+        internal string Prompt()
         {
             try
             {
-                Execute("prompt | write-host -nonewline");
+                currentPipeline = myRunSpace.CreatePipeline("prompt");
 
+                try
+                {
+                    var output = currentPipeline.Invoke();
+                    if (output.Count < 1)
+                    {
+                        throw new Exception("'prompt' didn't return a string");
+                    }
+                    return output[0].ToString();
+                }
+                finally
+                {
+                    currentPipeline.Dispose();
+                    currentPipeline = null;
+                }
             }
             catch (Exception ex)
             {
-
                 this.myHost.UI.WriteLine(ex.ToString());
+            }
+            //default, if the "prompt" function doesn't return properly
+            return "PASH >";
+        }
+
+        bool? GetBoolVariable (string name)
+        {
+            var variable = myRunSpace.SessionStateProxy.GetVariable(name) as PSVariable;
+            if (variable == null)
+            {
+                return null;
+            }
+
+            var value = variable.Value;
+            var psObject = value as PSObject;
+            if (psObject == null)
+            {
+                return value as bool?;
+            }
+            else
+            {
+                return psObject.BaseObject as bool?;
             }
         }
 
