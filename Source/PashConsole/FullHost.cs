@@ -23,7 +23,7 @@ namespace Pash
             myRunSpace.Open();
 
             string exePath = Assembly.GetCallingAssembly().Location;
-            string configPath = Path.Combine(Path.GetDirectoryName(exePath), "config.ps1");
+            string configPath = "&\"" + Path.Combine(Path.GetDirectoryName(exePath), "config.ps1") + "\"";
 
             Execute(configPath);
         }
