@@ -22,10 +22,12 @@ namespace Pash
             myRunSpace = RunspaceFactory.CreateRunspace(myHost);
             myRunSpace.Open();
 
-            string exePath = Assembly.GetCallingAssembly().Location;
-            string configPath = "&\"" + Path.Combine(Path.GetDirectoryName(exePath), "config.ps1") + "\"";
+            Execute(FormatConfigCommand(Assembly.GetCallingAssembly().Location));
+        }
 
-            Execute(configPath);
+        static internal string FormatConfigCommand(string path)
+        {
+            return "&\"" + Path.Combine(Path.GetDirectoryName(path), "config.ps1") + "\"";
         }
 
         void executeHelper(string cmd, object input)

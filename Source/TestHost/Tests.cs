@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using System.IO;
+using Pash;
 
 namespace TestHost
 {
@@ -906,6 +907,13 @@ trap [FormatException] {
 }
 ");
             Assert.AreEqual("FormatException trapped" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void FormatConfigCommand() {
+            string input = Path.Combine("test", "path", "with spaces", "test.exe");
+            string expected = "&\"" + Path.Combine("test", "path", "with spaces", "config.ps1") + "\"";
+            Assert.AreEqual(expected, FullHost.FormatConfigCommand(input));
         }
     }
 }
