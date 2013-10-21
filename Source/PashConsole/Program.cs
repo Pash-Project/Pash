@@ -1,9 +1,11 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Linq;
 using System.Text;
 using System.Management.Automation.Runspaces;
 using System.Management.Automation;
 using System.Collections.ObjectModel;
+using CommandLine.Text;
 
 namespace Pash
 {
@@ -12,51 +14,60 @@ namespace Pash
     {
         static void Main(string[] args)
         {
+            var options = new Options();
 
-            /*
-            PashHost host = new PashHost();
-
-            using (Runspace space = RunspaceFactory.CreateRunspace(host))
+            var parser = new CommandLine.Parser(settings => {
+                settings.HelpWriter = null;
+                settings.CaseSensitive = false;
+            });
+            if (parser.ParseArguments(args, options))
             {
-                space.Open();
 
-                // Create the pipeline.
-                Pipeline pipe = space.CreatePipeline();
+                var fullHost = new FullHost();
 
-                // Add the script we want to run. This script does two things. 
-                // First, it runs the Get-Process cmdlet with the cmdlet output 
-                // sorted by handle count. Second, the GetDate cmdlet is piped 
-                // to the Out-String cmdlet so that we can see the
-                // date displayed in German.
-
-                pipe.Commands.AddScript(@"
-                    get-process | sort handlecount
-                    # This should display the date in German...
-                    get-date | out-string
-                    ");
-
-                // Add the default outputter to the end of the pipe and indicate
-                // that it should handle both output and errors from the previous
-                // commands. This will result in the output being written using the PSHost
-                // and PSHostUserInterface classes instead of returning objects to the hosting
-                // application.
-                pipe.Commands.Add("out-default");
-                pipe.Commands[0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
-
-                Collection<PSObject> results = pipe.Invoke();
-
-                foreach (PSObject result in results)
+                if (!string.IsNullOrEmpty(options.InputFile))
                 {
-                    Console.WriteLine(result);
+                    int fileParamStart = -1;
+                    for (int i = 0; i < args.Length; i++)
+                    {
+                        //Console.WriteLine("arg[" + i + "]" + args[i]);
+                        if (args[i].Equals("-f", StringComparison.InvariantCultureIgnoreCase) ||
+                            args[i].Equals("--file", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            fileParamStart = i;
+                        }
+                    }
+
+                    if (fileParamStart > -1)
+                    {
+                        // Check to see if we're passing in arguments after the file.
+                        if (args.Length > fileParamStart + 2)
+                        {
+                            // I'm not sure how best to handle file arguments at the command line
+                            // Below could be one way (take the input args, execute them in the 
+                            // runspace by assigning them to the $args array?
+                            //
+                            //var argsArray = string.Join(",", args.Skip(fileParamStart + 2));
+                            //var inputArgs = "$args=@(" + argsArray + ")";
+                            //Console.WriteLine(inputArgs);
+
+                            Console.WriteLine("Parameters to a file not yet supported...");
+                            return;
+                        }
+                    }
+
+                    var script = System.IO.File.ReadAllText(options.InputFile);
+                    fullHost.Execute(script);
+
+                    return;
                 }
 
-                System.Console.WriteLine("Hit any key to exit...");
-                System.Console.ReadKey();
+                fullHost.Run();
             }
-            */
-
-            FullHost p = new FullHost();
-            p.Run();
+            else
+            {
+                Console.WriteLine(options.GetUsage());
+            }
         }
     }
 }

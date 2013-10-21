@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{840D5A81-18E7-4198-8B27-0BFC35B78D4B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>PashConsole.Tests</RootNamespace>
+    <AssemblyName>PashConsole.Tests</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\Tools\NUnit-2.6.1\bin\nunit.framework.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PashConsole\FileCommandTests.cs" />
+    <Compile Include="PashConsole\PashConsoleTestHelper.cs" />
+    <Compile Include="..\TestHost\TestHelpers\NUnitSpecificationExtensions.cs">
+      <Link>TestHelpers\NUnitSpecificationExtensions.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="TestHelpers\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PashConsole\PashConsole.csproj">
+      <Project>{BB348EAD-1713-4760-9953-BC721A203885}</Project>
+      <Name>PashConsole</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Management\System.Management.csproj">
+      <Project>{C5E303EC-5684-4C95-B0EC-2593E6662403}</Project>
+      <Name>System.Management</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

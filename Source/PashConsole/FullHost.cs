@@ -28,7 +28,7 @@ namespace Pash
             Execute(configPath);
         }
 
-        void executeHelper(string cmd, object input)
+        internal void Execute(string cmd, object input)
         {
             // Ignore empty command lines.
             if (String.IsNullOrEmpty(cmd))
@@ -44,7 +44,6 @@ namespace Pash
             try
             {
                 currentPipeline.Commands.Add(cmd);
-
                 // Now add the default outputter to the end of the pipe and indicate
                 // that it should handle both output and errors from the previous
                 // commands. This will result in the output being written using the PSHost
@@ -90,12 +89,12 @@ namespace Pash
             }
         }
 
-        void Execute(string cmd)
+        internal void Execute(string cmd)
         {
             try
             {
                 // execute the command with no input...
-                executeHelper(cmd, null);
+                Execute(cmd, null);
             }
             catch (RuntimeException rte)
             {
@@ -104,7 +103,7 @@ namespace Pash
                 // a second pipeline passing in the error record.
                 // The runtime will bind this to the $input variable
                 // which is why $input is being piped to out-default
-                executeHelper("$input | out-default", rte.ErrorRecord);
+                Execute("$input | out-default", rte.ErrorRecord);
             }
         }
 
