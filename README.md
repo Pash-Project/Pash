@@ -69,4 +69,4 @@ If you like Pash and want to express your gratitude, you could:
 - Create art, music, architecture, boat plans, whatever, and release it under [Creative Commons](http://creativecommons.org/licenses/by-sa/2.5/).
 - Volunteer in your community.
 - Give free hugs!
-- If you're making money with Pash, then you should [send money](http://pledgie.com/campaigns/19268).
+- If you're making money with Pash, then you should [send money](https://www.gittip.com/PashProject/).
