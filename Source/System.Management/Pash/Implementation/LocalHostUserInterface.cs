@@ -5,11 +5,36 @@ using System.Text;
 using System.Management.Automation.Host;
 using System.Management.Automation;
 using System.Collections.ObjectModel;
+using Mono.Terminal;
 
 namespace Pash.Implementation
 {
-    class LocalHostUserInterface : PSHostUserInterface
+    public class LocalHostUserInterface : PSHostUserInterface
     {
+        private bool useUnixLikeInput;
+        private LineEditor getlineEditor;
+
+        public bool UseUnixLikeInput {
+            get
+            {
+                return useUnixLikeInput;
+            }
+
+            set
+            {
+                if (value != useUnixLikeInput)
+                {
+                    useUnixLikeInput = value;
+                    getlineEditor = useUnixLikeInput ? new LineEditor("Pash") : null;
+                }
+            }
+        }
+
+        public LocalHostUserInterface()
+        {
+            UseUnixLikeInput = Environment.OSVersion.Platform != System.PlatformID.Win32NT;
+        }
+
         #region User prompt Methods
         public override Dictionary<string, PSObject> Prompt(string caption, string message, Collection<FieldDescription> descriptions)
         {
@@ -39,7 +64,7 @@ namespace Pash.Implementation
                 Console.Write(cd.Label.Replace("&", "") + "  ");
             }
             Console.Write("[?] Help (default is \"{0}\"): ", chs[defaultChoice]);
-            string str = Console.ReadLine().ToUpper();
+            string str = ReadLine().ToUpper();
             if (str == "?")
             {
                 // TODO: implement help
@@ -83,7 +108,7 @@ namespace Pash.Implementation
         #region ReadXXX methods
         public override string ReadLine()
         {
-            return Console.ReadLine();
+            return UseUnixLikeInput ? getlineEditor.Edit("", "") : Console.ReadLine();
         }
 
         public override System.Security.SecureString ReadLineAsSecureString()

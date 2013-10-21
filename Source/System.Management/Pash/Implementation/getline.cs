@@ -9,6 +9,8 @@
 // Dual-licensed under the terms of the MIT X11 license or the
 // Apache License 2.0
 //
+// Modified by Stefan Burnicki
+//
 // USE -define:DEMO to build this as a standalone file and test it
 //
 // TODO:
@@ -65,6 +67,8 @@ namespace Mono.Terminal {
 
         // The row where we started displaying data.
         int home_row;
+        // The col where we started displaying data.
+        int home_col;
 
         // The maximum length that has been displayed on the screen
         int max_rendered;
@@ -220,7 +224,7 @@ namespace Mono.Terminal {
             // end of a line.
             Console.Write (' ');
 
-            UpdateHomeRow (max);
+            UpdateHomeRow (max + home_col);
         }
 
         void UpdateHomeRow (int screenpos)
@@ -291,7 +295,7 @@ namespace Mono.Terminal {
 
         int TextToScreenPos (int pos)
         {
-            return shown_prompt.Length + TextToRenderPos (pos);
+            return shown_prompt.Length + TextToRenderPos (pos) + home_col;
         }
         
         string Prompt {
@@ -304,12 +308,12 @@ namespace Mono.Terminal {
                 return (shown_prompt.Length + rendered_text.Length)/Console.WindowWidth;
             }
         }
-        
+
         void ForceCursor (int newpos)
         {
             cursor = newpos;
 
-            int actual_pos = shown_prompt.Length + TextToRenderPos (cursor);
+            int actual_pos = shown_prompt.Length + TextToRenderPos (cursor) + home_col;
             int row = home_row + (actual_pos/Console.WindowWidth);
             int col = actual_pos % Console.WindowWidth;
 
@@ -336,7 +340,7 @@ namespace Mono.Terminal {
             ComputeRendered ();
             if (prev_lines != LineCount){
 
-                Console.SetCursorPosition (0, home_row);
+                Console.SetCursorPosition (home_col, home_row);
                 Render ();
                 ForceCursor (++cursor);
             } else {
@@ -637,7 +641,7 @@ namespace Mono.Terminal {
             text.Insert (cursor, str);
             ComputeRendered ();
             if (prev_lines != LineCount){
-                Console.SetCursorPosition (0, home_row);
+                Console.SetCursorPosition (home_col, home_row);
                 Render ();
                 cursor += str.Length;
                 ForceCursor (cursor);
@@ -651,12 +655,19 @@ namespace Mono.Terminal {
         
         void SetSearchPrompt (string s)
         {
-            SetPrompt ("(reverse-i-search)`" + s + "': ");
+            ComputeRendered();
+            int render_line_offset = (rendered_text.Length + shown_prompt.Length + home_col) / Console.WindowWidth;
+            string search_prompt = "(reverse-i-search): " + s + "\x5f";
+            Console.SetCursorPosition(0, render_line_offset + 1 + home_row);
+            Console.Write(search_prompt);
+            max_rendered = (render_line_offset + 1) * Console.BufferWidth + search_prompt.Length;
+            ForceCursor(cursor);
         }
 
         void ReverseSearch ()
         {
             int p;
+            SetSearchPrompt(search); //redraw the search prompt, if text got updated
 
             if (cursor == text.Length){
                 // The cursor is at the end of the string
@@ -814,14 +825,14 @@ namespace Mono.Terminal {
 
         void SetText (string newtext)
         {
-            Console.SetCursorPosition (0, home_row);
+            Console.SetCursorPosition (home_col, home_row);
             InitText (newtext);
         }
 
         void SetPrompt (string newprompt)
         {
             shown_prompt = newprompt;
-            Console.SetCursorPosition (0, home_row);
+            Console.SetCursorPosition (home_col, home_row);
             Render ();
             ForceCursor (cursor);
         }
@@ -831,7 +842,8 @@ namespace Mono.Terminal {
             edit_thread = Thread.CurrentThread;
             searching = 0;
             Console.CancelKeyPress += InterruptEdit;
-            
+            home_col = Console.CursorLeft;
+
             done = false;
             history.CursorToEnd ();
             max_rendered = 0;
@@ -847,9 +859,8 @@ namespace Mono.Terminal {
                 } catch (ThreadAbortException){
                     searching = 0;
                     Thread.ResetAbort ();
-                    Console.WriteLine ();
-                    SetPrompt (prompt);
-                    SetText ("");
+                    text = null;
+                    break;
                 }
             } while (!done);
             Console.WriteLine ();
@@ -857,6 +868,8 @@ namespace Mono.Terminal {
             Console.CancelKeyPress -= InterruptEdit;
 
             if (text == null){
+                //remove initial text from history
+                history.RemoveLast ();
                 history.Close ();
                 return null;
             }
