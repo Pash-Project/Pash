@@ -2,8 +2,9 @@
 
 namespace Pash
 {
-    internal static class PashVariables
+    public static class PashVariables
     {
         public const string ForceSynchronizeProcessOutput = "PASHForceSynchronizeProcessOutput";
+        public const string UseUnixLikeConsole = "PASHUseUnixLikeConsole";
     }
 }
