@@ -32,7 +32,7 @@ namespace Pash.Implementation
 
         public LocalHostUserInterface()
         {
-            UseUnixLikeInput = Environment.OSVersion.Platform != System.PlatformID.Win32NT;
+            UseUnixLikeInput = Environment.OSVersion.Platform != System.PlatformID.Win32NT && Console.WindowWidth > 0;
         }
 
         #region User prompt Methods

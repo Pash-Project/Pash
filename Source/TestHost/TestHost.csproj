@@ -90,6 +90,7 @@
     <Compile Include="TestHost.cs" />
     <Compile Include="TestHostUserInterface.cs" />
     <Compile Include="Tests.cs" />
+    <Compile Include="LocalHostUserInterfaceTests.cs" />
     <Compile Include="System.Management\PathTests.cs" />
     <Compile Include="System.Management\ParameterTests.cs" />
     <Compile Include="TestHelpers\NUnitSpecificationExtensions.cs" />
