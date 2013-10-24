@@ -19,3 +19,4 @@ Jonathan Ben-Joseph        |                                                    
 Alistair Hughes            | [alesliehughes](https://github.com/alesliehughes)      |                               | 
 Johannes Rössel            | [@ygra](https://github.com/ygra)                       | <pash@hypftier.de>            | 
 Alexander Sturm            | [@Ventero](https://github.com/Ventero)                 | <pash@ventero.de>             | 
+Stefan Burnicki            | [@sburnicki](https://github.com/sburnicki)             | <stefan.burnicki@gmail.com>   |
