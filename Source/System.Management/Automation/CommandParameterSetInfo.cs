@@ -70,5 +70,14 @@ namespace System.Management.Automation
 
             return found;
         }
+
+        internal IDictionary<string, CommandParameterInfo> LookupAllParameters(IEnumerable<string> names)
+        {
+            var lookupDictionary = new Dictionary<string, CommandParameterInfo> ();
+            foreach (string name in names) {
+                lookupDictionary.Add (name, this.LookupParameter(name));
+            }
+            return lookupDictionary;
+        }
     }
 }

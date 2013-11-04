@@ -122,7 +122,7 @@ namespace System.Management.Tests.ParameterTests
             Assert.IsTrue(cmdlet.Recurse.ToBool());
         }
 
-        [Test, Explicit]
+        [Test]
         public void BindingCombinationNonDefaultSet()
         {
             CommandProcessor cmdProc = new CommandProcessor(info);
@@ -134,8 +134,7 @@ namespace System.Management.Tests.ParameterTests
 
             cmdProc.BindArguments(null);
 
-            Assert.AreEqual("John", cmdlet.Name);
-            Assert.AreEqual("a path", cmdlet.FilePath);
+            Assert.AreEqual("a", cmdlet.Variable);
             Assert.IsTrue(cmdlet.Recurse.ToBool());
         }
 

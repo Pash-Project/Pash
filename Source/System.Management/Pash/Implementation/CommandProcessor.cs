@@ -37,7 +37,7 @@ namespace System.Management.Automation
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="obj"></param>
         /// <remarks>
@@ -52,8 +52,31 @@ namespace System.Management.Automation
             if ((obj == null) && (Parameters.Count == 0))
                 return;
 
-            // TODO: Perform analysis on passed arguments and obj to identify which parameter set to select for binding
+            IEnumerable<string> namedParameters = Parameters.Select (x => x.Name).Where (x => !string.IsNullOrEmpty (x));
             CommandParameterSetInfo paramSetInfo = _cmdletInfo.GetDefaultParameterSet();
+            IDictionary<string, CommandParameterInfo> namedParametersLookup = paramSetInfo.LookupAllParameters(namedParameters);
+            IEnumerable<KeyValuePair<string, CommandParameterInfo>> unknownParameters = namedParametersLookup.ToList ().Where(x => x.Value == null);
+            if (unknownParameters.Any ())
+            {
+                // Cannot find all named parameters in default parameter set.
+                // Lets try other parameter sets.
+                bool found = false;
+                foreach (CommandParameterSetInfo nonDefaultParamSetInfo in _cmdletInfo.GetNonDefaultParameterSets())
+                {
+                    namedParametersLookup = nonDefaultParamSetInfo.LookupAllParameters(namedParameters);
+                    if (!namedParametersLookup.Values.Where (x => x == null).Any ())
+                    {
+                        paramSetInfo = nonDefaultParamSetInfo;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    //TODO: Throw ParameterBindingException when implemented
+                    throw(new Exception("No parameter found matching '" + unknownParameters.First().Key + "'"));
+                }
+            }
 
             if (obj != null)
             {
@@ -83,24 +106,15 @@ namespace System.Management.Automation
                     }
                     else
                     {
-                        paramInfo = paramSetInfo.LookupParameter(parameter.Name);
-
-                        if (paramInfo != null)
+                        namedParametersLookup.TryGetValue(parameter.Name, out paramInfo);
+                        if (parameter.Value == null && paramInfo.ParameterType != typeof(SwitchParameter)
+                            && i < Parameters.Count - 1 && Parameters[i + 1].Name == null)
                         {
-                            if (parameter.Value == null && paramInfo.ParameterType != typeof(SwitchParameter)
-                                && i < Parameters.Count - 1 && Parameters[i + 1].Name == null)
-                            {
-                                BindArgument(paramInfo.Name, Parameters[i + 1].Value, paramInfo.ParameterType);
-                                i++;
-                            }
-                            else
-                                BindArgument(paramInfo.Name, parameter.Value, paramInfo.ParameterType);
+                            BindArgument(paramInfo.Name, Parameters[i + 1].Value, paramInfo.ParameterType);
+                            i++;
                         }
                         else
-                        {
-                            //TODO: Throw ParameterBindingException when implemented
-                            throw(new Exception("No parameter found matching '" + parameter.Name + "'"));
-                        }
+                            BindArgument(paramInfo.Name, parameter.Value, paramInfo.ParameterType);
                     }
                 }
             }
@@ -146,7 +160,7 @@ namespace System.Management.Automation
             {
                 SetValue(memberInfo, Command, value.ToString());
             }
-            
+
             else if (memberType.IsEnum) {
                   SetValue (memberInfo, Command, Enum.Parse (type, value.ToString(), true));
             }
