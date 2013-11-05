@@ -36,7 +36,7 @@ namespace System.Management.Automation.Provider
         {
             get
             {
-                return new SessionState(this.ProviderRuntime.ExecutionContext.SessionState);
+                return this.ProviderRuntime.ExecutionContext.SessionState;
             }
         }
 
