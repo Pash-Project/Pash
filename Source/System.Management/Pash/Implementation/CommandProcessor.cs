@@ -73,8 +73,7 @@ namespace System.Management.Automation
                 }
                 if (!found)
                 {
-                    //TODO: Throw ParameterBindingException when implemented
-                    throw(new Exception("No parameter found matching '" + unknownParameters.First().Key + "'"));
+                    throw new ParameterBindingException("No parameter found matching '" + unknownParameters.First().Key + "'");
                 }
             }
 
