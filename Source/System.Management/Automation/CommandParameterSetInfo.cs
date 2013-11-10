@@ -61,7 +61,7 @@ namespace System.Management.Automation
                     // If match already found, name is ambiguous
                     if (found != null)
                     {
-                        throw new ParameterBindingException("Supplied parmameter '" + name + "' is ambiguous, possibilities include '" + found.Name + "' and '" + parameter.Name + "'" );
+                        throw new ArgumentException("Supplied parmameter '" + name + "' is ambiguous, possibilities include '" + found.Name + "' and '" + parameter.Name + "'" );
                     }
                     found = parameter;
                 }
