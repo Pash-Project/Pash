@@ -1456,5 +1456,82 @@ ls
 
             Assert.IsNull(breakStatementAst.Label);
         }
+
+        [TestFixture]
+        public class ExpandableStringExpressionTests
+        {
+            dynamic Parse(string input)
+            {
+                return ParseStatement(input)
+                    .PipelineElements[0]
+                    .Expression;
+            }
+
+            [Test]
+            public void VariableInsideDoubleQuotedString()
+            {
+                ExpandableStringExpressionAst expandableStringAst = Parse("\"$foo\"");
+
+                var variableAst = expandableStringAst.NestedExpressions.FirstOrDefault() as VariableExpressionAst;
+                Assert.AreEqual(StringConstantType.DoubleQuoted, expandableStringAst.StringConstantType);
+                Assert.AreEqual(typeof(string), expandableStringAst.StaticType);
+                Assert.AreEqual("$foo", expandableStringAst.Value);
+                Assert.AreEqual("foo", variableAst.VariablePath.UserPath);
+            }
+
+            /// <summary>
+            /// PowerShell only creates an ExpandableStringExpressionAst if the string needs to be
+            /// expanded.
+            /// </summary>
+            [Test]
+            [TestCase("\"abc\"")]
+            [TestCase("\"$\"")]
+            public void DoubleQuotedStringContainingConstantStringShouldBeTreatedAsStringConstantNotExpandableString(string input)
+            {
+                StringConstantExpressionAst stringConstantAst = Parse(input);
+
+                Assert.AreEqual(StringConstantType.DoubleQuoted, stringConstantAst.StringConstantType);
+            }
+
+            [Test]
+            public void VariableFollowedByDotCharacterShouldNotIncludeDotInVariableName()
+            {
+                ExpandableStringExpressionAst expandableStringAst = Parse("\"$foo.\"");
+
+                var variableAst = expandableStringAst.NestedExpressions.FirstOrDefault() as VariableExpressionAst;
+                Assert.AreEqual("foo", variableAst.VariablePath.UserPath);
+            }
+
+            [Test]
+            public void TwoVariablesNextToEachOtherBothAreFound()
+            {
+                ExpandableStringExpressionAst expandableStringAst = Parse("\"$foo$bar\"");
+
+                var firstVariableAst = expandableStringAst.NestedExpressions.FirstOrDefault() as VariableExpressionAst;
+                var lastVariableAst = expandableStringAst.NestedExpressions.LastOrDefault() as VariableExpressionAst;
+                Assert.AreEqual("foo", firstVariableAst.VariablePath.UserPath);
+                Assert.AreEqual("bar", lastVariableAst.VariablePath.UserPath);
+                Assert.AreEqual(2, expandableStringAst.NestedExpressions.Count);
+            }
+
+            [Test]
+            public void EscapedDollarSignFollowedByLettersShouldNotBeTreatedAsVariable()
+            {
+                ExpandableStringExpressionAst expandableStringAst = Parse("\"`$foo $bar\"");
+
+                var variableAst = expandableStringAst.NestedExpressions.FirstOrDefault() as VariableExpressionAst;
+                Assert.AreEqual("bar", variableAst.VariablePath.UserPath);
+                Assert.AreEqual(1, expandableStringAst.NestedExpressions.Count);
+            }
+
+            [Test]
+            public void SingleCharacterVariableName()
+            {
+                ExpandableStringExpressionAst expandableStringAst = Parse("\"$a\"");
+
+                var variableAst = expandableStringAst.NestedExpressions.FirstOrDefault() as VariableExpressionAst;
+                Assert.AreEqual("a", variableAst.VariablePath.UserPath);
+            }
+        }
     }
 }

@@ -461,6 +461,7 @@
     <Compile Include="Pash\Path.cs" />
     <Compile Include="Pash\PathNavigation.cs" />
     <Compile Include="Pash\Implementation\ApplicationProcessor.cs" />
+    <Compile Include="Pash\ExpandableStringParser.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
