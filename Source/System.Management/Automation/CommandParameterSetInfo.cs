@@ -61,7 +61,6 @@ namespace System.Management.Automation
                     // If match already found, name is ambiguous
                     if (found != null)
                     {
-                        //TODO: Throw ParameterBindingException when implemented
                         throw new ArgumentException("Supplied parmameter '" + name + "' is ambiguous, possibilities include '" + found.Name + "' and '" + parameter.Name + "'" );
                     }
                     found = parameter;
@@ -69,6 +68,15 @@ namespace System.Management.Automation
             }
 
             return found;
+        }
+
+        internal IDictionary<string, CommandParameterInfo> LookupAllParameters(IEnumerable<string> names)
+        {
+            var lookupDictionary = new Dictionary<string, CommandParameterInfo> ();
+            foreach (string name in names) {
+                lookupDictionary.Add (name, this.LookupParameter(name));
+            }
+            return lookupDictionary;
         }
     }
 }
