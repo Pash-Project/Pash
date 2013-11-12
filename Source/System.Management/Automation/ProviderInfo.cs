@@ -19,6 +19,7 @@ namespace System.Management.Automation
         {
             get
             {
+                //TODO: only get the ones of the global scope to match PS 2.0 behavior
                 return _sessionState.Drive.GetAllForProvider(FullName);
             }
         }

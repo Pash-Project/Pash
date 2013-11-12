@@ -42,7 +42,7 @@ namespace TestHost
             Console.SetOut(originalOut);
         }
 
-        [Test]
+        [Test,Explicit("Currently Nunit ignores the redirection of stdin when running from commandline, so the testing doesn't work")]
         public void TestReadLine()
         {
             SetInput("foobar" + Environment.NewLine);

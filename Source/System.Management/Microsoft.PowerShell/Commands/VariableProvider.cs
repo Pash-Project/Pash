@@ -29,7 +29,7 @@ namespace Microsoft.PowerShell.Commands
             if (string.Equals("variable:" + name.CorrectSlash, name, StringComparison.CurrentCultureIgnoreCase))
                 return true;
 
-            return SessionState.SessionStateGlobal.GetVariable(name);
+            return SessionState.PSVariable.Get(name);
         }
 
         internal override bool CanRenameItem(object item)
@@ -49,7 +49,7 @@ namespace Microsoft.PowerShell.Commands
 
         internal override IDictionary GetSessionStateTable()
         {
-            return (IDictionary)SessionState.SessionStateGlobal.GetVariables();
+            return (IDictionary)SessionState.PSVariable.GetAll();
         }
 
         internal override void SetSessionStateItem(Path name, object value, bool writeItem)
@@ -74,7 +74,8 @@ namespace Microsoft.PowerShell.Commands
                 variable = new PSVariable(name, null);
             }
             // TODO: can be Force'ed
-            PSVariable item = base.SessionState.SessionStateGlobal.SetVariable(variable) as PSVariable;
+            SessionState.PSVariable.Set(variable);
+            PSVariable item = SessionState.PSVariable.Get(variable.Name);
             if (writeItem && (item != null))
             {
                 WriteItemObject(item, item.Name, false);
@@ -84,7 +85,7 @@ namespace Microsoft.PowerShell.Commands
         internal override void RemoveSessionStateItem(Path name)
         {
             // TODO: can be Force'ed
-            SessionState.SessionStateGlobal.RemoveVariable(name);
+            SessionState.PSVariable.Remove(name);
         }
 
         protected override void GetItem(Path name)

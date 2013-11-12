@@ -12,88 +12,24 @@ using System.Management.Automation.Provider;
 
 namespace Pash.Implementation
 {
-    public class PSDriveInfoCollection //: IEnumerable<KeyValuePair<string, PSDriveInfo>>
-    {
-
-        private Dictionary<string, PSDriveInfo> _drives;
-        public PSDriveInfoCollection()
-        {
-            _drives = new Dictionary<string, PSDriveInfo>(StringComparer.CurrentCultureIgnoreCase);
-        }
-
-        public void Add(string name, PSDriveInfo driveInfo)
-        {
-            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException("name");
-            if (driveInfo == null) throw new ArgumentNullException("driveInfo");
-            _drives.Add(name, driveInfo);
-        }
-
-        public bool ContainsKey(string driveName)
-        {
-            return _drives.ContainsKey(driveName);
-        }
-
-        public PSDriveInfo GetDrive(string driveName)
-        {
-            if (!_drives.ContainsKey(driveName))
-                return null;
-
-            return _drives[driveName];
-        }
-
-        public IEnumerable<PSDriveInfo> Drives
-        {
-            get { return _drives.Values; }
-        }
-    }
 
     internal class SessionStateGlobal
     {
         private Dictionary<string, List<ProviderInfo>> _providers;
         private Dictionary<string, List<CmdletProvider>> _providerInstances;
         private Dictionary<ProviderInfo, PSDriveInfo> _providersCurrentDrive;
-        private PSDriveInfoCollection _drives;
         private Dictionary<string, Stack<PathInfo>> _workingLocationStack;
-        private Dictionary<string, AliasInfo> _aliases;
-        private Dictionary<string, CommandInfo> _functions;
-        private HybridDictionary _variables;
+
         private ExecutionContext _executionContext;
         internal PSDriveInfo _currentDrive;
 
-        // Test access only?? We need a better way to get access to 'state' for use in tests
-        internal PSDriveInfoCollection DrivesCollection { get { return _drives; } }
-
-        private SessionStateGlobal()
+        internal SessionStateGlobal(ExecutionContext executionContext)
         {
+			_executionContext = executionContext;
             _providers = new Dictionary<string, List<ProviderInfo>>(StringComparer.CurrentCultureIgnoreCase);
             _providerInstances = new Dictionary<string, List<CmdletProvider>>(StringComparer.CurrentCultureIgnoreCase);
             _providersCurrentDrive = new Dictionary<ProviderInfo, PSDriveInfo>();
-            _drives = new PSDriveInfoCollection();
             _workingLocationStack = new Dictionary<string, Stack<PathInfo>>(StringComparer.CurrentCultureIgnoreCase);
-            _aliases = new Dictionary<string, AliasInfo>(StringComparer.CurrentCultureIgnoreCase);
-            _functions = new Dictionary<string, CommandInfo>(StringComparer.CurrentCultureIgnoreCase);
-            _variables = new HybridDictionary(true);
-
-            SetVariable("true", true);
-            SetVariable("false", false);
-            SetVariable("null", null);
-        }
-
-        internal SessionStateGlobal(ExecutionContext context)
-            : this()
-        {
-            _executionContext = context;
-            if (context.SessionState == null)
-                return;
-            if (context.SessionState.SessionStateGlobal == null)
-                return;
-            _providers = context.SessionState.SessionStateGlobal._providers;
-            _providersCurrentDrive = context.SessionState.SessionStateGlobal._providersCurrentDrive;
-            _workingLocationStack = context.SessionState.SessionStateGlobal._workingLocationStack;
-            _drives = context.SessionState.SessionStateGlobal._drives;
-            _aliases = context.SessionState.SessionStateGlobal._aliases;
-            _functions = context.SessionState.SessionStateGlobal._functions;
-            _variables = context.SessionState.SessionStateGlobal._variables;
         }
 
         #region CmdletProviderManagementIntrinsics
@@ -147,7 +83,7 @@ namespace Pash.Implementation
             CommandManager commandManager = this.CommandManager;
             foreach (var providerTypePair in commandManager._providers)
             {
-                ProviderInfo providerInfo = new ProviderInfo(new SessionState(this), providerTypePair.providerType, providerTypePair.providerAttr.ProviderName, string.Empty, providerTypePair.snapinInfo);
+                ProviderInfo providerInfo = new ProviderInfo(_executionContext.SessionState, providerTypePair.providerType, providerTypePair.providerAttr.ProviderName, string.Empty, providerTypePair.snapinInfo);
                 CmdletProvider provider = AddProvider(providerInfo);
 
                 InitializeProvider(provider, providerInfo);
@@ -214,7 +150,8 @@ namespace Pash.Implementation
 
                         try
                         {
-                            _drives.Add(driveInfo.Name, driveInfo);
+                            _executionContext.SessionState.Drive.New(driveInfo,
+                                SessionStateScope.ScopeSpecifiers.Global.ToString());
                         }
                         catch
                         {
@@ -236,7 +173,7 @@ namespace Pash.Implementation
                     throw new NullReferenceException("CurrentDrive is null.");
                 }
                 PSDriveInfo driveInfo = CurrentDrive;
-                return new PathInfo(driveInfo, driveInfo.Provider, driveInfo.CurrentLocation, new SessionState(this));
+                return new PathInfo(driveInfo, driveInfo.Provider, driveInfo.CurrentLocation, _executionContext.SessionState);
             }
         }
 
@@ -275,64 +212,7 @@ namespace Pash.Implementation
         }
         #endregion
 
-        #region PSVariableIntrinsics
-        internal PSVariable GetVariable(string name)
-        {
-            // TODO: deal with scopes
 
-            if (_variables.Contains(name))
-                return (PSVariable)_variables[name];
-
-            return null;
-        }
-
-        internal object GetVariableValue(string name)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object GetVariableValue(string name, object defaultValue)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal void RemoveVariable(PSVariable variable)
-        {
-            RemoveVariable(variable.Name);
-        }
-
-        internal void RemoveVariable(string name)
-        {
-            if (_variables.Contains(name))
-                _variables.Remove(name);
-        }
-
-        internal object SetVariable(PSVariable variable)
-        {
-            // TODO: deal with scopes
-
-            RemoveVariable(variable);
-
-            _variables.Add(variable.Name, variable);
-
-            return variable;
-        }
-
-        internal object SetVariable(string name, object value)
-        {
-            PSVariable variable = GetVariable(name);
-
-            if (variable != null)
-                RemoveVariable(variable);
-
-            variable = new PSVariable(name, value);
-
-            _variables.Add(variable.Name, variable);
-
-            return variable;
-        }
-
-        #endregion
 
         #region PathIntrinsics
         internal string MakePath(string parent, string child)
@@ -391,36 +271,6 @@ namespace Pash.Implementation
         }
         #endregion
 
-        #region DriveManagementIntrinsics
-        internal PSDriveInfo GetDrive(string driveName)
-        {
-            return _drives.GetDrive(driveName);
-        }
-
-        /// <summary>
-        /// Returns a list of physical file system drives, including all the mounted removable drives
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <returns></returns>
-        internal Collection<PSDriveInfo> GetDrives(string scope)
-        {
-            Collection<PSDriveInfo> collection = new Collection<PSDriveInfo>();
-            foreach (PSDriveInfo info in _drives.Drives)
-            {
-                // TODO: make sure not to include the removed drives or to
-                // TODO: make sure to mount all the removable drives
-                //PSDriveInfo psDriveInfo = MountFileSystemDrive(driveInfo);
-                //if (psDriveInfo != null)
-                //{
-                //    drivesList[psDriveInfo.Name] = psDriveInfo;
-                //}
-
-                collection.Add(info);
-            }
-
-            return collection;
-        }
-
         internal CmdletProvider GetProviderInstance(string name)
         {
             if (_providerInstances.ContainsKey(name))
@@ -437,85 +287,10 @@ namespace Pash.Implementation
             return null;
         }
 
-        //private PSDriveInfo MountFileSystemDrive(DriveInfo driveInfo)
-        //{
-        //    PSDriveInfo newDrive = null;
-
-        //    ProviderInfo providerInfo = GetProviderByName(FileSystemProvider.ProviderName);
-        //    // If no FileSystem provider - do nothing
-        //    if (providerInfo == null)
-        //    {
-        //        return newDrive;
-        //    }
-        //    try
-        //    {
-        //        DriveCmdletProvider driveProviderInstance = GetDriveProviderInstance(FileSystemProvider.ProviderName);
-        //        if (driveProviderInstance != null)
-        //        {
-        //            PSDriveInfo drive = new PSDriveInfo(driveInfo.Name.Substring(0, 1), driveProviderInstance.ProviderInfo, driveInfo.RootDirectory.FullName, driveInfo.VolumeLabel, null);
-        //            drive.RemovableDrive = driveInfo.DriveType != DriveType.Fixed;
-
-        //            newDrive = drive;
-        //        }
-        //    }
-        //    catch(Exception ex)
-        //    {
-        //        System.Diagnostics.Debug.WriteLine(ex.ToString());
-        //    }
-        //    return newDrive;
-        //}
-
-        internal Collection<PSDriveInfo> GetDrivesForProvider(string providerName)
-        {
-            if (string.IsNullOrEmpty(providerName))
-            {
-                return GetDrives(null);
-            }
-            Collection<PSDriveInfo> collection = new Collection<PSDriveInfo>();
-            foreach (PSDriveInfo driveInfo in GetDrives(null))
-            {
-                if ((driveInfo != null) && driveInfo.Provider.IsNameMatch(providerName))
-                {
-                    collection.Add(driveInfo);
-                }
-            }
-            return collection;
-        }
-
-        internal PSDriveInfo AddNewDrive(PSDriveInfo drive, string scope)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal void RemoveDrive(string driveName, bool force, string scope)
-        {
-            throw new NotImplementedException();
-        }
-        #endregion
-
-        internal IDictionary GetVariables()
-        {
-            Dictionary<string, PSVariable> dictionary = new Dictionary<string, PSVariable>(StringComparer.OrdinalIgnoreCase);
-            foreach (DictionaryEntry entry in _variables)
-            {
-                if (dictionary.ContainsKey((string)entry.Key))
-                {
-                    continue;
-                }
-                PSVariable variable = (PSVariable)entry.Value;
-                if (!variable.IsPrivate)
-                {
-                    dictionary.Add((string)entry.Key, (PSVariable)entry.Value);
-                }
-            }
-            return dictionary;
-
-        }
-
         internal IDictionary GetFunctions()
         {
             Dictionary<string, CommandInfo> dictionary = new Dictionary<string, CommandInfo>(StringComparer.OrdinalIgnoreCase);
-            foreach (CommandInfo info in _functions.Values)
+            foreach (CommandInfo info in _executionContext.SessionState.SessionStateScope.LocalFunctions.Values)
             {
                 if (!dictionary.ContainsKey(info.Name))
                 {
@@ -587,7 +362,7 @@ namespace Pash.Implementation
                 path = CurrentLocation.Path;
 
             string driveName = path.GetDrive();
-            PSDriveInfo drive = GetDrive(driveName);
+            PSDriveInfo drive = _executionContext.SessionState.Drive.Get(driveName);
 
             if (drive == null)
             {
@@ -664,12 +439,14 @@ namespace Pash.Implementation
             string driveName = null;
             if (path.TryGetDriveName(out driveName))
             {
-                nextDrive = GetDrive(driveName);
-            }
-
-            if (nextDrive == null)
-            {
-                nextDrive = CurrentDrive;
+                try
+                {
+                    nextDrive = _executionContext.SessionState.Drive.Get(driveName);
+                }
+                catch (MethodInvocationException) //didn't find a drive (maybe it's "\" on Windows)
+                {
+                    nextDrive = CurrentDrive;
+                }
             }
 
             Path newLocation = PathNavigation.CalculateFullPath(nextDrive.CurrentLocation, path);
