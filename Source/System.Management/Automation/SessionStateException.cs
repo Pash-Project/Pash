@@ -7,14 +7,37 @@ namespace System.Management.Automation
     [Serializable]
     public class SessionStateException : RuntimeException
     {
-        public SessionStateException() { throw new NotImplementedException(); }
-        public SessionStateException(string message) { throw new NotImplementedException(); }
-        protected SessionStateException(SerializationInfo info, StreamingContext context) { throw new NotImplementedException(); }
-        public SessionStateException(string message, Exception innerException) { throw new NotImplementedException(); }
-        internal SessionStateException(string itemName, SessionStateCategory sessionStateCategory, string errorIdAndResourceId, ErrorCategory errorCategory, params object[] messageArgs)
-        { throw new NotImplementedException(); }
-        private static string BuildMessage(string itemName, string resourceId, params object[] messageArgs)
-        { throw new NotImplementedException(); }
+        public string ItemName { get; private set; }
+        public SessionStateCategory SessionStateCategory { get; private set; }
+        public override ErrorRecord ErrorRecord { get; set; }
+
+        public SessionStateException() : base()
+        {
+        }
+
+        public SessionStateException(string message) : base(message)
+        {
+        }
+
+        protected SessionStateException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
+
+        public SessionStateException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        internal SessionStateException(string itemName, SessionStateCategory sessionStateCategory, 
+                                       string errorIdAndResourceId, ErrorCategory errorCategory,
+                                       params object[] messageArgs)
+            : base(String.Format("The {0} \"{1}\" ({2}) caused the following error: {3}",
+                                 new object[] {sessionStateCategory.ToString(), itemName, errorIdAndResourceId, 
+                                               errorCategory.ToString()}))
+        {
+            //TODO: make this better
+            SessionStateCategory = sessionStateCategory;
+            ErrorRecord = new ErrorRecord(this, errorIdAndResourceId, errorCategory, null);
+        }
 
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -22,9 +45,6 @@ namespace System.Management.Automation
             throw new NotImplementedException();
         }
 
-        public override ErrorRecord ErrorRecord { get { throw new NotImplementedException(); } }
-        public string ItemName { get { throw new NotImplementedException(); } }
-        public SessionStateCategory SessionStateCategory { get { throw new NotImplementedException(); } }
     }
 
 }

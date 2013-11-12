@@ -16,6 +16,12 @@ namespace System.Management.Automation
 
         public SessionStateUnauthorizedAccessException(string message, Exception innerException)
             : base() { }
+
+        internal SessionStateUnauthorizedAccessException(string itemName, SessionStateCategory sessionStateCategory, 
+                                                         string errorIdAndResourceId, params object[] messageArgs)
+            : base(itemName, sessionStateCategory, errorIdAndResourceId, ErrorCategory.WriteError, messageArgs)
+        {
+        }
     }
 }
 

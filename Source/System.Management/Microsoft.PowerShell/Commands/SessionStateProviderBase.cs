@@ -79,6 +79,7 @@ namespace Microsoft.PowerShell.Commands
             }
             return item;
         }
+        //TODO: remove these functions from all subclasses - they are never in use!
         internal abstract void RemoveSessionStateItem(Path name);
         internal abstract void SetSessionStateItem(Path name, object value, bool writeItem);
 

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Globalization;
 
 namespace System.Management.Automation
 {
@@ -21,10 +22,21 @@ namespace System.Management.Automation
         public string Reason { get; set; }
         public string TargetName { get; set; }
         public string TargetType { get; set; }
-        /*
-        public string GetMessage();
-        public string GetMessage(CultureInfo uiCultureInfo);
-        public override string ToString();
-        */
+
+        public string GetMessage()
+        {
+            //TODO: fix this
+            return ToString();
+        }
+
+        public string GetMessage(CultureInfo uiCultureInfo)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string ToString()
+        {
+            return String.Format("{0}, Reason: {1}", Category, Reason);
+        }
     }
 }

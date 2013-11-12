@@ -31,7 +31,6 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            // TODO: deal with scope
             // TODO: deal with Force
             // TODO: deal with ShouldProcess
 
@@ -40,9 +39,12 @@ namespace Microsoft.PowerShell.Commands
             {
                 variable.Description = Description;
             }
+            //TODO: check if variable already exists and check if force has influence on behavior
+            //implement also an overloaded Get method in PSVariableIntrniscs that allow to pass a scope
             try
             {
-                SessionState.SessionStateGlobal.NewVariable(variable, (bool)this.Force);
+                //TODO: create a new overloaded method in PSVariableIntrinsics that allows to pass (bool)this.Force
+                SessionState.PSVariable.Set(variable);
             }
             catch (Exception ex)
             {

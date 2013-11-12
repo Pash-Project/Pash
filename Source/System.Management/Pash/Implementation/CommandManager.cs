@@ -18,24 +18,11 @@ namespace Pash.Implementation
 {
     internal class CommandManager
     {
-        public struct SnapinProviderPair
-        {
-            public PSSnapInInfo snapinInfo;
-            public Type providerType;
-            public CmdletProviderAttribute providerAttr;
-        }
 
         private Dictionary<string, PSSnapInInfo> _snapins;
         private Dictionary<string, List<CmdletInfo>> _cmdLets;
         private Dictionary<string, ScriptInfo> _scripts;
-        private Dictionary<string, AliasInfo> _aliases;
-        internal Collection<SnapinProviderPair> _providers;
         private ExecutionContext _context;
-
-        public CommandManager()
-            : this(null)
-        {
-        }
 
         public CommandManager(ExecutionContext context)
         {
@@ -44,42 +31,9 @@ namespace Pash.Implementation
             _snapins = new Dictionary<string, PSSnapInInfo>(StringComparer.CurrentCultureIgnoreCase);
             _cmdLets = new Dictionary<string, List<CmdletInfo>>(StringComparer.CurrentCultureIgnoreCase);
             _scripts = new Dictionary<string, ScriptInfo>(StringComparer.CurrentCultureIgnoreCase);
-            _aliases = new Dictionary<string, AliasInfo>(StringComparer.CurrentCultureIgnoreCase);
-            _providers = new Collection<SnapinProviderPair>();
-
-            // if no execution scope is provided load all the initial settings from the config file
-            if (context == null)
-            {
-                // TODO: move this to config.ps1
-                foreach (var snapinTypeName in new[] { 
-                    "Microsoft.PowerShell.PSCorePSSnapIn, System.Management.Automation",
-                    "Microsoft.PowerShell.PSUtilityPSSnapIn, Microsoft.PowerShell.Commands.Utility",
-                    "Microsoft.Commands.Management.PSManagementPSSnapIn, Microsoft.PowerShell.Commands.Management",
-                })
-                {
-                    var tmpProviders = new Collection<SnapinProviderPair>();
-
-                    // Load all PSSnapin's
-                    foreach (CmdletInfo cmdLetInfo in LoadCmdletsFromPSSnapin(snapinTypeName, out tmpProviders))
-                    {
-                        // Register PSSnapin
-                        if (_snapins.ContainsKey(cmdLetInfo.PSSnapIn.Name))
-                        {
-                            _snapins.Add(cmdLetInfo.PSSnapIn.Name, cmdLetInfo.PSSnapIn);
-                        }
-
-                        RegisterCmdlet(cmdLetInfo);
-                    }
-
-                    foreach (SnapinProviderPair providerTypePair in tmpProviders)
-                    {
-                        _providers.Add(providerTypePair);
-                    }
-                }
-            }
         }
 
-        private void RegisterCmdlet(CmdletInfo cmdLetInfo)
+        internal void RegisterCmdlet(CmdletInfo cmdLetInfo)
         {
             List<CmdletInfo> cmdletList = null;
             if (_cmdLets.ContainsKey(cmdLetInfo.Name))
@@ -94,20 +48,12 @@ namespace Pash.Implementation
             cmdletList.Add(cmdLetInfo);
         }
 
-        public void SetAlias(string name, string definition)
+        internal void RegisterPSSnaping(PSSnapInInfo snapinInfo)
         {
-            if (this._aliases.ContainsKey(name))
-                this._aliases[name] = new AliasInfo(name, definition, this);
-            else
-                NewAlias(name, definition);
-        }
-
-        public void NewAlias(string name, string definition)
-        {
-            if (this._aliases.ContainsKey(name)) throw new Exception("duplicate alias");
-            AliasInfo aliasInfo = new AliasInfo(name, definition, this);
-
-            _aliases.Add(aliasInfo.Name, aliasInfo);
+            if (!_snapins.ContainsKey(snapinInfo.Name))
+            {
+                _snapins.Add(snapinInfo.Name, snapinInfo);
+            }
         }
 
         private void LoadScripts()
@@ -143,19 +89,9 @@ namespace Pash.Implementation
                 throw new NotImplementedException(this.ToString());
             }
 
-            if (commandInfo == null && _aliases.ContainsKey(cmdName))
+            if (commandInfo == null)
             {
-                commandInfo = _aliases[cmdName].ReferencedCommand;
-            }
-
-            if (commandInfo == null && _cmdLets.ContainsKey(cmdName))
-            {
-                commandInfo = _cmdLets[cmdName].First();
-            }
-
-            if (commandInfo == null && _scripts.ContainsKey(cmdName))
-            {
-                commandInfo = _scripts[cmdName];
+                commandInfo = FindCommand(cmdName);
             }
 
             // TODO: if the command wasn't found should we treat is as a Script?
@@ -222,22 +158,20 @@ namespace Pash.Implementation
 
         internal CommandInfo FindCommand(string command)
         {
-            // TODO: find the CommandInfo from CommandManager
-
-            List<CmdletInfo> cmdletsList;
-            if (_cmdLets.TryGetValue(command, out cmdletsList))
+            if (_context.SessionState.Alias.Exists(command))
             {
-                if (cmdletsList.Count > 0)
-                    return cmdletsList[0];
+                return _context.SessionState.Alias.Get(command).ReferencedCommand;
             }
 
-            ScriptInfo scriptInfo;
-            if (_scripts.TryGetValue(command, out scriptInfo))
-                return scriptInfo;
+            if (_cmdLets.ContainsKey(command))
+            {
+                return _cmdLets[command].First();
+            }
 
-            AliasInfo aliasInfo;
-            if (_aliases.TryGetValue(command, out aliasInfo))
-                return aliasInfo;
+            if (_scripts.ContainsKey(command))
+            {
+                return _scripts[command];
+            }
 
             // TODO: search functions (in a context?)
 
@@ -251,33 +185,7 @@ namespace Pash.Implementation
                    select info;
         }
 
-        // TODO: separate providers from cmdlets
-        internal Collection<CmdletInfo> LoadCmdletsFromPSSnapin(string strType, out Collection<SnapinProviderPair> providers)
-        {
-            Type snapinType = Type.GetType(strType, true);
-            Assembly assembly = snapinType.Assembly;
-
-            PSSnapIn snapin = Activator.CreateInstance(snapinType) as PSSnapIn;
-
-            PSSnapInInfo snapinInfo = new PSSnapInInfo(snapin.Name, false, string.Empty, assembly.GetName().Name, string.Empty, new Version(1, 0), null, null, null, snapin.Description, snapin.Vendor);
-
-            var snapinProviderPairs = from Type type in assembly.GetTypes()
-                                      where !type.IsSubclassOf(typeof(Cmdlet))
-                                      where type.IsSubclassOf(typeof(CmdletProvider))
-                                      from CmdletProviderAttribute providerAttr in type.GetCustomAttributes(typeof(CmdletProviderAttribute), true)
-                                      select new SnapinProviderPair
-                                        {
-                                            snapinInfo = snapinInfo,
-                                            providerType = type,
-                                            providerAttr = providerAttr
-                                        };
-
-            providers = snapinProviderPairs.ToCollection();
-
-            return LoadCmdletsFromAssembly(assembly, snapinInfo).ToCollection();
-        }
-
-        private IEnumerable<CmdletInfo> LoadCmdletsFromAssembly(Assembly assembly, PSSnapInInfo snapinInfo = null)
+        internal IEnumerable<CmdletInfo> LoadCmdletsFromAssembly(Assembly assembly, PSSnapInInfo snapinInfo = null)
         {
             return from Type type in assembly.GetTypes()
                    where type.IsSubclassOf(typeof(Cmdlet))
@@ -285,7 +193,7 @@ namespace Pash.Implementation
                    select new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, _context);
         }
 
-        private IEnumerable<CmdletInfo> LoadCmdletsFromAssemblies(IEnumerable<Assembly> assemblies)
+        internal IEnumerable<CmdletInfo> LoadCmdletsFromAssemblies(IEnumerable<Assembly> assemblies)
         {
             return from Assembly assembly in assemblies
                    from CmdletInfo cmdletInfo in LoadCmdletsFromAssembly(assembly)

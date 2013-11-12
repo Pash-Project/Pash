@@ -26,7 +26,7 @@ namespace Microsoft.PowerShell.Commands
 
         // TODO:
         [Parameter]
-        public string Option { get; set; }
+        public ScopedItemOptions Option { get; set; }
 
         // TODO:
         [Parameter]
@@ -46,7 +46,8 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            SessionState.SessionStateGlobal.NewAlias(this.Name, this.Value);
+            AliasInfo info = new AliasInfo(Name, Value, SessionState.SessionStateGlobal.CommandManager, Option);
+            SessionState.Alias.New(info, Scope);
         }
     }
 }

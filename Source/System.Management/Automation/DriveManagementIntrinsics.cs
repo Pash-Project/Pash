@@ -12,54 +12,37 @@ namespace System.Management.Automation
         private const string driveDoesntExistFormat = @"No such drive. A drive with the name ""{0}"" doesn't exist.";
         private const string driveAlreadyExistsFormat = @"A drive with the name ""{0}"" already exists.";
 
-        private SessionStateScope sessionScope;
+        private SessionState _sessionState;
+        private SessionStateScope<PSDriveInfo> _scope;
 
-        internal DriveManagementIntrinsics(SessionStateScope scope)
+        internal DriveManagementIntrinsics(SessionState sessionState, SessionStateScope<PSDriveInfo> driveScope)
         {
-            sessionScope = scope;
+            _sessionState = sessionState;
+            _scope = driveScope;
         }
 
         public PSDriveInfo Current
         {
             get
             {
-                return sessionScope.SessionStateGlobal.CurrentDrive;
+                return _sessionState.SessionStateGlobal.CurrentDrive;
             }
         }
 
         public PSDriveInfo Get(string driveName)
         {
-            //recursively look for the drive
-            for (var candidate = sessionScope; candidate != null; candidate = candidate.ParentScope)
+            var drive = _scope.Get(driveName, false);
+            if (drive == null)
             {
-                var info = candidate.GetLocalDrive(driveName);
-                if (info != null)
-                {
-                    return info;
-                }
+                //PS 2.0 throws an exception here instead of returning null
+                throw new MethodInvocationException(String.Format(driveDoesntExistFormat, driveName));
             }
-            //no such drive found
-            throw new MethodInvocationException(String.Format(driveDoesntExistFormat, driveName));
+            return drive;
         }
 
         public Collection<PSDriveInfo> GetAll()
         {
-            //first get a copy of the drives in the local scope. NOTE: it also copies the correct StringComparer
-            //dictionary first, so ContainsKey is faster than in a collection
-            var visibleDrives = new Dictionary<string, PSDriveInfo>(sessionScope.LocalDrives);
-            //recursively gather all drives from parent scopes
-            for (var cur = sessionScope.ParentScope; cur != null; cur = cur.ParentScope)
-            {
-                foreach (KeyValuePair<string, PSDriveInfo> pair in cur.LocalDrives)
-                {
-                    //as ascend the scope hierarchy, we must not overwrite values of child scopes
-                    if (!visibleDrives.ContainsKey(pair.Key))
-                    {
-                        visibleDrives.Add(pair.Key, pair.Value);
-                    }
-                }
-            }
-            return new Collection<PSDriveInfo>(visibleDrives.Values.ToList());
+            return new Collection<PSDriveInfo>(_scope.GetAll().Values.ToList());
         }
 
         public Collection<PSDriveInfo> GetAllAtScope(string scope)
@@ -69,8 +52,7 @@ namespace System.Management.Automation
                  //this behavior corresponds to PS 2.0
                 return GetAll();
             }
-            SessionStateScope affectedScope = sessionScope.GetScope(scope);
-            return new Collection<PSDriveInfo>(affectedScope.LocalDrives.Values.ToList());
+            return new Collection<PSDriveInfo>(_scope.GetAllAtScope(scope).Values.ToList());
         }
 
         public Collection<PSDriveInfo> GetAllForProvider(string providerName)
@@ -108,8 +90,7 @@ namespace System.Management.Automation
 
         public PSDriveInfo GetAtScope(string driveName, string scope)
         {
-            SessionStateScope affectedScope = sessionScope.GetScope(scope);
-            var info = affectedScope.GetLocalDrive(driveName);
+            var info =_scope.GetAtScope(driveName, scope);
             if (info == null)
             {
                 throw new MethodInvocationException(String.Format(driveDoesntExistFormat, driveName));
@@ -119,20 +100,30 @@ namespace System.Management.Automation
 
         public PSDriveInfo New(PSDriveInfo drive, string scope)
         {
-            SessionStateScope affectedScope = sessionScope.GetScope(scope);
-            if (!affectedScope.AddLocalDrive(drive))
-            {
-                throw new MethodInvocationException(String.Format(driveAlreadyExistsFormat, drive.Name));
-            }
+            /*
+             * "Fun" Fact: Although "private" is a valid scope specifier, it does not really make the drive
+             * private, i.e. it does not restricts child scopes froma accessing or removing it.
+             * "Private" seems to be only effective for variables, functions and aliases, but not for drives.
+             * Who knows why.
+             */
+            _scope.SetAtScope(drive, scope, false);
             return drive;
         }
 
         public void Remove(string driveName, bool force, string scope)
         {
-            SessionStateScope affectedScope = sessionScope.GetScope(scope);
-            if (!affectedScope.RemoveLocalDrive(driveName, force))
+            /* TODO: force is used to remove the drive "although it's in use by the provider"
+             * So, we need to find out when a drive is in use and should throw an exception on removal without
+             * the "force" parameter being true
+             */
+
+            try
             {
-                throw new MethodInvocationException(String.Format(driveDoesntExistFormat, driveName));
+                _scope.RemoveAtScope(driveName, scope);
+            }
+            catch (ItemNotFoundException)
+            {
+                throw new DriveNotFoundException(driveName, String.Empty, null);
             }
         }
     }

@@ -25,5 +25,11 @@ namespace System.Management.Automation
             : base(message, innerException)
         {
         }
+
+        internal ItemNotFoundException(string itemName, SessionStateCategory sessionStateCategory, 
+                                       string errorIdAndResourceId, params object[] messageArgs)
+            : base(itemName, sessionStateCategory, errorIdAndResourceId, ErrorCategory.ObjectNotFound, messageArgs)
+        {
+        }
     }
 }
