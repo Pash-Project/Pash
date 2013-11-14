@@ -1533,5 +1533,27 @@ ls
                 Assert.AreEqual("a", variableAst.VariablePath.UserPath);
             }
         }
+
+        [TestFixture]
+        public class ScriptExtentTests
+        {
+            [Test]
+            [TestCase("$abc")]
+            [TestCase("")]
+            public void SingleLineScriptBlock(string input)
+            {
+                IScriptExtent extent = ParseInput(input)
+                    .Extent;
+
+                Assert.AreEqual(input, extent.Text);
+                Assert.AreEqual(0, extent.StartOffset);
+                Assert.AreEqual(input.Length, extent.EndOffset);
+                Assert.AreEqual(1, extent.StartLineNumber);
+                Assert.AreEqual(1, extent.EndLineNumber);
+                Assert.AreEqual(1, extent.StartColumnNumber);
+                Assert.AreEqual(input.Length + 1, extent.EndColumnNumber);
+                Assert.AreEqual(null, extent.File);
+            }
+        }
     }
 }
