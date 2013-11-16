@@ -3,6 +3,8 @@ using System;
 using System.Management.Automation.Language;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Irony.Parsing;
+using Pash.ParserIntrinsics;
 
 namespace Pash
 {
@@ -93,7 +95,8 @@ namespace Pash
                 return;
 
             string variableName = GetText(startIndex + 1, endIndex);
-            var variableAst = new VariableExpressionAst(_extent, variableName, false);
+            IScriptExtent variableExtent = GetScriptExtent(startIndex, endIndex);
+            var variableAst = new VariableExpressionAst(variableExtent, variableName, false);
             _nestedExpressions.Add(variableAst);
         }
 
@@ -101,6 +104,22 @@ namespace Pash
         {
             int length = endIndex - startIndex;
             return _input.Substring(startIndex, length);
+        }
+
+        private IScriptExtent GetScriptExtent(int startIndex, int endIndex)
+        {
+            SourceLocation location = GetSourceLocation(startIndex, endIndex);
+            var token = new Token(new Terminal(""), location, GetText(startIndex, endIndex), null);
+            var parseTreeNode = new ParseTreeNode(token);
+            return new ScriptExtent(parseTreeNode);
+        }
+
+        private SourceLocation GetSourceLocation(int startIndex, int endIndex)
+        {
+            return new SourceLocation(
+                _extent.StartOffset + startIndex + 1,
+                _extent.StartLineNumber - 1,
+                _extent.StartColumnNumber + startIndex);
         }
 
         private void ReadEscapedCharacter()

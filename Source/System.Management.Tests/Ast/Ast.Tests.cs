@@ -1479,6 +1479,59 @@ ls
                 Assert.AreEqual("foo", variableAst.VariablePath.UserPath);
             }
 
+            [Test]
+            public void ExpandableStringVariableInsideDoubleQuotedStringHasExtentThatIncludesDoubleQuotes()
+            {
+                ExpandableStringExpressionAst expandableStringAst = Parse("\"$a\"");
+
+                IScriptExtent extent = expandableStringAst.Extent;
+                var expectedExtent = new ExpectedScriptExtent
+                {
+                    Text = "\"$a\"",
+                    StartOffset = 0,
+                    EndOffset = 4,
+                    StartColumnNumber = 1,
+                    EndColumnNumber = 5,
+                    EndLineNumber = 1,
+                    StartLineNumber = 1
+                };
+                expectedExtent.AssertAreEqual(extent);
+            }
+
+            [Test]
+            [TestCase("\"$abc\"", "$abc", 1, 5, 2, 6, 1, 1)]
+            [TestCase("\"-$abc-\"", "$abc", 2, 6, 3, 7, 1, 1)]
+            [TestCase("\"`$a=$a.\"", "$a", 5, 7, 6, 8, 1, 1)]
+            [TestCase("\"  $abc\"", "$abc", 3, 7, 4, 8, 1, 1)]
+            [TestCase("\r\n\"$abc\"", "$abc", 3, 7, 2, 6, 2, 2)]
+            public void VariableInsideDoubleQuotedStringHasScriptExtentDefined(
+                string input,
+                string extentText,
+                int startOffset,
+                int endOffset,
+                int startColumn,
+                int endColumn,
+                int startLine,
+                int endLine)
+            {
+                ExpandableStringExpressionAst expandableStringAst = Parse(input);
+
+                var variableAst = expandableStringAst.NestedExpressions.FirstOrDefault() as VariableExpressionAst;
+                IScriptExtent extent = variableAst.Extent;
+
+                var expectedExtent = new ExpectedScriptExtent
+                {
+                    Text = extentText,
+                    StartOffset = startOffset,
+                    EndOffset = endOffset,
+                    StartColumnNumber = startColumn,
+                    EndColumnNumber = endColumn,
+                    StartLineNumber = startLine,
+                    EndLineNumber = endLine
+                };
+                expectedExtent.AssertAreEqual(extent);
+            }
+
             /// <summary>
             /// PowerShell only creates an ExpandableStringExpressionAst if the string needs to be
             /// expanded.
@@ -1540,6 +1593,7 @@ ls
             [Test]
             [TestCase("$abc")]
             [TestCase("")]
+            [TestCase("\"$a\"")]
             public void SingleLineScriptBlock(string input)
             {
                 IScriptExtent extent = ParseInput(input)
