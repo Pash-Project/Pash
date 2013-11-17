@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Management.Automation;
+using System.Text;
 using Pash;
 
 namespace System.Management.Automation.Language
@@ -46,7 +48,6 @@ namespace System.Management.Automation.Language
                 case StringConstantType.DoubleQuotedHereString:
                     return string.Format("@\"{0}\"", this.Value);
 
-
                 default:
                     throw new InvalidOperationException();
             }
@@ -57,6 +58,42 @@ namespace System.Management.Automation.Language
             var parser = new ExpandableStringParser(Extent, value);
             parser.Parse();
             this.NestedExpressions = parser.NestedExpressions;
+        }
+
+        internal string ExpandString(IEnumerable<object> expandedValues)
+        {
+            var expandedString = new StringBuilder();
+            int currentIndex = 0;
+
+            List<object> values = expandedValues.ToList();
+            for (int i = 0; i < values.Count; ++i)
+            {
+                Ast nestedExpressionAst = NestedExpressions[i];
+                object expandedValue = values[i];
+
+                int nestedExpressionStartIndex = GetRelativeStartIndex(nestedExpressionAst);
+                expandedString.Append(Value.Substring(currentIndex, nestedExpressionStartIndex - currentIndex));
+                expandedString.Append(expandedValue);
+
+                currentIndex = GetRelativeEndIndex(nestedExpressionAst);
+            }
+
+            if (currentIndex < Value.Length)
+            {
+                expandedString.Append(Value.Substring(currentIndex));
+            }
+
+            return expandedString.ToString();
+        }
+
+        private int GetRelativeStartIndex(Ast ast)
+        {
+            return ast.Extent.StartOffset - Extent.StartOffset - 1;
+        }
+
+        private int GetRelativeEndIndex(Ast ast)
+        {
+            return ast.Extent.EndOffset - Extent.StartOffset - 1;
         }
     }
 }

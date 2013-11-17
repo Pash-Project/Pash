@@ -907,5 +907,30 @@ trap [FormatException] {
 ");
             Assert.AreEqual("FormatException trapped" + Environment.NewLine, result);
         }
+
+        [TestFixture]
+        public class ExpandableStringTests
+        {
+            [Test]
+            public void SingleVariableInsideExpandableStringIsExpanded()
+            {
+                string result = TestHost.Execute(@"
+$a = 10
+""a = $a""
+");
+                Assert.AreEqual("a = 10" + Environment.NewLine, result);
+            }
+
+            [Test]
+            public void TwoVariablesNextToEachOtherInsideExpandableStringAreExpanded()
+            {
+                string result = TestHost.Execute(@"
+$a = 'a'
+$b = 'b'
+""$a$b""
+");
+                Assert.AreEqual("ab" + Environment.NewLine, result);
+            }
+        }
     }
 }
