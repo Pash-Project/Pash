@@ -213,5 +213,10 @@ namespace System.Management.Automation
 
             return null;
         }
+
+        internal ReadOnlyCollection<CommandParameterSetInfo> GetNonDefaultParameterSets()
+        {
+            return new ReadOnlyCollection<CommandParameterSetInfo>(ParameterSets.Where(x => !x.IsDefault).ToList());
+        }
     }
 }

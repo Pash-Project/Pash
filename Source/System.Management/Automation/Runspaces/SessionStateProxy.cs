@@ -17,7 +17,7 @@ namespace System.Management.Automation.Runspaces
             if (string.IsNullOrEmpty(name))
                 throw new NullReferenceException("Variable name can't be empty.");
 
-            return _runspace.GetVariable(name);
+            return _runspace.ExecutionContext.SessionState.PSVariable.Get(name);
         }
 
         public void SetVariable(string name, object value)
@@ -25,7 +25,7 @@ namespace System.Management.Automation.Runspaces
             if (string.IsNullOrEmpty(name))
                 throw new NullReferenceException("Variable name can't be empty.");
 
-            _runspace.SetVariable(name, value);
+            _runspace.ExecutionContext.SessionState.PSVariable.Set(name, value);
         }
     }
 }

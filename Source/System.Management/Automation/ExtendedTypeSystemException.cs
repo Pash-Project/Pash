@@ -43,12 +43,30 @@ namespace System.Management.Automation
         internal const string ToStringExceptionMsg = "ToStringException";
         internal const string TypesXmlErrorMsg = "TypesXmlError";
 
-        public ExtendedTypeSystemException() { throw new NotImplementedException(); }
-        public ExtendedTypeSystemException(string message) { throw new NotImplementedException(); }
-        protected ExtendedTypeSystemException(SerializationInfo info, StreamingContext context) { throw new NotImplementedException(); }
-        public ExtendedTypeSystemException(string message, Exception innerException) { throw new NotImplementedException(); }
-        internal ExtendedTypeSystemException(string errorId, Exception innerException, string baseName, string resourceId, params object[] arguments)
-        { throw new NotImplementedException(); }
+        public ExtendedTypeSystemException()
+            : base()
+        {
+        }
+
+        public ExtendedTypeSystemException(string message)
+            : base(message)
+        {
+        }
+
+        protected ExtendedTypeSystemException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+        public ExtendedTypeSystemException(string message, Exception innerException) 
+            : base(message, innerException)
+        {
+        }
+
+        internal ExtendedTypeSystemException(string errorId, Exception innerException,
+                                             string baseName, string resourceId, params object[] arguments)
+        {
+            throw new NotImplementedException(); 
+        }
     }
 
 }

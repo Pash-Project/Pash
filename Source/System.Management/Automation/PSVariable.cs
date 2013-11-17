@@ -65,7 +65,9 @@ namespace System.Management.Automation
         //internal object TransformValue(object value);
         //internal bool IsAllScope { get; }
         //internal bool IsConstant { get; }
-        internal bool IsPrivate { get; private set; }
+        internal bool IsPrivate { 
+            get { return Options.HasFlag(ScopedItemOptions.Private); } 
+        }
         //internal bool IsReadOnly { get; }
         //internal bool WasRemoved { set; get; }
 

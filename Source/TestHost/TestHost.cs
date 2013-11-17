@@ -66,7 +66,7 @@ namespace TestHost
             return ui.Log.ToString();
         }
 
-        private static Runspace CreateRunspace(PSHost host)
+        public static Runspace CreateRunspace(PSHost host)
         {
             if (InitialSessionState != null)
             {
