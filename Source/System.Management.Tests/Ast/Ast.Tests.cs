@@ -1456,5 +1456,158 @@ ls
 
             Assert.IsNull(breakStatementAst.Label);
         }
+
+        [TestFixture]
+        public class ExpandableStringExpressionTests
+        {
+            dynamic Parse(string input)
+            {
+                return ParseStatement(input)
+                    .PipelineElements[0]
+                    .Expression;
+            }
+
+            [Test]
+            public void VariableInsideDoubleQuotedString()
+            {
+                ExpandableStringExpressionAst expandableStringAst = Parse("\"$foo\"");
+
+                var variableAst = expandableStringAst.NestedExpressions.FirstOrDefault() as VariableExpressionAst;
+                Assert.AreEqual(StringConstantType.DoubleQuoted, expandableStringAst.StringConstantType);
+                Assert.AreEqual(typeof(string), expandableStringAst.StaticType);
+                Assert.AreEqual("$foo", expandableStringAst.Value);
+                Assert.AreEqual("foo", variableAst.VariablePath.UserPath);
+            }
+
+            [Test]
+            public void ExpandableStringVariableInsideDoubleQuotedStringHasExtentThatIncludesDoubleQuotes()
+            {
+                ExpandableStringExpressionAst expandableStringAst = Parse("\"$a\"");
+
+                IScriptExtent extent = expandableStringAst.Extent;
+                var expectedExtent = new ExpectedScriptExtent
+                {
+                    Text = "\"$a\"",
+                    StartOffset = 0,
+                    EndOffset = 4,
+                    StartColumnNumber = 1,
+                    EndColumnNumber = 5,
+                    EndLineNumber = 1,
+                    StartLineNumber = 1
+                };
+                expectedExtent.AssertAreEqual(extent);
+            }
+
+            [Test]
+            [TestCase("\"$abc\"", "$abc", 1, 5, 2, 6, 1, 1)]
+            [TestCase("\"-$abc-\"", "$abc", 2, 6, 3, 7, 1, 1)]
+            [TestCase("\"`$a=$a.\"", "$a", 5, 7, 6, 8, 1, 1)]
+            [TestCase("\"  $abc\"", "$abc", 3, 7, 4, 8, 1, 1)]
+            [TestCase("\r\n\"$abc\"", "$abc", 3, 7, 2, 6, 2, 2)]
+            public void VariableInsideDoubleQuotedStringHasScriptExtentDefined(
+                string input,
+                string extentText,
+                int startOffset,
+                int endOffset,
+                int startColumn,
+                int endColumn,
+                int startLine,
+                int endLine)
+            {
+                ExpandableStringExpressionAst expandableStringAst = Parse(input);
+
+                var variableAst = expandableStringAst.NestedExpressions.FirstOrDefault() as VariableExpressionAst;
+                IScriptExtent extent = variableAst.Extent;
+
+                var expectedExtent = new ExpectedScriptExtent
+                {
+                    Text = extentText,
+                    StartOffset = startOffset,
+                    EndOffset = endOffset,
+                    StartColumnNumber = startColumn,
+                    EndColumnNumber = endColumn,
+                    StartLineNumber = startLine,
+                    EndLineNumber = endLine
+                };
+                expectedExtent.AssertAreEqual(extent);
+            }
+
+            /// <summary>
+            /// PowerShell only creates an ExpandableStringExpressionAst if the string needs to be
+            /// expanded.
+            /// </summary>
+            [Test]
+            [TestCase("\"abc\"")]
+            [TestCase("\"$\"")]
+            public void DoubleQuotedStringContainingConstantStringShouldBeTreatedAsStringConstantNotExpandableString(string input)
+            {
+                StringConstantExpressionAst stringConstantAst = Parse(input);
+
+                Assert.AreEqual(StringConstantType.DoubleQuoted, stringConstantAst.StringConstantType);
+            }
+
+            [Test]
+            public void VariableFollowedByDotCharacterShouldNotIncludeDotInVariableName()
+            {
+                ExpandableStringExpressionAst expandableStringAst = Parse("\"$foo.\"");
+
+                var variableAst = expandableStringAst.NestedExpressions.FirstOrDefault() as VariableExpressionAst;
+                Assert.AreEqual("foo", variableAst.VariablePath.UserPath);
+            }
+
+            [Test]
+            public void TwoVariablesNextToEachOtherBothAreFound()
+            {
+                ExpandableStringExpressionAst expandableStringAst = Parse("\"$foo$bar\"");
+
+                var firstVariableAst = expandableStringAst.NestedExpressions.FirstOrDefault() as VariableExpressionAst;
+                var lastVariableAst = expandableStringAst.NestedExpressions.LastOrDefault() as VariableExpressionAst;
+                Assert.AreEqual("foo", firstVariableAst.VariablePath.UserPath);
+                Assert.AreEqual("bar", lastVariableAst.VariablePath.UserPath);
+                Assert.AreEqual(2, expandableStringAst.NestedExpressions.Count);
+            }
+
+            [Test]
+            public void EscapedDollarSignFollowedByLettersShouldNotBeTreatedAsVariable()
+            {
+                ExpandableStringExpressionAst expandableStringAst = Parse("\"`$foo $bar\"");
+
+                var variableAst = expandableStringAst.NestedExpressions.FirstOrDefault() as VariableExpressionAst;
+                Assert.AreEqual("bar", variableAst.VariablePath.UserPath);
+                Assert.AreEqual(1, expandableStringAst.NestedExpressions.Count);
+            }
+
+            [Test]
+            public void SingleCharacterVariableName()
+            {
+                ExpandableStringExpressionAst expandableStringAst = Parse("\"$a\"");
+
+                var variableAst = expandableStringAst.NestedExpressions.FirstOrDefault() as VariableExpressionAst;
+                Assert.AreEqual("a", variableAst.VariablePath.UserPath);
+            }
+        }
+
+        [TestFixture]
+        public class ScriptExtentTests
+        {
+            [Test]
+            [TestCase("$abc")]
+            [TestCase("")]
+            [TestCase("\"$a\"")]
+            public void SingleLineScriptBlock(string input)
+            {
+                IScriptExtent extent = ParseInput(input)
+                    .Extent;
+
+                Assert.AreEqual(input, extent.Text);
+                Assert.AreEqual(0, extent.StartOffset);
+                Assert.AreEqual(input.Length, extent.EndOffset);
+                Assert.AreEqual(1, extent.StartLineNumber);
+                Assert.AreEqual(1, extent.EndLineNumber);
+                Assert.AreEqual(1, extent.StartColumnNumber);
+                Assert.AreEqual(input.Length + 1, extent.EndColumnNumber);
+                Assert.AreEqual(null, extent.File);
+            }
+        }
     }
 }

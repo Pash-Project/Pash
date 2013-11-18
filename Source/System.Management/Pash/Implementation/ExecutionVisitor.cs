@@ -799,7 +799,12 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitExpandableStringExpression(ExpandableStringExpressionAst expandableStringExpressionAst)
         {
-            throw new NotImplementedException(); //VisitExpandableStringExpression(expandableStringExpressionAst);
+            var evaluatedExpressions = from expressionAst in expandableStringExpressionAst.NestedExpressions
+                                       select EvaluateAst(expressionAst);
+
+            string expandedString = expandableStringExpressionAst.ExpandString(evaluatedExpressions);
+            this._pipelineCommandRuntime.outputResults.Write(expandedString);
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitFileRedirection(FileRedirectionAst redirectionAst)

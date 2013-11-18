@@ -520,7 +520,7 @@ namespace Pash.ParserIntrinsics
         ////                    double_quote_character
         ////                    `   (The backtick character U+0060)
         public readonly RegexBasedTerminal _expandable_string_part_expansion = null; // Initialized by reflection
-        const string _expandable_string_part_expansion_pattern = "(?<_expandable_string_part_expansion>" + @"\$[\(\{" + double_quote_character_ + @"\u0060]" + ")";
+        const string _expandable_string_part_expansion_pattern = "(?<_expandable_string_part_expansion>" + @"\$[^\(\{" + double_quote_character_ + @"\u0060]" + ")";
 
         ////            $   escaped_character
         public readonly RegexBasedTerminal _expandable_string_part_dollarescaped = null; // Initialized by reflection

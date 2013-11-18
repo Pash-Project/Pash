@@ -1402,7 +1402,7 @@ namespace Pash.ParserIntrinsics
                 );
         }
 
-        ConstantExpressionAst BuildLiteralAst(ParseTreeNode parseTreeNode)
+        ExpressionAst BuildLiteralAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.literal);
 
@@ -1455,7 +1455,7 @@ namespace Pash.ParserIntrinsics
             return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), Convert.ToInt32(value, 16));
         }
 
-        StringConstantExpressionAst BuildStringLiteralAst(ParseTreeNode parseTreeNode)
+        ExpressionAst BuildStringLiteralAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.string_literal);
 
@@ -1472,13 +1472,18 @@ namespace Pash.ParserIntrinsics
             throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
         }
 
-        StringConstantExpressionAst BuildExpandableStringLiteralAst(ParseTreeNode parseTreeNode)
+        ExpressionAst BuildExpandableStringLiteralAst(ParseTreeNode parseTreeNode)
         {
             var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), this._grammar.expandable_string_literal.Pattern, RegexOptions.IgnoreCase);
             string value = matches.Groups[this._grammar.expandable_string_characters.Name].Value +
                 matches.Groups[this._grammar.dollars.Name].Value
                 ;
 
+            var ast = new ExpandableStringExpressionAst(new ScriptExtent(parseTreeNode), value, StringConstantType.DoubleQuoted);
+            if (ast.NestedExpressions.Any())
+            {
+                return ast;
+            }
             return new StringConstantExpressionAst(new ScriptExtent(parseTreeNode), value, StringConstantType.DoubleQuoted);
         }
 

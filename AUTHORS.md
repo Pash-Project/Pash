@@ -21,3 +21,4 @@ Johannes Rössel            | [@ygra](https://github.com/ygra)                  
 Alexander Sturm            | [@Ventero](https://github.com/Ventero)                 | <pash@ventero.de>             | 
 Stefan Burnicki            | [@sburnicki](https://github.com/sburnicki)             | <stefan.burnicki@gmail.com>   |
 Sergei Vorobev             | [@vors](https://github.com/vors)                       | <xvorsx@gmail.com>            | 
+Matt Ward                  | [@mrward](https://github.com/mrward)                   |                               | 
