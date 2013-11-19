@@ -43,7 +43,7 @@ namespace Microsoft.PowerShell.Commands
 
         internal override IDictionary GetSessionStateTable()
         {
-            return SessionState.SessionStateGlobal.GetFunctions();
+            return SessionState.Function.GetAll();
         }
 
         internal override object GetValueOfItem(object item)
@@ -64,8 +64,7 @@ namespace Microsoft.PowerShell.Commands
 
         internal override void RemoveSessionStateItem(Path name)
         {
-            // TODO: can be Force'ed
-            SessionState.SessionStateGlobal.RemoveFunction(name);
+            throw new NotImplementedException();
         }
 
         internal override void SetSessionStateItem(Path name, object value, bool writeItem)

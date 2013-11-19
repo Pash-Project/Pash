@@ -2,10 +2,11 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Text;
+using Pash.Implementation;
 
 namespace System.Management.Automation
 {
-    public class PSVariable
+    public class PSVariable : IScopedItem
     {
         public string Name { get; private set; }
         public virtual string Description { get; set; }
@@ -56,21 +57,6 @@ namespace System.Management.Automation
             throw new NotImplementedException();
         }
 
-        // internals
-        //internal static bool IsValidValue(object value, System.Attribute attribute);
-        //internal PSVariable(string name, object value, System.Management.Automation.ScopedItemOptions options, System.Collections.ObjectModel.Collection<Attribute> attributes, string description);
-        //internal PSVariable(string name, object value, System.Management.Automation.ScopedItemOptions options, string description);
-        //internal void SetOptions(System.Management.Automation.ScopedItemOptions newOptions, bool force);
-        //internal void SetValueRaw(object newValue, bool preserveValueTypeSemantics);
-        //internal object TransformValue(object value);
-        //internal bool IsAllScope { get; }
-        //internal bool IsConstant { get; }
-        internal bool IsPrivate { 
-            get { return Options.HasFlag(ScopedItemOptions.Private); } 
-        }
-        //internal bool IsReadOnly { get; }
-        //internal bool WasRemoved { set; get; }
-
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -92,5 +78,22 @@ namespace System.Management.Automation
 
             return Value;
         }
+
+    
+        #region IScopedItem Members
+
+        public string ItemName
+        {
+            get { return Name; }
+        }
+
+        public ScopedItemOptions ItemOptions
+        {
+            get { return Options; }
+            set { Options = value; }
+        }
+
+        #endregion
+
     }
 }

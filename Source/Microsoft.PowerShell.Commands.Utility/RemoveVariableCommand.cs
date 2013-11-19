@@ -35,6 +35,8 @@ namespace Microsoft.PowerShell.Commands
 
                 try
                 {
+                    //TODO: implement a Remove method that takes force and scope!
+                    //standard is local scope, no search in the parent scopes!
                     SessionState.PSVariable.Remove(variable);
                 }
                 catch (Exception ex)

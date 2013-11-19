@@ -6,46 +6,301 @@ using System.Linq;
 
 namespace Pash.Implementation
 {
-    internal class SessionStateScope
+    internal class SessionStateScope<T> where T : IScopedItem
     {
-        public enum ScopeSpecifiers {
+        public enum ScopeSpecifiers
+        {
             Global,
             Local,
             Script,
             Private
-        };
-
-        internal Dictionary<string, AliasInfo> LocalAliases { get; private set; }
-        internal Dictionary<string, CommandInfo> LocalFunctions { get; private set; }
-        internal Dictionary<string, PSVariable> LocalVariables { get; private set; }
-        internal Dictionary<string, PSDriveInfo> LocalDrives { get; private set; }
-
-        public SessionStateScope ParentScope { get; private set; }
-        public SessionStateGlobal SessionStateGlobal { get; private set; }
-        public bool IsScriptScope { get; set; }
-
-        public SessionStateScope(SessionStateGlobal sessionStateGlobal) : this(null, sessionStateGlobal) {}
-
-        public SessionStateScope(SessionStateScope parentScope) : this(parentScope, parentScope.SessionStateGlobal) {}
-
-
-        private SessionStateScope(SessionStateScope parentScope, SessionStateGlobal sessionStateGlobal)
-        {
-            LocalAliases = new Dictionary<string, AliasInfo>(StringComparer.CurrentCultureIgnoreCase);
-            LocalFunctions = new Dictionary<string, CommandInfo>(StringComparer.CurrentCultureIgnoreCase);
-            LocalVariables = new Dictionary<string, PSVariable>(StringComparer.CurrentCultureIgnoreCase);
-            LocalDrives = new Dictionary<string, PSDriveInfo>(StringComparer.CurrentCultureIgnoreCase);
-            SessionStateGlobal = sessionStateGlobal;
-            IsScriptScope = false;
-            ParentScope = parentScope;
-            //TODO: care about AllScope items!
-            //Just setting the parent scope is a little too easy. We have to copy all AllScope members to this scope!
         }
 
-        internal SessionStateScope GetScope(string specifier, bool numberAllowed = true)
+        //allows foreach statement with scope hierarchies
+        public class ScopeHierarchyIterator : IEnumerable<SessionStateScope<T>>
+        {
+            private SessionStateScope<T> _start;
+
+            public ScopeHierarchyIterator(SessionStateScope<T> start)
+            {
+                _start = start;
+            }
+
+            public IEnumerator<SessionStateScope<T>> GetEnumerator()
+            {
+                for (var itemSet = _start; itemSet != null; itemSet = itemSet.ParentScope)
+                {
+                    yield return itemSet;
+                }
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                for (var itemSet = _start; itemSet != null; itemSet = itemSet.ParentScope)
+                {
+                    yield return itemSet;
+                }
+            }
+        }
+
+        public class QualifiedName
+        {
+            public string ScopeSpecifier { get; private set; }
+            public string UnqualifiedName { get; private set; }
+
+            public QualifiedName(string name)
+            {
+                //default: the name has no specifier
+                ScopeSpecifier = String.Empty;
+                UnqualifiedName = name;
+                //specifier is usually before the colon
+                var parts = name.Split(new char[] {':'}, 2);
+                if (parts.Length > 1 && ValidateScopeSpecifier(parts[0], false))
+                {
+                    ScopeSpecifier = parts[0];
+                    UnqualifiedName = parts[1];
+                }
+            }
+        }
+
+        internal SessionStateCategory SessionStateCategory { get; private set; }
+
+        public SessionStateScope<T> ParentScope{ get; private set; }
+        public Dictionary<string, T> Items { get; private set; }
+        public bool IsScriptScope { get; set; }
+        public IEnumerable<SessionStateScope<T>> HierarchyIterator
+        {
+            get { return new ScopeHierarchyIterator(this); }
+        }
+
+
+        public SessionStateScope(SessionStateScope<T> parentItems, SessionStateCategory sessionStateCategory)
+        {
+            ParentScope = parentItems;
+            Items = new Dictionary<string, T>(StringComparer.CurrentCultureIgnoreCase);
+            //TODO: care about AllScope items!
+
+            SessionStateCategory = sessionStateCategory;
+        }
+
+        #region general functions that work with full hierarchy and qualified names
+        public T Get(string name, bool isQualified)
+        {
+            if (name == null)
+            {
+                throw new MethodInvocationException("The value of the argument \"name\" is null");
+            }
+            //if the name is qualified, look for the specified scope
+            if (isQualified)
+            {
+                var qualName = new QualifiedName(name);
+                if (!String.IsNullOrEmpty(qualName.ScopeSpecifier))
+                {
+                    SessionStateScope<T> affectedScope = GetScope(qualName.ScopeSpecifier, false);
+                    var item = affectedScope.GetLocal(qualName.UnqualifiedName);
+                    //return null if it's private
+                    if (affectedScope != this && item.ItemOptions.HasFlag(ScopedItemOptions.Private))
+                    {
+                        return default(T);
+                    }
+                    return item;
+                }
+            }
+            //no scope specifier in name, look in hierarchy
+            var hostingScope = this.FindHostingScope(name);
+            if (hostingScope != null)
+            {
+                return hostingScope.GetLocal(name);
+            }
+            return default(T);
+        }
+
+        public void Set(string name, T value, bool isQualified, bool overwrite)
+        {
+            if (name == null)
+            {
+                throw new MethodInvocationException("The value of the argument \"name\" is null");
+            }
+            var qualName = new QualifiedName(name);
+            var isPrivate = isQualified ? String.Equals(ScopeSpecifiers.Private.ToString(), qualName.ScopeSpecifier,
+                                                       StringComparison.CurrentCultureIgnoreCase)
+                                        : false;
+            var affectedScope = isQualified ? GetScope(qualName.ScopeSpecifier, false, this) : this;
+            if (isPrivate) //make sure to set the private flag correctly
+            {
+                value.ItemOptions |= ScopedItemOptions.Private;
+            }
+            affectedScope.SetLocal(value, overwrite);
+        }
+
+        public void Remove(string name, bool isQualified)
+        {
+            if (name == null)
+            {
+                throw new MethodInvocationException("The value of the argument \"name\" is null");
+            }
+            //if the scope isn't specified, we will look in the hierarchy for the variable
+            SessionStateScope<T> affectedScope = null;
+            if (isQualified)
+            {
+                var qualName = new QualifiedName(name);
+                affectedScope = GetScope(qualName.ScopeSpecifier, false);
+                name = qualName.UnqualifiedName; //use the unqualified name to set the item
+            }
+            if (affectedScope == null)
+            {
+                affectedScope = FindHostingScope(name) ?? this;
+            }
+            affectedScope.RemoveLocal(name);
+        }
+
+        public Dictionary<string, T> GetAll()
+        {
+            //get a copy of the vars in the local scope first. Note: it also copies the correct comperator
+            var visibleItems = new Dictionary<string, T>(Items);
+            //now check recursively the parent scopes for non-private, not overriden variables
+            //explicitly instantiate hierarchyiterator as ParentScope can be null
+            foreach (var curScope in new ScopeHierarchyIterator(ParentScope))
+            {
+                foreach (var pair in curScope.Items)
+                {
+                    if (!visibleItems.ContainsKey(pair.Key) && 
+                        !pair.Value.ItemOptions.HasFlag(ScopedItemOptions.Private))
+                    {
+                        visibleItems.Add(pair.Key, pair.Value);
+                    }
+                }
+            }
+            return visibleItems;
+        }
+
+        #endregion
+
+        #region specified scope related
+
+        public T GetAtScope(string name, string scope)
+        {
+            var affectedScope = GetScope(scope, true, this);
+            return affectedScope.GetLocal(name);
+        }
+
+        public void SetAtScope(T value, string scope, bool overwrite)
+        {
+            var affectedScope = GetScope(scope, true, this);
+            affectedScope.SetLocal(value, overwrite);
+        }
+
+        public void RemoveAtScope(string name, string scope)
+        {
+            var affectedScope = GetScope(scope, true, this);
+            affectedScope.RemoveLocal(name);
+        }
+
+        public Dictionary<string, T> GetAllAtScope(string scope)
+        {
+            var affectedScope = GetScope(scope, true, this);
+            return affectedScope.Items;
+        }
+
+        #endregion
+           
+        #region local scope only
+
+        public T GetLocal(string name)
+        {
+            if (name == null)
+            {
+                throw new MethodInvocationException("The value of the argument \"name\" is null");
+            }
+            if (Items.ContainsKey(name))
+            {
+                return Items[name];
+            }
+            return default(T);
+        }
+
+        public void SetLocal(T item, bool overwrite)
+        {
+            if (item == null)
+            {
+                throw new MethodInvocationException("The value of the argument \"item\" is null");
+            }
+            var original = GetLocal(item.ItemName);
+            if (original != null)
+            {
+                if (!overwrite)
+                {
+                    throw new SessionStateException(item.ItemName, SessionStateCategory, String.Empty,
+                                                    ErrorCategory.ResourceExists, null);
+                }
+                if (original.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly))
+                {
+                    throw new SessionStateUnauthorizedAccessException(item.ItemName, SessionStateCategory,
+                                                                      String.Empty, null);
+                }
+                if (!original.ItemOptions.HasFlag(ScopedItemOptions.Private)) //privacy cannot be changed
+                {
+                    item.ItemOptions &= ~ScopedItemOptions.Private;
+                }
+                else //original was private
+                {
+                    item.ItemOptions |= ScopedItemOptions.Private;
+                }
+                RemoveLocal(item.ItemName); //checks also for constants
+            }
+            Items.Add(item.ItemName, item);
+        }
+
+        public void RemoveLocal(string name)
+        {
+            if (name == null)
+            {
+                throw new MethodInvocationException("The value of the argument \"name\" is null");
+            }
+            var item = GetLocal(name);
+            if (item == null) //doesn't exist
+            {
+                throw new ItemNotFoundException(name, SessionStateCategory, String.Empty, null);
+            }
+            if (item.ItemOptions.HasFlag(ScopedItemOptions.Constant))
+            {
+                throw new SessionStateUnauthorizedAccessException(name, SessionStateCategory, String.Empty, null);
+            }
+            Items.Remove(name);
+        }
+
+        #endregion
+
+        #region helper functions
+
+        private SessionStateScope<T> FindHostingScope(string unqualifiedName)
+        {
+            //iterate through scopes and parents until we find the variable
+            foreach (var candidate in HierarchyIterator)
+            {
+                var item = candidate.GetLocal(unqualifiedName);
+                if (item == null)
+                {
+                    continue;
+                }
+                //make also sure the variable isn't private, if it's from a parent scope!
+                if ((candidate == this) || !item.ItemOptions.HasFlag(ScopedItemOptions.Private))
+                {
+                    return candidate;
+                }
+            }
+            return null; //nothing found
+        }
+
+        private SessionStateScope<T> GetScope(string specifier, bool numberAllowed,
+                                               SessionStateScope<T> fallback = null)
         {
             int scopeLevel = -1;
-            SessionStateScope candidate = this;
+            if (String.IsNullOrEmpty(specifier))
+            {
+                return fallback;
+            }
+            SessionStateScope<T> candidate = this;
             //check if the specifier is a number before trying to interprete it as enum
             if (int.TryParse(specifier, out scopeLevel))
             {
@@ -55,15 +310,14 @@ namespace Pash.Implementation
                 {
                     throw new ArgumentException("Invalid scope specifier");
                 }
-                while (scopeLevel > 0)
+                for (var curLevel = scopeLevel; curLevel > 0; curLevel--)
                 {
                     //make sure we can proceed looking for the next scope
-                    if (candidate.ParentScope == null)
+                    candidate = candidate.ParentScope;
+                    if (candidate == null)
                     {
                         throw new ArgumentOutOfRangeException("Exceeded the maximum number of available scopes");
                     }
-                    candidate = candidate.ParentScope;
-                    scopeLevel--;
                 }
                 return candidate;
             }
@@ -71,12 +325,12 @@ namespace Pash.Implementation
             ScopeSpecifiers scopeSpecifier;
             if (!ScopeSpecifiers.TryParse(specifier, true, out scopeSpecifier))
             {
-                throw new ArgumentException("Invalid scope specifier");
+                throw new ArgumentException(String.Format("Invalid scope specifier \"{0}\".", specifier));
             }
             return GetScope(scopeSpecifier);
         }
 
-        internal SessionStateScope GetScope(ScopeSpecifiers specifier)
+        private SessionStateScope<T> GetScope(ScopeSpecifiers specifier)
         {
             //if the local scope is meant, return this instance itself
             if (specifier == ScopeSpecifiers.Local || specifier == ScopeSpecifiers.Private)
@@ -101,57 +355,23 @@ namespace Pash.Implementation
             throw new ArgumentException(String.Format("Invalid scope specifier \"{0}\"", specifier));
         }
 
-        #region drive access
-        internal PSDriveInfo GetLocalDrive(string driveName)
+        static private bool ValidateScopeSpecifier(string specifier, bool numberAllowed)
         {
-            if (LocalDrives.ContainsKey(driveName))
-            {
-                return LocalDrives[driveName];
-            }
-            return null;
-        }
-
-        internal bool AddLocalDrive(PSDriveInfo drive)
-        {
-            if (LocalDrives.ContainsKey(drive.Name))
+            int scopeLevel = -1;
+            //first try to interprete it as an int. if we don't do this, the enums TryParse method will misinterpret it
+            if (int.TryParse(specifier, out scopeLevel) && (scopeLevel < 0 || !numberAllowed))
             {
                 return false;
             }
-            LocalDrives.Add(drive.Name, drive);
+            ScopeSpecifiers scopeSpecifier;
+            if (!ScopeSpecifiers.TryParse(specifier, true, out scopeSpecifier))
+            {
+                return false;
+            }
             return true;
         }
 
-        internal bool RemoveLocalDrive(string driveName, bool force)
-        {
-            /* TODO: force is used to remove the drive "although it's in use by the provider"
-             * So, we need to find out when a drive is in use and should throw an exception on removal without
-             * the "force" parameter being true
-             */
-            return LocalDrives.Remove(driveName);
-        }
-        #endregion
-
-        #region variable access
-        internal PSVariable GetLocalVariable(string unqualifiedName)
-        {
-            if (LocalVariables.ContainsKey(unqualifiedName))
-            {
-                return (PSVariable) LocalVariables[unqualifiedName];
-            }
-            return null;
-        }
-
-        internal void RemoveLocalVariable(string name)
-        {
-            LocalVariables.Remove(name);
-        }
-
-        internal void SetLocalVariable(PSVariable variable)
-        {
-            RemoveLocalVariable(variable.Name);
-            LocalVariables.Add(variable.Name, variable);
-        }
-        #endregion
+        #endregion                    
     }
 }
 

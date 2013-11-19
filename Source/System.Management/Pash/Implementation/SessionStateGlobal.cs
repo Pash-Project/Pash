@@ -9,12 +9,24 @@ using Microsoft.PowerShell.Commands;
 using System.Management;
 using System.Management.Automation;
 using System.Management.Automation.Provider;
+using System.Reflection;
+using Extensions.Enumerable;
 
 namespace Pash.Implementation
 {
 
     internal class SessionStateGlobal
     {
+        private struct SnapinProviderPair
+        {
+            public PSSnapInInfo snapinInfo;
+            public Type providerType;
+            public CmdletProviderAttribute providerAttr;
+        }
+
+        /*
+         * TODO: Move the provider stuff to ProviderIntrinsics and access it through SessionState.Provider
+         */
         private Dictionary<string, List<ProviderInfo>> _providers;
         private Dictionary<string, List<CmdletProvider>> _providerInstances;
         private Dictionary<ProviderInfo, PSDriveInfo> _providersCurrentDrive;
@@ -25,7 +37,7 @@ namespace Pash.Implementation
 
         internal SessionStateGlobal(ExecutionContext executionContext)
         {
-			_executionContext = executionContext;
+            _executionContext = executionContext;
             _providers = new Dictionary<string, List<ProviderInfo>>(StringComparer.CurrentCultureIgnoreCase);
             _providerInstances = new Dictionary<string, List<CmdletProvider>>(StringComparer.CurrentCultureIgnoreCase);
             _providersCurrentDrive = new Dictionary<ProviderInfo, PSDriveInfo>();
@@ -80,8 +92,10 @@ namespace Pash.Implementation
                 //AddProvider
             }*/
 
-            CommandManager commandManager = this.CommandManager;
-            foreach (var providerTypePair in commandManager._providers)
+            // TODO: move this to config.ps1
+            Collection<SnapinProviderPair> providerPairs = LoadSnapins();
+
+            foreach (var providerTypePair in providerPairs)
             {
                 ProviderInfo providerInfo = new ProviderInfo(_executionContext.SessionState, providerTypePair.providerType, providerTypePair.providerAttr.ProviderName, string.Empty, providerTypePair.snapinInfo);
                 CmdletProvider provider = AddProvider(providerInfo);
@@ -98,7 +112,63 @@ namespace Pash.Implementation
             }
         }
 
-        CommandManager CommandManager
+        private Collection<SnapinProviderPair> LoadSnapins()
+        {
+            var providerPairs = new Collection<SnapinProviderPair>();
+            foreach (var snapinTypeName in new[] { 
+                "Microsoft.PowerShell.PSCorePSSnapIn, System.Management.Automation",
+                "Microsoft.PowerShell.PSUtilityPSSnapIn, Microsoft.PowerShell.Commands.Utility",
+                "Microsoft.Commands.Management.PSManagementPSSnapIn, Microsoft.PowerShell.Commands.Management",
+            })
+            {
+                var tmpProviders = new Collection<SnapinProviderPair>();
+
+                // Load all PSSnapin's
+                foreach (CmdletInfo cmdLetInfo in LoadCmdletsFromPSSnapin(snapinTypeName, out tmpProviders))
+                {
+                    // Register PSSnapin
+                    CommandManager.RegisterPSSnaping(cmdLetInfo.PSSnapIn);
+                    CommandManager.RegisterCmdlet(cmdLetInfo);
+                }
+
+                foreach (SnapinProviderPair providerTypePair in tmpProviders)
+                {
+                    providerPairs.Add(providerTypePair);
+                }
+            }
+            return providerPairs;
+        }
+
+        // TODO: separate providers from cmdlets
+        private Collection<CmdletInfo> LoadCmdletsFromPSSnapin(string strType, out Collection<SnapinProviderPair> providers)
+        {
+            Type snapinType = Type.GetType(strType, true);
+            Assembly assembly = snapinType.Assembly;
+
+            PSSnapIn snapin = Activator.CreateInstance(snapinType) as PSSnapIn;
+
+            PSSnapInInfo snapinInfo = new PSSnapInInfo(snapin.Name, false, string.Empty, assembly.GetName().Name, 
+                                                       string.Empty, new Version(1, 0), null, null, null, 
+                                                       snapin.Description, snapin.Vendor);
+
+            var snapinProviderPairs = from Type type in assembly.GetTypes()
+                                      where !type.IsSubclassOf(typeof(Cmdlet))
+                                      where type.IsSubclassOf(typeof(CmdletProvider))
+                                      from CmdletProviderAttribute providerAttr in 
+                                        type.GetCustomAttributes(typeof(CmdletProviderAttribute), true)
+                                      select new SnapinProviderPair
+                                        {
+                                            snapinInfo = snapinInfo,
+                                            providerType = type,
+                                            providerAttr = providerAttr
+                                        };
+
+            providers = snapinProviderPairs.ToCollection();
+
+            return CommandManager.LoadCmdletsFromAssembly(assembly, snapinInfo).ToCollection();
+        }
+
+        internal CommandManager CommandManager
         {
             get
             {
@@ -145,13 +215,14 @@ namespace Pash.Implementation
                     if (driveInfo != null)
                     {
                         // TODO: need to set driveInfo.Root
-
+                        // TODO: the following function should also register it with SessionState.Drive.New!
                         driveProvider.DoNewDrive(driveInfo);
 
                         try
                         {
+                            //always to global scope
                             _executionContext.SessionState.Drive.New(driveInfo,
-                                SessionStateScope.ScopeSpecifiers.Global.ToString());
+                                SessionStateScope<PSDriveInfo>.ScopeSpecifiers.Global.ToString());
                         }
                         catch
                         {
@@ -285,39 +356,6 @@ namespace Pash.Implementation
             }
 
             return null;
-        }
-
-        internal IDictionary GetFunctions()
-        {
-            Dictionary<string, CommandInfo> dictionary = new Dictionary<string, CommandInfo>(StringComparer.OrdinalIgnoreCase);
-            foreach (CommandInfo info in _executionContext.SessionState.SessionStateScope.LocalFunctions.Values)
-            {
-                if (!dictionary.ContainsKey(info.Name))
-                {
-                    dictionary.Add(info.Name, info);
-                }
-            }
-            return dictionary;
-        }
-
-        internal void RemoveFunction(string name)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal void SetAlias(string name, string value)
-        {
-            this.CommandManager.SetAlias(name, value);
-        }
-
-        internal void NewAlias(string name, string value)
-        {
-            this.CommandManager.NewAlias(name, value);
-        }
-
-        internal void NewVariable(PSVariable variable, bool force)
-        {
-            throw new NotImplementedException();
         }
 
         internal Collection<PSObject> GetChildItems(string path, bool recurse)

@@ -464,6 +464,9 @@
     <Compile Include="Pash\ExpandableStringParser.cs" />
     <Compile Include="Pash\Implementation\SessionStateScope.cs" />
     <Compile Include="Automation\SessionStateUnauthorizedAccessException.cs" />
+    <Compile Include="Pash\Implementation\AliasIntrinsics.cs" />
+    <Compile Include="Pash\Implementation\FunctionIntrinsics.cs" />
+    <Compile Include="Pash\Implementation\IScopedItem.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

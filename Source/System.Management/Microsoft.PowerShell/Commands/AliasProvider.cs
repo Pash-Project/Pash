@@ -45,7 +45,7 @@ namespace Microsoft.PowerShell.Commands
 
         internal override System.Collections.IDictionary GetSessionStateTable()
         {
-            throw new NotImplementedException();
+            return SessionState.Alias.GetAll();
         }
 
         internal override object GetValueOfItem(object item)
