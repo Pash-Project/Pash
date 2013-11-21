@@ -1440,9 +1440,62 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.decimal_integer_literal);
             var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), this._grammar.decimal_integer_literal.Pattern, RegexOptions.IgnoreCase);
-            string value = matches.Groups[this._grammar.decimal_digits.Name].Value;
+            string digits = matches.Groups[this._grammar.decimal_digits.Name].Value;
+            string typeSuffix = matches.Groups[this._grammar.numeric_type_suffix.Name].Value;
+            string longTypeSuffix = matches.Groups[this._grammar.long_type_suffix.Name].Value;
+            string multiplier = matches.Groups[this._grammar.numeric_multiplier.Name].Value;
 
-            return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), Convert.ToInt32(value, 10));
+            // The type of an integer literal is determined by its value, the presence or absence of long-type-suffix, and the
+            // presence of a numeric-multiplier (§2.3.5.1.3).
+
+            object value;
+
+            if (typeSuffix == string.Empty)
+            {
+                // For an integer literal with no long-type-suffix
+
+                int intValue;
+                long longValue;
+                decimal decimalValue;
+                double doubleValue;
+
+                // Note: TryParse will only ever return false here if the conversion overflows because
+                // all other conditions are impossible when the supplied string consists only of digits.
+                if (int.TryParse(digits, out intValue))
+                    // • If its value can be represented by type int (§4.2.3), that is its type;
+                    value = intValue;
+                else if (long.TryParse(digits, out longValue))
+                    // • Otherwise, if its value can be represented by type long (§4.2.3), that is its type.
+                    value = longValue;
+                else if (decimal.TryParse(digits, out decimalValue))
+                    // • Otherwise, if its value can be represented by type decimal (§2.3.5.1.2), that is its type.
+                    value = decimalValue;
+                else if (double.TryParse(digits, out doubleValue))
+                    // • Otherwise, it is represented by type double (§2.3.5.1.2).
+                    value = doubleValue;
+                else
+                    // For PowerShell compatibility throw an error here instead of saturating the double to infinity.
+                    throw new OverflowException(string.Format("The integer literal {0} is too large.", matches.Value));
+            }
+            else if (longTypeSuffix != string.Empty)
+            {
+                // For an integer literal with long-type-suffix
+
+                long longValue;
+
+                // • If its value can be represented by type long (§4.2.3), that is its type;
+                if (long.TryParse(digits, out longValue))
+                    value = longValue;
+                else
+                    // • Otherwise, that literal is ill formed.
+                    throw new ArithmeticException(string.Format("The integer literal {0} is invalid because it does not fit into a long.", matches.Value));
+            }
+            else
+            {
+                throw new NotImplementedException("Decimal type suffix not yet implemented");
+            }
+
+            return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), value);
         }
 
         ConstantExpressionAst BuildHexaecimalIntegerLiteralAst(ParseTreeNode parseTreeNode)
