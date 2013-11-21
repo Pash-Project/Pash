@@ -1430,7 +1430,7 @@ namespace Pash.ParserIntrinsics
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.hexadecimal_integer_literal)
             {
-                return BuildHexaecimalIntegerLiteralAst(parseTreeNode.ChildNodes.Single());
+                return BuildHexadecimalIntegerLiteralAst(parseTreeNode.ChildNodes.Single());
             }
 
             throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
@@ -1445,7 +1445,7 @@ namespace Pash.ParserIntrinsics
             return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), Convert.ToInt32(value, 10));
         }
 
-        ConstantExpressionAst BuildHexaecimalIntegerLiteralAst(ParseTreeNode parseTreeNode)
+        ConstantExpressionAst BuildHexadecimalIntegerLiteralAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.hexadecimal_integer_literal);
 
