@@ -57,5 +57,17 @@ namespace TestHost
             var result = TestHost.Execute(true, string.Format("(9223372036854775808{0}).GetType()", typeSuffix));
             StringAssert.Contains("Exception", result);
         }
+
+        [Test]
+        [TestCase("-1", "System.Int32")]
+        [TestCase("-2147483647", "System.Int32")] // int.MinValue + 1
+        [TestCase("-2147483648", "System.Int32")] // int.MinValue
+        [TestCase("-9223372036854775807", "System.Int64")] // long.MaxValue + 1
+        [TestCase("-9223372036854775808", "System.Int64")] // long.MaxValue
+        public void NegativeIntegerLiteralShouldBeOfType(string literal, string expectedType)
+        {
+            var result = TestHost.Execute(true, string.Format("({0}).GetType()", literal));
+            Assert.AreEqual(expectedType + Environment.NewLine, result);
+        }
     }
 }

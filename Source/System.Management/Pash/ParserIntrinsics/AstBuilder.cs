@@ -919,16 +919,66 @@ namespace Pash.ParserIntrinsics
         ExpressionAst BuildUnaryDashExpressionAst(ParseTreeNode parseTreeNode)
         {
             var expression = BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1]);
-            ConstantExpressionAst constantExpressionAst = expression as ConstantExpressionAst;
+            var constantExpressionAst = expression as ConstantExpressionAst;
+            var type = constantExpressionAst.StaticType;
             if (constantExpressionAst == null)
             {
                 throw new NotImplementedException(parseTreeNode.ToString());
             }
             else
             {
-                if (constantExpressionAst.StaticType == typeof(int))
+                // From the spec (2.3.5.1.1 Integer literals):
+
+                // “In the twos-complement representation of integer values,
+                // there is one more negative value than there is positive.
+                // For the int type, that extra value is -2147483648. For the
+                // long type, that extra value is -9223372036854775808. Even
+                // though the token 2147483648 would ordinarily be treated as
+                // a literal of type long, if it is preceded immediately by
+                // the unary - operator, that operator and literal are treated
+                // as a literal of type int having the smallest value.
+                // Similarly, even though the token 9223372036854775808 would
+                // ordinarily be treated as a real literal of type decimal,
+                // if it is immediately preceded by the unary - operator, that
+                // operator and literal are treated as a literal of type long
+                // having the smallest value.”
+
+                // The following code deals both with conflating unary minus
+                // and a constant expression into a single constant expression
+                // as well as the type juggling the above quote from the
+                // specification entails.
+
+                // TODO: The wording of the specification only refers to
+                // int.MinValue and long.MinValue, which should be parsed as a
+                // single literal. Would we normally have to treat everything
+                // else as the combination of an unary minus and a constant
+                // expression?
+
+                if (type == typeof(int))
                 {
-                    return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0 - ((int)constantExpressionAst.Value));
+                    var value = (int)constantExpressionAst.Value;
+                    return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0 - value);
+                }
+                else if (type == typeof(long))
+                {
+                    var value = (long)constantExpressionAst.Value;
+                    if (value == -(long)int.MinValue)
+                        return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), int.MinValue);
+                    else
+                        return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0L - value);
+                }
+                else if (type == typeof(decimal))
+                {
+                    var value = (decimal)constantExpressionAst.Value;
+                    if (value == -(decimal)long.MinValue)
+                        return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), long.MinValue);
+                    else
+                        return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0m - value);
+                }
+                else if (type == typeof(double))
+                {
+                    var value = (double)constantExpressionAst.Value;
+                    return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0d - value);
                 }
                 else
                 {
