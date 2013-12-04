@@ -27,7 +27,7 @@ namespace Pash
 
         static internal string FormatConfigCommand(string path)
         {
-            return "&\"" + Path.Combine(Path.GetDirectoryName(path), "config.ps1") + "\"";
+            return ". \"" + Path.Combine(Path.GetDirectoryName(path), "config.ps1") + "\"";
         }
 
         void executeHelper(string cmd, object input)
