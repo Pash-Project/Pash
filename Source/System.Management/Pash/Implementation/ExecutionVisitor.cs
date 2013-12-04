@@ -424,7 +424,8 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitVariableExpression(VariableExpressionAst variableExpressionAst)
         {
             var variable = GetVariable(variableExpressionAst);
-            this._pipelineCommandRuntime.WriteObject(variable.Value, true);
+            var value = (variable != null) ? variable.Value : null;
+            this._pipelineCommandRuntime.WriteObject(value, true);
 
             return AstVisitAction.SkipChildren;
         }
