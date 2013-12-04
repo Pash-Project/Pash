@@ -100,5 +100,39 @@ namespace TestHost
 
             Assert.AreEqual(result, string.Format("script output{0}", Environment.NewLine));
         }
+
+        [Test]
+        public void DotSourceScriptBlockVariableTest()
+        {
+            string statement = "$a=0; Write-Host $a; . { $a = 10; Write-Host $a }; Write-Host $a;";
+            string result = TestHost.Execute(statement);
+            string expected = String.Join(Environment.NewLine, new string[] { "0", "10", "10" }) + Environment.NewLine;
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void DotSourceVariableScriptBlockVariableTest()
+        {
+            string statement = "$a=0; Write-Host $a; $b = { $a = 10; Write-Host $a }; . $b; Write-Host $a;";
+            string result = TestHost.Execute(statement);
+            string expected = String.Join(Environment.NewLine, new string[] { "0", "10", "10" }) + Environment.NewLine;
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void DotSourceOverwriteFunctionTest()
+        {
+            string fileName = CreateScript("function foo { Write-Host 'bar' };");
+            string result = TestHost.Execute(
+                "function foo { Write-Host 'foo' }",
+                "foo;", //prints "foo"
+                string.Format("$fileName = '{0}'", fileName),
+                ". $fileName",
+                "foo;" //was overwritten and prints now "bar"
+            );
+            string expected = String.Join(Environment.NewLine, new string[] { "foo", "bar" }) + Environment.NewLine;
+
+            Assert.AreEqual(expected, result);
+        }
     }
 }

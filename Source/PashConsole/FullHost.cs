@@ -24,8 +24,9 @@ namespace Pash
 
             string exePath = Assembly.GetCallingAssembly().Location;
             string configPath = Path.Combine(Path.GetDirectoryName(exePath), "config.ps1");
-
-            Execute(configPath);
+            //we need to dot-source the script to affect the global scope
+            //make sure that the pending pull request is updated and merged to implement this properly
+            Execute(". \"" + configPath + "\"");
         }
 
         void executeHelper(string cmd, object input)
@@ -43,7 +44,9 @@ namespace Pash
             // instance variable so that it is available to be stopped.
             try
             {
-                currentPipeline.Commands.Add(cmd);
+                // A command is not a simple word here, it's the whole user input and might contain
+                // multiple commands. Therefore we parse it first, but make sure it's not executed in a local scope
+                currentPipeline.Commands.AddScript(cmd, false);
 
                 // Now add the default outputter to the end of the pipe and indicate
                 // that it should handle both output and errors from the previous

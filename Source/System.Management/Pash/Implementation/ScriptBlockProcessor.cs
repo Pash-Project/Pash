@@ -14,22 +14,22 @@ using System.Management.Pash.Implementation;
 
 namespace Pash.Implementation
 {
-    internal class ScriptProcessor : CommandProcessorBase
+    internal class ScriptBlockProcessor : CommandProcessorBase
     {
-        readonly ScriptInfo _scriptInfo;
+        readonly IScriptBlockInfo _scriptBlockInfo;
 
 
-        public ScriptProcessor(ScriptInfo scriptInfo)
-            : base(scriptInfo)
+        public ScriptBlockProcessor(IScriptBlockInfo scriptBlockInfo, CommandInfo commandInfo)
+            : base(commandInfo)
         {
-            this._scriptInfo = scriptInfo;
+            this._scriptBlockInfo = scriptBlockInfo;
         }
 
         internal override ICommandRuntime CommandRuntime { get; set; }
 
         internal override void BindArguments(PSObject obj)
         {
-            ReadOnlyCollection<ParameterAst> scriptParameters = _scriptInfo.GetParameters();
+            ReadOnlyCollection<ParameterAst> scriptParameters = _scriptBlockInfo.GetParameters();
 
             for (int i = 0; i < scriptParameters.Count; ++i)
             {
@@ -76,11 +76,19 @@ namespace Pash.Implementation
 
         internal override void ProcessRecord()
         {
-            ExecutionContext context = ExecutionContext.Clone();
-
-            PipelineCommandRuntime pipelineCommandRuntime = (PipelineCommandRuntime)CommandRuntime;
-
-            this._scriptInfo.ScriptBlock.Ast.Visit(new ExecutionVisitor(context, pipelineCommandRuntime, false));
+            //Let's see on the long run if there is an easier solution for this #ExecutionContextChange
+            ExecutionContext context = ExecutionContext.Clone(_scriptBlockInfo.ScopeUsage);
+            //set the execution context of the runspace to the new context for execution in it
+            ExecutionContext.CurrentRunspace.ExecutionContext = context;
+            try
+            {
+                PipelineCommandRuntime pipelineCommandRuntime = (PipelineCommandRuntime)CommandRuntime;
+                this._scriptBlockInfo.ScriptBlock.Ast.Visit(new ExecutionVisitor(context, pipelineCommandRuntime, false));
+            }
+            finally //make sure we switch back to the original execution context, no matter what happened
+            {
+                ExecutionContext.CurrentRunspace.ExecutionContext = ExecutionContext;
+            }
         }
 
         internal override void Complete()
@@ -90,7 +98,7 @@ namespace Pash.Implementation
 
         public override string ToString()
         {
-            return this._scriptInfo.ToString();
+            return this._scriptBlockInfo.ToString();
         }
     }
 }

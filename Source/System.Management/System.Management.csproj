@@ -354,7 +354,6 @@
     <Compile Include="Automation\RuntimeException.cs" />
     <Compile Include="Automation\ScopedItemOptions.cs" />
     <Compile Include="Automation\ScriptBlock.cs" />
-    <Compile Include="Automation\ScriptInfo.cs" />
     <Compile Include="Automation\SecurityDescriptorCmdletProviderIntrinsics.cs" />
     <Compile Include="Automation\SessionCapabilities.cs" />
     <Compile Include="Automation\SessionState.cs" />
@@ -444,7 +443,6 @@
     <Compile Include="Pash\Implementation\PipelineProcessor.cs" />
     <Compile Include="Pash\Implementation\ProviderRuntime.cs" />
     <Compile Include="Pash\Implementation\PSObjectPipelineReader.cs" />
-    <Compile Include="Pash\Implementation\ScriptProcessor.cs" />
     <Compile Include="Pash\Implementation\SessionStateGlobal.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstBuilder.cs" />
     <Compile Include="Pash\ParserIntrinsics\BacktickLineContinuationTerminal.cs" />
@@ -467,6 +465,10 @@
     <Compile Include="Pash\Implementation\AliasIntrinsics.cs" />
     <Compile Include="Pash\Implementation\FunctionIntrinsics.cs" />
     <Compile Include="Pash\Implementation\IScopedItem.cs" />
+    <Compile Include="Pash\Implementation\ScriptBlockProcessor.cs" />
+    <Compile Include="Automation\ScriptInfo.cs" />
+    <Compile Include="Pash\Implementation\IScriptBlockInfo.cs" />
+    <Compile Include="Pash\Implementation\ScopeUsages.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

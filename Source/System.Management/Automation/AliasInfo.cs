@@ -40,7 +40,18 @@ namespace System.Management.Automation
         {
             _definition = definition;
 
-            ReferencedCommand = cmdManager.FindCommand(definition);
+            //only set referenced command if found
+            //aliases only cause errors when they are used, not at instanciation
+            CommandInfo refInfo = null;
+            try
+            {
+                cmdManager.FindCommand(definition);
+            }
+            catch (CommandNotFoundException)
+            {
+            }
+
+            ReferencedCommand = refInfo;
             ResolvedCommand = ReferencedCommand;
         }
         //internal void SetOptions(ScopedItemOptions newOptions, bool force);

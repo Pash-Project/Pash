@@ -134,7 +134,7 @@ namespace Pash.Implementation
         #region OpenXXX Runspace
         public override void Open()
         {
-            CommandManager = new CommandManager(ExecutionContext);
+            CommandManager = new CommandManager(this);
             InitializeSession();
             InitializeProviders();
         }
