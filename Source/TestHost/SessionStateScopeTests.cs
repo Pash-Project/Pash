@@ -43,7 +43,7 @@ namespace TestHost
             states.Add(AvailableStates.Function, functionState);
             states.Add(AvailableStates.Local, localState);
 
-            hostCommandManager = new CommandManager(hostRunspace.ExecutionContext);
+            hostCommandManager = new CommandManager(hostRunspace as LocalRunspace);
         }
 
         #region general scope related

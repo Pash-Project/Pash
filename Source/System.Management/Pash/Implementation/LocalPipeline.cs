@@ -34,7 +34,7 @@ namespace Pash.Implementation
             _pipelineStateInfo = new PipelineStateInfo(PipelineState.NotStarted);
 
             if (!string.IsNullOrEmpty(command))
-                Commands.Add(command);
+                Commands.AddScript(command, false);
         }
 
         protected override void Dispose(bool disposing)
@@ -112,6 +112,7 @@ namespace Pash.Implementation
 
             SetPipelineState(PipelineState.NotStarted);
 
+            //why do we clone the execution context?
             ExecutionContext context = _runspace.ExecutionContext.Clone();
             RerouteExecutionContext(context);
 

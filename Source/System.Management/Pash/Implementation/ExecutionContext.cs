@@ -34,9 +34,13 @@ namespace Pash.Implementation
             SessionState = new SessionState(SessionStateGlobal);
         }
 
-        public ExecutionContext Clone(bool newScope = false)
+        public ExecutionContext Clone(ScopeUsages scopeUsage = ScopeUsages.CurrentScope)
         {
-            var sstate = newScope ? new SessionState(SessionState) : SessionState;
+            var sstate = (scopeUsage == ScopeUsages.CurrentScope) ? SessionState : new SessionState(SessionState);
+            if (scopeUsage == ScopeUsages.NewScriptScope)
+            {
+                sstate.IsScriptScope = true;
+            }
             var context = new ExecutionContext
             {
                 inputStreamReader = inputStreamReader,
@@ -49,13 +53,14 @@ namespace Pash.Implementation
                 SessionState = sstate
             };
 
-            // TODO: copy (not reference) all the variables to allow nested context
+            // TODO: copy (not reference) all the variables to allow nested context <- what does it mean?
 
             return context;
         }
 
         public ExecutionContext CreateNestedContext()
         {
+            //What's the purpose of this function?
             ExecutionContext nestedContext = Clone();
 
             //nestedContext.

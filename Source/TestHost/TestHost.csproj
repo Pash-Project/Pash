@@ -98,7 +98,8 @@
     <Compile Include="FileSystemTests\FileSystemTestBaseTests.cs" />
     <Compile Include="FileSystemTests\FileSystemNavigationTests.cs" />
     <Compile Include="System.Management\PathNavigationTests.cs" />
-    <Compile Include="SessionStateScopeTests.cs" />  
+    <Compile Include="SessionStateScopeTests.cs" />
+    <Compile Include="ScopeTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.PowerShell.Commands.Management\Microsoft.Commands.Management.csproj">

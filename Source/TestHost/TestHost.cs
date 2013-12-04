@@ -57,7 +57,7 @@ namespace TestHost
             {
                 using (var currentPipeline = myRunSpace.CreatePipeline())
                 {
-                    currentPipeline.Commands.Add(statement);
+                    currentPipeline.Commands.AddScript(statement, false);
                     currentPipeline.Commands.Add("Out-Default");
                     currentPipeline.Invoke();
                 }
