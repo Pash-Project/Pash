@@ -649,6 +649,13 @@ namespace TestHost
             StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
         }
 
+        [Test]
+        public void UndefinedVariableIsNull()
+        {
+            var result = TestHost.Execute("$a -eq $null");
+            Assert.AreEqual("True" + Environment.NewLine, result);
+        }
+
         [TestFixture]
         class ThrowTests
         {
