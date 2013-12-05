@@ -45,7 +45,9 @@ namespace Pash
             // instance variable so that it is available to be stopped.
             try
             {
-                currentPipeline.Commands.Add(cmd);
+                // A command is not a simple word here, it's the whole user input and might contain
+                // multiple commands. Therefore we parse it first, but make sure it's not executed in a local scope
+                currentPipeline.Commands.AddScript(cmd, false);
 
                 // Now add the default outputter to the end of the pipe and indicate
                 // that it should handle both output and errors from the previous
@@ -112,12 +114,27 @@ namespace Pash
 
         public void Run()
         {
+            /* LocalHostUserInterface supports getline.cs to provide more comfort for non-Windows users.
+             * By default, getline.cs is used on non-Windows systems to hanle user input. However, it can be controlled
+             * on all systems with the PASHUseUnixLikeConsole variable. As this has nothing to do with the PS
+             * specification, this option is specific to LocalHostUserInterface and cannot be set otherwise.
+             */
+            var ui = myHost.UI;
+            var localUI = ui as LocalHostUserInterface;
+            if (localUI != null)
+            {
+                bool? useUnixLikeConsole = GetBoolVariable (PashVariables.UseUnixLikeConsole);
+                localUI.UseUnixLikeInput = useUnixLikeConsole ?? localUI.UseUnixLikeInput;
+            }
+
+
+
             // Set up the control-C handler.
             Console.CancelKeyPress += new ConsoleCancelEventHandler(HandleControlC);
             Console.TreatControlCAsInput = false;
 
-            myHost.UI.WriteLine(ConsoleColor.White, ConsoleColor.Black, "Pash - Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/");
-            myHost.UI.WriteLine();
+            ui.WriteLine(ConsoleColor.White, ConsoleColor.Black, "Pash - Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/");
+            ui.WriteLine();
 
             // Loop reading commands to execute until ShouldExit is set by
             // the user calling "exit".
@@ -125,7 +142,7 @@ namespace Pash
             {
                 Prompt();
 
-                string cmd = Console.ReadLine();
+                string cmd = ui.ReadLine();
 
                 if (cmd == null)
                     continue;
@@ -151,8 +168,27 @@ namespace Pash
             }
             catch (Exception ex)
             {
-
                 this.myHost.UI.WriteLine(ex.ToString());
+            }
+        }
+
+        bool? GetBoolVariable (string name)
+        {
+            var variable = myRunSpace.SessionStateProxy.GetVariable(name) as PSVariable;
+            if (variable == null)
+            {
+                return null;
+            }
+
+            var value = variable.Value;
+            var psObject = value as PSObject;
+            if (psObject == null)
+            {
+                return value as bool?;
+            }
+            else
+            {
+                return psObject.BaseObject as bool?;
             }
         }
 

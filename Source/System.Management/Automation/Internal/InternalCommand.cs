@@ -23,7 +23,7 @@ namespace System.Management.Automation.Internal
             set
             {
                 _executionContext = value;
-                State = new SessionState(_executionContext.SessionState.SessionStateGlobal);
+                State = _executionContext.SessionState;
                 PSHostInternal = _executionContext.LocalHost;
             }
         }

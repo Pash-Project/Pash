@@ -13,7 +13,7 @@ namespace System.Management.Automation.Runspaces
 
         public void AddScript(string scriptContents)
         {
-            Add(new Command(scriptContents, true));
+            AddScript(scriptContents, true); //per default a script runs in  its own scope
         }
 
         public void AddScript(string scriptContents, bool useLocalScope)

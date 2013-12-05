@@ -3,10 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using Pash.Implementation;
 
 namespace System.Management.Automation
 {
-    public class PSDriveInfo : IComparable
+    public class PSDriveInfo : IComparable, IScopedItem
     {
         // TODO: drive can be hidden
         public string Name { get; private set; }
@@ -131,6 +132,21 @@ namespace System.Management.Automation
                 return CompareTo(obj as PSDriveInfo);
 
             throw new InvalidOperationException("Can compare only to PSDriveInfo");
+        }
+
+        #endregion
+
+        #region IScopedItem Members
+
+        public string ItemName
+        {
+            get { return Name; }
+        }
+
+        public ScopedItemOptions ItemOptions
+        {
+            get { return ScopedItemOptions.None; }
+            set { /* nothing happens */ }
         }
 
         #endregion

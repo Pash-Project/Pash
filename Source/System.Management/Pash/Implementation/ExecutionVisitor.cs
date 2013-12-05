@@ -33,7 +33,7 @@ namespace System.Management.Pash.Implementation
         ExecutionVisitor CloneSub(bool writeSideEffectsToPipeline)
         {
             return new ExecutionVisitor(
-                this._context.CreateNestedContext(),
+                this._context.CreateNestedContext(), //Why can't we just use the original context?
                 new PipelineCommandRuntime(this._pipelineCommandRuntime.pipelineProcessor),
                 writeSideEffectsToPipeline
                 );
@@ -233,10 +233,8 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitCommand(CommandAst commandAst)
         {
-            if (commandAst.InvocationOperator == TokenKind.Dot)
-                return VisitDotSourceCommand(commandAst);
-
             // Pipeline uses global execution context, so we should set its WriteSideEffects flag, and restore it to previous value after.
+            //TODO: make sure this is still needed
             var pipeLineContext = _context.CurrentRunspace.ExecutionContext;
             bool writeSideEffects = pipeLineContext.WriteSideEffectsToPipeline;
             try
@@ -261,7 +259,7 @@ namespace System.Management.Pash.Implementation
                 {
                     // TODO: develop a rational model for null/singleton/collection
                     var result = pipeline.Invoke();
-                    if (result.Any())
+                    if (result != null && result.Any())
                     {
                         _pipelineCommandRuntime.WriteObject(result, true);
                     }
@@ -275,15 +273,6 @@ namespace System.Management.Pash.Implementation
             {
                 pipeLineContext.WriteSideEffectsToPipeline = writeSideEffects;
             }
-
-            return AstVisitAction.SkipChildren;
-        }
-
-        private AstVisitAction VisitDotSourceCommand(CommandAst commandAst)
-        {
-            object scriptFileName = EvaluateAst(commandAst.Children.First());
-            ScriptBlockAst ast = PowerShellGrammar.ParseInteractiveInput(File.ReadAllText(scriptFileName.ToString()));
-            ast.Visit(this);
 
             return AstVisitAction.SkipChildren;
         }
@@ -312,15 +301,34 @@ namespace System.Management.Pash.Implementation
 
         Command GetCommand(CommandAst commandAst)
         {
-            if (commandAst.CommandElements.First() is ScriptBlockExpressionAst)
+            var firstCommandElement = commandAst.CommandElements.First();
+            object command = null;
+            bool useLocalScope = commandAst.InvocationOperator != TokenKind.Dot;
+            if (firstCommandElement is ScriptBlockExpressionAst)
             {
-                var scriptBlockAst = (commandAst.CommandElements.First() as ScriptBlockExpressionAst).ScriptBlock;
-                return new Command(scriptBlockAst);
+                command = (firstCommandElement as ScriptBlockExpressionAst).ScriptBlock;
             }
-
-            else
+            else //otherwise we evaluate it and get the result
             {
-                return new Command(commandAst.GetCommandName());
+                command = EvaluateAst(firstCommandElement);
+                if (command is PSObject)
+                {
+                    command = (command as PSObject).BaseObject;
+                }
+            }
+            //if it's a script block, we are only interested in its Ast (which is indeed always a ScriptBlockAst)
+            if (command is ScriptBlock)
+            {
+                command = (command as ScriptBlock).Ast as ScriptBlockAst;
+            }
+            //let's check if we got something useful to execute
+            if (command is ScriptBlockAst)
+            {
+                return new Command(command as ScriptBlockAst, useLocalScope);
+            }
+            else //all other objects will converted as a string with ToString(). This is normal powershell behavior!
+            {
+                return new Command(command.ToString(), false, useLocalScope);
             }
         }
 
@@ -424,7 +432,8 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitVariableExpression(VariableExpressionAst variableExpressionAst)
         {
             var variable = GetVariable(variableExpressionAst);
-            this._pipelineCommandRuntime.WriteObject(variable.Value, true);
+            var value = (variable != null) ? variable.Value : null;
+            this._pipelineCommandRuntime.WriteObject(value, true);
 
             return AstVisitAction.SkipChildren;
         }
@@ -497,11 +506,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitFunctionDefinition(FunctionDefinitionAst functionDefinitionAst)
         {
-            var functionInfo = new /*FunctionInfo*/ScriptInfo(functionDefinitionAst.Name, functionDefinitionAst.Body.GetScriptBlock());
-
-            // HACK: we shouldn't be casting this. But I'm too confused about runspace management in Pash.
-            ((LocalRunspace)this._context.CurrentRunspace).CommandManager.SetFunction(functionInfo);
-
+            _context.SessionState.Function.Set(functionDefinitionAst.Name, functionDefinitionAst.Body.GetScriptBlock());
             return AstVisitAction.SkipChildren;
         }
 
@@ -799,7 +804,12 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitExpandableStringExpression(ExpandableStringExpressionAst expandableStringExpressionAst)
         {
-            throw new NotImplementedException(); //VisitExpandableStringExpression(expandableStringExpressionAst);
+            var evaluatedExpressions = from expressionAst in expandableStringExpressionAst.NestedExpressions
+                                       select EvaluateAst(expressionAst);
+
+            string expandedString = expandableStringExpressionAst.ExpandString(evaluatedExpressions);
+            this._pipelineCommandRuntime.outputResults.Write(expandedString);
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitFileRedirection(FileRedirectionAst redirectionAst)

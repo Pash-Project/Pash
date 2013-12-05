@@ -7,11 +7,10 @@ namespace System.Management.Automation.Runspaces
 {
     public sealed class Command
     {
-        internal readonly ScriptBlockAst ScriptBlockAst;
 
-        readonly string _commandText;
-        public string CommandText { get { return this._commandText; } }
+        internal ScriptBlockAst ScriptBlockAst { get; set; }
 
+        public string CommandText { get; private set; }
         public bool IsScript { get; private set; }
         public bool UseLocalScope { get; private set; }
 
@@ -31,9 +30,10 @@ namespace System.Management.Automation.Runspaces
         public Command(string command, bool isScript, bool useLocalScope)
             : this()
         {
-            _commandText = command;
+            CommandText = command;
             IsScript = isScript;
             UseLocalScope = useLocalScope;
+            ScriptBlockAst = null;
         }
 
         private Command()
@@ -43,10 +43,11 @@ namespace System.Management.Automation.Runspaces
             MergeToResult = PipelineResultTypes.None;
         }
 
-        internal Command(ScriptBlockAst scriptBlockAst)
+        internal Command(ScriptBlockAst scriptBlockAst, bool useLocalScope = false)
             : this()
         {
             this.ScriptBlockAst = scriptBlockAst;
+            this.UseLocalScope = useLocalScope;
             IsScript = false;
         }
 

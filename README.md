@@ -24,6 +24,8 @@ Assuming you have MonoDevelop installed:
 3. `xbuild`
 4. `mono Source/PashConsole/bin/Debug/Pash.exe`
 
+If you're experiencing difficulties with reading Pash output, e.g. it looks like `[%?%p1%{8}%...` - try adding `TERM=xterm`, like `TERM=xterm mono Source/PashConsole/bin/Debug/Pash.exe`. In particular, this is a known issue on Fedora systems.
+
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for more details.
 
 License
@@ -69,4 +71,4 @@ If you like Pash and want to express your gratitude, you could:
 - Create art, music, architecture, boat plans, whatever, and release it under [Creative Commons](http://creativecommons.org/licenses/by-sa/2.5/).
 - Volunteer in your community.
 - Give free hugs!
-- If you're making money with Pash, then you should [send money](http://pledgie.com/campaigns/19268).
+- If you're making money with Pash, then you should [send money](https://www.gittip.com/PashProject/).

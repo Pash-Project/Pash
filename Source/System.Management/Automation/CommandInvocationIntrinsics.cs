@@ -32,10 +32,21 @@ namespace System.Management.Automation
 
         public Collection<PSObject> InvokeScript(string script, bool useNewScope, PipelineResultTypes writeToPipeline, IList input, params object[] args)
         {
-            ScriptBlock scriptBlock = NewScriptBlock(script);
-            var executionVisitor = new ExecutionVisitor(executionContext, commandRuntime);
-            scriptBlock.Ast.Visit(executionVisitor);
-
+            var context = useNewScope ? executionContext.Clone(ScopeUsages.NewScriptScope)
+                                      : executionContext;
+            //Let's see on the long run if there is an easier solution for this #ExecutionContextChange
+            //we need to change the global execution context to change the scope we are currently operating in
+            executionContext.CurrentRunspace.ExecutionContext = context;
+            try
+            {
+                ScriptBlock scriptBlock = NewScriptBlock(script);
+                var executionVisitor = new ExecutionVisitor(context, commandRuntime);
+                scriptBlock.Ast.Visit(executionVisitor);
+            }
+            finally //make sure we set back the old execution context, no matter what happened
+            {
+                executionContext.CurrentRunspace.ExecutionContext = executionContext;
+            }
             return new Collection<PSObject>();
         }
         

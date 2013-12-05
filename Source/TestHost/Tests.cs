@@ -277,7 +277,7 @@ namespace TestHost
             // notice typo
             var result = TestHost.ExecuteWithZeroErrors("Get-ChlidItem");
 
-            Assert.AreEqual("Exception: Command 'Get-ChlidItem' not found.", result);
+            Assert.AreEqual("CommandNotFoundException: Command 'Get-ChlidItem' not found.", result);
         }
 
         [Test]
@@ -650,6 +650,13 @@ namespace TestHost
             StringAssert.AreEqualIgnoringCase(expected + Environment.NewLine, result);
         }
 
+        [Test]
+        public void UndefinedVariableIsNull()
+        {
+            var result = TestHost.Execute("$a -eq $null");
+            Assert.AreEqual("True" + Environment.NewLine, result);
+        }
+
         [TestFixture]
         class ThrowTests
         {
@@ -914,6 +921,31 @@ trap [FormatException] {
             string input = Path.Combine("test", "path", "with spaces", "test.exe");
             string expected = ". \"" + Path.Combine("test", "path", "with spaces", "config.ps1") + "\"";
             Assert.AreEqual(expected, FullHost.FormatConfigCommand(input));
+        }
+
+        [TestFixture]
+        public class ExpandableStringTests
+        {
+            [Test]
+            public void SingleVariableInsideExpandableStringIsExpanded()
+            {
+                string result = TestHost.Execute(@"
+$a = 10
+""a = $a""
+");
+                Assert.AreEqual("a = 10" + Environment.NewLine, result);
+            }
+
+            [Test]
+            public void TwoVariablesNextToEachOtherInsideExpandableStringAreExpanded()
+            {
+                string result = TestHost.Execute(@"
+$a = 'a'
+$b = 'b'
+""$a$b""
+");
+                Assert.AreEqual("ab" + Environment.NewLine, result);
+            }
         }
     }
 }

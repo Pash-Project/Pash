@@ -1,4 +1,4 @@
-﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,68 +18,22 @@ namespace Pash.Implementation
 {
     internal class CommandManager
     {
-        public struct SnapinProviderPair
-        {
-            public PSSnapInInfo snapinInfo;
-            public Type providerType;
-            public CmdletProviderAttribute providerAttr;
-        }
 
         private Dictionary<string, PSSnapInInfo> _snapins;
         private Dictionary<string, List<CmdletInfo>> _cmdLets;
         private Dictionary<string, ScriptInfo> _scripts;
-        private Dictionary<string, AliasInfo> _aliases;
-        internal Collection<SnapinProviderPair> _providers;
-        private ExecutionContext _context;
+        private LocalRunspace _runspace;
 
-        public CommandManager()
-            : this(null)
+        public CommandManager(LocalRunspace runspace)
         {
-        }
-
-        public CommandManager(ExecutionContext context)
-        {
-            _context = context;
+            _runspace = runspace;
 
             _snapins = new Dictionary<string, PSSnapInInfo>(StringComparer.CurrentCultureIgnoreCase);
             _cmdLets = new Dictionary<string, List<CmdletInfo>>(StringComparer.CurrentCultureIgnoreCase);
             _scripts = new Dictionary<string, ScriptInfo>(StringComparer.CurrentCultureIgnoreCase);
-            _aliases = new Dictionary<string, AliasInfo>(StringComparer.CurrentCultureIgnoreCase);
-            _providers = new Collection<SnapinProviderPair>();
-
-            // if no execution scope is provided load all the initial settings from the config file
-            if (context == null)
-            {
-                // TODO: move this to config.ps1
-                foreach (var snapinTypeName in new[] { 
-                    "Microsoft.PowerShell.PSCorePSSnapIn, System.Management.Automation",
-                    "Microsoft.PowerShell.PSUtilityPSSnapIn, Microsoft.PowerShell.Commands.Utility",
-                    "Microsoft.Commands.Management.PSManagementPSSnapIn, Microsoft.PowerShell.Commands.Management",
-                })
-                {
-                    var tmpProviders = new Collection<SnapinProviderPair>();
-
-                    // Load all PSSnapin's
-                    foreach (CmdletInfo cmdLetInfo in LoadCmdletsFromPSSnapin(snapinTypeName, out tmpProviders))
-                    {
-                        // Register PSSnapin
-                        if (_snapins.ContainsKey(cmdLetInfo.PSSnapIn.Name))
-                        {
-                            _snapins.Add(cmdLetInfo.PSSnapIn.Name, cmdLetInfo.PSSnapIn);
-                        }
-
-                        RegisterCmdlet(cmdLetInfo);
-                    }
-
-                    foreach (SnapinProviderPair providerTypePair in tmpProviders)
-                    {
-                        _providers.Add(providerTypePair);
-                    }
-                }
-            }
         }
 
-        private void RegisterCmdlet(CmdletInfo cmdLetInfo)
+        internal void RegisterCmdlet(CmdletInfo cmdLetInfo)
         {
             List<CmdletInfo> cmdletList = null;
             if (_cmdLets.ContainsKey(cmdLetInfo.Name))
@@ -94,29 +48,23 @@ namespace Pash.Implementation
             cmdletList.Add(cmdLetInfo);
         }
 
-        public void SetAlias(string name, string definition)
+        internal void RegisterPSSnaping(PSSnapInInfo snapinInfo)
         {
-            if (this._aliases.ContainsKey(name))
-                this._aliases[name] = new AliasInfo(name, definition, this);
-            else
-                NewAlias(name, definition);
-        }
-
-        public void NewAlias(string name, string definition)
-        {
-            if (this._aliases.ContainsKey(name)) throw new Exception("duplicate alias");
-            AliasInfo aliasInfo = new AliasInfo(name, definition, this);
-
-            _aliases.Add(aliasInfo.Name, aliasInfo);
+            if (!_snapins.ContainsKey(snapinInfo.Name))
+            {
+                _snapins.Add(snapinInfo.Name, snapinInfo);
+            }
         }
 
         private void LoadScripts()
         {
-            foreach (ScriptConfigurationEntry entry in _context.RunspaceConfiguration.Scripts)
+            foreach (ScriptConfigurationEntry entry in _runspace.ExecutionContext.RunspaceConfiguration.Scripts)
             {
                 try
                 {
-                    _scripts.Add(entry.Name, new ScriptInfo(entry.Name, new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(entry.Definition))));
+                    var scriptBlock = new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(entry.Definition));
+                    _scripts.Add(entry.Name, new ScriptInfo(entry.Name, scriptBlock,
+                                                            ScopeUsages.NewScriptScope));
                     continue;
                 }
                 catch
@@ -128,120 +76,86 @@ namespace Pash.Implementation
 
         public CommandProcessorBase CreateCommandProcessor(Command command)
         {
-            string cmdName = command.CommandText;
+            string cmdText = command.CommandText;
 
             CommandInfo commandInfo = null;
+            bool useLocalScope = command.UseLocalScope;
 
-            if (command.CommandText == null)
+            if (command.IsScript) //CommandText contains a script block. Parse it
             {
-                commandInfo = new ScriptInfo("", command.ScriptBlockAst.GetScriptBlock());
+                command.ScriptBlockAst = PowerShellGrammar.ParseInteractiveInput(cmdText);
             }
 
-            if (command.IsScript)
+            //either we parsed something like "& { foo; bar }", or the CommandText was a script and was just parsed
+            if (command.ScriptBlockAst != null)
             {
-                // TODO: take care of the script commands
-                throw new NotImplementedException(this.ToString());
+                commandInfo = new ScriptInfo("", command.ScriptBlockAst.GetScriptBlock(), 
+                                             useLocalScope ? ScopeUsages.NewScope : ScopeUsages.CurrentScope);
+            }
+            else //otherwise it's a real command (cmdlet, script, function, application)
+            {
+                commandInfo = FindCommand(cmdText, useLocalScope);
             }
 
-            if (commandInfo == null && _aliases.ContainsKey(cmdName))
+            switch (commandInfo.CommandType)
             {
-                commandInfo = _aliases[cmdName].ReferencedCommand;
+                case CommandTypes.Application:
+                    return new ApplicationProcessor((ApplicationInfo)commandInfo);
+
+                case CommandTypes.Cmdlet:
+                    return new CommandProcessor(commandInfo as CmdletInfo);
+
+                case CommandTypes.Script:
+                case CommandTypes.Function:
+                    return new ScriptBlockProcessor(commandInfo as IScriptBlockInfo, commandInfo);
+                default:
+                    throw new NotImplementedException("Invalid command type");
             }
-
-            if (commandInfo == null && _cmdLets.ContainsKey(cmdName))
-            {
-                commandInfo = _cmdLets[cmdName].First();
-            }
-
-            if (commandInfo == null && _scripts.ContainsKey(cmdName))
-            {
-                commandInfo = _scripts[cmdName];
-            }
-
-            // TODO: if the command wasn't found should we treat is as a Script?
-            if (commandInfo == null)
-            {
-                var parseTree = PowerShellGrammar.ParseInteractiveInput(command.CommandText);
-                var statements = parseTree.EndBlock.Statements;
-                if (statements.Count == 1 && statements.Single() is PipelineAst)
-                {
-                    var pipelineAst = statements.Single() as PipelineAst;
-                    if (pipelineAst.PipelineElements.Count == 1 && pipelineAst.PipelineElements.Single() is CommandAst)
-                    {
-                        var commandAst = pipelineAst.PipelineElements.Single() as CommandAst;
-                        if (commandAst.CommandElements.Count == 1 && commandAst.CommandElements.Single() is StringConstantExpressionAst)
-                        {
-                            var stringAst = commandAst.CommandElements.Single() as StringConstantExpressionAst;
-                            var path = ResolveExecutablePath(stringAst.Value);
-                            if (path == null)
-                            {
-                                throw new Exception(string.Format("Command '{0}' not found.", cmdName));
-                            }
-
-                            if (Path.GetExtension(path) == ".ps1")
-                            {
-                                // I think we should be using a ScriptFile parser, but this will do for now.
-                                commandInfo = new ScriptInfo(path, new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(File.ReadAllText(path))));
-                            }
-                            else
-                            {
-                                var commandName = Path.GetFileName(path);
-                                var extension = Path.GetExtension(path);
-
-                                commandInfo = new ApplicationInfo(commandName, path, extension);
-                            }
-                        }
-                    }
-                }
-
-                if (commandInfo == null)
-                    commandInfo = new ScriptInfo("", new ScriptBlock(parseTree));
-            }
-
-            if (commandInfo != null)
-            {
-                switch (commandInfo.CommandType)
-                {
-                    case CommandTypes.Application:
-                        return new ApplicationProcessor((ApplicationInfo)commandInfo);
-
-                    case CommandTypes.Cmdlet:
-                        return new CommandProcessor(commandInfo as CmdletInfo);
-
-                    case CommandTypes.Function:
-                        // TODO: teat the function as a script
-                        break;
-
-                    case CommandTypes.Script:
-                        return new ScriptProcessor(commandInfo as ScriptInfo);
-                }
-            }
-
-            throw new Exception(string.Format("Command '{0}' not found.", cmdName));
         }
 
-        internal CommandInfo FindCommand(string command)
+        internal CommandInfo FindCommand(string command, bool useLocalScope=true)
         {
-            // TODO: find the CommandInfo from CommandManager
-
-            List<CmdletInfo> cmdletsList;
-            if (_cmdLets.TryGetValue(command, out cmdletsList))
+            if (_runspace.ExecutionContext.SessionState.Alias.Exists(command))
             {
-                if (cmdletsList.Count > 0)
-                    return cmdletsList[0];
+                return _runspace.ExecutionContext.SessionState.Alias.Get(command).ReferencedCommand;
             }
 
-            ScriptInfo scriptInfo;
-            if (_scripts.TryGetValue(command, out scriptInfo))
-                return scriptInfo;
+            CommandInfo function = _runspace.ExecutionContext.SessionState.Function.Get(command);
+            if (function != null)
+            {
+                return function;
+            }
 
-            AliasInfo aliasInfo;
-            if (_aliases.TryGetValue(command, out aliasInfo))
-                return aliasInfo;
+            if (_cmdLets.ContainsKey(command))
+            {
+                return _cmdLets[command].First();
+            }
 
-            // TODO: search functions (in a context?)
+            if (_scripts.ContainsKey(command))
+            {
+                return _scripts[command];
+            }
 
-            return null;
+            var path = ResolveExecutablePath(command);
+            if (path == null)
+            {
+                //This means it's neither a command name, nor there was a file that can be executed
+                throw new CommandNotFoundException(string.Format("Command '{0}' not found.", command));
+            }
+            if (Path.GetExtension(path) == ".ps1")
+            {
+                // TODO: this should be an ExternalScriptInfo object, not ScriptInfo
+                // I don't feel very well about how this is handled atm.
+                // I think we should be using a ScriptFile parser, but this will do for now.
+                
+                var scriptBlockAst = PowerShellGrammar.ParseInteractiveInput(File.ReadAllText(path));
+                //notice that we have an external script here. This means we create either a new *script*scope
+                //or run it in the currrent one
+                return new ScriptInfo(path, new ScriptBlock(scriptBlockAst),
+                                            useLocalScope ? ScopeUsages.NewScriptScope : ScopeUsages.CurrentScope);
+            }
+            //otherwise it's an application
+            return new ApplicationInfo(Path.GetFileName(path), path, Path.GetExtension(path));
         }
 
         internal IEnumerable<CommandInfo> FindCommands(string pattern)
@@ -251,41 +165,15 @@ namespace Pash.Implementation
                    select info;
         }
 
-        // TODO: separate providers from cmdlets
-        internal Collection<CmdletInfo> LoadCmdletsFromPSSnapin(string strType, out Collection<SnapinProviderPair> providers)
-        {
-            Type snapinType = Type.GetType(strType, true);
-            Assembly assembly = snapinType.Assembly;
-
-            PSSnapIn snapin = Activator.CreateInstance(snapinType) as PSSnapIn;
-
-            PSSnapInInfo snapinInfo = new PSSnapInInfo(snapin.Name, false, string.Empty, assembly.GetName().Name, string.Empty, new Version(1, 0), null, null, null, snapin.Description, snapin.Vendor);
-
-            var snapinProviderPairs = from Type type in assembly.GetTypes()
-                                      where !type.IsSubclassOf(typeof(Cmdlet))
-                                      where type.IsSubclassOf(typeof(CmdletProvider))
-                                      from CmdletProviderAttribute providerAttr in type.GetCustomAttributes(typeof(CmdletProviderAttribute), true)
-                                      select new SnapinProviderPair
-                                        {
-                                            snapinInfo = snapinInfo,
-                                            providerType = type,
-                                            providerAttr = providerAttr
-                                        };
-
-            providers = snapinProviderPairs.ToCollection();
-
-            return LoadCmdletsFromAssembly(assembly, snapinInfo).ToCollection();
-        }
-
-        private IEnumerable<CmdletInfo> LoadCmdletsFromAssembly(Assembly assembly, PSSnapInInfo snapinInfo = null)
+        internal IEnumerable<CmdletInfo> LoadCmdletsFromAssembly(Assembly assembly, PSSnapInInfo snapinInfo = null)
         {
             return from Type type in assembly.GetTypes()
                    where type.IsSubclassOf(typeof(Cmdlet))
                    from CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof(CmdletAttribute), true)
-                   select new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, _context);
+                   select new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, _runspace.ExecutionContext);
         }
 
-        private IEnumerable<CmdletInfo> LoadCmdletsFromAssemblies(IEnumerable<Assembly> assemblies)
+        internal IEnumerable<CmdletInfo> LoadCmdletsFromAssemblies(IEnumerable<Assembly> assemblies)
         {
             return from Assembly assembly in assemblies
                    from CmdletInfo cmdletInfo in LoadCmdletsFromAssembly(assembly)
@@ -301,12 +189,6 @@ namespace Pash.Implementation
             {
                 RegisterCmdlet(cmdletInfo);
             }
-        }
-
-        // HACK: all functions are currently stored as scripts. But I'm confused, so I don't know how to fix it.
-        internal void SetFunction(/*FunctionInfo */ScriptInfo functionInfo)
-        {
-            this._scripts[functionInfo.Name] = functionInfo;
         }
 
         /// <summary>

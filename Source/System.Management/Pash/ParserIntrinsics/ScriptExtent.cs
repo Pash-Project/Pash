@@ -19,17 +19,17 @@ namespace Pash.ParserIntrinsics
 
         int IScriptExtent.EndColumnNumber
         {
-            get { throw new NotImplementedException(); }
+            get { return Location.Column + Span.Length + 1; }
         }
 
         int IScriptExtent.EndLineNumber
         {
-            get { throw new NotImplementedException(); }
+            get { return Location.Line + 1; }
         }
 
         int IScriptExtent.EndOffset
         {
-            get { throw new NotImplementedException(); }
+            get { return Span.EndPosition; }
         }
 
         IScriptPosition IScriptExtent.EndScriptPosition
@@ -39,22 +39,22 @@ namespace Pash.ParserIntrinsics
 
         string IScriptExtent.File
         {
-            get { throw new NotImplementedException(); }
+            get { return null; }
         }
 
         int IScriptExtent.StartColumnNumber
         {
-            get { throw new NotImplementedException(); }
+            get { return Location.Column + 1; }
         }
 
         int IScriptExtent.StartLineNumber
         {
-            get { throw new NotImplementedException(); }
+            get { return Location.Line + 1; }
         }
 
         int IScriptExtent.StartOffset
         {
-            get { throw new NotImplementedException(); }
+            get { return Location.Position; }
         }
 
         IScriptPosition IScriptExtent.StartScriptPosition
@@ -64,7 +64,17 @@ namespace Pash.ParserIntrinsics
 
         string IScriptExtent.Text
         {
-            get { return this._parseTreeNode.FindTokenAndGetText(); }
+            get { return this._parseTreeNode.FindTokenAndGetText() ?? string.Empty; }
+        }
+
+        private SourceLocation Location
+        {
+            get { return Span.Location; }
+        }
+
+        private SourceSpan Span
+        {
+            get { return _parseTreeNode.Span; }
         }
     }
 }

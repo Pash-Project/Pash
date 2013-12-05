@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="2.3.5.1.1 Integer literals.cs" />
     <Compile Include="Cmdlets\JoinPathTests.cs" />
     <Compile Include="Cmdlets\SortObjectTests.cs" />
     <Compile Include="Cmdlets\GetCommandTests.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="TestHost.cs" />
     <Compile Include="TestHostUserInterface.cs" />
     <Compile Include="Tests.cs" />
+    <Compile Include="LocalHostUserInterfaceTests.cs" />
     <Compile Include="System.Management\PathTests.cs" />
     <Compile Include="System.Management\ParameterTests.cs" />
     <Compile Include="TestHelpers\NUnitSpecificationExtensions.cs" />
@@ -97,6 +99,8 @@
     <Compile Include="FileSystemTests\FileSystemTestBaseTests.cs" />
     <Compile Include="FileSystemTests\FileSystemNavigationTests.cs" />
     <Compile Include="System.Management\PathNavigationTests.cs" />
+    <Compile Include="SessionStateScopeTests.cs" />
+    <Compile Include="ScopeTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.PowerShell.Commands.Management\Microsoft.Commands.Management.csproj">

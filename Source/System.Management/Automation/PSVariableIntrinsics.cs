@@ -1,59 +1,81 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using Pash.Implementation;
+using System.Collections.Generic;
 
 namespace System.Management.Automation
 {
     public sealed class PSVariableIntrinsics
     {
-        private SessionStateGlobal _sessionState;
+        private SessionState _sessionState;
+        private SessionStateScope<PSVariable> _scope;
 
-        internal PSVariableIntrinsics(SessionStateGlobal sessionState)
+        internal PSVariableIntrinsics(SessionState sessionState, SessionStateScope<PSVariable> variableScope)
         {
             _sessionState = sessionState;
+            _scope = variableScope;
         }
 
         public PSVariable Get(string name)
         {
-            return _sessionState.GetVariable(name);
+            return _scope.Get(name, true);
         }
 
         public object GetValue(string name)
         {
-            return _sessionState.GetVariableValue(name);
+            var variable = Get(name);
+            return (variable != null) ? variable.Value : null;
         }
 
         public object GetValue(string name, object defaultValue)
         {
-            return _sessionState.GetVariableValue(name, defaultValue);
+            return GetValue(name) ?? defaultValue;
         }
 
         public void Remove(PSVariable variable)
         {
-            _sessionState.RemoveVariable(variable);
+            //no scope specified when passing an object: we only care about the local scope
+            if (variable == null)
+            {
+                throw new ArgumentNullException("The variable is null.");
+            }
+            //add the local scope specifier to make sure we don't screw up with other variables
+            Remove("local:" + variable.Name);
         }
 
         public void Remove(string name)
         {
-            _sessionState.RemoveVariable(name);
+            _scope.Remove(name, true);
         }
 
         public void Set(PSVariable variable)
         {
-            _sessionState.SetVariable(variable);
+            if (variable == null)
+            {
+                throw new ArgumentNullException("The variable is null.");
+            }
+            var original = _scope.GetLocal(variable.Name);
+            if (original == null)
+            {
+                _scope.SetLocal(variable, true);
+                return;
+            }
+            original.Value = variable.Value;
+            original.Description = variable.Description;
+            original.Options = variable.Options;
+            _scope.SetLocal(original, true);
         }
 
         public void Set(string name, object value)
         {
-            _sessionState.SetVariable(name, value);
+            var qualName = new SessionStateScope<PSVariable>.QualifiedName(name);
+            _scope.Set(name, new PSVariable(qualName.UnqualifiedName, value), true, true);
         }
 
-        // internals
-        //internal PSVariable GetAtScope(string name, string scope);
-        //internal object GetValueAtScope(string name, string scope);
-        //internal void RemoveAtScope(PSVariable variable, string scope);
-        //internal void RemoveAtScope(string name, string scope);
-        //internal void SetAtScope(PSVariable variable, string scope);
-        //internal void SetAtScope(string name, object value, string scope);
+        internal Dictionary<string, PSVariable> GetAll()
+        {
+            return _scope.GetAll();
+        }
+
     }
 }

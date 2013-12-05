@@ -14,3 +14,11 @@ This variable control process execution. Possible values:
 
 _Note:_ This flag effectively has no effect under Unix-like OS (Linux, Mac), because any applications
 under Unix counts as console.
+
+## PASHUseUnixLikeConsole
+This variable can be used to force to either use or use not a Unix-like console which adds support for
+cursor movement, history, and some more tweaks. By default, such a console will be used on all operating systems
+but Windows, as it has its own features for console input. Possible values:
+
+* `$false` - No Unix-like console will be used and the operating system's default console input will be used.
+* `$true` - The console input will have features that are similar to the common console features on Unix-like systems.

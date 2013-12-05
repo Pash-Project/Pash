@@ -919,16 +919,66 @@ namespace Pash.ParserIntrinsics
         ExpressionAst BuildUnaryDashExpressionAst(ParseTreeNode parseTreeNode)
         {
             var expression = BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1]);
-            ConstantExpressionAst constantExpressionAst = expression as ConstantExpressionAst;
+            var constantExpressionAst = expression as ConstantExpressionAst;
+            var type = constantExpressionAst.StaticType;
             if (constantExpressionAst == null)
             {
                 throw new NotImplementedException(parseTreeNode.ToString());
             }
             else
             {
-                if (constantExpressionAst.StaticType == typeof(int))
+                // From the spec (2.3.5.1.1 Integer literals):
+
+                // “In the twos-complement representation of integer values,
+                // there is one more negative value than there is positive.
+                // For the int type, that extra value is -2147483648. For the
+                // long type, that extra value is -9223372036854775808. Even
+                // though the token 2147483648 would ordinarily be treated as
+                // a literal of type long, if it is preceded immediately by
+                // the unary - operator, that operator and literal are treated
+                // as a literal of type int having the smallest value.
+                // Similarly, even though the token 9223372036854775808 would
+                // ordinarily be treated as a real literal of type decimal,
+                // if it is immediately preceded by the unary - operator, that
+                // operator and literal are treated as a literal of type long
+                // having the smallest value.”
+
+                // The following code deals both with conflating unary minus
+                // and a constant expression into a single constant expression
+                // as well as the type juggling the above quote from the
+                // specification entails.
+
+                // TODO: The wording of the specification only refers to
+                // int.MinValue and long.MinValue, which should be parsed as a
+                // single literal. Would we normally have to treat everything
+                // else as the combination of an unary minus and a constant
+                // expression?
+
+                if (type == typeof(int))
                 {
-                    return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0 - ((int)constantExpressionAst.Value));
+                    var value = (int)constantExpressionAst.Value;
+                    return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0 - value);
+                }
+                else if (type == typeof(long))
+                {
+                    var value = (long)constantExpressionAst.Value;
+                    if (value == -(long)int.MinValue)
+                        return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), int.MinValue);
+                    else
+                        return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0L - value);
+                }
+                else if (type == typeof(decimal))
+                {
+                    var value = (decimal)constantExpressionAst.Value;
+                    if (value == -(decimal)long.MinValue)
+                        return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), long.MinValue);
+                    else
+                        return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0m - value);
+                }
+                else if (type == typeof(double))
+                {
+                    var value = (double)constantExpressionAst.Value;
+                    return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), 0d - value);
                 }
                 else
                 {
@@ -1402,7 +1452,7 @@ namespace Pash.ParserIntrinsics
                 );
         }
 
-        ConstantExpressionAst BuildLiteralAst(ParseTreeNode parseTreeNode)
+        ExpressionAst BuildLiteralAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.literal);
 
@@ -1430,7 +1480,7 @@ namespace Pash.ParserIntrinsics
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.hexadecimal_integer_literal)
             {
-                return BuildHexaecimalIntegerLiteralAst(parseTreeNode.ChildNodes.Single());
+                return BuildHexadecimalIntegerLiteralAst(parseTreeNode.ChildNodes.Single());
             }
 
             throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
@@ -1440,12 +1490,65 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.decimal_integer_literal);
             var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), this._grammar.decimal_integer_literal.Pattern, RegexOptions.IgnoreCase);
-            string value = matches.Groups[this._grammar.decimal_digits.Name].Value;
+            string digits = matches.Groups[this._grammar.decimal_digits.Name].Value;
+            string typeSuffix = matches.Groups[this._grammar.numeric_type_suffix.Name].Value;
+            string longTypeSuffix = matches.Groups[this._grammar.long_type_suffix.Name].Value;
+            string multiplier = matches.Groups[this._grammar.numeric_multiplier.Name].Value;
 
-            return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), Convert.ToInt32(value, 10));
+            // The type of an integer literal is determined by its value, the presence or absence of long-type-suffix, and the
+            // presence of a numeric-multiplier (§2.3.5.1.3).
+
+            object value;
+
+            if (typeSuffix == string.Empty)
+            {
+                // For an integer literal with no long-type-suffix
+
+                int intValue;
+                long longValue;
+                decimal decimalValue;
+                double doubleValue;
+
+                // Note: TryParse will only ever return false here if the conversion overflows because
+                // all other conditions are impossible when the supplied string consists only of digits.
+                if (int.TryParse(digits, out intValue))
+                    // • If its value can be represented by type int (§4.2.3), that is its type;
+                    value = intValue;
+                else if (long.TryParse(digits, out longValue))
+                    // • Otherwise, if its value can be represented by type long (§4.2.3), that is its type.
+                    value = longValue;
+                else if (decimal.TryParse(digits, out decimalValue))
+                    // • Otherwise, if its value can be represented by type decimal (§2.3.5.1.2), that is its type.
+                    value = decimalValue;
+                else if (double.TryParse(digits, out doubleValue))
+                    // • Otherwise, it is represented by type double (§2.3.5.1.2).
+                    value = doubleValue;
+                else
+                    // For PowerShell compatibility throw an error here instead of saturating the double to infinity.
+                    throw new OverflowException(string.Format("The integer literal {0} is too large.", matches.Value));
+            }
+            else if (longTypeSuffix != string.Empty)
+            {
+                // For an integer literal with long-type-suffix
+
+                long longValue;
+
+                // • If its value can be represented by type long (§4.2.3), that is its type;
+                if (long.TryParse(digits, out longValue))
+                    value = longValue;
+                else
+                    // • Otherwise, that literal is ill formed.
+                    throw new ArithmeticException(string.Format("The integer literal {0} is invalid because it does not fit into a long.", matches.Value));
+            }
+            else
+            {
+                throw new NotImplementedException("Decimal type suffix not yet implemented");
+            }
+
+            return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), value);
         }
 
-        ConstantExpressionAst BuildHexaecimalIntegerLiteralAst(ParseTreeNode parseTreeNode)
+        ConstantExpressionAst BuildHexadecimalIntegerLiteralAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.hexadecimal_integer_literal);
 
@@ -1455,7 +1558,7 @@ namespace Pash.ParserIntrinsics
             return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), Convert.ToInt32(value, 16));
         }
 
-        StringConstantExpressionAst BuildStringLiteralAst(ParseTreeNode parseTreeNode)
+        ExpressionAst BuildStringLiteralAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.string_literal);
 
@@ -1472,13 +1575,18 @@ namespace Pash.ParserIntrinsics
             throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
         }
 
-        StringConstantExpressionAst BuildExpandableStringLiteralAst(ParseTreeNode parseTreeNode)
+        ExpressionAst BuildExpandableStringLiteralAst(ParseTreeNode parseTreeNode)
         {
             var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), this._grammar.expandable_string_literal.Pattern, RegexOptions.IgnoreCase);
             string value = matches.Groups[this._grammar.expandable_string_characters.Name].Value +
                 matches.Groups[this._grammar.dollars.Name].Value
                 ;
 
+            var ast = new ExpandableStringExpressionAst(new ScriptExtent(parseTreeNode), value, StringConstantType.DoubleQuoted);
+            if (ast.NestedExpressions.Any())
+            {
+                return ast;
+            }
             return new StringConstantExpressionAst(new ScriptExtent(parseTreeNode), value, StringConstantType.DoubleQuoted);
         }
 

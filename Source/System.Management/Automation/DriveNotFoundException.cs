@@ -28,6 +28,12 @@ namespace System.Management.Automation
             : base(info, context)
         {
         }
+
+        internal DriveNotFoundException(string itemName, string errorIdAndResourceId, params object[] messageArgs)
+            : base(itemName, SessionStateCategory.Drive, errorIdAndResourceId, ErrorCategory.ObjectNotFound, 
+                   messageArgs)
+        {
+        }
     }
 }
 

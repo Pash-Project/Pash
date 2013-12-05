@@ -16,20 +16,13 @@ namespace Pash.Implementation
         internal Runspace CurrentRunspace { get; set; }
         internal Stack<Pipeline> _pipelineStack;
         internal PSHost LocalHost { get; set; }
-        internal Dictionary<string, PSVariable> _variables;
         internal SessionState SessionState { get; private set; }
-        internal static SessionStateGlobal _sessionStateGlobal;
+        internal SessionStateGlobal SessionStateGlobal { get; private set; }
 
         private ExecutionContext()
         {
-            // TODO: create a "Global Session state"
-            if (_sessionStateGlobal == null)
-                _sessionStateGlobal = new SessionStateGlobal(this);
-
             // TODO: initialize all the default settings
             _pipelineStack = new Stack<Pipeline>();
-            _variables = new Dictionary<string, PSVariable>(StringComparer.CurrentCultureIgnoreCase);
-            SessionState = new SessionState(_sessionStateGlobal);
         }
 
         public ExecutionContext(PSHost host, RunspaceConfiguration config)
@@ -37,10 +30,17 @@ namespace Pash.Implementation
         {
             RunspaceConfiguration = config;
             LocalHost = host;
+            SessionStateGlobal = new SessionStateGlobal(this);
+            SessionState = new SessionState(SessionStateGlobal);
         }
 
-        public ExecutionContext Clone()
+        public ExecutionContext Clone(ScopeUsages scopeUsage = ScopeUsages.CurrentScope)
         {
+            var sstate = (scopeUsage == ScopeUsages.CurrentScope) ? SessionState : new SessionState(SessionState);
+            if (scopeUsage == ScopeUsages.NewScriptScope)
+            {
+                sstate.IsScriptScope = true;
+            }
             var context = new ExecutionContext
             {
                 inputStreamReader = inputStreamReader,
@@ -48,16 +48,19 @@ namespace Pash.Implementation
                 errorStreamWriter = errorStreamWriter,
                 CurrentRunspace = CurrentRunspace,
                 LocalHost = LocalHost,
-                WriteSideEffectsToPipeline = WriteSideEffectsToPipeline
+                WriteSideEffectsToPipeline = WriteSideEffectsToPipeline,
+                SessionStateGlobal = SessionStateGlobal,
+                SessionState = sstate
             };
 
-            // TODO: copy (not reference) all the variables to allow nested context
+            // TODO: copy (not reference) all the variables to allow nested context <- what does it mean?
 
             return context;
         }
 
         public ExecutionContext CreateNestedContext()
         {
+            //What's the purpose of this function?
             ExecutionContext nestedContext = Clone();
 
             //nestedContext.
