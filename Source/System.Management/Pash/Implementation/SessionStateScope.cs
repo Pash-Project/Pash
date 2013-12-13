@@ -206,6 +206,20 @@ namespace Pash.Implementation
            
         #region local scope only
 
+        public bool HasLocal(string name)
+        {
+            return Items.ContainsKey(name);
+        }
+
+        public bool HasLocal(T item)
+        {
+            if (Items.ContainsKey(item.ItemName) && Items[item.ItemName].Equals(item))
+            {
+                return true;
+            }
+            return false;
+        }
+
         public T GetLocal(string name)
         {
             if (name == null)

@@ -45,7 +45,7 @@ namespace System.Management.Automation
             CommandInfo refInfo = null;
             try
             {
-                cmdManager.FindCommand(definition);
+                refInfo = cmdManager.FindCommand(definition);
             }
             catch (CommandNotFoundException)
             {

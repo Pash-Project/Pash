@@ -1,9 +1,12 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System.Management.Automation;
+using System.Collections.Generic;
+using System;
+using System.Collections.ObjectModel;
 
 namespace Microsoft.PowerShell.Commands
 {
-    [Cmdlet("Get", "PSSnapin")]
+    [Cmdlet(VerbsCommon.Get, "PSSnapin")]
     public sealed class GetPSSnapinCommand : PSSnapInCommandBase
     {
         [Parameter(Position = 0, Mandatory = false)]
@@ -19,7 +22,28 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void BeginProcessing()
         {
-            // TODO: write out all the registred snapins
+            if (Name == null || Name.Length < 1)
+            {
+                Name = new string[] { "*" }; //Will simply get all of the desired type
+            }
+
+            foreach (var curName in Name)
+            {
+                Collection<PSSnapInInfo> snapins;
+                try
+                {
+                    snapins = Registered ? GetRegisteredSnapIns(curName) : GetSnapIns(curName);
+                }
+                catch (PSArgumentException ex)
+                {
+                    WriteError(ex.ErrorRecord);
+                    continue;
+                }
+                foreach (PSSnapInInfo info in snapins)
+                {
+                    WriteObject(info);
+                }
+            }
         }
     }
 }

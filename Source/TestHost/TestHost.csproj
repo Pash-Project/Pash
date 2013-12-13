@@ -101,6 +101,7 @@
     <Compile Include="System.Management\PathNavigationTests.cs" />
     <Compile Include="SessionStateScopeTests.cs" />
     <Compile Include="ScopeTests.cs" />
+    <Compile Include="SnapInTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.PowerShell.Commands.Management\Microsoft.Commands.Management.csproj">
@@ -118,6 +119,10 @@
     <ProjectReference Include="..\PashConsole\PashConsole.csproj">
       <Project>{BB348EAD-1713-4760-9953-BC721A203885}</Project>
       <Name>PashConsole</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TestPSSnapIn\TestPSSnapIn.csproj">
+      <Project>{DC9303A4-3F38-4591-9BD4-67F223F7D204}</Project>
+      <Name>TestPSSnapIn</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

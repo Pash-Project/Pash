@@ -4,7 +4,7 @@ using System;
 
 namespace Microsoft.PowerShell.Commands
 {
-    [Cmdlet("Add", "PSSnapin")]
+    [Cmdlet(VerbsCommon.Add, "PSSnapin")]
     public sealed class AddPSSnapinCommand : PSSnapInCommandBase
     {
         [Parameter(Position = 0, Mandatory = true, ValueFromPipelineByPropertyName = true)]
@@ -20,7 +20,21 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            throw new NotImplementedException();
+            foreach (var curName in Name)
+            {
+                try
+                {
+                    var snapin = SessionState.SessionStateGlobal.AddPSSnapIn(curName);
+                    if (PassThru.IsPresent)
+                    {
+                        WriteObject(snapin);
+                    }
+                }
+                catch (PSArgumentException e)
+                {
+                    WriteError(e.ErrorRecord);
+                }
+            }
         }
     }
 }

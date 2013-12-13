@@ -56,16 +56,28 @@ namespace System.Management.Automation
 
         public override bool Equals(object obj)
         {
+            if (ImmediateBaseObject == null)
+            {
+                return obj == null;
+            }
             return ImmediateBaseObject.Equals(obj);
         }
 
         public override int GetHashCode()
         {
+            if (ImmediateBaseObject == null)
+            {
+                return 0;
+            }
             return ImmediateBaseObject.GetHashCode();
         }
 
         public override string ToString()
         {
+            if (ImmediateBaseObject == null)
+            {
+                return "<null>";
+            }
             return ImmediateBaseObject.ToString();
         }
 

@@ -106,6 +106,7 @@ namespace System.Management.Automation
              * "Private" seems to be only effective for variables, functions and aliases, but not for drives.
              * Who knows why.
              */
+            //TODO: the provider's "NewDrive" method must be called here l #providerSupport
             _scope.SetAtScope(drive, scope, false);
             return drive;
         }
@@ -116,14 +117,26 @@ namespace System.Management.Automation
              * So, we need to find out when a drive is in use and should throw an exception on removal without
              * the "force" parameter being true
              */
-
             try
             {
+                //TODO: the provider's "RemoveDrive" method must be called here l #providerSupport
                 _scope.RemoveAtScope(driveName, scope);
             }
             catch (ItemNotFoundException)
             {
                 throw new DriveNotFoundException(driveName, String.Empty, null);
+            }
+        }
+
+        internal void RemoveAtAllScopes(PSDriveInfo drive)
+        {
+            foreach (var curScope in _scope.HierarchyIterator)
+            {
+                if (curScope.HasLocal(drive))
+                {
+                    //TODO: the provider's "RemoveDrive" method must be called here l #providerSupport
+                    curScope.RemoveLocal(drive.Name);
+                }
             }
         }
     }

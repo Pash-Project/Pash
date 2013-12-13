@@ -4,7 +4,7 @@ using System.Management.Automation.Provider;
 
 namespace System.Management.Automation
 {
-    public class ProviderInfo
+    public class ProviderInfo : IComparable
     {
         public PSSnapInInfo PSSnapIn { get; private set; }
         public string Name { get; private set; }
@@ -133,6 +133,41 @@ namespace System.Management.Automation
         {
             return string.Equals(FullName, providerName, StringComparison.CurrentCultureIgnoreCase);
         }
+
+        public override bool Equals(object obj)
+        {
+
+            return CompareTo(obj) == 0;
+        }
+
+        public override int GetHashCode()
+        {
+            //toLower makes sure that two equal objects with same name but othe case-sensitivity return the same value
+            return FullName.ToLower().GetHashCode();
+        }
+
+        #region IComparable members
+
+        public int CompareTo(ProviderInfo provider)
+        {
+            if (!IsNameMatch(provider.FullName))
+            {
+                return provider.FullName.CompareTo(provider.FullName); //cannot be 0, otherwise it was a name match
+            }
+            return PSSnapIn.CompareTo(provider.PSSnapIn);
+        }
+
+        public int CompareTo(object obj)
+        {
+            ProviderInfo other = obj as ProviderInfo;
+            if (other == null)
+            {
+                throw new PSInvalidOperationException("Can only compare to ProviderInfo!");
+            }
+            return CompareTo(other);
+        }
+
+        #endregion
 
         //internal bool IsMatch(WildcardPattern namePattern, PSSnapinQualifiedName psSnapinQualifiedName)
         //{

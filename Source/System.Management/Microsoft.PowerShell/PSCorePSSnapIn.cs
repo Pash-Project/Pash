@@ -37,7 +37,7 @@ namespace Microsoft.PowerShell
                     "PowerShellTrace.format.ps1xml", 
                     "Registry.format.ps1xml" 
                 };*/
-                throw new NotImplementedException();
+                return new string[]{};
             }
         }
 
@@ -55,7 +55,7 @@ namespace Microsoft.PowerShell
             {
                 /* // TODO: implement types extensions
                 return new string[] { "types.ps1xml" };*/
-                throw new NotImplementedException();
+                return new string[]{};
             }
         }
 

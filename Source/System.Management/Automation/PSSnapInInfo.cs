@@ -2,10 +2,11 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
+using System.Reflection;
 
 namespace System.Management.Automation
 {
-    public class PSSnapInInfo
+    public class PSSnapInInfo : IComparable
     {
         public string ApplicationBase { get; private set; }
         public string AssemblyName { get; private set; }
@@ -22,13 +23,24 @@ namespace System.Management.Automation
 
         public override string ToString()
         {
-            throw new NotImplementedException();
+            return Name;
         }
 
         // internals
         //internal PSSnapInInfo Clone();
         //internal void LoadIndirectResources();
-        internal PSSnapInInfo(string name, bool isDefault, string applicationBase, string assemblyName, string moduleName, Version psVersion, Version version, Collection<string> types, Collection<string> formats, string description, string vendor)
+
+        //TODO: support versions properly
+        internal PSSnapInInfo(PSSnapIn snapin, Assembly snapinAssembly, bool isDefault):
+            this(snapin.Name, isDefault, snapinAssembly.Location, snapinAssembly.GetName().Name, snapinAssembly.Location,
+                 new Version(1, 0), new Version(1, 0), new Collection<string>(snapin.Types),
+                 new Collection<string>(snapin.Formats), snapin.Description, snapin.Vendor)
+        {
+        }
+
+        internal PSSnapInInfo(string name, bool isDefault, string applicationBase, string assemblyName, 
+                              string moduleName, Version psVersion, Version version, Collection<string> types, 
+                              Collection<string> formats, string description, string vendor)
         {
             Name = name;
             IsDefault = isDefault;
@@ -43,6 +55,41 @@ namespace System.Management.Automation
             Vendor = vendor;
         }
 
+        public override bool Equals(object obj)
+        {
+            return CompareTo(obj) == 0;
+        }
+
+        public override int GetHashCode()
+        {
+            //toLower makes sure that two equal objects with same name but othe case-sensitivity return the same value
+            return Name.ToLower().GetHashCode();
+        }
+
+        #region IComparable members
+        public int CompareTo(object obj)
+        {
+            PSSnapInInfo other = obj as PSSnapInInfo;
+            if (other == null)
+            {
+                throw new PSInvalidOperationException("Can only compare to PSSnapInInfo!");
+            }
+            return CompareTo(other);
+        }
+
+        public int CompareTo(PSSnapInInfo other)
+        {
+            if (!string.Equals(Name, other.Name, StringComparison.CurrentCultureIgnoreCase))
+            {
+                return Name.CompareTo(other.Name);
+            }
+            if (string.Equals(AssemblyName, other.AssemblyName, StringComparison.CurrentCultureIgnoreCase))
+            {
+                return 0;
+            }
+            return AssemblyName.CompareTo(other.AssemblyName);
+        }
+        #endregion
         //internal PSSnapInInfo(string name, bool isDefault, string applicationBase, string assemblyName, string moduleName, Version psVersion, Version version, Collection<string> types, Collection<string> formats, string description, string descriptionFallback, string descriptionIndirect, string vendor, string vendorFallback, string vendorIndirect, string customPSSnapInType);
         //internal PSSnapInInfo(string name, bool isDefault, string applicationBase, string assemblyName, string moduleName, Version psVersion, Version version, Collection<string> types, Collection<string> formats, string description, string descriptionFallback, string vendor, string vendorFallback, string customPSSnapInType);
         //internal PSSnapInInfo(string name, bool isDefault, string applicationBase, string assemblyName, string moduleName, Version psVersion, Version version, Collection<string> types, Collection<string> formats, string descriptionFallback, string vendorFallback, string customPSSnapInType);

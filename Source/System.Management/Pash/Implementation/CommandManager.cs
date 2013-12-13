@@ -18,8 +18,7 @@ namespace Pash.Implementation
 {
     internal class CommandManager
     {
-
-        private Dictionary<string, PSSnapInInfo> _snapins;
+        //TODO: why do we support multiple commandlets with the same name? That really bugs me.
         private Dictionary<string, List<CmdletInfo>> _cmdLets;
         private Dictionary<string, ScriptInfo> _scripts;
         private LocalRunspace _runspace;
@@ -28,7 +27,6 @@ namespace Pash.Implementation
         {
             _runspace = runspace;
 
-            _snapins = new Dictionary<string, PSSnapInInfo>(StringComparer.CurrentCultureIgnoreCase);
             _cmdLets = new Dictionary<string, List<CmdletInfo>>(StringComparer.CurrentCultureIgnoreCase);
             _scripts = new Dictionary<string, ScriptInfo>(StringComparer.CurrentCultureIgnoreCase);
         }
@@ -48,11 +46,28 @@ namespace Pash.Implementation
             cmdletList.Add(cmdLetInfo);
         }
 
-        internal void RegisterPSSnaping(PSSnapInInfo snapinInfo)
+        /// <summary>
+        /// Removes all cmdlets of a specific PSSnapIn
+        /// </summary>
+        /// <param name="snapinInfo">Information about the PSSnapIn whose cmdlets should be removed</param>
+        internal void RemoveCmdlets(PSSnapInInfo snapinInfo)
         {
-            if (!_snapins.ContainsKey(snapinInfo.Name))
+            foreach (var pair in _cmdLets)
             {
-                _snapins.Add(snapinInfo.Name, snapinInfo);
+                Collection <CmdletInfo> removables = new Collection<CmdletInfo>();
+                foreach (var cmdlet in pair.Value)
+                {
+                    if (cmdlet.PSSnapIn == null) // not loaded with a snapin. e.g. with a module
+                        continue;
+                    if (cmdlet.PSSnapIn.Equals(snapinInfo))
+                    {
+                        removables.Add(cmdlet);
+                    }
+                }
+                foreach (var rmCmdlet in removables)
+                {
+                    pair.Value.Remove(rmCmdlet);
+                }
             }
         }
 
@@ -126,7 +141,7 @@ namespace Pash.Implementation
                 return function;
             }
 
-            if (_cmdLets.ContainsKey(command))
+            if (_cmdLets.ContainsKey(command) && _cmdLets[command].Any())
             {
                 return _cmdLets[command].First();
             }
@@ -167,28 +182,32 @@ namespace Pash.Implementation
 
         internal IEnumerable<CmdletInfo> LoadCmdletsFromAssembly(Assembly assembly, PSSnapInInfo snapinInfo = null)
         {
-            return from Type type in assembly.GetTypes()
+            var cmdlets = from Type type in assembly.GetTypes()
                    where type.IsSubclassOf(typeof(Cmdlet))
                    from CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof(CmdletAttribute), true)
                    select new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, _runspace.ExecutionContext);
+            foreach (CmdletInfo curCmdlet in cmdlets)
+            {
+                RegisterCmdlet(curCmdlet);
+            }
+            return cmdlets;
         }
 
-        internal IEnumerable<CmdletInfo> LoadCmdletsFromAssemblies(IEnumerable<Assembly> assemblies)
+        internal void LoadCmdletsFromAssemblies(IEnumerable<Assembly> assemblies)
         {
-            return from Assembly assembly in assemblies
-                   from CmdletInfo cmdletInfo in LoadCmdletsFromAssembly(assembly)
-                   select cmdletInfo;
+            foreach (var curAssembly in assemblies)
+            {
+                LoadCmdletsFromAssembly(curAssembly);
+            }
         }
 
         internal void ImportModules(IEnumerable<ModuleSpecification> modules)
         {
+            //TODO: this module support is not good. we need a proper implementation that allows removing modules,
+            //that remembers loaded modules and cares about public and private items in the modules
             var assemblies = from ModuleSpecification module in modules
                              select Assembly.LoadFile(module.Name);
-
-            foreach (CmdletInfo cmdletInfo in LoadCmdletsFromAssemblies(assemblies))
-            {
-                RegisterCmdlet(cmdletInfo);
-            }
+            LoadCmdletsFromAssemblies(assemblies);
         }
 
         /// <summary>

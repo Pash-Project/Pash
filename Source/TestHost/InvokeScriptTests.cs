@@ -18,6 +18,13 @@ namespace TestHost
             TestHost.InitialSessionState = sessionState;
         }
 
+        [TearDown]
+        public void ResetInitialSessionState()
+        {
+            //necessarry as TestHost is (unfortunately) used in a static way
+            TestHost.InitialSessionState = null;
+        }
+
         [Test]
         public void ScriptCanBeInvokedByPSCmdletInvokeCommand()
         {

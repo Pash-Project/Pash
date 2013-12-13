@@ -66,6 +66,7 @@ namespace Pash.Implementation
 
                     // TODO: process Error stream
 
+                    //TODO: does it make sense to oeverwrite the collection in each iteration?
                     dataCollection = new PSObjectPipelineReader(commandRuntime.outputResults).ReadToEnd();
                 }
             } while ((psObjectCurrent = context.inputStreamReader.Read()) != null);
