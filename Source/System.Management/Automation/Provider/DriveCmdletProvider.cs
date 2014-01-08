@@ -29,7 +29,7 @@ namespace System.Management.Automation.Provider
 
         protected virtual PSDriveInfo RemoveDrive(PSDriveInfo drive)
         {
-            throw new NotImplementedException();
+            return drive; //nothing special to do per default
         }
 
         // internals

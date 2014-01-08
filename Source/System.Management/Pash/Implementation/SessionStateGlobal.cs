@@ -11,26 +11,27 @@ using System.Management.Automation;
 using System.Management.Automation.Provider;
 using System.Reflection;
 using Extensions.Enumerable;
+using System.Text.RegularExpressions;
+using System.Management.Automation.Runspaces;
 
 namespace Pash.Implementation
 {
 
     internal class SessionStateGlobal
     {
-        private struct SnapinProviderPair
-        {
-            public PSSnapInInfo snapinInfo;
-            public Type providerType;
-            public CmdletProviderAttribute providerAttr;
-        }
-
-        /*
-         * TODO: Move the provider stuff to ProviderIntrinsics and access it through SessionState.Provider
-         */
+        //TODO: I don't think that this information should stay here. Maybe RunspaceConfiguration or InitialSessionState
+        //would be better place, once they are implemented
+        private string[] _defaultSnapins = new string[] {
+            "Microsoft.PowerShell.PSCorePSSnapIn, System.Management.Automation",
+            "Microsoft.PowerShell.PSUtilityPSSnapIn, Microsoft.PowerShell.Commands.Utility",
+            "Microsoft.Commands.Management.PSManagementPSSnapIn, Microsoft.PowerShell.Commands.Management",
+        };
+        //TODO: I really don't know why we should support lists of providers with the same name. This isn't reasonable!
         private Dictionary<string, List<ProviderInfo>> _providers;
         private Dictionary<string, List<CmdletProvider>> _providerInstances;
         private Dictionary<ProviderInfo, PSDriveInfo> _providersCurrentDrive;
         private Dictionary<string, Stack<PathInfo>> _workingLocationStack;
+        private Dictionary<string, PSSnapInInfo> _snapins;
 
         private ExecutionContext _executionContext;
         internal PSDriveInfo _currentDrive;
@@ -42,9 +43,11 @@ namespace Pash.Implementation
             _providerInstances = new Dictionary<string, List<CmdletProvider>>(StringComparer.CurrentCultureIgnoreCase);
             _providersCurrentDrive = new Dictionary<ProviderInfo, PSDriveInfo>();
             _workingLocationStack = new Dictionary<string, Stack<PathInfo>>(StringComparer.CurrentCultureIgnoreCase);
+            _snapins = new Dictionary<string, PSSnapInInfo>(StringComparer.CurrentCultureIgnoreCase);
         }
 
         #region CmdletProviderManagementIntrinsics
+        //TODO: this should go into CmdletProviderManagementIntrinsics
         internal IEnumerable<ProviderInfo> Providers
         {
             get
@@ -78,102 +81,217 @@ namespace Pash.Implementation
 
             return new Collection<ProviderInfo>();
         }
+
+        private Collection<ProviderInfo> GetProvidersByPSSnapIn(PSSnapInInfo snapinInfo)
+        {
+            Collection<ProviderInfo> snapinProviders = new Collection<ProviderInfo>();
+            foreach (var pair in _providers)
+            {
+                foreach (var provider in pair.Value)
+                {
+                    if (provider.PSSnapIn.Equals(snapinInfo))
+                    {
+                        snapinProviders.Add(provider);
+                    }
+                }
+            }
+            return snapinProviders;
+        }
+        #endregion
+
+        #region PSSnapIn specific stuff
+        internal void LoadDefaultPSSnapIns()
+        {
+            foreach (var defaultSnapin in _defaultSnapins)
+            {
+                Type snapinType = Type.GetType(defaultSnapin, true);
+                PSSnapIn snapin = Activator.CreateInstance(snapinType) as PSSnapIn;
+                Assembly snapinAssembly = snapinType.Assembly;
+                LoadPSSnapIn(new PSSnapInInfo(snapin, snapinAssembly, true), snapinAssembly);
+            }
+        }
+
+        internal Collection<PSSnapInInfo> GetPSSnapIns(WildcardPattern wildcard)
+        {
+            Collection<PSSnapInInfo> matches = new Collection<PSSnapInInfo>();
+            foreach (var pair in _snapins)
+            {
+                if (wildcard.IsMatch(pair.Key))
+                {
+                    matches.Add(pair.Value);
+                }
+            }
+            return matches;
+        }
+
+        internal PSSnapInInfo GetPSSnapIn(string name)
+        {
+            ValidatePSSnapInName(name);
+            if (!_snapins.ContainsKey(name))
+            {
+                return null;
+            }
+            return _snapins[name];
+        }
+
+        internal PSSnapInInfo RemovePSSnapIn(string name)
+        {
+            ValidatePSSnapInName(name);
+            if (!_snapins.ContainsKey(name))
+            {
+                throw new PSArgumentException(String.Format("PSSnapIn '{0}' is not loaded!", name));
+            }
+            var snapinInfo = _snapins[name];
+            if (snapinInfo.IsDefault)
+            {
+                throw new PSSnapInException(String.Format("PSSnapIn '{0}' is a built-in snapin and connot be removed!",
+                                                          name));
+            }
+            //unload providers and associated drives
+            foreach (var provider in GetProvidersByPSSnapIn(snapinInfo))
+            {
+                try
+                {
+                    RemoveProvider(provider.Name);
+                }
+                catch (ProviderNotFoundException)
+                {
+                    //TODO: it would be great to have the possibilities to write warnings here. It'd be nice notifying
+                    //the user about this strange effect, but isn't worth aborting the whole action
+                }
+            }
+            
+            //unload cmdlets
+            CommandManager.RemoveCmdlets(snapinInfo);
+
+            _snapins.Remove(name);
+            return snapinInfo;
+        }
+
+        /// <summary>
+        /// Adds the PSSnapIn by name/path
+        /// </summary>
+        /// <exception cref="PSArgumentException">If loading the snapin fails (e.g. invalid name/path)</exception>
+        /// <param name="name">Either the name of the registered snapin or a path to an assembly</param>
+        /// <returns>The newly added PSSnapIn</returns>
+        internal PSSnapInInfo AddPSSnapIn(string name)
+        {
+            // a slash is not part of a valid snapin name. If the name contains a slash (e.g. "./foobar") its likely
+            // that the user wants to load an assembly directly
+            Assembly assembly = null;
+            if (name.Contains(PathIntrinsics.CorrectSlash) || name.Contains(PathIntrinsics.WrongSlash))
+            {
+                assembly = LoadAssemblyFromFile(name);
+            }
+            else
+            {
+                assembly = LoadRegisteredPSSnapInAssembly(name);
+            }
+            //load snapins from assembly and make sure it's only one snapin class defined in thwere
+            var snapins = from Type type in assembly.GetTypes()
+                          where type.IsSubclassOf(typeof(PSSnapIn))
+                          select type;
+            if (snapins.Count() != 1)
+            {
+                string errorMsg = "The assembly '{0}' contains either no or more than one PSSnapIn class!";
+                throw new PSSnapInException(String.Format(errorMsg, assembly.FullName));
+            }
+            PSSnapIn snapin = (PSSnapIn) Activator.CreateInstance(snapins.First());
+            //okay, we got the new snapin. now load it
+            PSSnapInInfo snapinInfo = new PSSnapInInfo(snapin, assembly, false);
+            LoadPSSnapIn(snapinInfo, assembly);
+            return snapinInfo;
+        }
+
+        private void LoadPSSnapIn(PSSnapInInfo snapinInfo, Assembly assembly)
+        {
+            var snapinName = snapinInfo.Name;
+            try
+            {
+                _snapins.Add(snapinName, snapinInfo);
+            }
+            catch (ArgumentException)
+            {
+                throw new PSSnapInException(String.Format("The snapin '{0}' is already loaded!", snapinName));
+            }
+            LoadProvidersFromAssembly(assembly, snapinInfo);
+            CommandManager.LoadCmdletsFromAssembly(assembly, snapinInfo);
+        }
+
+        Assembly LoadAssemblyFromFile(string name)
+        {
+            try
+            {
+                return Assembly.LoadFrom(name);
+            }
+            catch (System.IO.FileNotFoundException e)
+            {
+                throw new PSArgumentException("The assembly was not found!", e);
+            }
+            catch (Exception e)
+            {
+                throw new PSSnapInException(String.Format("Loading the assembly '{0}' failed!", name), e);
+            }
+        }
+
+        Assembly LoadRegisteredPSSnapInAssembly(string name)
+        {
+            ValidatePSSnapInName(name);
+            throw new NotImplementedException();
+            //TODO: support snapins registered in registry: read registry, get assembly path and load with
+            //return LoadAssemblyFromFile(name);
+        }
+
+        private void ValidatePSSnapInName(string name)
+        {
+            if (!Regex.IsMatch(name, "[a-zA-Z0-9._]+"))
+            {
+                throw new PSArgumentException(String.Format("Invalid PSSnapIn name '{0}'", name));
+            }
+        }
         #endregion
 
         #region Provider's Initialization
-        /// <summary>
-        /// Loads providers from the PSSnapins on the Pash startup
-        /// </summary>
-        internal void LoadProviders()
-        {
-            // TODO: do it via RunspaceConfiguration
-            /*foreach (ProviderConfigurationEntry entry in _executionContext.RunspaceConfiguration.Providers)
-            {
-                //AddProvider
-            }*/
-
-            // TODO: move this to config.ps1
-            Collection<SnapinProviderPair> providerPairs = LoadSnapins();
-
-            foreach (var providerTypePair in providerPairs)
-            {
-                ProviderInfo providerInfo = new ProviderInfo(_executionContext.SessionState, providerTypePair.providerType, providerTypePair.providerAttr.ProviderName, string.Empty, providerTypePair.snapinInfo);
-                CmdletProvider provider = AddProvider(providerInfo);
-
-                InitializeProvider(provider, providerInfo);
-
-                // Cache the provider's instance
-                if (!_providerInstances.ContainsKey(providerInfo.Name))
-                {
-                    _providerInstances.Add(providerInfo.Name, new List<CmdletProvider>());
-                }
-                List<CmdletProvider> instanceList = _providerInstances[providerInfo.Name];
-                instanceList.Add(provider);
-            }
-        }
-
-        private Collection<SnapinProviderPair> LoadSnapins()
-        {
-            var providerPairs = new Collection<SnapinProviderPair>();
-            foreach (var snapinTypeName in new[] { 
-                "Microsoft.PowerShell.PSCorePSSnapIn, System.Management.Automation",
-                "Microsoft.PowerShell.PSUtilityPSSnapIn, Microsoft.PowerShell.Commands.Utility",
-                "Microsoft.Commands.Management.PSManagementPSSnapIn, Microsoft.PowerShell.Commands.Management",
-            })
-            {
-                var tmpProviders = new Collection<SnapinProviderPair>();
-
-                // Load all PSSnapin's
-                foreach (CmdletInfo cmdLetInfo in LoadCmdletsFromPSSnapin(snapinTypeName, out tmpProviders))
-                {
-                    // Register PSSnapin
-                    CommandManager.RegisterPSSnaping(cmdLetInfo.PSSnapIn);
-                    CommandManager.RegisterCmdlet(cmdLetInfo);
-                }
-
-                foreach (SnapinProviderPair providerTypePair in tmpProviders)
-                {
-                    providerPairs.Add(providerTypePair);
-                }
-            }
-            return providerPairs;
-        }
-
-        // TODO: separate providers from cmdlets
-        private Collection<CmdletInfo> LoadCmdletsFromPSSnapin(string strType, out Collection<SnapinProviderPair> providers)
-        {
-            Type snapinType = Type.GetType(strType, true);
-            Assembly assembly = snapinType.Assembly;
-
-            PSSnapIn snapin = Activator.CreateInstance(snapinType) as PSSnapIn;
-
-            PSSnapInInfo snapinInfo = new PSSnapInInfo(snapin.Name, false, string.Empty, assembly.GetName().Name, 
-                                                       string.Empty, new Version(1, 0), null, null, null, 
-                                                       snapin.Description, snapin.Vendor);
-
-            var snapinProviderPairs = from Type type in assembly.GetTypes()
-                                      where !type.IsSubclassOf(typeof(Cmdlet))
-                                      where type.IsSubclassOf(typeof(CmdletProvider))
-                                      from CmdletProviderAttribute providerAttr in 
-                                        type.GetCustomAttributes(typeof(CmdletProviderAttribute), true)
-                                      select new SnapinProviderPair
-                                        {
-                                            snapinInfo = snapinInfo,
-                                            providerType = type,
-                                            providerAttr = providerAttr
-                                        };
-
-            providers = snapinProviderPairs.ToCollection();
-
-            return CommandManager.LoadCmdletsFromAssembly(assembly, snapinInfo).ToCollection();
-        }
-
+        //TODO: Move this provider stuff to ProviderIntrinsics and access it through SessionState.Provider
         internal CommandManager CommandManager
         {
             get
             {
+                //TODO: somehow this doesn't look like a good idea, we should change that and get this class
+                //independent from the CommandManager, so the CM should check out the SessionStateGlobal, not the other
+                //way around
                 return ((LocalRunspace)_executionContext.CurrentRunspace).CommandManager;
             }
+        }
+
+        private void RemoveProvider(string name)
+        {
+            if (!_providers.ContainsKey(name))
+            {
+                throw new ProviderNotFoundException(name, SessionStateCategory.CmdletProvider, "RemoveProviderNotFound",
+                                                    null);
+            }
+            //remove all drives. TODO: I think _providers[name].Drive
+            foreach (var drive in _executionContext.SessionState.Drive.GetAllForProvider(name))
+            {
+                //remove from all scopes, sub-scopes might created a new drive using this provider
+                _executionContext.SessionState.Drive.RemoveAtAllScopes(drive);
+            }
+
+            //now also stop and remove all instances
+            if (_providerInstances.ContainsKey(name))
+            {
+                var instances = _providerInstances[name];
+                foreach (var inst in instances)
+                {
+                    //TODO: it should be possible to notify the provider that it's removed. That's also the intention
+                    //of the provider's Stop() method. However, the specification says that Stop() is protected. So
+                    //we need another, internal method, that can be called. I called it DoStop(), but this should
+                    //certainly be changed. Like ghaving an internal Stop() method with a useful argument
+                    inst.DoStop();
+                }
+            }
+             _providers.Remove(name);
         }
 
         private CmdletProvider AddProvider(ProviderInfo providerInfo)
@@ -192,6 +310,7 @@ namespace Pash.Implementation
 
             return provider;
         }
+
 
         private void InitializeProvider(CmdletProvider providerInstance, ProviderInfo provider)
         {
@@ -215,7 +334,7 @@ namespace Pash.Implementation
                     if (driveInfo != null)
                     {
                         // TODO: need to set driveInfo.Root
-                        // TODO: the following function should also register it with SessionState.Drive.New!
+                        // TODO:this should be automatically called when using DriveIntrinsics.New! #providerSupport
                         driveProvider.DoNewDrive(driveInfo);
 
                         try
@@ -227,9 +346,37 @@ namespace Pash.Implementation
                         catch
                         {
                             // TODO: What should we do if the drive name is not unique?
+                            // => I guess overwrite the old one and write a warning (however this works from here)
                         }
                     }
                 }
+            }
+        }
+
+        private void LoadProvidersFromAssembly(Assembly assembly, PSSnapInInfo snapinInfo)
+        {
+            // first get name and type of all providers in this assembly
+            var providers = from Type type in assembly.GetTypes()
+                where !type.IsSubclassOf(typeof(Cmdlet))
+                    where type.IsSubclassOf(typeof(CmdletProvider))
+                    from CmdletProviderAttribute providerAttr in
+                    type.GetCustomAttributes(typeof(CmdletProviderAttribute), true)
+                    select new KeyValuePair<string, Type>(providerAttr.ProviderName, type);
+            // then initialize all providers
+            foreach (var curPair in providers)
+            {
+                ProviderInfo providerInfo = new ProviderInfo(_executionContext.SessionState, curPair.Value,
+                                                             curPair.Key, string.Empty, snapinInfo);
+                CmdletProvider provider = AddProvider(providerInfo);
+                InitializeProvider(provider, providerInfo);
+
+                // Cache the provider's instance
+                if (!_providerInstances.ContainsKey(providerInfo.Name))
+                {
+                    _providerInstances.Add(providerInfo.Name, new List<CmdletProvider>());
+                }
+                List<CmdletProvider> instanceList = _providerInstances[providerInfo.Name];
+                instanceList.Add(provider);
             }
         }
         #endregion
@@ -286,6 +433,7 @@ namespace Pash.Implementation
 
 
         #region PathIntrinsics
+        //TODO: move this (and implement it) in the appropriate class, not here
         internal string MakePath(string parent, string child)
         {
             throw new NotImplementedException();

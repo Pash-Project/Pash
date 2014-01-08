@@ -10,8 +10,8 @@ namespace System.Management.Automation
 
         }
 
-        public virtual string[] Formats { get { return null; } }
-        public virtual string[] Types { get { return null; } }
+        public virtual string[] Formats { get { return new string[]{}; } }
+        public virtual string[] Types { get { return new string[]{}; } }
     }
 
 }

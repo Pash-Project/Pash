@@ -32,6 +32,7 @@ namespace Pash.Implementation
 
         internal LocalRunspace(PSHost host, RunspaceConfiguration configuration, InitialSessionState initialSessionState)
         {
+            //TODO: we should support both RunspaceConfigurations and IntialSessionStates properly
             DefaultRunspace = this;
             PSHost = host;
             if (configuration == null)
@@ -136,7 +137,7 @@ namespace Pash.Implementation
         {
             CommandManager = new CommandManager(this);
             InitializeSession();
-            InitializeProviders();
+            InitializeDefaultSnapins();
         }
 
         public override void OpenAsync()
@@ -157,9 +158,9 @@ namespace Pash.Implementation
         #endregion
 
         // internals
-        internal void InitializeProviders()
+        internal void InitializeDefaultSnapins()
         {
-            ExecutionContext.SessionState.SessionStateGlobal.LoadProviders();
+            ExecutionContext.SessionState.SessionStateGlobal.LoadDefaultPSSnapIns();
             ExecutionContext.SessionState.SessionStateGlobal.SetCurrentDrive();
         }
 

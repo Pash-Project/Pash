@@ -16,7 +16,7 @@ namespace TestHost
 
         public static string Execute(params string[] statements)
         {
-            return Execute(false, error => {/* do nothing with error? weird? */}, statements);
+            return Execute(false, null, statements);
         }
 
         public static string Execute(bool logErrors, params string[] statements)
@@ -30,16 +30,8 @@ namespace TestHost
 
         public static string ExecuteWithZeroErrors(params string[] statements)
         {
-            var errors = new List<string>();
             //Execute
-            var result = Execute(true, error => errors.Add(error), statements);
-
-            if (errors.Any())
-            {
-                var exceptionMessage = errors.JoinString(Environment.NewLine);
-                throw new Exception(exceptionMessage);
-            }
-            return result;
+            return Execute(true, null, statements);
         }
 
         private static string Execute(bool logErrors, Action<string> onErrorHandler, params string[] statements)
@@ -47,7 +39,9 @@ namespace TestHost
             TestHostUserInterface ui = new TestHostUserInterface();
 
             if (logErrors)
-                ui.OnWriteErrorLineString = s => ui.Log.Append(s);
+            {
+                ui.OnWriteErrorLineString = onErrorHandler ?? (s => ui.Log.Append(s));
+            }
 
             TestHost host = new TestHost(ui);
             var myRunSpace = CreateRunspace(host);

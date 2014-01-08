@@ -12,7 +12,13 @@ namespace System.Management.Automation
     [Serializable]
     public class PSArgumentException : ArgumentException, IContainsErrorRecord
     {
-        public ErrorRecord ErrorRecord { get; private set; }
+        public ErrorRecord ErrorRecord
+        {
+            get
+            {
+                return new ErrorRecord(this, "", ErrorCategory.InvalidArgument, null);
+            }
+        }
 
         //todo: implement
         //public override string Message { get; }

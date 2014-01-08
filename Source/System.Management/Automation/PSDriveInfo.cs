@@ -123,7 +123,12 @@ namespace System.Management.Automation
 
         public int CompareTo(PSDriveInfo drive)
         {
-            return string.Compare(Name, drive.Name, true, CultureInfo.CurrentUICulture);
+            int cmp = string.Compare(Name, drive.Name, true, CultureInfo.CurrentUICulture);
+            if (cmp == 0)
+            {
+                return Provider.CompareTo(drive.Provider);
+            }
+            return cmp;
         }
 
         public int CompareTo(object obj)

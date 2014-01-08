@@ -33,6 +33,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Spikes", "Spikes", "{64820A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spikes", "..\Spikes\Spikes\Spikes.csproj", "{FF03D73A-2153-41DD-98B9-17632531079B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestPSSnapIn", "TestPSSnapIn\TestPSSnapIn.csproj", "{DC9303A4-3F38-4591-9BD4-67F223F7D204}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +107,14 @@ Global
 		{5606175C-6EE1-439A-ADB4-92BB58563EDD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5606175C-6EE1-439A-ADB4-92BB58563EDD}.Release|x86.ActiveCfg = Release|x86
 		{5606175C-6EE1-439A-ADB4-92BB58563EDD}.Release|x86.Build.0 = Release|x86
+		{DC9303A4-3F38-4591-9BD4-67F223F7D204}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC9303A4-3F38-4591-9BD4-67F223F7D204}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC9303A4-3F38-4591-9BD4-67F223F7D204}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DC9303A4-3F38-4591-9BD4-67F223F7D204}.Debug|x86.Build.0 = Debug|Any CPU
+		{DC9303A4-3F38-4591-9BD4-67F223F7D204}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC9303A4-3F38-4591-9BD4-67F223F7D204}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC9303A4-3F38-4591-9BD4-67F223F7D204}.Release|x86.ActiveCfg = Release|Any CPU
+		{DC9303A4-3F38-4591-9BD4-67F223F7D204}.Release|x86.Build.0 = Release|Any CPU
 		{FF03D73A-2153-41DD-98B9-17632531079B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FF03D73A-2153-41DD-98B9-17632531079B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF03D73A-2153-41DD-98B9-17632531079B}.Debug|x86.ActiveCfg = Debug|x86
