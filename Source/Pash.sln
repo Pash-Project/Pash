@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spikes", "..\Spikes\Spikes\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestPSSnapIn", "TestPSSnapIn\TestPSSnapIn.csproj", "{DC9303A4-3F38-4591-9BD4-67F223F7D204}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PashConsole.Tests", "PashConsole.Tests\PashConsole.Tests.csproj", "{AC423D58-7BFD-4F6C-9A80-63F555B6F0EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +77,14 @@ Global
 		{C5E303EC-5684-4C95-B0EC-2593E6662403}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C5E303EC-5684-4C95-B0EC-2593E6662403}.Release|x86.ActiveCfg = Release|x86
 		{C5E303EC-5684-4C95-B0EC-2593E6662403}.Release|x86.Build.0 = Release|x86
+		{AC423D58-7BFD-4F6C-9A80-63F555B6F0EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC423D58-7BFD-4F6C-9A80-63F555B6F0EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC423D58-7BFD-4F6C-9A80-63F555B6F0EB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AC423D58-7BFD-4F6C-9A80-63F555B6F0EB}.Debug|x86.Build.0 = Debug|Any CPU
+		{AC423D58-7BFD-4F6C-9A80-63F555B6F0EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC423D58-7BFD-4F6C-9A80-63F555B6F0EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC423D58-7BFD-4F6C-9A80-63F555B6F0EB}.Release|x86.ActiveCfg = Release|Any CPU
+		{AC423D58-7BFD-4F6C-9A80-63F555B6F0EB}.Release|x86.Build.0 = Release|Any CPU
 		{A5550FB3-553B-441E-8386-AD1EF5C31FAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A5550FB3-553B-441E-8386-AD1EF5C31FAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5550FB3-553B-441E-8386-AD1EF5C31FAE}.Debug|x86.ActiveCfg = Debug|x86

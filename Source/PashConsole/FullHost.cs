@@ -13,16 +13,21 @@ namespace Pash
     internal class FullHost
     {
         private Runspace myRunSpace;
-        private LocalHost myHost;
         private Pipeline currentPipeline;
+
+        public const string BannerText = "Pash - Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/";
+
+        internal LocalHost LocalHost { get; private set; }
 
         public FullHost()
         {
-            myHost = new LocalHost();
-            myRunSpace = RunspaceFactory.CreateRunspace(myHost);
+            LocalHost = new LocalHost();
+            myRunSpace = RunspaceFactory.CreateRunspace(LocalHost);
             myRunSpace.Open();
 
-            Execute(FormatConfigCommand(Assembly.GetCallingAssembly().Location));
+            // use .CodeBase property, as .Location gets the wrong path if the assembly was shadow-copied
+            var localAssemblyPath = new Uri(Assembly.GetCallingAssembly().CodeBase).LocalPath;
+            Execute(FormatConfigCommand(localAssemblyPath));
         }
 
         static internal string FormatConfigCommand(string path)
@@ -90,7 +95,7 @@ namespace Pash
             }
             catch (Exception exception)
             {
-                this.myHost.UI.WriteErrorLine(exception.ToString());
+                this.LocalHost.UI.WriteErrorLine(exception.ToString());
             }
         }
 
@@ -112,14 +117,20 @@ namespace Pash
             }
         }
 
-        public void Run()
+
+        public int Run()
+        {
+            return Run(true, null);
+        }
+
+        public int Run(bool interactive, string commands)
         {
             /* LocalHostUserInterface supports getline.cs to provide more comfort for non-Windows users.
              * By default, getline.cs is used on non-Windows systems to hanle user input. However, it can be controlled
              * on all systems with the PASHUseUnixLikeConsole variable. As this has nothing to do with the PS
              * specification, this option is specific to LocalHostUserInterface and cannot be set otherwise.
              */
-            var ui = myHost.UI;
+            var ui = LocalHost.UI;
             var localUI = ui as LocalHostUserInterface;
             if (localUI != null)
             {
@@ -128,24 +139,43 @@ namespace Pash
             }
 
 
+            try
+            {
+                // Set up the control-C handler.
+                Console.CancelKeyPress += new ConsoleCancelEventHandler(HandleControlC);
+                Console.TreatControlCAsInput = false;
+            }
+            catch (IOException)
+            {
+                // don't mind. if it doesn't work we're likely in a condition where stdin/stdout was redirected
+            }
 
-            // Set up the control-C handler.
-            Console.CancelKeyPress += new ConsoleCancelEventHandler(HandleControlC);
-            Console.TreatControlCAsInput = false;
+            if (String.IsNullOrEmpty(commands))
+            { 
+                ui.WriteLine(ConsoleColor.White, ConsoleColor.Black, BannerText);
+                ui.WriteLine();
+            }
+            else
+            {
+                Execute(commands);
+            }
 
-            ui.WriteLine(ConsoleColor.White, ConsoleColor.Black, "Pash - Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/");
-            ui.WriteLine();
+            // exit now if we don't want an interactive prompt
+            if (!interactive)
+            {
+                return LocalHost.ExitCode;
+            }
 
             // Loop reading commands to execute until ShouldExit is set by
             // the user calling "exit".
-            while (!myHost.ShouldExit)
+            while (!LocalHost.ShouldExit)
             {
                 Prompt();
 
                 string cmd = ui.ReadLine();
 
-                if (cmd == null)
-                    continue;
+                if (cmd == null) // EOF
+                    break;
 
                 // TODO: remove the cheat - control via script and ShouldExit
                 if (string.Compare(cmd.Trim(), "exit", true) == 0)
@@ -156,7 +186,7 @@ namespace Pash
 
             // Exit with the desired exit code that was set by exit command.
             // This is set in the host by the MyHost.SetShouldExit() implementation.
-            Environment.Exit(myHost.ExitCode);
+            return LocalHost.ExitCode;
         }
 
         internal void Prompt()
@@ -168,7 +198,7 @@ namespace Pash
             }
             catch (Exception ex)
             {
-                this.myHost.UI.WriteLine(ex.ToString());
+                this.LocalHost.UI.WriteLine(ex.ToString());
             }
         }
 

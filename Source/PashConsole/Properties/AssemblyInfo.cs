@@ -37,3 +37,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 [assembly: InternalsVisibleTo("TestHost")]
+[assembly: InternalsVisibleTo("PashConsole.Tests")]

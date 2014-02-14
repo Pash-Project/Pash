@@ -12,7 +12,7 @@ namespace Pash.Implementation
     {
         private CultureInfo originalCultureInfo = System.Threading.Thread.CurrentThread.CurrentCulture;
         private CultureInfo originalUICultureInfo = System.Threading.Thread.CurrentThread.CurrentUICulture;
-        private LocalHostUserInterface localHostUserInterface;
+        private PSHostUserInterface localHostUserInterface;
 
         public override System.Globalization.CultureInfo CurrentCulture
         {
@@ -90,6 +90,11 @@ namespace Pash.Implementation
         public LocalHost()
         {
             localHostUserInterface = new LocalHostUserInterface();
+        }
+
+        internal void SetHostUserInterface(PSHostUserInterface ui)
+        {
+            localHostUserInterface = ui;
         }
     }
 }
