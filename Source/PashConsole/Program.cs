@@ -10,10 +10,12 @@ namespace Pash
     // TODO: fix all the assembly attributes
     class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
 
             /*
+            TODO: can we remove this stuff?
+            
             PashHost host = new PashHost();
 
             using (Runspace space = RunspaceFactory.CreateRunspace(host))
@@ -54,9 +56,32 @@ namespace Pash
                 System.Console.ReadKey();
             }
             */
+            var interactive = true; // interactive by default
+            StringBuilder commands = new StringBuilder();
+            int startCommandAt = 0;
+
+            // check first arg for "-noexit"
+
+            if (args.Length > 0)
+            {
+                // no interactive shell if we have commands given but not this parameter
+                interactive = args[0].Equals("-noexit");
+                if (interactive)
+                {
+                    // ignore first arg as it is no command
+                    startCommandAt = 1;
+                }
+            }
+
+            // other args are interpreted as commands to be executed
+            for (int i = startCommandAt; i < args.Length; i++)
+            {
+                commands.Append(args[i]);
+                commands.Append("; ");
+            }
 
             FullHost p = new FullHost();
-            p.Run();
+            return p.Run(interactive, commands.ToString());
         }
     }
 }

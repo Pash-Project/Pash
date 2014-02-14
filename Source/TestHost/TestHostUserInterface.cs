@@ -5,12 +5,20 @@ using System.Linq;
 using System.Text;
 using System.Management.Automation.Host;
 using NUnit.Framework;
+using System.IO;
 
 namespace TestHost
 {
     class TestHostUserInterface : PSHostUserInterface
     {
+        public TextReader InputStream;
         public Action<string> OnWriteErrorLineString = delegate(string s) { Assert.Fail(s); };
+
+
+        internal void SetInput(string input)
+        {
+            InputStream = new StringReader(input);
+        }
 
         public override PSHostRawUserInterface RawUI
         {
@@ -39,7 +47,11 @@ namespace TestHost
 
         public override string ReadLine()
         {
-            throw new NotImplementedException();
+            if (InputStream == null)
+            {
+                return null;
+            }
+            return InputStream.ReadLine();
         }
 
         public override System.Security.SecureString ReadLineAsSecureString()
@@ -87,6 +99,11 @@ namespace TestHost
         public override void WriteWarningLine(string message)
         {
             throw new NotImplementedException();
+        }
+
+        public string GetOutput()
+        {
+            return Log.ToString();
         }
     }
 }

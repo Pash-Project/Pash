@@ -102,6 +102,7 @@
     <Compile Include="SessionStateScopeTests.cs" />
     <Compile Include="ScopeTests.cs" />
     <Compile Include="SnapInTests.cs" />
+    <Compile Include="FullHostTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.PowerShell.Commands.Management\Microsoft.Commands.Management.csproj">
