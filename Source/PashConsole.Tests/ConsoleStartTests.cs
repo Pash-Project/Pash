@@ -10,13 +10,16 @@ namespace PashConsoleTests
     [TestFixture]
     public class ConsoleStartTest
     {
+        // NOTE: make sure when using functions with "args", that the arguments
+        // only use *SINGLE* quotes itself
+
         private Regex _whiteSpaceRegex = new Regex(@"\s");
 
-        private String SingleQuoteWithSpace(string input)
+        private String QuoteWithSpace(string input)
         {
             if (_whiteSpaceRegex.IsMatch(input))
             {
-                return String.Format("'{0}'", input);
+                return String.Format(@"""{0}""", input);
             }
             return input;
         }
@@ -29,7 +32,7 @@ namespace PashConsoleTests
             if (Type.GetType("Mono.Runtime") != null)
             {
                 realCmd = "mono";
-                realArgs.Add(SingleQuoteWithSpace(command));
+                realArgs.Add(QuoteWithSpace(command));
             }
             else
             {
@@ -38,7 +41,7 @@ namespace PashConsoleTests
 
             foreach (var arg in args)
             {
-                realArgs.Add(SingleQuoteWithSpace(arg));
+                realArgs.Add(QuoteWithSpace(arg));
             }
             var process = new Process();
             process.StartInfo.FileName = realCmd;
@@ -52,7 +55,7 @@ namespace PashConsoleTests
 
         private Process CreatePashProcess(params string[] args)
         {
-            var cmd = typeof(Pash.Program).Assembly.Location;
+            var cmd = new Uri(typeof(Pash.Program).Assembly.CodeBase).LocalPath;
             return CreateDotNetProcess(cmd, args);
         }
 
@@ -87,7 +90,7 @@ namespace PashConsoleTests
             var process = CreatePashProcess();
             process.Start();
             process.StandardInput.WriteLine("exit");
-            process.StandardInput.WriteLine(@"            Write-Host ""foo""");
+            process.StandardInput.WriteLine(@"Write-Host 'foo'");
             var output = FinishProcess(process);
             Assert.False(output.Contains("foo"));
         }
@@ -95,7 +98,7 @@ namespace PashConsoleTests
         [Test]
         public void StartWithCommandInArg()
         {
-            var process = CreatePashProcess(@"Write-Host ""foo""");
+            var process = CreatePashProcess(@"Write-Host 'foo'");
             process.Start();
             var output = FinishProcess(process);
             // pash should only execute the command, show no banner and not
@@ -107,9 +110,9 @@ namespace PashConsoleTests
         [Test]
         public void StartWithMultipleArgs()
         {
-            var process = CreatePashProcess(@"Write-Host ""foo""", @"Write-Host ""bar""");
+            var process = CreatePashProcess(@"Write-Host 'foo'", @"Write-Host 'bar'");
             process.Start();
-            process.StandardInput.WriteLine(@"Write-Host ""interactiveInput"""); // should be ignored by pash process
+            process.StandardInput.WriteLine(@"Write-Host 'interactiveInput'"); // should be ignored by pash process
             var output = FinishProcess(process);
             // pash should only execute the command, show no banner and not
             // be in interactive mode. so the output should only contain the
@@ -120,9 +123,9 @@ namespace PashConsoleTests
         [Test]
         public void StartWithArgsAndInteractiveInput()
         {
-            var process = CreatePashProcess("-noexit", @"Write-Host ""foo""");
+            var process = CreatePashProcess("-noexit", @"Write-Host 'foo'");
             process.Start();
-            process.StandardInput.WriteLine(@"Write-Host ""interactiveInput"""); // should be ignored by pash process
+            process.StandardInput.WriteLine(@"Write-Host 'interactiveInput'"); // should be ignored by pash process
             var output = FinishProcess(process);
             // pash should execute the provided args and what's coming from stdin
             // as it will also print a prompt, we won't do an exact comparison

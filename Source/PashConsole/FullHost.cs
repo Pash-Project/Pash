@@ -25,7 +25,9 @@ namespace Pash
             myRunSpace = RunspaceFactory.CreateRunspace(LocalHost);
             myRunSpace.Open();
 
-            Execute(FormatConfigCommand(Assembly.GetCallingAssembly().Location));
+            // use .CodeBase property, as .Location gets the wrong path if the assembly was shadow-copied
+            var localAssemblyPath = new Uri(Assembly.GetCallingAssembly().CodeBase).LocalPath;
+            Execute(FormatConfigCommand(localAssemblyPath));
         }
 
         static internal string FormatConfigCommand(string path)
@@ -137,10 +139,16 @@ namespace Pash
             }
 
 
-
-            // Set up the control-C handler.
-            Console.CancelKeyPress += new ConsoleCancelEventHandler(HandleControlC);
-            Console.TreatControlCAsInput = false;
+            try
+            {
+                // Set up the control-C handler.
+                Console.CancelKeyPress += new ConsoleCancelEventHandler(HandleControlC);
+                Console.TreatControlCAsInput = false;
+            }
+            catch (IOException)
+            {
+                // don't mind. if it doesn't work we're likely in a condition where stdin/stdout was redirected
+            }
 
             if (String.IsNullOrEmpty(commands))
             { 
