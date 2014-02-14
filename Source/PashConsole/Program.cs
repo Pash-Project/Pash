@@ -8,7 +8,7 @@ using System.Collections.ObjectModel;
 namespace Pash
 {
     // TODO: fix all the assembly attributes
-    class Program
+    internal class Program
     {
         static int Main(string[] args)
         {

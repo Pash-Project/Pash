@@ -166,8 +166,8 @@ namespace Pash
 
                 string cmd = ui.ReadLine();
 
-                if (cmd == null)
-                    continue;
+                if (cmd == null) // EOF
+                    break;
 
                 // TODO: remove the cheat - control via script and ShouldExit
                 if (string.Compare(cmd.Trim(), "exit", true) == 0)
