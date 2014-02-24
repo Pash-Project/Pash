@@ -76,7 +76,7 @@ namespace System.Management.Automation
         {
             if (ImmediateBaseObject == null)
             {
-                return "<null>";
+                return "";
             }
             return ImmediateBaseObject.ToString();
         }
