@@ -5,6 +5,7 @@ using System.Text;
 using System.Management.Automation.Host;
 using System.Globalization;
 using System.Management.Automation;
+using System.Management.Automation.Runspaces;
 
 namespace Pash.Implementation
 {
@@ -76,6 +77,11 @@ namespace Pash.Implementation
             get { return new Version(1, 0, 0, 0); }
         }
 
+        // TODO: Implement and support IHostSupportsInteractiveSession instead
+        // this basically means that the host supports and exchangable runspace and
+        // is not bound to a specific one. However, for now we have a one-to-one relationship
+        public Runspace OpenRunspace { get; set; }
+
         // TODO: what options are needed?
         object Options = new object();
 
@@ -89,12 +95,13 @@ namespace Pash.Implementation
 
         public LocalHost()
         {
-            localHostUserInterface = new LocalHostUserInterface();
+            localHostUserInterface = new LocalHostUserInterface(this);
         }
 
         internal void SetHostUserInterface(PSHostUserInterface ui)
         {
             localHostUserInterface = ui;
         }
+
     }
 }

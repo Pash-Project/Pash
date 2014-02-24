@@ -3,6 +3,7 @@ using System;
 using System.Management.Automation.Runspaces;
 using System.Management.Automation.Host;
 using System.Management.Automation;
+using System.Collections.Generic;
 
 namespace Pash.Implementation
 {
@@ -10,6 +11,7 @@ namespace Pash.Implementation
     {
         private InitialSessionState _initialSessionState;
         private RunspaceConfiguration _runspaceConfiguration;
+        private List<Pipeline> _runningPipelines;
 
         internal PSHost PSHost { get; set; }
 
@@ -33,6 +35,7 @@ namespace Pash.Implementation
         internal LocalRunspace(PSHost host, RunspaceConfiguration configuration, InitialSessionState initialSessionState)
         {
             //TODO: we should support both RunspaceConfigurations and IntialSessionStates properly
+            _runningPipelines = new List<Pipeline>();
             DefaultRunspace = this;
             PSHost = host;
             if (configuration == null)
@@ -135,6 +138,13 @@ namespace Pash.Implementation
         #region OpenXXX Runspace
         public override void Open()
         {
+            if (PSHost is LocalHost)
+            {
+                // TODO: make sure we use something like IHostSupportsInterativeSession for this
+                // However, for now we need that reference and it's okay as we have a simple
+                // one-to-one relationship between host and runspace
+                ((LocalHost)PSHost).OpenRunspace = this;
+            }
             CommandManager = new CommandManager(this);
             InitializeSession();
             InitializeDefaultSnapins();
@@ -158,6 +168,21 @@ namespace Pash.Implementation
         #endregion
 
         // internals
+        internal void AddRunningPipeline(Pipeline pipeline)
+        {
+            _runningPipelines.Add(pipeline);
+        }
+
+        internal void RemoveRunningPipeline(Pipeline pipeline)
+        {
+            _runningPipelines.Remove(pipeline);
+        }
+
+        internal override Pipeline GetCurrentlyRunningPipeline()
+        {
+            return _runningPipelines[_runningPipelines.Count - 1];
+        }
+
         internal void InitializeDefaultSnapins()
         {
             ExecutionContext.SessionState.SessionStateGlobal.LoadDefaultPSSnapIns();

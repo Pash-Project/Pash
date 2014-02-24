@@ -122,6 +122,7 @@ namespace Pash.Implementation
             // TODO: add a default out-command to the pipeline
             // TODO: it should do the "foreach read from pipe and out via formatter"
 
+            _runspace.AddRunningPipeline(this);
             SetPipelineState(PipelineState.Running);
             try
             {
@@ -132,9 +133,9 @@ namespace Pash.Implementation
             {
                 SetPipelineState(PipelineState.Failed, ex);
 
-                ((LocalRunspace)_runspace).PSHost.UI.WriteErrorLine(ex.ToString());
+                _runspace.PSHost.UI.WriteErrorLine(ex.ToString());
             }
-
+            _runspace.RemoveRunningPipeline(this);
             // TODO: process Error results
 
             return Output.NonBlockingRead();

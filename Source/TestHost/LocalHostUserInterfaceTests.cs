@@ -46,7 +46,7 @@ namespace TestHost
         public void TestReadLine()
         {
             SetInput("foobar" + Environment.NewLine);
-            var ui = new LocalHostUserInterface();
+            var ui = new LocalHostUserInterface(null);
 
             Assert.AreEqual("foobar", ui.ReadLine());
         }
@@ -54,7 +54,7 @@ namespace TestHost
         [Test]
         public void TestWriteLine()
         {
-            var ui = new LocalHostUserInterface();
+            var ui = new LocalHostUserInterface(null);
             string str = "foobar";
             ui.WriteLine(str);
             Assert.AreEqual(str + Environment.NewLine, GetOutput());

@@ -12,8 +12,7 @@ namespace Pash
 {
     internal class FullHost
     {
-        private Runspace myRunSpace;
-        private Pipeline currentPipeline;
+        private Runspace _currentRunspace;
 
         public const string BannerText = "Pash - Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/";
 
@@ -22,10 +21,11 @@ namespace Pash
         public FullHost()
         {
             LocalHost = new LocalHost();
-            myRunSpace = RunspaceFactory.CreateRunspace(LocalHost);
-            myRunSpace.Open();
+            _currentRunspace = RunspaceFactory.CreateRunspace(LocalHost);
+            _currentRunspace.Open();
 
-            // use .CodeBase property, as .Location gets the wrong path if the assembly was shadow-copied
+            // TODO: check user directory for a config script and fall back to the default one of the installation
+            // need to use .CodeBase property, as .Location gets the wrong path if the assembly was shadow-copied
             var localAssemblyPath = new Uri(Assembly.GetCallingAssembly().CodeBase).LocalPath;
             Execute(FormatConfigCommand(localAssemblyPath));
         }
@@ -33,70 +33,6 @@ namespace Pash
         static internal string FormatConfigCommand(string path)
         {
             return ". \"" + Path.Combine(Path.GetDirectoryName(path), "config.ps1") + "\"";
-        }
-
-        void executeHelper(string cmd, object input)
-        {
-            // Ignore empty command lines.
-            if (String.IsNullOrEmpty(cmd))
-                return;
-
-            // Create the pipeline object and make it available
-            // to the ctrl-C handle through the currentPipeline instance
-            // variable.
-            currentPipeline = myRunSpace.CreatePipeline();
-
-            // Create a pipeline for this execution. Place the result in the currentPipeline
-            // instance variable so that it is available to be stopped.
-            try
-            {
-                // A command is not a simple word here, it's the whole user input and might contain
-                // multiple commands. Therefore we parse it first, but make sure it's not executed in a local scope
-                currentPipeline.Commands.AddScript(cmd, false);
-
-                // Now add the default outputter to the end of the pipe and indicate
-                // that it should handle both output and errors from the previous
-                // commands. This will result in the output being written using the PSHost
-                // and PSHostUserInterface classes instead of returning objects to the hosting
-                // application.
-                currentPipeline.Commands.Add("out-default");
-                currentPipeline.Commands[0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
-
-                // If there was any input specified, pass it in, otherwise just
-                // execute the pipeline.
-                if (input != null)
-                {
-                    currentPipeline.Invoke(new object[] { input });
-                }
-                else
-                {
-                    currentPipeline.Invoke();
-                }
-            }
-            finally
-            {
-                // Dispose of the pipeline line and set it to null, locked because currentPipeline
-                // may be accessed by the ctrl-C handler.
-                currentPipeline.Dispose();
-                currentPipeline = null;
-            }
-        }
-
-        void HandleControlC(object sender, ConsoleCancelEventArgs e)
-        {
-            Console.WriteLine("Ctrl-C pressed");
-
-            try
-            {
-                if (currentPipeline != null && currentPipeline.PipelineStateInfo.State == PipelineState.Running)
-                    currentPipeline.Stop();
-
-                e.Cancel = true;
-            }
-            catch (Exception exception)
-            {
-                this.LocalHost.UI.WriteErrorLine(exception.ToString());
-            }
         }
 
         void Execute(string cmd)
@@ -136,18 +72,6 @@ namespace Pash
             {
                 bool? useUnixLikeConsole = GetBoolVariable (PashVariables.UseUnixLikeConsole);
                 localUI.UseUnixLikeInput = useUnixLikeConsole ?? localUI.UseUnixLikeInput;
-            }
-
-
-            try
-            {
-                // Set up the control-C handler.
-                Console.CancelKeyPress += new ConsoleCancelEventHandler(HandleControlC);
-                Console.TreatControlCAsInput = false;
-            }
-            catch (IOException)
-            {
-                // don't mind. if it doesn't work we're likely in a condition where stdin/stdout was redirected
             }
 
             if (String.IsNullOrEmpty(commands))
@@ -202,9 +126,9 @@ namespace Pash
             }
         }
 
-        bool? GetBoolVariable (string name)
+        private bool? GetBoolVariable (string name)
         {
-            var variable = myRunSpace.SessionStateProxy.GetVariable(name) as PSVariable;
+            var variable = _currentRunspace.SessionStateProxy.GetVariable(name) as PSVariable;
             if (variable == null)
             {
                 return null;
@@ -222,37 +146,36 @@ namespace Pash
             }
         }
 
-        void ExecuteHelper(string cmd, object input)
+        private void executeHelper(string cmd, object input)
         {
             // Ignore empty command lines.
             if (String.IsNullOrEmpty(cmd))
-            {
                 return;
-            }
 
-            // Create the pipeline object and make it available
-            // to the ctrl-C handle through the currentPipeline instance
-            // variable.
-
-            currentPipeline = myRunSpace.CreatePipeline(cmd);
-
-            // Create a pipeline for this execution. Place the result in the currentPipeline
-            // instance variable so that it is available to be stopped.
-            try
+            using (var currentPipeline = _currentRunspace.CreatePipeline())
             {
-                currentPipeline.InvokeAsync();
+                // A command is not a simple word here, it's the whole user input and might contain
+                // multiple commands. Therefore we parse it first, but make sure it's not executed in a local scope
+                currentPipeline.Commands.AddScript(cmd, false);
+
+                // Now add the default outputter to the end of the pipe and indicate
+                // that it should handle both output and errors from the previous
+                // commands. This will result in the output being written using the PSHost
+                // and PSHostUserInterface classes instead of returning objects to the hosting
+                // application.
+                currentPipeline.Commands.Add("out-default");
+                currentPipeline.Commands[0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
+
+                // If there was any input specified, pass it in, otherwise just
+                // execute the pipeline.
                 if (input != null)
                 {
-                    currentPipeline.Input.Write(input);
+                    currentPipeline.Invoke(new object[] { input });
                 }
-                currentPipeline.Input.Close();
-            }
-            catch
-            {
-                // Dispose of the pipeline line and set it to null, locked because currentPipeline
-                // may be accessed by the ctrl-C handler.
-                currentPipeline.Dispose();
-                currentPipeline = null;
+                else
+                {
+                    currentPipeline.Invoke();
+                }
             }
         }
     }
