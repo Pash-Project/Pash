@@ -39,6 +39,8 @@ namespace System.Management.Automation.Runspaces
         //internal abstract ExecutionContext GetExecutionContext { get; }
         //internal bool SkipUserProfile { set; get; }
 
+        internal abstract Pipeline GetCurrentlyRunningPipeline();
+
         #region IDisposable Members
 
         public void Dispose()

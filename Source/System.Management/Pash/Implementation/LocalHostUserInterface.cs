@@ -6,34 +6,69 @@ using System.Management.Automation.Host;
 using System.Management.Automation;
 using System.Collections.ObjectModel;
 using Mono.Terminal;
+using System.IO;
 
 namespace Pash.Implementation
 {
     public class LocalHostUserInterface : PSHostUserInterface
     {
-        private bool useUnixLikeInput;
-        private LineEditor getlineEditor;
+        private bool _useUnixLikeInput;
+        private LineEditor _getlineEditor;
+        private LocalHost _parentHost;
 
         public bool UseUnixLikeInput {
             get
             {
-                return useUnixLikeInput;
+                return _useUnixLikeInput;
             }
 
             set
             {
-                if (value != useUnixLikeInput)
+                if (value != _useUnixLikeInput)
                 {
-                    useUnixLikeInput = value;
-                    getlineEditor = useUnixLikeInput ? new LineEditor("Pash") : null;
+                    _useUnixLikeInput = value;
+                    _getlineEditor = _useUnixLikeInput ? new LineEditor("Pash") : null;
                 }
             }
         }
 
-        public LocalHostUserInterface()
+        public LocalHostUserInterface(LocalHost parent)
         {
             UseUnixLikeInput = Environment.OSVersion.Platform != System.PlatformID.Win32NT && Console.WindowWidth > 0;
+            _parentHost = parent;
+
+            // Set up the control-C handler.
+            try
+            {
+                Console.CancelKeyPress += new ConsoleCancelEventHandler(HandleControlC);
+                Console.TreatControlCAsInput = false;
+            }
+            catch (IOException)
+            {
+                // don't mind. if it doesn't work we're likely in a condition where stdin/stdout was redirected
+            }
         }
+
+        #region Private stuff
+        void HandleControlC(object sender, ConsoleCancelEventArgs e)
+        {
+            Console.WriteLine("Ctrl-C pressed");
+
+            try
+            {
+                var runningPipeline = _parentHost.OpenRunspace.GetCurrentlyRunningPipeline();
+                if (runningPipeline != null)
+                {
+                    runningPipeline.Stop();
+                }
+                e.Cancel = true;
+            }
+            catch (Exception exception)
+            {
+                WriteErrorLine(exception.ToString());
+            }
+        }
+        #endregion
 
         #region User prompt Methods
         public override Dictionary<string, PSObject> Prompt(string caption, string message, Collection<FieldDescription> descriptions)
@@ -108,7 +143,7 @@ namespace Pash.Implementation
         #region ReadXXX methods
         public override string ReadLine()
         {
-            return UseUnixLikeInput ? getlineEditor.Edit("", "") : Console.ReadLine();
+            return UseUnixLikeInput ? _getlineEditor.Edit("", "") : Console.ReadLine();
         }
 
         public override System.Security.SecureString ReadLineAsSecureString()
