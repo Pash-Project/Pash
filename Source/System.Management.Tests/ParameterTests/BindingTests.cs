@@ -28,7 +28,7 @@ namespace System.Management.Tests.ParameterTests
 
             cmdProc.AddParameter("Name", "John");
 
-            cmdProc.BindArguments(null);
+            cmdProc.BindCommandLineArguments();
 
             Assert.AreEqual("John", cmdlet.Name);
         }
@@ -42,7 +42,7 @@ namespace System.Management.Tests.ParameterTests
 
             cmdProc.AddParameter("fn", "John");
 
-            cmdProc.BindArguments(null);
+            cmdProc.BindCommandLineArguments();
 
             Assert.AreEqual("John", cmdlet.Name);
         }
@@ -56,7 +56,7 @@ namespace System.Management.Tests.ParameterTests
 
             cmdProc.AddParameter("InputObject", 10);
 
-            cmdProc.BindArguments(null);
+            cmdProc.BindCommandLineArguments();
 
             Assert.AreEqual("10", cmdlet.InputObject.ToString());
         }
@@ -70,7 +70,7 @@ namespace System.Management.Tests.ParameterTests
 
             cmdProc.AddParameter("Path", "a path");
 
-            cmdProc.BindArguments(null);
+            cmdProc.BindCommandLineArguments();
 
             Assert.AreEqual("a path", cmdlet.FilePath.ToString());
         }
@@ -85,7 +85,7 @@ namespace System.Management.Tests.ParameterTests
             cmdProc.AddParameter("i", 10);
 
             Assert.Throws(typeof(ArgumentException), delegate() {
-                cmdProc.BindArguments(null);
+                cmdProc.BindCommandLineArguments();
             });
         }
 
@@ -99,7 +99,7 @@ namespace System.Management.Tests.ParameterTests
             cmdProc.AddParameter("Name", null);
             cmdProc.AddParameter(null, "John");
 
-            cmdProc.BindArguments(null);
+            cmdProc.BindCommandLineArguments();
 
             Assert.AreEqual("John", cmdlet.Name);
             Assert.IsFalse(cmdlet.Recurse.ToBool());
@@ -116,7 +116,7 @@ namespace System.Management.Tests.ParameterTests
             cmdProc.AddParameter(null, "John");
             cmdProc.AddParameter("Recurse", null);
 
-            cmdProc.BindArguments(null);
+            cmdProc.BindCommandLineArguments();
 
             Assert.AreEqual("John", cmdlet.Name);
             Assert.IsTrue(cmdlet.Recurse.ToBool());
@@ -132,7 +132,7 @@ namespace System.Management.Tests.ParameterTests
             cmdProc.AddParameter("Variable", "a");
             cmdProc.AddParameter("Recurse", null);
 
-            cmdProc.BindArguments(null);
+            cmdProc.BindCommandLineArguments();
 
             Assert.AreEqual("a", cmdlet.Variable);
             Assert.IsTrue(cmdlet.Recurse.ToBool());
@@ -148,7 +148,7 @@ namespace System.Management.Tests.ParameterTests
             cmdProc.AddParameter("FilePath", null);
             cmdProc.AddParameter(null, "a path");
 
-            cmdProc.BindArguments(null);
+            cmdProc.BindCommandLineArguments();
 
             Assert.AreEqual("File", cmdlet.ParameterSetName);
         }
@@ -163,7 +163,7 @@ namespace System.Management.Tests.ParameterTests
             cmdProc.AddParameter("PSPath", null);
             cmdProc.AddParameter(null, "a path");
 
-            cmdProc.BindArguments(null);
+            cmdProc.BindCommandLineArguments();
 
             Assert.AreEqual("File", cmdlet.ParameterSetName);
         }
@@ -182,7 +182,7 @@ namespace System.Management.Tests.ParameterTests
 
             Assert.Throws(typeof(Exception), delegate()
             {
-                cmdProc.BindArguments(null);
+                    cmdProc.BindCommandLineArguments();
             });
         }
     }

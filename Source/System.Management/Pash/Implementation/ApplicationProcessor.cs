@@ -39,24 +39,27 @@ namespace Pash.Implementation
             return executableType == Shell32.MZ || executableType == Shell32.PE;
         }
 
-        internal override void Initialize()
+        public override void Prepare()
+        {
+            // nothing to do, applcation is completely executed in the ProcessRecords phas
+        }
+
+        public override void BeginProcessing()
+        {
+            // nothing to do
+        }
+
+        public override void ProcessRecords()
         {
             var flag = GetPSForceSynchronizeProcessOutput();
             _shouldBlock = NeedWaitForProcess(flag, ApplicationInfo.Path);
             _process = StartProcess();
-        }
 
-        internal override void BindArguments(PSObject obj)
-        {
-            if (obj != null)
+            foreach (var curInput in CommandRuntime.InputStream.Read())
             {
-                var inputObject = obj.ToString();
-                _process.StandardInput.WriteLine(inputObject);
+                _process.StandardInput.WriteLine(curInput.ToString());
             }
-        }
 
-        internal override void ProcessRecord()
-        {
             if (!_shouldBlock)
             {
                 return;
@@ -77,7 +80,7 @@ namespace Pash.Implementation
             }
         }
 
-        internal override void Complete()
+        public override void EndProcessing()
         {
             // TODO: Should we set $LASTEXITCODE here?
             // TODO: Same for the $? variable.
@@ -85,12 +88,6 @@ namespace Pash.Implementation
             {
                 _process.Dispose();
             }
-        }
-
-        internal override ICommandRuntime CommandRuntime
-        {
-            get;
-            set;
         }
 
         private ApplicationInfo ApplicationInfo

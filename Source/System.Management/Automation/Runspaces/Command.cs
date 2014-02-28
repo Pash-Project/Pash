@@ -33,7 +33,16 @@ namespace System.Management.Automation.Runspaces
             CommandText = command;
             IsScript = isScript;
             UseLocalScope = useLocalScope;
-            ScriptBlockAst = null;
+            // although the following lines are a kind of "hack", these might be the only location
+            // to generally set this property for any occurence of "out-default"
+            if (String.Equals(CommandText, "out-default", StringComparison.CurrentCultureIgnoreCase))
+            {
+                MergeUnclaimedPreviousCommandResults = PipelineResultTypes.Output | PipelineResultTypes.Error;
+            }
+            else
+            {
+                MergeUnclaimedPreviousCommandResults = PipelineResultTypes.None;
+            }
         }
 
         private Command()
@@ -41,6 +50,7 @@ namespace System.Management.Automation.Runspaces
             Parameters = new CommandParameterCollection();
             MergeMyResult = PipelineResultTypes.None;
             MergeToResult = PipelineResultTypes.None;
+            ScriptBlockAst = null;
         }
 
         internal Command(ScriptBlockAst scriptBlockAst, bool useLocalScope = false)
@@ -84,8 +94,16 @@ namespace System.Management.Automation.Runspaces
                     }
                 }
             }
-
+            SetMergeResultOptions(cmdProcBase);
             return cmdProcBase;
+        }
+
+        internal void SetMergeResultOptions(CommandProcessorBase procBase)
+        {
+            var rt = procBase.CommandRuntime;
+            rt.MergeErrorToOutput = (MergeMyResult.Equals(PipelineResultTypes.Error) &&
+                MergeToResult.Equals(PipelineResultTypes.Output));
+            rt.MergeUnclaimedPreviousErrors = MergeUnclaimedPreviousCommandResults != PipelineResultTypes.None;
         }
 
         internal PipelineResultTypes MergeMyResult { get; private set; }

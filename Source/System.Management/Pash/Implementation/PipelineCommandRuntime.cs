@@ -5,26 +5,32 @@ using Pash.Implementation;
 
 namespace System.Management.Automation
 {
-    // TODO: can we replace the runtime with the ExecutionContext?
     internal class PipelineCommandRuntime : ICommandRuntime
     {
-        internal ObjectStream outputResults { get; private set; }
-        internal ObjectStream errorResults { get; private set; }
-        internal PipelineProcessor pipelineProcessor { get; private set; }
+        internal bool MergeErrorToOutput;
+        internal bool MergeUnclaimedPreviousErrors;
+        internal ObjectStream OutputStream { get; private set; }
+        internal ObjectStream ErrorStream { get; private set; }
+        internal ObjectStream InputStream { get; private set; }
+        internal PipelineProcessor PipelineProcessor { get; set; }
+        internal ExecutionContext ExecutionContext { get; set; }
 
         // TODO: hook the runtime to the Host for Debug and Error output
         internal PipelineCommandRuntime(PipelineProcessor pipelineProcessor)
         {
-            this.pipelineProcessor = pipelineProcessor;
-            this.outputResults = new ObjectStream();
-            this.errorResults = new ObjectStream();
+            PipelineProcessor = pipelineProcessor;
+            MergeErrorToOutput = false;
+            MergeUnclaimedPreviousErrors = false;
+            OutputStream = new ObjectStream(this);
+            ErrorStream = new ObjectStream(this);
+            InputStream = new ObjectStream(this);
         }
 
         internal bool IsStopping
         {
             get
             {
-                return (pipelineProcessor != null) && pipelineProcessor.Stopping;
+                return (PipelineProcessor != null) && PipelineProcessor.Stopping;
             }
         }
 
@@ -32,7 +38,10 @@ namespace System.Management.Automation
 
         public Host.PSHost Host
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                return (ExecutionContext != null) ? ExecutionContext.LocalHost : null;
+            }
         }
 
         public bool ShouldContinue(string query, string caption)
@@ -85,12 +94,20 @@ namespace System.Management.Automation
 
         public void WriteError(ErrorRecord errorRecord)
         {
-            errorResults.Write(PSObject.AsPSObject(errorRecord));
+            var psobj = PSObject.AsPSObject(errorRecord);
+            // if merged with stdout, we can later on check to which stream the object usually belongs
+            psobj.Properties.Add(new PSNoteProperty("writeToErrorStream", true));
+            ErrorStream.Write(psobj);
+            ExecutionContext.AddToErrorVariable(errorRecord);
+            if (MergeErrorToOutput)
+            {
+                OutputStream.Write(psobj);
+            }
         }
 
         public void WriteObject(object sendToPipeline)
         {
-            outputResults.Write(PSObject.AsPSObject(sendToPipeline));
+            OutputStream.Write(PSObject.AsPSObject(sendToPipeline));
         }
 
         public void WriteObject(object sendToPipeline, bool enumerateCollection)

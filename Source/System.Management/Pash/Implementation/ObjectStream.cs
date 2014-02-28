@@ -5,6 +5,7 @@ using System.Text;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Management.Automation;
 
 namespace Pash.Implementation
 {
@@ -12,17 +13,27 @@ namespace Pash.Implementation
     {
         // TODO: implement ObjectStream
         private ArrayList _objectsStream;
+        public object Owner { get; private set; }
+        public object ClaimedBy { get; private set; }
 
-        internal ObjectStream()
+        internal ObjectStream(object owner)
         {
+            Owner = owner;
             _objectsStream = new ArrayList();
+            ClaimedBy = null;
         }
 
-        internal ObjectStream(IEnumerable input)
-            : this()
+        internal ObjectStream(object owner, IEnumerable input)
+            : this(owner)
         {
             foreach (object obj in input)
                 _objectsStream.Add(obj);
+        }
+
+        public void Redirect(ObjectStream redirection)
+        {
+            _objectsStream = redirection._objectsStream;
+            ClaimedBy = redirection.Owner;
         }
 
         internal void Write(object obj)
@@ -32,25 +43,15 @@ namespace Pash.Implementation
 
         internal Collection<object> Read()
         {
-            // TODO: (code duplication) does it makes sense to call the Read(count) with "everyting" as a value?
-
-            Collection<object> c = new Collection<object>();
-
-            // nothing to read
-            if (_objectsStream.Count < 0)
-                return c;
-
-            foreach (object obj in _objectsStream)
-            {
-                c.Add(obj);
-            }
-
-            _objectsStream.Clear();
-
-            return c;
+            return Read(null);
         }
 
         internal Collection<object> Read(int count)
+        {
+            return Read(count);
+        }
+
+        internal Collection<object> Read(int? optCount)
         {
             Collection<object> c = new Collection<object>();
 
@@ -58,6 +59,7 @@ namespace Pash.Implementation
             if (_objectsStream.Count < 0)
                 return c;
 
+            int count = optCount ?? _objectsStream.Count;
             // TODO: what should be done if requested more than it's available?
             if (count > _objectsStream.Count)
                 count = _objectsStream.Count;

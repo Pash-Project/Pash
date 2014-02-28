@@ -277,7 +277,7 @@ namespace TestHost
             // notice typo
             var result = TestHost.ExecuteWithZeroErrors("Get-ChlidItem");
 
-            Assert.AreEqual("CommandNotFoundException: Command 'Get-ChlidItem' not found.", result);
+            StringAssert.Contains("CommandNotFoundException", result);
         }
 
         [Test]

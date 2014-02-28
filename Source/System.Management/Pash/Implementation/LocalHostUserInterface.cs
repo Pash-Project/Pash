@@ -183,7 +183,12 @@ namespace Pash.Implementation
 
         public override void WriteErrorLine(string value)
         {
+            // TODO: unfortunately, it doesn't seem to work to print with colors to stderr
+            //       so let's stay with stdout
+            // var origOut = Console.Out;
+            // Console.SetOut(Console.Error);
             WriteLine(ConsoleColor.Red, ConsoleColor.Black, String.Format("ERROR: {0}", value));
+            // Console.SetOut(origOut);
         }
 
         public override void WriteLine(string value)

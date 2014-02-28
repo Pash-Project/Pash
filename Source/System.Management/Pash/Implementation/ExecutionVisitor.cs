@@ -34,7 +34,7 @@ namespace System.Management.Pash.Implementation
         {
             return new ExecutionVisitor(
                 this._context.CreateNestedContext(), //Why can't we just use the original context?
-                new PipelineCommandRuntime(this._pipelineCommandRuntime.pipelineProcessor),
+                new PipelineCommandRuntime(this._pipelineCommandRuntime.PipelineProcessor),
                 writeSideEffectsToPipeline
                 );
         }
@@ -242,7 +242,10 @@ namespace System.Management.Pash.Implementation
                 pipeLineContext.WriteSideEffectsToPipeline = _writeSideEffectsToPipeline;
                 var pipeline = _context.CurrentRunspace.CreateNestedPipeline();
 
-                pipeline.Input.Write(_context.inputStreamReader.ReadToEnd(), true);
+                foreach (var input in _context.InputStream.Read())
+                {
+                    pipeline.Input.Write(input);
+                }
 
                 var command = GetCommand(commandAst);
 
@@ -258,10 +261,14 @@ namespace System.Management.Pash.Implementation
                 try
                 {
                     // TODO: develop a rational model for null/singleton/collection
-                    var result = pipeline.Invoke();
-                    if (result != null && result.Any())
+                    foreach (var curResult in pipeline.Invoke())
                     {
-                        _pipelineCommandRuntime.WriteObject(result, true);
+                        _pipelineCommandRuntime.WriteObject(curResult, true);
+                    }
+                    var errors = pipeline.Error.NonBlockingRead();
+                    foreach (var curError in errors)
+                    {
+                        _pipelineCommandRuntime.ErrorStream.Write(curError);
                     }
                 }
                 finally
@@ -372,7 +379,7 @@ namespace System.Management.Pash.Implementation
         {
             var subVisitor = this.CloneSub(writeSideEffectsToPipeline);
             expressionAst.Visit(subVisitor);
-            var result = subVisitor._pipelineCommandRuntime.outputResults.Read();
+            var result = subVisitor._pipelineCommandRuntime.OutputStream.Read();
 
             if (result.Count == 0) return null;
             if (result.Count == 1) return result.Single();
@@ -381,13 +388,14 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitConstantExpression(ConstantExpressionAst constantExpressionAst)
         {
-            this._pipelineCommandRuntime.outputResults.Write(constantExpressionAst.Value);
+            this._pipelineCommandRuntime.OutputStream.Write(constantExpressionAst.Value);
             return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitPipeline(PipelineAst pipelineAst)
         {
             // TODO: rewrite this - it should expand the commands in the original pipe
+            // TODO: Why don't we take the normal pipeline mechanism?
 
             PipelineCommandRuntime subRuntime = null;
 
@@ -397,20 +405,25 @@ namespace System.Management.Pash.Implementation
 
                 if (subRuntime == null)
                 {
-                    subContext.inputStreamReader = this._context.inputStreamReader;
+                    subContext.InputStream = this._context.InputStream;
                 }
                 else
                 {
-                    subContext.inputStreamReader = new PSObjectPipelineReader(subRuntime.outputResults);
+                    subContext.InputStream = subRuntime.OutputStream;
                 }
 
-                subRuntime = new PipelineCommandRuntime(this._pipelineCommandRuntime.pipelineProcessor);
-                subContext.inputStreamReader = subContext.inputStreamReader;
-
+                subRuntime = new PipelineCommandRuntime(this._pipelineCommandRuntime.PipelineProcessor);
+                subRuntime.ExecutionContext = subContext;
                 pipelineElement.Visit(new ExecutionVisitor(subContext, subRuntime, this._writeSideEffectsToPipeline));
             }
-
-            this._pipelineCommandRuntime.WriteObject(subRuntime.outputResults.Read(), true);
+            foreach (var error in subRuntime.ErrorStream.Read())
+            {
+                this._pipelineCommandRuntime.ErrorStream.Write(error);
+            }
+            foreach (var output in subRuntime.OutputStream.Read())
+            {
+                this._pipelineCommandRuntime.WriteObject(output, true);
+            }
 
             return AstVisitAction.SkipChildren;
         }
@@ -808,7 +821,7 @@ namespace System.Management.Pash.Implementation
                                        select EvaluateAst(expressionAst);
 
             string expandedString = expandableStringExpressionAst.ExpandString(evaluatedExpressions);
-            this._pipelineCommandRuntime.outputResults.Write(expandedString);
+            this._pipelineCommandRuntime.OutputStream.Write(expandedString);
             return AstVisitAction.SkipChildren;
         }
 
@@ -1046,7 +1059,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitStringConstantExpression(StringConstantExpressionAst stringConstantExpressionAst)
         {
-            this._pipelineCommandRuntime.outputResults.Write(stringConstantExpressionAst.Value);
+            this._pipelineCommandRuntime.OutputStream.Write(stringConstantExpressionAst.Value);
             return AstVisitAction.SkipChildren;
         }
 
@@ -1154,7 +1167,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitTypeExpression(TypeExpressionAst typeExpressionAst)
         {
-            this._pipelineCommandRuntime.outputResults.Write(typeExpressionAst.TypeName.GetReflectionType());
+            this._pipelineCommandRuntime.OutputStream.Write(typeExpressionAst.TypeName.GetReflectionType());
             return AstVisitAction.SkipChildren;
         }
         #endregion

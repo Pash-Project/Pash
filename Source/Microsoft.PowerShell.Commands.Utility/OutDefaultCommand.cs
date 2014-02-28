@@ -19,16 +19,31 @@ namespace Microsoft.PowerShell.Commands
             // TODO: output the data via OutHostCommand
 
             // TODO: should we print Null?
-            if (InputObject.ImmediateBaseObject == null)
+            if (InputObject == null || InputObject.ImmediateBaseObject == null)
                 return;
-
+            var writeToErrorProperty = InputObject.Properties["writeToErrorStream"];
+            bool writeToError = (writeToErrorProperty != null && writeToErrorProperty.Value is bool && (bool)writeToErrorProperty.Value);
             if (InputObject.BaseObject is Array)
             {
-                Host.UI.WriteLine(string.Join(Environment.NewLine, (object[])InputObject.BaseObject));
+                if (writeToError)
+                {
+                    Host.UI.WriteErrorLine(string.Join(Environment.NewLine, (object[])InputObject.BaseObject));
+                }
+                else
+                {
+                    Host.UI.WriteLine(string.Join(Environment.NewLine, (object[])InputObject.BaseObject));
+                }
             }
             else
             {
-                this.Host.UI.WriteLine(InputObject.ToString());
+                if (writeToError)
+                {
+                    Host.UI.WriteErrorLine(InputObject.ToString());
+                }
+                else
+                {
+                    Host.UI.WriteLine(InputObject.ToString());
+                }
             }
         }
     }

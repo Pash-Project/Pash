@@ -1,4 +1,4 @@
-﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+﻿﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Linq;
 using System.Collections;
@@ -8,11 +8,15 @@ using System.Reflection;
 using System.Text;
 using Pash.Implementation;
 using System.Management.Automation;
+using System.Collections.ObjectModel;
 
 namespace System.Management.Automation
 {
     internal class CommandProcessor : CommandProcessorBase
     {
+        private Dictionary<MemberInfo, object> _defaultArguments;
+        private Collection<MemberInfo> _boundArguments;
+        private Dictionary<MemberInfo, object> _commandLineArgumentsBackup;
         internal Cmdlet Command { get; set; }
         readonly CmdletInfo _cmdletInfo;
         bool _beganProcessing;
@@ -22,34 +26,27 @@ namespace System.Management.Automation
         {
             _cmdletInfo = cmdletInfo;
             _beganProcessing = false;
+            _defaultArguments = new Dictionary<MemberInfo, object>();
+            _boundArguments = new Collection<MemberInfo>();
+            _commandLineArgumentsBackup = new Dictionary<MemberInfo, object>();
         }
 
-        internal override ICommandRuntime CommandRuntime
-        {
-            get
-            {
-                return Command.CommandRuntime;
-            }
-            set
-            {
-                Command.CommandRuntime = value;
-            }
-        }
+        // TODO: move parameter related stuff to a separate class
 
         /// <summary>
-        ///
+        /// Binds the parameters from the command line to the command.
         /// </summary>
-        /// <param name="obj"></param>
         /// <remarks>
         /// All abount Cmdlet parameters: http://msdn2.microsoft.com/en-us/library/ms714433(VS.85).aspx
+        /// About the lifecycle: http://msdn.microsoft.com/en-us/library/ms714429(v=vs.85).aspx
         /// </remarks>
-        internal override void BindArguments(PSObject obj)
+        internal void BindCommandLineArguments()
         {
-            // TODO: Bind obj properties to ValueFromPipelinebyPropertyName parameters
             // TODO: If parameter has ValueFromRemainingArguments any unmatched arguments should be bound to this parameter as an array
             // TODO: If no parameter has ValueFromRemainingArguments any supplied parameters are unmatched then fail with exception
+            // TODO: try to get missing parameters that cannot be acquired by pipeline input, and fail otherwise
 
-            if ((obj == null) && (Parameters.Count == 0))
+            if (Parameters.Count == 0)
                 return;
 
             IEnumerable<string> namedParameters = Parameters.Select (x => x.Name).Where (x => !string.IsNullOrEmpty (x));
@@ -77,13 +74,6 @@ namespace System.Management.Automation
                 }
             }
 
-            if (obj != null)
-            {
-                var valueFromPipelineParameter = paramSetInfo.Parameters.Where(paramInfo => paramInfo.ValueFromPipeline).SingleOrDefault();
-
-                if (valueFromPipelineParameter != null)
-                    BindArgument(valueFromPipelineParameter.Name, obj, valueFromPipelineParameter.ParameterType);
-            }
 
             if (Parameters.Count > 0)
             {
@@ -117,6 +107,28 @@ namespace System.Management.Automation
                     }
                 }
             }
+            BackupCommandLineArguments();
+        }
+
+        /// <summary>
+        /// Binds the arguments provided by pipeline to be processed as a separate record
+        /// </summary>
+        /// <param name="curInput">Current input object from the pipeline</param>
+        internal void BindPipelineArguments(object curInput)
+        {
+            // TODO: Bind obj properties to ValueFromPipelinebyPropertyName parameters
+            if (curInput == null)
+            {
+                return;
+            }
+
+            CommandParameterSetInfo paramSetInfo = _cmdletInfo.GetDefaultParameterSet();
+            var valueFromPipelineParameter = paramSetInfo.Parameters.Where(paramInfo => paramInfo.ValueFromPipeline).SingleOrDefault();
+
+            if (valueFromPipelineParameter != null)
+            {
+                BindArgument(valueFromPipelineParameter.Name, curInput, valueFromPipelineParameter.ParameterType);
+            }
         }
 
         private void BindArgument(string name, object value, Type type)
@@ -147,42 +159,43 @@ namespace System.Management.Automation
             // TODO: make this generic
             if (memberType == typeof(PSObject[]))
             {
-                SetValue(memberInfo, Command, new[] { PSObject.AsPSObject(value) });
+                SetCommandValue(memberInfo, new[] { PSObject.AsPSObject(value) });
             }
 
             else if (memberType == typeof(String[]))
             {
-                SetValue(memberInfo, Command, ConvertToStringArray(value));
+                SetCommandValue(memberInfo, ConvertToStringArray(value));
             }
 
             else if (memberType == typeof(String))
             {
-                SetValue(memberInfo, Command, value.ToString());
+                SetCommandValue(memberInfo, value.ToString());
             }
 
             else if (memberType.IsEnum) {
-                  SetValue (memberInfo, Command, Enum.Parse (type, value.ToString(), true));
+                  SetCommandValue (memberInfo, Enum.Parse (type, value.ToString(), true));
             }
 
             else if (memberType == typeof(PSObject))
             {
-                SetValue(memberInfo, Command, PSObject.AsPSObject(value));
+                SetCommandValue(memberInfo, PSObject.AsPSObject(value));
             }
 
             else if (memberType == typeof(SwitchParameter))
             {
-                SetValue(memberInfo, Command, new SwitchParameter(true));
+                SetCommandValue(memberInfo, new SwitchParameter(true));
             }
 
             else if (memberType == typeof(Object[]))
             {
-                SetValue(memberInfo, Command, new[] { value });
+                SetCommandValue(memberInfo, new[] { value });
             }
 
             else
             {
-                SetValue(memberInfo, Command, value is PSObject ? ((PSObject)value).BaseObject : value);
+                SetCommandValue(memberInfo, value is PSObject ? ((PSObject)value).BaseObject : value);
             }
+            _boundArguments.Add(memberInfo);
         }
 
         private object ConvertToStringArray(object value)
@@ -198,64 +211,156 @@ namespace System.Management.Automation
             }
         }
 
-        public static void SetValue(MemberInfo info, object targetObject, object value)
+        private void SetCommandValue(MemberInfo info, object value)
+        {
+            // make a backup of the default values first, if we don't have one
+            if (!_defaultArguments.ContainsKey(info))
+            {
+                _defaultArguments[info] = GetCommandValue(info);
+            }
+            // now set the field or property
+            if (info.MemberType == MemberTypes.Field)
+            {
+                FieldInfo fieldInfo = info as FieldInfo;
+                fieldInfo.SetValue(Command, value);
+            }
+            else if (info.MemberType == MemberTypes.Property)
+            {
+                PropertyInfo propertyInfo = info as PropertyInfo;
+                propertyInfo.SetValue(Command, value, null);
+            }
+            else
+            {
+                throw new Exception("SetValue only implemented for fields and properties");
+            }
+        }
+
+        private object GetCommandValue(MemberInfo info)
         {
             if (info.MemberType == MemberTypes.Field)
             {
                 FieldInfo fieldInfo = info as FieldInfo;
-                fieldInfo.SetValue(targetObject, value);
+                return fieldInfo.GetValue(Command);
             }
-
             else if (info.MemberType == MemberTypes.Property)
             {
                 PropertyInfo propertyInfo = info as PropertyInfo;
-                propertyInfo.SetValue(targetObject, value, null);
+                return propertyInfo.GetValue(Command, null);
             }
-
-            else throw new Exception("SetValue only implemented for fields and properties");
-        }
-
-        internal override void Initialize()
-        {
-            try
+            else
             {
-                Cmdlet cmdlet = (Cmdlet)Activator.CreateInstance(_cmdletInfo.ImplementingType);
-
-                cmdlet.CommandInfo = _cmdletInfo;
-                cmdlet.ExecutionContext = base.ExecutionContext;
-                Command = cmdlet;
-            }
-            catch (Exception e)
-            {
-                // TODO: work out the failure
-                System.Console.WriteLine(e);
+                throw new Exception("SetValue only implemented for fields and properties");
             }
         }
 
-        internal override void ProcessRecord()
+        /// <summary>
+        /// Makes and internal backup of the command line arguments, so they can be restored
+        /// </summary>
+        private void BackupCommandLineArguments()
         {
-            // TODO: initialize Cmdlet parameters
+            _commandLineArgumentsBackup.Clear();
+            foreach (var info in _boundArguments)
+            {
+                _commandLineArgumentsBackup[info] = GetCommandValue(info);
+            }
+        }
+
+        /// <summary>
+        /// Restores arguments to those provided by command line, so multiple
+        /// records can be processed without influencing each other
+        /// </summary>
+        private void RestoreCommandLineArguments()
+        {
+            foreach (var bound in _boundArguments)
+            {
+                if (_commandLineArgumentsBackup.ContainsKey(bound))
+                {
+                    SetCommandValue(bound, _commandLineArgumentsBackup[bound]);
+                }
+                else // if it wasn't a command line argument, restor the default
+                {
+                    SetCommandValue(bound, _defaultArguments[bound]);
+                }
+            }
+            // reset the bound arguments list
+            _boundArguments.Clear();
+            foreach (MemberInfo info in _commandLineArgumentsBackup.Keys)
+            {
+                _boundArguments.Add(info);
+            }
+        }
+
+        /// <summary>
+        /// Checks wether we can clearly identify a parameter set to use which is not
+        /// umbigious and has all mandatory parameters set. Fails with an exception if
+        /// this is not the case.
+        /// </summary>
+        private void CheckParameterSet()
+        {
+            // TODO: implement
+        }
+
+        /// <summary>
+        /// First phase of cmdlet lifecycle: "Binding Parameters that Take Command-Line Input"
+        /// </summary>
+        public override void Prepare()
+        {
+            Cmdlet cmdlet = (Cmdlet)Activator.CreateInstance(_cmdletInfo.ImplementingType);
+            cmdlet.CommandInfo = _cmdletInfo;
+            cmdlet.ExecutionContext = base.ExecutionContext;
+            cmdlet.CommandRuntime = CommandRuntime;
+            Command = cmdlet;
+            BindCommandLineArguments();
+        }
+
+        /// <summary>
+        /// Second phase. Basically calling the command's "BeginProcessing" method
+        /// </summary>
+        public override void BeginProcessing()
+        {
             if (!_beganProcessing)
             {
                 Command.DoBeginProcessing();
                 _beganProcessing = true;
             }
-
-            Command.DoProcessRecord();
         }
 
-        internal void ProcessObject(object inObject)
+        /// <summary>
+        /// In this phase, the "ProcessRecord" method of the command will be called for each
+        /// object from the input pipeline, but at least once. Doing so, the input object
+        /// will be bound as parameters, but only for the specific invocation.
+        /// </summary>
+        public override void ProcessRecords()
         {
-            /*
-            PSObject inPsObject = null;
-            if (inputObject != null)
+            var inputObjects = CommandRuntime.InputStream.Read();
+            // make sure we call ProcessRecord at least once!
+            if (!inputObjects.Any())
             {
-                inPsObject = PSObject.AsPSObject(inObject);
+                inputObjects.Add(null);
             }
-            */
+            foreach (var curInput in inputObjects)
+            {
+                RestoreCommandLineArguments();
+                BindPipelineArguments(curInput);
+                try
+                {
+                    CheckParameterSet();
+                }
+                catch (Exception e)
+                {
+                    var error = new ErrorRecord(e, "NotAllParametersProvided", ErrorCategory.InvalidOperation, null);
+                    CommandRuntime.WriteError(error);
+                    continue;
+                }
+                Command.DoProcessRecord();
+            }
+            RestoreCommandLineArguments();
         }
 
-        internal override void Complete()
+        /// <summary>
+        /// In the cleanup phase, the command's "EndProcessing" method will be called to do own cleanup
+        /// </summary>
+        public override void EndProcessing()
         {
             Command.DoEndProcessing();
         }

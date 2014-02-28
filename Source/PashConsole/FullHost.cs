@@ -158,13 +158,11 @@ namespace Pash
                 // multiple commands. Therefore we parse it first, but make sure it's not executed in a local scope
                 currentPipeline.Commands.AddScript(cmd, false);
 
-                // Now add the default outputter to the end of the pipe and indicate
-                // that it should handle both output and errors from the previous
-                // commands. This will result in the output being written using the PSHost
+                // Now add the default outputter to the end of the pipe.
+                // This will result in the output being written using the PSHost
                 // and PSHostUserInterface classes instead of returning objects to the hosting
                 // application.
                 currentPipeline.Commands.Add("out-default");
-                currentPipeline.Commands[0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
 
                 // If there was any input specified, pass it in, otherwise just
                 // execute the pipeline.
@@ -175,6 +173,15 @@ namespace Pash
                 else
                 {
                     currentPipeline.Invoke();
+                }
+                // if the pipeline failed, not everything was printed by the out-default command. print the errors
+                if (currentPipeline.PipelineStateInfo.State.Equals(PipelineState.Failed))
+                {
+                    var errors = currentPipeline.Error.ReadToEnd();
+                    foreach (var curError in errors)
+                    {
+                        LocalHost.UI.WriteErrorLine(errors[errors.Count - 1].ToString());
+                    }
                 }
             }
         }

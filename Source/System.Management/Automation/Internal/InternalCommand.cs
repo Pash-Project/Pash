@@ -1,4 +1,4 @@
-﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+﻿﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System.Management.Automation.Host;
 using System.Xml.Schema;
 using Pash.Implementation;
@@ -32,7 +32,8 @@ namespace System.Management.Automation.Internal
         {
             get
             {
-                return ((PipelineCommandRuntime)CommandRuntime).IsStopping;
+                var pipelineCommandRuntime = CommandRuntime as PipelineCommandRuntime;
+                return pipelineCommandRuntime.IsStopping;
             }
         }
 
