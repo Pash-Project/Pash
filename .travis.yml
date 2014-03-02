@@ -1,11 +1,14 @@
-language: c
+language: objective-c
 
 notifications:
   email:
     on_success: always
 
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq mono-devel gtk-sharp2
+  - wget "http://download.xamarin.com/MonoFrameworkMDK/Macx86/MonoFramework-MDK-3.2.5.macos10.xamarin.x86.pkg"
+  - sudo installer -pkg "MonoFramework-MDK-3.2.5.macos10.xamarin.x86.pkg" -target /
+  - export EnableNuGetPackageRestore="true"
+  - mono --runtime=v4.0 .nuget/NuGet.exe install NUnit.Runners -Version 2.6.1 -o packages
 
-script: "xbuild /target:test"
+script:
+  - xbuild /target:test
