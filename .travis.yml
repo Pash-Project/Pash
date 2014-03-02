@@ -4,15 +4,11 @@ notifications:
   email:
     on_success: always
 
-env:
- global:
-  - EnableNuGetPackageRestore=true 
- matrix:
-  - MONO_VERSION="3.2.5"
-
 before_install:
- - wget "http://download.xamarin.com/MonoFrameworkMDK/Macx86/MonoFramework-MDK-${MONO_VERSION}.macos10.xamarin.x86.pkg"
- - sudo installer -pkg "MonoFramework-MDK-${MONO_VERSION}.macos10.xamarin.x86.pkg" -target /
+  - wget "http://download.xamarin.com/MonoFrameworkMDK/Macx86/MonoFramework-MDK-3.2.5.macos10.xamarin.x86.pkg"
+  - sudo installer -pkg "MonoFramework-MDK-3.2.5.macos10.xamarin.x86.pkg" -target /
+  - export EnableNuGetPackageRestore="true"
+  - mono --runtime=v4.0 .nuget/NuGet.exe install NUnit.Runners -Version 2.6.1 -o packages
 
 script:
- - xbuild /target:test
+  - xbuild /target:test
