@@ -1,11 +1,17 @@
-language: c
+language: objective-c
 
 notifications:
   email:
     on_success: always
 
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq mono-devel gtk-sharp2
+env:
+  matrix:
+    - MONO_VERSION="3.2.5"
 
-script: "xbuild /target:test"
+before_install:
+  - wget "http://download.xamarin.com/MonoFrameworkMDK/Macx86/MonoFramework-MDK-${MONO_VERSION}.macos10.xamarin.x86.pkg"
+  - sudo installer -pkg MonoFramework-MDK-${MONO_VERSION}.macos10.xamarin.x86.pkg -target /
+  - export EnableNuGetPackageRestore="true"
+
+script:
+  - xbuild /target:test
