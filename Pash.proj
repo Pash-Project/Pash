@@ -31,7 +31,7 @@
   </Target>
 
   <PropertyGroup>
-    <NUnitCommandLine>Tools\NUnit-2.6.1\bin\nunit-console.exe -nologo Pash.nunit</NUnitCommandLine>
+    <NUnitCommandLine>Source\packages\NUnit-2.6.3\bin\nunit-console.exe -nologo Pash.nunit</NUnitCommandLine>
   </PropertyGroup>
 
   <PropertyGroup>
