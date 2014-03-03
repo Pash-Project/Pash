@@ -71,7 +71,9 @@ namespace Pash.Implementation
             // redirect context input to first command's input
             _commandsToExecute[0].CommandRuntime.InputStream.Redirect(context.InputStream);
             // redirect output of last command to context
-            _commandsToExecute[_commandsToExecute.Count - 1].CommandRuntime.OutputStream.Redirect(context.OutputStream);
+            var lastCommandRuntime = _commandsToExecute[_commandsToExecute.Count - 1].CommandRuntime;
+            lastCommandRuntime.OutputStream.Redirect(context.OutputStream);
+            lastCommandRuntime.ErrorStream.Redirect(context.ErrorStream);
             // set correct ExecutionContext
             // TODO: think about whether it's okay that everyone uses simply the same context
             foreach (var curCommand in _commandsToExecute)

@@ -10,8 +10,16 @@ namespace Microsoft.PowerShell.Commands
         [Parameter(ValueFromPipeline = true)]
         public PSObject InputObject { get; set; }
 
-        protected override void BeginProcessing()
+        private bool CheckWriteError(object obj)
         {
+            if (!(obj is PSObject))
+            {
+                return false;
+            }
+            var writeToErrorProperty = ((PSObject) InputObject).Properties["writeToErrorStream"];
+            return (writeToErrorProperty != null &&
+                    writeToErrorProperty.Value is bool &&
+                   (bool)writeToErrorProperty.Value);
         }
 
         protected override void ProcessRecord()
@@ -21,17 +29,19 @@ namespace Microsoft.PowerShell.Commands
             // TODO: should we print Null?
             if (InputObject == null || InputObject.ImmediateBaseObject == null)
                 return;
-            var writeToErrorProperty = InputObject.Properties["writeToErrorStream"];
-            bool writeToError = (writeToErrorProperty != null && writeToErrorProperty.Value is bool && (bool)writeToErrorProperty.Value);
+            bool writeToError = CheckWriteError(InputObject);
             if (InputObject.BaseObject is Array)
             {
-                if (writeToError)
+                foreach (var curObj in (Array) InputObject.BaseObject)
                 {
-                    Host.UI.WriteErrorLine(string.Join(Environment.NewLine, (object[])InputObject.BaseObject));
-                }
-                else
-                {
-                    Host.UI.WriteLine(string.Join(Environment.NewLine, (object[])InputObject.BaseObject));
+                    if (writeToError || CheckWriteError(curObj))
+                    {
+                        Host.UI.WriteErrorLine(curObj.ToString());
+                    }
+                    else
+                    {
+                        Host.UI.WriteLine(curObj.ToString());
+                    }
                 }
             }
             else

@@ -13,6 +13,7 @@ namespace TestHost
         readonly PSHostUserInterface _ui = new TestHostUserInterface();
 
         public static InitialSessionState InitialSessionState { get; set; }
+        public static Runspace LastUsedRunspace { get; private set; }
 
         public static string Execute(params string[] statements)
         {
@@ -34,7 +35,7 @@ namespace TestHost
             return Execute(true, null, statements);
         }
 
-        private static string Execute(bool logErrors, Action<string> onErrorHandler, params string[] statements)
+        public static string Execute(bool logErrors, Action<string> onErrorHandler, params string[] statements)
         {
             TestHostUserInterface ui = new TestHostUserInterface();
 
@@ -44,12 +45,13 @@ namespace TestHost
             }
 
             TestHost host = new TestHost(ui);
-            var myRunSpace = CreateRunspace(host);
-            myRunSpace.Open();
+            // use public static property, so we can access e.g. the ExecutionContext after execution
+            LastUsedRunspace = CreateRunspace(host);
+            LastUsedRunspace.Open();
 
             foreach (var statement in statements)
             {
-                using (var currentPipeline = myRunSpace.CreatePipeline())
+                using (var currentPipeline = LastUsedRunspace.CreatePipeline())
                 {
                     currentPipeline.Commands.AddScript(statement, false);
                     currentPipeline.Commands.Add("Out-Default");
