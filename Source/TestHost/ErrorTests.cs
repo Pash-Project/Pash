@@ -45,7 +45,7 @@ namespace TestHost
         public void ErrorVarCanBeCleared()
         {
             // incomplete pipe: parse error
-            var result = TestHost.ExecuteWithZeroErrors(new string[] {@"""foo"" |; ", "$errors.Clear()"});
+            var result = TestHost.ExecuteWithZeroErrors(new string[] {@"""foo"" |; ", "$error.Clear()"});
             StringAssert.Contains("ParseException", result);
             var errorVarVal = TestHost.LastUsedRunspace.ExecutionContext.GetVariableValue("error")
                               as Collection<ErrorRecord>;
@@ -70,36 +70,80 @@ namespace TestHost
         [Test]
         public void CreateErrorCmdletCanWriteObject()
         {
-            var output = TestHost.ExecuteWithZeroErrors("Test-CreateError -Message 'test' -NoError");
-            Assert.AreEqual("test"+ Environment.NewLine, output);
+            // writes object to ui and to pipeline
+            var output = TestHost.ExecuteWithZeroErrors("Test-CreateError -Message 'test' -NoError | Write-Host");
+            Assert.AreEqual("test"+ Environment.NewLine + "test"+ Environment.NewLine, output);
         }
 
-        [TestCase("begin", new string[] {})]
-        [TestCase("process", new string[] {"foo"})]
-        [TestCase("end", new string[] {"foo", "bar"})]
+        [TestCase("begin", new string[] {})] // before anything happens
+        [TestCase("process", new string[] {"foo"})] // before writing to pipeline, but after first command
+        [TestCase("end", new string[] {"foo", "foo"})]  // message from ProcessRecords is processed by Out-Default
         public void ThrowTerminatingBreaksPipelineInCorrectPhase(string phase, string[] expectedParts)
         {
             var errors = new StringBuilder();
-            var statements_format = @"Write-Host 'foo' | Test-CreateError -Terminating -Phase {0} | Write-Host 'bar'";
-            var output = TestHost.Execute(true, s => errors.Append(s), String.Format(statements_format, phase));
-            var expected = String.Join(Environment.NewLine, expectedParts) + Environment.NewLine;
+            var pipeline = String.Join(" | ", new string[] {
+                "Test-CreateError -Message 'foo' -NoError", // writes message to host ui and to pipeline in ProcessRecord
+                // throws error in given phase and passes message to pipeline in ProcessRecord (after throwing)
+                String.Format("Test-CreateError -Terminating -Phase {0}", phase)
+            });
+            var output = TestHost.Execute(true, s => errors.Append(s), pipeline);
+            var expected = (expectedParts.Length > 0) ? 
+                             String.Join(Environment.NewLine, expectedParts) + Environment.NewLine
+                           : "";
             StringAssert.Contains("TestException", errors.ToString());
             Assert.AreEqual(expected, output);
         }
 
-        [TestCase("begin", new string[] {"TestException", "foo", "bar"})]
-        [TestCase("process", new string[] {"foo", "TestException", "bar"})]
-        [TestCase("end", new string[] {"foo", "bar", "TestException"})]
-        public void WriteErrorDoesNotBreakPipeline(string phase, string[] expectedParts)
+        // same as "end" test above, but the last output should be processed by a third command
+        [Test, Ignore("Pipeline processes input currently not directly after writing")]
+        public void BrokenPipelineStopsProcessingOfOutput()
         {
-            var statements_format = @"Write-Host 'foo' | Test-CreateError -Phase {0} | Write-Host 'bar'";
-            var output = TestHost.ExecuteWithZeroErrors(String.Format(statements_format, phase));
-            var lastpos = -1;
-            // can't just compare as the "Write-Error" operation writes a whole exception
-            foreach (var expected in expectedParts)
+            var errors = new StringBuilder();
+            var pipeline = String.Join(" | ", new string[] {
+                "Test-CreateError -Message 'foo' -NoError",
+                "Test-CreateError -Terminating -Phase End",
+                "Write-Host"
+            });
+            var output = TestHost.Execute(true, s => errors.Append(s), pipeline);
+            var expected = "foo" + Environment.NewLine + "foo" + Environment.NewLine;
+            StringAssert.Contains("TestException", errors.ToString());
+            Assert.AreEqual(expected, output);
+        }
+
+        [TestCase("begin")]
+        [TestCase("process")]
+        [TestCase("end")]
+        public void WriteErrorDoesNotBreakPipeline(string phase)
+        {
+            var errors = new StringBuilder();
+            var pipeline = String.Join(" | ", new string[] {
+                "Test-CreateError -Message 'foo' -NoError", // write and pass message
+                String.Format("Test-CreateError -Phase {0}", phase), // write error and pass message
+                "Write-Host" // write message
+            });
+            var output = TestHost.Execute(true, s => errors.Append(s), pipeline);
+            var expected = "foo" + Environment.NewLine + "foo" + Environment.NewLine;
+            StringAssert.Contains("TestException", errors.ToString());
+            Assert.AreEqual(expected, output);
+        }
+
+        [TestCase("begin", new string[] {"TestException", "foo", "foo"})]
+        [TestCase("process", new string[] {"foo", "TestException", "foo"})]
+        [TestCase("end", new string[] {"foo", "TestException", "foo"})]
+        [Ignore("Pipeline processes input currently not directly after writing")]
+        public void ErrorAppearsInCorrectOrder(string phase, string[] expectedParts)
+        {
+            var pipeline = String.Join(" | ", new string[] {
+                "Test-CreateError -Message 'foo' -NoError", // write and pass message
+                String.Format("Test-CreateError -Phase {0}", phase), // write error and pass message
+                "Write-Host" // write message
+            });
+            var output = TestHost.ExecuteWithZeroErrors(pipeline).Split(new string[] {Environment.NewLine},
+                 StringSplitOptions.None);
+            Assert.AreEqual(output.Length, expectedParts.Length);
+            for (int i = 0; i < expectedParts.Length; i++)
             {
-                int idx = output.IndexOf(expected);
-                Assert.Greater(idx, lastpos, "Expexted output not found or in wrong order!");
+                StringAssert.Contains(expectedParts[i], output[i]);
             }
         }
     }

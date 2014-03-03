@@ -51,13 +51,17 @@ namespace Pash.Implementation
 
         public override void ProcessRecords()
         {
+            // TODO: make a check if process is already started. ProcessRecords() can be called multiple times
             var flag = GetPSForceSynchronizeProcessOutput();
             _shouldBlock = NeedWaitForProcess(flag, ApplicationInfo.Path);
             _process = StartProcess();
 
             foreach (var curInput in CommandRuntime.InputStream.Read())
             {
-                _process.StandardInput.WriteLine(curInput.ToString());
+                if (curInput != null)
+                {
+                    _process.StandardInput.WriteLine(curInput.ToString());
+                }
             }
 
             if (!_shouldBlock)

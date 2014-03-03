@@ -110,6 +110,14 @@ namespace Pash.Implementation
 
             Input.Write(input, true);
 
+            // in a pipeline, the first command enters *always* the ProcessRecord phase, the following commands only
+            // if the previous command generated output. To make sure the first command enters that phase, add null
+            // if nothing else is in the input stream
+            if (_inputStream.Count == 0)
+            {
+                Input.Write(null);
+            }
+
             string errorId = "BuildingPipelineProcessorFailed";
 
             ExecutionContext context = _runspace.ExecutionContext.Clone();

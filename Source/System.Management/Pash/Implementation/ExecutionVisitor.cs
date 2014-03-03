@@ -32,9 +32,12 @@ namespace System.Management.Pash.Implementation
 
         ExecutionVisitor CloneSub(bool writeSideEffectsToPipeline)
         {
+            var subContext = this._context.CreateNestedContext();
+            var subRuntime = new PipelineCommandRuntime(this._pipelineCommandRuntime.PipelineProcessor);
+            subRuntime.ExecutionContext = subContext;
             return new ExecutionVisitor(
-                this._context.CreateNestedContext(), //Why can't we just use the original context?
-                new PipelineCommandRuntime(this._pipelineCommandRuntime.PipelineProcessor),
+                subContext,
+                subRuntime,
                 writeSideEffectsToPipeline
                 );
         }
@@ -233,55 +236,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitCommand(CommandAst commandAst)
         {
-            // Pipeline uses global execution context, so we should set its WriteSideEffects flag, and restore it to previous value after.
-            //TODO: make sure this is still needed
-            var pipeLineContext = _context.CurrentRunspace.ExecutionContext;
-            bool writeSideEffects = pipeLineContext.WriteSideEffectsToPipeline;
-            try
-            {
-                pipeLineContext.WriteSideEffectsToPipeline = _writeSideEffectsToPipeline;
-                var pipeline = _context.CurrentRunspace.CreateNestedPipeline();
-
-                foreach (var input in _context.InputStream.Read())
-                {
-                    pipeline.Input.Write(input);
-                }
-
-                var command = GetCommand(commandAst);
-
-                commandAst.CommandElements
-                    // the first CommandElements is the command itself. The rest are parameters/arguments
-                    .Skip(1)
-                    .Select(ConvertCommandElementToCommandParameter)
-                    .ForEach(command.Parameters.Add);
-
-                pipeline.Commands.Add(command);
-
-                _context.PushPipeline(pipeline);
-                try
-                {
-                    // TODO: develop a rational model for null/singleton/collection
-                    foreach (var curResult in pipeline.Invoke())
-                    {
-                        _pipelineCommandRuntime.WriteObject(curResult, true);
-                    }
-                    var errors = pipeline.Error.NonBlockingRead();
-                    foreach (var curError in errors)
-                    {
-                        _pipelineCommandRuntime.ErrorStream.Write(curError);
-                    }
-                }
-                finally
-                {
-                    _context.PopPipeline();
-                }
-            }
-            finally
-            {
-                pipeLineContext.WriteSideEffectsToPipeline = writeSideEffects;
-            }
-
-            return AstVisitAction.SkipChildren;
+            throw new Exception("Unreachable, should be part of a pipeline. Please report this!");
         }
 
         CommandParameter ConvertCommandElementToCommandParameter(CommandElementAst commandElement)
@@ -394,35 +349,90 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitPipeline(PipelineAst pipelineAst)
         {
-            // TODO: rewrite this - it should expand the commands in the original pipe
-            // TODO: Why don't we take the normal pipeline mechanism?
-
-            PipelineCommandRuntime subRuntime = null;
-
-            foreach (var pipelineElement in pipelineAst.PipelineElements)
+            // shouldn't happen, but anyway
+            if (!pipelineAst.PipelineElements.Any())
             {
-                ExecutionContext subContext = this._context.CreateNestedContext();
-
-                if (subRuntime == null)
-                {
-                    subContext.InputStream = this._context.InputStream;
-                }
-                else
-                {
-                    subContext.InputStream = subRuntime.OutputStream;
-                }
-
-                subRuntime = new PipelineCommandRuntime(this._pipelineCommandRuntime.PipelineProcessor);
-                subRuntime.ExecutionContext = subContext;
-                pipelineElement.Visit(new ExecutionVisitor(subContext, subRuntime, this._writeSideEffectsToPipeline));
+                return AstVisitAction.SkipChildren;
             }
-            foreach (var error in subRuntime.ErrorStream.Read())
+            // Pipeline uses global execution context, so we should set its WriteSideEffects flag, and restore it after.
+            // TODO: I'm not very sure about that changing context and WriteSideEffectsToPipeline stuff
+            var pipeLineContext = _context.CurrentRunspace.ExecutionContext;
+            bool writeSideEffects = pipeLineContext.WriteSideEffectsToPipeline;
+            try
             {
-                this._pipelineCommandRuntime.ErrorStream.Write(error);
+                pipeLineContext.WriteSideEffectsToPipeline = _writeSideEffectsToPipeline;
+                var pipeline = _context.CurrentRunspace.CreateNestedPipeline();
+                int startAt = 0; // set to 1 if first element is an expression
+                int pipelineCommandCount = pipelineAst.PipelineElements.Count;
+
+                // first element of pipeline can be an expression that needs to be evaluated
+                var expression = pipelineAst.PipelineElements[0] as CommandExpressionAst;
+                if (expression != null)
+                {
+                    // evaluate it and get results
+                    var value = EvaluateAst(expression.Expression, _writeSideEffectsToPipeline);
+                    // if we only have that one expression and no commands, write expression to output and return
+                    if (pipelineCommandCount == 1)
+                    {
+                        _pipelineCommandRuntime.WriteObject(value, true);
+                        return AstVisitAction.SkipChildren;
+                    }
+                    // otherwise write value to input of pipeline to be processed
+                    pipeline.Input.Write(value, true);
+                    startAt = 1;
+                }
+                else // if there was no expression we take the input of the context's input stream
+                {
+                    foreach (var input in _context.InputStream.Read())
+                    {
+                        pipeline.Input.Write(input);
+                    }
+                }
+
+                // all other elements *need* to be commands (same in PS). Make that sure and add them to the pipeline
+                for (int curCommand = startAt; curCommand < pipelineCommandCount; curCommand++)
+                {
+                    var commandAst = pipelineAst.PipelineElements[curCommand] as CommandAst;
+                    if (commandAst == null)
+                    {
+                        throw new NotSupportedException("Invalid command in pipeline."
+                            + " Only the first element of a pipeline can be an expression.");
+                    }
+                    var command = GetCommand(commandAst);
+
+                    commandAst.CommandElements
+                    // the first CommandElements is the command itself. The rest are parameters/arguments
+                    .Skip(1)
+                        .Select(ConvertCommandElementToCommandParameter)
+                        .ForEach(command.Parameters.Add);
+
+                    pipeline.Commands.Add(command);
+                }
+
+                // now execute the pipeline
+                _context.PushPipeline(pipeline);
+                try
+                {
+                    var results = pipeline.Invoke();
+                    // read output and error and write them as results of the current commandRuntime
+                    foreach (var curResult in results)
+                    {
+                        _pipelineCommandRuntime.WriteObject(curResult, true);
+                    }
+                    var errors = pipeline.Error.NonBlockingRead();
+                    foreach (var curError in errors)
+                    {
+                        _pipelineCommandRuntime.ErrorStream.Write(curError);
+                    }
+                }
+                finally
+                {
+                    _context.PopPipeline();
+                }
             }
-            foreach (var output in subRuntime.OutputStream.Read())
+            finally
             {
-                this._pipelineCommandRuntime.WriteObject(output, true);
+                pipeLineContext.WriteSideEffectsToPipeline = writeSideEffects;
             }
 
             return AstVisitAction.SkipChildren;
@@ -446,7 +456,8 @@ namespace System.Management.Pash.Implementation
         {
             var variable = GetVariable(variableExpressionAst);
             var value = (variable != null) ? variable.Value : null;
-            this._pipelineCommandRuntime.WriteObject(value, true);
+            var expandEnumerable = !variableExpressionAst.PreventEnumerationOnEvaluation;
+            this._pipelineCommandRuntime.WriteObject(value, expandEnumerable);
 
             return AstVisitAction.SkipChildren;
         }
@@ -624,6 +635,14 @@ namespace System.Management.Pash.Implementation
 
         private ObjectInfo GetObjectInfo(ExpressionAst expression)
         {
+            // we want an object. so if the expression is a variable including an enumerable object (e.g. collection)
+            // then we want the collection itself. The enumerable object should only be expanded when being processed
+            // e.g. in a pipeline
+            var variableExpression = expression as VariableExpressionAst;
+            if (variableExpression != null)
+            {
+                variableExpression.PreventEnumerationOnEvaluation = true;
+            }
             return new ObjectInfo(EvaluateAst(expression));
         }
 
@@ -762,8 +781,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitCommandExpression(CommandExpressionAst commandExpressionAst)
         {
-            // just iterate over children
-            return base.VisitCommandExpression(commandExpressionAst);
+            throw new Exception("Unreachable, should be part of a pipeline. Please report this!");
         }
 
         public override AstVisitAction VisitCommandParameter(CommandParameterAst commandParameterAst)

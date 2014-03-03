@@ -6,7 +6,7 @@ using System.Management.Automation;
 namespace TestHost.TestHelpers
 {
     [Cmdlet("Test", "CreateError")]
-    public class TestCreateError : PSCmdlet
+    public class TestCreateErrorCommand : PSCmdlet
     {
         public enum Phases
         {
@@ -18,7 +18,7 @@ namespace TestHost.TestHelpers
         [Parameter]
         public Phases Phase { get; set; }
 
-        [Parameter]
+        [Parameter(ValueFromPipeline = true)]
         public string Message { get; set; }
 
         [Parameter]
@@ -27,18 +27,14 @@ namespace TestHost.TestHelpers
         [Parameter]
         public SwitchParameter NoError { get; set; }
 
-        private void DoWork()
+        private void DoError()
         {
             var err = new TestException(Message ?? "testerror").ErrorRecord;
             if (NoError.IsPresent)
             {
                 if (Message != null)
                 {
-                    WriteObject(Message);
-                }
-                else
-                {
-                    WriteObject(err);
+                    Host.UI.WriteLine(Message);
                 }
             }
             else if (Terminating.IsPresent)
@@ -55,7 +51,7 @@ namespace TestHost.TestHelpers
         {
             if (Phase.Equals(Phases.Begin))
             {
-                DoWork();
+                DoError();
             }
         }
 
@@ -63,7 +59,12 @@ namespace TestHost.TestHelpers
         {
             if (Phase.Equals(Phases.Process))
             {
-                DoWork();
+                DoError();
+            }
+            // write input object to pipeline for further processing
+            if (Message != null)
+            {
+                WriteObject(Message);
             }
         }
 
@@ -71,7 +72,7 @@ namespace TestHost.TestHelpers
         {
             if (Phase.Equals(Phases.End))
             {
-                DoWork();
+                DoError();
             }
         }
     }

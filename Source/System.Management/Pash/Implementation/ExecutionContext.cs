@@ -61,7 +61,8 @@ namespace Pash.Implementation
 
         public ExecutionContext CreateNestedContext()
         {
-            //What's the purpose of this function?
+            // I guess the idea of this function is that Input/Error/Ouput streams aren't copied
+            // However, as it works as it is, we won't change this, yet
             ExecutionContext nestedContext = Clone();
 
             //nestedContext.
@@ -127,7 +128,7 @@ namespace Pash.Implementation
                 // TODO: this should never happen as the variable is const. but anyway
                 return;
             }
-            records.Add(errorRecord);
+            records.Insert(0, errorRecord);
         }
     }
 }

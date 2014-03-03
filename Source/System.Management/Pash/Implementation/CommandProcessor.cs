@@ -1,4 +1,4 @@
-﻿﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Linq;
 using System.Collections;
@@ -127,6 +127,7 @@ namespace System.Management.Automation
 
             if (valueFromPipelineParameter != null)
             {
+                // TODO: throw an error if this parameter is already bound (in _boundArguments)
                 BindArgument(valueFromPipelineParameter.Name, curInput, valueFromPipelineParameter.ParameterType);
             }
         }
@@ -332,12 +333,14 @@ namespace System.Management.Automation
         /// </summary>
         public override void ProcessRecords()
         {
-            var inputObjects = CommandRuntime.InputStream.Read();
-            // make sure we call ProcessRecord at least once!
-            if (!inputObjects.Any())
+            // check if we already called BeginProcessing for this command
+            if (!_beganProcessing)
             {
-                inputObjects.Add(null);
+                // this can happen if the previous element in the pipeline produces output in the BeginProcessing phase
+                // than this command is asked to process the records but wasn't in the BeginProcessing phase, yet.
+                BeginProcessing();
             }
+            var inputObjects = CommandRuntime.InputStream.Read();
             foreach (var curInput in inputObjects)
             {
                 RestoreCommandLineArguments();

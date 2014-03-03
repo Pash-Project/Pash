@@ -10,6 +10,9 @@ namespace Pash.Implementation
 {
     internal class PipelineProcessor
     {
+        // TODO: implement direct input processing: if one command does generate output, ProcessRecords() of the
+        // next command should be called immediately (so says the specification)
+
         // TODO: implement pipeline stopping mechanism
         // Not really supposed to be `const`, that's just to clarify that this variable isn't currently used.
         private const bool _stopping = false;
@@ -73,11 +76,14 @@ namespace Pash.Implementation
             // redirect output of last command to context
             var lastCommandRuntime = _commandsToExecute[_commandsToExecute.Count - 1].CommandRuntime;
             lastCommandRuntime.OutputStream.Redirect(context.OutputStream);
-            lastCommandRuntime.ErrorStream.Redirect(context.ErrorStream);
-            // set correct ExecutionContext
+            // set correct ExecutionContext and direct all unclaimed error streams to the context error stream
             // TODO: think about whether it's okay that everyone uses simply the same context
             foreach (var curCommand in _commandsToExecute)
             {
+                if (curCommand.CommandRuntime.ErrorStream.ClaimedBy == null)
+                {
+                    curCommand.CommandRuntime.ErrorStream.Redirect(context.ErrorStream);
+                }
                 curCommand.ExecutionContext = context;
             }
 
@@ -105,15 +111,11 @@ namespace Pash.Implementation
                     2. Bind dynamic pipeline parameters.
                     3. Determine wether all necessary parameters are set
                     4. Call the real command's "ProcessRecord" method
+               END - call all EndProcessing methods
              */
             foreach (var curCommand in _commandsToExecute)
             {
                 curCommand.ProcessRecords();
-            }
-
-            // END - call all EndProcessing methods
-            foreach (var curCommand in _commandsToExecute)
-            {
                 curCommand.EndProcessing();
             }
         }

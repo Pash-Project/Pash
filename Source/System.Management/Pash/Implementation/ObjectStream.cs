@@ -11,7 +11,9 @@ namespace Pash.Implementation
 {
     internal class ObjectStream
     {
-        // TODO: implement ObjectStream
+        // TODO: implement this in a way that we can call a ProcessRecord method if an element is written
+        // and the stream is claimed by a specific command (as input). In this way, we implement the "process record
+        // as soon as an object is available" specification
         private ArrayList _objectsStream;
         public object Owner { get; private set; }
         public object ClaimedBy { get; private set; }

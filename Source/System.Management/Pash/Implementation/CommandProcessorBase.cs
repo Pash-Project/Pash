@@ -1,4 +1,4 @@
-﻿﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System.Management.Automation.Runspaces;
 using System.Management.Automation;
 
@@ -55,15 +55,16 @@ namespace Pash.Implementation
         }
 
         /// <summary>
-        /// First phase of lifecycle. E.g. for binding parameters that take command-line input.
+        /// First phase of lifecycle. E.g. for binding parameters that take command-line input. This happens
+        /// before any command in the pipeline is executed and in this phase the command can not write to error/output
         /// </summary>
         public abstract void Prepare();
 
         /// <summary>
         /// Starting the processing. E.g. for the cmdlet's BeginProcessing method.
         /// At this point, the CommandRuntime is already set up and can be used.
-        /// Note that all elements of the pipeline pass this phase before one element
-        /// enters the next phase.
+        /// Usually, this phase is called before any element of the pipeline enters the ProcessRecord phase,
+        /// unless some element produces output that needs to be directly consumed
         /// </summary>
         public abstract void BeginProcessing();
 
@@ -71,11 +72,14 @@ namespace Pash.Implementation
         /// The phase in which the pipeline's input objects are processed.
         /// For a cmdlet this means that eah object is bound as parameter and
         /// then processed by the cmdlet's ProcessRecord method.
+        /// This method might be called several times, as soon as new input is available that needs to be processed
         /// </summary>
         public abstract void ProcessRecords();
 
         /// <summary>
-        /// The last phase. This is for cmdlet's to clean up after themselves (EndProcessing method).
+        /// The last phase. This phase is executed directly after the ProcessRecords phase of this command.
+        /// Only after this phase, the next command in the pipeline enters the ProcessRecords phase.
+        /// This is for cmdlet's to clean up after themselves (EndProcessing method).
         /// Last but not least this is for cleanup of the CommandProcessor itself.
         /// </summary>
         public abstract void EndProcessing();
