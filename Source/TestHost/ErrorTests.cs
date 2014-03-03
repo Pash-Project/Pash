@@ -42,6 +42,17 @@ namespace TestHost
          }
 
         [Test]
+        public void ErrorVarCanBeCleared()
+        {
+            // incomplete pipe: parse error
+            var result = TestHost.ExecuteWithZeroErrors(new string[] {@"""foo"" |; ", "$errors.Clear()"});
+            StringAssert.Contains("ParseException", result);
+            var errorVarVal = TestHost.LastUsedRunspace.ExecutionContext.GetVariableValue("error")
+                              as Collection<ErrorRecord>;
+            errorVarVal.ShouldBeEmpty();
+        }
+
+        [Test]
         public void CreateErrorCmdletCanThrowTerminating()
         {
             var output = TestHost.ExecuteWithZeroErrors("Test-CreateError -Terminating");
