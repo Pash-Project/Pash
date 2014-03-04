@@ -22,7 +22,7 @@ namespace System.Management.Tests.ParameterTests
         [Test]
         public void ParameterSetCount()
         {
-            Assert.AreEqual(3, info.ParameterSets.Count);
+            Assert.AreEqual(4, info.ParameterSets.Count);
         }
 
         [Test]
@@ -31,6 +31,7 @@ namespace System.Management.Tests.ParameterTests
             CommandParameterSetInfo allSet = info.GetParameterSetByName(ParameterAttribute.AllParameterSets);
             CommandParameterSetInfo fileSet = info.GetParameterSetByName("File");
             CommandParameterSetInfo variableSet = info.GetParameterSetByName("Variable");
+
 
             Assert.AreEqual(3, allSet.Parameters.Count);
             Assert.AreEqual(4, fileSet.Parameters.Count);

@@ -150,44 +150,77 @@ namespace System.Management.Automation
                 }
             }
 
+            bool didSet = false;
             // TODO: make this generic
-            if (memberType == typeof(PSObject[]))
+            if (memberType == typeof(PSObject[])) // check for simple PSObjects / arrays of it first
             {
                 SetCommandValue(memberInfo, new[] { PSObject.AsPSObject(value) });
+                didSet = true;
+            }
+            else if (memberType == typeof(PSObject))
+            {
+                SetCommandValue(memberInfo, PSObject.AsPSObject(value));
+                didSet = true;
             }
 
-            else if (memberType == typeof(String[]))
+            if (didSet)
+            {
+                _boundArguments.Add(memberInfo);
+                return;
+            }
+
+            // unpack the value if it's a PSObject
+            if (value is PSObject)
+            {
+                value = ((PSObject)value).BaseObject;
+            }
+            if (memberType == typeof(String[]))  // check for strings and convert
             {
                 SetCommandValue(memberInfo, ConvertToStringArray(value));
             }
-
             else if (memberType == typeof(String))
             {
                 SetCommandValue(memberInfo, value.ToString());
             }
-
-            else if (memberType.IsEnum) {
-                SetCommandValue (memberInfo, Enum.Parse (type, value.ToString(), true));
-            }
-
-            else if (memberType == typeof(PSObject))
+            else if (memberType.IsEnum) // enums have to be parsed
             {
-                SetCommandValue(memberInfo, PSObject.AsPSObject(value));
+                SetCommandValue(memberInfo, Enum.Parse(type, value.ToString(), true));
             }
-
-            else if (memberType == typeof(SwitchParameter))
+            else if (memberType == typeof(SwitchParameter)) // switch parameters can simply be present
             {
                 SetCommandValue(memberInfo, new SwitchParameter(true));
             }
-
-            else if (memberType == typeof(Object[]))
+            else if (value != null && memberType == value.GetType()) // same type
             {
-                SetCommandValue(memberInfo, new[] { value });
+                SetCommandValue(memberInfo, value);
             }
-
-            else
+            // check if array alements need to be casted
+            else if (memberType.IsArray)
             {
-                SetCommandValue(memberInfo, value is PSObject ? ((PSObject)value).BaseObject : value);
+                var elementType = memberType.GetElementType();
+                Array convertedValues;
+                if (value.GetType().IsArray)
+                {
+                    Array valueArray = (Array)value;
+                    int valueCount = valueArray.Length;
+                    convertedValues = Array.CreateInstance(elementType, valueCount);
+                    // try to cast each element to the desired type
+                    for (int i = 0; i < valueCount; i++)
+                    {
+                        var converted = ConvertOrCast(valueArray.GetValue(i), elementType);
+                        convertedValues.SetValue(converted, i);
+                    }
+                }
+                else
+                {
+                    convertedValues = Array.CreateInstance(elementType, 1);
+                    convertedValues.SetValue(ConvertOrCast(value, elementType), 0);
+                }
+                SetCommandValue(memberInfo, convertedValues);
+            }
+            else // last option: try direct cast
+            {
+                SetCommandValue(memberInfo, ConvertOrCast(value, memberType));
             }
             _boundArguments.Add(memberInfo);
         }
@@ -203,6 +236,34 @@ namespace System.Management.Automation
             {
                 return new[] { value.ToString() };
             }
+        }
+
+        private object ConvertOrCast(object value, Type type)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+            // check for convertibles
+            try
+            {
+                if (value is IConvertible)
+                {
+                    return Convert.ChangeType(value, type);
+                }
+            }
+            catch (Exception) //ignore exception and try cast
+            {
+            }
+            // following idea from http://stackoverflow.com/questions/3062807/dynamic-casting-based-on-type-information
+            var castMethod = this.GetType().GetMethod("Cast").MakeGenericMethod(type);
+            // it's okay to have an excpetion if we can't do anything anymore, then the parameter just doesn't work
+            return castMethod.Invoke(null, new object[] { value });
+        }
+
+        public static T Cast<T>(object obj)
+        {
+            return (T) obj;
         }
 
         private void SetCommandValue(MemberInfo info, object value)

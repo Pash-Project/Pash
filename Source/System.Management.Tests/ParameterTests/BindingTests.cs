@@ -194,11 +194,12 @@ namespace System.Management.Tests.ParameterTests
             CmdletArgumentBinder binder = new CmdletArgumentBinder(info, cmdlet);
             CommandParameterCollection parameters = new CommandParameterCollection();
 
-            parameters.Add("FavoriteNumbers", 2);
+            double pi = 3.14159;
+            parameters.Add("FavoriteNumbers", pi);
 
             binder.BindCommandLineArguments(parameters);
 
-            Assert.AreEqual(cmdlet.FavoriteNumbers, new int[] { 2 });
+            Assert.AreEqual(cmdlet.FavoriteNumbers, new double[] { pi });
         }
 
         [Test]
@@ -213,7 +214,21 @@ namespace System.Management.Tests.ParameterTests
 
             binder.BindCommandLineArguments(parameters);
 
-            Assert.AreEqual(cmdlet.FavoriteNumbers, new Exception[] { exception });
+            Assert.AreEqual(new Exception[] { exception }, cmdlet.FavoriteExceptions);
+        }
+
+        public void BindingParameterArrayElementConversion()
+        {
+            TestParameterCommand cmdlet = new TestParameterCommand();
+            CmdletArgumentBinder binder = new CmdletArgumentBinder(info, cmdlet);
+            CommandParameterCollection parameters = new CommandParameterCollection();
+
+            int two = 2;
+            parameters.Add("FavoriteNumbers", two);
+
+            binder.BindCommandLineArguments(parameters);
+
+            Assert.AreEqual(cmdlet.FavoriteNumbers, new double[] { (double) two });
         }
     }
 }

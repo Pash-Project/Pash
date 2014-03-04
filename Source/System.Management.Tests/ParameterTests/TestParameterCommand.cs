@@ -28,10 +28,10 @@ namespace System.Management.Tests.ParameterTests
         [Parameter]
         public SwitchParameter Recurse;
 
-        [Parameter]
-        public int[] FavoriteNumbers { get; set; }
+        [Parameter(ParameterSetName = "Other")]
+        public double[] FavoriteNumbers { get; set; }
 
-        [Parameter]
+        [Parameter(ParameterSetName = "Other")]
         public Exception[] FavoriteExceptions { get; set; }
 
         // ValueFromPipeline need public getter so this should be skipped
