@@ -15,15 +15,20 @@ namespace System.Management.Automation.Runspaces
         public object GetVariable(string name)
         {
             if (string.IsNullOrEmpty(name))
+            {
                 throw new NullReferenceException("Variable name can't be empty.");
+            }
 
-            return _runspace.ExecutionContext.SessionState.PSVariable.Get(name);
+            var variable = _runspace.ExecutionContext.SessionState.PSVariable.Get(name);         
+            return (variable == null) ? null : variable.Value;
         }
 
         public void SetVariable(string name, object value)
         {
             if (string.IsNullOrEmpty(name))
+            {
                 throw new NullReferenceException("Variable name can't be empty.");
+            }
 
             _runspace.ExecutionContext.SessionState.PSVariable.Set(name, value);
         }
