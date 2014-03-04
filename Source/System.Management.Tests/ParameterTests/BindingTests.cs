@@ -186,5 +186,34 @@ namespace System.Management.Tests.ParameterTests
                     binder.BindCommandLineArguments(parameters);
             });
         }
+
+        [Test]
+        public void BindingParameterIntToIntArrayConversion()
+        {
+            TestParameterCommand cmdlet = new TestParameterCommand();
+            CmdletArgumentBinder binder = new CmdletArgumentBinder(info, cmdlet);
+            CommandParameterCollection parameters = new CommandParameterCollection();
+
+            parameters.Add("FavoriteNumbers", 2);
+
+            binder.BindCommandLineArguments(parameters);
+
+            Assert.AreEqual(cmdlet.FavoriteNumbers, new int[] { 2 });
+        }
+
+        [Test]
+        public void BindingParameterAnyObjectToSpecificArrayConversion()
+        {
+            TestParameterCommand cmdlet = new TestParameterCommand();
+            CmdletArgumentBinder binder = new CmdletArgumentBinder(info, cmdlet);
+            CommandParameterCollection parameters = new CommandParameterCollection();
+
+            var exception = new RuntimeException("foo");
+            parameters.Add("FavoriteExceptions", exception);
+
+            binder.BindCommandLineArguments(parameters);
+
+            Assert.AreEqual(cmdlet.FavoriteNumbers, new Exception[] { exception });
+        }
     }
 }

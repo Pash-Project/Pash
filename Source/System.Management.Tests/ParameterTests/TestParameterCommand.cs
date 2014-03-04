@@ -28,6 +28,12 @@ namespace System.Management.Tests.ParameterTests
         [Parameter]
         public SwitchParameter Recurse;
 
+        [Parameter]
+        public int[] FavoriteNumbers { get; set; }
+
+        [Parameter]
+        public Exception[] FavoriteExceptions { get; set; }
+
         // ValueFromPipeline need public getter so this should be skipped
         [Parameter(ValueFromPipelineByPropertyName = true, ParameterSetName = "TheseShouldBeSkipped")]
         public int Length { private get; set; }
