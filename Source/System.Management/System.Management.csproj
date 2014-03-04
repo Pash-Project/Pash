@@ -64,10 +64,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Irony, Version=1.0.0.0, Culture=neutral, PublicKeyToken=ca48ace7223ead47, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Irony.0.9.0\lib\net45\Irony.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -489,9 +485,12 @@
   </Target>
   -->
   <ItemGroup>
-    <Content Include="Pash\ParserIntrinsics\README.TXT" />
+    <ProjectReference Include="..\..\Libraries\Irony\Irony\010.Irony.2010.csproj">
+      <Project>{D81F5C91-D7DB-46E5-BC99-49488FB6814C}</Project>
+      <Name>010.Irony.2010</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <Content Include="Pash\ParserIntrinsics\README.TXT" />
   </ItemGroup>
 </Project>
