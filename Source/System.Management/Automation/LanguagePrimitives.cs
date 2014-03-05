@@ -7,6 +7,7 @@ using System.Linq;
 using System.Collections;
 using System.Globalization;
 using System.Reflection;
+using System.Collections.Generic;
 
 namespace System.Management.Automation
 {
@@ -178,37 +179,57 @@ namespace System.Management.Automation
                 throw new ArgumentException("Result type can not be null.");
             }
 
-            // TODO: use PSTypeConverters for the following!
-            // value might be a PSObject, so check that first
-            if (resultType == typeof(PSObject[]))
+            // check if the result is an array and we have something that needs to be casted
+            if (resultType.IsArray && valueToConvert != null && resultType != valueToConvert.GetType())
             {
-                // TODO: sburnicki - check if value is an array
-                return new[] { PSObject.AsPSObject(valueToConvert) };
+                var elementType = resultType.GetElementType();
+                var enumerableValue = valueToConvert as IEnumerable;
+                // check for simple packaging
+                if (enumerableValue == null || enumerableValue is string) // nothing "real" enumerable
+                {
+                    var array = Array.CreateInstance(elementType, 1);
+                    array.SetValue(ConvertTo(valueToConvert, elementType, formatProvider), 0);
+                    return array;
+                }
+                // otherwise we have some IEnumerable thing. recursively create a list and copy to array
+                // a list first, because we don't know the number of arguments
+                var list = (IList) Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType));
+                foreach (var curValue in enumerableValue)
+                {
+                    list.Add(ConvertTo(curValue, elementType, formatProvider));
+                }
+                var targetArray = Array.CreateInstance(elementType, list.Count);
+                for (int i = 0; i < list.Count; i++)
+                {
+                    targetArray.SetValue(list[i], i);
+                }
+                return targetArray;
             }
 
+            // resultType is no array
+            // TODO: use PSTypeConverters for the following!
             if (resultType == typeof(PSObject))
             {
                 return PSObject.AsPSObject(valueToConvert);
             }
 
-            // unpack the value if it's a PSObject
+            // result is no PSObject, so unpack the value if we deal with one
             if (valueToConvert is PSObject)
             {
                 valueToConvert = ((PSObject)valueToConvert).BaseObject;
             }
 
-            if (resultType == typeof(String[]))  // check for strings and convert
+            if (valueToConvert != null && resultType.IsAssignableFrom(valueToConvert.GetType()))
             {
-                return ConvertToStringArray(valueToConvert);
+                return valueToConvert;
             }
 
-
-            if (resultType == typeof(String))
+            if (valueToConvert != null && resultType == typeof(String))
             {
                 return valueToConvert.ToString();
             }
 
-            if (resultType.IsEnum) // enums have to be parsed
+            if (valueToConvert != null && resultType.IsEnum) // enums have to be parsed
             {
                 return Enum.Parse(resultType, valueToConvert.ToString(), true);
             }
@@ -216,37 +237,6 @@ namespace System.Management.Automation
             if (resultType == typeof(SwitchParameter)) // switch parameters can simply be present
             {
                 return new SwitchParameter(true);
-            }
-
-            if (resultType.IsAssignableFrom(valueToConvert.GetType()))
-            {
-                return valueToConvert;
-            }
-
-            // check if array alements need to be casted
-            else if (resultType.IsArray)
-            {
-                var elementType = resultType.GetElementType();
-                Array convertedValues;
-                if (valueToConvert.GetType().IsArray)
-                {
-                    Array valueArray = (Array) valueToConvert;
-                    int valueCount = valueArray.Length;
-                    convertedValues = Array.CreateInstance(elementType, valueCount);
-                    // try to cast each element to the desired type
-                    for (int i = 0; i < valueCount; i++)
-                    {
-                        // TODO: sburnicki: use this convertToMethod again!
-                        var converted = DefaultConvertOrCast(valueArray.GetValue(i), elementType);
-                        convertedValues.SetValue(converted, i);
-                    }
-                }
-                else
-                {
-                    convertedValues = Array.CreateInstance(elementType, 1);
-                    convertedValues.SetValue(DefaultConvertOrCast(valueToConvert, elementType), 0);
-                }
-                return convertedValues;
             }
 
             return DefaultConvertOrCast(valueToConvert, resultType);
@@ -396,25 +386,8 @@ namespace System.Management.Automation
 
         #endregion
 
-        private static object ConvertToStringArray(object value)
-        {
-            if ((value is IEnumerable) && !(value is string))
-            {
-                return (from object item in (IEnumerable)value
-                    select item.ToString()).ToArray();
-            }
-            else
-            {
-                return new[] { value.ToString() };
-            }
-        }
-
         private static object DefaultConvertOrCast(object value, Type type)
         {
-            if (value == null)
-            {
-                return null;
-            }
             // check for convertibles
             try
             {
