@@ -35,9 +35,22 @@ namespace System.Management.Automation
         /// </remarks>
         public void BindCommandLineArguments(CommandParameterCollection parameters)
         {
-            // TODO: If parameter has ValueFromRemainingArguments any unmatched arguments should be bound to this parameter as an array
-            // TODO: If no parameter has ValueFromRemainingArguments any supplied parameters are unmatched then fail with exception
-            // TODO: try to get missing parameters that cannot be acquired by pipeline input, and fail otherwise
+            // TODO: sburnicki - implement the behavior:
+            // How command line arguments are bound:
+            // 1. Bind all named parameters, fail if some name is bound twice
+            // 2. Check if there is an "active" parameter set, yet. Active: Identified to be used (unique parameter set)
+            //    If there is more than one "active" parameter set, fail with ambigous error
+            // 3. Bind positional parameters per parameter set
+            //    To do so, sort parameters of set by position, ignore bound parameters and set the first unbound position
+            // 4. This would be the place for common parameters, support of ShouldProcess and dynamic parameters
+            // 5. Check if there is an "active" parameter set, yet, and fail if there are more than one
+            // 6. For either the (active or default) parameter set: Gather missing mandatory parameters by UI
+            //    But not pipeline related parameters, they might get passed later on
+            // 7. Check if (active or default) parameter set has unbound mandatory parameters and fail if so
+            //    But ignore pipeline related parameters for that check, they might get passed later on
+            // 8. Define "candidate" parameter sets: All that have mandatory parameters set, ignoring pipeline related
+            //    If one set is already active, this should be the only candidate set
+            // 9. Bind all set parameters for (active or default) parameter set and back them up 
 
             if (parameters.Count == 0)
                 return;
@@ -109,7 +122,28 @@ namespace System.Management.Automation
         /// <param name="curInput">Current input object from the pipeline</param>
         public void BindPipelineArguments(object curInput)
         {
-            // TODO: Bind obj properties to ValueFromPipelinebyPropertyName parameters
+            // TODO: sburnicki - implement the behavior:
+            // How pipeline parameters are bound
+            // 1. If this command is the first in pipeline and there are no input objects:
+            //    Then get all left mandatory parameters for the (active or default) parameter set from UI
+            // 2. If there is an input object:
+            //    1. If the default parameter set is still a candidate:
+            //       1. Try to bind the object to the parameter *without* type conversion with "ValueFromPipeline" set, if exists
+            //       2. If this is not sucessfull, try to bind the object to parameters with "ValueFromPipelineByPropertyName"
+            //         *without" conversion, if exists
+            //       3. If this fails, try 1. step but *with* type conversion
+            //       4. If this fails, try 2. step but *with* type conversion
+            //    2. If binding to the default set was not possible, try the same with all parameters
+            // 3. This would be the place to process dynamic pipeline parameters
+            // 3. Check for active sets, fail the record (ambiguous) if there are multiples (can only be no-defaults)
+            // 4. Check for candidate sets, not ignoring pipeline related parameters
+            //    1. If there is only one candidate: Choose that parameter set
+            //    3. If there is more than one candidate, and there is one active set among them: choose that set
+            //    4. If there is more than one candidate, no active set, but the default set: choose the default set
+            //    4. If there is more than one candidate, and no active set: fail the record (ambiguous)
+            //    4. If there is no candidate, fail the record and tell why the (active or default) set wasn't satisfied
+            // 5. At this point we know the chosen parameter set. The parameters can be bound to the command
+
             if (curInput == null)
             {
                 return;
