@@ -21,3 +21,6 @@ _ReSharper.*
 test-results/
 *.VisualState.xml
 TestResult.xml
+
+# NuGet
+Source/packages
