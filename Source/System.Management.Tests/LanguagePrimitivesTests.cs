@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using System;
 using System.Management.Automation;
+using System.Collections.ObjectModel;
 
 namespace System.Management.Tests
 {
@@ -59,6 +60,17 @@ namespace System.Management.Tests
             var result = LanguagePrimitives.ConvertTo(obj, type);
             Assert.AreEqual(type, result.GetType());
             Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void ConvertToThrowsExceptionIfStringConversionFails()
+        {
+            Assert.Throws(
+                typeof(PSInvalidCastException),
+                delegate() {
+                    LanguagePrimitives.ConvertTo("3foo", typeof(int));
+                }
+            );
         }
 
         [Test]
@@ -123,6 +135,46 @@ namespace System.Management.Tests
         {
             var result = LanguagePrimitives.ConvertTo(3, typeof(PSObject[]));
             var expected = new PSObject[] { PSObject.AsPSObject(3) };
+            Assert.AreEqual(expected.GetType(), result.GetType());
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void ConvertToConvertsArrayToPSObjectArray()
+        {
+            var input = new int[] { 3, 4, 5 };
+            var expected = new PSObject[] { PSObject.AsPSObject(3), PSObject.AsPSObject(4), PSObject.AsPSObject(5) };
+            var result = LanguagePrimitives.ConvertTo(input, typeof(PSObject[]));
+            Assert.AreEqual(expected.GetType(), result.GetType());
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void ConvertToConvertsArraysRecursivelyNumbers()
+        {
+            var input = new int[][] { new int[] { 3, 4 }, new int[] { 5, 6 } };
+            var expected = new double[][] { new double[] { 3.0, 4.0 }, new double[] { 5.0, 6.0 } };
+            var result = LanguagePrimitives.ConvertTo(input, typeof(double[][]));
+            Assert.AreEqual(expected.GetType(), result.GetType());
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void ConvertToConvertsArraysRecursivelyStrings()
+        {
+            var input = new int[][] { new int[] { 3, 4 }, new int[] { 5, 6 } };
+            var expected = new string[][] { new string[] { "3", "4" }, new string[] { "5", "6" } };
+            var result = LanguagePrimitives.ConvertTo(input, typeof(string[][]));
+            Assert.AreEqual(expected.GetType(), result.GetType());
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void ConvertToConvertsEnumerableToArray()
+        {
+            var input = new Collection<int> { 3, 4, 5 };
+            var expected = new string[] { "3", "4", "5" };
+            var result = LanguagePrimitives.ConvertTo(input, typeof(string[]));
             Assert.AreEqual(expected.GetType(), result.GetType());
             Assert.AreEqual(expected, result);
         }
