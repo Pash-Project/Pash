@@ -3,6 +3,7 @@
 //todo: handle value types (if needed)
 
 using System;
+using System.Linq;
 using System.Collections;
 using System.Globalization;
 using System.Reflection;
@@ -169,31 +170,86 @@ namespace System.Management.Automation
         /// <param name="formatProvider">The format provider to use for type conversions.</param>
         /// <returns>The converted type.</returns>
         public static object ConvertTo(object valueToConvert, Type resultType, IFormatProvider formatProvider)
-        { //TODO: Make it use formatProvider
-
-            MethodInfo _cast = valueToConvert.GetType().GetMethod("", new Type[] { resultType });
-
+        {
+            // TODO: Make it use formatProvider
+            // TODO: read more about the Extended Type System (ETS) of Powershell and enhance this functionality
             if (resultType == null)
             {
                 throw new ArgumentException("Result type can not be null.");
             }
 
+            // TODO: use PSTypeConverters for the following!
+            // value might be a PSObject, so check that first
+            if (resultType == typeof(PSObject[]))
+            {
+                // TODO: sburnicki - check if value is an array
+                return new[] { PSObject.AsPSObject(valueToConvert) };
+            }
+
+            if (resultType == typeof(PSObject))
+            {
+                return PSObject.AsPSObject(valueToConvert);
+            }
+
+            // unpack the value if it's a PSObject
+            if (valueToConvert is PSObject)
+            {
+                valueToConvert = ((PSObject)valueToConvert).BaseObject;
+            }
+
+            if (resultType == typeof(String[]))  // check for strings and convert
+            {
+                return ConvertToStringArray(valueToConvert);
+            }
+
+
+            if (resultType == typeof(String))
+            {
+                return valueToConvert.ToString();
+            }
+
+            if (resultType.IsEnum) // enums have to be parsed
+            {
+                return Enum.Parse(resultType, valueToConvert.ToString(), true);
+            }
+
+            if (resultType == typeof(SwitchParameter)) // switch parameters can simply be present
+            {
+                return new SwitchParameter(true);
+            }
+
             if (resultType.IsAssignableFrom(valueToConvert.GetType()))
             {
-                return _cast.Invoke(null, new object[] { valueToConvert });
+                return valueToConvert;
             }
 
-            PSObject _psvalue = valueToConvert as PSObject;
-
-            if (_psvalue != null)
+            // check if array alements need to be casted
+            else if (resultType.IsArray)
             {
-                if (resultType.IsAssignableFrom(_psvalue.BaseObject.GetType()))
+                var elementType = resultType.GetElementType();
+                Array convertedValues;
+                if (valueToConvert.GetType().IsArray)
                 {
-                    return _cast.Invoke(null, new object[] { valueToConvert });
+                    Array valueArray = (Array) valueToConvert;
+                    int valueCount = valueArray.Length;
+                    convertedValues = Array.CreateInstance(elementType, valueCount);
+                    // try to cast each element to the desired type
+                    for (int i = 0; i < valueCount; i++)
+                    {
+                        // TODO: sburnicki: use this convertToMethod again!
+                        var converted = DefaultConvertOrCast(valueArray.GetValue(i), elementType);
+                        convertedValues.SetValue(converted, i);
+                    }
                 }
+                else
+                {
+                    convertedValues = Array.CreateInstance(elementType, 1);
+                    convertedValues.SetValue(DefaultConvertOrCast(valueToConvert, elementType), 0);
+                }
+                return convertedValues;
             }
 
-            return null;
+            return DefaultConvertOrCast(valueToConvert, resultType);
 
         }
 
@@ -339,6 +395,49 @@ namespace System.Management.Automation
         }
 
         #endregion
+
+        private static object ConvertToStringArray(object value)
+        {
+            if ((value is IEnumerable) && !(value is string))
+            {
+                return (from object item in (IEnumerable)value
+                    select item.ToString()).ToArray();
+            }
+            else
+            {
+                return new[] { value.ToString() };
+            }
+        }
+
+        private static object DefaultConvertOrCast(object value, Type type)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+            // check for convertibles
+            try
+            {
+                if (value is IConvertible)
+                {
+                    return Convert.ChangeType(value, type);
+                }
+            }
+            catch (Exception) //ignore exception and try cast
+            {
+            }
+            // following idea from http://stackoverflow.com/questions/3062807/dynamic-casting-based-on-type-information
+            var castMethod = typeof(LanguagePrimitives).GetMethod("Cast").MakeGenericMethod(type);
+            // it's okay to have an excpetion if we can't do anything anymore, then the parameter just doesn't work
+            // TODO: sburnicki - throw correct PSInvalidCastException in case, not simple InvalidCastExcpetion
+            return castMethod.Invoke(null, new object[] { value });
+        }
+
+        public static T Cast<T>(object obj)
+        {
+            // TODO: make private
+            return (T) obj;
+        }
 
 
     }
