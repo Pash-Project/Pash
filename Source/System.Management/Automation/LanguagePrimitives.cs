@@ -429,8 +429,16 @@ namespace System.Management.Automation
             // following idea from http://stackoverflow.com/questions/3062807/dynamic-casting-based-on-type-information
             var castMethod = typeof(LanguagePrimitives).GetMethod("Cast").MakeGenericMethod(type);
             // it's okay to have an excpetion if we can't do anything anymore, then the parameter just doesn't work
-            // TODO: sburnicki - throw correct PSInvalidCastException in case, not simple InvalidCastExcpetion
-            return castMethod.Invoke(null, new object[] { value });
+            try
+            {
+                return castMethod.Invoke(null, new object[] { value });
+            }
+            catch (Exception e)
+            {
+                var msg = String.Format("Value '{0}' can't be converted or casted to '{0}'",
+                    value.ToString(), type.ToString());
+                throw new PSInvalidCastException(msg, e);
+            }
         }
 
         public static T Cast<T>(object obj)
