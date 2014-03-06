@@ -21,3 +21,8 @@ _ReSharper.*
 test-results/
 *.VisualState.xml
 TestResult.xml
+
+# NCrunch
+*.ncrunchproject
+*.ncrunchsolution
+_NCrunch_*/
