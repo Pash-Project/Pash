@@ -17,8 +17,8 @@ namespace Microsoft.PowerShell.Commands.Utility
 
         public ConsoleColorCmdlet()
         {
-            this.BackgroundColor = ConsoleColor.Black;
-            this.ForegroundColor = ConsoleColor.Gray;
+            this.BackgroundColor = Console.BackgroundColor;
+            this.ForegroundColor = Console.ForegroundColor;
         }
     }
 }

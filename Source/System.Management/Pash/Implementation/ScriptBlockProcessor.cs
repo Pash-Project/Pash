@@ -17,6 +17,8 @@ namespace Pash.Implementation
     internal class ScriptBlockProcessor : CommandProcessorBase
     {
         readonly IScriptBlockInfo _scriptBlockInfo;
+        private ExecutionContext _scopedContext;
+        private ExecutionContext _originalContext;
 
 
         public ScriptBlockProcessor(IScriptBlockInfo scriptBlockInfo, CommandInfo commandInfo)
@@ -25,9 +27,7 @@ namespace Pash.Implementation
             this._scriptBlockInfo = scriptBlockInfo;
         }
 
-        internal override ICommandRuntime CommandRuntime { get; set; }
-
-        internal override void BindArguments(PSObject obj)
+        private void BindArguments()
         {
             ReadOnlyCollection<ParameterAst> scriptParameters = _scriptBlockInfo.GetParameters();
 
@@ -69,31 +69,75 @@ namespace Pash.Implementation
             return null;
         }
 
-        internal override void Initialize()
+        private void CreateOwnScope()
         {
-            // TODO: initialize ScriptProcessor
+            _originalContext = ExecutionContext;
+            _scopedContext = ExecutionContext.Clone(_scriptBlockInfo.ScopeUsage);
         }
 
-        internal override void ProcessRecord()
+        private void SwitchToOwnScope()
         {
+            // globally for access through the runspace
+            ExecutionContext.CurrentRunspace.ExecutionContext = _scopedContext;
+            // privately for access through own reference
+            ExecutionContext = _scopedContext;
+        }
+
+        private void RestoreOriginalScope()
+        {
+            ExecutionContext.CurrentRunspace.ExecutionContext = _originalContext;
+            ExecutionContext = _originalContext;
+        }
+
+        /// <summary>
+        /// Create the scope for this script block and binding arguments in it
+        /// </summary>
+        public override void Prepare()
+        {
+            // TODO: check if it makes sense to move the scope handling to the PipelineProcessor!
             //Let's see on the long run if there is an easier solution for this #ExecutionContextChange
-            ExecutionContext context = ExecutionContext.Clone(_scriptBlockInfo.ScopeUsage);
-            //set the execution context of the runspace to the new context for execution in it
-            ExecutionContext.CurrentRunspace.ExecutionContext = context;
+            CreateOwnScope();
+            SwitchToOwnScope();
             try
             {
-                PipelineCommandRuntime pipelineCommandRuntime = (PipelineCommandRuntime)CommandRuntime;
-                this._scriptBlockInfo.ScriptBlock.Ast.Visit(new ExecutionVisitor(context, pipelineCommandRuntime, false));
+                BindArguments();
+            }
+            finally
+            {
+                RestoreOriginalScope();
+            }
+        }
+
+        public override void BeginProcessing()
+        {
+            // nothing to do
+            // TODO: process begin clause. remember to switch scope
+        }
+
+        /// <summary>
+        /// In a script block, we only provide the pipeline as the automatic $input variable, but call it only once
+        /// </summary>
+        public override void ProcessRecords()
+        {
+            // TODO: provide the automatic $input variable
+            // TODO: currently we don't support "cmdlet scripts", i.e. functions that behave like cmdlets.
+            // TODO: Investigate the usage of different function blocks properly before implementing them
+            //set the execution context of the runspace to the new context for execution in it
+            SwitchToOwnScope();
+            try
+            {
+                this._scriptBlockInfo.ScriptBlock.Ast.Visit(new ExecutionVisitor(ExecutionContext, CommandRuntime, false));
             }
             finally //make sure we switch back to the original execution context, no matter what happened
             {
-                ExecutionContext.CurrentRunspace.ExecutionContext = ExecutionContext;
+                RestoreOriginalScope();
             }
         }
 
-        internal override void Complete()
+        public override void EndProcessing()
         {
-            // TODO: do a full cleanup
+            // nothing to do
+            // TODO: process end clause. remember to switch scope
         }
 
         public override string ToString()

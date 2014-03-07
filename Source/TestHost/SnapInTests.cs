@@ -104,7 +104,7 @@ namespace TestHost
                 TestCmdletName
             };
             var output = TestHost.ExecuteWithZeroErrors(statements);
-            output.ShouldStartWith("CommandNotFoundException");
+            StringAssert.Contains("CommandNotFoundException", output);
         }
     }
 }

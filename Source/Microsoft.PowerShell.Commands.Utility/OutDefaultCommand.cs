@@ -10,8 +10,16 @@ namespace Microsoft.PowerShell.Commands
         [Parameter(ValueFromPipeline = true)]
         public PSObject InputObject { get; set; }
 
-        protected override void BeginProcessing()
+        private bool CheckWriteError(object obj)
         {
+            if (!(obj is PSObject))
+            {
+                return false;
+            }
+            var writeToErrorProperty = ((PSObject) InputObject).Properties["writeToErrorStream"];
+            return (writeToErrorProperty != null &&
+                    writeToErrorProperty.Value is bool &&
+                   (bool)writeToErrorProperty.Value);
         }
 
         protected override void ProcessRecord()
@@ -19,16 +27,33 @@ namespace Microsoft.PowerShell.Commands
             // TODO: output the data via OutHostCommand
 
             // TODO: should we print Null?
-            if (InputObject.ImmediateBaseObject == null)
+            if (InputObject == null || InputObject.ImmediateBaseObject == null)
                 return;
-
+            bool writeToError = CheckWriteError(InputObject);
             if (InputObject.BaseObject is Array)
             {
-                Host.UI.WriteLine(string.Join(Environment.NewLine, (object[])InputObject.BaseObject));
+                foreach (var curObj in (Array) InputObject.BaseObject)
+                {
+                    if (writeToError || CheckWriteError(curObj))
+                    {
+                        Host.UI.WriteErrorLine(curObj.ToString());
+                    }
+                    else
+                    {
+                        Host.UI.WriteLine(curObj.ToString());
+                    }
+                }
             }
             else
             {
-                this.Host.UI.WriteLine(InputObject.ToString());
+                if (writeToError)
+                {
+                    Host.UI.WriteErrorLine(InputObject.ToString());
+                }
+                else
+                {
+                    Host.UI.WriteLine(InputObject.ToString());
+                }
             }
         }
     }

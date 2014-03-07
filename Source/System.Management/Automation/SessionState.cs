@@ -1,6 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using Pash.Implementation;
+using System.Collections.ObjectModel;
 
 namespace System.Management.Automation
 {
@@ -73,9 +74,10 @@ namespace System.Management.Automation
 
         private void defaultInit()
         {
-            PSVariable.Set("true", true);
-            PSVariable.Set("false", false);
-            PSVariable.Set("null", null);
+            PSVariable.Set(new PSVariable("true", true, ScopedItemOptions.Constant));
+            PSVariable.Set(new PSVariable("false", false, ScopedItemOptions.Constant));
+            PSVariable.Set(new PSVariable("null", null, ScopedItemOptions.Constant));
+            PSVariable.Set(new PSVariable("Error", new Collection<ErrorRecord>(), ScopedItemOptions.Constant));
         }
     }
 }

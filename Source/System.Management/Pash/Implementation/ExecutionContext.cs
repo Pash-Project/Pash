@@ -4,15 +4,16 @@ using System.Collections.Generic;
 using System.Management.Automation;
 using System.Management.Automation.Host;
 using System.Management.Automation.Runspaces;
+using System.Collections.ObjectModel;
 
 namespace Pash.Implementation
 {
     internal class ExecutionContext
     {
         internal RunspaceConfiguration RunspaceConfiguration { get; private set; }
-        internal PipelineReader<PSObject> inputStreamReader { get; set; }
-        internal PipelineWriter outputStreamWriter { get; set; }
-        internal PipelineWriter errorStreamWriter { get; set; }
+        internal ObjectStream InputStream { get; set; }
+        internal ObjectStream OutputStream { get; set; }
+        internal ObjectStream ErrorStream { get; set; }
         internal Runspace CurrentRunspace { get; set; }
         internal Stack<Pipeline> _pipelineStack;
         internal PSHost LocalHost { get; set; }
@@ -43,9 +44,9 @@ namespace Pash.Implementation
             }
             var context = new ExecutionContext
             {
-                inputStreamReader = inputStreamReader,
-                outputStreamWriter = outputStreamWriter,
-                errorStreamWriter = errorStreamWriter,
+                InputStream = InputStream,
+                OutputStream = OutputStream,
+                ErrorStream = ErrorStream,
                 CurrentRunspace = CurrentRunspace,
                 LocalHost = LocalHost,
                 WriteSideEffectsToPipeline = WriteSideEffectsToPipeline,
@@ -60,7 +61,8 @@ namespace Pash.Implementation
 
         public ExecutionContext CreateNestedContext()
         {
-            //What's the purpose of this function?
+            // I guess the idea of this function is that Input/Error/Ouput streams aren't copied
+            // However, as it works as it is, we won't change this, yet
             ExecutionContext nestedContext = Clone();
 
             //nestedContext.
@@ -94,7 +96,7 @@ namespace Pash.Implementation
             return pipeline;
         }
 
-        internal object GetVariable(string name)
+        internal PSVariable GetVariable(string name)
         {
             if (string.IsNullOrEmpty(name))
                 throw new NullReferenceException("Variable name can't be empty.");
@@ -116,5 +118,17 @@ namespace Pash.Implementation
         }
 
         internal bool WriteSideEffectsToPipeline { get; set; }
+
+        public void AddToErrorVariable(ErrorRecord errorRecord)
+        {
+            var errorRecordsVar = GetVariable("Error");
+            var records = errorRecordsVar.Value as Collection<ErrorRecord>;
+            if (records == null)
+            {
+                // TODO: this should never happen as the variable is const. but anyway
+                return;
+            }
+            records.Insert(0, errorRecord);
+        }
     }
 }

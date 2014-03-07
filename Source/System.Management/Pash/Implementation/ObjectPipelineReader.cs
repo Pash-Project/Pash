@@ -28,7 +28,7 @@ namespace Pash.Implementation
 
         public override int Count
         {
-            get { throw new NotImplementedException(); }
+            get { return _stream.Count; }
         }
 
         public override bool EndOfPipeline
@@ -61,14 +61,12 @@ namespace Pash.Implementation
 
         public override Collection<object> NonBlockingRead()
         {
-            Collection<object> c = new Collection<object>();
-
-            throw new NotImplementedException();
+            return _stream.Read();
         }
 
         public override Collection<object> NonBlockingRead(int maxRequested)
         {
-            throw new NotImplementedException();
+            return _stream.Read(maxRequested);
         }
 
         public override object Peek()
@@ -78,17 +76,17 @@ namespace Pash.Implementation
 
         public override object Read()
         {
-            throw new NotImplementedException();
+            return _stream.Read();
         }
 
         public override Collection<object> Read(int count)
         {
-            throw new NotImplementedException();
+            return _stream.Read(count);
         }
 
         public override Collection<object> ReadToEnd()
         {
-            throw new NotImplementedException();
+            return _stream.Read();
         }
 
         public override string ToString()

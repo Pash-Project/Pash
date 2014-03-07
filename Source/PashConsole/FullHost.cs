@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using Pash.Implementation;
 using System.Reflection;
 using System.IO;
+using System.Collections;
 
 namespace Pash
 {
@@ -37,19 +38,26 @@ namespace Pash
 
         void Execute(string cmd)
         {
+            var errors = new Collection<object>();
+            bool hadSuccess = false;
             try
             {
                 // execute the command with no input...
-                executeHelper(cmd, null);
+                hadSuccess = executeHelper(cmd, null, ref errors);
             }
-            catch (RuntimeException rte)
+            catch (Exception e)
             {
                 // An exception occurred that we want to display
                 // using the display formatter. To do this we run
                 // a second pipeline passing in the error record.
                 // The runtime will bind this to the $input variable
                 // which is why $input is being piped to out-default
-                executeHelper("$input | out-default", rte.ErrorRecord);
+                hadSuccess = false;
+                errors.Add(e);
+            }
+            if (!hadSuccess && errors.Count > 0)
+            {
+                executeHelper("out-default", new ArrayList(errors).ToArray(), ref errors);
             }
         }
 
@@ -115,15 +123,7 @@ namespace Pash
 
         internal void Prompt()
         {
-            try
-            {
-                Execute("prompt | write-host -nonewline");
-
-            }
-            catch (Exception ex)
-            {
-                this.LocalHost.UI.WriteLine(ex.ToString());
-            }
+            Execute("prompt | write-host -nonewline");
         }
 
         private bool? GetBoolVariable (string name)
@@ -146,37 +146,46 @@ namespace Pash
             }
         }
 
-        private void executeHelper(string cmd, object input)
+        private bool executeHelper(string cmd, object[] input, ref Collection<object> errors)
         {
             // Ignore empty command lines.
             if (String.IsNullOrEmpty(cmd))
-                return;
+                return true;
 
+            bool success = true;
             using (var currentPipeline = _currentRunspace.CreatePipeline())
             {
                 // A command is not a simple word here, it's the whole user input and might contain
                 // multiple commands. Therefore we parse it first, but make sure it's not executed in a local scope
                 currentPipeline.Commands.AddScript(cmd, false);
 
-                // Now add the default outputter to the end of the pipe and indicate
-                // that it should handle both output and errors from the previous
-                // commands. This will result in the output being written using the PSHost
+                // Now add the default outputter to the end of the pipe.
+                // This will result in the output being written using the PSHost
                 // and PSHostUserInterface classes instead of returning objects to the hosting
                 // application.
                 currentPipeline.Commands.Add("out-default");
-                currentPipeline.Commands[0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
 
                 // If there was any input specified, pass it in, otherwise just
                 // execute the pipeline.
                 if (input != null)
                 {
-                    currentPipeline.Invoke(new object[] { input });
+                    currentPipeline.Invoke(input);
                 }
                 else
                 {
                     currentPipeline.Invoke();
                 }
+                // if the pipeline failed, not everything was printed by the out-default command. print the errors
+                if (currentPipeline.PipelineStateInfo.State.Equals(PipelineState.Failed))
+                {
+                    if (errors != null)
+                    {
+                        errors = currentPipeline.Error.ReadToEnd();
+                    }
+                    success = false;
+                }
             }
+            return success;
         }
     }
 }

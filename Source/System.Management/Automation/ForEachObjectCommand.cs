@@ -56,8 +56,6 @@ namespace Microsoft.PowerShell.Commands
                 );
 
             this.Process.Ast.Visit(executionVisitor);
-
-            this.ExecutionContext.outputStreamWriter.Write(((PipelineCommandRuntime)CommandRuntime).outputResults.Read(), true);
         }
     }
 }

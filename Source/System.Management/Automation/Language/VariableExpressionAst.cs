@@ -9,16 +9,18 @@ namespace System.Management.Automation.Language
     public class VariableExpressionAst : ExpressionAst
     {
         public VariableExpressionAst(IScriptExtent extent, string variableName, bool splatted)
-            : base(extent)
+            : this(extent, new VariablePath(variableName), splatted)
         {
-            this.VariablePath = new VariablePath(variableName);
         }
 
         public VariableExpressionAst(IScriptExtent extent, VariablePath variablePath, bool splatted)
             : base(extent)
         {
             this.VariablePath = variablePath;
+            PreventEnumerationOnEvaluation = false;
         }
+
+        internal bool PreventEnumerationOnEvaluation;
 
         public bool Splatted { get; private set; }
         public VariablePath VariablePath { get; private set; }

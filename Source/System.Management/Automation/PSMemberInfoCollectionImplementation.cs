@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace System.Management.Automation
 {
@@ -26,7 +27,13 @@ namespace System.Management.Automation
 
         public override T this[string name]
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                return ( from info in _collection
+                         where String.Equals(info.Name, name, StringComparison.CurrentCultureIgnoreCase)
+                         select info
+                ).FirstOrDefault() as T;
+            }
         }
 
         // MUST: implement this to do the PSObject ValueFromPipelineByPropertyName 

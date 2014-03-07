@@ -10,6 +10,9 @@ namespace Pash.Implementation
 {
     internal class PipelineProcessor
     {
+        // TODO: implement direct input processing: if one command does generate output, ProcessRecords() of the
+        // next command should be called immediately (so says the specification)
+
         // TODO: implement pipeline stopping mechanism
         // Not really supposed to be `const`, that's just to clarify that this variable isn't currently used.
         private const bool _stopping = false;
@@ -22,59 +25,100 @@ namespace Pash.Implementation
             }
         }
 
-        List<CommandProcessorBase> commandsToExecute;
+        private List<CommandProcessorBase> _commandsToExecute;
 
         public PipelineProcessor()
         {
-            commandsToExecute = new List<CommandProcessorBase>();
+            _commandsToExecute = new List<CommandProcessorBase>();
         }
 
         public void Add(CommandProcessorBase commandProcessor)
         {
-            commandsToExecute.Add(commandProcessor);
-        }
-
-        public Array Execute(ExecutionContext context)
-        {
-            PSObject psObjectCurrent = context.inputStreamReader.Read();
-            Collection<PSObject> dataCollection;
-
-            do
+            var commandCount = _commandsToExecute.Count;
+            var commandInput = commandProcessor.CommandRuntime.InputStream;
+            // redirect output of last command to new input
+            if (commandCount > 0)
             {
-                dataCollection = new Collection<PSObject>() { psObjectCurrent };
-                foreach (CommandProcessorBase commandProcessor in commandsToExecute)
+                var lastCommand = _commandsToExecute[commandCount - 1];
+                lastCommand.CommandRuntime.OutputStream.Redirect(commandInput);
+            }
+            // check if the command collets previous error results
+            if (commandCount >  0 &&
+                commandProcessor.CommandRuntime.MergeUnclaimedPreviousErrors)
+            {
+                foreach (var prevCommand in _commandsToExecute)
                 {
-                    PipelineCommandRuntime commandRuntime = new PipelineCommandRuntime(this);
-
-                    foreach (PSObject psObject in dataCollection)
+                    if (prevCommand.CommandRuntime.ErrorStream.ClaimedBy == null)
                     {
-                        // TODO: protect the execution context
-                        commandProcessor.ExecutionContext = context;
-
-                        // TODO: replace the Command default runtime to execute callbacks on the pipeline when the object is written to the pipeline and then execute the next cmdlet
-
-                        // TODO: provide a proper command initialization (for parameters and pipeline objects)
-                        commandProcessor.CommandRuntime = commandRuntime;
-
-                        commandProcessor.BindArguments(psObject);
-
-                        // TODO: for each entry in pipe
-                        // Execute the cmdlet at least once (even if there were nothing in the pipe
-                        commandProcessor.ProcessRecord();
+                        prevCommand.CommandRuntime.ErrorStream.Redirect(commandInput);
                     }
-                    commandProcessor.Complete();
-
-                    // TODO: process Error stream
-
-                    //TODO: does it make sense to oeverwrite the collection in each iteration?
-                    dataCollection = new PSObjectPipelineReader(commandRuntime.outputResults).ReadToEnd();
                 }
-            } while ((psObjectCurrent = context.inputStreamReader.Read()) != null);
-
-            // Write the final result to the output pipeline
-            context.outputStreamWriter.Write(dataCollection, true);
-
-            return dataCollection.Cast<object>().ToArray();
+            }
+            _commandsToExecute.Add(commandProcessor);
         }
+
+        /// <summary>
+        ///  Executes the pipeline with regard to the processing lifecycle.
+        /// </summary>
+        /// <param name="context">The current ExecutionContext</param>
+        /// <remarks>
+        /// Read more about the lifecycle at http://msdn.microsoft.com/en-us/library/ms714429(v=vs.85).aspx
+        /// </remarks>
+        public void Execute(ExecutionContext context)
+        {
+
+            if (!_commandsToExecute.Any())
+            {
+                return;
+            }
+            // redirect context input to first command's input
+            _commandsToExecute[0].CommandRuntime.InputStream.Redirect(context.InputStream);
+            // redirect output of last command to context
+            var lastCommandRuntime = _commandsToExecute[_commandsToExecute.Count - 1].CommandRuntime;
+            lastCommandRuntime.OutputStream.Redirect(context.OutputStream);
+            // set correct ExecutionContext and direct all unclaimed error streams to the context error stream
+            // TODO: think about whether it's okay that everyone uses simply the same context
+            foreach (var curCommand in _commandsToExecute)
+            {
+                if (curCommand.CommandRuntime.ErrorStream.ClaimedBy == null)
+                {
+                    curCommand.CommandRuntime.ErrorStream.Redirect(context.ErrorStream);
+                }
+                curCommand.ExecutionContext = context;
+            }
+
+            /* PREPARE - bind all cli args
+                    1. Bind the named parameters.
+                    2. Bind the positional parameters.
+                    3. Bind the common parameters.
+                    4. Bind the parameters to support calls to the ShouldProcess method.
+                    5. Bind the named dynamic parameters
+                    6. Bind the positional dynamic parameters.
+             */
+            foreach (var curCommand in _commandsToExecute)
+            {
+                curCommand.Prepare();
+            }
+
+            // BEGIN - call all BeginProcessing methods
+            foreach (var curCommand in _commandsToExecute)
+            {
+                curCommand.BeginProcessing();
+            }
+
+            /* PROCESS - process records from pipeline
+                    1. Bind command-defined pipeline parameters.
+                    2. Bind dynamic pipeline parameters.
+                    3. Determine wether all necessary parameters are set
+                    4. Call the real command's "ProcessRecord" method
+               END - call all EndProcessing methods
+             */
+            foreach (var curCommand in _commandsToExecute)
+            {
+                curCommand.ProcessRecords();
+                curCommand.EndProcessing();
+            }
+        }
+
     }
 }

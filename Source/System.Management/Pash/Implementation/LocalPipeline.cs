@@ -25,9 +25,9 @@ namespace Pash.Implementation
             : base()
         {
             _runspace = runspace;
-            _inputStream = new ObjectStream();
-            _outputStream = new ObjectStream();
-            _errorStream = new ObjectStream();
+            _inputStream = new ObjectStream(this);
+            _outputStream = new ObjectStream(this);
+            _errorStream = new ObjectStream(this);
             _inputPipelineWriter = new ObjectStreamWriter(_inputStream);
             _outputPipelineReader = new PSObjectPipelineReader(_outputStream);
             _errorPipelineReader = new ObjectPipelineReader(_errorStream);
@@ -110,34 +110,48 @@ namespace Pash.Implementation
 
             Input.Write(input, true);
 
-            SetPipelineState(PipelineState.NotStarted);
+            // in a pipeline, the first command enters *always* the ProcessRecord phase, the following commands only
+            // if the previous command generated output. To make sure the first command enters that phase, add null
+            // if nothing else is in the input stream
+            if (_inputStream.Count == 0)
+            {
+                Input.Write(null);
+            }
 
-            //why do we clone the execution context?
+            string errorId = "BuildingPipelineProcessorFailed";
+
             ExecutionContext context = _runspace.ExecutionContext.Clone();
             RerouteExecutionContext(context);
-
-            PipelineProcessor pipelineProcessor = BuildPipelineProcessor(context);
-            if (pipelineProcessor == null) return null;
-
-            // TODO: add a default out-command to the pipeline
-            // TODO: it should do the "foreach read from pipe and out via formatter"
-
-            _runspace.AddRunningPipeline(this);
-            SetPipelineState(PipelineState.Running);
             try
             {
+                if (!_pipelineStateInfo.State.Equals(PipelineState.NotStarted))
+                {
+                    throw new InvalidPipelineStateException("Pipeline cannot be started",
+                        _pipelineStateInfo.State, PipelineState.NotStarted);
+                }
+
+                var pipelineProcessor = BuildPipelineProcessor(context);
+
+                _runspace.AddRunningPipeline(this);
+                SetPipelineState(PipelineState.Running);
+
+                errorId = "TerminatingError";
                 pipelineProcessor.Execute(context);
                 SetPipelineState(PipelineState.Completed);
             }
             catch (Exception ex)
             {
-                SetPipelineState(PipelineState.Failed, ex);
+                // in case of throw statement, parse error, or "ThrowTerminatingError"
+                var errorRecord = new ErrorRecord(ex, errorId, ErrorCategory.InvalidOperation, null);
+                var psobj = PSObject.AsPSObject(errorRecord);
+                // if merged with stdout, we can later on check to which stream the object usually belongs
+                psobj.Properties.Add(new PSNoteProperty("writeToErrorStream", true));
+                _errorStream.Write(psobj);
+                context.AddToErrorVariable(errorRecord);
 
-                _runspace.PSHost.UI.WriteErrorLine(ex.ToString());
+                SetPipelineState(PipelineState.Failed, ex);
             }
             _runspace.RemoveRunningPipeline(this);
-            // TODO: process Error results
-
             return Output.NonBlockingRead();
         }
 
@@ -156,17 +170,9 @@ namespace Pash.Implementation
                 }
                 catch (PowerShellGrammar.ParseException exception)
                 {
-                    _runspace.PSHost.UI.WriteErrorLine("parse error at " + exception.LogMessage.Location.ToUiString());
-                    return null;
+                    // nicer error message
+                    throw new ParseException("Parse error at " + exception.LogMessage.Location.ToUiString(), exception);
                 }
-                catch (Exception exception)
-                {
-                    _runspace.PSHost.UI.WriteErrorLine(exception.GetType().Name + ": " + exception.Message);
-                    return null;
-                }
-
-
-                commandProcessor.Initialize();
                 pipelineProcessor.Add(commandProcessor);
             }
 
@@ -176,9 +182,9 @@ namespace Pash.Implementation
         internal void RerouteExecutionContext(ExecutionContext context)
         {
             // Filling the input stream with the initial data
-            context.inputStreamReader = new PSObjectPipelineReader(_inputStream);
-            context.outputStreamWriter = new ObjectStreamWriter(_outputStream);
-            context.errorStreamWriter = new ObjectStreamWriter(_errorStream);
+            context.InputStream = _inputStream;
+            context.OutputStream = _outputStream;
+            context.ErrorStream = _errorStream;
         }
 
         public override void InvokeAsync()
