@@ -1,6 +1,9 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using Pash.Implementation;
+using System.Management.Automation.Runspaces;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
 
 namespace System.Management.Automation
 {
@@ -28,6 +31,7 @@ namespace System.Management.Automation
             cmdlet.ExecutionContext = base.ExecutionContext;
             cmdlet.CommandRuntime = CommandRuntime;
             Command = cmdlet;
+            MergeParameters();
             _argumentBinder = new CmdletArgumentBinder(_cmdletInfo, Command);
             _argumentBinder.BindCommandLineArguments(Parameters);
         }
@@ -61,18 +65,8 @@ namespace System.Management.Automation
             var inputObjects = CommandRuntime.InputStream.Read();
             foreach (var curInput in inputObjects)
             {
-                _argumentBinder.RestoreCommandLineArguments();
-                _argumentBinder.BindPipelineArguments(curInput);
-                try
-                {
-                    _argumentBinder.CheckParameterSet();
-                }
-                catch (Exception e)
-                {
-                    var error = new ErrorRecord(e, "NotAllParametersProvided", ErrorCategory.InvalidOperation, null);
-                    CommandRuntime.WriteError(error);
-                    continue;
-                }
+                // TODO: sburnicki - determine the correct second argument
+                _argumentBinder.BindPipelineArguments(curInput, true);
                 Command.DoProcessRecord();
             }
             _argumentBinder.RestoreCommandLineArguments();
@@ -84,6 +78,50 @@ namespace System.Management.Automation
         public override void EndProcessing()
         {
             Command.DoEndProcessing();
+        }
+
+        /// <summary>
+        /// The parse currently adds each parameter without value and each value without parameter name, because
+        /// it doesn't know at parse time whether the value belongs to the paramater or if the parameter is a switch
+        /// parameter and the value is just a positional parameter. As we now know more abot the parameters, we can
+        /// merge all parameters with the upcoming value if it's not a switch parameter
+        /// </summary>
+        private void MergeParameters()
+        {
+            var oldParameters = new Collection<CommandParameter>(new List<CommandParameter>(Parameters));
+            Parameters.Clear();
+            int numParams = oldParameters.Count;
+            for (int i = 0; i < numParams; i++)
+            {
+                var current = oldParameters[i];
+                var peek = (i < numParams - 1) ? oldParameters[i + 1] : null;
+                if (peek != null &&
+                    !String.IsNullOrEmpty(current.Name) &&
+                    current.Value == null &&
+                    !IsSwitchParameter(current.Name) &&
+                    String.IsNullOrEmpty(peek.Name))
+                {
+                    Parameters.Add(current.Name, peek.Value);
+                    i++; // skip next element as it was merged
+                }
+                else
+                {
+                    Parameters.Add(current);
+                }
+            }
+        }
+
+        private bool IsSwitchParameter(string name)
+        {
+            foreach (var curPair in _cmdletInfo.ParameterTypeLookupTable)
+            {
+                if (curPair.Key.StartsWith(name, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    // one match is enough, if there were multiple matches we'll get an error anyway
+                    return curPair.Value == typeof(SwitchParameter);
+                }
+            }
+            return false;
         }
     }
 }

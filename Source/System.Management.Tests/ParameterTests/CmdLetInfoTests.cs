@@ -35,7 +35,7 @@ namespace System.Management.Tests.ParameterTests
 
             Assert.AreEqual(3, allSet.Parameters.Count);
             Assert.AreEqual(4, fileSet.Parameters.Count);
-            Assert.AreEqual(4, variableSet.Parameters.Count);
+            Assert.AreEqual(5, variableSet.Parameters.Count);
 
             Assert.IsNotNull(allSet);
             Assert.IsNotNull(fileSet);
@@ -49,14 +49,20 @@ namespace System.Management.Tests.ParameterTests
             CommandParameterInfo filePathParam = fileSet.GetParameterByName("FilePath");
             Assert.IsNotNull(filePathParam);
             Assert.AreEqual("FilePath", filePathParam.Name);
-            Assert.AreEqual(0, filePathParam.Position);
+            Assert.AreEqual(3, filePathParam.Position);
             Assert.AreEqual(true, filePathParam.IsMandatory);
 
             CommandParameterInfo variableParam = variableSet.GetParameterByName("Variable");
             Assert.IsNotNull(variableParam);
             Assert.AreEqual("Variable", variableParam.Name);
-            Assert.AreEqual(-1, variableParam.Position);
+            Assert.AreEqual(0, variableParam.Position);
             Assert.AreEqual(true, variableParam.IsMandatory);
+
+            CommandParameterInfo constVarParam = variableSet.GetParameterByName("ConstVar");
+            Assert.IsNotNull(constVarParam);
+            Assert.AreEqual("ConstVar", constVarParam.Name);
+            Assert.AreEqual(-1, constVarParam.Position);
+            Assert.AreEqual(false, constVarParam.IsMandatory);
 
             CommandParameterInfo ageParam = fileSet.GetParameterByName("Age");
             Assert.IsNull(ageParam);
@@ -73,7 +79,7 @@ namespace System.Management.Tests.ParameterTests
             CommandParameterInfo nameParam = set.GetParameterByName("Name");
             Assert.IsNotNull(nameParam);
             Assert.AreEqual("Name", nameParam.Name);
-            Assert.AreEqual(-1, nameParam.Position);
+            Assert.AreEqual(1, nameParam.Position);
             Assert.AreEqual(false, nameParam.IsMandatory);
 
             CommandParameterInfo recurseParam = set.GetParameterByName("Recurse");

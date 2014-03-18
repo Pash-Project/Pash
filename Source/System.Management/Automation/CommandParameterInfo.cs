@@ -10,7 +10,7 @@ namespace System.Management.Automation
     /// <summary>
     /// A type representing information about a command's parameters.
     /// </summary>
-    public class CommandParameterInfo
+    public class CommandParameterInfo : IEquatable<CommandParameterInfo>
     {
         public ReadOnlyCollection<string> Aliases { get; private set; }
         public ReadOnlyCollection<Attribute> Attributes { get; private set; }
@@ -24,11 +24,11 @@ namespace System.Management.Automation
         public bool ValueFromPipelineByPropertyName { get; private set; }
         public bool ValueFromRemainingArguments { get; private set; }
 
-        // internals
-        //internal CommandParameterInfo(System.Management.Automation.CompiledCommandParameter parameter, uint parameterSetFlag);
+        internal MemberInfo MemberInfo { get; private set; }
 
         internal CommandParameterInfo(MemberInfo info, Type paramType, ParameterAttribute paramAttr)
         {
+            MemberInfo = info;
             Name = info.Name;
             ParameterType = paramType;
             Position = paramAttr.Position;
@@ -50,6 +50,35 @@ namespace System.Management.Automation
             }
 
             Attributes = new ReadOnlyCollection<Attribute>(attributes);
+        }
+
+        public bool Equals(CommandParameterInfo other)
+        {
+            if (Object.ReferenceEquals(this, other))
+            {
+                return true;
+            }
+            return Name.Equals(other.Name) && ParameterType.Equals(other.ParameterType);
+        }
+
+        public override bool Equals(object obj)
+        {
+            var otherParamInfo = obj as CommandParameterInfo;
+            if (obj == null)
+            {
+                throw new ArgumentException("Equality check with null or different obejct type");
+            }
+            return Equals(otherParamInfo);
+        }
+
+        public override string ToString()
+        {
+            return string.Format("[{0}:{1}]", Name, ParameterType.Name);
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode() ^ ParameterType.GetHashCode();
         }
     }
 }

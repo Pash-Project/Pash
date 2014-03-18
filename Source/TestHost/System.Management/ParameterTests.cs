@@ -19,7 +19,7 @@ namespace TestHost
             Assert.AreEqual("$a = 10" + Environment.NewLine, results);
         }
 
-        [Test, Explicit("This currently fails because GetDateCommand has default parameter set: net but no parameters in the set ( missing -Format param.).")]
+        [Test]
         public void ParametersByName2()
         {
             var result1 = TestHost.Execute("Get-Date");

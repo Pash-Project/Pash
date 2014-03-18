@@ -1,6 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System.Management.Automation.Runspaces;
 using System.Management.Automation;
+using System.Collections.ObjectModel;
 
 namespace Pash.Implementation
 {
@@ -39,9 +40,16 @@ namespace Pash.Implementation
             CommandRuntime.PipelineProcessor = pipelineProcessor;
         }
 
-        internal void AddParameter(object value)
+        internal void AddParameters(Collection<CommandParameter> parameters)
         {
-            Parameters.Add(null, value);
+            if (parameters == null)
+            {
+                return;
+            }
+            foreach (var param in parameters)
+            {
+                Parameters.Add(param);
+            }
         }
 
         internal void AddParameter(string name, object value)

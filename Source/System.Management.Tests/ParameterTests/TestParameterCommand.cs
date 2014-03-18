@@ -12,18 +12,21 @@ namespace System.Management.Tests.ParameterTests
     public sealed class TestParameterCommand : PSCmdlet
     {
         [Alias(new string[] { "PSPath", "Path" })]
-        [Parameter(Mandatory = true, Position = 0, ParameterSetName = "File")]
+        [Parameter(Mandatory = true, Position = 3, ParameterSetName = "File")]
         public string FilePath { get; set; }
+
+        [Parameter(Mandatory = true, Position = 0, ParameterSetName = "Variable")]
+        public string Variable { get; set; }
+
+        [Parameter(ParameterSetName = "Variable")]
+        public SwitchParameter ConstVar;
+
+        [Parameter(Position=1)]
+        [Alias(new string[] { "FullName", "fn", "identity" })]
+        public string Name;
 
         [Parameter(ValueFromPipeline = true)]
         public PSObject InputObject { get; set; }
-
-        [Parameter(Mandatory = true, ParameterSetName = "Variable")]
-        public string Variable { get; set; }
-
-        [Parameter]
-        [Alias(new string[] { "FullName", "fn", "identity" })]
-        public string Name;
 
         [Parameter]
         public SwitchParameter Recurse;

@@ -21,6 +21,9 @@ namespace System.Management.Automation
         public string Verb { get; private set; }
         public ReadOnlyCollection<CommandParameterSetInfo> ParameterSets { get; private set; }
 
+        internal Dictionary<string, string> UniqueSetParameters { get; private set; }
+        internal Dictionary<string, Type> ParameterTypeLookupTable { get; private set; }
+
         private ExecutionContext _context;
 
         internal CmdletInfo(string name, Type implementingType, string helpFile, PSSnapInInfo PSSnapin, ExecutionContext context)
@@ -31,13 +34,15 @@ namespace System.Management.Automation
             {
                 throw new Exception("InvalidCmdletNameFormat " + name);
             }
+            UniqueSetParameters = new Dictionary<string, string>();
+            ParameterTypeLookupTable = new Dictionary<string, Type>(StringComparer.CurrentCultureIgnoreCase);
             Verb = name.Substring(0, i);
             Noun = name.Substring(i + 1);
             ImplementingType = implementingType;
             HelpFile = helpFile;
             PSSnapIn = PSSnapin;
             _context = context;
-            ParameterSets = GetParameterSetInfo(implementingType);
+            GetParameterSetInfo(implementingType);
         }
 
         public override string Definition
@@ -54,11 +59,64 @@ namespace System.Management.Automation
             }
         }
 
+        private void RegisterParameter(string name, ReadOnlyCollection<string> aliases, Type type)
+        {
+            // also add it to lookuptable and check for unuque names/aliases
+            var allNames = new List<string>();
+            if (aliases != null)
+            {
+                allNames.AddRange(aliases);
+            }
+            allNames.Add(name);
+            foreach (var curName in allNames)
+            {
+                if (ParameterTypeLookupTable.ContainsKey(curName))
+                {
+                    var msg = String.Format("The name or alias '{0}' is used multiple times.", curName);
+                    throw new MetadataException(msg);
+                }
+                ParameterTypeLookupTable[curName] = type;
+            }
+        }
+
         // internals
         //internal CmdletInfo CreateGetCommandCopy(CmdletInfo cmdletInfo, object[] arguments);
         //internal object[] Arguments { set; get; }
         //internal string FullName { get; }
         //internal bool IsGetCommandCopy { set; get; }
+
+        private CommandParameterInfo AddParameterToParameterSet(Dictionary<string, Collection<CommandParameterInfo>> paramSets,
+                                                MemberInfo memberInfo, Type type, ParameterAttribute paramAttr)
+        {
+            CommandParameterInfo pi = new CommandParameterInfo(memberInfo, type, paramAttr);
+            var paramSetName = paramAttr.ParameterSetName;
+            // Determine if this parameter is uniquely defined for one set and rember it
+            if (!String.IsNullOrEmpty(paramSetName) && !paramSetName.Equals(ParameterAttribute.AllParameterSets))
+            {
+                var parameterName = pi.Name;
+                // check if we already defined that parameter for another set
+                if (UniqueSetParameters.ContainsKey(parameterName))
+                {
+                    UniqueSetParameters[parameterName] = null;
+                }
+                else
+                {
+                    // not yet in any set, it's a candidate for a unique parameter
+                    UniqueSetParameters[parameterName] = paramSetName;
+                }
+            }
+
+            paramSetName = paramSetName ?? ParameterAttribute.AllParameterSets;
+
+            if (!paramSets.ContainsKey(paramSetName))
+            {
+                paramSets.Add(paramSetName, new Collection<CommandParameterInfo>());
+            }
+
+            Collection<CommandParameterInfo> paramSet = paramSets[paramSetName];
+            paramSet.Add(pi);
+            return pi;
+        }
 
         /// <remarks>
         /// From MSDN article: http://msdn2.microsoft.com/en-us/library/ms714348(VS.85).aspx
@@ -76,59 +134,55 @@ namespace System.Management.Automation
         /// * In addition, only one parameter in a set should declare ValueFromPipeline = true. Multiple parameters may define ValueFromPipelineByPropertyName = true.
         /// 
         /// </remarks>
-        private static ReadOnlyCollection<CommandParameterSetInfo> GetParameterSetInfo(Type cmdletType)
+        private void GetParameterSetInfo(Type cmdletType)
         {
             Dictionary<string, Collection<CommandParameterInfo>> paramSets = new Dictionary<string, Collection<CommandParameterInfo>>(StringComparer.CurrentCultureIgnoreCase);
 
-            // TODO: Ensure there are no duplicate named or aliased parameters inside scope of a single parameter set.
             // TODO: When using parameter sets, no parameter set should contain more than one positional parameter with the same position. 
             // TODO: If not parameters have a position declared then positions for all the parameters should be automatically declaredin the order they are specified
             // TODO: Only one parameter in a set should declare ValueFromRemainingArguments = true
             // TODO: Only one parameter in a set should declare ValueFromPipeline = true. Multiple parameters may define ValueFromPipelineByPropertyName = true.
             // TODO: Currently due to the way parameters are loaded into sets from all set at the end the parameter end up in incorrect order.
 
-            // Add fields with ParameterAttribute
-            foreach (FieldInfo filedInfo in cmdletType.GetFields(BindingFlags.Public | BindingFlags.Instance))
-            {
-                System.Diagnostics.Debug.WriteLine(filedInfo.ToString());
+            // always have a parameter set for all parameters. even if we don't have any parameters or no parameters
+            // that are in all sets. This will nevertheless save various checks
+            paramSets.Add(ParameterAttribute.AllParameterSets, new Collection<CommandParameterInfo>());
 
-                object[] attributes = filedInfo.GetCustomAttributes(false);
+            // Add fields with ParameterAttribute
+            foreach (FieldInfo fieldInfo in cmdletType.GetFields(BindingFlags.Public | BindingFlags.Instance))
+            {
+                System.Diagnostics.Debug.WriteLine(fieldInfo.ToString());
+
+                object[] attributes = fieldInfo.GetCustomAttributes(false);
+                CommandParameterInfo last = null;
 
                 // Find all [Parameter] attributes on the property
-                ParameterAttribute paramAttr = null;
                 foreach (object attr in attributes)
                 {
                     if (attr is ParameterAttribute)
                     {
-                        paramAttr = (ParameterAttribute)attr;
-
-                        CommandParameterInfo pi = new CommandParameterInfo(filedInfo, filedInfo.FieldType, paramAttr);
-
-                        string paramSetName = paramAttr.ParameterSetName ?? ParameterAttribute.AllParameterSets;
-
-                        if (!paramSets.ContainsKey(paramSetName))
-                        {
-                            paramSets.Add(paramSetName, new Collection<CommandParameterInfo>());
-                        }
-
-                        Collection<CommandParameterInfo> paramSet = paramSets[paramSetName];
-                        paramSet.Add(pi);
+                        last = AddParameterToParameterSet(paramSets, fieldInfo, fieldInfo.FieldType, (ParameterAttribute) attr);
                     }
+                }
+                if (last != null)
+                {
+                    RegisterParameter(fieldInfo.Name, last.Aliases, fieldInfo.FieldType);
                 }
             }
 
             // Add properties with ParameterAttribute
-            foreach (PropertyInfo filedInfo in cmdletType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            foreach (PropertyInfo propertyInfo in cmdletType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                System.Diagnostics.Debug.WriteLine(filedInfo.ToString());
+                System.Diagnostics.Debug.WriteLine(propertyInfo.ToString());
 
-                object[] attributes = filedInfo.GetCustomAttributes(false);
+                object[] attributes = propertyInfo.GetCustomAttributes(false);
 
                 // Get info for the setter and getter
-                MethodInfo getter = filedInfo.GetAccessors().FirstOrDefault(i => i.IsSpecialName && i.Name.StartsWith("get_"));
-                MethodInfo setter = filedInfo.GetSetMethod();
+                MethodInfo getter = propertyInfo.GetAccessors().FirstOrDefault(i => i.IsSpecialName && i.Name.StartsWith("get_"));
+                MethodInfo setter = propertyInfo.GetSetMethod();
 
                 // Find all [Parameter] attributes on the property
+                CommandParameterInfo last = null;
                 ParameterAttribute paramAttr = null;
                 foreach (object attr in attributes)
                 {
@@ -148,33 +202,35 @@ namespace System.Management.Automation
                             break;
                         }
 
-                        CommandParameterInfo pi = new CommandParameterInfo(filedInfo, filedInfo.PropertyType, paramAttr);
-
-                        string paramSetName = paramAttr.ParameterSetName ?? ParameterAttribute.AllParameterSets;
-
-                        if (!paramSets.ContainsKey(paramSetName))
-                        {
-                            paramSets.Add(paramSetName, new Collection<CommandParameterInfo>());
-                        }
-
-                        Collection<CommandParameterInfo> paramSet = paramSets[paramSetName];
-                        paramSet.Add(pi);
+                        last = AddParameterToParameterSet(paramSets, propertyInfo, propertyInfo.PropertyType, paramAttr);
                     }
                 }
+                if (last != null)
+                {
+                    RegisterParameter(propertyInfo.Name, last.Aliases, propertyInfo.PropertyType);
+                }
+            }
+
+            // Clean the UniqueSetParameters
+            foreach (var cur in UniqueSetParameters.Where(keyValue => (keyValue.Value == null)).ToList())
+            {
+                UniqueSetParameters.Remove(cur.Key);
             }
 
             // Create param-sets collection
             Collection<CommandParameterSetInfo> paramSetInfo = new Collection<CommandParameterSetInfo>();
 
             // TODO: find the name of the default param set
-            string strDefaultParameterSetName = ParameterAttribute.AllParameterSets;
+            string strDefaultParameterSetName = null;
             object[] cmdLetAttrs = cmdletType.GetCustomAttributes(typeof(CmdletAttribute), false);
             if (cmdLetAttrs.Length > 0)
-                strDefaultParameterSetName = ((CmdletAttribute)cmdLetAttrs[0]).DefaultParameterSetName ?? strDefaultParameterSetName;
+            {
+                strDefaultParameterSetName = ((CmdletAttribute)cmdLetAttrs[0]).DefaultParameterSetName;
+            }
 
             foreach (string paramSetName in paramSets.Keys)
             {
-                bool bIsDefaultParamSet = paramSetName == strDefaultParameterSetName;
+                bool bIsDefaultParamSet = paramSetName.Equals(strDefaultParameterSetName);
 
                 paramSetInfo.Add(new CommandParameterSetInfo(paramSetName, bIsDefaultParamSet, paramSets[paramSetName]));
 
@@ -189,7 +245,7 @@ namespace System.Management.Automation
                 }
             }
 
-            return new ReadOnlyCollection<CommandParameterSetInfo>(paramSetInfo);
+            ParameterSets = new ReadOnlyCollection<CommandParameterSetInfo>(paramSetInfo);
         }
 
         internal CommandParameterSetInfo GetParameterSetByName(string strParamSetName)
@@ -205,6 +261,7 @@ namespace System.Management.Automation
 
         internal CommandParameterSetInfo GetDefaultParameterSet()
         {
+            // TODO: get by name
             foreach (CommandParameterSetInfo paramSetInfo in ParameterSets)
             {
                 if (paramSetInfo.IsDefault)

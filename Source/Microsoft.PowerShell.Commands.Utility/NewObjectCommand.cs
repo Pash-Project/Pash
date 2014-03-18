@@ -10,10 +10,10 @@ using System.Text;
 
 namespace Microsoft.PowerShell.Commands.Utility
 {
-    [Cmdlet("New", "Object")]
+    [Cmdlet("New", "Object", DefaultParameterSetName = "Net")]
     public sealed class NewObjectCommand : PSCmdlet
     {
-        [Parameter(/*ParameterSetName = "Net", */Mandatory = false, Position = 1)]
+        [Parameter(ParameterSetName = "Net", Mandatory = false, Position = 1)]
         public object[] ArgumentList { get; set; }
 
         [Parameter(ParameterSetName = "Com", Mandatory = true, Position = 0)]
@@ -25,7 +25,7 @@ namespace Microsoft.PowerShell.Commands.Utility
         [Parameter(ParameterSetName = "Com")]
         public SwitchParameter Strict { get; set; }
 
-        [Parameter(/*ParameterSetName = "Net", */Mandatory = true, Position = 0)]
+        [Parameter(ParameterSetName = "Net", Mandatory = true, Position = 0)]
         public string TypeName { get; set; }
 
         protected override void ProcessRecord()

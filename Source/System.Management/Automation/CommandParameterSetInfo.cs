@@ -15,8 +15,6 @@ namespace System.Management.Automation
         public string Name { get; private set; }
         public ReadOnlyCollection<CommandParameterInfo> Parameters { get; private set; }
 
-        public override string ToString() { throw new NotImplementedException(); }
-
         // internals
         //internal CommandParameterSetInfo(string name, bool isDefaultParameterSet, uint parameterSetFlag, MergedCommandParameterMetadata parameterMetadata)
         internal CommandParameterSetInfo(string name, bool isDefaultParameterSet, Collection<CommandParameterInfo> paramsInfo)
@@ -26,17 +24,6 @@ namespace System.Management.Automation
 
             // TODO: fill in the parameters info
             Parameters = new ReadOnlyCollection<CommandParameterInfo>(paramsInfo);
-        }
-
-        internal CommandParameterInfo GetParameterByPosition(int position)
-        {
-            foreach (CommandParameterInfo parameter in Parameters)
-            {
-                if (parameter.Position == position)
-                    return parameter;
-            }
-
-            return null;
         }
 
         internal CommandParameterInfo GetParameterByName(string name)
@@ -52,16 +39,18 @@ namespace System.Management.Automation
 
         internal CommandParameterInfo LookupParameter(string name)
         {
+            // TODO: Exception should include all possible matches
             CommandParameterInfo found = null;
             foreach (CommandParameterInfo parameter in Parameters)
             {
                 if (parameter.Name.StartsWith(name, StringComparison.CurrentCultureIgnoreCase) ||
                     (parameter.Aliases != null && parameter.Aliases.Where(a => a.StartsWith(name, StringComparison.CurrentCultureIgnoreCase)).Count() > 0))
                 {
-                    // If match already found, name is ambiguous
+                    // If match already found, name is ambiguous.
                     if (found != null)
                     {
-                        throw new ArgumentException("Supplied parmameter '" + name + "' is ambiguous, possibilities include '" + found.Name + "' and '" + parameter.Name + "'" );
+                        // AmbiguousParameter
+                        throw new ParameterBindingException("Supplied parmameter '" + name + "' is ambiguous, possibilities include '" + found.Name + "' and '" + parameter.Name + "'" );
                     }
                     found = parameter;
                 }
@@ -77,6 +66,11 @@ namespace System.Management.Automation
                 lookupDictionary.Add (name, this.LookupParameter(name));
             }
             return lookupDictionary;
+        }
+
+        public override string ToString()
+        {
+            return String.Format("{0}({1} parameters)", Name, Parameters.Count);
         }
     }
 }
