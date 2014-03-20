@@ -6,11 +6,13 @@
     <assembly path="Libraries/Libraries.Tests/bin/Debug/Libraries.Tests.dll" />
     <assembly path="Spikes/Spikes/bin/Debug/Spikes.dll" />
     <assembly path="Source/PashConsole.Tests/bin/Debug/PashConsole.Tests.dll" />
+    <assembly path="Source/ReferenceTests/bin/Debug/ReferenceTests.dll" />
   </Config>
   <Config name="Release" binpathtype="Auto">
     <assembly path="Source/TestHost/bin/Release/TestHost.exe" />
     <assembly path="Source/System.Management.Tests/bin/Release/System.Management.Tests.dll" />
     <assembly path="Libraries/Libraries.Tests/bin/Release/Libraries.Tests.dll" />
     <assembly path="Spikes/Spikes/bin/Release/Spikes.dll" />
+    <assembly path="Source/ReferenceTests/bin/Release/ReferenceTests.dll" />
   </Config>
 </NUnitProject>

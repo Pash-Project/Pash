@@ -8,7 +8,7 @@ using System.Management.Automation.Runspaces;
 
 namespace TestHost
 {
-    class TestHost : PSHost
+    internal class TestHost : PSHost
     {
         readonly PSHostUserInterface _ui = new TestHostUserInterface();
 
