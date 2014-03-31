@@ -224,7 +224,6 @@ namespace System.Management.Automation
             foreach (var curParam in namedParameters)
             {
                 string curName = curParam.Name;
-                bool found = false;
 
                 // try to get the parameter from any set. throws an error if the name is ambiguous or doesn't exist
                 var paramInfo = _cmdletInfo.LookupParameter(curName);
