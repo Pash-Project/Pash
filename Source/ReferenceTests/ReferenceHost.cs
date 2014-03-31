@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
@@ -51,6 +51,20 @@ namespace ReferenceTests
                 resultstr.Append(Environment.NewLine);
             }
             return resultstr.ToString();
+        }
+
+        internal static void ImportModules(string[] modules)
+        {
+            if (modules == null)
+            {
+                ReferenceHost.InitialSessionState = null;
+            }
+            else
+            {
+                InitialSessionState sessionState = InitialSessionState.CreateDefault();
+                sessionState.ImportPSModule(modules);
+                ReferenceHost.InitialSessionState = sessionState;
+            }
         }
     }
 }
