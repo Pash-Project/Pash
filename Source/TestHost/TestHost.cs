@@ -55,7 +55,14 @@ namespace TestHost
                 {
                     currentPipeline.Commands.AddScript(statement, false);
                     currentPipeline.Commands.Add("Out-Default");
-                    currentPipeline.Invoke();
+                    try
+                    {
+                        currentPipeline.Invoke();
+                    }
+                    catch (Exception e)
+                    {
+                        ui.WriteErrorLine(e.ToString());
+                    }
                     // pipeline might failed, write errors to ui
                     if (currentPipeline.PipelineStateInfo.State.Equals(PipelineState.Failed))
                     {
