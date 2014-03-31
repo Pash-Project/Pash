@@ -37,37 +37,6 @@ namespace System.Management.Automation
             return null;
         }
 
-        internal CommandParameterInfo LookupParameter(string name)
-        {
-            // TODO: Exception should include all possible matches
-            CommandParameterInfo found = null;
-            foreach (CommandParameterInfo parameter in Parameters)
-            {
-                if (parameter.Name.StartsWith(name, StringComparison.CurrentCultureIgnoreCase) ||
-                    (parameter.Aliases != null && parameter.Aliases.Where(a => a.StartsWith(name, StringComparison.CurrentCultureIgnoreCase)).Count() > 0))
-                {
-                    // If match already found, name is ambiguous.
-                    if (found != null)
-                    {
-                        // AmbiguousParameter
-                        throw new ParameterBindingException("Supplied parmameter '" + name + "' is ambiguous, possibilities include '" + found.Name + "' and '" + parameter.Name + "'" );
-                    }
-                    found = parameter;
-                }
-            }
-
-            return found;
-        }
-
-        internal IDictionary<string, CommandParameterInfo> LookupAllParameters(IEnumerable<string> names)
-        {
-            var lookupDictionary = new Dictionary<string, CommandParameterInfo> ();
-            foreach (string name in names) {
-                lookupDictionary.Add (name, this.LookupParameter(name));
-            }
-            return lookupDictionary;
-        }
-
         public override string ToString()
         {
             return String.Format("{0}({1} parameters)", Name, Parameters.Count);

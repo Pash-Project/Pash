@@ -149,10 +149,10 @@ namespace TestPSSnapIn
     [Cmdlet(VerbsDiagnostic.Test, "DefaultParameterSetDoesntExist", DefaultParameterSetName = "DoesntExist")]
     public class TestDefaultParameterSetDoesntExistCommand : PSCmdlet
     {
-        [Parameter(ParameterSetName = "One")]
+        [Parameter(ParameterSetName = "One", Mandatory = true)]
         public string Arg1 { get; set; }
 
-        [Parameter(ParameterSetName = "Two")]
+        [Parameter(ParameterSetName = "Two", Mandatory = true)]
         public string Arg2 { get; set; }
 
         protected override void ProcessRecord()

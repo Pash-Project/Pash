@@ -19,7 +19,33 @@ namespace System.Management.Automation
         {
         }
 
-        public virtual ErrorRecord ErrorRecord { get; set; }
+        internal RuntimeException(string message, string errorId, ErrorCategory category, object target)
+            : base(message, null)
+        {
+            Id = errorId;
+            Category = category;
+            TargetObject = target;
+        }
+
+        internal object TargetObject { get; set; }
+
+        private ErrorRecord _errorRecord;
+        public virtual ErrorRecord ErrorRecord {
+            get
+            {
+                // TODO: I'm not quite sure if this is the intention of this property
+                if (_errorRecord == null)
+                {
+                    _errorRecord = new ErrorRecord(this, Id, Category, TargetObject);
+                }
+                return _errorRecord;
+            }
+
+            set
+            {
+                _errorRecord = value;
+            }
+        }
 
         protected RuntimeException(SerializationInfo info, StreamingContext context) { throw new NotImplementedException(); }
 

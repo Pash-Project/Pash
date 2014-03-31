@@ -6,6 +6,7 @@ using System;
 using System.Resources;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+using System.Reflection;
 
 namespace System.Management.Automation
 {
@@ -53,6 +54,32 @@ namespace System.Management.Automation
             : base(message, innerException)
         {
             this.message = message;
+        }
+
+        internal ParameterBindingException(string message, string errorId, MemberInfo target)
+            : base(message, errorId, ErrorCategory.InvalidArgument, target)
+        {
+            ParameterName = target.Name;
+            if (target is PropertyInfo)
+            {
+                ParameterType = ((PropertyInfo)target).PropertyType;
+            }
+            else if (target is FieldInfo)
+            {
+                ParameterType = ((FieldInfo)target).FieldType;
+            }
+        }
+
+        internal ParameterBindingException(string message, string errorId, CommandParameterInfo target)
+            : base(message, errorId, ErrorCategory.InvalidArgument, target)
+        {
+            ParameterName = target.Name;
+            ParameterType = target.ParameterType;
+        }
+
+        internal ParameterBindingException(string message, string errorId)
+            : base(message, errorId, ErrorCategory.InvalidArgument, null)
+        {
         }
 
         //todo: implement

@@ -140,7 +140,8 @@ namespace System.Management.Automation
                 // 3. If we still had no success, throw an error
                 if (!success)
                 {
-                    throw new ParameterBindingException("The pipeline input cannot be bound to any parameter");
+                    throw new ParameterBindingException("The pipeline input cannot be bound to any parameter", 
+                        "PipelineInputCannotBeBound");
                 }
             }
 
@@ -178,8 +179,8 @@ namespace System.Management.Automation
                 // 2. Otherwise we could choose multiple sets, so throw an ambigiuous error
                 else
                 {
-                    // AmbiguousParameterSet
-                    throw new ParameterBindingException("The parameter set to be used cannot be resolved.");
+                    throw new ParameterBindingException("The parameter set to be used cannot be resolved.",
+                         "AmbiguousParameterSet");
                 }
             }
             // 8. If the candidate set is empty: Throw an error and tell the user what's missing
@@ -211,7 +212,7 @@ namespace System.Management.Automation
         {
             var missing = GetMandatoryUnboundParameters(paramSet, true);
             var msg = "Missing value for mandatory parameter(s): " + String.Join(", ", missing);
-            throw new ParameterBindingException(msg);
+            throw new ParameterBindingException(msg, "MissingMandatoryParameter");
         }
 
         private void BindNamedParameters(CommandParameterCollection parameters)
@@ -225,26 +226,9 @@ namespace System.Management.Automation
                 string curName = curParam.Name;
                 bool found = false;
 
-                // look for the parameter in all sets.
-                foreach (var curParamSet in _cmdletInfo.ParameterSets)
-                {
-                    // get info about it, as we need the desired type. look for it by name and alias
-                    // a check for duplicate names and aliases should happen in CmdletInfo
-                    var paramInfo = curParamSet.LookupParameter(curName);
-                    if (paramInfo != null)
-                    {
-                        // bind by real name, not by provided alias
-                        BindArgument(paramInfo, curParam.Value, true);
-                        found = true;
-                        break;
-                    }
-                }
-                // throw error if the parameter to be bound is unknown
-                if (!found)
-                {
-                    var msg = String.Format("No parameter was found that matches the name or alias '{0}'.", curName);
-                    throw new ParameterBindingException(msg);
-                }
+                // try to get the parameter from any set. throws an error if the name is ambiguous or doesn't exist
+                var paramInfo = _cmdletInfo.LookupParameter(curName);
+                BindArgument(paramInfo, curParam.Value, true);
             }
         }
 
@@ -257,8 +241,8 @@ namespace System.Management.Automation
             {
                 if (parametersWithoutName.Any())
                 {
-                    // AmbiguousParameterSet
-                    throw new ParameterBindingException("The parameter set to be used cannot be resolved.");
+                    throw new ParameterBindingException("The parameter set to be used cannot be resolved.",
+                         "AmbiguousParameterSet");
                 }
                 return;
             }
@@ -277,9 +261,8 @@ namespace System.Management.Automation
                 }
                 else
                 {
-                    // PositionalParameterNotFound
                     var msg = String.Format("Positional parameter not found for provided argument '{0}'", curParam.Value);
-                    throw new ParameterBindingException(msg);
+                    throw new ParameterBindingException(msg, "PositionalParameterNotFound");
                 }
             }
         }
@@ -301,7 +284,7 @@ namespace System.Management.Automation
                 if (value == null)
                 {
                     var msg = String.Format("Missing value for mandatory parameter '{0}'.", curParam.Name);
-                    throw new ParameterBindingException(msg);
+                    throw new ParameterBindingException(msg, "MissingMandatoryParameter");
                 }
                 BindArgument(curParam, value, true);
             }
@@ -334,31 +317,34 @@ namespace System.Management.Automation
 
         bool BindPipelineParameter(IEnumerable<CommandParameterInfo> parameterSet, object pipelineInput)
         {
-            var valueByPipeParam = (from param in parameterSet
-                                   where param.ValueFromPipeline
-                select param).FirstOrDefault();
+            var valueByPipeParams = (from param in parameterSet
+                                     where param.ValueFromPipeline
+                                     select param);
             var valuesByNamedPipeParams = from param in parameterSet
                                                   where param.ValueFromPipelineByPropertyName
                                                   select param;
-            var success = false;
 
             // first try to bind the parameter without conversion, then with conversion
             foreach (var doConvert in new bool[] { false, true })
             {
                 // 1. Try to bind the object to the parameter *without* type conversion with "ValueFromPipeline" param
-                if (!success && valueByPipeParam != null)
+                foreach (var param in valueByPipeParams)
                 {
-                    success = TryBindArgument(valueByPipeParam, pipelineInput, doConvert);
+                    if (TryBindArgument(param, pipelineInput, doConvert))
+                    {
+                        return true;
+                    }
                 }
 
                 // 2. If this is not sucessfull, try to bind the object to parameters with "ValueFromPipelineByPropertyName"
                 //    *without" conversion, if exists
-                if (!success && valuesByNamedPipeParams.Any())
+                if (valuesByNamedPipeParams.Any() && 
+                    TryBindObjectAsArguments(valuesByNamedPipeParams, pipelineInput, doConvert))
                 {
-                    success = TryBindObjectAsArguments(valuesByNamedPipeParams, pipelineInput, doConvert);
+                    return true;
                 }
             }
-            return success;
+            return false;
         }
 
 
@@ -421,7 +407,8 @@ namespace System.Management.Automation
                 {
                     if (_activeSet != null && !_activeSet.Name.Equals(activeSetName))
                     {
-                        throw new ParameterBindingException("The parameter set selection is ambiguous!");
+                        throw new ParameterBindingException("The parameter set selection is ambiguous!",
+                             "AmbiguousParameterSet");
                     }
                     _activeSet = _cmdletInfo.GetParameterSetByName(activeSetName);
                 }
@@ -499,10 +486,10 @@ namespace System.Management.Automation
                     throw new Exception("SetValue only implemented for fields and properties");
                 }
             }
-            catch (ArgumentException e)
+            catch (ArgumentException)
             {
                 var msg = String.Format("Can't bind value to parameter '{0}'", info.Name);
-                throw new ParameterBindingException(msg, e);
+                throw new ParameterBindingException(msg, "BindingFailed");
             }
         }
 

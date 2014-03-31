@@ -22,7 +22,7 @@ namespace System.Management.Automation
         public ReadOnlyCollection<CommandParameterSetInfo> ParameterSets { get; private set; }
 
         internal Dictionary<string, string> UniqueSetParameters { get; private set; }
-        internal Dictionary<string, Type> ParameterTypeLookupTable { get; private set; }
+        internal Dictionary<string, CommandParameterInfo> ParameterInfoLookupTable { get; private set; }
 
         private ExecutionContext _context;
         private Exception _validationException;
@@ -36,7 +36,7 @@ namespace System.Management.Automation
                 throw new Exception("InvalidCmdletNameFormat " + name);
             }
             UniqueSetParameters = new Dictionary<string, string>();
-            ParameterTypeLookupTable = new Dictionary<string, Type>(StringComparer.CurrentCultureIgnoreCase);
+            ParameterInfoLookupTable = new Dictionary<string, CommandParameterInfo>(StringComparer.CurrentCultureIgnoreCase);
             Verb = name.Substring(0, i);
             Noun = name.Substring(i + 1);
             ImplementingType = implementingType;
@@ -69,26 +69,53 @@ namespace System.Management.Automation
             }
         }
 
-        private void RegisterParameter(string name, ReadOnlyCollection<string> aliases, Type type)
+        private void RegisterParameter(CommandParameterInfo parameterInfo)
         {
             // also add it to lookuptable and check for unuque names/aliases
             var allNames = new List<string>();
-            if (aliases != null)
+            if (parameterInfo.Aliases != null)
             {
-                allNames.AddRange(aliases);
+                allNames.AddRange(parameterInfo.Aliases);
             }
-            allNames.Add(name);
+            allNames.Add(parameterInfo.Name);
             foreach (var curName in allNames)
             {
-                if (ParameterTypeLookupTable.ContainsKey(curName))
+                if (ParameterInfoLookupTable.ContainsKey(curName))
                 {
                     // save exception to be thrown when this object is validated, not now
                     var msg = String.Format("The name or alias '{0}' is used multiple times.", curName);
                     _validationException = new MetadataException(msg);
                     continue;
                 }
-                ParameterTypeLookupTable[curName] = type;
+                ParameterInfoLookupTable[curName] = parameterInfo;
             }
+        }
+
+        internal CommandParameterInfo LookupParameter(string name)
+        {
+            // check for complete name first
+            if (ParameterInfoLookupTable.ContainsKey(name))
+            {
+                return ParameterInfoLookupTable[name];
+            }
+
+            // if we didn't find it by name or alias, try to find it by prefix
+            var candidates = (from key in ParameterInfoLookupTable.Keys
+                              where key.StartsWith(name)
+                              select key).ToList();
+            if (candidates.Count < 1)
+            {
+                var msg = String.Format("No parameter was found that matches the name or alias '{0}'.", name);
+                throw new ParameterBindingException(msg, "ParameterNotFound");
+            }
+            if (candidates.Count > 1)
+            {
+                var msg = String.Format("Supplied parmameter '{0}' is ambiguous, possibilities are: {1}",
+                              name, String.Join(", ", candidates));
+                throw new ParameterBindingException(msg, "AmbiguousParameter");
+            }
+
+            return ParameterInfoLookupTable[candidates[0]];
         }
 
         // internals
@@ -160,6 +187,20 @@ namespace System.Management.Automation
             // that are in all sets. This will nevertheless save various checks
             paramSets.Add(ParameterAttribute.AllParameterSets, new Collection<CommandParameterInfo>());
 
+            // get the name of the default parameter set
+            string strDefaultParameterSetName = null;
+            object[] cmdLetAttrs = cmdletType.GetCustomAttributes(typeof(CmdletAttribute), false);
+            if (cmdLetAttrs.Length > 0)
+            {
+                strDefaultParameterSetName = ((CmdletAttribute)cmdLetAttrs[0]).DefaultParameterSetName;
+                // If a default set is specified, it has to exist, even if it's empty.
+                // See NonExisitingDefaultParameterSetIsEmptyPatameterSet reference test
+                if (!String.IsNullOrEmpty(strDefaultParameterSetName))
+                {
+                    paramSets.Add(strDefaultParameterSetName, new Collection<CommandParameterInfo>());
+                }
+            }
+
             // Add fields with ParameterAttribute
             foreach (FieldInfo fieldInfo in cmdletType.GetFields(BindingFlags.Public | BindingFlags.Instance))
             {
@@ -178,7 +219,7 @@ namespace System.Management.Automation
                 }
                 if (last != null)
                 {
-                    RegisterParameter(fieldInfo.Name, last.Aliases, fieldInfo.FieldType);
+                    RegisterParameter(last);
                 }
             }
 
@@ -219,7 +260,7 @@ namespace System.Management.Automation
                 }
                 if (last != null)
                 {
-                    RegisterParameter(propertyInfo.Name, last.Aliases, propertyInfo.PropertyType);
+                    RegisterParameter(last);
                 }
             }
 
@@ -231,14 +272,6 @@ namespace System.Management.Automation
 
             // Create param-sets collection
             Collection<CommandParameterSetInfo> paramSetInfo = new Collection<CommandParameterSetInfo>();
-
-            // TODO: find the name of the default param set
-            string strDefaultParameterSetName = null;
-            object[] cmdLetAttrs = cmdletType.GetCustomAttributes(typeof(CmdletAttribute), false);
-            if (cmdLetAttrs.Length > 0)
-            {
-                strDefaultParameterSetName = ((CmdletAttribute)cmdLetAttrs[0]).DefaultParameterSetName;
-            }
 
             foreach (string paramSetName in paramSets.Keys)
             {

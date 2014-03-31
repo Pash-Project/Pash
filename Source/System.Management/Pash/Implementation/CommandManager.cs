@@ -111,6 +111,7 @@ namespace Pash.Implementation
             {
                 commandInfo = FindCommand(cmdText, useLocalScope);
             }
+            // make sure we only create a valid command processor if it's a valid command
             commandInfo.Validate();
 
             switch (commandInfo.CommandType)

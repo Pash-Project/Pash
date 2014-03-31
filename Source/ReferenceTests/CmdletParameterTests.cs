@@ -176,9 +176,8 @@ namespace ReferenceTests
         }
 
         [Test]
-        public void NonExisitingDefaultParameterSetDoesntInfluenceExecution()
+        public void NonExisitingDefaultParameterSetIsEmptyPatameterSet()
         {
-            // TODO: sburnicki : find out which ParameterSetName is used then?
             var cmd = "Test-DefaultParameterSetDoesntExist";
             var res = ReferenceHost.Execute(cmd);
             Assert.AreEqual("works" + Environment.NewLine, res);

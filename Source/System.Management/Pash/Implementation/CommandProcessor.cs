@@ -113,13 +113,14 @@ namespace System.Management.Automation
 
         private bool IsSwitchParameter(string name)
         {
-            foreach (var curPair in _cmdletInfo.ParameterTypeLookupTable)
+            try
             {
-                if (curPair.Key.StartsWith(name, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    // one match is enough, if there were multiple matches we'll get an error anyway
-                    return curPair.Value == typeof(SwitchParameter);
-                }
+                var parameterInfo = _cmdletInfo.LookupParameter(name);
+                return parameterInfo.ParameterType == typeof(SwitchParameter);
+            }
+            catch (ParameterBindingException)
+            {
+                // seems to be ambiguous. well, this is the wrong place to throw the error, it will be thrown later on
             }
             return false;
         }
