@@ -111,6 +111,7 @@ namespace Pash.Implementation
             {
                 commandInfo = FindCommand(cmdText, useLocalScope);
             }
+            commandInfo.Validate();
 
             switch (commandInfo.CommandType)
             {

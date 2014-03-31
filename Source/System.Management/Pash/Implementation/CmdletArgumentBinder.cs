@@ -250,21 +250,23 @@ namespace System.Management.Automation
 
         private void BindPositionalParameters(CommandParameterCollection parameters, CommandParameterSetInfo parameterSet)
         {
-            if (parameterSet == null)
-            {
-                // AmbiguousParameterSet
-                throw new ParameterBindingException("The parameter set to be used cannot be resolved.");
-            }
-
-            var positionalsEnum = from param in parameterSet.Parameters
-                                      where param.Position >= 0
-                                  orderby param.Position ascending
-                                  select param;
-            var positionals = positionalsEnum.ToList();
-            int i = 0;
             var parametersWithoutName = from param in parameters
                                             where String.IsNullOrEmpty(param.Name)
                                         select param;
+            if (parameterSet == null)
+            {
+                if (parametersWithoutName.Any())
+                {
+                    // AmbiguousParameterSet
+                    throw new ParameterBindingException("The parameter set to be used cannot be resolved.");
+                }
+                return;
+            }
+            var positionals = (from param in parameterSet.Parameters
+                where param.Position >= 0
+                orderby param.Position ascending
+                select param).ToList();
+            int i = 0;
             foreach (var curParam in parametersWithoutName)
             {
                 if (i < positionals.Count)
@@ -284,10 +286,6 @@ namespace System.Management.Automation
 
         private void HandleMissingMandatoryParameters(CommandParameterSetInfo parameterSet, bool considerPipeline, bool askUser)
         {
-            if (parameterSet == null)
-            {
-                throw new ParameterBindingException("The parameter set to be used cannot be resolved.");
-            }
             // select mandatory parametes
             var unsetMandatories = GetMandatoryUnboundParameters(parameterSet, considerPipeline);
             foreach (var curParam in unsetMandatories)
@@ -372,6 +370,10 @@ namespace System.Management.Automation
 
         private IEnumerable<CommandParameterInfo> GetMandatoryUnboundParameters(CommandParameterSetInfo parameterSet, bool considerPipeline)
         {
+            if (parameterSet == null)
+            {
+                return Enumerable.Empty<CommandParameterInfo>();
+            }
             return from param in parameterSet.Parameters
                     where param.IsMandatory &&
                 !_boundArguments.Contains(param.MemberInfo) && 

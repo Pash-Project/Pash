@@ -20,6 +20,11 @@ namespace System.Management.Automation
         {
         }
 
+        virtual internal void Validate()
+        {
+            // does nothing by default
+        }
+
         public CommandTypes CommandType { get; private set; }
 
         public abstract string Definition { get; }

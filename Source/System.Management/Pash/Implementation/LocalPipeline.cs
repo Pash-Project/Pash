@@ -142,14 +142,11 @@ namespace Pash.Implementation
             catch (Exception ex)
             {
                 // in case of throw statement, parse error, or "ThrowTerminatingError"
-                var errorRecord = new ErrorRecord(ex, errorId, ErrorCategory.InvalidOperation, null);
-                var psobj = PSObject.AsPSObject(errorRecord);
-                // if merged with stdout, we can later on check to which stream the object usually belongs
-                psobj.Properties.Add(new PSNoteProperty("writeToErrorStream", true));
-                _errorStream.Write(psobj);
+                // just add to error variable and rethrow that thing
+                var errorRecord = (ex is IContainsErrorRecord) ?
+                    ((IContainsErrorRecord) ex).ErrorRecord : new ErrorRecord(ex, errorId, ErrorCategory.InvalidOperation, null);
                 context.AddToErrorVariable(errorRecord);
-
-                SetPipelineState(PipelineState.Failed, ex);
+                throw;
             }
             _runspace.RemoveRunningPipeline(this);
             return Output.NonBlockingRead();

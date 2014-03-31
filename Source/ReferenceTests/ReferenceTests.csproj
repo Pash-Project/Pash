@@ -11,6 +11,8 @@
     <AssemblyName>ReferenceTests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,10 +32,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Tools\NUnit-2.6.1\bin\nunit.framework.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,6 +39,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\Tools\NUnit-2.6.1\bin\nunit.framework.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CmdletParameterTests.cs" />
@@ -49,16 +50,24 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
-      <Project>{c5e303ec-5684-4c95-b0ec-2593e6662403}</Project>
+      <Project>{C5E303EC-5684-4C95-B0EC-2593E6662403}</Project>
       <Name>System.Management</Name>
     </ProjectReference>
     <ProjectReference Include="..\TestHost\TestHost.csproj">
-      <Project>{a5550fb3-553b-441e-8386-ad1ef5c31fae}</Project>
+      <Project>{A5550FB3-553B-441E-8386-AD1EF5C31FAE}</Project>
       <Name>TestHost</Name>
     </ProjectReference>
     <ProjectReference Include="..\TestPSSnapIn\TestPSSnapIn.csproj">
-      <Project>{dc9303a4-3f38-4591-9bd4-67f223f7d204}</Project>
+      <Project>{DC9303A4-3F38-4591-9BD4-67F223F7D204}</Project>
       <Name>TestPSSnapIn</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.PowerShell.Commands.Management\Microsoft.Commands.Management.csproj">
+      <Project>{91225A72-A021-4B7D-BA56-5E1B7AC02F03}</Project>
+      <Name>Microsoft.Commands.Management</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.PowerShell.Commands.Utility\Microsoft.PowerShell.Commands.Utility.csproj">
+      <Project>{0E1D573C-C57D-4A83-A739-3A38E719D87E}</Project>
+      <Name>Microsoft.PowerShell.Commands.Utility</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

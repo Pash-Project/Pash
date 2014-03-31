@@ -25,6 +25,7 @@ namespace System.Management.Automation
         internal Dictionary<string, Type> ParameterTypeLookupTable { get; private set; }
 
         private ExecutionContext _context;
+        private Exception _validationException;
 
         internal CmdletInfo(string name, Type implementingType, string helpFile, PSSnapInInfo PSSnapin, ExecutionContext context)
             : base(name, CommandTypes.Cmdlet)
@@ -42,6 +43,7 @@ namespace System.Management.Automation
             HelpFile = helpFile;
             PSSnapIn = PSSnapin;
             _context = context;
+            _validationException = null;
             GetParameterSetInfo(implementingType);
         }
 
@@ -59,6 +61,14 @@ namespace System.Management.Automation
             }
         }
 
+        internal override void Validate()
+        {
+            if (_validationException != null)
+            {
+                throw _validationException;
+            }
+        }
+
         private void RegisterParameter(string name, ReadOnlyCollection<string> aliases, Type type)
         {
             // also add it to lookuptable and check for unuque names/aliases
@@ -72,8 +82,10 @@ namespace System.Management.Automation
             {
                 if (ParameterTypeLookupTable.ContainsKey(curName))
                 {
+                    // save exception to be thrown when this object is validated, not now
                     var msg = String.Format("The name or alias '{0}' is used multiple times.", curName);
-                    throw new MetadataException(msg);
+                    _validationException = new MetadataException(msg);
+                    continue;
                 }
                 ParameterTypeLookupTable[curName] = type;
             }
