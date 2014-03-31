@@ -9,7 +9,7 @@ namespace System.Management.Automation
 {
     internal class CommandProcessor : CommandProcessorBase
     {
-        private CmdletArgumentBinder _argumentBinder;
+        private CmdletParameterBinder _argumentBinder;
         internal Cmdlet Command { get; private set; }
         readonly CmdletInfo _cmdletInfo;
         bool _beganProcessing;
@@ -32,8 +32,8 @@ namespace System.Management.Automation
             cmdlet.CommandRuntime = CommandRuntime;
             Command = cmdlet;
             MergeParameters();
-            _argumentBinder = new CmdletArgumentBinder(_cmdletInfo, Command);
-            _argumentBinder.BindCommandLineArguments(Parameters);
+            _argumentBinder = new CmdletParameterBinder(_cmdletInfo, Command);
+            _argumentBinder.BindCommandLineParameters(Parameters);
         }
 
         /// <summary>
@@ -66,10 +66,10 @@ namespace System.Management.Automation
             foreach (var curInput in inputObjects)
             {
                 // TODO: sburnicki - determine the correct second argument
-                _argumentBinder.BindPipelineArguments(curInput, true);
+                _argumentBinder.BindPipelineParameters(curInput, true);
                 Command.DoProcessRecord();
             }
-            _argumentBinder.RestoreCommandLineArguments();
+            _argumentBinder.RestoreCommandLineParameterValues();
         }
 
         /// <summary>

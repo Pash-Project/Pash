@@ -9,11 +9,11 @@ using System.Management.Automation.Runspaces;
 
 namespace System.Management.Automation
 {
-    internal class CmdletArgumentBinder
+    internal class CmdletParameterBinder
     {
-        private Dictionary<MemberInfo, object> _defaultArguments;
-        private Collection<MemberInfo> _boundArguments;
-        private Dictionary<MemberInfo, object> _commandLineArgumentsBackup;
+        private Dictionary<MemberInfo, object> _defaultValues;
+        private Collection<MemberInfo> _boundParameters;
+        private Dictionary<MemberInfo, object> _commandLineValuesBackup;
         private CmdletInfo _cmdletInfo;
         private Cmdlet _cmdlet;
         private CommandParameterSetInfo _activeSet;
@@ -42,14 +42,14 @@ namespace System.Management.Automation
             }
         }
 
-        public CmdletArgumentBinder(CmdletInfo cmdletInfo, Cmdlet cmdlet)
+        public CmdletParameterBinder(CmdletInfo cmdletInfo, Cmdlet cmdlet)
         {
             _cmdletInfo = cmdletInfo;
             _cmdlet = cmdlet;
-            _defaultArguments = new Dictionary<MemberInfo, object>();
-            _boundArguments = new Collection<MemberInfo>();
+            _defaultValues = new Dictionary<MemberInfo, object>();
+            _boundParameters = new Collection<MemberInfo>();
             _candidateParameterSets = new Collection<CommandParameterSetInfo>();
-            _commandLineArgumentsBackup = new Dictionary<MemberInfo, object>();
+            _commandLineValuesBackup = new Dictionary<MemberInfo, object>();
             _activeSet = null;
             _defaultSet = null;
             _hasDefaultSet = true;
@@ -62,10 +62,10 @@ namespace System.Management.Automation
         /// All abount Cmdlet parameters: http://msdn2.microsoft.com/en-us/library/ms714433(VS.85).aspx
         /// About the lifecycle: http://msdn.microsoft.com/en-us/library/ms714429(v=vs.85).aspx
         /// </remarks>
-        public void BindCommandLineArguments(CommandParameterCollection parameters)
+        public void BindCommandLineParameters(CommandParameterCollection parameters)
         {
 
-            // How command line arguments are bound:
+            // How command line parameters are bound:
             // 1. Bind all named parameters, fail if some name is bound twice
             BindNamedParameters(parameters);
 
@@ -99,21 +99,21 @@ namespace System.Management.Automation
             _candidateParameterSets = GetCandidateParameterSets(false);
 
             // 10. Back up the bound parameters
-            BackupCommandLineArguments();
+            BackupCommandLineParameterValues();
 
             // 11. For the beginning phase: Tell the cmdlet which parameter set is likely to be used (if we know it)
             ChooseParameterSet(ActiveOrDefaultParameterSet);
         }
 
         /// <summary>
-        /// Binds the arguments provided by pipeline to be processed as a separate record
+        /// Binds the parameter values provided by pipeline to be processed as a separate record
         /// </summary>
         /// <param name="curInput">Current input object from the pipeline</param>
         /// <param name="isFirstInPipeline">Whether the command is the first in pipeline</param>
-        public void BindPipelineArguments(object pipelineInput, bool isFirstInPipeline)
+        public void BindPipelineParameters(object pipelineInput, bool isFirstInPipeline)
         {
-            // First reset to command line arguments
-            RestoreCommandLineArguments();
+            // First reset to command line parameter values
+            RestoreCommandLineParameterValues();
 
             // How pipeline parameters are bound
             // 1. If this command is the first in pipeline and there are no input objects:
@@ -130,12 +130,12 @@ namespace System.Management.Automation
                 // 1. If the default parameter set is still a candidate: Try to bind pipeline object properly
                 if (DefaultParameterSet != null && _candidateParameterSets.Contains(DefaultParameterSet))
                 {
-                    success = BindPipelineParameter(DefaultParameterSet.Parameters, pipelineInput);
+                    success = BindPipelineParameters(DefaultParameterSet.Parameters, pipelineInput);
                 }
                 // 2. If binding to the default set was not possible, try the same with all parameters
                 if (!success)
                 {
-                    success = BindPipelineParameter(AllParameters(_candidateParameterSets), pipelineInput);
+                    success = BindPipelineParameters(AllParameters(_candidateParameterSets), pipelineInput);
                 }
                 // 3. If we still had no success, throw an error
                 if (!success)
@@ -227,7 +227,7 @@ namespace System.Management.Automation
 
                 // try to get the parameter from any set. throws an error if the name is ambiguous or doesn't exist
                 var paramInfo = _cmdletInfo.LookupParameter(curName);
-                BindArgument(paramInfo, curParam.Value, true);
+                BindParameter(paramInfo, curParam.Value, true);
             }
         }
 
@@ -255,7 +255,7 @@ namespace System.Management.Automation
                 if (i < positionals.Count)
                 {
                     var affectedParam = positionals[i];
-                    BindArgument(affectedParam, curParam.Value, true);
+                    BindParameter(affectedParam, curParam.Value, true);
                     i++;
                 }
                 else
@@ -285,7 +285,7 @@ namespace System.Management.Automation
                     var msg = String.Format("Missing value for mandatory parameter '{0}'.", curParam.Name);
                     throw new ParameterBindingException(msg, "MissingMandatoryParameter");
                 }
-                BindArgument(curParam, value, true);
+                BindParameter(curParam, value, true);
             }
         }
 
@@ -314,7 +314,7 @@ namespace System.Management.Automation
             return candidates;
         }
 
-        bool BindPipelineParameter(IEnumerable<CommandParameterInfo> parameterSet, object pipelineInput)
+        bool BindPipelineParameters(IEnumerable<CommandParameterInfo> parameterSet, object pipelineInput)
         {
             var valueByPipeParams = (from param in parameterSet
                                      where param.ValueFromPipeline
@@ -329,7 +329,7 @@ namespace System.Management.Automation
                 // 1. Try to bind the object to the parameter *without* type conversion with "ValueFromPipeline" param
                 foreach (var param in valueByPipeParams)
                 {
-                    if (TryBindArgument(param, pipelineInput, doConvert))
+                    if (TryBindParameter(param, pipelineInput, doConvert))
                     {
                         return true;
                     }
@@ -338,7 +338,7 @@ namespace System.Management.Automation
                 // 2. If this is not sucessfull, try to bind the object to parameters with "ValueFromPipelineByPropertyName"
                 //    *without" conversion, if exists
                 if (valuesByNamedPipeParams.Any() && 
-                    TryBindObjectAsArguments(valuesByNamedPipeParams, pipelineInput, doConvert))
+                    TryBindObjectAsParameters(valuesByNamedPipeParams, pipelineInput, doConvert))
                 {
                     return true;
                 }
@@ -361,7 +361,7 @@ namespace System.Management.Automation
             }
             return from param in parameterSet.Parameters
                     where param.IsMandatory &&
-                !_boundArguments.Contains(param.MemberInfo) && 
+                !_boundParameters.Contains(param.MemberInfo) && 
                 (considerPipeline ||
                     !(param.ValueFromPipeline || param.ValueFromPipelineByPropertyName)
                 )
@@ -399,7 +399,7 @@ namespace System.Management.Automation
             }
             // otherwise we have more than one parameter set with name
             // even if an activeSet was already chosen, make sure there ist at most one active set
-            foreach (var param in _boundArguments)
+            foreach (var param in _boundParameters)
             {
                 string activeSetName;
                 if (_cmdletInfo.UniqueSetParameters.TryGetValue(param.Name, out activeSetName))
@@ -414,11 +414,11 @@ namespace System.Management.Automation
             }
         }
 
-        private bool TryBindArgument(CommandParameterInfo info, object value, bool doConvert)
+        private bool TryBindParameter(CommandParameterInfo info, object value, bool doConvert)
         {
             try
             {
-                BindArgument(info, value, doConvert);
+                BindParameter(info, value, doConvert);
                 return true;
             }
             catch (Exception)
@@ -427,10 +427,10 @@ namespace System.Management.Automation
             }
         }
 
-        private void BindArgument(CommandParameterInfo info, object value, bool doConvert)
+        private void BindParameter(CommandParameterInfo info, object value, bool doConvert)
         {
             var memberInfo = info.MemberInfo;
-            if (_boundArguments.Contains(memberInfo))
+            if (_boundParameters.Contains(memberInfo))
             {
                 var msg = String.Format("Parameter '{0}' has already been bound!", info.Name);
                 throw new ParameterBindingException(msg);
@@ -441,10 +441,10 @@ namespace System.Management.Automation
                 value = LanguagePrimitives.ConvertTo(value, info.ParameterType);
             }
             SetCommandValue(memberInfo, value);
-            _boundArguments.Add(memberInfo);
+            _boundParameters.Add(memberInfo);
         }
 
-        private bool TryBindObjectAsArguments(IEnumerable<CommandParameterInfo> parameters, object valueObject, bool doConvert)
+        private bool TryBindObjectAsParameters(IEnumerable<CommandParameterInfo> parameters, object valueObject, bool doConvert)
         {
             var values = PSObject.AsPSObject(valueObject);
             var success = false;
@@ -454,7 +454,7 @@ namespace System.Management.Automation
                 if (curValue != null)
                 {
                     // important: || success needs to be at the end, because we want to try to bind *every* parameter
-                    success = TryBindArgument(param, curValue, doConvert) || success;
+                    success = TryBindParameter(param, curValue, doConvert) || success;
                 }
             }
             return success;
@@ -463,9 +463,9 @@ namespace System.Management.Automation
         private void SetCommandValue(MemberInfo info, object value)
         {
             // make a backup of the default values first, if we don't have one
-            if (!_defaultArguments.ContainsKey(info))
+            if (!_defaultValues.ContainsKey(info))
             {
-                _defaultArguments[info] = GetCommandValue(info);
+                _defaultValues[info] = GetCommandValue(info);
             }
             // now set the field or property
             try
@@ -511,37 +511,37 @@ namespace System.Management.Automation
         }
 
         /// <summary>
-        /// Makes and internal backup of the command line arguments, so they can be restored
+        /// Makes and internal backup of the command line parameter values, so they can be restored
         /// </summary>
-        private void BackupCommandLineArguments()
+        private void BackupCommandLineParameterValues()
         {
-            _commandLineArgumentsBackup.Clear();
-            foreach (var info in _boundArguments)
+            _commandLineValuesBackup.Clear();
+            foreach (var info in _boundParameters)
             {
-                _commandLineArgumentsBackup[info] = GetCommandValue(info);
+                _commandLineValuesBackup[info] = GetCommandValue(info);
             }
         }
 
         /// <summary>
-        /// Restores arguments to those provided by command line, so multiple
+        /// Restores parameters to those provided by command line, so multiple
         /// records can be processed without influencing each other
         /// </summary>
-        public void RestoreCommandLineArguments()
+        public void RestoreCommandLineParameterValues()
         {
-            foreach (var bound in _boundArguments)
+            foreach (var bound in _boundParameters)
             {
-                object restoredVaue = _commandLineArgumentsBackup.ContainsKey(bound) ?
-                                _commandLineArgumentsBackup[bound] : _defaultArguments[bound];
+                object restoredVaue = _commandLineValuesBackup.ContainsKey(bound) ?
+                                _commandLineValuesBackup[bound] : _defaultValues[bound];
                 if (GetCommandValue(bound) != restoredVaue)
                 {
                     SetCommandValue(bound, restoredVaue);
                 }
             }
-            // reset the bound arguments list
-            _boundArguments.Clear();
-            foreach (MemberInfo info in _commandLineArgumentsBackup.Keys)
+            // reset the bound parameter list
+            _boundParameters.Clear();
+            foreach (MemberInfo info in _commandLineValuesBackup.Keys)
             {
-                _boundArguments.Add(info);
+                _boundParameters.Add(info);
             }
         }
 
