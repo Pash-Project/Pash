@@ -13,7 +13,6 @@ namespace System.Management.Tests.ParameterTests
     public class BindingTests
     {
         private CmdletInfo _info = null;
-        private CommandParameterCollection _parameters = null;
         private CmdletParameterBinder _binder = null;
         private TestParameterCommand _cmdlet = null;
 
@@ -23,16 +22,17 @@ namespace System.Management.Tests.ParameterTests
             _info = TestParameterCommand.CreateCmdletInfo();
             _cmdlet = new TestParameterCommand();
             _binder = new CmdletParameterBinder(_info, _cmdlet);
-            _parameters = new CommandParameterCollection();
         }
 
         [Test]
         public void BindingField()
         {
-            _parameters.Add("Name", "John");
-            _parameters.Add("Variable", "foo"); // mandatory
+            var parameters = new CommandParameterCollection {
+                { "Name", "John" },
+                { "Variable", "foo" } // mandatory
+            };
 
-            _binder.BindCommandLineParameters(_parameters);
+            _binder.BindCommandLineParameters(parameters);
 
             Assert.AreEqual("John", _cmdlet.Name);
         }
@@ -40,10 +40,12 @@ namespace System.Management.Tests.ParameterTests
         [Test]
         public void BindingFieldAlias()
         {
-            _parameters.Add("fn", "John");
-            _parameters.Add("Variable", "foo"); // mandatory
+            var parameters = new CommandParameterCollection {
+                { "fn", "John" },
+                { "Variable", "foo" } // mandatory
+            };
 
-            _binder.BindCommandLineParameters(_parameters);
+            _binder.BindCommandLineParameters(parameters);
 
             Assert.AreEqual("John", _cmdlet.Name);
         }
@@ -51,10 +53,12 @@ namespace System.Management.Tests.ParameterTests
         [Test]
         public void BindingParameter()
         {
-            _parameters.Add("InputObject", 10);
-            _parameters.Add("Variable", "foo"); // mandatory
+            var parameters = new CommandParameterCollection {
+                { "InputObject", 10 },
+                { "Variable", "foo" } // mandatory
+            };
 
-            _binder.BindCommandLineParameters(_parameters);
+            _binder.BindCommandLineParameters(parameters);
 
             Assert.AreEqual("10", _cmdlet.InputObject.ToString());
         }
@@ -62,9 +66,11 @@ namespace System.Management.Tests.ParameterTests
         [Test]
         public void BindingParameterByPipeline()
         {
-            _parameters.Add("Variable", "foo"); // mandatory
+            var parameters = new CommandParameterCollection {
+                { "Variable", "foo" } // mandatory
+            };
 
-            _binder.BindCommandLineParameters(_parameters);
+            _binder.BindCommandLineParameters(parameters);
             _binder.BindPipelineParameters(10, true);
 
             Assert.AreEqual("10", _cmdlet.InputObject.ToString());
@@ -73,9 +79,11 @@ namespace System.Management.Tests.ParameterTests
         [Test]
         public void BindingParameterAlias()
         {
-            _parameters.Add("Path", "a path");
+            var parameters = new CommandParameterCollection {
+                { "Path", "a path" }
+            };
 
-            _binder.BindCommandLineParameters(_parameters);
+            _binder.BindCommandLineParameters(parameters);
 
             Assert.AreEqual("a path", _cmdlet.FilePath.ToString());
         }
@@ -83,20 +91,24 @@ namespace System.Management.Tests.ParameterTests
         [Test]
         public void LookupOfAmbiguousParameterFails()
         {
-            _parameters.Add("i", 10);
+            var parameters = new CommandParameterCollection {
+                { "i", 10 }
+            };
 
             Assert.Throws(typeof(ParameterBindingException), delegate() {
-                _binder.BindCommandLineParameters(_parameters);
+                _binder.BindCommandLineParameters(parameters);
             });
         }
 
         [Test]
         public void BindingNonSwitch()
         {
-            _parameters.Add("Name", "John");
-            _parameters.Add("Variable", "foo"); // mandatory
+            var parameters = new CommandParameterCollection {
+                { "Name", "John" },
+                { "Variable", "foo" }
+            };
 
-            _binder.BindCommandLineParameters(_parameters);
+            _binder.BindCommandLineParameters(parameters);
 
             Assert.AreEqual("John", _cmdlet.Name);
             Assert.IsFalse(_cmdlet.Recurse.ToBool());
@@ -106,11 +118,13 @@ namespace System.Management.Tests.ParameterTests
         [TestCase("FilePath")]
         public void BindingCombinationAllSet(string mandatory)
         {
-            _parameters.Add("Name", "John");
-            _parameters.Add("Recurse", null);
-            _parameters.Add(mandatory, "foo"); // chooses the parameter set
+            var parameters = new CommandParameterCollection {
+                { "Name", "John" },
+                { "Recurse", null },
+                { mandatory, "foo" } // chooses the parameter set
+            };
 
-            _binder.BindCommandLineParameters(_parameters);
+            _binder.BindCommandLineParameters(parameters);
 
             // as the values are in both sets, it should be always set
             Assert.AreEqual("John", _cmdlet.Name);
@@ -120,10 +134,12 @@ namespace System.Management.Tests.ParameterTests
         [Test]
         public void BindingCombinationNonDefaultSet()
         {
-            _parameters.Add("Variable", "a");
-            _parameters.Add("Recurse", null);
+            var parameters = new CommandParameterCollection {
+                { "Variable", "a" },
+                { "Recurse", null }
+            };
 
-            _binder.BindCommandLineParameters(_parameters);
+            _binder.BindCommandLineParameters(parameters);
 
             Assert.AreEqual("a", _cmdlet.Variable);
             Assert.IsTrue(_cmdlet.Recurse.ToBool());
@@ -132,9 +148,11 @@ namespace System.Management.Tests.ParameterTests
         [Test]
         public void BindingParameterSetSelectionSingle()
         {
-            _parameters.Add("FilePath", "a path");
+            var parameters = new CommandParameterCollection {
+                { "FilePath", "a path" }
+            };
 
-            _binder.BindCommandLineParameters(_parameters);
+            _binder.BindCommandLineParameters(parameters);
 
             Assert.AreEqual("File", _cmdlet.ParameterSetName);
         }
@@ -142,9 +160,11 @@ namespace System.Management.Tests.ParameterTests
         [Test]
         public void BindingParameterSetSelectionSingleAlias()
         {
-            _parameters.Add("PSPath", "a path");
+            var parameters = new CommandParameterCollection {
+                { "PSPath", "a path" }
+            };
 
-            _binder.BindCommandLineParameters(_parameters);
+            _binder.BindCommandLineParameters(parameters);
 
             Assert.AreEqual("File", _cmdlet.ParameterSetName);
         }
@@ -152,25 +172,27 @@ namespace System.Management.Tests.ParameterTests
         [Test]
         public void BindingParameterSetSelectionDoubleShouldFail()
         {
-            _parameters.Add("Variable", "test");
-            _parameters.Add("FilePath", "a path");
+            var parameters = new CommandParameterCollection {
+                { "Variable", "test" },
+                { "FilePath", "a path" }
+            };
 
             Assert.Throws(typeof(ParameterBindingException), delegate()
             {
-                    _binder.BindCommandLineParameters(_parameters);
+                    _binder.BindCommandLineParameters(parameters);
             });
         }
 
-        // TODO: refine exception types
-        // general stuff
         [Test]
         public void BindingParameterTwiceShouldFail()
         {
-            _parameters.Add("Variable", "foo");
-            _parameters.Add("Variable", "bar");
+            var parameters = new CommandParameterCollection {
+                { "Variable", "foo" },
+                { "Variable", "bar" }
+            };
             Assert.Throws(typeof(ParameterBindingException), delegate()
             {
-                _binder.BindCommandLineParameters(_parameters);
+                _binder.BindCommandLineParameters(parameters);
             });
         }
 
@@ -186,11 +208,13 @@ namespace System.Management.Tests.ParameterTests
         public void BindingParameterByPositionSelectsDefaultParameterSetIncomplete()
         {
             var name = "foo";
-            _parameters.Add(null, name);
+            var parameters = new CommandParameterCollection {
+                { null, name }
+            };
 
             var ex = Assert.Throws(typeof(ParameterBindingException), delegate()
             {
-                _binder.BindCommandLineParameters(_parameters);
+                _binder.BindCommandLineParameters(parameters);
             });
             StringAssert.Contains("FilePath", ex.Message); // should complain that no "FilePath" was provided
         }
@@ -200,10 +224,12 @@ namespace System.Management.Tests.ParameterTests
         {
             var name = "foo";
             var path = "a path";
-            _parameters.Add(null, name);
-            _parameters.Add(null, path);
+            var parameters = new CommandParameterCollection {
+                { null, name },
+                { null, path }
+            };
 
-            _binder.BindCommandLineParameters(_parameters);
+            _binder.BindCommandLineParameters(parameters);
 
             Assert.AreEqual(path, _cmdlet.FilePath);
             Assert.AreEqual(name, _cmdlet.Name);
@@ -214,10 +240,12 @@ namespace System.Management.Tests.ParameterTests
         public void BindingParameterByPositionAfterSetSelection()
         {
             var varname = "foo";
-            _parameters.Add("ConstVar", null); // switch parameter, should select "Variable" set
-            _parameters.Add(null, varname);
+            var parameters = new CommandParameterCollection {
+                { "ConstVar", null}, // switch parameter, should select "Variable" set
+                { null, varname }
+            };
 
-            _binder.BindCommandLineParameters(_parameters);
+            _binder.BindCommandLineParameters(parameters);
 
             Assert.IsTrue(_cmdlet.ConstVar.ToBool());
             Assert.AreEqual(varname, _cmdlet.Variable);
@@ -233,9 +261,11 @@ namespace System.Management.Tests.ParameterTests
         public void BindingParameterIntToIntArrayConversion()
         {
             double pi = 3.14159;
-            _parameters.Add("FavoriteNumbers", pi);
+            var parameters = new CommandParameterCollection {
+                { "FavoriteNumbers", pi}
+            };
 
-            _binder.BindCommandLineParameters(_parameters);
+            _binder.BindCommandLineParameters(parameters);
 
             Assert.AreEqual(new double[] { pi }, _cmdlet.FavoriteNumbers);
         }
@@ -244,9 +274,11 @@ namespace System.Management.Tests.ParameterTests
         public void BindingParameterAnyObjectToSpecificArrayConversion()
         {
             var exception = new RuntimeException("foo");
-            _parameters.Add("FavoriteExceptions", exception);
+            var parameters = new CommandParameterCollection {
+                { "FavoriteExceptions", exception}
+            };
 
-            _binder.BindCommandLineParameters(_parameters);
+            _binder.BindCommandLineParameters(parameters);
 
             Assert.AreEqual(new Exception[] { exception }, _cmdlet.FavoriteExceptions);
         }
@@ -255,9 +287,11 @@ namespace System.Management.Tests.ParameterTests
         public void BindingParameterArrayElementConversion()
         {
             int two = 2;
-            _parameters.Add("FavoriteNumbers", two);
+            var parameters = new CommandParameterCollection {
+                { "FavoriteNumbers", two}
+            };
 
-            _binder.BindCommandLineParameters(_parameters);
+            _binder.BindCommandLineParameters(parameters);
 
             Assert.AreEqual(new double[] { (double) two }, _cmdlet.FavoriteNumbers);
         }
