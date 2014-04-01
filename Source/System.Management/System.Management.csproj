@@ -470,6 +470,7 @@
     <Compile Include="Pash\Implementation\IScriptBlockInfo.cs" />
     <Compile Include="Pash\Implementation\ScopeUsages.cs" />
     <Compile Include="Automation\Runspaces\InvalidPipelineStateException.cs" />
+    <Compile Include="Pash\Implementation\CmdletParameterBinder.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

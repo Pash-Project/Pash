@@ -69,7 +69,11 @@ namespace System.Management.Automation
 
         public override bool Equals(object obj)
         {
-            return IsPresent == (bool)obj;
+            if (!( obj is SwitchParameter))
+            {
+                throw new InvalidOperationException("obj is not a SwitchParameter");
+            }
+            return IsPresent == ((SwitchParameter) obj).IsPresent;
         }
 
         public override int GetHashCode()

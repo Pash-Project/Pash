@@ -56,6 +56,10 @@ namespace System.Management.Automation
 
         public override bool Equals(object obj)
         {
+            if (obj is PSObject)
+            {
+                obj = ((PSObject)obj).ImmediateBaseObject;
+            }
             if (ImmediateBaseObject == null)
             {
                 return obj == null;

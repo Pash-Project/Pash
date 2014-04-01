@@ -1,17 +1,16 @@
-﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TestHost")]
+[assembly: AssemblyTitle("PowershellReferenceTests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Pash Contributors")]
 [assembly: AssemblyProduct("Pash - https://github.com/Pash-Project/Pash/")]
-[assembly: AssemblyCopyright("Copyright © 2012-2013 - License: GPL/BSD")]
+[assembly: AssemblyCopyright("Copyright © 2008,2012-2013 - License: GPL/BSD")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -21,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("02054b6f-dcc0-44e8-80e2-4b7e90dc17b8")]
+[assembly: Guid("6730461c-9be5-4808-85b3-f4a2364072ad")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -35,4 +34,3 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: InternalsVisibleTo("ReferenceTests")]

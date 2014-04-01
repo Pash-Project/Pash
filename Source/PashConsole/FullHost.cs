@@ -167,13 +167,25 @@ namespace Pash
 
                 // If there was any input specified, pass it in, otherwise just
                 // execute the pipeline.
-                if (input != null)
+                ErrorRecord pipelineError = null;
+                try
                 {
-                    currentPipeline.Invoke(input);
+                    if (input != null)
+                    {
+                        currentPipeline.Invoke(input);
+                    }
+                    else
+                    {
+                        currentPipeline.Invoke();
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    currentPipeline.Invoke();
+                    // in case of throw statement, parse error, or "ThrowTerminatingError"
+                    // append it later to "errors" to preserve the correct order
+                    pipelineError = (ex is IContainsErrorRecord) ?
+                                    ((IContainsErrorRecord) ex).ErrorRecord : 
+                                    new ErrorRecord(ex, "PipelineError", ErrorCategory.InvalidOperation, null);
                 }
                 // if the pipeline failed, not everything was printed by the out-default command. print the errors
                 if (currentPipeline.PipelineStateInfo.State.Equals(PipelineState.Failed))
@@ -183,6 +195,13 @@ namespace Pash
                         errors = currentPipeline.Error.ReadToEnd();
                     }
                     success = false;
+                }
+                if (pipelineError != null)
+                {
+                    var psobj = PSObject.AsPSObject(pipelineError);
+                    // if merged with stdout, we can later on check to which stream the object usually belongs
+                    psobj.Properties.Add(new PSNoteProperty("writeToErrorStream", true));
+                    errors.Add(psobj);
                 }
             }
             return success;

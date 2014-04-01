@@ -17,5 +17,10 @@ namespace System.Management.Automation.Runspaces
 
         public string Name { get; private set; }
         public object Value { get; private set; }
+
+        public override string ToString()
+        {
+            return Name + "=" + Value;
+        }
     }
 }

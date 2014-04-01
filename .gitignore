@@ -26,3 +26,5 @@ TestResult.xml
 *.ncrunchproject
 *.ncrunchsolution
 _NCrunch_*/
+*.ldf
+*.mdf

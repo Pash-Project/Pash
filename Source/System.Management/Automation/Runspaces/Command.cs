@@ -79,21 +79,7 @@ namespace System.Management.Automation.Runspaces
         {
             CommandProcessorBase cmdProcBase = commandFactory.CreateCommandProcessor(this);
             cmdProcBase.ExecutionContext = executionContext;
-
-            if ((Parameters != null) && (Parameters.Count > 0))
-            {
-                foreach (CommandParameter parameter in Parameters)
-                {
-                    if (string.IsNullOrEmpty(parameter.Name))
-                    {
-                        cmdProcBase.AddParameter(parameter.Value);
-                    }
-                    else
-                    {
-                        cmdProcBase.AddParameter(parameter.Name, parameter.Value);
-                    }
-                }
-            }
+            cmdProcBase.AddParameters(Parameters);
             SetMergeResultOptions(cmdProcBase);
             return cmdProcBase;
         }
