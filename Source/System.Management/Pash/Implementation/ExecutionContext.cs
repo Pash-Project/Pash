@@ -128,7 +128,11 @@ namespace Pash.Implementation
                 // TODO: this should never happen as the variable is const. but anyway
                 return;
             }
-            records.Insert(0, errorRecord);
+            // make sure it's not added multiple times (e.g. *same* exception thrown through multiple nested pipelines)
+            if (!records.Contains(errorRecord))
+            {
+                records.Insert(0, errorRecord);
+            }
         }
     }
 }

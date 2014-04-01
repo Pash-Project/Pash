@@ -86,12 +86,7 @@ namespace Pash.Implementation
 
         public override void EndProcessing()
         {
-            // TODO: Should we set $LASTEXITCODE here?
-            // TODO: Same for the $? variable.
-            if (_process != null)
-            {
-                _process.Dispose();
-            }
+            // As the process can run asynchronous, cleanup is handled by ProcessExited
         }
 
         private ApplicationInfo ApplicationInfo
@@ -100,6 +95,15 @@ namespace Pash.Implementation
             {
                 return (ApplicationInfo)CommandInfo;
             }
+        }
+
+        private void ProcessExited(object sender, System.EventArgs e)
+        {
+            ExecutionContext.SetVariable("global:LASTEXITCODE", _process.ExitCode);
+            ExecutionContext.SetVariable("global:?", _process.ExitCode == 0); // PS also just compares against null
+
+            _process.Dispose();
+            _process = null;
         }
 
         private bool? GetPSForceSynchronizeProcessOutput()
@@ -135,6 +139,7 @@ namespace Pash.Implementation
             {
                 StartInfo = startInfo
             };
+            process.Exited += new EventHandler(ProcessExited);
 
             if (!process.Start())
             {

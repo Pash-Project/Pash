@@ -49,6 +49,9 @@
     <Compile Include="ReferenceHost.cs" />
     <Compile Include="PipelineExecutionTests.cs" />
     <Compile Include="ReferenceTestBase.cs" />
+    <Compile Include="ExitTests.cs" />
+    <Compile Include="ReferenceTestInfo.cs" />
+    <Compile Include="ReturnTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
@@ -70,6 +73,10 @@
     <ProjectReference Include="..\Microsoft.PowerShell.Commands.Utility\Microsoft.PowerShell.Commands.Utility.csproj">
       <Project>{0E1D573C-C57D-4A83-A739-3A38E719D87E}</Project>
       <Name>Microsoft.PowerShell.Commands.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PashConsole\PashConsole.csproj">
+      <Project>{BB348EAD-1713-4760-9953-BC721A203885}</Project>
+      <Name>PashConsole</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

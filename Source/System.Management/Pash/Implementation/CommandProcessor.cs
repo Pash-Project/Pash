@@ -65,7 +65,7 @@ namespace System.Management.Automation
             var inputObjects = CommandRuntime.InputStream.Read();
             foreach (var curInput in inputObjects)
             {
-                // TODO: sburnicki - determine the correct second argument
+                // TODO: determine the correct second arg: true if this commandProcessor is the first command in pipeline
                 _argumentBinder.BindPipelineParameters(curInput, true);
                 Command.DoProcessRecord();
             }
@@ -78,6 +78,7 @@ namespace System.Management.Automation
         public override void EndProcessing()
         {
             Command.DoEndProcessing();
+            ExecutionContext.SetVariable("global:?", true); // only false if we got an exception
         }
 
         /// <summary>

@@ -41,6 +41,7 @@ namespace System.Management.Automation
             {
                 ScriptBlock scriptBlock = NewScriptBlock(script);
                 var executionVisitor = new ExecutionVisitor(context, commandRuntime);
+                // sburnicki - handle ExitException
                 scriptBlock.Ast.Visit(executionVisitor);
             }
             finally //make sure we set back the old execution context, no matter what happened

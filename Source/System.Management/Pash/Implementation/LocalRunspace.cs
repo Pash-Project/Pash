@@ -79,12 +79,6 @@ namespace Pash.Implementation
         // unusued - NYI
         public override event EventHandler<RunspaceStateEventArgs> StateChanged = delegate { };
 
-        public override Pipeline CreateNestedPipeline()
-        {
-            // TODO: make sure to fail if not Open
-            return CreatePipeline();
-        }
-
         internal override SessionStateProxy GetSessionStateProxy()
         {
             return new SessionStateProxy(this);
@@ -107,10 +101,16 @@ namespace Pash.Implementation
         }
 
         #region CreateXXX Pipeline
+
+        public override Pipeline CreateNestedPipeline()
+        {
+            return CreateNestedPipeline("", false);
+        }
+
         public override Pipeline CreateNestedPipeline(string command, bool addToHistory)
         {
             // TODO: make sure to fail if not Open
-            throw new NotImplementedException();
+            return new LocalPipeline(this, command, true);
         }
 
         public override Pipeline CreatePipeline()
@@ -129,9 +129,7 @@ namespace Pash.Implementation
         {
             // TODO: take care of the command history
             // TODO: make sure to fail if not Open
-            LocalPipeline pipeline = new LocalPipeline(this, command);
-
-            return pipeline;
+            return new LocalPipeline(this, command, false);
         }
         #endregion
 

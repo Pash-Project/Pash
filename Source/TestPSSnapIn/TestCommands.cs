@@ -97,6 +97,16 @@ namespace TestPSSnapIn
         }
     }
 
+    [Cmdlet(VerbsDiagnostic.Test, "ThrowError")]
+    public class TestThrowErrorCommand : PSCmdlet
+    {
+        protected override void ProcessRecord()
+        {
+            ThrowTerminatingError(new ErrorRecord(new Exception("testerror"), "TestError",
+                                                  ErrorCategory.InvalidOperation, null));
+        }
+    }
+
     [Cmdlet(VerbsDiagnostic.Test, "Dummy")]
     public class TestDummyCommand : PSCmdlet
     {

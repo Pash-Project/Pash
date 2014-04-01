@@ -123,6 +123,7 @@ namespace Pash.Implementation
                     return new CommandProcessor(commandInfo as CmdletInfo);
 
                 case CommandTypes.Script:
+                case CommandTypes.ExternalScript:
                 case CommandTypes.Function:
                     return new ScriptBlockProcessor(commandInfo as IScriptBlockInfo, commandInfo);
                 default:
@@ -161,15 +162,7 @@ namespace Pash.Implementation
             }
             if (Path.GetExtension(path) == ".ps1")
             {
-                // TODO: this should be an ExternalScriptInfo object, not ScriptInfo
-                // I don't feel very well about how this is handled atm.
-                // I think we should be using a ScriptFile parser, but this will do for now.
-                
-                var scriptBlockAst = PowerShellGrammar.ParseInteractiveInput(File.ReadAllText(path));
-                //notice that we have an external script here. This means we create either a new *script*scope
-                //or run it in the currrent one
-                return new ScriptInfo(path, new ScriptBlock(scriptBlockAst),
-                                            useLocalScope ? ScopeUsages.NewScriptScope : ScopeUsages.CurrentScope);
+                return new ExternalScriptInfo(path, useLocalScope ? ScopeUsages.NewScriptScope : ScopeUsages.CurrentScope);
             }
             //otherwise it's an application
             return new ApplicationInfo(Path.GetFileName(path), path, Path.GetExtension(path));

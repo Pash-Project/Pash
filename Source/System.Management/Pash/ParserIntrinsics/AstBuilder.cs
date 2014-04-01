@@ -301,9 +301,12 @@ namespace Pash.ParserIntrinsics
 
         private StatementAst BuildExitStatementAst(ParseTreeNode parseTreeNode)
         {
+            VerifyTerm(parseTreeNode, this._grammar._flow_control_statement_exit);
+
+            var pipeline = parseTreeNode.ChildNodes.Count > 1 ? BuildPipelineAst(parseTreeNode.ChildNodes[1]) : null;
             return new ExitStatementAst(
                 new ScriptExtent(parseTreeNode),
-                null
+                pipeline
                 );
         }
 
@@ -1350,7 +1353,10 @@ namespace Pash.ParserIntrinsics
             {
                 return new VariableExpressionAst(new ScriptExtent(parseTreeNode), parseTreeNode.Token.Text.Substring(1), false);
             }
-
+            else if (match.Groups[this._grammar._variable_dollar_question.Name].Success)
+            {
+                return new VariableExpressionAst(new ScriptExtent(parseTreeNode), "?", false);
+            }
             throw new NotImplementedException(parseTreeNode.ToString());
         }
 

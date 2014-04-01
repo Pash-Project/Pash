@@ -35,8 +35,8 @@ namespace Pash
                 commands.Append("; ");
             }
 
-            FullHost p = new FullHost();
-            return p.Run(interactive, commands.ToString());
+            FullHost p = new FullHost(interactive);
+            return p.Run(commands.ToString());
         }
     }
 }

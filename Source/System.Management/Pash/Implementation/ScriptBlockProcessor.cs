@@ -16,15 +16,18 @@ namespace Pash.Implementation
 {
     internal class ScriptBlockProcessor : CommandProcessorBase
     {
-        readonly IScriptBlockInfo _scriptBlockInfo;
+        private readonly IScriptBlockInfo _scriptBlockInfo;
         private ExecutionContext _scopedContext;
         private ExecutionContext _originalContext;
+        private bool _fromFile;
+        private int? _exitCode;
 
 
         public ScriptBlockProcessor(IScriptBlockInfo scriptBlockInfo, CommandInfo commandInfo)
             : base(commandInfo)
         {
-            this._scriptBlockInfo = scriptBlockInfo;
+            _scriptBlockInfo = scriptBlockInfo;
+            _fromFile = commandInfo.CommandType.Equals(CommandTypes.ExternalScript);
         }
 
         private void BindArguments()
@@ -126,7 +129,19 @@ namespace Pash.Implementation
             SwitchToOwnScope();
             try
             {
-                this._scriptBlockInfo.ScriptBlock.Ast.Visit(new ExecutionVisitor(ExecutionContext, CommandRuntime, false));
+                _scriptBlockInfo.ScriptBlock.Ast.Visit(new ExecutionVisitor(ExecutionContext, CommandRuntime, false));
+            }
+            catch (ExitException e)
+            {
+                if (_fromFile)
+                {
+                    _exitCode = e.ExitCode;
+                    ExecutionContext.SetVariable("global:LASTEXITCODE", e.ExitCode);
+                }
+                else
+                {
+                    throw;
+                }
             }
             finally //make sure we switch back to the original execution context, no matter what happened
             {
@@ -136,8 +151,8 @@ namespace Pash.Implementation
 
         public override void EndProcessing()
         {
-            // nothing to do
             // TODO: process end clause. remember to switch scope
+            ExecutionContext.SetVariable("global:?", _exitCode == null || _exitCode == 0);
         }
 
         public override string ToString()

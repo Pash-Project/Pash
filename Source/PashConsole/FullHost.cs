@@ -13,14 +13,16 @@ namespace Pash
 {
     internal class FullHost
     {
+        private bool _interactive;
         private Runspace _currentRunspace;
 
         public const string BannerText = "Pash - Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/";
 
         internal LocalHost LocalHost { get; private set; }
 
-        public FullHost()
+        public FullHost(bool interactive)
         {
+            _interactive = interactive;
             LocalHost = new LocalHost();
             _currentRunspace = RunspaceFactory.CreateRunspace(LocalHost);
             _currentRunspace.Open();
@@ -59,15 +61,19 @@ namespace Pash
             {
                 executeHelper("out-default", new ArrayList(errors).ToArray(), ref errors);
             }
+            if (!hadSuccess && !_interactive && LocalHost.ExitCode == 0)
+            {
+                LocalHost.SetShouldExit(1);
+            }
         }
 
 
         public int Run()
         {
-            return Run(true, null);
+            return Run(null);
         }
 
-        public int Run(bool interactive, string commands)
+        public int Run(string commands)
         {
             /* LocalHostUserInterface supports getline.cs to provide more comfort for non-Windows users.
              * By default, getline.cs is used on non-Windows systems to hanle user input. However, it can be controlled
@@ -92,26 +98,19 @@ namespace Pash
                 Execute(commands);
             }
 
-            // exit now if we don't want an interactive prompt
-            if (!interactive)
-            {
-                return LocalHost.ExitCode;
-            }
-
-            // Loop reading commands to execute until ShouldExit is set by
+            // If interactive, loop reading commands to execute until ShouldExit is set by
             // the user calling "exit".
-            while (!LocalHost.ShouldExit)
+            while (!LocalHost.ShouldExit && _interactive)
             {
                 Prompt();
 
                 string cmd = ui.ReadLine();
 
-                if (cmd == null) // EOF
+                if (cmd == null)
+                {
+                    // EOF
                     break;
-
-                // TODO: remove the cheat - control via script and ShouldExit
-                if (string.Compare(cmd.Trim(), "exit", true) == 0)
-                    break;
+                }
 
                 Execute(cmd);
             }
@@ -198,6 +197,7 @@ namespace Pash
                 }
                 if (pipelineError != null)
                 {
+                    success = false;
                     var psobj = PSObject.AsPSObject(pipelineError);
                     // if merged with stdout, we can later on check to which stream the object usually belongs
                     psobj.Properties.Add(new PSNoteProperty("writeToErrorStream", true));
