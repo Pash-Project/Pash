@@ -22,10 +22,10 @@ namespace TestHost
         [Test]
         public void ParametersByName2()
         {
-            var result1 = TestHost.Execute("Get-Date");
-            var result2 = TestHost.Execute("$d = Get-Date; Get-Date -Date $d");
-
-            Assert.AreEqual(result1, result2);
+            var result2 = TestHost.Execute("$d = Get-Date; $d; Get-Date -Date $d");
+            var dates = result2.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            Assert.AreEqual(2, dates.Count());
+            Assert.AreEqual(dates[0], dates[1]);
         }
 
         [Test]
