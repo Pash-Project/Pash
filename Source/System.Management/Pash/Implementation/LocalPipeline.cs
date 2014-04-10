@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Collections;
 using System.Management.Automation;
 using Pash.ParserIntrinsics;
+using System.Management.Pash.Implementation;
 
 namespace Pash.Implementation
 {
@@ -20,8 +21,9 @@ namespace Pash.Implementation
         private ObjectPipelineReader _errorPipelineReader;
         private LocalRunspace _runspace;
         private PipelineStateInfo _pipelineStateInfo;
+        private bool _isNested;
 
-        public LocalPipeline(LocalRunspace runspace, string command)
+        public LocalPipeline(LocalRunspace runspace, string command, bool isNested)
             : base()
         {
             _runspace = runspace;
@@ -32,6 +34,7 @@ namespace Pash.Implementation
             _outputPipelineReader = new PSObjectPipelineReader(_outputStream);
             _errorPipelineReader = new ObjectPipelineReader(_errorStream);
             _pipelineStateInfo = new PipelineStateInfo(PipelineState.NotStarted);
+            _isNested = isNested;
 
             if (!string.IsNullOrEmpty(command))
                 Commands.AddScript(command, false);
@@ -55,9 +58,11 @@ namespace Pash.Implementation
             get { return _inputPipelineWriter; }
         }
 
-        public override bool IsNested
-        {
-            get { throw new NotImplementedException(); }
+        public override bool IsNested {
+            get
+            {
+                return _isNested;
+            }
         }
 
         public override PipelineReader<PSObject> Output
@@ -107,6 +112,8 @@ namespace Pash.Implementation
         public override Collection<PSObject> Invoke(IEnumerable input)
         {
             // TODO: run the pipeline on another thread and wait for the completion
+            // TODO: nested pipelines: make sure we are running in the same thread as another pipeline, because
+            // nested pipelines aren't allowed to run in their own thread. This ensures that there is a "parent" pipeline
 
             Input.Write(input, true);
 
@@ -139,6 +146,19 @@ namespace Pash.Implementation
                 pipelineProcessor.Execute(context);
                 SetPipelineState(PipelineState.Completed);
             }
+            catch (ExitException ex)
+            {
+                // Toplevel pipeline
+                if (!IsNested)
+                {
+                    _runspace.PSHost.SetShouldExit(ex.ExitCode);
+                }
+                else
+                {
+                    // nested pipelines propagate the exit command
+                    throw;
+                }
+            }
             catch (Exception ex)
             {
                 // in case of throw statement, parse error, or "ThrowTerminatingError"
@@ -146,6 +166,7 @@ namespace Pash.Implementation
                 var errorRecord = (ex is IContainsErrorRecord) ?
                     ((IContainsErrorRecord) ex).ErrorRecord : new ErrorRecord(ex, errorId, ErrorCategory.InvalidOperation, null);
                 context.AddToErrorVariable(errorRecord);
+                context.SetVariable("global:?", false); // last command was definitely not successfull
                 throw;
             }
             _runspace.RemoveRunningPipeline(this);
@@ -186,6 +207,8 @@ namespace Pash.Implementation
 
         public override void InvokeAsync()
         {
+            // TODO: on implementation, check if IsNested is set and throw an error then!
+            // nested pipelines must not be invoked asynchronously
             throw new NotImplementedException();
         }
 

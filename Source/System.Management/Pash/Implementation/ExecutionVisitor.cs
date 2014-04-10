@@ -828,9 +828,14 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitExitStatement(ExitStatementAst exitStatementAst)
         {
-            if (exitStatementAst.Pipeline == null) throw new ReturnException();
-
-            throw new NotImplementedException(); //VisitExitStatement(exitStatementAst);
+            int exitCode = 0;
+            if (exitStatementAst.Pipeline != null)
+            {
+                var value = EvaluateAst(exitStatementAst.Pipeline, false);
+                // Default PS behavior: either convert value to int or it's 0 (see above)
+                LanguagePrimitives.TryConvertTo<int>(value, out exitCode);
+            }
+            throw new ExitException(exitCode);
         }
 
         public override AstVisitAction VisitExpandableStringExpression(ExpandableStringExpressionAst expandableStringExpressionAst)
@@ -940,6 +945,10 @@ namespace System.Management.Pash.Implementation
                 {
                     throw;
                 }
+                catch (ExitException)
+                {
+                    throw;
+                }
                 catch (Exception ex)
                 {
                     TrapStatementAst trapStatementAst = FindMatchingTrapStatement(namedBlockAst.Traps, ex);
@@ -1039,15 +1048,15 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
-        class ReturnException : Exception
-        {
-        }
-
         public override AstVisitAction VisitReturnStatement(ReturnStatementAst returnStatementAst)
         {
-            if (returnStatementAst.Pipeline == null) throw new ReturnException();
+            object value = null;
+            if (returnStatementAst.Pipeline != null)
+            {
+                value = EvaluateAst(returnStatementAst.Pipeline, false);
+            }
 
-            throw new NotImplementedException(); //VisitReturnStatement(returnStatementAst);
+            throw new ReturnException(value);
         }
 
         public override AstVisitAction VisitScriptBlock(ScriptBlockAst scriptBlockAst)
@@ -1056,8 +1065,9 @@ namespace System.Management.Pash.Implementation
             {
                 scriptBlockAst.EndBlock.Visit(this);
             }
-            catch (ReturnException)
+            catch (ReturnException e)
             {
+                _pipelineCommandRuntime.WriteObject(e.Value);
             }
 
             return AstVisitAction.SkipChildren;

@@ -11,9 +11,11 @@ namespace TestHost
     internal class TestHost : PSHost
     {
         readonly PSHostUserInterface _ui = new TestHostUserInterface();
+        private static bool _doExit = false;
 
         public static InitialSessionState InitialSessionState { get; set; }
         public static Runspace LastUsedRunspace { get; private set; }
+        public static int? LastExitCode;
 
         public static string Execute(params string[] statements)
         {
@@ -48,9 +50,15 @@ namespace TestHost
             // use public static property, so we can access e.g. the ExecutionContext after execution
             LastUsedRunspace = CreateRunspace(host);
             LastUsedRunspace.Open();
+            _doExit = false;
+            LastExitCode = null;
 
             foreach (var statement in statements)
             {
+                if (_doExit)
+                {
+                    break;
+                }
                 using (var currentPipeline = LastUsedRunspace.CreatePipeline())
                 {
                     currentPipeline.Commands.AddScript(statement, false);
@@ -147,7 +155,8 @@ namespace TestHost
 
         public override void SetShouldExit(int exitCode)
         {
-            throw new NotImplementedException();
+            _doExit = true;
+            LastExitCode = exitCode;
         }
     }
 }

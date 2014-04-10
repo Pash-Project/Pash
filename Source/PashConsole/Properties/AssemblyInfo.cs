@@ -38,3 +38,4 @@ using System.Runtime.InteropServices;
 
 [assembly: InternalsVisibleTo("TestHost")]
 [assembly: InternalsVisibleTo("PashConsole.Tests")]
+[assembly: InternalsVisibleTo("ReferenceTests")]

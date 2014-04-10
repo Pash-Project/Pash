@@ -31,7 +31,7 @@ namespace ReferenceTests
             {
                 foreach (var command in commands)
                 {
-                    pipeline.Commands.AddScript(command, false);
+                    pipeline.Commands.AddScript(command, true);
                 }
                 results = pipeline.Invoke();
                 if (pipeline.Error.Count > 0)

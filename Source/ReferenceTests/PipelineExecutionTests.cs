@@ -28,7 +28,7 @@ namespace ReferenceTests
         {
             var cmd = CmdletName(typeof(TestCmdletPhasesCommand));
             var res = ReferenceHost.Execute(cmd);
-            var expected = OutputString(new string[] { "Begin", "Process", "End" });
+            var expected = NewlineJoin(new string[] { "Begin", "Process", "End" });
             Assert.AreEqual(expected, res);
         }
 
@@ -37,7 +37,7 @@ namespace ReferenceTests
         {
             var cmd = "$null | " + CmdletName(typeof(TestCmdletPhasesCommand));
             var res = ReferenceHost.Execute(cmd);
-            var expected = OutputString(new string[] { "Begin", "Process", "End" });
+            var expected = NewlineJoin(new string[] { "Begin", "Process", "End" });
             Assert.AreEqual(expected, res);
         }
 
@@ -46,9 +46,18 @@ namespace ReferenceTests
         {
             var cmd = CmdletName(typeof(TestDummyCommand)) + " | " + CmdletName(typeof(TestCmdletPhasesCommand));
             var res = ReferenceHost.Execute(cmd);
-            var expected = OutputString(new string[] { "Begin", "End" });
+            var expected = NewlineJoin(new string[] { "Begin", "End" });
             Assert.AreEqual(expected, res);
         }
+
+        [Test]
+        public void MultipleObjectsAsPipelineCommandScriptsReturnLastObject()
+        {
+            var expected = NewlineJoin(new string[] { "bar" });
+            var result = ReferenceHost.Execute(new [] { "'foo'", "'bar'" });
+            Assert.AreEqual(expected, result);
+        }
+
     }
 }
 
