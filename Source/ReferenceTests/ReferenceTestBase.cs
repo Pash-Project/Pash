@@ -20,7 +20,10 @@ namespace ReferenceTests
             _createdScripts = new List<string>();
             _assemblyDirectory = Path.GetDirectoryName(new Uri(GetType().Assembly.CodeBase).LocalPath);
             _whiteSpaceRegex = new Regex(@"\s");
+            // prevents the project with Powershell to complain about the second part of the expression below
+#pragma warning disable 0429 
             _isMonoRuntime = ReferenceTestInfo.IS_PASH && Type.GetType("Mono.Runtime") != null;
+#pragma warning restore 0429
         }
 
         private String QuoteWithSpace(string input)

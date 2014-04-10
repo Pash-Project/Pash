@@ -55,6 +55,9 @@
     <Compile Include="..\Source\ReferenceTests\PipelineExecutionTests.cs">
       <Link>PipelineExecutionTests.cs</Link>
     </Compile>
+    <Compile Include="..\Source\ReferenceTests\PSObjectTests.cs">
+      <Link>PSObjectTests.cs</Link>
+    </Compile>
     <Compile Include="..\Source\ReferenceTests\ReferenceHost.cs">
       <Link>ReferenceHost.cs</Link>
     </Compile>
