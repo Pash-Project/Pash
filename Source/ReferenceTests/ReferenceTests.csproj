@@ -52,6 +52,7 @@
     <Compile Include="ExitTests.cs" />
     <Compile Include="ReferenceTestInfo.cs" />
     <Compile Include="ReturnTests.cs" />
+    <Compile Include="PSObjectTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

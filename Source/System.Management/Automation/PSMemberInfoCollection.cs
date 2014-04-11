@@ -21,10 +21,7 @@ namespace System.Management.Automation
 
         #region IEnumerable<T> Members
 
-        public IEnumerator<T> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
+        public abstract IEnumerator<T> GetEnumerator();
 
         #endregion
 
@@ -32,7 +29,7 @@ namespace System.Management.Automation
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            throw new NotImplementedException();
+            return GetEnumerator();
         }
 
         #endregion

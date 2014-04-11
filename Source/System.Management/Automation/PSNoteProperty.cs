@@ -7,7 +7,6 @@ namespace System.Management.Automation
     {
         static PSNoteProperty()
         {
-
         }
 
         public PSNoteProperty(string name, object value)
@@ -17,6 +16,20 @@ namespace System.Management.Automation
 
             Name = name;
             _value = value;
+        }
+
+        public override bool IsGettable {
+            get
+            {
+                return true;
+            }
+        }
+
+        public override bool IsSettable {
+            get
+            {
+                return true;
+            }
         }
 
         private object _value;
@@ -33,22 +46,6 @@ namespace System.Management.Automation
                     throw new Exception("Can't change value of a static note.");
 
                 _value = value;
-            }
-        }
-
-        public override bool IsGettable
-        {
-            get
-            {
-                return true;
-            }
-        }
-
-        public override bool IsSettable
-        {
-            get
-            {
-                return IsInstance;
             }
         }
 
