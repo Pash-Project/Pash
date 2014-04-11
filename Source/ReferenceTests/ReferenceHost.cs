@@ -21,24 +21,8 @@ namespace ReferenceTests
 
         public static string Execute(string[] commands)
         {
-            Collection<PSObject> results = null;
+            var results = RawExecute(commands);
             StringBuilder resultstr = new StringBuilder();
-
-            LastUsedRunspace = InitialSessionState == null ?
-                RunspaceFactory.CreateRunspace() : RunspaceFactory.CreateRunspace(InitialSessionState);
-            LastUsedRunspace.Open();
-            using (var pipeline = LastUsedRunspace.CreatePipeline())
-            {
-                foreach (var command in commands)
-                {
-                    pipeline.Commands.AddScript(command, true);
-                }
-                results = pipeline.Invoke();
-                if (pipeline.Error.Count > 0)
-                {
-                    throw new MethodInvocationException(String.Join(Environment.NewLine, pipeline.Error.ReadToEnd()));
-                }
-            }
             if (results == null)
             {
                 return "";
@@ -52,6 +36,33 @@ namespace ReferenceTests
                 resultstr.Append(Environment.NewLine);
             }
             return resultstr.ToString();
+        }
+
+        public static Collection<PSObject> RawExecute(string cmd)
+        {
+            return RawExecute(new string[] { cmd });
+        }
+
+        public static Collection<PSObject> RawExecute(string[] commands)
+        {
+            Collection<PSObject> results = null;
+
+            LastUsedRunspace = InitialSessionState == null ?
+                RunspaceFactory.CreateRunspace() : RunspaceFactory.CreateRunspace(InitialSessionState);
+            LastUsedRunspace.Open();
+            foreach (var command in commands)
+            {
+                using (var pipeline = LastUsedRunspace.CreatePipeline())
+                {
+                    pipeline.Commands.AddScript(command, true);
+                    results = pipeline.Invoke();
+                    if (pipeline.Error.Count > 0)
+                    {
+                        throw new MethodInvocationException(String.Join(Environment.NewLine, pipeline.Error.ReadToEnd()));
+                    }
+                }
+            }
+            return results;
         }
 
         internal static void ImportModules(string[] modules)

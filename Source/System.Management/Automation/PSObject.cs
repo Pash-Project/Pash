@@ -29,11 +29,13 @@ namespace System.Management.Automation
         {
             get
             {
-                if (_members == null)
+                if (_properties == null)
                 {
-                    _members = new PSMemberInfoCollectionImplementation<PSMemberInfo>(this);
-                    Properties.ToList().ForEach(_members.Add);
-                    Methods.ToList().ForEach(_members.Add);
+                    InitProperties();
+                }
+                if (_methods == null)
+                {
+                    InitMethods();
                 }
                 return _members;
             }
@@ -46,11 +48,7 @@ namespace System.Management.Automation
             {
                 if (_methods == null)
                 {
-                    _methods = new PSMemberInfoCollectionImplementation<PSMethodInfo>(this);
-                    var baseObject = ImmediateBaseObject;
-                    (from property
-                     in baseObject.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                     select new PSMethodInfo(property, baseObject)).ToList().ForEach(_methods.Add);
+                    InitMethods();
                 }
                 return _methods;
             }
@@ -63,14 +61,7 @@ namespace System.Management.Automation
             {
                 if (_properties == null)
                 {
-                    _properties = new PSMemberInfoCollectionImplementation<PSPropertyInfo>(this);
-                    var baseObject = ImmediateBaseObject;
-                    (from property
-                     in baseObject.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                     select new PSProperty(property, baseObject)).ToList().ForEach(_properties.Add);
-                    (from field
-                     in baseObject.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance)
-                     select new PSFieldProperty(field, baseObject)).ToList().ForEach(_properties.Add);
+                    InitProperties();
                 }
                 return _properties;
             }
@@ -111,8 +102,36 @@ namespace System.Management.Automation
             }
         }
 
+        private void InitMethods()
+        {
+            _methods = new PSMemberInfoCollectionImplementation<PSMethodInfo>(this);
+            var baseObject = ImmediateBaseObject;
+            var methods = (from method
+                              in baseObject.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                           select new PSMethodInfo(method, baseObject)).ToList();
+            methods.ForEach(_methods.Add);
+            methods.ForEach(_members.Add);
+        }
+
+        private void InitProperties()
+        {
+            _properties = new PSMemberInfoCollectionImplementation<PSPropertyInfo>(this);
+            var baseObject = ImmediateBaseObject;
+            var properties = (from property
+                              in baseObject.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                              select new PSProperty(property, baseObject)).ToList();
+            properties.ForEach(_properties.Add);
+            properties.ForEach(_members.Add);
+            var fields = (from field
+             in baseObject.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance)
+                          select new PSFieldProperty(field, baseObject)).ToList();
+            fields.ForEach(_properties.Add);
+            fields.ForEach(_members.Add);
+        }
+
         protected void Initialize(object obj)
         {
+            _members = new PSMemberInfoCollectionImplementation<PSMemberInfo>(this);
             ImmediateBaseObject = obj;
         }
 
