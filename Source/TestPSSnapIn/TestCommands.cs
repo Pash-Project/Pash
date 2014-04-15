@@ -3,6 +3,28 @@ using System.Management.Automation;
 
 namespace TestPSSnapIn
 {
+    public class CustomTestClass
+    {
+        public string MessageProperty { get; set; }
+        public string MessageField { get; set; }
+
+        public CustomTestClass(string messageProperty, string messageField)
+        {
+            SetMessages(messageProperty, messageField);
+        }
+
+        public string Combine()
+        {
+            return MessageProperty + MessageField;
+        }
+
+        public void SetMessages(string messageProperty, string messageField)
+        {
+            MessageProperty = messageProperty;
+            MessageField = messageField;
+        }
+    }
+
     [Cmdlet(VerbsDiagnostic.Test, "PSSnapin")]
     public class TestCommand : PSCmdlet
     {
@@ -235,5 +257,21 @@ namespace TestPSSnapIn
 
         [Parameter(ParameterSetName = "Set1")]
         public SwitchParameter ListAvailable { get; set; }
+    }
+ 
+    [Cmdlet(VerbsDiagnostic.Test, "CreateCustomObject")]
+    public class TestCreateCustomObjectCommand : PSCmdlet
+    {
+        [Parameter(Position = 0)]
+        public string CustomMessageProperty { get; set; }
+
+        [Parameter(Position = 1)]
+        public string CustomMessageField { get; set; }
+
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(new CustomTestClass(CustomMessageProperty ?? "", CustomMessageField ?? ""));
+        }
     }
 }

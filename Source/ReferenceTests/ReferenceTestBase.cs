@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Management.Automation;
 using System.Text.RegularExpressions;
+using TestPSSnapIn;
 
 namespace ReferenceTests
 {
@@ -85,6 +86,16 @@ namespace ReferenceTests
                 throw new Exception(ReferenceTestInfo.SHELL_NAME + " didn't exit");
             }
             return output;
+        }
+
+        public void ImportTestCmdlets()
+        {
+            ReferenceHost.ImportModules(new string[] {  typeof(TestCommand).Assembly.Location });
+        }
+
+        public void CleanImports()
+        {
+            ReferenceHost.ImportModules(null);
         }
 
         public string CreateScript(string script)
