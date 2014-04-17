@@ -154,15 +154,14 @@ $a.$property				# property name is a variable
             Assert.AreEqual(double.PositiveInfinity + Environment.NewLine, result);
         }
 
-        [Test, Explicit]
+        [Test]
         public void StaticPropertyNameIsAVariable()
         {
             var result = TestHost.Execute(true, @"
 $property = ""MinValue""
 [long]::$property					# property name is a variable
 ");
-
-            Assert.AreEqual("3" + Environment.NewLine, result);
+            Assert.AreEqual(long.MinValue + Environment.NewLine, result);
         }
 
         [Test, Explicit]
