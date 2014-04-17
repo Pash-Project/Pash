@@ -478,18 +478,21 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitAssignmentStatement(AssignmentStatementAst assignmentStatementAst)
         {
             ExpressionAst expressionAst = assignmentStatementAst.Left;
-            var isEquals = assignmentStatementAst.Operator != TokenKind.Equals;
+            var isEquals = assignmentStatementAst.Operator == TokenKind.Equals;
             var isVariableAssignment = expressionAst is VariableExpressionAst;
             dynamic rightValueRes = EvaluateAst(assignmentStatementAst.Right);
             // a little ugly, but we need to stay dynamic. It's crucial that a psobject isn't unpacked if it's simply
             // assigned to a variable, otherwise we could lose some important properties
             // TODO: this is more like a workaround. PSObject should implement implicit casting,
             // then no checks and .BaseObject calls should be necessary anymore
-            dynamic rightValue = (rightValueRes is PSObject && !isVariableAssignment) ?
+            bool unpackPSObject = !isEquals || !isVariableAssignment;
+            dynamic rightValue = (rightValueRes is PSObject && unpackPSObject) ?
                 ((PSObject)rightValueRes).BaseObject : rightValueRes;
             object newValue = rightValue;
 
-            dynamic currentValue = isEquals ? EvaluateAst(assignmentStatementAst.Left) : null;
+            dynamic currentValueRes = isEquals ? null : EvaluateAst(assignmentStatementAst.Left);
+            dynamic currentValue = (currentValueRes != null && currentValueRes is PSObject && unpackPSObject) ?
+                                   ((PSObject)currentValueRes).BaseObject : currentValueRes;
             // TODO: sburnicki - refactor
 
             if (assignmentStatementAst.Operator == TokenKind.Equals)

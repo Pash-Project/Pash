@@ -229,5 +229,7 @@ namespace System.Management.Automation
             else
                 return LanguagePrimitives.Compare(this.BaseObject, obj);
         }
+
+
     }
 }
