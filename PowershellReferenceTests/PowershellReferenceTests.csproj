@@ -46,6 +46,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Source\ReferenceTests\ArrayTests.cs">
+      <Link>ArrayTests.cs</Link>
+    </Compile>
     <Compile Include="..\Source\ReferenceTests\CmdletParameterTests.cs">
       <Link>CmdletParameterTests.cs</Link>
     </Compile>

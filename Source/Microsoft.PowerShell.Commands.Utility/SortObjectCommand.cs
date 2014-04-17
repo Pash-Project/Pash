@@ -62,8 +62,8 @@ namespace Microsoft.PowerShell.Commands
 
             foreach (var property in this.Property)
             {
-                var xPropertyValue = x.BaseObject.GetType().GetProperty(property.ToString(), BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase).GetValue(x.BaseObject, null);
-                var yPropertyValue = y.BaseObject.GetType().GetProperty(property.ToString(), BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase).GetValue(y.BaseObject, null);
+                var xPropertyValue = x.Properties[property.ToString()].Value;
+                var yPropertyValue = y.Properties[property.ToString()].Value;
 
                 var result = LanguagePrimitives.Compare(xPropertyValue, yPropertyValue);
                 if (result != 0) return result;

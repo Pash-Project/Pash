@@ -376,7 +376,7 @@ namespace System.Management.Pash.Implementation
                     {
                         if (value != null)
                         {
-                            _pipelineCommandRuntime.WriteObject(value, true);
+                            _pipelineCommandRuntime.WriteObject(value, !pipelineAst.PreventEnumerationOnEvaluation);
                         }
                         return AstVisitAction.SkipChildren;
                     }
@@ -423,7 +423,7 @@ namespace System.Management.Pash.Implementation
                     // read output and error and write them as results of the current commandRuntime
                     foreach (var curResult in results)
                     {
-                        _pipelineCommandRuntime.WriteObject(curResult, true);
+                        _pipelineCommandRuntime.WriteObject(curResult, !pipelineAst.PreventEnumerationOnEvaluation);
                     }
                     var errors = pipeline.Error.NonBlockingRead();
                     foreach (var curError in errors)
@@ -480,6 +480,7 @@ namespace System.Management.Pash.Implementation
             ExpressionAst expressionAst = assignmentStatementAst.Left;
             var isEquals = assignmentStatementAst.Operator == TokenKind.Equals;
             var isVariableAssignment = expressionAst is VariableExpressionAst;
+            assignmentStatementAst.Right.PreventEnumerationOnEvaluation = true;
             dynamic rightValueRes = EvaluateAst(assignmentStatementAst.Right);
             // a little ugly, but we need to stay dynamic. It's crucial that a psobject isn't unpacked if it's simply
             // assigned to a variable, otherwise we could lose some important properties
@@ -493,7 +494,6 @@ namespace System.Management.Pash.Implementation
             dynamic currentValueRes = isEquals ? null : EvaluateAst(assignmentStatementAst.Left);
             dynamic currentValue = (currentValueRes != null && currentValueRes is PSObject && unpackPSObject) ?
                                    ((PSObject)currentValueRes).BaseObject : currentValueRes;
-            // TODO: sburnicki - refactor
 
             if (assignmentStatementAst.Operator == TokenKind.Equals)
             {
@@ -566,6 +566,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitIndexExpression(IndexExpressionAst indexExpressionAst)
         {
+            indexExpressionAst.Target.PreventEnumerationOnEvaluation = true;
             var targetValue = EvaluateAst(indexExpressionAst.Target);
 
             object index = EvaluateAst(indexExpressionAst.Index);
@@ -698,7 +699,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitArrayLiteral(ArrayLiteralAst arrayLiteralAst)
         {
-            _pipelineCommandRuntime.WriteObject(arrayLiteralAst.Elements.Select(EvaluateAst).ToArray(), true);
+            _pipelineCommandRuntime.WriteObject(arrayLiteralAst.Elements.Select(EvaluateAst).ToArray(), false);
 
             return AstVisitAction.SkipChildren;
         }
@@ -762,11 +763,27 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitArrayExpression(ArrayExpressionAst arrayExpressionAst)
         {
-            foreach (var statement in arrayExpressionAst.SubExpression.Statements)
+            List<object> elements = new List<object>();
+            var numStatements = arrayExpressionAst.SubExpression.Statements.Count;
+            foreach (var stmt in arrayExpressionAst.SubExpression.Statements)
             {
-                var value = EvaluateAst(statement, false);
-                this._pipelineCommandRuntime.WriteObject(value, true);
+                var result = EvaluateAst(stmt, false);
+                // expand if only one element and it is enumerable
+                var enumerator = GetEnumerator(result, false);
+                if (numStatements > 1 || enumerator == null)
+                {
+                    elements.Add(result);
+                }
+                else
+                {
+                    while (enumerator.MoveNext())
+                    {
+                        elements.Add(enumerator.Current);
+                    }
+                }
             }
+
+            this._pipelineCommandRuntime.WriteObject(elements.ToArray());
 
             return AstVisitAction.SkipChildren;
         }
@@ -869,7 +886,12 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitForEachStatement(ForEachStatementAst forEachStatementAst)
         {
             object enumerable = EvaluateAst(forEachStatementAst.Condition);
-            IEnumerator enumerator = GetEnumerator(enumerable);
+            IEnumerator enumerator = GetEnumerator(enumerable, false);
+
+            if (enumerator == null)
+            {
+                enumerator = new [] { enumerable }.GetEnumerator();
+            }
 
             while (enumerator.MoveNext())
             {
@@ -880,13 +902,16 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
-        private IEnumerator GetEnumerator(object obj)
+        private IEnumerator GetEnumerator(object obj, bool enumerateString)
         {
             if (obj is PSObject)
             {
                 obj = ((PSObject)obj).BaseObject;
             }
-
+            if (!enumerateString && obj is string)
+            {
+                return null;
+            }
             return _pipelineCommandRuntime.GetEnumerator(obj);
         }
 

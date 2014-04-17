@@ -456,8 +456,8 @@ namespace TestHost
             Assert.AreEqual("11" + Environment.NewLine, result);
         }
 
-        [Test, Explicit("Does currently not work")]
-        public void ForEachCharacterInString()
+        [Test]
+        public void ForEachCharacterInStringIsString()
         {
             string result = TestHost.Execute("foreach ($char in 'abc') { $char }");
 

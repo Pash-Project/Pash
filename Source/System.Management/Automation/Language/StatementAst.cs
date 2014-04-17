@@ -3,6 +3,11 @@ namespace System.Management.Automation.Language
 {
     public abstract class StatementAst : Ast
     {
-        protected StatementAst(IScriptExtent extent) : base(extent) { }
+        protected StatementAst(IScriptExtent extent) : base(extent)
+        {
+            PreventEnumerationOnEvaluation = false;
+        }
+
+        internal bool PreventEnumerationOnEvaluation;
     }
 }
