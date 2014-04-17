@@ -69,20 +69,21 @@ namespace System.Management.Automation
 
         public override PSMemberInfo Copy()
         {
-            return new PSProperty(_propertyInfo, Owner);
+            return new PSProperty(_propertyInfo, Owner, IsInstance);
         }
 
-        internal PSProperty(object owner, bool gettable, bool settable)
+        internal PSProperty(object owner, string name, bool gettable, bool settable, bool isInstance)
         {
+            Name = name;
+            IsInstance = isInstance;
             Owner = owner;
             _isGettable = gettable;
             _isSettable = settable;
         }
 
-        internal PSProperty(PropertyInfo info, object owner)
-            : this(owner, info.CanRead, info.CanWrite)
+        internal PSProperty(PropertyInfo info, object owner, bool isInstance)
+            : this(owner, info.Name, info.CanRead, info.CanWrite, isInstance)
         {
-            Name = info.Name;
             _propertyInfo = info;
         }
     }

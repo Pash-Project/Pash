@@ -679,7 +679,7 @@ namespace System.Management.Pash.Implementation
             memberName = memberNameObj.ToString();
             if (memberExpressionAst.Static)
             {
-                // TODO: sburnicki - return psobj.GetStaticMember(memberName);
+                return psobj.StaticMembers[memberName];
             }
             return psobj.Members[memberName];
         }

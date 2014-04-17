@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Collections;
 using System.Reflection;
+using System.Collections.Generic;
 
 namespace System.Management.Automation
 {
@@ -38,6 +39,19 @@ namespace System.Management.Automation
                     InitMethods();
                 }
                 return _members;
+            }
+        }
+
+        private PSMemberInfoCollection<PSMemberInfo> _staticMembers;
+        internal PSMemberInfoCollection<PSMemberInfo> StaticMembers
+        {
+            get
+            {
+                if (_staticMembers == null)
+                {
+                    InitStaticMembers();
+                }
+                return _staticMembers;
             }
         }
 
@@ -102,13 +116,39 @@ namespace System.Management.Automation
             }
         }
 
+        private List<PSMethodInfo> GetMethods(bool isInstance)
+        {
+            var baseObject = ImmediateBaseObject;
+            var type = (baseObject is Type && !isInstance) ? (Type) baseObject : baseObject.GetType();
+            var instanceObject = isInstance ? baseObject : null;
+            BindingFlags flags = BindingFlags.Public;
+            flags |= isInstance ? BindingFlags.Instance : BindingFlags.Static;
+            return (from method in type.GetMethods(flags)
+                select new PSMethodInfo(method, instanceObject, isInstance)).ToList();
+        }
+
+        private List<PSProperty> GetPropeties(bool isInstance)
+        {
+            var baseObject = ImmediateBaseObject;
+            var type = (baseObject is Type && !isInstance) ? (Type) baseObject : baseObject.GetType();
+            var instanceObject = isInstance ? baseObject : null;
+            BindingFlags flags = BindingFlags.Public;
+            flags |= isInstance ? BindingFlags.Instance : BindingFlags.Static;
+            var properties = (from property
+                in type.GetProperties(flags)
+                select new PSProperty(property, instanceObject, isInstance)).ToList();
+            properties.AddRange(
+                from field
+                in type.GetFields(flags)
+                select new PSFieldProperty(field, instanceObject, isInstance)
+            );
+            return properties;
+        }
+
         private void InitMethods()
         {
             _methods = new PSMemberInfoCollectionImplementation<PSMethodInfo>(this);
-            var baseObject = ImmediateBaseObject;
-            var methods = (from method
-                              in baseObject.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                           select new PSMethodInfo(method, baseObject)).ToList();
+            var methods = GetMethods(true);
             methods.ForEach(_methods.Add);
             methods.ForEach(_members.Add);
         }
@@ -116,17 +156,16 @@ namespace System.Management.Automation
         private void InitProperties()
         {
             _properties = new PSMemberInfoCollectionImplementation<PSPropertyInfo>(this);
-            var baseObject = ImmediateBaseObject;
-            var properties = (from property
-                              in baseObject.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                              select new PSProperty(property, baseObject)).ToList();
+            var properties = GetPropeties(true);
             properties.ForEach(_properties.Add);
             properties.ForEach(_members.Add);
-            var fields = (from field
-             in baseObject.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance)
-                          select new PSFieldProperty(field, baseObject)).ToList();
-            fields.ForEach(_properties.Add);
-            fields.ForEach(_members.Add);
+        }
+
+        private void InitStaticMembers()
+        {
+            _staticMembers = new PSMemberInfoCollectionImplementation<PSMemberInfo>(this);
+            GetMethods(false).ForEach(_staticMembers.Add);
+            GetPropeties(false).ForEach(_staticMembers.Add);
         }
 
         protected void Initialize(object obj)

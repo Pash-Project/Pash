@@ -174,6 +174,7 @@ namespace System.Management.Automation
         {
             // TODO: Make it use formatProvider
             // TODO: read more about the Extended Type System (ETS) of Powershell and enhance this functionality
+            // TODO: check "3.7.5 Better conversion" of Windows Powershell Language Specification 3.0
             if (resultType == null)
             {
                 throw new ArgumentException("Result type can not be null.");

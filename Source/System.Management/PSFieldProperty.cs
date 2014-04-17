@@ -36,7 +36,7 @@ namespace System.Management.Automation
 
         public override PSMemberInfo Copy()
         {
-            return new PSFieldProperty(_fieldInfo, Owner);
+            return new PSFieldProperty(_fieldInfo, Owner, IsInstance);
         }
 
         public override string TypeNameOfValue {
@@ -46,10 +46,9 @@ namespace System.Management.Automation
             }
         }
 
-        internal PSFieldProperty(FieldInfo info, object owner)
-            : base(owner, true, true)
+        internal PSFieldProperty(FieldInfo info, object owner, bool isInstance)
+            : base(owner, info.Name, true, true, isInstance)
         {
-            Name = info.Name;
             _fieldInfo = info;
         }
     }

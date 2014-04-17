@@ -16,11 +16,12 @@ namespace System.Management.Automation
         {
         }
 
-        internal PSMethodInfo(MethodInfo info, object owner)
+        internal PSMethodInfo(MethodInfo info, object owner, bool isInstance)
         {
             Name = info.Name;
             _methodInfo = info;
             _owner = owner;
+            IsInstance = isInstance;
         }
 
         public override string TypeNameOfValue {
@@ -66,7 +67,7 @@ namespace System.Management.Automation
 
         public override PSMemberInfo Copy()
         {
-            return new PSMethodInfo(_methodInfo, _owner);
+            return new PSMethodInfo(_methodInfo, _owner, IsInstance);
         }
 
         private object[] StuffVariableParameters(object[] arguments)
