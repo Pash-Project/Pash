@@ -123,8 +123,8 @@ namespace System.Management.Automation
             var instanceObject = isInstance ? baseObject : null;
             BindingFlags flags = BindingFlags.Public;
             flags |= isInstance ? BindingFlags.Instance : BindingFlags.Static;
-            return (from method in type.GetMethods(flags)
-                select new PSMethod(method, instanceObject, isInstance)).ToList();
+            var methodNames = (from method in type.GetMethods(flags) select method.Name).Distinct();
+            return (from name in methodNames select new PSMethod(name, type, instanceObject, isInstance)).ToList();
         }
 
         private List<PSProperty> GetPropeties(bool isInstance)

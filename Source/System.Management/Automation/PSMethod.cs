@@ -9,15 +9,32 @@ namespace System.Management.Automation
     public class PSMethod : PSMethodInfo
     {
 
-        private MethodInfo _methodInfo;
-        private object _owner;
+        private Type _classType;
+        private object _instance;
 
-        internal PSMethod(MethodInfo info, object owner, bool isInstance)
+        private MethodInfo[] _overloads;
+        private MethodInfo[] Overloads
+        {
+            get
+            {
+                if (_overloads == null)
+                {
+                    var flags = BindingFlags.Public;
+                    flags |= IsInstance ? BindingFlags.Instance : BindingFlags.Static;
+                    _overloads = (from method in _classType.GetMethods(flags)
+                                                 where method.Name.Equals(Name)
+                                                 select method).ToArray();
+                }
+                return _overloads;
+            }
+        }
+
+        internal PSMethod(string methodName, Type classType, object owner, bool isInstance)
              : base()
         {
-            Name = info.Name;
-            _methodInfo = info;
-            _owner = owner;
+            Name = methodName;
+            _classType = classType;
+            _instance = owner;
             IsInstance = isInstance;
         }
 
@@ -31,35 +48,128 @@ namespace System.Management.Automation
 
         public override object Invoke(params object[] arguments)
         {
-            var stuffedArgs = StuffVariableParameters(arguments);
-            return _methodInfo.Invoke(_owner, stuffedArgs);
+            object[] newArgs;
+            var methodInfo = FindBestMethod(arguments, out newArgs);
+            return methodInfo.Invoke(_instance, newArgs);
         }
 
         public override PSMemberInfo Copy()
         {
-            return new PSMethod(_methodInfo, _owner, IsInstance);
+            return new PSMethod(Name, _classType, _instance, IsInstance);
         }
 
-        private object[] StuffVariableParameters(object[] arguments)
+        private bool MethodFitsArgs(MethodInfo method, object[] arguments, out object[] newArguments)
         {
-            // TODO: support for better type conversion through LanguagePrimitives? This would be a good place
-            var parameters = _methodInfo.GetParameters();
-            var lastParam = parameters.LastOrDefault();
-            // check if parameters exist and if last parameter is actually defined with "params"
-            if (lastParam == null ||
-                !lastParam.GetCustomAttributes(typeof(ParamArrayAttribute), true).Any())
+            var numArgs = arguments.Length;
+            var paras = method.GetParameters();
+            var numParams = paras.Length;
+            newArguments = new object[numParams];
+            var minCommon = numArgs;
+            if (numArgs < numParams)
             {
-                return arguments;
+                for (int i = numArgs; i < numParams; i++)
+                {
+                    var curParam = paras[i];
+                    if (curParam.IsOptional)
+                    {
+                        newArguments[i - numArgs] = curParam.DefaultValue;
+                    }
+                    else if (IsParamsParameter(curParam))
+                    {
+                        newArguments[i - numArgs] = Array.CreateInstance(curParam.ParameterType.GetElementType(), 0);
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                minCommon = numArgs;
+            }
+            else if (numArgs > numParams)
+            {
+                var lastParam = paras[numParams - 1];
+                if (!IsParamsParameter(lastParam))
+                {
+                    return false;
+                }
+                var paramsType = lastParam.ParameterType.GetElementType();
+                var paramsArray = Array.CreateInstance(paramsType, numArgs - numParams + 1);
+                for (int i = numParams - 1; i < numArgs; i++)
+                {
+                    object converted;
+                    if (!LanguagePrimitives.TryConvertTo(arguments[i], paramsType, out converted))
+                    {
+                        return false;
+                    }
+                    paramsArray.SetValue(converted, i - numParams + 1);
+                }
+                newArguments[numParams - 1] = paramsArray;
+                minCommon = numParams - 1;
+            }
+            for (int i = 0; i < minCommon; i++)
+            {
+                object converted;
+                if (!LanguagePrimitives.TryConvertTo(arguments[i], paras[i].ParameterType, out converted))
+                {
+                    return false;
+                }
+                newArguments[i] = converted;
+            }
+            return true;
+        }
+
+        private bool IsParamsParameter(ParameterInfo info)
+        {
+            return info.GetCustomAttributes(typeof(ParamArrayAttribute), true).Any();
+        }
+
+        private MethodInfo FindBestMethod(object[] arguments, out object[] newArguments)
+        {
+            var candidates = new List<Tuple<MethodInfo, object[]>>();
+            var numArgs = arguments.Length;
+            // try direct match first
+            var argTypes = (from arg in arguments
+                                     select arg.GetType()).ToArray();
+            var methodInfo = _classType.GetMethod(Name, argTypes);
+            if (methodInfo != null && methodInfo.IsPublic && methodInfo.IsStatic != IsInstance)
+            {
+                newArguments = arguments;
+                return methodInfo;
             }
 
-            List<object> argList = new List<object>();
-            // invocations with less arguments provided than parameters exist will fail anyway later on
-            var numNonVariableParams = parameters.Count() - 1;
-            // copy the first not variable parameters to the new list
-            argList.AddRange(arguments.Take(numNonVariableParams));
-            // add the others a an array for the last parameter
-            argList.Add(arguments.Skip(numNonVariableParams).ToArray());
-            return argList.ToArray();
+            // then check methods with conersion, optionall parameters or "params" parameter
+            foreach (var method in Overloads)
+            {
+                object[] fittingArgs;
+                if (MethodFitsArgs(method, arguments, out fittingArgs))
+                {
+                    candidates.Add(new Tuple<MethodInfo, object[]>(method, fittingArgs));
+                }
+            }
+            if (candidates.Count < 1)
+            {
+                throw new PSArgumentException("The method (or none of its overloads) takes the given arguments!");
+            }
+            else if (candidates.Count > 1)
+            {
+                var candidateStrings = String.Join(Environment.NewLine, from cand in candidates
+                    select MethodWithParametersToString(cand.Item1));
+                throw new PSArgumentException("Multiple overloaded functions match the given parameters: "
+                    + Environment.NewLine + candidateStrings);
+            }
+            else
+            {
+                var tuple = candidates[0];
+                newArguments = tuple.Item2;
+                return tuple.Item1;
+            }
+        }
+
+        private string MethodWithParametersToString(MethodInfo method)
+        {
+            string paras = String.Join(", ", from param in method.GetParameters()
+                                                      select param.ParameterType.Name);
+            return String.Format("{0}({1})", method.Name, paras);
         }
     }
 }
