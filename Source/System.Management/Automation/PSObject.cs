@@ -116,7 +116,7 @@ namespace System.Management.Automation
             }
         }
 
-        private List<PSMethodInfo> GetMethods(bool isInstance)
+        private List<PSMethod> GetMethods(bool isInstance)
         {
             var baseObject = ImmediateBaseObject;
             var type = (baseObject is Type && !isInstance) ? (Type) baseObject : baseObject.GetType();
@@ -124,7 +124,7 @@ namespace System.Management.Automation
             BindingFlags flags = BindingFlags.Public;
             flags |= isInstance ? BindingFlags.Instance : BindingFlags.Static;
             return (from method in type.GetMethods(flags)
-                select new PSMethodInfo(method, instanceObject, isInstance)).ToList();
+                select new PSMethod(method, instanceObject, isInstance)).ToList();
         }
 
         private List<PSProperty> GetPropeties(bool isInstance)
