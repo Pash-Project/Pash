@@ -185,4 +185,55 @@ namespace TestPSSnapIn
             WriteObject("1:" + Arg1 + ", 2:" + Arg2);
         }
     }
+
+    [Cmdlet(VerbsDiagnostic.Test, "DefaultSetIsAllParameterSetAndTwoParameterSets",
+        DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
+    public sealed class TestDefaultSetIsAllParameterSetAndTwoParameterSetsCommand : PSCmdlet
+    {
+        [Parameter(Position = 0)]
+        [ValidateNotNullOrEmpty]
+        public string First { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            if (First == null) {
+                WriteObject("First: null");
+            } else {
+                WriteObject("First:" + First);
+            }
+        }
+        
+        [Parameter(Position = 1, ParameterSetName = "Set1")]
+        [Parameter(Position = 1, ParameterSetName = "Set2")]
+        [ValidateNotNullOrEmpty]
+        public string Second { get; set; }
+
+        [Parameter(ParameterSetName = "Set1")]
+        public SwitchParameter ListAvailable { get; set; }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "TwoAmbiguousParameterSets")]
+    public sealed class TestTwoAmbiguousParameterSetsCommand : PSCmdlet
+    {
+        [Parameter(Position = 0)]
+        [ValidateNotNullOrEmpty]
+        public string First { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            if (First == null) {
+                WriteObject("First: null");
+            } else {
+                WriteObject("First:" + First);
+            }
+        }
+        
+        [Parameter(Position = 1, ParameterSetName = "Set1")]
+        [Parameter(Position = 1, ParameterSetName = "Set2")]
+        [ValidateNotNullOrEmpty]
+        public string Second { get; set; }
+
+        [Parameter(ParameterSetName = "Set1")]
+        public SwitchParameter ListAvailable { get; set; }
+    }
 }
