@@ -1609,5 +1609,116 @@ ls
                 Assert.AreEqual(null, extent.File);
             }
         }
+
+        [TestFixture]
+        public class RealLiteralExpressionTests
+        {
+            dynamic ParseConstantExpression(string input)
+            {
+                return ParseStatement(input)
+                    .PipelineElements[0]
+                    .Expression;
+            }
+
+            [Test]
+            public void Value()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("1.2");
+                Assert.AreEqual(1.2, expression.Value);
+            }
+
+            [Test]
+            public void StaticType()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("1.2");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            public void Text()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("1.2");
+                Assert.AreEqual("1.2", expression.Extent.Text);
+            }
+
+            [Test]
+            public void StaticTypeExponentWithNoSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("3.45e3");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            [Ignore("Grammar does not support this. PowerShell spec does not include this even though it is supported")]
+            public void StaticTypeDotPrecedesSingleDigitExponentWithNoSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("3.e3");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            public void StaticTypeStartingDotThenFollowedByExponentWithNoSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression(".45e35");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            public void StaticTypeExponentNoSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("2.45e35");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            public void StaticTypeSingleDigitExponentWithPositiveSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("32.2e+3");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            [Ignore("Grammar does not support this. PowerShell spec does not include this even though it is supported")]
+            public void StaticTypeDotPrecedingExponentWithPositiveSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("32.e+12");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            public void StaticTypeSingleDigitExponentWithNegativeSignSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("123.456e-2");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            public void StaticTypeExponentWithNegativeSignSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("123.456e-231");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            public void StaticTypeExponentInUpperCaseWithNegativeSignSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("123.456E-231");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            [Ignore("Grammar does not support this. PowerShell spec does not include this even though it is supported")]
+            public void StaticTypeDotPrecedingExponentWithNegativeSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("32.e+12");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            public void TooBigForDouble()
+            {
+                Assert.Throws<OverflowException>(() => ParseConstantExpression("2.2e500"));
+            }
+        }
     }
 }

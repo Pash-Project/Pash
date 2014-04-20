@@ -1472,6 +1472,11 @@ namespace Pash.ParserIntrinsics
                 return BuildStringLiteralAst(parseTreeNode.ChildNodes.Single());
             }
 
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar.real_literal)
+            {
+                return BuildRealLiteralAst(parseTreeNode.ChildNodes.Single());
+            }
+
             throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
         }
 
@@ -1604,6 +1609,21 @@ namespace Pash.ParserIntrinsics
             string value = matches.Groups[this._grammar.verbatim_string_characters.Name].Value;
 
             return new StringConstantExpressionAst(new ScriptExtent(parseTreeNode), value, StringConstantType.SingleQuoted);
+        }
+
+        ConstantExpressionAst BuildRealLiteralAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.real_literal);
+
+            double doubleValue;
+            string digits = parseTreeNode.FindTokenAndGetText();
+
+            if (!double.TryParse(digits, out doubleValue))
+            {
+                throw new OverflowException(string.Format("The real literal {0} is too large.", digits));
+            }
+
+            return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), doubleValue);
         }
 
         CommandAst BuildPipelineTailAst(ParseTreeNode parseTreeNode)
