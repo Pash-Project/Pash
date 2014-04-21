@@ -187,6 +187,26 @@ namespace ReferenceTests
             var res = ReferenceHost.Execute(cmd);
             Assert.AreEqual("works" + Environment.NewLine, res);
         }
+
+        [Test]
+        public void DefaultSetIsAllParametersAndTwoParameterSetsWhenNoParameterPassedShouldExecuteCmdlet()
+        {
+            var cmd = CmdletName(typeof(TestDefaultSetIsAllParameterSetAndTwoParameterSetsCommand));
+            var res = ReferenceHost.Execute(cmd);
+            Assert.AreEqual("First: null" + Environment.NewLine, res);
+        }
+
+        [Test]
+        public void TwoParameterAmbiguousSetsWhenNoParameterPassedShouldNotExecuteCmdlet()
+        {
+            var cmd = CmdletName(typeof(TestTwoAmbiguousParameterSetsCommand));
+            var ex = Assert.Throws<ParameterBindingException>(() =>
+                {
+                    ReferenceHost.Execute(cmd);
+                }
+            );
+            StringAssert.Contains("Ambiguous", ex.ErrorRecord.FullyQualifiedErrorId);
+        }
     }
 }
 

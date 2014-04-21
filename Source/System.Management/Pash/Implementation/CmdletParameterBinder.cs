@@ -176,7 +176,13 @@ namespace System.Management.Automation
                     ChooseParameterSet(DefaultParameterSet);
                     return;
                 }
-                // 2. Otherwise we could choose multiple sets, so throw an ambigiuous error
+                // 2. If the default set is the AllParameter set then choose it.
+                else if (DefaultParameterSet != null && (DefaultParameterSet.Name == ParameterAttribute.AllParameterSets))
+                {
+                    ChooseParameterSet(DefaultParameterSet);
+                    return;
+                }
+                // 3. Otherwise we could choose multiple sets, so throw an ambigiuous error
                 else
                 {
                     throw new ParameterBindingException("The parameter set to be used cannot be resolved.",
