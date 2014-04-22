@@ -25,7 +25,7 @@ namespace ReferenceTests
         public void NewObjectCanCreatePSObject()
         {
             var results = ReferenceHost.RawExecute("New-Object -Type PSObject");
-            results.ShouldNotBeEmpty();
+            Assert.AreEqual(1, results.Count, "No results");
             var obj = results[0].BaseObject;
             Assert.True(obj is PSCustomObject);
         }
@@ -38,7 +38,7 @@ namespace ReferenceTests
                 "$a | Add-Member -Type NoteProperty -Name TestName -Value TestValue",
                 "$a"
             }));
-            results.ShouldNotBeEmpty();
+            Assert.AreEqual(1, results.Count, "No results");
             var obj = results[0];
             Assert.NotNull(obj.Members["TestName"]);
             Assert.NotNull(obj.Properties["TestName"]);
