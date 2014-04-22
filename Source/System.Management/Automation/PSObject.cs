@@ -119,6 +119,10 @@ namespace System.Management.Automation
         private List<PSMethod> GetMethods(bool isInstance)
         {
             var baseObject = ImmediateBaseObject;
+            if (baseObject == null)
+            {
+                return new List<PSMethod>();
+            }
             var type = (baseObject is Type && !isInstance) ? (Type) baseObject : baseObject.GetType();
             var instanceObject = isInstance ? baseObject : null;
             BindingFlags flags = BindingFlags.Public;
@@ -130,6 +134,10 @@ namespace System.Management.Automation
         private List<PSProperty> GetProperties(bool isInstance)
         {
             var baseObject = ImmediateBaseObject;
+            if (baseObject == null)
+            {
+                return new List<PSProperty>();
+            }
             var type = (baseObject is Type && !isInstance) ? (Type) baseObject : baseObject.GetType();
             var instanceObject = isInstance ? baseObject : null;
             BindingFlags flags = BindingFlags.Public;

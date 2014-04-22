@@ -27,7 +27,7 @@ namespace TestHost
         }
 
         // Taken from the spec, section 7.1.2
-        [Test, Explicit]
+        [Test]
         public void InstanceProperty()
         {
             var result = TestHost.Execute(true, @"
@@ -110,7 +110,7 @@ $path::GetExtension('test.txt')
             var result = TestHost.Execute(input);
         }
 
-        [Test, Explicit]
+        [Test]
         public void InstancePropertyNameIsVariable()
         {
             var result = TestHost.Execute(true, @"

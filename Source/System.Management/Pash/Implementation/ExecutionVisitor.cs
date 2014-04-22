@@ -664,11 +664,7 @@ namespace System.Management.Pash.Implementation
             // if the expression is a variable including an enumerable object (e.g. collection)
             // then we want the collection itself. The enumerable object should only be expanded when being processed
             // e.g. in a pipeline
-            var variableExpression = expression as VariableExpressionAst;
-            if (variableExpression != null)
-            {
-                variableExpression.PreventEnumerationOnEvaluation = true;
-            }
+            expression.PreventEnumerationOnEvaluation = true;
             return PSObject.AsPSObject(EvaluateAst(expression, false));
         }
 
@@ -699,7 +695,14 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitArrayLiteral(ArrayLiteralAst arrayLiteralAst)
         {
-            _pipelineCommandRuntime.WriteObject(arrayLiteralAst.Elements.Select(EvaluateAst).ToArray(), false);
+            var arrayList = new List<object>();
+            var preventEnum = arrayLiteralAst.Elements.Count > 1;
+            foreach (var el in arrayLiteralAst.Elements)
+            {
+                el.PreventEnumerationOnEvaluation = preventEnum;
+                arrayList.Add(EvaluateAst(el));
+            }
+            _pipelineCommandRuntime.WriteObject(arrayList.ToArray(), false);
 
             return AstVisitAction.SkipChildren;
         }
@@ -1081,8 +1084,9 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitParenExpression(ParenExpressionAst parenExpressionAst)
         {
+            parenExpressionAst.Pipeline.PreventEnumerationOnEvaluation = parenExpressionAst.PreventEnumerationOnEvaluation;
             var value = EvaluateAst(parenExpressionAst.Pipeline);
-            this._pipelineCommandRuntime.WriteObject(value, true);
+            this._pipelineCommandRuntime.WriteObject(value, !parenExpressionAst.PreventEnumerationOnEvaluation);
             return AstVisitAction.SkipChildren;
         }
 
