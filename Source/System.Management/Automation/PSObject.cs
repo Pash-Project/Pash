@@ -127,7 +127,7 @@ namespace System.Management.Automation
             return (from name in methodNames select new PSMethod(name, type, instanceObject, isInstance)).ToList();
         }
 
-        private List<PSProperty> GetPropeties(bool isInstance)
+        private List<PSProperty> GetProperties(bool isInstance)
         {
             var baseObject = ImmediateBaseObject;
             var type = (baseObject is Type && !isInstance) ? (Type) baseObject : baseObject.GetType();
@@ -156,7 +156,7 @@ namespace System.Management.Automation
         private void InitProperties()
         {
             _properties = new PSMemberInfoCollectionImplementation<PSPropertyInfo>(this);
-            var properties = GetPropeties(true);
+            var properties = GetProperties(true);
             properties.ForEach(_properties.Add);
             properties.ForEach(_members.Add);
         }
@@ -165,7 +165,7 @@ namespace System.Management.Automation
         {
             _staticMembers = new PSMemberInfoCollectionImplementation<PSMemberInfo>(this);
             GetMethods(false).ForEach(_staticMembers.Add);
-            GetPropeties(false).ForEach(_staticMembers.Add);
+            GetProperties(false).ForEach(_staticMembers.Add);
         }
 
         protected void Initialize(object obj)
