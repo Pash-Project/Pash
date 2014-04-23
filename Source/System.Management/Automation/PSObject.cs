@@ -125,7 +125,7 @@ namespace System.Management.Automation
             }
             var type = (baseObject is Type && !isInstance) ? (Type) baseObject : baseObject.GetType();
             var instanceObject = isInstance ? baseObject : null;
-            BindingFlags flags = BindingFlags.Public;
+            BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy;
             flags |= isInstance ? BindingFlags.Instance : BindingFlags.Static;
             var methodNames = (from method in type.GetMethods(flags) select method.Name).Distinct();
             return (from name in methodNames select new PSMethod(name, type, instanceObject, isInstance)).ToList();
@@ -140,11 +140,18 @@ namespace System.Management.Automation
             }
             var type = (baseObject is Type && !isInstance) ? (Type) baseObject : baseObject.GetType();
             var instanceObject = isInstance ? baseObject : null;
-            BindingFlags flags = BindingFlags.Public;
+            BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy;
             flags |= isInstance ? BindingFlags.Instance : BindingFlags.Static;
+            // get all properties
+            var propertyInfos = type.GetProperties(flags).ToList();
+            // get properties of all interfaces explicitly, as properties of interfaces implemented by interfaces aren't
+            // included in the normal GetProperties() call
+            type.GetInterfaces().ToList().ForEach(i => propertyInfos.AddRange(i.GetProperties(flags)));
+            // add a PSProperty for each propertInfo, ignoring duplicates (same name)
             var properties = (from property
-                in type.GetProperties(flags)
+                in propertyInfos.GroupBy(prop => prop.Name).Select(grp => grp.First())
                 select new PSProperty(property, instanceObject, isInstance)).ToList();
+            // add a PSProperty for each field
             properties.AddRange(
                 from field
                 in type.GetFields(flags)

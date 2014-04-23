@@ -10,12 +10,24 @@ namespace ReferenceTests
 {
 // prevents the compiler from complaining about unused fields, etc
 #pragma warning disable 169, 414, 0649
-    class DummyAncestor
+    interface IDummyBase
+    {
+        int DummyBaseProperty { get; }
+    }
+
+    interface IDummy : IDummyBase
+    {
+
+    }
+
+    class DummyAncestor : IDummyBase
     {
         private int AncFieldPrivated;
         protected int AncFieldProtected;
         static public int AncFieldPublic;
         public string AncProperty { get; set;  }
+
+        public int DummyBaseProperty { get { return 0; } }
 
         private void AncMethodPrivate() { }
         protected void AncMethodProtected() { }
@@ -49,10 +61,18 @@ namespace ReferenceTests
 
         private IEnumerable<string> GetPublicInstanceMembers(Type type)
         {
-            return from member in
+            var members = (from member in
                        type.GetMembers(BindingFlags.Instance | BindingFlags.Public)
                    where (member.MemberType & (MemberTypes.Field | MemberTypes.Property)) != 0
-                   select member.Name;
+                   select member.Name).ToList();
+            type.GetInterfaces().ToList().ForEach(
+                i => members.AddRange(
+                    from prop
+                    in i.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                    select prop.Name
+                )
+            );
+            return members.Distinct();
         }
 
         private IEnumerable<string> GetPublicInstanceMethods(Type type)
