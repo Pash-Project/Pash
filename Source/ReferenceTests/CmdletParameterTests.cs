@@ -272,6 +272,7 @@ namespace ReferenceTests
             });
         }
 
+
         [Test, Explicit("To be honest: I don't understand why PS writes the last output AND still throws and excpetion")]
         public void CmdletPipeParamByPropertyCanProcessMultipleButThrowsOnError()
         {
