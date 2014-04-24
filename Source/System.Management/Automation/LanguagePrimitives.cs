@@ -181,7 +181,9 @@ namespace System.Management.Automation
             }
 
             // result is no PSObject, so unpack the value if we deal with one
-            if (valueToConvert is PSObject && !(resultType is PSObject) && !(resultType is PSObject[]))
+            if (valueToConvert is PSObject &&
+                resultType != typeof(PSObject) &&
+                resultType != typeof(PSObject[]))
             {
                 valueToConvert = ((PSObject)valueToConvert).BaseObject;
             }
