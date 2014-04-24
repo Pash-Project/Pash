@@ -72,11 +72,7 @@ namespace System.Management.Automation
         private void RegisterParameter(CommandParameterInfo parameterInfo)
         {
             // also add it to lookuptable and check for unuque names/aliases
-            var allNames = new List<string>();
-            if (parameterInfo.Aliases != null)
-            {
-                allNames.AddRange(parameterInfo.Aliases);
-            }
+            var allNames = parameterInfo.Aliases.ToList();
             allNames.Add(parameterInfo.Name);
             foreach (var curName in allNames)
             {

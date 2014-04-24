@@ -140,8 +140,8 @@ namespace System.Management.Automation
                 // 3. If we still had no success, throw an error
                 if (!success)
                 {
-                    throw new ParameterBindingException("The pipeline input cannot be bound to any parameter", 
-                        "PipelineInputCannotBeBound");
+                    // well PS throws a MethodInvocationException instead of a ParameterBindingException, so..
+                    throw new MethodInvocationException("The pipeline input cannot be bound to any parameter");
                 }
             }
 
@@ -288,8 +288,19 @@ namespace System.Management.Automation
                 // check if we had success, fail otherwise
                 if (value == null)
                 {
-                    var msg = String.Format("Missing value for mandatory parameter '{0}'.", curParam.Name);
-                    throw new ParameterBindingException(msg, "MissingMandatoryParameter");
+                    // WORKAROUND: PS throws a MethodInvocationException when binding pipeline parameters
+                    // that is when a user shouldn't be asked anymore... let's do the same
+                    if (askUser)
+                    {
+                        var msg = String.Format("Missing value for mandatory parameter '{0}'.", curParam.Name);
+                        throw new ParameterBindingException(msg, "MissingMandatoryParameter");
+                    }
+                    else
+                    {
+                        var msg = "The input object cannot be bound as it doesn't provide some mandatory information: "
+                            + curParam.Name;
+                        throw new MethodInvocationException(msg);
+                    }
                 }
                 BindParameter(curParam, value, true);
             }
@@ -456,12 +467,24 @@ namespace System.Management.Automation
             var success = false;
             foreach (var param in parameters)
             {
-                var curValue = values.Properties[param.Name];
-                if (curValue != null)
+                var aliases = new List<string>(param.Aliases);
+                aliases.Add(param.Name);
+                foreach (var curAlias in aliases)
                 {
-                    // important: || success needs to be at the end, because we want to try to bind *every* parameter
-                    success = TryBindParameter(param, curValue, doConvert) || success;
+                    var propertyInfo = values.Properties[curAlias];
+                    if (propertyInfo == null)
+                    {
+                        continue;
+                    }
+                    var curValue = propertyInfo.Value;
+                    bool hadSuccess = TryBindParameter(param, curValue, doConvert);
+                    if (hadSuccess)
+                    {
+                        success = true;
+                        break;
+                    }
                 }
+
             }
             return success;
         }

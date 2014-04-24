@@ -99,7 +99,6 @@ namespace System.Management.Tests.ParameterTests
             var nameParam = allSet.GetParameterByName("Name");
             Assert.IsNotNull(nameParam);
 
-            Assert.IsNotNull(nameParam.Aliases);
             Assert.AreEqual(3, nameParam.Aliases.Count);
             Assert.Contains("FullName", nameParam.Aliases);
             Assert.Contains("fn", nameParam.Aliases);
@@ -116,7 +115,6 @@ namespace System.Management.Tests.ParameterTests
             var nameParam = allSet.GetParameterByName("Name");
             Assert.IsNotNull(nameParam);
 
-            Assert.IsNotNull(nameParam.Aliases);
             Assert.AreEqual(2, nameParam.Attributes.Count);
             Assert.AreEqual(1, nameParam.Attributes.Where(a => a is AliasAttribute).Count());
             Assert.AreEqual(1, nameParam.Attributes.Where(a => a is ParameterAttribute).Count());
