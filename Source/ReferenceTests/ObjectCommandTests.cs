@@ -66,6 +66,18 @@ namespace ReferenceTests
         }
 
         [Test]
+        public void CreatePSObjectWithPropertiesByHashtable()
+        {
+            var result = ReferenceHost.Execute(NewlineJoin(new string[] {
+                "$obj = new-object psobject -property @{foo='abc'; bar='def'}",
+                "$obj.FoO",
+                "$obj.bAR"
+            }));
+            var expected = NewlineJoin(new string[] { "abc", "def" });
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
         public void CanGetCustomCSharpObjectAndIdentifyType()
         {
             var result = ReferenceHost.Execute(NewlineJoin(new string[] {

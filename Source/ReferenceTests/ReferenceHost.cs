@@ -12,6 +12,8 @@ namespace ReferenceTests
     {
         public static InitialSessionState InitialSessionState { get; set; }
         public static Runspace LastUsedRunspace { get; private set; }
+        public static Collection<PSObject> LastRawResults { get; private set; }
+        public static string LastResults { get; private set; }
 
 
         public static string Execute(string cmd)
@@ -21,21 +23,28 @@ namespace ReferenceTests
 
         public static string Execute(string[] commands)
         {
-            var results = RawExecute(commands);
-            StringBuilder resultstr = new StringBuilder();
-            if (results == null)
+            LastResults = "";
+            try
             {
-                return "";
+                RawExecute(commands);
             }
-            foreach (var curPSObject in results)
+            finally
             {
-                if (curPSObject != null)
+                if (LastRawResults != null)
                 {
-                    resultstr.Append(curPSObject.ToString());
+                    StringBuilder resultstr = new StringBuilder();
+                    foreach (var curPSObject in LastRawResults)
+                    {
+                        if (curPSObject != null)
+                        {
+                            resultstr.Append(curPSObject.ToString());
+                        }
+                        resultstr.Append(Environment.NewLine);
+                    }
+                    LastResults = resultstr.ToString();
                 }
-                resultstr.Append(Environment.NewLine);
             }
-            return resultstr.ToString();
+            return LastResults;
         }
 
         public static Collection<PSObject> RawExecute(string cmd)
@@ -45,8 +54,7 @@ namespace ReferenceTests
 
         public static Collection<PSObject> RawExecute(string[] commands)
         {
-            Collection<PSObject> results = null;
-
+            LastRawResults = null;
             LastUsedRunspace = InitialSessionState == null ?
                 RunspaceFactory.CreateRunspace() : RunspaceFactory.CreateRunspace(InitialSessionState);
             LastUsedRunspace.Open();
@@ -55,14 +63,22 @@ namespace ReferenceTests
                 using (var pipeline = LastUsedRunspace.CreatePipeline())
                 {
                     pipeline.Commands.AddScript(command, true);
-                    results = pipeline.Invoke();
+                    try
+                    {
+                        LastRawResults = pipeline.Invoke();
+                    }
+                    catch (Exception)
+                    {
+                        LastRawResults = pipeline.Output.ReadToEnd();
+                        throw;
+                    }
                     if (pipeline.Error.Count > 0)
                     {
                         throw new MethodInvocationException(String.Join(Environment.NewLine, pipeline.Error.ReadToEnd()));
                     }
                 }
             }
-            return results;
+            return LastRawResults;
         }
 
         internal static void ImportModules(string[] modules)

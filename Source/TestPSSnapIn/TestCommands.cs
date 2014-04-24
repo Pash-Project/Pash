@@ -25,6 +25,40 @@ namespace TestPSSnapIn
         }
     }
 
+    public class InternalMessageClass
+    {
+        private string _msg;
+        public InternalMessageClass(string msg)
+        {
+            _msg = msg;
+        }
+        public string GetMessage()
+        {
+            return _msg;
+        }
+
+        public static explicit operator InternalMessageClass(FooMessageClass fooObject)
+        {
+            return new InternalMessageClass("cast_" + fooObject.GetInternalMessage());
+        }
+    }
+
+    public class FooMessageClass
+    {
+        public string _internalMsg;
+        public InternalMessageClass Foo;
+
+        public FooMessageClass(string msg)
+        {
+            Foo = new InternalMessageClass(msg);
+        }
+
+        public string GetInternalMessage()
+        {
+            return _internalMsg;
+        }
+    }
+
     [Cmdlet(VerbsDiagnostic.Test, "PSSnapin")]
     public class TestCommand : PSCmdlet
     {
@@ -272,6 +306,47 @@ namespace TestPSSnapIn
         protected override void ProcessRecord()
         {
             WriteObject(new CustomTestClass(CustomMessageProperty ?? "", CustomMessageField ?? ""));
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "ParametersByPipelinePropertyNames")]
+    public class TestParametersByPipelinePropertyNamesCommand : PSCmdlet
+    {
+        [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 1)]
+        [Alias(new string[] { "Baz" })]
+        public string Foo { get; set; }
+
+        [Parameter(Mandatory = false, ValueFromPipelineByPropertyName = true, Position = 0)]
+        public string Bar { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(Foo + " " + Bar);
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "CreateFooMessageObject")]
+    public class TestCreateFooMessageObjectCommand : PSCmdlet
+    {
+        [Parameter(Mandatory = true, Position = 0)]
+        public string Msg { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(new FooMessageClass(Msg));
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "ParametersByPipelineWithPropertiesAndConversion")]
+    public class TestParametersByPipelineWithPropertiesAndConversionCommand : PSCmdlet
+    {
+        [Parameter(Mandatory = true, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
+        [Alias(new string[] { "Baz" })]
+        public InternalMessageClass Foo { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(Foo.GetMessage());
         }
     }
 }
