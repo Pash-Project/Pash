@@ -223,6 +223,18 @@ ls
         }
 
         [Test]
+        public void FunctionWithEmptyParameterListTest()
+        {
+            FunctionDefinitionAst functionDefinitionAst = ParseInput("function f() { 'x' }").
+                   EndBlock.
+                   Statements[0];
+
+            Assert.IsFalse(functionDefinitionAst.IsFilter);
+            Assert.IsFalse(functionDefinitionAst.IsWorkflow);
+            Assert.AreEqual("f", functionDefinitionAst.Name);
+        }
+
+        [Test]
         public void FunctionWithOneParameter()
         {
             FunctionDefinitionAst functionDefinitionAst = ParseInput("function Update-File($file) { 'x' }").
