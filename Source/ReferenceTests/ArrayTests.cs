@@ -61,6 +61,13 @@ namespace ReferenceTests
             Assert.AreEqual(typeof(object[]).FullName + Environment.NewLine, result);
         }
 
+        [Test] // issue #116
+        public void SingleArrayElementIsStillArray()
+        {
+            var result = ReferenceHost.Execute("@(1).GetType().FullName; @(1).Count");
+            Assert.AreEqual(NewlineJoin(new string[] { typeof(object[]).FullName, "1"}), result);
+        }
+
         [Test]
         public void NestedTwoDimensionalArrayWorks()
         {
