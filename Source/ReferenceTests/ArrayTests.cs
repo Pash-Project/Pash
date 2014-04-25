@@ -55,6 +55,13 @@ namespace ReferenceTests
         }
 
         [Test]
+        public void ArrayInParenthesisIsStillArray()
+        {
+            var result = ReferenceHost.Execute("(@(1,2)).GetType().FullName");
+            Assert.AreEqual(typeof(object[]).FullName + Environment.NewLine, result);
+        }
+
+        [Test]
         public void NestedTwoDimensionalArrayWorks()
         {
             var results = ReferenceHost.RawExecute("@(@(@('foo')), @(@('bar')))");

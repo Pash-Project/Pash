@@ -336,8 +336,14 @@ namespace System.Management.Pash.Implementation
             expressionAst.Visit(subVisitor);
             var result = subVisitor._pipelineCommandRuntime.OutputStream.Read();
 
-            if (result.Count == 0) return null;
-            if (result.Count == 1) return result.Single();
+            if (result.Count == 0)
+            {
+                return null;
+            }
+            else if (result.Count == 1)
+            {
+                return result.Single();
+            }
             return result.ToArray();
         }
 
@@ -376,7 +382,7 @@ namespace System.Management.Pash.Implementation
                     {
                         if (value != null)
                         {
-                            _pipelineCommandRuntime.WriteObject(value, !pipelineAst.PreventEnumerationOnEvaluation);
+                            _pipelineCommandRuntime.WriteObject(value, true);
                         }
                         return AstVisitAction.SkipChildren;
                     }
@@ -423,7 +429,7 @@ namespace System.Management.Pash.Implementation
                     // read output and error and write them as results of the current commandRuntime
                     foreach (var curResult in results)
                     {
-                        _pipelineCommandRuntime.WriteObject(curResult, !pipelineAst.PreventEnumerationOnEvaluation);
+                        _pipelineCommandRuntime.WriteObject(curResult);
                     }
                     var errors = pipeline.Error.NonBlockingRead();
                     foreach (var curError in errors)
@@ -462,8 +468,7 @@ namespace System.Management.Pash.Implementation
         {
             var variable = GetVariable(variableExpressionAst);
             var value = (variable != null) ? variable.Value : null;
-            var expandEnumerable = !variableExpressionAst.PreventEnumerationOnEvaluation;
-            this._pipelineCommandRuntime.WriteObject(value, expandEnumerable);
+            this._pipelineCommandRuntime.WriteObject(value);
 
             return AstVisitAction.SkipChildren;
         }
@@ -480,8 +485,7 @@ namespace System.Management.Pash.Implementation
             ExpressionAst expressionAst = assignmentStatementAst.Left;
             var isEquals = assignmentStatementAst.Operator == TokenKind.Equals;
             var isVariableAssignment = expressionAst is VariableExpressionAst;
-            assignmentStatementAst.Right.PreventEnumerationOnEvaluation = true;
-            dynamic rightValueRes = EvaluateAst(assignmentStatementAst.Right);
+            var rightValueRes = EvaluateAst(assignmentStatementAst.Right);
             // a little ugly, but we need to stay dynamic. It's crucial that a psobject isn't unpacked if it's simply
             // assigned to a variable, otherwise we could lose some important properties
             // TODO: this is more like a workaround. PSObject should implement implicit casting,
@@ -566,8 +570,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitIndexExpression(IndexExpressionAst indexExpressionAst)
         {
-            indexExpressionAst.Target.PreventEnumerationOnEvaluation = true;
-            var targetValue = EvaluateAst(indexExpressionAst.Target);
+            var targetValue = EvaluateAst(indexExpressionAst.Target, true);
 
             object index = EvaluateAst(indexExpressionAst.Index);
 
@@ -664,7 +667,6 @@ namespace System.Management.Pash.Implementation
             // if the expression is a variable including an enumerable object (e.g. collection)
             // then we want the collection itself. The enumerable object should only be expanded when being processed
             // e.g. in a pipeline
-            expression.PreventEnumerationOnEvaluation = true;
             return PSObject.AsPSObject(EvaluateAst(expression, false));
         }
 
@@ -699,7 +701,6 @@ namespace System.Management.Pash.Implementation
             var preventEnum = arrayLiteralAst.Elements.Count > 1;
             foreach (var el in arrayLiteralAst.Elements)
             {
-                el.PreventEnumerationOnEvaluation = preventEnum;
                 arrayList.Add(EvaluateAst(el));
             }
             _pipelineCommandRuntime.WriteObject(arrayList.ToArray(), false);
@@ -1084,9 +1085,8 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitParenExpression(ParenExpressionAst parenExpressionAst)
         {
-            parenExpressionAst.Pipeline.PreventEnumerationOnEvaluation = parenExpressionAst.PreventEnumerationOnEvaluation;
             var value = EvaluateAst(parenExpressionAst.Pipeline);
-            this._pipelineCommandRuntime.WriteObject(value, !parenExpressionAst.PreventEnumerationOnEvaluation);
+            this._pipelineCommandRuntime.WriteObject(value, true);
             return AstVisitAction.SkipChildren;
         }
 

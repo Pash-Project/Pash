@@ -5,9 +5,6 @@ namespace System.Management.Automation.Language
     {
         protected StatementAst(IScriptExtent extent) : base(extent)
         {
-            PreventEnumerationOnEvaluation = false;
         }
-
-        internal bool PreventEnumerationOnEvaluation;
     }
 }

@@ -7,10 +7,7 @@ namespace System.Management.Automation.Language
     {
         protected ExpressionAst(IScriptExtent extent) : base(extent)
         {
-            PreventEnumerationOnEvaluation = false;
         }
-
-        internal bool PreventEnumerationOnEvaluation;
 
         public virtual Type StaticType { get { return typeof(object); } }
     }
