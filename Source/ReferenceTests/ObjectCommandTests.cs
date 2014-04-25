@@ -33,11 +33,11 @@ namespace ReferenceTests
         [Test]
         public void AddMemberCanAddNoteProperties()
         {
-            var results = ReferenceHost.RawExecute(NewlineJoin(new string[] {
+            var results = ReferenceHost.RawExecute(NewlineJoin(
                 "$a = New-Object -Type PSObject",
                 "$a | Add-Member -Type NoteProperty -Name TestName -Value TestValue",
                 "$a"
-            }));
+            ));
             Assert.AreEqual(1, results.Count, "No results");
             var obj = results[0];
             Assert.NotNull(obj.Members["TestName"]);
@@ -47,119 +47,113 @@ namespace ReferenceTests
         [Test]
         public void CustomPSObjectPropertiesCanBeAccessedCaseInsensitive()
         {
-            var result = ReferenceHost.Execute(NewlineJoin(new string[] {
+            var result = ReferenceHost.Execute(NewlineJoin(
                 "$a = New-Object -Type PSObject",
                 "$a | Add-Member -Type NoteProperty -Name TestName -Value TestValue",
                 "$a.testname"
-            }));
-            Assert.AreEqual("TestValue" + Environment.NewLine, result);
+            ));
+            Assert.AreEqual(NewlineJoin("TestValue"), result);
         }
 
         [Test]
         public void AccessingNonExistingPropertiesDoesntFail()
         {
-            var result = ReferenceHost.Execute(NewlineJoin(new string[] {
+            var result = ReferenceHost.Execute(NewlineJoin(
                 "$a = New-Object -Type PSObject",
                 "$a.testname"
-            }));
-            Assert.AreEqual(Environment.NewLine, result);
+            ));
+            Assert.AreEqual(NewlineJoin(), result);
         }
 
         [Test]
         public void CanGetCustomCSharpObjectAndIdentifyType()
         {
-            var result = ReferenceHost.Execute(NewlineJoin(new string[] {
+            var result = ReferenceHost.Execute(NewlineJoin(
                 "$a = " + CmdletName(typeof(TestCreateCustomObjectCommand)),
                 "$a.GetType().FullName"
-            }));
-            Assert.AreEqual(typeof(CustomTestClass).FullName + Environment.NewLine, result);
+            ));
+            Assert.AreEqual(NewlineJoin(typeof(CustomTestClass).FullName), result);
         }
 
         [Test]
         public void CanAccessCSharpObjectProperty()
         {
-            var result = ReferenceHost.Execute(NewlineJoin(new string[] {
+            var result = ReferenceHost.Execute(NewlineJoin(
                 "$a = " + CmdletName(typeof(TestCreateCustomObjectCommand)) + " 'foo' 'bar'",
                 "$a.MessageProperty"
-            }));
-            Assert.AreEqual("foo" + Environment.NewLine, result);
+            ));
+            Assert.AreEqual(NewlineJoin("foo"), result);
         }
 
         [Test]
         public void CanSetCSharpObjectProperty()
         {
-            var result = ReferenceHost.Execute(NewlineJoin(new string[] {
+            var result = ReferenceHost.Execute(NewlineJoin(
                 "$a = " + CmdletName(typeof(TestCreateCustomObjectCommand)) + " 'foo' 'bar'",
                 "$a.MessageProperty = 'baz'",
                 "$a.MessageProperty"
-            }));
-            Assert.AreEqual("baz" + Environment.NewLine, result);
+            ));
+            Assert.AreEqual(NewlineJoin("baz"), result);
         }
 
         [Test]
         public void CanAccessCSharpObjectField()
         {
-            var result = ReferenceHost.Execute(NewlineJoin(new string[] {
+            var result = ReferenceHost.Execute(NewlineJoin(
                 "$a = " + CmdletName(typeof(TestCreateCustomObjectCommand)) + " 'foo' 'bar'",
                 "$a.MessageField"
-            }));
-            Assert.AreEqual("bar" + Environment.NewLine, result);
+            ));
+            Assert.AreEqual(NewlineJoin("bar"), result);
         }
 
         [Test]
         public void CanSetCSharpObjectField()
         {
-            var result = ReferenceHost.Execute(NewlineJoin(new string[] {
+            var result = ReferenceHost.Execute(NewlineJoin(
                 "$a = " + CmdletName(typeof(TestCreateCustomObjectCommand)) + " 'foo' 'bar'",
                 "$a.MessageField = 'baz'",
                 "$a.MessageField"
-            }));
-            Assert.AreEqual("baz" + Environment.NewLine, result);
+            ));
+            Assert.AreEqual(NewlineJoin("baz"), result);
         }
 
         [Test]
         public void CanInvokeCSharpObjectMethodAndGetResult()
         {
-            var result = ReferenceHost.Execute(NewlineJoin(new string[] {
+            var result = ReferenceHost.Execute(NewlineJoin(
                 "$a = " + CmdletName(typeof(TestCreateCustomObjectCommand)) + " 'foo' 'bar'",
                 "$b = $a.Combine()",
                 "$b.GetType().FullName",
-                "$b",
-            }));
-            var expected = NewlineJoin(new string[] {
-                typeof(string).FullName,
-                "foobar"
-            });
+                "$b"
+            ));
+            var expected = NewlineJoin(typeof(string).FullName, "foobar");
             Assert.AreEqual(expected, result);
         }
 
         [Test]
         public void CanInvokeCSharpObjectMethodWithArguments()
         {
-            var result = ReferenceHost.Execute(NewlineJoin(new string[] {
+            var result = ReferenceHost.Execute(NewlineJoin(
                 "$a = " + CmdletName(typeof(TestCreateCustomObjectCommand)) + " 'foo' 'bar'",
                 "$a.SetMessages('bla', 'blub')",
                 "$a.MessageProperty",
-                "$a.MessageField",
-            }));
-            var expected = NewlineJoin(new string[] {
-                "bla",
-                "blub"
-            });
+                "$a.MessageField"
+            ));
+            var expected = NewlineJoin("bla", "blub");
             Assert.AreEqual(expected, result);
         }
 
         [Test]
         public void CanGetCSharpObjectMethodAndInvokeLater()
         {
-            var result = ReferenceHost.Execute(NewlineJoin(new string[] {
+            var result = ReferenceHost.Execute(NewlineJoin(
                 "$a = " + CmdletName(typeof(TestCreateCustomObjectCommand)) + " 'foo' 'bar'",
                 "$b = $a.SetMessages",
                 "$c = $a.Combine",
                 "$b.Invoke('bla', 'blub')",
                 "$c.Invoke()"
-            }));
-            Assert.AreEqual("blablub" + Environment.NewLine, result);
+            ));
+            Assert.AreEqual(NewlineJoin("blablub"), result);
         }
     }
 }

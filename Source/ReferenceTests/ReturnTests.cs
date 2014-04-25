@@ -15,7 +15,7 @@ namespace ReferenceTests
         [Test]
         public void ReturnWritesToPipeline()
         {
-            var expected = "foobar" + Environment.NewLine;
+            var expected = NewlineJoin("foobar");
             var result = ReferenceHost.Execute("return 'foobar'");
             Assert.AreEqual(expected, result);
         }
@@ -23,12 +23,12 @@ namespace ReferenceTests
         [Test]
         public void ReturnEndsScriptBlockAndWritesToPipeline()
         {
-            var expected = NewlineJoin(new [] { "foo", "bar", "bla" });
-            var command = NewlineJoin(new [] {
+            var expected = NewlineJoin("foo", "bar", "bla" );
+            var command = NewlineJoin(
                 "'foo'",
                 "& { return 'bar'; 'baz' }",
                 "'bla'"
-            });
+            );
             var result = ReferenceHost.Execute(command);
             Assert.AreEqual(expected, result);
         }
@@ -36,12 +36,12 @@ namespace ReferenceTests
         [Test]
         public void ReturnEndsFunctionAndWritesToPipeline()
         {
-            var expected = NewlineJoin(new [] { "foo", "bar", "bla" });
-            var command = NewlineJoin(new [] {
+            var expected = NewlineJoin("foo", "bar", "bla");
+            var command = NewlineJoin(
                 "function testfun { 'foo'; return 'bar'; 'baz' }",
                 "testfun",
                 "'bla'"
-            });
+            );
             var result = ReferenceHost.Execute(command);
             Assert.AreEqual(expected, result);
         }
@@ -49,12 +49,9 @@ namespace ReferenceTests
         [Test]
         public void ReturnEndsScriptAndWritesToPipeline()
         {
-            var expected = NewlineJoin(new [] { "foo", "bar", "bla" });
+            var expected = NewlineJoin("foo", "bar", "bla");
             var scriptname = CreateScript("'foo'; return 'bar'; 'baz'");
-            var command = NewlineJoin(new [] {
-                String.Format("& '{0}'", scriptname),
-                "'bla'"
-            });
+            var command = NewlineJoin(String.Format("& '{0}'", scriptname), "'bla'");
             var result = ReferenceHost.Execute(command);
             Assert.AreEqual(expected, result);
         }
@@ -64,11 +61,11 @@ namespace ReferenceTests
         [TestCase("TESTVALUE", "$testvar")]
         public void ReturnEvaluatesExpression(string returnValue, string returnExpression)
         {
-            var expected = NewlineJoin(new [] { "foo", returnValue, "bla" });
-            var command = NewlineJoin(new [] {
+            var expected = NewlineJoin("foo", returnValue, "bla");
+            var command = NewlineJoin(
                 "& { $testvar = 'TESTVALUE'; 'foo'; return " + returnExpression + "; 'baz' }",
                 "'bla'"
-            });
+            );
             var result = ReferenceHost.Execute(command);
             Assert.AreEqual(expected, result);
         }
