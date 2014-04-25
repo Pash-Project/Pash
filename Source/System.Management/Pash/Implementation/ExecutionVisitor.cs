@@ -338,7 +338,7 @@ namespace System.Management.Pash.Implementation
 
             if (result.Count == 0) return null;
             if (result.Count == 1) return result.Single();
-            return result;
+            return result.ToArray();
         }
 
         public override AstVisitAction VisitConstantExpression(ConstantExpressionAst constantExpressionAst)

@@ -144,6 +144,11 @@ namespace System.Management.Automation
             flags |= isInstance ? BindingFlags.Instance : BindingFlags.Static;
             // get all properties
             var propertyInfos = type.GetProperties(flags).ToList();
+            // TODO: maybe the following isn't necessary. I investigated this, because I saw that in PS you can access
+            // an array's .Count property. However, I just read that they do this by adding this property through
+            // Types.ps1xml. So although the following code did the same (as it indeed implemnts/inherits a Count property)
+            // this did not seem to be the actual intention
+
             // get properties of all interfaces explicitly, as properties of interfaces implemented by interfaces aren't
             // included in the normal GetProperties() call
             type.GetInterfaces().ToList().ForEach(i => propertyInfos.AddRange(i.GetProperties(flags)));

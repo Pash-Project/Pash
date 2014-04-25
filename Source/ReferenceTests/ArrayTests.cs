@@ -1,11 +1,23 @@
 using System;
 using NUnit.Framework;
 using System.Management.Automation;
+using TestPSSnapIn;
 
 namespace ReferenceTests
 {
     public class ArrayTests : ReferenceTestBase
     {
+        [SetUp]
+        public void LoadCmdlets()
+        {
+            ImportTestCmdlets();
+        }
+
+        [TearDown]
+        public void CleanUp()
+        {
+            CleanImports();
+        }
 
         [TestCase("1,2,3")]
         [TestCase("@('foo',2,3)")]
@@ -32,7 +44,15 @@ namespace ReferenceTests
             Assert.AreEqual(PSObject.AsPSObject("foo"), results[0]);
         }
 
-
+        [Test]
+        public void ElementsFromPipelineAreStoredAsArray()
+        {
+            var result = ReferenceHost.Execute(NewlineJoin(new string[] {
+                "$a = @('foo', 'bar', 'baz') | " + CmdletName(typeof(TestCmdletPhasesCommand)),
+                "$a.GetType().FullName"
+            }));
+            Assert.AreEqual(typeof(object[]).FullName + Environment.NewLine, result);
+        }
 
         [Test]
         public void NestedTwoDimensionalArrayWorks()
