@@ -1564,9 +1564,11 @@ namespace Pash.ParserIntrinsics
             VerifyTerm(parseTreeNode, this._grammar.hexadecimal_integer_literal);
 
             var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), this._grammar.hexadecimal_integer_literal.Pattern, RegexOptions.IgnoreCase);
-            string value = matches.Groups[this._grammar.hexadecimal_digits.Name].Value;
+            string digits = matches.Groups[this._grammar.hexadecimal_digits.Name].Value;
+            string multiplier = matches.Groups[this._grammar.numeric_multiplier.Name].Value;
 
-            return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), Convert.ToInt32(value, 16));
+            object value = NumericMultiplier.Multiply(Convert.ToInt32(digits, 16), multiplier);
+            return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), value);
         }
 
         ExpressionAst BuildStringLiteralAst(ParseTreeNode parseTreeNode)

@@ -981,6 +981,22 @@ ls
         }
 
         [Test]
+        [TestCase("0x12kb", 18432)]
+        [TestCase("0x12mb", 18874368)]
+        [TestCase("0x12gb", 19327352832)]
+        [TestCase("0x12tb", 19791209299968)]
+        //[TestCase("0x12pb", 20266198323167232)]
+        public void HexIntegerWithNumericMultiplierTest(string expression, object expectedResult)
+        {
+            var result = ParseStatement(expression)
+                .PipelineElements[0]
+                .Expression
+                .Value;
+
+            Assert.AreEqual(expectedResult, result);
+        }
+
+        [Test]
         public void ArrayRangeTest()
         {
             BinaryExpressionAst result = ParseStatement("1..10")
