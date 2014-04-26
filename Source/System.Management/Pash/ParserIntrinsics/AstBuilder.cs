@@ -1546,7 +1546,7 @@ namespace Pash.ParserIntrinsics
 
                 // • If its value can be represented by type long (§4.2.3), that is its type;
                 if (long.TryParse(digits, out longValue))
-                    value = longValue;
+                    value = NumericMultiplier.Multiply(longValue, multiplier);
                 else
                     // • Otherwise, that literal is ill formed.
                     throw new ArithmeticException(string.Format("The integer literal {0} is invalid because it does not fit into a long.", matches.Value));

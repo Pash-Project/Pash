@@ -81,6 +81,7 @@ namespace TestHost
         [TestCase("1tb", "1099511627776")]
         [TestCase("1pb", "1125899906842624")]
         [TestCase("9876543210kb", "10113580247040")]
+        [TestCase("12lkb", "12288")]
         public void IntegerWithNumericMultiplier(string literal, string expectedValue)
         {
             var result = TestHost.Execute(true, string.Format("{0}", literal));
