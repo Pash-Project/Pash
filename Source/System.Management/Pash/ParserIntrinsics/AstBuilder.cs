@@ -1524,10 +1524,10 @@ namespace Pash.ParserIntrinsics
                 // all other conditions are impossible when the supplied string consists only of digits.
                 if (int.TryParse(digits, out intValue))
                     // • If its value can be represented by type int (§4.2.3), that is its type;
-                    value = intValue;
+                    value = NumericMultiplier.Multiply(intValue, multiplier);
                 else if (long.TryParse(digits, out longValue))
                     // • Otherwise, if its value can be represented by type long (§4.2.3), that is its type.
-                    value = longValue;
+                    value = NumericMultiplier.Multiply(longValue, multiplier);
                 else if (decimal.TryParse(digits, out decimalValue))
                     // • Otherwise, if its value can be represented by type decimal (§2.3.5.1.2), that is its type.
                     value = decimalValue;

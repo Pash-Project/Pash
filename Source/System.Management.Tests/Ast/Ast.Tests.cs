@@ -877,6 +877,22 @@ ls
         }
 
         [Test]
+        [TestCase("1mb", 1048576)]
+        [TestCase("1MB", 1048576)]
+        [TestCase("1kb", 1024)]
+        [TestCase("1gb", 1073741824)]
+        [TestCase("1tb", 1099511627776)]
+        [TestCase("1pb", 1125899906842624)]
+        public void IntegerWithNumericMultiplier(string expression, object result)
+        {
+            var expressionValue = ParseStatement(expression)
+                .PipelineElements[0]
+                .Expression
+                .Value;
+            Assert.AreEqual(result, expressionValue);
+        }
+
+        [Test]
         public void ExpandableStringLiteralExpression()
         {
             string value = ParseStatement("\"PS> \"")

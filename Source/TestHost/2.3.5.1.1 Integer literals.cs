@@ -18,6 +18,11 @@ namespace TestHost
         [TestCase("9223372036854775808", "System.Decimal")] // long.MaxValue + 1
         [TestCase("79228162514264337593543950335", "System.Decimal")] // decimal.MaxValue
         [TestCase("79228162514264337593543950336", "System.Double")] // decimal.MaxValue + 1
+        [TestCase("1kb", "System.Int32")]
+        [TestCase("1mb", "System.Int32")]
+        [TestCase("1gb", "System.Int32")]
+        [TestCase("1tb", "System.Int64")]
+        [TestCase("1pb", "System.Int64")]
         public void SimpleIntegerLiteralShouldBeOfType(string literal, string expectedType)
         {
             var result = TestHost.Execute(true, string.Format("({0}).GetType()", literal));
@@ -68,6 +73,18 @@ namespace TestHost
         {
             var result = TestHost.Execute(true, string.Format("({0}).GetType()", literal));
             Assert.AreEqual(expectedType + Environment.NewLine, result);
+        }
+
+        [TestCase("1kb", "1024")]
+        [TestCase("1mb", "1048576")]
+        [TestCase("1gb", "1073741824")]
+        [TestCase("1tb", "1099511627776")]
+        [TestCase("1pb", "1125899906842624")]
+        [TestCase("9876543210kb", "10113580247040")]
+        public void IntegerWithNumericMultiplier(string literal, string expectedValue)
+        {
+            var result = TestHost.Execute(true, string.Format("{0}", literal));
+            Assert.AreEqual(expectedValue + Environment.NewLine, result);
         }
     }
 }
