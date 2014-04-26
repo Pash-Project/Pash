@@ -1614,13 +1614,25 @@ namespace Pash.ParserIntrinsics
         ConstantExpressionAst BuildRealLiteralAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.real_literal);
+            var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), this._grammar.real_literal.Pattern, RegexOptions.IgnoreCase);
+            Group multiplier = matches.Groups[this._grammar.numeric_multiplier.Name];
 
             double doubleValue;
             string digits = parseTreeNode.FindTokenAndGetText();
 
+            if (multiplier.Success)
+            {
+                digits = digits.Substring(0, multiplier.Index) + digits.Substring(multiplier.Index + multiplier.Length);
+            }
+
             if (!double.TryParse(digits, out doubleValue))
             {
                 throw new OverflowException(string.Format("The real literal {0} is too large.", digits));
+            }
+
+            if (multiplier.Success)
+            {
+                doubleValue *= NumericMultiplier.GetValue(multiplier.Value);
             }
 
             return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), doubleValue);

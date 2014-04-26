@@ -25,6 +25,12 @@ namespace TestHost
         [TestCase("123.456e-231", "System.Double")]
         [TestCase("123.456E-231", "System.Double")]
         //[TestCase("32.e+12", "System.Double")] Works with Microsoft's PowerShell.
+        [TestCase("1.1mb", "System.Double")]
+        [TestCase("1.2MB", "System.Double")]
+        [TestCase("1.1kb", "System.Double")]
+        [TestCase("1.1gb", "System.Double")]
+        [TestCase("1.1tb", "System.Double")]
+        [TestCase("1.1pb", "System.Double")]
         public void SimpleRealLiteralShouldBeOfType(string literal, string expectedType)
         {
             var result = TestHost.Execute(true, string.Format("({0}).GetType()", literal));

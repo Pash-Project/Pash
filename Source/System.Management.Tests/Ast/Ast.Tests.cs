@@ -1719,6 +1719,20 @@ ls
             {
                 Assert.Throws<OverflowException>(() => ParseConstantExpression("2.2e500"));
             }
+
+            [Test]
+            [TestCase("1.5mb", 1572864)]
+            [TestCase("1.5MB", 1572864)]
+            [TestCase("1.5kb", 1536)]
+            [TestCase("1.5gb", 1610612736)]
+            [TestCase("0.5tb", 549755813888)]
+            [TestCase("0.5pb", 562949953421312)]
+            public void NumericMultiplier(string expression, double result)
+            {
+                ConstantExpressionAst constExpression = ParseConstantExpression(expression);
+                Assert.AreEqual(typeof(double), constExpression.StaticType);
+                Assert.AreEqual(result, constExpression.Value);
+            }
         }
     }
 }
