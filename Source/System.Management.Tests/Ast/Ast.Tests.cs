@@ -985,7 +985,7 @@ ls
         [TestCase("0x12mb", 18874368)]
         [TestCase("0x12gb", 19327352832)]
         [TestCase("0x12tb", 19791209299968)]
-        //[TestCase("0x12pb", 20266198323167232)]
+        [TestCase("0x12pb", 20266198323167232)]
         public void HexIntegerWithNumericMultiplierTest(string expression, object expectedResult)
         {
             var result = ParseStatement(expression)

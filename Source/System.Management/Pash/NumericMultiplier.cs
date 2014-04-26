@@ -47,7 +47,7 @@ namespace Pash
             int multiplierValue;
             if (GetInt32MultiplierValue(multiplier, out multiplierValue))
             {
-                return value * multiplierValue;
+                return Multiply(value, multiplierValue);
             }
 
             return value * GetValue(multiplier);
@@ -70,6 +70,21 @@ namespace Pash
                 default:
                     multiplierValue = 1;
                     return false;
+            }
+        }
+
+        static object Multiply(int x, int y)
+        {
+            try
+            {
+                checked
+                {
+                    return x * y;
+                }
+            }
+            catch (OverflowException)
+            {
+                return (long)x * y;
             }
         }
     }

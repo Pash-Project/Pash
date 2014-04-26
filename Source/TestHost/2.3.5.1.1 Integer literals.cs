@@ -21,6 +21,7 @@ namespace TestHost
         [TestCase("1kb", "System.Int32")]
         [TestCase("1mb", "System.Int32")]
         [TestCase("1gb", "System.Int32")]
+        [TestCase("100gb", "System.Int64")]
         [TestCase("1tb", "System.Int64")]
         [TestCase("1pb", "System.Int64")]
         public void SimpleIntegerLiteralShouldBeOfType(string literal, string expectedType)
@@ -78,6 +79,7 @@ namespace TestHost
         [TestCase("1kb", "1024")]
         [TestCase("1mb", "1048576")]
         [TestCase("1gb", "1073741824")]
+        [TestCase("100gb", "107374182400")]
         [TestCase("1tb", "1099511627776")]
         [TestCase("1pb", "1125899906842624")]
         [TestCase("9876543210kb", "10113580247040")]
