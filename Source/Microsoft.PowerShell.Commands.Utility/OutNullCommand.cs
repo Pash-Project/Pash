@@ -4,11 +4,11 @@ using System.Management.Automation;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Out", "Null", SupportsShouldProcess = false)]
-    public class OutNullCommand : PSCmdlet
+    public class OutNullCommand : OutCommandBase
     {
-        [Parameter(ValueFromPipeline = true)]
-        public PSObject InputObject { get; set; }
-
-        protected override void ProcessRecord() { }
+        protected override void ProcessRecord()
+        {
+            // do nothing
+        }
     }
 }

@@ -58,7 +58,8 @@ namespace Pash.Implementation
         public override int Write(object obj, bool enumerateCollection)
         {
             int numWritten = 0;
-            if (!enumerateCollection || (obj is string))
+            bool isString = obj is string || (obj is PSObject && ((PSObject)obj).BaseObject is string);
+            if (!enumerateCollection || isString)
             {
                 Write(obj);
                 numWritten = 1;

@@ -1,14 +1,19 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Management.Automation;
+using Microsoft.PowerShell.Commands.Utility;
 
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Out", "Default")]
-    public class OutDefaultCommand : PSCmdlet
+    public class OutDefaultCommand : OutCommandBase
     {
-        [Parameter(ValueFromPipeline = true)]
-        public PSObject InputObject { get; set; }
+        protected override void BeginProcessing()
+        {
+            OutputWriter = new ConsoleOutputWriter(Host);
+        }
+
+        /*
 
         private bool CheckWriteError(object obj)
         {
@@ -56,5 +61,6 @@ namespace Microsoft.PowerShell.Commands
                 }
             }
         }
+        */
     }
 }

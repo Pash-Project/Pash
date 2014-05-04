@@ -194,6 +194,20 @@ namespace System.Management.Automation
             ImmediateBaseObject = obj;
         }
 
+        internal Collection<PSPropertyInfo> GetDefaultDisplayPropertySet()
+        {
+            // TODO: As soon as the extended type system is supported, we can check the types TypeData on initialization
+            // and then get the DefaultDisplayPropertySet, a set that defines all properties of the object that should
+            // be printed by default
+            // For now we just return all properties
+            var collection = new Collection<PSPropertyInfo>();
+            foreach (var info in Properties)
+            {
+                collection.Add(info);
+            }
+            return collection;
+        }
+
         public override bool Equals(object obj)
         {
             if (obj is PSObject)
