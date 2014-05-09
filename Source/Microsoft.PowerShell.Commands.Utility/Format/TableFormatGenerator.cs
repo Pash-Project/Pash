@@ -13,22 +13,20 @@ namespace Microsoft.PowerShell.Commands.Utility
         {
         }
 
-        public override GroupStartData GenerateGroupStart (PSObject data)
+        public override GroupStartData GenerateGroupStart(PSObject data)
         {
             // TODO: sburnicki
             return new GroupStartData(Shape);
         }
 
-        public override FormatEntryData GenerateFormatEntry (PSObject data)
+        public override FormatEntryData GenerateObjectFormatEntry (PSObject data)
         {
-            // TODO: sburnicki
-            var entry = new FormatEntryData(Shape, data.ToString());
-            var errFlag = data.Properties["writeToErrorStream"];
-            entry.WriteToErrorStream = errFlag != null && errFlag.Value is bool && (bool) errFlag.Value;
-            return entry;
+            return new SimpleFormatEntryData(Shape, data.ToString()) {
+                WriteToErrorStream =  data.WriteToErrorStream
+            };
         }
 
-        public override GroupEndData GenerateGroupEnd ()
+        public override GroupEndData GenerateGroupEnd()
         {
             // TODO: sburnicki
             return new GroupEndData(Shape);

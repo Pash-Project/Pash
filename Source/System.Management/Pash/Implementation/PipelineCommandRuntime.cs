@@ -96,7 +96,7 @@ namespace System.Management.Automation
         {
             var psobj = PSObject.AsPSObject(errorRecord);
             // if merged with stdout, we can later on check to which stream the object usually belongs
-            psobj.Properties.Add(new PSNoteProperty("writeToErrorStream", true));
+            psobj.WriteToErrorStream = true;
             ErrorStream.Write(psobj);
             ExecutionContext.AddToErrorVariable(errorRecord);
             if (MergeErrorToOutput)

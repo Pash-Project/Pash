@@ -1,27 +1,32 @@
 using System;
+using System.Configuration;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.PowerShell.Commands.Utility
 {
+
     internal class TableFormatProcessor : FormatProcessor
     {
         internal TableFormatProcessor(OutputWriter writer) : base(FormatShape.Table, writer)
         {
         }
 
-        protected override void ProcessFormatEntry (FormatEntryData data)
+        protected override void ProcessGroupStart(GroupStartData data)
         {
-            if (String.IsNullOrEmpty(data.Data))
+        }
+
+        protected override void ProcessSimpleFormatEntry(SimpleFormatEntryData data)
+        {
+            OutputWriter.WriteToErrorStream = data.WriteToErrorStream;
+            if (!String.IsNullOrEmpty(data.Value))
             {
-                return;
+                OutputWriter.WriteLine(data.Value);
             }
-            if (data.WriteToErrorStream)
-            {
-                OutputWriter.WriteErrorLine(data.Data);
-            }
-            else
-            {
-                OutputWriter.WriteLine(data.Data);
-            }
+        }
+
+        protected override void ProcessObjectFormatEntry(FormatEntryData data)
+        {
+
         }
     }
 }

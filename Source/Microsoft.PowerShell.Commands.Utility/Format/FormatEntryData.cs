@@ -6,11 +6,8 @@ namespace Microsoft.PowerShell.Commands.Utility
     {
         internal bool WriteToErrorStream { get; set; }
 
-        internal string Data { get; set; }
-
-        internal FormatEntryData(FormatShape shape, string data) : base(shape)
+        internal FormatEntryData(FormatShape shape) : base(shape)
         {
-            Data = data;
         }
     }
 }

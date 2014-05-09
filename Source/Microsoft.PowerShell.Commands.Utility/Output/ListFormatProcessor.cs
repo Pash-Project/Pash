@@ -8,9 +8,14 @@ namespace Microsoft.PowerShell.Commands.Utility
         {
         }
 
-        protected override void ProcessFormatEntry (FormatEntryData data)
+        protected override void ProcessObjectFormatEntry(FormatEntryData data)
         {
-            throw new NotImplementedException ();
+            throw new NotImplementedException();
+        }
+
+        protected override void ProcessSimpleFormatEntry(SimpleFormatEntryData data)
+        {
+            throw new NotImplementedException();
         }
     }
 }

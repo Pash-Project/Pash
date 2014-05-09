@@ -37,7 +37,6 @@ namespace Microsoft.PowerShell.Commands.Utility
                     break;
                 default:
                     throw new PSInvalidOperationException("Cannot get FormatProcessor for undefined shape");
-                    break;
             }
             return _lastProcessor;
         }
@@ -57,10 +56,15 @@ namespace Microsoft.PowerShell.Commands.Utility
                 ProcessGroupStart(groupData);
                 _state = FormattingState.GroupStart;
             }
+            else if (data is SimpleFormatEntryData)
+            {
+                VerifyState(FormattingState.GroupStart, data);
+                ProcessSimpleFormatEntry((SimpleFormatEntryData)data);
+            }
             else if (data is FormatEntryData)
             {
                 VerifyState(FormattingState.GroupStart, data);
-                ProcessFormatEntry((FormatEntryData)data);
+                ProcessObjectFormatEntry((FormatEntryData)data);
             }
             else if (data is GroupEndData)
             {
@@ -90,7 +94,9 @@ namespace Microsoft.PowerShell.Commands.Utility
         {
         }
 
-        protected abstract void ProcessFormatEntry(FormatEntryData data);
+        protected abstract void ProcessSimpleFormatEntry(SimpleFormatEntryData data);
+
+        protected abstract void ProcessObjectFormatEntry(FormatEntryData data);
 
         protected virtual void ProcessGroupEnd(GroupEndData data)
         {

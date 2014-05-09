@@ -21,12 +21,6 @@ namespace Microsoft.PowerShell.Commands.Utility
         {
             _streamWriter.Write(output);
         }
-
-        public override void WriteErrorLine(string output)
-        {
-            // In a file we don't destinguish between stdout and stderr
-            WriteLine(output);
-        }
     }
 }
 

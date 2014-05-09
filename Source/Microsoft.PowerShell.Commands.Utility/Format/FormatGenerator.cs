@@ -42,8 +42,32 @@ namespace Microsoft.PowerShell.Commands.Utility
         }
 
         public abstract GroupStartData GenerateGroupStart(PSObject data);
-        public abstract FormatEntryData GenerateFormatEntry(PSObject data);
-        public abstract GroupEndData GenerateGroupEnd();
+
+        public FormatEntryData GenerateFormatEntry(PSObject data)
+        {
+            var val = data.BaseObject ?? "";
+            var type = val.GetType();
+            if (type.IsPrimitive || type == typeof(string))
+            {
+                return GenerateSimpleFormatEntry(data);
+            }
+
+            return GenerateObjectFormatEntry(data);
+        }
+
+        public virtual SimpleFormatEntryData GenerateSimpleFormatEntry(PSObject data)
+        {
+            return new SimpleFormatEntryData(Shape, data.ToString()) {
+                WriteToErrorStream = data.WriteToErrorStream
+            };
+        }
+
+        public abstract FormatEntryData GenerateObjectFormatEntry(PSObject data);
+
+        public virtual GroupEndData GenerateGroupEnd()
+        {
+            return new GroupEndData(Shape);
+        }
 
         public virtual FormatEndData GenerateFormatEnd()
         {

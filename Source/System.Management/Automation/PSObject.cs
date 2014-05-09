@@ -116,6 +116,27 @@ namespace System.Management.Automation
             }
         }
 
+        internal bool WriteToErrorStream
+        {
+            get
+            {
+                var prop = Properties["writeToErrorStream"];
+                return (prop == null) ? false : prop.Value is bool && (bool)prop.Value;
+            }
+            set
+            {
+                var prop = Properties["writeToErrorStream"];
+                if (prop != null)
+                {
+                    prop.Value = value;
+                }
+                else
+                {
+                    Properties.Add(new PSNoteProperty("writeToErrorStream", value));
+                }
+            }
+        }
+
         private List<PSMethod> GetMethods(bool isInstance)
         {
             var baseObject = ImmediateBaseObject;

@@ -1,4 +1,5 @@
 using System;
+using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands.Utility
 {
@@ -8,19 +9,14 @@ namespace Microsoft.PowerShell.Commands.Utility
         {
         }
 
-        public override GroupStartData GenerateGroupStart (System.Management.Automation.PSObject data)
+        public override GroupStartData GenerateGroupStart(PSObject data)
         {
-            throw new NotImplementedException ();
+            throw new NotImplementedException();
         }
 
-        public override FormatEntryData GenerateFormatEntry (System.Management.Automation.PSObject data)
+        public override FormatEntryData GenerateObjectFormatEntry(PSObject data)
         {
-            throw new NotImplementedException ();
-        }
-
-        public override GroupEndData GenerateGroupEnd ()
-        {
-            throw new NotImplementedException ();
+            throw new NotImplementedException();
         }
     }
 }
