@@ -1626,25 +1626,7 @@ namespace Pash.ParserIntrinsics
                 return BuildDecimalRealLiteralAst(parseTreeNode, multiplier, decimalTypeSuffix);
             }
 
-            string digits = parseTreeNode.FindTokenAndGetText();
-
-            if (multiplier.Success)
-            {
-                digits = digits.Substring(0, multiplier.Index) + digits.Substring(multiplier.Index + multiplier.Length);
-            }
-
-            double doubleValue;
-            if (!double.TryParse(digits, out doubleValue))
-            {
-                throw new OverflowException(string.Format("The real literal {0} is too large.", digits));
-            }
-
-            if (multiplier.Success)
-            {
-                doubleValue *= NumericMultiplier.GetValue(multiplier.Value);
-            }
-
-            return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), doubleValue);
+            return BuildDoubleRealLiteralAst(parseTreeNode, multiplier);
         }
 
         private ConstantExpressionAst BuildDecimalRealLiteralAst(ParseTreeNode parseTreeNode, Group multiplier, Group decimalTypeSuffix)
@@ -1653,15 +1635,43 @@ namespace Pash.ParserIntrinsics
 
             if (multiplier.Success)
             {
-                digits = digits.Substring(0, multiplier.Index) + digits.Substring(multiplier.Index + multiplier.Length);
+                digits = RemoveMatchedString(digits, multiplier);
             }
 
-            digits = digits.Substring(0, decimalTypeSuffix.Index) + digits.Substring(decimalTypeSuffix.Index + decimalTypeSuffix.Length);
+            digits = RemoveMatchedString(digits, decimalTypeSuffix);
 
             decimal value;
             if (!decimal.TryParse(digits, NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out value))
             {
                 throw new OverflowException(string.Format("Bad numeric constant: {0}.", parseTreeNode.FindTokenAndGetText()));
+            }
+
+            if (multiplier.Success)
+            {
+                value *= NumericMultiplier.GetValue(multiplier.Value);
+            }
+
+            return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), value);
+        }
+
+        private string RemoveMatchedString(string text, Group match)
+        {
+            return text.Substring(0, match.Index) + text.Substring(match.Index + match.Length);
+        }
+
+        private ConstantExpressionAst BuildDoubleRealLiteralAst(ParseTreeNode parseTreeNode, Group multiplier)
+        {
+            string digits = parseTreeNode.FindTokenAndGetText();
+
+            if (multiplier.Success)
+            {
+                digits = RemoveMatchedString(digits, multiplier);
+            }
+
+            double value;
+            if (!double.TryParse(digits, out value))
+            {
+                throw new OverflowException(string.Format("The real literal {0} is too large.", digits));
             }
 
             if (multiplier.Success)
