@@ -17,7 +17,7 @@ namespace TestHost
         ////      
         ////          This operator is left associative.
         ////      
-        [Test(Description = "from the spec"), Explicit("NYI")]
+        [Test(Description = "from the spec")]
         public void AdditionExamples()
         {
             ////          12 + -10L               # long result 2
