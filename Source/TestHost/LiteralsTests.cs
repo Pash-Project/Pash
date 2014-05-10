@@ -62,6 +62,10 @@ namespace TestHost
         [TestCase("1KB + 2.2", "1026.2")]
         [TestCase("2.2 + 1KB", "1026.2")]
         [TestCase("1.1kb + 1.2kb", "2355.2")]
+        [TestCase("-10.300D + 12", "1.700")]
+        [TestCase("-10.300D + 12.1", "1.800")]
+        [TestCase("12 + 10.300D", "22.300")]
+        [TestCase("12.1 + 10.300D", "22.400")]
         public void AddReals(string input, string result)
         {
             Assert.AreEqual(result + Environment.NewLine, TestHost.Execute(input));

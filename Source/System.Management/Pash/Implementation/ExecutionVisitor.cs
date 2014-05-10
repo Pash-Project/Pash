@@ -320,6 +320,10 @@ namespace System.Management.Pash.Implementation
 
             if (leftValue is string) return leftValue + rightValue.ToString();
 
+            if (leftValue is decimal) return (decimal)leftValue + Convert.ToDecimal(rightValue);
+
+            if (rightValue is decimal) return Convert.ToDecimal(leftValue) + (decimal)rightValue;
+
             if (leftValue is double) return (double)leftValue + Convert.ToDouble(rightValue);
 
             if (rightValue is double) return Convert.ToDouble(leftValue) + (double)rightValue;
