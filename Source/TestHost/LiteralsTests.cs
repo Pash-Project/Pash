@@ -50,5 +50,21 @@ namespace TestHost
         {
             Assert.AreEqual("xxx" + Environment.NewLine, TestHost.Execute("'xxx'"));
         }
+
+        [Test]
+        [TestCase("1.1 + 2.3", "3.4")]
+        [TestCase("1 + 0.4", "1.4")]
+        [TestCase("0.4 + 1", "1.4")]
+        [TestCase("1.1 + \"2.3\"", "3.4")]
+        [TestCase("1.1 + 0xab", "172.1")]
+        [TestCase("0xab + 1.1", "172.1")]
+        [TestCase("-1.1 + 2.3", "1.2")]
+        [TestCase("1KB + 2.2", "1026.2")]
+        [TestCase("2.2 + 1KB", "1026.2")]
+        [TestCase("1.1kb + 1.2kb", "2355.2")]
+        public void AddReals(string input, string result)
+        {
+            Assert.AreEqual(result + Environment.NewLine, TestHost.Execute(input));
+        }
     }
 }

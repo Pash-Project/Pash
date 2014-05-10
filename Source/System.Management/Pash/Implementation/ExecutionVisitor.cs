@@ -320,6 +320,10 @@ namespace System.Management.Pash.Implementation
 
             if (leftValue is string) return leftValue + rightValue.ToString();
 
+            if (leftValue is double) return (double)leftValue + Convert.ToDouble(rightValue);
+
+            if (rightValue is double) return Convert.ToDouble(leftValue) + (double)rightValue;
+
             if (leftValue is int) return (int)leftValue + Convert.ToInt32(rightValue);
 
             throw new NotImplementedException(this.ToString());
