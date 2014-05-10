@@ -24,7 +24,6 @@ namespace TestHost
         [TestCase("123.456e-2", "System.Double")]
         [TestCase("123.456e-231", "System.Double")]
         [TestCase("123.456E-231", "System.Double")]
-        //[TestCase("32.e+12", "System.Double")] Works with Microsoft's PowerShell.
         [TestCase("1.1mb", "System.Double")]
         [TestCase("1.2MB", "System.Double")]
         [TestCase("1.1kb", "System.Double")]
@@ -67,6 +66,39 @@ namespace TestHost
         {
             var result = TestHost.Execute(true, "2.2E+500");
             StringAssert.Contains("The real literal 2.2E+500 is too large.", result);
+        }
+
+        [Test]
+        [TestCase("1.2d", "System.Decimal")]
+        //[TestCase("1.d", "System.Decimal")] Throws parse exception but works with Microsoft's PowerShell
+        [TestCase("-4.5D", "System.Decimal")]
+        [TestCase(".4d", "System.Decimal")]
+        [TestCase("3.45e3d", "System.Decimal")]
+        //[TestCase("3.e3d", "System.Decimal")] Works with Microsoft's PowerShell.
+        [TestCase("32.2e+3D", "System.Decimal")]
+        //[TestCase("32.e+12d", "System.Decimal")] Works with Microsoft's PowerShell.
+        [TestCase("123.456e-2d", "System.Decimal")]
+        [TestCase("123.456e-231d", "System.Decimal")]
+        [TestCase("123.456E-231d", "System.Decimal")]
+        [TestCase("1.1dmb", "System.Decimal")]
+        [TestCase("1.2dMB", "System.Decimal")]
+        [TestCase("1.1Dkb", "System.Decimal")]
+        [TestCase("1.1DGB", "System.Decimal")]
+        [TestCase("1.1dtb", "System.Decimal")]
+        [TestCase("1.1dpb", "System.Decimal")]
+        public void SimpleDecimalRealLiteralShouldBeOfType(string literal, string expectedType)
+        {
+            var result = TestHost.Execute(true, string.Format("({0}).GetType()", literal));
+            Assert.AreEqual(expectedType + Environment.NewLine, result);
+        }
+
+        [Test]
+        [TestCase(".45e35d", "Bad numeric constant: .45e35d.")]
+        [TestCase("2.45e35D", "Bad numeric constant: 2.45e35D.")]
+        public void InvalidDecimalRealLiterals(string literal, string expectedResult)
+        {
+            var result = TestHost.Execute(true, literal);
+            StringAssert.Contains(expectedResult, result);
         }
     }
 }

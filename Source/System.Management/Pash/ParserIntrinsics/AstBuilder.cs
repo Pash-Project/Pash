@@ -3,6 +3,7 @@ using System;
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Management.Automation.Language;
 
@@ -1618,8 +1619,13 @@ namespace Pash.ParserIntrinsics
             VerifyTerm(parseTreeNode, this._grammar.real_literal);
             var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), this._grammar.real_literal.Pattern, RegexOptions.IgnoreCase);
             Group multiplier = matches.Groups[this._grammar.numeric_multiplier.Name];
+            Group decimalTypeSuffix = matches.Groups[this._grammar.decimal_type_suffix.Name];
 
-            double doubleValue;
+            if (decimalTypeSuffix.Success)
+            {
+                return BuildDecimalRealLiteralAst(parseTreeNode, multiplier, decimalTypeSuffix);
+            }
+
             string digits = parseTreeNode.FindTokenAndGetText();
 
             if (multiplier.Success)
@@ -1627,6 +1633,7 @@ namespace Pash.ParserIntrinsics
                 digits = digits.Substring(0, multiplier.Index) + digits.Substring(multiplier.Index + multiplier.Length);
             }
 
+            double doubleValue;
             if (!double.TryParse(digits, out doubleValue))
             {
                 throw new OverflowException(string.Format("The real literal {0} is too large.", digits));
@@ -1638,6 +1645,31 @@ namespace Pash.ParserIntrinsics
             }
 
             return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), doubleValue);
+        }
+
+        private ConstantExpressionAst BuildDecimalRealLiteralAst(ParseTreeNode parseTreeNode, Group multiplier, Group decimalTypeSuffix)
+        {
+            string digits = parseTreeNode.FindTokenAndGetText();
+
+            if (multiplier.Success)
+            {
+                digits = digits.Substring(0, multiplier.Index) + digits.Substring(multiplier.Index + multiplier.Length);
+            }
+
+            digits = digits.Substring(0, decimalTypeSuffix.Index) + digits.Substring(decimalTypeSuffix.Index + decimalTypeSuffix.Length);
+
+            decimal value;
+            if (!decimal.TryParse(digits, NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out value))
+            {
+                throw new OverflowException(string.Format("Bad numeric constant: {0}.", parseTreeNode.FindTokenAndGetText()));
+            }
+
+            if (multiplier.Success)
+            {
+                value *= NumericMultiplier.GetValue(multiplier.Value);
+            }
+
+            return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), value);
         }
 
         CommandAst BuildPipelineTailAst(ParseTreeNode parseTreeNode)
