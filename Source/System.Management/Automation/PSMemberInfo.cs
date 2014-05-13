@@ -23,7 +23,6 @@ namespace System.Management.Automation
         //internal bool IsHidden { get; }
         //internal bool IsReservedMember { get; }
         //internal bool ShouldSerialize { set; get; }
-        internal PSObject _instance;
         //internal bool isHidden;
         //internal bool isInstance;
         //internal bool isReservedMember;
@@ -34,7 +33,6 @@ namespace System.Management.Automation
         {
             toObj.Name = Name;
             toObj.IsInstance = IsInstance;
-            toObj._instance = _instance;
         }
     }
 }

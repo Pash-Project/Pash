@@ -13,13 +13,13 @@ namespace ReferenceTests
         [SetUp]
         public void ImportTestInvokeScriptCmdlet()
         {
-            ReferenceHost.ImportModules(new string[] {  typeof(TestCommand).Assembly.Location });
+            ImportTestCmdlets();
         }
 
         [TearDown]
         public void ResetInitialSessionState()
         {
-            ReferenceHost.ImportModules(null);
+            CleanImports();
         }
 
         [Test]

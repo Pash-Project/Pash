@@ -17,10 +17,7 @@ namespace System.Management.Automation.Language
             : base(extent)
         {
             this.VariablePath = variablePath;
-            PreventEnumerationOnEvaluation = false;
         }
-
-        internal bool PreventEnumerationOnEvaluation;
 
         public bool Splatted { get; private set; }
         public VariablePath VariablePath { get; private set; }

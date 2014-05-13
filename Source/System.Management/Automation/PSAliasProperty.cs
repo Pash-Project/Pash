@@ -24,6 +24,20 @@ namespace System.Management.Automation
             ConversionType = conversionType;
         }
 
+        public override bool IsGettable {
+            get
+            {
+                return true;
+            }
+        }
+
+        public override bool IsSettable {
+            get
+            {
+                return false;
+            }
+        }
+
         //todo: implement
         public override PSMemberInfo Copy()
         {
@@ -39,23 +53,6 @@ namespace System.Management.Automation
         }
 
         public Type ConversionType { get; private set; }
-
-        public override bool IsGettable
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-
-        public override bool IsSettable
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
 
         public override PSMemberTypes MemberType
         {

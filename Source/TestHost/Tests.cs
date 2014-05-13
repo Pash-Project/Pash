@@ -457,8 +457,7 @@ namespace TestHost
         }
 
         [Test]
-        [Explicit("Does not currently work")]
-        public void ForEachCharacterInString()
+        public void ForEachCharacterInStringIsString()
         {
             string result = TestHost.Execute("foreach ($char in 'abc') { $char }");
 

@@ -174,9 +174,18 @@ namespace System.Management.Automation
         {
             // TODO: Make it use formatProvider
             // TODO: read more about the Extended Type System (ETS) of Powershell and enhance this functionality
+            // TODO: check "3.7.5 Better conversion" of Windows Powershell Language Specification 3.0
             if (resultType == null)
             {
                 throw new ArgumentException("Result type can not be null.");
+            }
+
+            // result is no PSObject, so unpack the value if we deal with one
+            if (valueToConvert is PSObject &&
+                resultType != typeof(PSObject) &&
+                resultType != typeof(PSObject[]))
+            {
+                valueToConvert = ((PSObject)valueToConvert).BaseObject;
             }
 
             // check if the result is an array and we have something that needs to be casted
@@ -211,12 +220,6 @@ namespace System.Management.Automation
             if (resultType == typeof(PSObject))
             {
                 return PSObject.AsPSObject(valueToConvert);
-            }
-
-            // result is no PSObject, so unpack the value if we deal with one
-            if (valueToConvert is PSObject)
-            {
-                valueToConvert = ((PSObject)valueToConvert).BaseObject;
             }
 
             if (valueToConvert != null && resultType.IsAssignableFrom(valueToConvert.GetType()))

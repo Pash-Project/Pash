@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using Pash.Implementation;
 using System.Management.Automation.Runspaces;
+using System.Management.Automation;
 
 namespace Pash.Implementation
 {
@@ -85,6 +86,10 @@ namespace Pash.Implementation
 
         private IEnumerator GetEnumerator(object obj)
         {
+            if (obj is PSObject)
+            {
+                obj = ((PSObject)obj).BaseObject;
+            }
             IEnumerable enumerable = obj as IEnumerable;
             if (enumerable != null)
             {

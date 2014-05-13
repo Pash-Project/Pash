@@ -10,7 +10,8 @@ namespace System.Management.Automation.Language
 {
     public class TypeName : ITypeName
     {
-        private static readonly Dictionary<string, Type> TypeAccelerators = new Dictionary<string, Type>
+        private static readonly Dictionary<string, Type> TypeAccelerators = 
+            new Dictionary<string, Type>(StringComparer.CurrentCultureIgnoreCase)
         {
             { "int", typeof(int) },
             { "long", typeof(long) },
@@ -29,10 +30,10 @@ namespace System.Management.Automation.Language
             { "switch", typeof(SwitchParameter)  },
             { "hashtable", typeof(Collections.Hashtable) },
             { "type", typeof(Type) },
-            { "ipaddress", typeof(Net.IPAddress) }
+            { "ipaddress", typeof(Net.IPAddress) },
+            { "psobject", typeof(System.Management.Automation.PSObject) }
             // TODO: Next accelerators seems to be PowerShell and Windows-specific. Sort them out.
-            //ref System.Management.Automation.PSReference
-            //psobject	System.Management.Automation.PSObject
+            //{ "ref", typeof(System.Management.Automation.PSReference) },
             //pscustomobject	System.Management.Automation.PSObject
             //psmoduleinfo	System.Management.Automation.PSModuleInfo
             //powershell	System.Management.Automation.PowerShell
@@ -150,7 +151,7 @@ namespace System.Management.Automation.Language
 
             // TODO: Parse generic types.
 
-            throw new NotImplementedException();
+            throw new ArgumentException(String.Format("Unknown type '{0}'. The type cannot be resolved", Name));
         }
 
         public override string ToString()
