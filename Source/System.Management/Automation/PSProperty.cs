@@ -43,7 +43,8 @@ namespace System.Management.Automation
                 }
                 catch (Exception e)
                 {
-                    throw new GetValueException("Value cannot be read", e);
+                    var msg = String.Format("Value '{0}' cannot be read", _propertyInfo.Name);
+                    throw new GetValueException(msg, e);
                 }
             }
 

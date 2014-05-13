@@ -187,7 +187,7 @@ namespace Pash.Implementation
             //       so let's stay with stdout
             // var origOut = Console.Out;
             // Console.SetOut(Console.Error);
-            WriteLine(ConsoleColor.Red, ConsoleColor.Black, String.Format("ERROR: {0}", value));
+            WriteLine(ConsoleColor.Red, ConsoleColor.Black, value);
             // Console.SetOut(origOut);
         }
 

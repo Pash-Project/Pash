@@ -224,7 +224,10 @@ namespace System.Management.Automation
             var collection = new Collection<PSPropertyInfo>();
             foreach (var info in Properties)
             {
-                collection.Add(info);
+                if (info.IsGettable)
+                {
+                    collection.Add(info);
+                }
             }
             return collection;
         }
@@ -268,6 +271,12 @@ namespace System.Management.Automation
             }
 
             return new PSObject(obj);
+        }
+
+        public static object Unwrap(object obj)
+        {
+            var psobj = obj as PSObject;
+            return psobj == null ? obj : psobj.BaseObject;
         }
 
         public string ToString(string format, IFormatProvider formatProvider)

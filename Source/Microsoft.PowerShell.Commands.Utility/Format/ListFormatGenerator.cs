@@ -1,11 +1,13 @@
 using System;
 using System.Management.Automation;
+using Pash.Implementation;
 
 namespace Microsoft.PowerShell.Commands.Utility
 {
     internal class ListFormatGenerator : FormatGenerator
     {
-		public ListFormatGenerator(FormatGeneratorOptions options) : base(FormatShape.List, options)
+        public ListFormatGenerator(ExecutionContext context, FormatGeneratorOptions options)
+            : base(context, FormatShape.List, options)
         {
         }
 

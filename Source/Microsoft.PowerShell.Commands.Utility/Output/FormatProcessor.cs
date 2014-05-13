@@ -58,13 +58,18 @@ namespace Microsoft.PowerShell.Commands.Utility
             }
             else if (data is SimpleFormatEntryData)
             {
-                VerifyState(FormattingState.GroupStart, data);
-                ProcessSimpleFormatEntry((SimpleFormatEntryData)data);
+                // may occur in any state
+                ProcessFormatEntry((SimpleFormatEntryData)data);
+            }
+            else if (data is ErrorFormatEntryData)
+            {
+                // may occur in any state
+                ProcessFormatEntry((ErrorFormatEntryData)data);
             }
             else if (data is FormatEntryData)
             {
                 VerifyState(FormattingState.GroupStart, data);
-                ProcessObjectFormatEntry((FormatEntryData)data);
+                ProcessFormatEntry((FormatEntryData)data);
             }
             else if (data is GroupEndData)
             {
@@ -82,7 +87,7 @@ namespace Microsoft.PowerShell.Commands.Utility
             {
                 var msg = String.Format("The format data of type {0} is unknown and cannot be processed",
                                         data.GetType().Name);
-                throw new InvalidOperationException();
+                throw new InvalidOperationException(msg);
             }
         }
 
@@ -94,9 +99,24 @@ namespace Microsoft.PowerShell.Commands.Utility
         {
         }
 
-        protected abstract void ProcessSimpleFormatEntry(SimpleFormatEntryData data);
+        protected virtual void ProcessFormatEntry(SimpleFormatEntryData data)
+        {
+            OutputWriter.WriteToErrorStream = data.WriteToErrorStream;
+            if (!String.IsNullOrEmpty(data.Value))
+            {
+                OutputWriter.WriteLine(data.Value);
+            }
+        }
 
-        protected abstract void ProcessObjectFormatEntry(FormatEntryData data);
+        protected virtual void ProcessFormatEntry(ErrorFormatEntryData data)
+        {
+            OutputWriter.WriteToErrorStream = data.WriteToErrorStream;
+            OutputWriter.WriteLine(data.Message);
+            OutputWriter.WriteLine("  +CategoryInfo: " + data.CategoryInfo);
+            OutputWriter.WriteLine("  +FullyQualifiedErrorId: " + data.FullyQualifiedErrorId);
+        }
+
+        protected abstract void ProcessFormatEntry(FormatEntryData data);
 
         protected virtual void ProcessGroupEnd(GroupEndData data)
         {
@@ -110,7 +130,7 @@ namespace Microsoft.PowerShell.Commands.Utility
         {
             if (!allowedStates.HasFlag(_state))
             {
-                var msg = String.Format("The format data is invalid. Format data of type {0} is not allowed in state {1}",
+                var msg = String.Format("The format data is invalid. Did you modify the output of an Format-* command?",
                                         currentData.GetType().Name, _state);
                 throw new InvalidOperationException(msg);
             }

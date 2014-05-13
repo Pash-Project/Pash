@@ -128,6 +128,9 @@
     <Compile Include="Format\TableFormatGeneratorOptions.cs" />
     <Compile Include="Format\FormattingState.cs" />
     <Compile Include="Format\SimpleFormatEntryData.cs" />
+    <Compile Include="Format\TableFormatEntryData.cs" />
+    <Compile Include="Format\TableCellEntry.cs" />
+    <Compile Include="Format\ErrorFormatEntryData.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

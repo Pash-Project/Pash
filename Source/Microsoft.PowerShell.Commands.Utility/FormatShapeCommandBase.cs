@@ -1,6 +1,7 @@
 using System;
 using System.Management.Automation;
 using System.ComponentModel;
+using Microsoft.PowerShell.Commands.Utility;
 
 namespace Microsoft.PowerShell.Commands.Utility
 {
@@ -36,9 +37,14 @@ namespace Microsoft.PowerShell.Commands.Utility
 
         internal FormatGeneratorOptions GetOptions()
         {
-            var parsed = Enum.Parse(typeof(FormatGeneratorOptions.ExpandingOptions), Expand);
+            var parsed = FormatGeneratorOptions.ExpandingOptions.EnumOnly;
+            if (!String.IsNullOrEmpty(Expand))
+            {
+                parsed = (FormatGeneratorOptions.ExpandingOptions) 
+                    Enum.Parse(typeof(FormatGeneratorOptions.ExpandingOptions), Expand);
+            }
             return new FormatGeneratorOptions {
-                Expand = (FormatGeneratorOptions.ExpandingOptions) parsed,
+                Expand = parsed,
                 Force = Force.IsPresent,
                 GroupBy = GroupBy,
                 DisplayError = DisplayError.IsPresent,

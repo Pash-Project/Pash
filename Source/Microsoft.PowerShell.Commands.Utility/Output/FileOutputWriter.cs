@@ -7,7 +7,7 @@ namespace Microsoft.PowerShell.Commands.Utility
     {
         private StreamWriter _streamWriter;
 
-        public FileOutputWriter(string filename)
+        public FileOutputWriter(string filename) : base(-1, -1)
         {
             _streamWriter = new StreamWriter(File.Open(filename, FileMode.OpenOrCreate));
         }

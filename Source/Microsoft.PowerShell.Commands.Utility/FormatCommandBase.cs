@@ -2,6 +2,7 @@ using System;
 using System.Management.Automation;
 using System.Configuration;
 using System.Xml;
+using Extensions.Reflection;
 
 namespace Microsoft.PowerShell.Commands.Utility
 {
@@ -36,8 +37,21 @@ namespace Microsoft.PowerShell.Commands.Utility
                 {
                     Shape = FormatShapeHelper.SelectByData(InputObject);
                 }
-                _generator = FormatGenerator.Get(Shape, Options);
+                _generator = FormatGenerator.Get(ExecutionContext, Shape, Options);
             }
+            // check if we have a simple type or an error type. if yes, then we don't need a document structure
+            if (InputObject.BaseObject == null || InputObject.BaseObject.GetType().IsSimple())
+            {
+                WriteObject(_generator.GenerateSimpleFormatEntry(InputObject));
+                return;
+            }
+            if (InputObject.BaseObject is ErrorRecord || InputObject.BaseObject is Exception)
+            {
+                WriteObject(_generator.GenerateErrorFormatEntry(InputObject));
+                return;
+            }
+
+            // object to be printed get a complete document structure
             if (_state.Equals(FormattingState.FormatEnd))
             {
                 WriteObject(_generator.GenerateFormatStart());
@@ -54,7 +68,7 @@ namespace Microsoft.PowerShell.Commands.Utility
                 _state = FormattingState.GroupStart;
             }
             // we have to be in the state GroupStart where we can write the data itself
-            WriteObject(_generator.GenerateFormatEntry(InputObject));
+            WriteObject(_generator.GenerateObjectFormatEntry(InputObject));
         }
 
         protected override void EndProcessing()
