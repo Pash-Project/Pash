@@ -7,7 +7,7 @@ namespace Microsoft.PowerShell.Commands.Utility
     [Cmdlet(VerbsCommon.Add, "Member", DefaultParameterSetName="TypeNameSet"
             /*HelpUri="http://go.microsoft.com/fwlink/?LinkID=113280",
                      RemotingCapability=RemotingCapability.None*/)] 
-    public class AddMemberCommand : PSCmdlet
+    public class AddMemberCommand : ObjectCommandBase
     {
         [Parameter(ParameterSetName="MemberSet")] 
         [Parameter(ParameterSetName="NotePropertySingleMemberSet")] 
@@ -58,25 +58,6 @@ namespace Microsoft.PowerShell.Commands.Utility
         [Parameter(Position=2, ParameterSetName="MemberSet")] 
         public Object Value { get; set; }
 
-        private void AddMemberToCollection<T>(PSMemberInfoCollection<T> collection, T member) where T : PSMemberInfo
-        {
-            var existingValue = collection[member.Name];
-            if (existingValue != null)
-            {
-                if (Force.IsPresent)
-                {
-                    collection.Remove(member.Name);
-                }
-                else
-                {
-                    var msg = String.Format("Member '{0}' already exists. Use force to overwrite.", member.Name);
-                    ThrowTerminatingError(new ErrorRecord(new ArgumentException(msg), "MemberAlreadyExists", 
-                                                          ErrorCategory.InvalidArgument, member));
-                }
-            }
-            collection.Add(member);
-        }
-
         protected override void ProcessRecord()
         {
             if (ParameterSetName.Equals("MemberSet"))
@@ -85,8 +66,8 @@ namespace Microsoft.PowerShell.Commands.Utility
                 {
                     case PSMemberTypes.NoteProperty:
                         var member = new PSNoteProperty(Name, Value);
-                        AddMemberToCollection(InputObject.Properties, member);
-                        AddMemberToCollection(InputObject.Members, member);
+                        AddMemberToCollection(InputObject.Properties, member, Force.IsPresent);
+                        AddMemberToCollection(InputObject.Members, member, Force.IsPresent);
                         break;
 
                     default:

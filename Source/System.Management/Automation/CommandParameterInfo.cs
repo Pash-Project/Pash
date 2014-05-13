@@ -48,6 +48,10 @@ namespace System.Management.Automation
                 Aliases = new ReadOnlyCollection<string>(aliases);
                 attributes.Add(aliasAttr);
             }
+            else
+            {
+                Aliases = new ReadOnlyCollection<string>(new List<string>());
+            }
 
             Attributes = new ReadOnlyCollection<Attribute>(attributes);
         }

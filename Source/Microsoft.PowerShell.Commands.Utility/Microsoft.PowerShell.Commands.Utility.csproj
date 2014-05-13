@@ -105,6 +105,7 @@
     <Compile Include="WriteVerboseCommand.cs" />
     <Compile Include="WriteWarningCommand.cs" />
     <Compile Include="AddMemberCommand.cs" />
+    <Compile Include="ObjectCommandBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

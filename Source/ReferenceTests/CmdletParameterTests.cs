@@ -207,6 +207,107 @@ namespace ReferenceTests
             );
             StringAssert.Contains("Ambiguous", ex.ErrorRecord.FullyQualifiedErrorId);
         }
+
+        [Test]
+        public void CmdletCanTakeParametersByPropertyName()
+        {
+            var cmd = "new-object psobject -property @{foO='abc'; bAr='def'} | "
+                + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand));
+            var expected = "abc def" + Environment.NewLine;
+            var result = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(expected, result);
+        }
+
+
+        [Test]
+        public void CmdletPipeParamByPropertyNameCantBePartial()
+        {
+            var cmd = "new-object psobject -property @{f='abc'; b='def'} | "
+                + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand));
+            Assert.Throws<MethodInvocationException>(() => {
+                ReferenceHost.Execute(cmd);
+            });
+        }
+
+        [Test]
+        public void CmdletPipeParamByPropertyNameCanBeAlias()
+        {
+            var cmd = "new-object psobject -property @{baz='abc'; b='def'} | "
+                + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand));
+            var expected = "abc " + Environment.NewLine;
+            var result = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void CmdletPipeParamByPropertyNameCanOnlyProvideOptional()
+        {
+            var cmd = "new-object psobject -property @{bar='def'} | "
+                + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand))
+                + " -Foo 'a'";
+            var expected = "a def" + Environment.NewLine;
+            var result = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(expected, result);
+        }
+
+        [TestCase(" -Foo 'a'", "a def")]
+        [TestCase(" -Bar 'a'", "abc a")]
+        public void CmdletPipeParamByPropertyNameIgnoresAlreadyBound(string parameters, string expected)
+        {
+            var cmd = "new-object psobject -property @{foo='abc'; bar='def'} | "
+                + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand))
+                + parameters;
+            var result = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(expected + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void CmdletPipeParamByPropertyFailsIfAllAreAlreadyBound()
+        {
+            var cmd = "new-object psobject -property @{foo='abc'; bar='def'} | "
+                + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand))
+                + " -Foo 'a' -Bar 'a'";
+            Assert.Throws<MethodInvocationException>(() => {
+                ReferenceHost.Execute(cmd);
+            });
+        }
+
+        [Test, Explicit("To be honest: I don't understand why PS writes the last output AND still throws and excpetion")]
+        public void CmdletPipeParamByPropertyCanProcessMultipleButThrowsOnError()
+        {
+            var cmd = NewlineJoin(new string[] {
+                "$a = new-object psobject -property @{foo='abc'; bar='def'}",
+                "$b = new-object psobject -property @{foo='ghi'}",
+                "$c = new-object psobject -property @{bar='jkl'}",
+                "$d = new-object psobject -property @{foo='mno'; bar='jkl'}",
+                "@($a, $b, $c, $d) | " + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand))
+            });
+            var expected = NewlineJoin(new string[] {
+                "abc def",
+                "ghi ",
+                "mno jkl"
+            });
+            Assert.Throws<MethodInvocationException>(() =>
+            {
+                ReferenceHost.Execute(cmd);
+            });
+            // stuff before and after third object should work
+            Assert.AreEqual(expected, ReferenceHost.LastResults);
+        }
+
+        [Test]
+        public void CmdletPipeParamPropertyPreferredOverConversion()
+        {
+            var cmdletName = CmdletName(typeof(TestParametersByPipelineWithPropertiesAndConversionCommand));
+            var createObjectCmdlet = CmdletName(typeof(TestCreateFooMessageObjectCommand));
+            var cmd = NewlineJoin(new string[]{
+                "$a = " + createObjectCmdlet + " hello",
+                "$a | " + cmdletName
+            });
+            var expected = "hello" + Environment.NewLine;
+            var result = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(expected, result);
+        }
     }
 }
 
