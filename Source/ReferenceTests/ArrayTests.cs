@@ -25,7 +25,7 @@ namespace ReferenceTests
         {
             var cmd = String.Format("$a = {0}; $a.GetType().FullName", definition);
             var result = ReferenceHost.Execute(cmd);
-            Assert.AreEqual(typeof(object[]).FullName + Environment.NewLine, result);
+            Assert.AreEqual(NewlineJoin(typeof(object[]).FullName), result);
         }
 
         [Test]
@@ -47,25 +47,25 @@ namespace ReferenceTests
         [Test]
         public void ElementsFromPipelineAreStoredAsArray()
         {
-            var result = ReferenceHost.Execute(NewlineJoin(new string[] {
+            var result = ReferenceHost.Execute(NewlineJoin(
                 "$a = @('foo', 'bar', 'baz') | " + CmdletName(typeof(TestCmdletPhasesCommand)),
                 "$a.GetType().FullName"
-            }));
-            Assert.AreEqual(typeof(object[]).FullName + Environment.NewLine, result);
+            ));
+            Assert.AreEqual(NewlineJoin(typeof(object[]).FullName), result);
         }
 
         [Test]
         public void ArrayInParenthesisIsStillArray()
         {
             var result = ReferenceHost.Execute("(@(1,2)).GetType().FullName");
-            Assert.AreEqual(typeof(object[]).FullName + Environment.NewLine, result);
+            Assert.AreEqual(NewlineJoin(typeof(object[]).FullName), result);
         }
 
         [Test] // issue #116
         public void SingleArrayElementIsStillArray()
         {
             var result = ReferenceHost.Execute("@(1).GetType().FullName; @(1).Count");
-            Assert.AreEqual(NewlineJoin(new string[] { typeof(object[]).FullName, "1"}), result);
+            Assert.AreEqual(NewlineJoin(typeof(object[]).FullName, "1"), result);
         }
 
         [Test]

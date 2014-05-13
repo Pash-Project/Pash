@@ -123,7 +123,7 @@ namespace ReferenceTests
             return string.Format("{0}-{1}", attribute.VerbName, attribute.NounName);
         }
 
-        public static string NewlineJoin(string[] parts)
+        public static string NewlineJoin(params string[] parts)
         {
             return String.Join(Environment.NewLine, parts) + Environment.NewLine;
         }

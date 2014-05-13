@@ -27,7 +27,7 @@ namespace ReferenceTests
         {
             var cmd = CmdletName(typeof(TestNoMandatoriesCommand));
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual("Reversed:  " + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin("Reversed:  "), res);
         }
 
         [TestCase("'foo'", "Correct: 1 2")]
@@ -36,7 +36,7 @@ namespace ReferenceTests
         {
             var cmd = pipeInput + " | " + CmdletName(typeof(TestNoMandatoriesCommand)) + " -One '1' -Two '2'";
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual(expected + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin(expected), res);
         }
 
         [TestCase("-RandomString '4'", "Correct: 1 2")]
@@ -45,7 +45,7 @@ namespace ReferenceTests
         {
             var cmd = String.Format(CmdletName(typeof(TestNoMandatoriesCommand)) + " {0} '1' '2'", parameter);
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual(expected + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin(expected), res);
         }
 
         [TestCase("'foo'", "Correct: 2 1")] // right set was chosen, but positional bound by defualt set
@@ -54,7 +54,7 @@ namespace ReferenceTests
         {
             var cmd = pipeInput + " | " + CmdletName(typeof(TestNoMandatoriesCommand)) + " '1' '2'";
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual(expected + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin(expected), res);
         }
 
         [Test]
@@ -88,7 +88,7 @@ namespace ReferenceTests
         {
             var cmd = CmdletName(typeof(TestMandatoryInOneSetCommand)) + " 'works' 'foo'";
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual("works" + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin("works"), res);
         }
 
         [Test]
@@ -122,7 +122,7 @@ namespace ReferenceTests
         {
             var cmd = CmdletName(typeof(TestSwitchAndPositionalCommand)) + " -Switch 'test'";
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual("test" + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin("test"), res);
         }
 
         [Test]
@@ -143,7 +143,7 @@ namespace ReferenceTests
         {
             var cmd = CmdletName(typeof(TestDefaultParameterSetDoesntExistCommand));
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual("works" + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin("works"), res);
         }
 
         [Test]
@@ -164,7 +164,7 @@ namespace ReferenceTests
         {
             var cmd = CmdletName(typeof(TestNoMandatoriesCommand)) + " -One 1 -Tw 2"; // note Tw instead of "Two"
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual("Reversed: 1 2" + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin("Reversed: 1 2"), res);
         }
 
         [Test]
@@ -185,7 +185,7 @@ namespace ReferenceTests
         {
             var cmd = CmdletName(typeof(TestNoParametersCommand));
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual("works" + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin("works"), res);
         }
 
         [Test]
@@ -193,7 +193,7 @@ namespace ReferenceTests
         {
             var cmd = CmdletName(typeof(TestDefaultSetIsAllParameterSetAndTwoParameterSetsCommand));
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual("First: null" + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin("First: null"), res);
         }
 
         [Test]
