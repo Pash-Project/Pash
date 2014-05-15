@@ -20,17 +20,6 @@ namespace Microsoft.PowerShell.Commands.Utility
         {
         }
 
-        protected override void ProcessGroupStart(GroupStartData data)
-        {
-            OutputWriter.WriteToErrorStream = false;
-            OutputWriter.WriteLine("");
-            if (!String.IsNullOrEmpty(data.GroupName))
-            {
-                var output = String.Format("\t{0}: {1}" + Environment.NewLine, data.GroupType ?? "", data.GroupName);
-                OutputWriter.WriteLine(output);
-            }
-        }
-
         protected override void ProcessFormatEntry(FormatEntryData data)
         {
             var tableEntry = data as TableFormatEntryData;
@@ -54,16 +43,15 @@ namespace Microsoft.PowerShell.Commands.Utility
         {
             // make sure column widths are computed again for the next group
             _currentColumnWidths = null; 
-            OutputWriter.WriteToErrorStream = false;
-            OutputWriter.WriteLine("");
+            base.ProcessGroupEnd(data);
         }
 
-        private void CalculateColumns(List<TableCellEntry> row)
+        private void CalculateColumns(List<FormatObjectProperty> row)
         {
-            _fullWidth = OutputWriter.Columns - 1;
+            _fullWidth = OutputWriter.Columns - 1; // -1 because of newline
             if (_fullWidth <= 0)
             {
-                _fullWidth = OutputWriter.DefaultColumns;
+                _fullWidth = OutputWriter.DefaultColumns - 1;
             }
             var cols = row.Count;
             // make sure it fits
@@ -85,7 +73,7 @@ namespace Microsoft.PowerShell.Commands.Utility
 
         private void WriteHeader(TableFormatEntryData tableEntry)
         {
-            List<string> values = (from cell in tableEntry.Row select cell.ColumnName).ToList();
+            List<string> values = (from cell in tableEntry.Row select cell.PropertyName).ToList();
             var referenceEntry = new TableFormatEntryData(tableEntry);
             referenceEntry.Wrap = true;
             WriteValuesInRows(values, referenceEntry);

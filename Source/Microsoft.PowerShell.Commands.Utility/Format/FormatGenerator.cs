@@ -51,7 +51,10 @@ namespace Microsoft.PowerShell.Commands.Utility
             return new FormatStartData(Shape);
         }
 
-        public abstract GroupStartData GenerateGroupStart(PSObject data);
+        public virtual GroupStartData GenerateGroupStart(PSObject data)
+        {
+            return new GroupStartData(Shape);
+        }
 
         public virtual SimpleFormatEntryData GenerateSimpleFormatEntry(PSObject data)
         {

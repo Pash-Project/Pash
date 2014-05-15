@@ -62,6 +62,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClearVariableCommand.cs" />
@@ -129,8 +130,9 @@
     <Compile Include="Format\FormattingState.cs" />
     <Compile Include="Format\SimpleFormatEntryData.cs" />
     <Compile Include="Format\TableFormatEntryData.cs" />
-    <Compile Include="Format\TableCellEntry.cs" />
     <Compile Include="Format\ErrorFormatEntryData.cs" />
+    <Compile Include="Format\ListFormatEntryData.cs" />
+    <Compile Include="Format\FormatObjectProperty.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

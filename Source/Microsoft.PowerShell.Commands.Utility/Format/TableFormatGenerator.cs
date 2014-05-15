@@ -41,23 +41,23 @@ namespace Microsoft.PowerShell.Commands.Utility
         public override FormatEntryData GenerateObjectFormatEntry(PSObject data)
         {
             var rowData= GetSelectedProperties(data);
-            var row = new List<TableCellEntry>();
+            var row = new List<FormatObjectProperty>();
             foreach (var curData in rowData)
             {
                 object value = null;
+                // getting the value might throw an exception, so we just print nothing for it
                 try
                 {
                     value = PSObject.Unwrap(curData.Value);
                 } catch (GetValueException)
                 {
-                    continue;
                 }
                 Alignment align = Alignment.Left;
                 if (value != null)
                 {
                     align = (value.GetType().IsNumeric() || value is bool) ? Alignment.Right : Alignment.Left;
                 }
-                row.Add(new TableCellEntry(curData.Name, PSObject.AsPSObject(curData.Value).ToString(), align));
+                row.Add(new FormatObjectProperty(curData.Name, PSObject.AsPSObject(curData.Value).ToString(), align));
             }
 
             var entry = new TableFormatEntryData(row);

@@ -97,6 +97,13 @@ namespace Microsoft.PowerShell.Commands.Utility
 
         protected virtual void ProcessGroupStart(GroupStartData data)
         {
+            OutputWriter.WriteToErrorStream = false;
+            OutputWriter.WriteLine("");
+            if (!String.IsNullOrEmpty(data.GroupName))
+            {
+                var output = String.Format("\t{0}: {1}" + Environment.NewLine, data.GroupType ?? "", data.GroupName);
+                OutputWriter.WriteLine(output);
+            }
         }
 
         protected virtual void ProcessFormatEntry(SimpleFormatEntryData data)
@@ -120,6 +127,8 @@ namespace Microsoft.PowerShell.Commands.Utility
 
         protected virtual void ProcessGroupEnd(GroupEndData data)
         {
+            OutputWriter.WriteToErrorStream = false;
+            OutputWriter.WriteLine("");
         }
 
         protected virtual void ProcessFormatEnd(FormatEndData data)

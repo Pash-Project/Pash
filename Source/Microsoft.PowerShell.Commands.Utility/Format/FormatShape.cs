@@ -17,15 +17,16 @@ namespace Microsoft.PowerShell.Commands.Utility
 
         public static FormatShape SelectByData(PSObject data)
         {
-            return FormatShape.Table; // TODO: sburnicki
-            /*
+            if (data.BaseObject == null) // if it's null we don't really care...
+            {
+                return FormatShape.List;
+            }
             var defaultDisplayProperties = data.GetDefaultDisplayPropertySet();
             if (defaultDisplayProperties.Count <= MaxPropertiesInTable)
             {
                 return FormatShape.Table;
             }
             return FormatShape.List;
-            */
         }
     }
 }

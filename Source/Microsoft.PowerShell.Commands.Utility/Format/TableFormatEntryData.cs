@@ -5,11 +5,11 @@ namespace Microsoft.PowerShell.Commands.Utility
 {
     internal class TableFormatEntryData : FormatEntryData
     {
-        public List<TableCellEntry> Row { get; set; }
+        public List<FormatObjectProperty> Row { get; set; }
         public bool Wrap { get; set; }
         public bool ShowHeader { get; set; }
 
-        internal TableFormatEntryData(List<TableCellEntry> row) : base(FormatShape.Table)
+        internal TableFormatEntryData(List<FormatObjectProperty> row) : base(FormatShape.Table)
         {
             Row = row;
         }
