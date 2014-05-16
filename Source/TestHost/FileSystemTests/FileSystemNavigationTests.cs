@@ -17,20 +17,20 @@ namespace TestHost.FileSystemTests
 
             var result = TestHost.ExecuteWithZeroErrors(
                 "Set-Location " + rootPath,
-                "Get-Location");
+                "(Get-Location).Path");
 
             result.Trim().ShouldEqual((string)rootPath);
 
             result = TestHost.ExecuteWithZeroErrors(
                 "Set-Location " + (rootPath + "/FolderA").NormalizeSlashes(),
-                "Get-Location");
+                "(Get-Location).Path");
 
 
             result.Trim().ShouldEqual(((string)rootPath + "/FolderA").NormalizeSlashes());
 
             result = TestHost.ExecuteWithZeroErrors(
                 "Set-Location " + (rootPath + "/FolderA/SubFolderA").NormalizeSlashes(),
-                "Get-Location");
+                "(Get-Location).Path");
 
             result.Trim().PathShouldEqual(((string)rootPath + "/FolderA/SubFolderA").NormalizeSlashes());
         }
@@ -54,7 +54,7 @@ namespace TestHost.FileSystemTests
 
             var result = TestHost.ExecuteWithZeroErrors("Set-Location " + rootPath + "/a/b/c/d/e/f/g",
                                                         "Set-Location " + setLocationParam,
-                                                        "Get-Location");
+                                                        "(Get-Location).Path");
 
             result.Trim().PathShouldEqual(rootPath + expectedLocation);
         }
@@ -62,13 +62,13 @@ namespace TestHost.FileSystemTests
         [Test]
         public void CDToInvalidDirectoryShouldThrowError()
         {
-            var currentLocation = "Get-Location".Exec();
+            var currentLocation = "(Get-Location).Path".Exec();
 
             var result = TestHost.ExecuteWithZeroErrors("set-location thisFolderReallyShouldNotExistNoReallyItShouldNotBeAnywhereOnAnyDiskAnywherePERIOD");
             result.ShouldContain("Cannot find path");
             result.ShouldContain("because it does not exist.");
 
-            var currentLocationAfterBadCD = "Get-Location".Exec();
+            var currentLocationAfterBadCD = "(Get-Location).Path".Exec();
 
             currentLocation.PathShouldEqual(currentLocationAfterBadCD);
         }
@@ -76,7 +76,7 @@ namespace TestHost.FileSystemTests
         [Test]
         public void CDToSlashShouldTakeYouToTheRootOfTheFileSystemDrive()
         {
-            var currentLocation = "Set-Location /; Get-Location".Exec();
+            var currentLocation = "Set-Location /; (Get-Location).Path".Exec();
 
             //TODO: how to assert this is "C:\" on windows?
             currentLocation.PathShouldEqual("/");
@@ -95,7 +95,7 @@ namespace TestHost.FileSystemTests
         public void CDToTildeShouldNotChangeIntoTildeDirectory()
         {
             var rootPath = base.SetupFileSystemWithStructure(new[] { "/~/x" });
-            var currentLocation = ("Set-Location " + rootPath + "; Set-Location ~; Get-Location").Exec();
+            var currentLocation = ("Set-Location " + rootPath + "; Set-Location ~; (Get-Location).Path").Exec();
             StringAssert.DoesNotStartWith(rootPath, currentLocation);
         }
 
@@ -103,7 +103,7 @@ namespace TestHost.FileSystemTests
         public void CDToTildeShouldChangeIntoHomeDirectory()
         {
             var rootPath = base.SetupFileSystemWithStructure(new[] { "/~/x" });
-            var currentLocation = ("Set-Location " + rootPath + "; Set-Location ~; Get-Location").Exec();
+            var currentLocation = ("Set-Location " + rootPath + "; Set-Location ~; (Get-Location).Path").Exec();
 
             var userHome = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             // HACK: Due to Mono Bug 2873. See equivalent hack in
@@ -118,7 +118,7 @@ namespace TestHost.FileSystemTests
         public void CDToDotSlashTildeShouldChangeIntoTildeDirectory()
         {
             var rootPath = base.SetupFileSystemWithStructure(new[] { "/~/x" });
-            var currentLocation = ("Set-Location " + rootPath + "; Set-Location ./~; Get-Location").Exec();
+            var currentLocation = ("Set-Location " + rootPath + "; Set-Location ./~; (Get-Location).Path").Exec();
             currentLocation.PathShouldEqual(rootPath + "/~");
         }
 

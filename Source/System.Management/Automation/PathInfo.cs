@@ -9,11 +9,11 @@ namespace System.Management.Automation
         public PSDriveInfo Drive { get; private set; }
 
         private Path _path;
-        public Path Path
+        public string Path
         {
             get
             {
-                return _path.MakePath(Drive.Name);
+                return _path.MakePath(Drive.Name).ToString();
             }
         }
 

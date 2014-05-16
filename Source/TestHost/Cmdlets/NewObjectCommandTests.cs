@@ -13,26 +13,27 @@ namespace TestHost.Cmdlets
         [Test]
         public void CanCreateTypeWithNoParameters()
         {
-            Assert.AreEqual("0.0" + Environment.NewLine, TestHost.Execute("New-Object System.Version"));
+            Assert.AreEqual("0.0" + Environment.NewLine, TestHost.Execute("(New-Object System.Version).ToString()"));
         }
 
         [Test]
         public void SystemPrefixIsOptional()
         {
-            Assert.AreEqual("0.0" + Environment.NewLine, TestHost.Execute("New-Object Version"));
+            Assert.AreEqual("0.0" + Environment.NewLine, TestHost.Execute("(New-Object Version).ToString()"));
         }
 
         [Test]
         public void CaseInsenstive()
         {
-            Assert.AreEqual("0.0" + Environment.NewLine, TestHost.Execute("New-Object version"));
+            Assert.AreEqual("0.0" + Environment.NewLine, TestHost.Execute("(New-Object version).ToString()"));
         }
 
         // this one is not in mscorlib
         [Test]
         public void WebClient()
         {
-            Assert.AreEqual("System.Net.WebClient" + Environment.NewLine, TestHost.Execute("New-Object Net.WebClient"));
+            Assert.AreEqual(typeof(System.Net.WebClient).Name + Environment.NewLine,
+                            TestHost.Execute("(New-Object Net.WebClient).GetType().Name"));
         }
 
         [Test]
@@ -44,7 +45,8 @@ namespace TestHost.Cmdlets
         [Test]
         public void Parameter()
         {
-            Assert.AreEqual("3.4.5.6" + Environment.NewLine, TestHost.Execute("New-Object version \"3.4.5.6\""));
+            Assert.AreEqual("3.4.5.6" + Environment.NewLine,
+                            TestHost.Execute("(New-Object version \"3.4.5.6\").ToString()"));
         }
 
         [Test]

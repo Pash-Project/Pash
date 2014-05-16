@@ -11,9 +11,14 @@ namespace TestHost
 {
     class TestHostUserInterface : PSHostUserInterface
     {
+        private TestHostRawUserInterface _rawUI;
         public TextReader InputStream;
         public Action<string> OnWriteErrorLineString = delegate(string s) { Assert.Fail(s); };
 
+        internal TestHostUserInterface()
+        {
+            _rawUI = new TestHostRawUserInterface();
+        }
 
         internal void SetInput(string input)
         {
@@ -22,7 +27,7 @@ namespace TestHost
 
         public override PSHostRawUserInterface RawUI
         {
-            get { throw new NotImplementedException(); }
+            get { return _rawUI; }
         }
 
         public override Dictionary<string, System.Management.Automation.PSObject> Prompt(string caption, string message, System.Collections.ObjectModel.Collection<FieldDescription> descriptions)

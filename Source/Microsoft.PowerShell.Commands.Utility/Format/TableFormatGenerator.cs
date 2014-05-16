@@ -57,7 +57,7 @@ namespace Microsoft.PowerShell.Commands.Utility
                 {
                     align = (value.GetType().IsNumeric() || value is bool) ? Alignment.Right : Alignment.Left;
                 }
-                row.Add(new FormatObjectProperty(curData.Name, PSObject.AsPSObject(curData.Value).ToString(), align));
+                row.Add(new FormatObjectProperty(curData.Name, PSObject.AsPSObject(value).ToString(), align));
             }
 
             var entry = new TableFormatEntryData(row);

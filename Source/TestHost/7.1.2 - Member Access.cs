@@ -85,8 +85,8 @@ $path::GetExtension('test.txt')
         [Test]
         public void NoParametersTest()
         {
-            var result = TestHost.Execute(@"'a'.GetType()");
-            Assert.AreEqual("System.String" + Environment.NewLine, result);
+            var result = TestHost.Execute(@"'a'.GetType().Name");
+            Assert.AreEqual(typeof(System.String).Name + Environment.NewLine, result);
         }
 
         [Test]
