@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Management.Automation.Host;
 
 namespace Microsoft.PowerShell.Commands.Utility
@@ -7,9 +8,17 @@ namespace Microsoft.PowerShell.Commands.Utility
     {
         private PSHost _host;
 
-        public HostOutputWriter(PSHost host)
-            : base(host.UI.RawUI.BufferSize.Height, host.UI.RawUI.BufferSize.Width)
+        public HostOutputWriter(PSHost host) : base()
         {
+            try
+            {
+                Rows = host.UI.RawUI.BufferSize.Height;
+                Columns = host.UI.RawUI.BufferSize.Width;
+            }
+            catch (IOException)
+            {
+                // this could occur if Pash is used in a process and the I/O is redirected. We just use the default values then
+            }
             _host = host;
         }
 

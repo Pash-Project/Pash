@@ -4,12 +4,17 @@ namespace Microsoft.PowerShell.Commands.Utility
 {
     internal abstract class OutputWriter
     {
-        internal const int DefaultColumns = 80;
-        internal const int DefaultRows = 100;
+        internal const int DefaultColumns = 100;
+        internal const int DefaultRows = 400;
 
         public bool WriteToErrorStream { get; set; }
-        public int Rows { get; private set; }
-        public int Columns { get; private set; }
+        public int Rows { get; internal set; }
+        public int Columns { get; internal set; }
+
+        protected OutputWriter()
+            : this(DefaultRows, DefaultColumns)
+        {
+        }
 
         protected OutputWriter(int rows, int cols)
         {
