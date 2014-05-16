@@ -9,6 +9,8 @@ namespace Microsoft.PowerShell.Commands.Utility
     internal class TableFormatGenerator : FormatGenerator
     {
         private bool _nextWithHeader;
+        private Alignment[] _currentAlignments;
+
         private TableFormatGeneratorOptions TableOptions
         {
             get
@@ -42,8 +44,13 @@ namespace Microsoft.PowerShell.Commands.Utility
         {
             var rowData= GetSelectedProperties(data);
             var row = new List<FormatObjectProperty>();
-            foreach (var curData in rowData)
+            if (_nextWithHeader)
             {
+                _currentAlignments = new Alignment[rowData.Count];
+            }
+            for (int i = 0; i < rowData.Count; i++)
+            {
+                var curData = rowData[i];
                 object value = null;
                 // getting the value might throw an exception, so we just print nothing for it
                 try
@@ -53,11 +60,16 @@ namespace Microsoft.PowerShell.Commands.Utility
                 {
                 }
                 Alignment align = Alignment.Left;
-                if (value != null)
+                if (_nextWithHeader)
                 {
-                    align = (value.GetType().IsNumeric() || value is bool) ? Alignment.Right : Alignment.Left;
+                    if (value != null)
+                    {
+                        align = (value.GetType().IsNumeric() || value is bool) ? Alignment.Right : Alignment.Left;
+                    }
+                    _currentAlignments[i] = align;
                 }
-                row.Add(new FormatObjectProperty(curData.Name, PSObject.AsPSObject(value).ToString(), align));
+                row.Add(new FormatObjectProperty(curData.Name, PSObject.AsPSObject(value).ToString(),
+                                                 _currentAlignments[i]));
             }
 
             var entry = new TableFormatEntryData(row);
