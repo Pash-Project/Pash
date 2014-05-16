@@ -39,8 +39,12 @@ namespace TestHost
 
         public static string Execute(bool logErrors, Action<string> onErrorHandler, params string[] statements)
         {
-            TestHostUserInterface ui = new TestHostUserInterface();
+            return Execute(logErrors, onErrorHandler, new TestHostUserInterface(), statements);
+        }
 
+        public static string Execute(bool logErrors, Action<string> onErrorHandler, TestHostUserInterface ui,
+                                     params string[] statements)
+        {
             if (logErrors)
             {
                 ui.OnWriteErrorLineString = onErrorHandler ?? (s => ui.Log.Append(s));

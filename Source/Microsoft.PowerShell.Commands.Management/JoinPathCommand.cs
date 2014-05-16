@@ -16,7 +16,7 @@ namespace Microsoft.PowerShell.Commands
         {
             foreach (Path parentPath in Path)
             {
-                WriteObject(parentPath.Combine(ChildPath));
+                WriteObject(parentPath.Combine(ChildPath).ToString());
             }
         }
 

@@ -62,6 +62,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClearVariableCommand.cs" />
@@ -69,10 +70,8 @@
     <Compile Include="ConvertToHtmlCommand.cs" />
     <Compile Include="GetHostCommand.cs" />
     <Compile Include="ExportCsvCommand.cs" />
-    <Compile Include="FormatElement.cs" />
     <Compile Include="FormatListCommand.cs" />
     <Compile Include="FormatTableCommand.cs" />
-    <Compile Include="FormatTableShape.cs" />
     <Compile Include="GetDateCommand.cs" />
     <Compile Include="GetMemberCommand.cs" />
     <Compile Include="GetRandomCommand.cs" />
@@ -106,6 +105,35 @@
     <Compile Include="WriteWarningCommand.cs" />
     <Compile Include="AddMemberCommand.cs" />
     <Compile Include="ObjectCommandBase.cs" />
+    <Compile Include="OutCommandBase.cs" />
+    <Compile Include="Format\FormatData.cs" />
+    <Compile Include="Format\FormatStartData.cs" />
+    <Compile Include="Format\FormatEndData.cs" />
+    <Compile Include="Format\GroupStartData.cs" />
+    <Compile Include="Format\GroupEndData.cs" />
+    <Compile Include="Format\FormatEntryData.cs" />
+    <Compile Include="Output\OutputWriter.cs" />
+    <Compile Include="Output\HostOutputWriter.cs" />
+    <Compile Include="Output\FileOutputWriter.cs" />
+    <Compile Include="FormatDefaultCommand.cs" />
+    <Compile Include="FormatCommandBase.cs" />
+    <Compile Include="Format\FormatGenerator.cs" />
+    <Compile Include="Format\TableFormatGenerator.cs" />
+    <Compile Include="Output\FormatProcessor.cs" />
+    <Compile Include="Output\ListFormatProcessor.cs" />
+    <Compile Include="Output\TableFormatProcessor.cs" />
+    <Compile Include="Format\FormatShape.cs" />
+    <Compile Include="Format\ListFormatGenerator.cs" />
+    <Compile Include="FormatShapeCommandBase.cs" />
+    <Compile Include="Format\FromatGeneratorOptions.cs" />
+    <Compile Include="Format\TableFormatGeneratorOptions.cs" />
+    <Compile Include="Format\FormattingState.cs" />
+    <Compile Include="Format\SimpleFormatEntryData.cs" />
+    <Compile Include="Format\TableFormatEntryData.cs" />
+    <Compile Include="Format\ErrorFormatEntryData.cs" />
+    <Compile Include="Format\ListFormatEntryData.cs" />
+    <Compile Include="Format\FormatObjectProperty.cs" />
+    <Compile Include="Format\FormatManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
@@ -121,4 +149,8 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Folder Include="Output\" />
+    <Folder Include="Format\" />
+  </ItemGroup>
 </Project>

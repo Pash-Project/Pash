@@ -21,7 +21,8 @@ namespace TestHost
         [Test]
         public void RootPathTest()
         {
-            StringAssert.AreEqualIgnoringCase(Path.GetPathRoot(Environment.CurrentDirectory) + Environment.NewLine, TestHost.Execute("Set-Location / ; Get-Location"));
+            StringAssert.AreEqualIgnoringCase(Path.GetPathRoot(Environment.CurrentDirectory) + Environment.NewLine,
+                                              TestHost.Execute("Set-Location / ; (Get-Location).Path"));
         }
 
         [Test]
@@ -151,7 +152,7 @@ namespace TestHost
             System.Management.Path path = "";
 
             var expectedPath = "Variable:" + path.CorrectSlash;
-            var actualPath = TestHost.Execute("Set-Location variable:", "Get-Location").Trim();
+            var actualPath = TestHost.Execute("Set-Location variable:", "(Get-Location).Path").Trim();
 
             StringAssert.AreEqualIgnoringCase(expectedPath, actualPath);
         }

@@ -14,7 +14,7 @@ namespace TestHost
         [Test]
         public void ParametersByName1()
         {
-            var results = TestHost.Execute("$a = 10; Get-Variable -Name a");
+            var results = TestHost.Execute("$a = 10; (Get-Variable -Name a).ToString()");
 
             Assert.AreEqual("$a = 10" + Environment.NewLine, results);
         }
@@ -22,7 +22,7 @@ namespace TestHost
         [Test]
         public void ParametersByName2()
         {
-            var result2 = TestHost.Execute("$d = Get-Date; $d; Get-Date -Date $d");
+            var result2 = TestHost.Execute("$d = Get-Date; $d.ToString(); (Get-Date -Date $d).ToString()");
             var dates = result2.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             Assert.AreEqual(2, dates.Count());
             Assert.AreEqual(dates[0], dates[1]);
@@ -31,7 +31,7 @@ namespace TestHost
         [Test]
         public void ParametersByPrefix()
         {
-            var results = TestHost.Execute("$a = 10; Get-Variable -Nam a");
+            var results = TestHost.Execute("$a = 10; (Get-Variable -Nam a).ToString()");
 
             Assert.AreEqual("$a = 10" + Environment.NewLine, results);
         }

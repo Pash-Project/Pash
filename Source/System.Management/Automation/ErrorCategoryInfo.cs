@@ -36,7 +36,12 @@ namespace System.Management.Automation
 
         public override string ToString()
         {
-            return String.Format("{0}, Reason: {1}", Category, Reason);
+            var targetInfo = "";
+            if (!String.IsNullOrEmpty(TargetName))
+            {
+                targetInfo = String.Format(" {0}:{1},", TargetType, TargetName);
+            }
+            return String.Format("{0},{1} Reason: {2}", Category, targetInfo, Reason);
         }
     }
 }

@@ -116,6 +116,27 @@ namespace System.Management.Automation
             }
         }
 
+        internal bool WriteToErrorStream
+        {
+            get
+            {
+                var prop = Properties["writeToErrorStream"];
+                return (prop == null) ? false : prop.Value is bool && (bool)prop.Value;
+            }
+            set
+            {
+                var prop = Properties["writeToErrorStream"];
+                if (prop != null)
+                {
+                    prop.Value = value;
+                }
+                else
+                {
+                    Properties.Add(new PSNoteProperty("writeToErrorStream", value));
+                }
+            }
+        }
+
         private List<PSMethod> GetMethods(bool isInstance)
         {
             var baseObject = ImmediateBaseObject;
@@ -194,6 +215,23 @@ namespace System.Management.Automation
             ImmediateBaseObject = obj;
         }
 
+        internal Collection<PSPropertyInfo> GetDefaultDisplayPropertySet()
+        {
+            // TODO: As soon as the extended type system is supported, we can check the types TypeData on initialization
+            // and then get the DefaultDisplayPropertySet, a set that defines all properties of the object that should
+            // be printed by default
+            // For now we just return all properties
+            var collection = new Collection<PSPropertyInfo>();
+            foreach (var info in Properties)
+            {
+                if (info.IsGettable)
+                {
+                    collection.Add(info);
+                }
+            }
+            return collection;
+        }
+
         public override bool Equals(object obj)
         {
             if (obj is PSObject)
@@ -233,6 +271,12 @@ namespace System.Management.Automation
             }
 
             return new PSObject(obj);
+        }
+
+        public static object Unwrap(object obj)
+        {
+            var psobj = obj as PSObject;
+            return psobj == null ? obj : psobj.BaseObject;
         }
 
         public string ToString(string format, IFormatProvider formatProvider)
