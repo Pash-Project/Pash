@@ -864,7 +864,7 @@ namespace Mono.Terminal {
                 } catch (ThreadAbortException){
                     searching = 0;
                     Thread.ResetAbort ();
-                    text = null;
+                    text.Clear();
                     break;
                 }
             } while (!done);
