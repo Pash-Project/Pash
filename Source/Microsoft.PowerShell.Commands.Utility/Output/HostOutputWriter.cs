@@ -8,7 +8,7 @@ namespace Microsoft.PowerShell.Commands.Utility
         private PSHost _host;
 
         public HostOutputWriter(PSHost host)
-            : base(host.UI.RawUI.WindowSize.Height, host.UI.RawUI.WindowSize.Width)
+            : base(host.UI.RawUI.BufferSize.Height, host.UI.RawUI.BufferSize.Width)
         {
             _host = host;
         }

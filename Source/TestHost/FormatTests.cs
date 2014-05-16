@@ -135,6 +135,50 @@ namespace TestHost
             Assert.AreEqual(expected, result);
         }
 
+        [Test]
+        public void MultilineListIsCorrectlyFormatted()
+        {
+            var cmd = NewlineJoin(
+                "$a = new-object psobject -property @{foo='bar'}",
+                "$b = new-object psobject -property @{foobar='baz'}",
+                "$a, $b | Format-List"
+            );
+            // second column is now left aligned because the first object contains a string
+            // with an int it's right aligned (check above)
+            var expected = NewlineJoin(
+                "",
+                "foo : bar",
+                "",
+                "foobar : baz",
+                ""
+                );
+            var result = TestHost.Execute(true, null, new TestHostUserInterface(20, 100), cmd);
+            Assert.AreEqual(expected, result);
+        }
+
+
+        [Test]
+        public void MultilineTableShowsColumnsOfFirstObject()
+        {
+            var cmd = NewlineJoin(
+                "$a = new-object psobject -property @{foo='bar'}",
+                "$b = new-object psobject -property @{foobar='baz'}",
+                "$a, $b | Format-Table"
+            );
+            // second column is now left aligned because the first object contains a string
+            // with an int it's right aligned (check above)
+            var expected = NewlineJoin(
+                "",
+                "foo".PadRight(19),
+                "---".PadRight(19),
+                "bar".PadRight(19),
+                "".PadRight(19),
+                ""
+                );
+            var result = TestHost.Execute(true, null, new TestHostUserInterface(20, 100), cmd);
+            Assert.AreEqual(expected, result);
+        }
+
         private string NewlineJoin(params string[] strs)
         {
             return String.Join(Environment.NewLine, strs) + Environment.NewLine;

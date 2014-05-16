@@ -13,7 +13,7 @@ namespace Microsoft.PowerShell.Commands.Utility
 
     internal class TableFormatProcessor : FormatProcessor
     {
-        private int[] _currentColumnWidths;
+        private KeyValuePair<string, int>[] _currentColumns;
         private int _fullWidth;
 
         internal TableFormatProcessor(OutputWriter writer) : base(FormatShape.Table, writer)
@@ -28,7 +28,7 @@ namespace Microsoft.PowerShell.Commands.Utility
                 throw new PSInvalidOperationException("TableFormatProcessor can only process TableFormatEntryData");
             }
             OutputWriter.WriteToErrorStream = data.WriteToErrorStream;
-            if (_currentColumnWidths == null)
+            if (_currentColumns == null)
             {
                 CalculateColumns(tableEntry.Row);
             }
@@ -42,7 +42,7 @@ namespace Microsoft.PowerShell.Commands.Utility
         protected override void ProcessGroupEnd(GroupEndData data)
         {
             // make sure column widths are computed again for the next group
-            _currentColumnWidths = null; 
+            _currentColumns = null; 
             base.ProcessGroupEnd(data);
         }
 
@@ -64,10 +64,11 @@ namespace Microsoft.PowerShell.Commands.Utility
             }
             int perColumn = (_fullWidth - cols + 1) / cols;
             int rest = _fullWidth - cols + 1 - perColumn * cols; // because of rounding
-            _currentColumnWidths = new int[cols];
+            _currentColumns = new KeyValuePair<string, int>[cols];
             for (int i = 0; i < cols; i++)
             {
-                _currentColumnWidths[i] = i < rest ? perColumn + 1 : perColumn;
+                _currentColumns[i] = new KeyValuePair<string,int>(row[i].PropertyName,
+                                                     i < rest ? perColumn + 1 : perColumn);
             }
         }
 
@@ -80,9 +81,9 @@ namespace Microsoft.PowerShell.Commands.Utility
             // now print borders
             StringBuilder line = new StringBuilder(_fullWidth);
             OutputWriter.WriteToErrorStream = referenceEntry.WriteToErrorStream;
-            for (int i = 0; i < _currentColumnWidths.Length; i++)
+            for (int i = 0; i < _currentColumns.Length; i++)
             {
-                var cellWidth = _currentColumnWidths[i];
+                var cellWidth = _currentColumns[i].Value;
                 var curVal = values[i];
                 var borderWidth = curVal.Length > cellWidth ? cellWidth : curVal.Length;
                 var borderLine = "".PadLeft(borderWidth, '-');
@@ -105,7 +106,14 @@ namespace Microsoft.PowerShell.Commands.Utility
 
         private void WriteRow(TableFormatEntryData tableEntry)
         {
-            List<string> values = (from cell in tableEntry.Row select cell.Value).ToList();
+            var rowEntries = new Dictionary<string, string>();
+            foreach (var cell in tableEntry.Row)
+            {
+                rowEntries[cell.PropertyName] = cell.Value;
+            }
+            var values = (from column in _currentColumns
+                          select rowEntries.ContainsKey(column.Key) ? rowEntries[column.Key] : ""
+                          ).ToList();
             WriteValuesInRows(values, tableEntry);
         }
 
@@ -118,11 +126,11 @@ namespace Microsoft.PowerShell.Commands.Utility
             while (printOneMoreLine)
             {
                 printOneMoreLine = false;
-                for (int i = 0; i < _currentColumnWidths.Length; i++)
+                for (int i = 0; i < _currentColumns.Length; i++)
                 {
                     var alignRight = referenceEntry.Row[i].Align.Equals(Alignment.Right);
                     string rest;
-                    line.Append(TrimString(values[i], _currentColumnWidths[i], alignRight,
+                    line.Append(TrimString(values[i], _currentColumns[i].Value, alignRight,
                                            !referenceEntry.Wrap, out rest));
                     values[i] = referenceEntry.Wrap ? rest : "";
                     printOneMoreLine = printOneMoreLine || (referenceEntry.Wrap && !String.IsNullOrEmpty(rest));

@@ -5,9 +5,9 @@ namespace TestHost
 {
     public class TestHostRawUserInterface : PSHostRawUserInterface
     {
-        public const int ARTIFICIAL_WINDOW_WIDTH = 120;
-        public const int ARTIFICIAL_WINDOW_HEIGHT = 120;
-        private Size _size = new Size(ARTIFICIAL_WINDOW_WIDTH, ARTIFICIAL_WINDOW_HEIGHT);
+        public const int ARTIFICIAL_BUFFER_WIDTH = 120;
+        public const int ARTIFICIAL_BUFFER_HEIGHT = 120;
+        private Size _bufferSize = new Size(ARTIFICIAL_BUFFER_WIDTH, ARTIFICIAL_BUFFER_HEIGHT);
 
         public override ConsoleColor BackgroundColor
         {
@@ -17,8 +17,8 @@ namespace TestHost
 
         public override Size BufferSize
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get { return _bufferSize; }
+            set { _bufferSize = value; }
         }
 
         public override Coordinates CursorPosition
@@ -98,8 +98,8 @@ namespace TestHost
 
         public override Size WindowSize
         {
-            get { return _size; }
-            set { _size = value; }
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
         }
 
         public override string WindowTitle

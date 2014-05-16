@@ -108,8 +108,6 @@ namespace Microsoft.PowerShell.Commands.Utility
             if (Options.Properties == null || Options.Properties.Length < 1)
             {
                 var defProps = psobj.GetDefaultDisplayPropertySet();
-                // set for the next items
-                Options.Properties = (from prop in defProps select prop.Name).ToArray();
                 return defProps;
             }
             var props = new Collection<PSPropertyInfo>();

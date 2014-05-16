@@ -11,6 +11,12 @@ namespace Microsoft.PowerShell.Commands.Utility
         {
         }
 
+
+        protected override void ProcessGroupStart(GroupStartData data)
+        {
+            // do nothing
+        }
+
         protected override void ProcessFormatEntry(FormatEntryData data)
         {
             var list = data as ListFormatEntryData;
@@ -19,6 +25,7 @@ namespace Microsoft.PowerShell.Commands.Utility
                 throw new PSInvalidOperationException("ListFormatProcessor can only process ListFormatEntryData");
             }
             OutputWriter.WriteToErrorStream = data.WriteToErrorStream;
+            OutputWriter.WriteLine(""); // a blank line in front of every entry
             int maxPropNameWidth = list.Entries.Max(entry => entry.PropertyName.Length);
             int totalWidth = OutputWriter.Columns - 1; // -1 because of newline
             if (totalWidth <= 0)

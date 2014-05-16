@@ -22,7 +22,7 @@ namespace TestHost
 
         internal TestHostUserInterface(int width, int height) : this()
         {
-            _rawUI.WindowSize = new Size(width, height);
+            _rawUI.BufferSize = new Size(width, height);
         }
 
         internal void SetInput(string input)
