@@ -20,6 +20,11 @@ namespace TestHost
             _rawUI = new TestHostRawUserInterface();
         }
 
+        internal TestHostUserInterface(int width, int height) : this()
+        {
+            _rawUI.WindowSize = new Size(width, height);
+        }
+
         internal void SetInput(string input)
         {
             InputStream = new StringReader(input);

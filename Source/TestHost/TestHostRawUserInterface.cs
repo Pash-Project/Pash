@@ -5,8 +5,9 @@ namespace TestHost
 {
     public class TestHostRawUserInterface : PSHostRawUserInterface
     {
-        private const int ARTIFICIAL_WINDOW_WIDTH = 120;
-        private const int ARTIFICIAL_WINDOW_HEIGHT = 120;
+        public const int ARTIFICIAL_WINDOW_WIDTH = 120;
+        public const int ARTIFICIAL_WINDOW_HEIGHT = 120;
+        private Size _size = new Size(ARTIFICIAL_WINDOW_WIDTH, ARTIFICIAL_WINDOW_HEIGHT);
 
         public override ConsoleColor BackgroundColor
         {
@@ -97,8 +98,8 @@ namespace TestHost
 
         public override Size WindowSize
         {
-            get { return new Size(ARTIFICIAL_WINDOW_WIDTH, ARTIFICIAL_WINDOW_HEIGHT); }
-            set { throw new NotImplementedException(); }
+            get { return _size; }
+            set { _size = value; }
         }
 
         public override string WindowTitle
