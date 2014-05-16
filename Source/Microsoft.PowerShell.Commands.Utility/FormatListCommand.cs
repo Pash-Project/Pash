@@ -22,7 +22,7 @@ namespace Microsoft.PowerShell.Commands
         protected override void BeginProcessing()
         {
             base.BeginProcessing();
-            Options.Properties = Property;
+            FormatManager.Options.Properties = Property;
         }
     }
 }

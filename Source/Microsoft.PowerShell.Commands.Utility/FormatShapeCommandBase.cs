@@ -32,7 +32,8 @@ namespace Microsoft.PowerShell.Commands.Utility
 
         protected override void BeginProcessing()
         {
-            Options = GetOptions();
+            FormatManager.Options = GetOptions();
+            base.BeginProcessing();
         }
 
         internal FormatGeneratorOptions GetOptions()

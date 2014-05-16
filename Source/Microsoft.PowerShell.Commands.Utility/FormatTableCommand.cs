@@ -39,7 +39,7 @@ namespace Microsoft.PowerShell.Commands
             tableOptions.HideTableHeaders = HideTableHeaders.IsPresent;
             tableOptions.Wrap = Wrap.IsPresent;
             tableOptions.Properties = Property;
-            Options = tableOptions;
+            FormatManager.Options = tableOptions;
         }
     }
 }

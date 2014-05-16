@@ -133,6 +133,7 @@
     <Compile Include="Format\ErrorFormatEntryData.cs" />
     <Compile Include="Format\ListFormatEntryData.cs" />
     <Compile Include="Format\FormatObjectProperty.cs" />
+    <Compile Include="Format\FormatManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

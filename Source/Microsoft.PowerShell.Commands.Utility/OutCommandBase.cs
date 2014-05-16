@@ -9,6 +9,7 @@ namespace Microsoft.PowerShell.Commands
 {
     public class OutCommandBase : PSCmdlet
     {
+        private FormatManager _formatManager;
         internal OutputWriter OutputWriter { get; set; }
 
 
@@ -25,7 +26,11 @@ namespace Microsoft.PowerShell.Commands
             }
             else
             {
-                data = FormatDefault(InputObject);
+                if (_formatManager == null)
+                {
+                    _formatManager = new FormatManager(FormatShape.Undefined, ExecutionContext);
+                }
+                data = _formatManager.Process(InputObject);
             }
             // although we might have multiple FormatData objects, they are all derived from a single data object
             // so all should be formatted in the same shape
@@ -36,22 +41,22 @@ namespace Microsoft.PowerShell.Commands
             }
         }
 
-        private Collection<FormatData> FormatDefault(PSObject obj)
+        protected override void EndProcessing()
         {
-            var data = new Collection<FormatData>();
-            var pipeline = ExecutionContext.CurrentRunspace.CreateNestedPipeline("Format-Default", false);
-            pipeline.Input.Write(obj, true); // TODO: sburnicki - check if we should enumerate this
-            foreach (var res in pipeline.Invoke()) // error is hopefully propagated
+            if (_formatManager == null)
             {
-                var formatData = res.BaseObject as FormatData;
-                if (formatData == null)
-                {
-                    var exc = new PSInvalidOperationException("Format-Default didn't return FormatData");
-                    WriteError(exc.ErrorRecord);
-                }
-                data.Add(formatData);
+                return;
             }
-            return data;
+            var data = _formatManager.End();
+            if (data.Count < 1)
+            {
+                return;
+            }
+            var processor = FormatProcessor.Get(OutputWriter, data[0].Shape);
+            foreach (var formatPayload in data)
+            {
+                processor.ProcessPayload(formatPayload);
+            }
         }
     }
 }
