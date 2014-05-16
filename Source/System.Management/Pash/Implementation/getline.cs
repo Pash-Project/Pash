@@ -164,7 +164,7 @@ namespace Mono.Terminal {
                 new Handler (ConsoleKey.DownArrow,  CmdHistoryNext),
                 new Handler (ConsoleKey.Enter,      CmdDone),
                 new Handler (ConsoleKey.Backspace,  CmdBackspace),
-                new Handler (ConsoleKey.Delete,     CmdDeleteChar),
+                new Handler (ConsoleKey.Delete,     CmdSafeDeleteChar),
                 new Handler (ConsoleKey.Tab,        CmdTabOrComplete),
                 
                 // Emacs keys
@@ -485,13 +485,18 @@ namespace Mono.Terminal {
         void CmdDeleteChar ()
         {
             // If there is no input, this behaves like EOF
-            if (text.Length == 0){
+            if (text.Length == 0)
+            {
                 done = true;
                 text = null;
-                Console.WriteLine ();
+                Console.WriteLine();
                 return;
             }
-            
+            CmdSafeDeleteChar();
+        }
+
+        void CmdSafeDeleteChar()
+        {
             if (cursor == text.Length)
                 return;
             text.Remove (cursor, 1);
