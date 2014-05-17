@@ -1,5 +1,8 @@
 using System;
 using System.Management.Automation;
+using System.ComponentModel;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace TestPSSnapIn
 {
@@ -347,6 +350,38 @@ namespace TestPSSnapIn
         protected override void ProcessRecord()
         {
             WriteObject(Foo.GetMessage());
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "ParameterUsesCustomTypeWithTypeConverter")]
+    public sealed class TestParameterUsesCustomTypeWithTypeConverterCommand : PSCmdlet
+    {
+        [Parameter(Mandatory = true, Position = 0)]
+        public Custom CustomTypeParameter { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(string.Format("CustomType.Id='{0}'", CustomTypeParameter.Id));
+        }
+    }
+
+    [TypeConverter(typeof(CustomTypeConverter))]
+    public class Custom
+    {
+        public string Id { get; set; }
+    }
+
+    public class CustomTypeConverter : TypeConverter
+    {
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            return sourceType == typeof(string);
+        }
+
+        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        {
+            string stringValue = value as string;
+            return new Custom { Id = stringValue };
         }
     }
 }

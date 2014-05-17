@@ -73,6 +73,9 @@
     <Compile Include="..\Source\ReferenceTests\ReturnTests.cs">
       <Link>ReturnTests.cs</Link>
     </Compile>
+    <Compile Include="..\Source\ReferenceTests\TypeConverterTests.cs">
+      <Link>TypeConverterTests.cs</Link>
+    </Compile>
     <Compile Include="..\Source\TestPSSnapIn\TestCommands.cs">
       <Link>TestCommands.cs</Link>
     </Compile>
