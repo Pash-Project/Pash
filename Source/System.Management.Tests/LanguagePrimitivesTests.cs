@@ -96,6 +96,20 @@ namespace System.Management.Tests
         }
 
         [Test]
+        public void ConvertToThrowsExceptionAndShowsTypeBeingConvertedToInErrorMessage()
+        {
+            Exception ex = Assert.Throws(
+                typeof(PSInvalidCastException),
+                delegate()
+                {
+                    LanguagePrimitives.ConvertTo("foo", typeof(TestChild));
+                }
+            );
+
+            Assert.AreEqual("Value 'foo' can't be converted or casted to 'System.Management.Tests.TestChild'", ex.Message);
+        }
+
+        [Test]
         public void ConvertToWorksForUpcast()
         {
             var result = LanguagePrimitives.ConvertTo((TestParent) new TestChild("foo", "bar"), typeof(TestChild));

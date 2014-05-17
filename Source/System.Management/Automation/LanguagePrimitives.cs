@@ -411,7 +411,7 @@ namespace System.Management.Automation
             }
             catch (Exception e)
             {
-                var msg = String.Format("Value '{0}' can't be converted or casted to '{0}'",
+                var msg = String.Format("Value '{0}' can't be converted or casted to '{1}'",
                     value.ToString(), type.ToString());
                 throw new PSInvalidCastException(msg, e);
             }
