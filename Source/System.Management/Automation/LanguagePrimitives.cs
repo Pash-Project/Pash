@@ -8,6 +8,7 @@ using System.Collections;
 using System.Globalization;
 using System.Reflection;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace System.Management.Automation
 {
@@ -242,6 +243,12 @@ namespace System.Management.Automation
                 return new SwitchParameter(true);
             }
 
+            object result = null;
+            if (valueToConvert != null && TryConvertUsingTypeConverter(valueToConvert, resultType, out result))
+            {
+                return result;
+            }
+
             return DefaultConvertOrCast(valueToConvert, resultType);
 
         }
@@ -389,6 +396,25 @@ namespace System.Management.Automation
 
         #endregion
 
+        private static bool TryConvertUsingTypeConverter(object value, Type type, out object result)
+        {
+            TypeConverter converter = TypeDescriptor.GetConverter(type);
+            if (converter != null && converter.CanConvertFrom(value.GetType()))
+            {
+                try
+                {
+                    result = converter.ConvertFrom(value);
+                    return true;
+                }
+                catch
+                {
+                }
+            }
+
+            result = null;
+            return false;
+        }
+
         private static object DefaultConvertOrCast(object value, Type type)
         {
             // check for convertibles
@@ -411,7 +437,7 @@ namespace System.Management.Automation
             }
             catch (Exception e)
             {
-                var msg = String.Format("Value '{0}' can't be converted or casted to '{0}'",
+                var msg = String.Format("Value '{0}' can't be converted or casted to '{1}'",
                     value.ToString(), type.ToString());
                 throw new PSInvalidCastException(msg, e);
             }

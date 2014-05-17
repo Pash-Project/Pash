@@ -2,6 +2,8 @@ using NUnit.Framework;
 using System;
 using System.Management.Automation;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Globalization;
 
 namespace System.Management.Tests
 {
@@ -36,6 +38,26 @@ namespace System.Management.Tests
                 throw new InvalidOperationException("Wrong object type to compare to");
             }
             return _msg2.Equals(otherChild._msg2) && base.EqualsIgnoreCase(otherChild);
+        }
+    }
+
+    [TypeConverter(typeof(CustomTypeConverter))]
+    public class Custom
+    {
+        public string Id { get; set; }
+    }
+
+    public class CustomTypeConverter : TypeConverter
+    {
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            return sourceType == typeof(string);
+        }
+
+        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        {
+            string stringValue = value as string;
+            return new Custom { Id = stringValue };
         }
     }
 
@@ -93,6 +115,20 @@ namespace System.Management.Tests
                     LanguagePrimitives.ConvertTo(new TestParent("foo"), typeof(TestChild));
                 }
             );
+        }
+
+        [Test]
+        public void ConvertToThrowsExceptionAndShowsTypeBeingConvertedToInErrorMessage()
+        {
+            Exception ex = Assert.Throws(
+                typeof(PSInvalidCastException),
+                delegate()
+                {
+                    LanguagePrimitives.ConvertTo("foo", typeof(TestChild));
+                }
+            );
+
+            Assert.AreEqual("Value 'foo' can't be converted or casted to 'System.Management.Tests.TestChild'", ex.Message);
         }
 
         [Test]
@@ -177,6 +213,15 @@ namespace System.Management.Tests
             var result = LanguagePrimitives.ConvertTo(input, typeof(string[]));
             Assert.AreEqual(expected.GetType(), result.GetType());
             Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void ConvertToConvertsTypeWithTypeConverter()
+        {
+            string input = "MyId";
+            var result = LanguagePrimitives.ConvertTo(input, typeof(Custom));
+            Assert.AreEqual(typeof(Custom), result.GetType());
+            Assert.AreEqual("MyId", ((Custom)result).Id);
         }
     }
 }
