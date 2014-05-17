@@ -164,7 +164,7 @@ namespace Mono.Terminal {
                 new Handler (ConsoleKey.DownArrow,  CmdHistoryNext),
                 new Handler (ConsoleKey.Enter,      CmdDone),
                 new Handler (ConsoleKey.Backspace,  CmdBackspace),
-                new Handler (ConsoleKey.Delete,     CmdDeleteChar),
+                new Handler (ConsoleKey.Delete,     CmdSafeDeleteChar),
                 new Handler (ConsoleKey.Tab,        CmdTabOrComplete),
                 
                 // Emacs keys
@@ -485,13 +485,18 @@ namespace Mono.Terminal {
         void CmdDeleteChar ()
         {
             // If there is no input, this behaves like EOF
-            if (text.Length == 0){
+            if (text.Length == 0)
+            {
                 done = true;
                 text = null;
-                Console.WriteLine ();
+                Console.WriteLine();
                 return;
             }
-            
+            CmdSafeDeleteChar();
+        }
+
+        void CmdSafeDeleteChar()
+        {
             if (cursor == text.Length)
                 return;
             text.Remove (cursor, 1);
@@ -658,7 +663,14 @@ namespace Mono.Terminal {
             ComputeRendered();
             int render_line_offset = (rendered_text.Length + shown_prompt.Length + home_col) / Console.WindowWidth;
             string search_prompt = "(reverse-i-search): " + s + "\x5f";
-            Console.SetCursorPosition(0, render_line_offset + 1 + home_row);
+            int cursorTop = render_line_offset + 1 + home_row;
+            if (cursorTop == Console.BufferHeight)
+            {
+                Console.WriteLine(); // scroll the window
+                home_row--;
+                cursorTop--;
+            }
+            Console.SetCursorPosition(0, cursorTop);
             Console.Write(search_prompt);
             max_rendered = (render_line_offset + 1) * Console.BufferWidth + search_prompt.Length;
             ForceCursor(cursor);
@@ -859,7 +871,7 @@ namespace Mono.Terminal {
                 } catch (ThreadAbortException){
                     searching = 0;
                     Thread.ResetAbort ();
-                    text = null;
+                    text.Clear();
                     break;
                 }
             } while (!done);

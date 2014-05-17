@@ -178,6 +178,10 @@ namespace Pash.Implementation
 
         internal override Pipeline GetCurrentlyRunningPipeline()
         {
+            if (_runningPipelines.Count < 1)
+            {
+                return null;
+            }
             return _runningPipelines[_runningPipelines.Count - 1];
         }
 
