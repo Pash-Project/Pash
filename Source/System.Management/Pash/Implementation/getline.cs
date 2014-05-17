@@ -663,7 +663,14 @@ namespace Mono.Terminal {
             ComputeRendered();
             int render_line_offset = (rendered_text.Length + shown_prompt.Length + home_col) / Console.WindowWidth;
             string search_prompt = "(reverse-i-search): " + s + "\x5f";
-            Console.SetCursorPosition(0, render_line_offset + 1 + home_row);
+            int cursorTop = render_line_offset + 1 + home_row;
+            if (cursorTop == Console.BufferHeight)
+            {
+                Console.WriteLine(); // scroll the window
+                home_row--;
+                cursorTop--;
+            }
+            Console.SetCursorPosition(0, cursorTop);
             Console.Write(search_prompt);
             max_rendered = (render_line_offset + 1) * Console.BufferWidth + search_prompt.Length;
             ForceCursor(cursor);
