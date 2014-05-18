@@ -476,6 +476,7 @@
     <Compile Include="Automation\PSProperty.cs" />
     <Compile Include="PSFieldProperty.cs" />
     <Compile Include="Automation\PSMethod.cs" />
+    <Compile Include="Automation\Host\HostException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

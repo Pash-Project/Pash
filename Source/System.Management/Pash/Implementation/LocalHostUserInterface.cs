@@ -15,6 +15,7 @@ namespace Pash.Implementation
         private bool _useUnixLikeInput;
         private LineEditor _getlineEditor;
         private LocalHost _parentHost;
+        private bool _interactiveIO;
 
         public bool UseUnixLikeInput {
             get
@@ -32,10 +33,11 @@ namespace Pash.Implementation
             }
         }
 
-        public LocalHostUserInterface(LocalHost parent)
+        public LocalHostUserInterface(LocalHost parent, bool interactiveIO)
         {
             UseUnixLikeInput = Environment.OSVersion.Platform != System.PlatformID.Win32NT && Console.WindowWidth > 0;
             _parentHost = parent;
+            _interactiveIO = interactiveIO;
 
             // Set up the control-C handler.
             try
@@ -68,16 +70,30 @@ namespace Pash.Implementation
                 WriteErrorLine(exception.ToString());
             }
         }
+
+        void ThrowNotInteractiveException()
+        {
+            throw new HostException("No interactive I/O is available to read data");
+        }
+
         #endregion
 
         #region User prompt Methods
         public override Dictionary<string, PSObject> Prompt(string caption, string message, Collection<FieldDescription> descriptions)
         {
+            if (!_interactiveIO)
+            {
+                ThrowNotInteractiveException();
+            }
             throw new NotImplementedException();
         }
 
         public override int PromptForChoice(string caption, string message, Collection<ChoiceDescription> choices, int defaultChoice)
         {
+            if (!_interactiveIO)
+            {
+                ThrowNotInteractiveException();
+            }
             Console.WriteLine();
             Console.WriteLine(caption);
             Console.WriteLine(message);
@@ -119,11 +135,19 @@ namespace Pash.Implementation
 
         public override PSCredential PromptForCredential(string caption, string message, string userName, string targetName)
         {
+            if (!_interactiveIO)
+            {
+                ThrowNotInteractiveException();
+            }
             throw new NotImplementedException();
         }
 
         public override PSCredential PromptForCredential(string caption, string message, string userName, string targetName, PSCredentialTypes allowedCredentialTypes, PSCredentialUIOptions options)
         {
+            if (!_interactiveIO)
+            {
+                ThrowNotInteractiveException();
+            }
             throw new NotImplementedException();
         }
         #endregion
@@ -143,6 +167,10 @@ namespace Pash.Implementation
         #region ReadXXX methods
         public override string ReadLine()
         {
+            if (!_interactiveIO)
+            {
+                ThrowNotInteractiveException();
+            }
             return UseUnixLikeInput ? _getlineEditor.Edit("", "") : Console.ReadLine();
         }
 
