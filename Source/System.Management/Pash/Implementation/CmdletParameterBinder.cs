@@ -275,34 +275,44 @@ namespace System.Management.Automation
         private void HandleMissingMandatoryParameters(CommandParameterSetInfo parameterSet, bool considerPipeline, bool askUser)
         {
             // select mandatory parametes
-            var unsetMandatories = GetMandatoryUnboundParameters(parameterSet, considerPipeline);
-            foreach (var curParam in unsetMandatories)
+            var unsetMandatories = GetMandatoryUnboundParameters(parameterSet, considerPipeline).ToList();
+            // check if we got something to do, otherwise we're fine
+            if (unsetMandatories.Count == 0)
             {
-                object value = null;
-                // check if we should try to gather it
-                if (askUser)
-                {
-                    // try to get this value from UI
-                    GatherParameterValue(curParam);
-                }
-                // check if we had success, fail otherwise
-                if (value == null)
+                return;
+            }
+            Dictionary<CommandParameterInfo, object> values = null;
+            if (askUser)
+            {
+                // try to get this value from UI
+                values = GatherParameterValues(unsetMandatories);
+            }
+            if (values == null)
+            {
+                var parameterNames = from cmdInfo in unsetMandatories select "'" + cmdInfo.Name + "'";
+                var missingNames = String.Join(", ", parameterNames);
+                var msg = String.Format("Missing value for mandatory parameters {0}.", missingNames);
+                throw new ParameterBindingException(msg, "MissingMandatoryParameters");
+            }
+            foreach (var pair in values)
+            {
+                if (pair.Value == null)
                 {
                     // WORKAROUND: PS throws a MethodInvocationException when binding pipeline parameters
                     // that is when a user shouldn't be asked anymore... let's do the same
                     if (askUser)
                     {
-                        var msg = String.Format("Missing value for mandatory parameter '{0}'.", curParam.Name);
+                        var msg = String.Format("Missing value for mandatory parameter '{0}'.", pair.Key.Name);
                         throw new ParameterBindingException(msg, "MissingMandatoryParameter");
                     }
                     else
                     {
                         var msg = "The input object cannot be bound as it doesn't provide some mandatory information: "
-                            + curParam.Name;
+                            + pair.Key.Name;
                         throw new MethodInvocationException(msg);
                     }
                 }
-                BindParameter(curParam, value, true);
+                BindParameter(pair.Key, pair.Value, true);
             }
         }
 
@@ -364,7 +374,7 @@ namespace System.Management.Automation
         }
 
 
-        private object GatherParameterValue(CommandParameterInfo param)
+        private Dictionary<CommandParameterInfo, object> GatherParameterValues(IEnumerable<CommandParameterInfo> parameters)
         {
             // TODO: implement asking the user for a value
             return null;
