@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Collections.ObjectModel;
 using System.Collections;
 using System.Management.Automation.Runspaces;
+using System.Management.Automation.Host;
 
 namespace System.Management.Automation
 {
@@ -281,7 +282,7 @@ namespace System.Management.Automation
             {
                 return;
             }
-            Dictionary<CommandParameterInfo, object> values = null;
+            Dictionary<CommandParameterInfo, PSObject> values = null;
             if (askUser)
             {
                 // try to get this value from UI
@@ -374,10 +375,41 @@ namespace System.Management.Automation
         }
 
 
-        private Dictionary<CommandParameterInfo, object> GatherParameterValues(IEnumerable<CommandParameterInfo> parameters)
+        private Dictionary<CommandParameterInfo, PSObject> GatherParameterValues(IEnumerable<CommandParameterInfo> parameters)
         {
-            // TODO: implement asking the user for a value
-            return null;
+            var fieldDescs = new Collection<FieldDescription>(
+                (from param in parameters
+                 select new FieldDescription(param.Name, param.Name, param.ParameterType, param.HelpMessage,
+                                             PSObject.AsPSObject(null), param.IsMandatory, param.Attributes)
+                ).ToList()
+            );
+            //var caption = String.Format("Cmdlet {0} at position {1} in the pipeline", _cmdletInfo.Name, ???);
+            // we don't know the position in the pipeline
+            var caption = String.Format("Cmdlet {0} in the pipeline", _cmdletInfo.Name);
+            var message = "Please enter values for the following parameters:";
+            try
+            {
+                var values = _cmdlet.PSHostInternal.UI.Prompt(caption, message, fieldDescs);
+                var lookupDict = new Dictionary<string, CommandParameterInfo>();
+                foreach (var info in parameters)
+                {
+                    lookupDict[info.Name] = info;
+                }
+                var returnDict = new Dictionary<CommandParameterInfo, PSObject>();
+                foreach (var pair in values)
+                {
+                    returnDict[lookupDict[pair.Key]] = pair.Value;
+                }
+                return returnDict;
+            }
+            catch (HostException)
+            {
+                return null;
+            }
+            catch (NotImplementedException)
+            {
+                return null;
+            }
         }
 
         private IEnumerable<CommandParameterInfo> GetMandatoryUnboundParameters(CommandParameterSetInfo parameterSet, bool considerPipeline)
@@ -467,6 +499,7 @@ namespace System.Management.Automation
             {
                 value = LanguagePrimitives.ConvertTo(value, info.ParameterType);
             }
+            // TODO: validate value with Attributes (ValidateNotNullOrEmpty, etc)
             SetCommandValue(memberInfo, value);
             _boundParameters.Add(memberInfo);
         }

@@ -76,6 +76,64 @@ namespace Pash.Implementation
             throw new HostException("No interactive I/O is available to read data");
         }
 
+        public object PromptValue(string label, Type type, Collection<Attribute> attributes, string helpMessage)
+        {
+            if (type == typeof(PSCredential))
+            {
+                return PromptCredential(label, attributes, helpMessage);
+            }
+            if (type.IsArray)
+            {
+                List<object> values = new List<object>();
+                while (true)
+                {
+                    var elType = type.GetElementType();
+                    var val = PromptValue(String.Format("{0}[{1}]", label, values.Count), elType,
+                                          attributes, helpMessage);
+                    if (val == null || (elType == typeof(string) && String.IsNullOrEmpty((string) val)))
+                    {
+                        break;
+                    }
+                    values.Add(val);
+                }
+                return values.ToArray();
+            }
+            Write(label + ":");
+            // TODO: What about EOF here? I guess we'd need to stop the pipeline? Verify this before implementing
+            if (type == typeof(System.Security.SecureString))
+            {
+                return ReadLineAsSecureString();
+            }
+            string value = ReadLine();
+            if (value != null && value.Equals("!?"))
+            {
+                var msg = String.IsNullOrEmpty(helpMessage) ? "No help message provided for " + label : helpMessage;
+                WriteLine(msg);
+                // simply prompt again
+                return PromptValue(label, type, attributes, helpMessage);
+            }
+            object converted;
+            if (LanguagePrimitives.TryConvertTo(value, type, out converted))
+            {
+                // TODO: we should validate the value with the defined Attributes here
+                return converted;
+            }
+            return null;
+        }
+
+        public PSCredential PromptCredential(string label, Collection<Attribute> attributes, string helpMessage)
+        {
+            var user = PromptValue(label + " (UserName)", typeof(string), new Collection<Attribute>(),
+                                   helpMessage) as string;
+            var pw = PromptValue(label + " (UserName)", typeof(System.Security.SecureString),
+                                 new Collection<Attribute>(), helpMessage) as System.Security.SecureString;
+            if (user == null || pw == null)
+            {
+                return null;
+            }
+            return new PSCredential(user, pw);
+        }
+
         #endregion
 
         #region User prompt Methods
@@ -85,7 +143,15 @@ namespace Pash.Implementation
             {
                 ThrowNotInteractiveException();
             }
-            throw new NotImplementedException();
+            WriteLine(caption);
+            WriteLine(message);
+            var returnValues = new Dictionary<string, PSObject>();
+            foreach (var descr in descriptions)
+            {
+                var value = PromptValue(descr.Label, descr.ParameterType, descr.Attributes, descr.HelpMessage);
+                returnValues[descr.Name] = value == null ? descr.DefaultValue : PSObject.AsPSObject(value);
+            }
+            return returnValues;
         }
 
         public override int PromptForChoice(string caption, string message, Collection<ChoiceDescription> choices, int defaultChoice)
