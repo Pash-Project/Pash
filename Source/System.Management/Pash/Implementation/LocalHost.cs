@@ -93,9 +93,13 @@ namespace Pash.Implementation
             }
         }
 
-        public LocalHost()
+        public LocalHost() : this(false)
         {
-            localHostUserInterface = new LocalHostUserInterface(this);
+        }
+
+        public LocalHost(bool interactiveIO)
+        {
+            localHostUserInterface = new LocalHostUserInterface(this, interactiveIO);
         }
 
         internal void SetHostUserInterface(PSHostUserInterface ui)

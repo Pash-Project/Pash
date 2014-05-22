@@ -851,6 +851,11 @@ namespace Mono.Terminal {
 
         public string Edit (string prompt, string initial)
         {
+            return Edit(prompt, initial, true);
+        }
+
+        public string Edit (string prompt, string initial, bool addToHistory)
+        {
             edit_thread = Thread.CurrentThread;
             searching = 0;
             Console.CancelKeyPress += InterruptEdit;
@@ -887,7 +892,7 @@ namespace Mono.Terminal {
             }
 
             string result = text.ToString ();
-            if (result != "")
+            if (addToHistory && result != "")
                 history.Accept (result);
             else
                 history.RemoveLast ();

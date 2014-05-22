@@ -16,6 +16,8 @@ namespace Pash.Implementation
         private LineEditor _getlineEditor;
         private LocalHost _parentHost;
 
+        public bool InteractiveIO { get; set; }
+
         public bool UseUnixLikeInput {
             get
             {
@@ -32,10 +34,11 @@ namespace Pash.Implementation
             }
         }
 
-        public LocalHostUserInterface(LocalHost parent)
+        public LocalHostUserInterface(LocalHost parent, bool interactiveIO)
         {
             UseUnixLikeInput = Environment.OSVersion.Platform != System.PlatformID.Win32NT && Console.WindowWidth > 0;
             _parentHost = parent;
+            InteractiveIO = interactiveIO;
 
             // Set up the control-C handler.
             try
@@ -49,10 +52,17 @@ namespace Pash.Implementation
             }
         }
 
-        #region Private stuff
-        void HandleControlC(object sender, ConsoleCancelEventArgs e)
+        protected LocalHostUserInterface()
         {
-            Console.WriteLine("Ctrl-C pressed");
+            UseUnixLikeInput = false;
+            _parentHost = null;
+            InteractiveIO = false;
+        }
+
+        #region Private stuff
+        private void HandleControlC(object sender, ConsoleCancelEventArgs e)
+        {
+            WriteLine("Ctrl-C pressed");
 
             try
             {
@@ -68,19 +78,108 @@ namespace Pash.Implementation
                 WriteErrorLine(exception.ToString());
             }
         }
+
+        private void ThrowNotInteractiveException()
+        {
+            throw new HostException("No interactive I/O is available to read data");
+        }
+
+        private object PromptValue(string label, Type type, Collection<Attribute> attributes, string helpMessage)
+        {
+            if (type == typeof(PSCredential))
+            {
+                return PromptCredential(label, attributes, helpMessage);
+            }
+            if (type.IsArray)
+            {
+                List<object> values = new List<object>();
+                while (true)
+                {
+                    var elType = type.GetElementType();
+                    var val = PromptValue(String.Format("{0}[{1}]", label, values.Count), elType,
+                                          attributes, helpMessage);
+                    if (val == null || (elType == typeof(string) && String.IsNullOrEmpty((string) val)))
+                    {
+                        break;
+                    }
+                    values.Add(val);
+                }
+                return values.ToArray();
+            }
+            Write(label + ":");
+            // TODO: What about EOF here? I guess we'd need to stop the pipeline? Verify this before implementing
+            if (type == typeof(System.Security.SecureString))
+            {
+                return ReadLineAsSecureString();
+            }
+            string value = ReadLine(false);
+            if (value != null && value.Equals("!?"))
+            {
+                var msg = String.IsNullOrEmpty(helpMessage) ? "No help message provided for " + label : helpMessage;
+                WriteLine(msg);
+                // simply prompt again
+                return PromptValue(label, type, attributes, helpMessage);
+            }
+            object converted;
+            if (LanguagePrimitives.TryConvertTo(value, type, out converted))
+            {
+                // TODO: we should validate the value with the defined Attributes here
+                return converted;
+            }
+            return null;
+        }
+
+        private PSCredential PromptCredential(string label, Collection<Attribute> attributes, string helpMessage)
+        {
+            var user = PromptValue(label + " (UserName)", typeof(string), new Collection<Attribute>(),
+                                   helpMessage) as string;
+            var pw = PromptValue(label + " (UserName)", typeof(System.Security.SecureString),
+                                 new Collection<Attribute>(), helpMessage) as System.Security.SecureString;
+            if (user == null || pw == null)
+            {
+                return null;
+            }
+            return new PSCredential(user, pw);
+        }
+
+        // workaround as long as getline.cs might care about history on unix
+        protected virtual string ReadLine(bool addToHistory)
+        {
+            if (!InteractiveIO)
+            {
+                ThrowNotInteractiveException();
+            }
+            return UseUnixLikeInput ? _getlineEditor.Edit("", "", addToHistory) : Console.ReadLine();
+        }
         #endregion
 
         #region User prompt Methods
         public override Dictionary<string, PSObject> Prompt(string caption, string message, Collection<FieldDescription> descriptions)
         {
-            throw new NotImplementedException();
+            if (!InteractiveIO)
+            {
+                ThrowNotInteractiveException();
+            }
+            WriteLine(caption);
+            WriteLine(message);
+            var returnValues = new Dictionary<string, PSObject>();
+            foreach (var descr in descriptions)
+            {
+                var value = PromptValue(descr.Label, descr.ParameterType, descr.Attributes, descr.HelpMessage);
+                returnValues[descr.Name] = value == null ? descr.DefaultValue : PSObject.AsPSObject(value);
+            }
+            return returnValues;
         }
 
         public override int PromptForChoice(string caption, string message, Collection<ChoiceDescription> choices, int defaultChoice)
         {
-            Console.WriteLine();
-            Console.WriteLine(caption);
-            Console.WriteLine(message);
+            if (!InteractiveIO)
+            {
+                ThrowNotInteractiveException();
+            }
+            WriteLine();
+            WriteLine(caption);
+            WriteLine(message);
 
             // stop-service TermService -confirm
             //[Y] Yes  [A] Yes to All  [N] No  [L] No to All  [S] Suspend  [?] Help (default is "Y"):
@@ -94,12 +193,12 @@ namespace Pash.Implementation
                 {
                     char chChoice = s[z + 1];
                     chs.Add(chChoice);
-                    Console.Write("[{0}] ", chChoice);
+                    Write(String.Format("[{0}] ", chChoice));
                 }
-                Console.Write(cd.Label.Replace("&", "") + "  ");
+                Write(cd.Label.Replace("&", "") + "  ");
             }
-            Console.Write("[?] Help (default is \"{0}\"): ", chs[defaultChoice]);
-            string str = ReadLine().ToUpper();
+            Write(String.Format("[?] Help (default is \"{0}\"): ", chs[defaultChoice]));
+            string str = ReadLine(false).ToUpper();
             if (str == "?")
             {
                 // TODO: implement help
@@ -119,11 +218,19 @@ namespace Pash.Implementation
 
         public override PSCredential PromptForCredential(string caption, string message, string userName, string targetName)
         {
+            if (!InteractiveIO)
+            {
+                ThrowNotInteractiveException();
+            }
             throw new NotImplementedException();
         }
 
         public override PSCredential PromptForCredential(string caption, string message, string userName, string targetName, PSCredentialTypes allowedCredentialTypes, PSCredentialUIOptions options)
         {
+            if (!InteractiveIO)
+            {
+                ThrowNotInteractiveException();
+            }
             throw new NotImplementedException();
         }
         #endregion
@@ -143,7 +250,7 @@ namespace Pash.Implementation
         #region ReadXXX methods
         public override string ReadLine()
         {
-            return UseUnixLikeInput ? _getlineEditor.Edit("", "") : Console.ReadLine();
+            return ReadLine(true);
         }
 
         public override System.Security.SecureString ReadLineAsSecureString()

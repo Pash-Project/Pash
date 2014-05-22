@@ -23,7 +23,7 @@ namespace Pash
         public FullHost(bool interactive)
         {
             _interactive = interactive;
-            LocalHost = new LocalHost();
+            LocalHost = new LocalHost(true);
             _currentRunspace = RunspaceFactory.CreateRunspace(LocalHost);
             _currentRunspace.Open();
 

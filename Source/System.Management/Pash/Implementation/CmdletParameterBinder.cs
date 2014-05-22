@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Collections.ObjectModel;
 using System.Collections;
 using System.Management.Automation.Runspaces;
+using System.Management.Automation.Host;
 
 namespace System.Management.Automation
 {
@@ -275,34 +276,44 @@ namespace System.Management.Automation
         private void HandleMissingMandatoryParameters(CommandParameterSetInfo parameterSet, bool considerPipeline, bool askUser)
         {
             // select mandatory parametes
-            var unsetMandatories = GetMandatoryUnboundParameters(parameterSet, considerPipeline);
-            foreach (var curParam in unsetMandatories)
+            var unsetMandatories = GetMandatoryUnboundParameters(parameterSet, considerPipeline).ToList();
+            // check if we got something to do, otherwise we're fine
+            if (unsetMandatories.Count == 0)
             {
-                object value = null;
-                // check if we should try to gather it
-                if (askUser)
-                {
-                    // try to get this value from UI
-                    GatherParameterValue(curParam);
-                }
-                // check if we had success, fail otherwise
-                if (value == null)
+                return;
+            }
+            Dictionary<CommandParameterInfo, PSObject> values = null;
+            if (askUser)
+            {
+                // try to get this value from UI
+                values = GatherParameterValues(unsetMandatories);
+            }
+            if (values == null)
+            {
+                var parameterNames = from cmdInfo in unsetMandatories select "'" + cmdInfo.Name + "'";
+                var missingNames = String.Join(", ", parameterNames);
+                var msg = String.Format("Missing value for mandatory parameters {0}.", missingNames);
+                throw new ParameterBindingException(msg, "MissingMandatoryParameters");
+            }
+            foreach (var pair in values)
+            {
+                if (pair.Value == null)
                 {
                     // WORKAROUND: PS throws a MethodInvocationException when binding pipeline parameters
                     // that is when a user shouldn't be asked anymore... let's do the same
                     if (askUser)
                     {
-                        var msg = String.Format("Missing value for mandatory parameter '{0}'.", curParam.Name);
+                        var msg = String.Format("Missing value for mandatory parameter '{0}'.", pair.Key.Name);
                         throw new ParameterBindingException(msg, "MissingMandatoryParameter");
                     }
                     else
                     {
                         var msg = "The input object cannot be bound as it doesn't provide some mandatory information: "
-                            + curParam.Name;
+                            + pair.Key.Name;
                         throw new MethodInvocationException(msg);
                     }
                 }
-                BindParameter(curParam, value, true);
+                BindParameter(pair.Key, pair.Value, true);
             }
         }
 
@@ -364,10 +375,47 @@ namespace System.Management.Automation
         }
 
 
-        private object GatherParameterValue(CommandParameterInfo param)
+        private Dictionary<CommandParameterInfo, PSObject> GatherParameterValues(IEnumerable<CommandParameterInfo> parameters)
         {
-            // TODO: implement asking the user for a value
-            return null;
+            // check first if we have a host to interact with
+            if (_cmdlet.PSHostInternal == null)
+            {
+                return null;
+            }
+
+            var fieldDescs = new Collection<FieldDescription>(
+                (from param in parameters
+                 select new FieldDescription(param.Name, param.Name, param.ParameterType, param.HelpMessage,
+                                             PSObject.AsPSObject(null), param.IsMandatory, param.Attributes)
+                ).ToList()
+            );
+            //var caption = String.Format("Cmdlet {0} at position {1} in the pipeline", _cmdletInfo.Name, ???);
+            // we don't know the position in the pipeline
+            var caption = String.Format("Cmdlet {0} in the pipeline", _cmdletInfo.Name);
+            var message = "Please enter values for the following parameters:";
+            try
+            {
+                var values = _cmdlet.PSHostInternal.UI.Prompt(caption, message, fieldDescs);
+                var lookupDict = new Dictionary<string, CommandParameterInfo>();
+                foreach (var info in parameters)
+                {
+                    lookupDict[info.Name] = info;
+                }
+                var returnDict = new Dictionary<CommandParameterInfo, PSObject>();
+                foreach (var pair in values)
+                {
+                    returnDict[lookupDict[pair.Key]] = pair.Value;
+                }
+                return returnDict;
+            }
+            catch (HostException)
+            {
+                return null;
+            }
+            catch (NotImplementedException)
+            {
+                return null;
+            }
         }
 
         private IEnumerable<CommandParameterInfo> GetMandatoryUnboundParameters(CommandParameterSetInfo parameterSet, bool considerPipeline)
@@ -457,6 +505,7 @@ namespace System.Management.Automation
             {
                 value = LanguagePrimitives.ConvertTo(value, info.ParameterType);
             }
+            // TODO: validate value with Attributes (ValidateNotNullOrEmpty, etc)
             SetCommandValue(memberInfo, value);
             _boundParameters.Add(memberInfo);
         }
