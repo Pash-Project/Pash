@@ -74,6 +74,25 @@ namespace TestPSSnapIn
         }
     }
 
+    [Cmdlet(VerbsDiagnostic.Test, "WithMandatory")]
+    public class TestWithMandatoryCommand : PSCmdlet
+    {
+        public const string HELP_MSG = "Just provide some Message";
+
+        [Parameter(Mandatory = true, HelpMessage = HELP_MSG)]
+        public string OutputString { get; set; }
+
+        public static string Transform(string value)
+        {
+            return ">" + value.ToUpper() + "<";
+        }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(Transform(OutputString));
+        }
+    }
+
     [Cmdlet(VerbsDiagnostic.Test, "NoMandatories", DefaultParameterSetName = "Reversed")]
     public class TestNoMandatoriesCommand : PSCmdlet
     {
@@ -362,6 +381,28 @@ namespace TestPSSnapIn
         protected override void ProcessRecord()
         {
             WriteObject(string.Format("CustomType.Id='{0}'", CustomTypeParameter.Id));
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "IntegerArraySum")]
+    public sealed class TestIntegerArraySumCommand : PSCmdlet
+    {
+        [Parameter(Mandatory = true)]
+        public int[] IntArray { get; set; }
+
+        public static string Transform(int[] arr)
+        {
+            int s = 0;
+            foreach (var i in arr)
+            {
+                s += i;
+            }
+            return "l=" + arr.Length + ",s=" + s;
+        }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(Transform(IntArray));
         }
     }
 

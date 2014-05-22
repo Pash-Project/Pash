@@ -111,6 +111,7 @@
     <Compile Include="TestHelpers\TestException.cs" />
     <Compile Include="TestHostRawUserInterface.cs" />
     <Compile Include="FormatTests.cs" />
+    <Compile Include="CmdletUserInputTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.PowerShell.Commands.Management\Microsoft.Commands.Management.csproj">

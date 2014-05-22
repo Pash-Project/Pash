@@ -30,6 +30,19 @@ namespace ReferenceTests
             Assert.AreEqual(NewlineJoin("Reversed:  "), res);
         }
 
+        [Test]
+        public void CmdletWithoutProvidedMandatoryThrows()
+        {
+            var cmd = CmdletName(typeof(TestWithMandatoryCommand));
+            var ex = Assert.Throws(typeof(ParameterBindingException),
+                                   delegate()
+                                   {
+                ReferenceHost.Execute(cmd);
+            }
+            ) as ParameterBindingException;
+            StringAssert.Contains("Missing", ex.ErrorRecord.FullyQualifiedErrorId);
+        }
+
         [TestCase("'foo'", "Correct: 1 2")]
         [TestCase("12", "Reversed: 1 2")]
         public void ParameterSetSelectionByPipelineTest(string pipeInput, string expected)

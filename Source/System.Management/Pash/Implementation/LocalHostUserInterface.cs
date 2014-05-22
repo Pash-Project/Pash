@@ -143,7 +143,7 @@ namespace Pash.Implementation
         }
 
         // workaround as long as getline.cs might care about history on unix
-        private string ReadLine(bool addToHistory)
+        protected virtual string ReadLine(bool addToHistory)
         {
             if (!InteractiveIO)
             {

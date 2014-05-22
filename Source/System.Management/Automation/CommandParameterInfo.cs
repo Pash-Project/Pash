@@ -36,6 +36,7 @@ namespace System.Management.Automation
             ValueFromPipelineByPropertyName = paramAttr.ValueFromPipelineByPropertyName;
             ValueFromRemainingArguments = paramAttr.ValueFromRemainingArguments;
             IsMandatory = paramAttr.Mandatory;
+            HelpMessage = paramAttr.HelpMessage;
 
             List<Attribute> attributes = new List<Attribute>(1);
             attributes.Add(paramAttr);

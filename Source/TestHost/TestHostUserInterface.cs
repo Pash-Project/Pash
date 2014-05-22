@@ -39,12 +39,18 @@ namespace TestHost
             get { return _rawUI; }
         }
 
+        protected override string ReadLine(bool addToHistory)
+        {
+            return ReadLine();
+        }
+
         public override string ReadLine()
         {
             if (InputStream == null)
             {
                 return null;
             }
+            WriteLine(); // newline a user usually does at the end
             return InputStream.ReadLine();
         }
 
