@@ -377,6 +377,12 @@ namespace System.Management.Automation
 
         private Dictionary<CommandParameterInfo, PSObject> GatherParameterValues(IEnumerable<CommandParameterInfo> parameters)
         {
+            // check first if we have a host to interact with
+            if (_cmdlet.PSHostInternal == null)
+            {
+                return null;
+            }
+
             var fieldDescs = new Collection<FieldDescription>(
                 (from param in parameters
                  select new FieldDescription(param.Name, param.Name, param.ParameterType, param.HelpMessage,

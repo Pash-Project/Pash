@@ -6,16 +6,17 @@ using System.Text;
 using System.Management.Automation.Host;
 using NUnit.Framework;
 using System.IO;
+using Pash.Implementation;
 
 namespace TestHost
 {
-    class TestHostUserInterface : PSHostUserInterface
+    class TestHostUserInterface : LocalHostUserInterface
     {
         private TestHostRawUserInterface _rawUI;
         public TextReader InputStream;
         public Action<string> OnWriteErrorLineString = delegate(string s) { Assert.Fail(s); };
 
-        internal TestHostUserInterface()
+        internal TestHostUserInterface() : base()
         {
             _rawUI = new TestHostRawUserInterface();
         }
@@ -28,31 +29,14 @@ namespace TestHost
         internal void SetInput(string input)
         {
             InputStream = new StringReader(input);
+            InteractiveIO = true;
         }
+
+        //  need to override Readxxx and Writexxx methods. The other methods use them
 
         public override PSHostRawUserInterface RawUI
         {
             get { return _rawUI; }
-        }
-
-        public override Dictionary<string, System.Management.Automation.PSObject> Prompt(string caption, string message, System.Collections.ObjectModel.Collection<FieldDescription> descriptions)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override int PromptForChoice(string caption, string message, System.Collections.ObjectModel.Collection<ChoiceDescription> choices, int defaultChoice)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override System.Management.Automation.PSCredential PromptForCredential(string caption, string message, string userName, string targetName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override System.Management.Automation.PSCredential PromptForCredential(string caption, string message, string userName, string targetName, System.Management.Automation.PSCredentialTypes allowedCredentialTypes, System.Management.Automation.PSCredentialUIOptions options)
-        {
-            throw new NotImplementedException();
         }
 
         public override string ReadLine()
@@ -91,7 +75,17 @@ namespace TestHost
             this.OnWriteErrorLineString(value);
         }
 
+        public override void WriteLine()
+        {
+            this.Log.AppendLine();
+        }
+
         public override void WriteLine(string value)
+        {
+            this.Log.AppendLine(value);
+        }
+
+        public override void WriteLine(ConsoleColor foregroundColor, ConsoleColor backgroundColor, string value)
         {
             this.Log.AppendLine(value);
         }
