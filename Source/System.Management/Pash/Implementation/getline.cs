@@ -151,7 +151,7 @@ namespace Mono.Terminal {
         
         static Handler [] handlers;
 
-        public LineEditor (string name) : this (name, 10) { }
+        public LineEditor (string name) : this (name, 100) { }
         
         public LineEditor (string name, int histsize)
         {
