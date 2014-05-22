@@ -31,6 +31,19 @@ namespace Pash.Implementation
             _scripts = new Dictionary<string, ScriptInfo>(StringComparer.CurrentCultureIgnoreCase);
         }
 
+        public static ScriptBlockAst ParseInput(string input)
+        {
+            try
+            {
+                return PowerShellGrammar.ParseInteractiveInput(input);
+            }
+            catch (PowerShellGrammar.ParseException exception)
+            {
+                // nicer error message
+                throw new ParseException("Parse error at " + exception.LogMessage.Location.ToUiString(), exception);
+            }
+        }
+
         internal void RegisterCmdlet(CmdletInfo cmdLetInfo)
         {
             List<CmdletInfo> cmdletList = null;
@@ -77,7 +90,7 @@ namespace Pash.Implementation
             {
                 try
                 {
-                    var scriptBlock = new ScriptBlock(PowerShellGrammar.ParseInteractiveInput(entry.Definition));
+                    var scriptBlock = new ScriptBlock(ParseInput(entry.Definition));
                     _scripts.Add(entry.Name, new ScriptInfo(entry.Name, scriptBlock,
                                                             ScopeUsages.NewScriptScope));
                     continue;
@@ -98,7 +111,7 @@ namespace Pash.Implementation
 
             if (command.IsScript) //CommandText contains a script block. Parse it
             {
-                command.ScriptBlockAst = PowerShellGrammar.ParseInteractiveInput(cmdText);
+                command.ScriptBlockAst = CommandManager.ParseInput(cmdText);
             }
 
             //either we parsed something like "& { foo; bar }", or the CommandText was a script and was just parsed

@@ -182,15 +182,7 @@ namespace Pash.Implementation
             {
                 CommandProcessorBase commandProcessor;
 
-                try
-                {
-                    commandProcessor = command.CreateCommandProcessor(context, _runspace.CommandManager, false);
-                }
-                catch (PowerShellGrammar.ParseException exception)
-                {
-                    // nicer error message
-                    throw new ParseException("Parse error at " + exception.LogMessage.Location.ToUiString(), exception);
-                }
+                commandProcessor = command.CreateCommandProcessor(context, _runspace.CommandManager, false);
                 pipelineProcessor.Add(commandProcessor);
             }
 

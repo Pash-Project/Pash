@@ -155,17 +155,27 @@ namespace Pash.Implementation
             foreach (var parameter in Parameters)
             {
                 // PowerShell quotes any arguments that contain spaces except the arguments that start with a quote.
-                var argument = parameter.Value.ToString();
-                if (argument.Contains(" ") && !argument.StartsWith("\""))
+                // also: in parameter.Name are arguments that started with "-", so we need to use them again
+                if (!String.IsNullOrEmpty(parameter.Name))
                 {
-                    arguments.AppendFormat("\"{0}\"", argument);
-                }
-                else
-                {
-                    arguments.Append(argument);
+                    arguments.Append('-');
+                    arguments.Append(parameter.Name); // parameter names don't hava a whitespace
+                    arguments.Append(' ');
                 }
 
-                arguments.Append(' ');
+                if (parameter.Value != null)
+                {
+                    var argument = parameter.Value.ToString();
+                    if (argument.Contains(" ") && !argument.StartsWith("\""))
+                    {
+                        arguments.AppendFormat("\"{0}\"", argument);
+                    }
+                    else
+                    {
+                        arguments.Append(argument);
+                    }
+                    arguments.Append(' ');
+                }
             }
 
             return arguments.ToString();
