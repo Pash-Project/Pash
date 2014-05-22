@@ -57,7 +57,7 @@ namespace System.Management.Automation
             {
                 if (_scriptBlock == null)
                 {
-                    _scriptBlock = PowerShellGrammar.ParseInteractiveInput(ScriptContents).GetScriptBlock();
+                    _scriptBlock = CommandManager.ParseInput(ScriptContents).GetScriptBlock();
                 }
                 return _scriptBlock;
             }

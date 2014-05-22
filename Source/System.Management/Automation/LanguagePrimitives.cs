@@ -8,6 +8,7 @@ using System.Collections;
 using System.Globalization;
 using System.Reflection;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace System.Management.Automation
 {
@@ -174,9 +175,18 @@ namespace System.Management.Automation
         {
             // TODO: Make it use formatProvider
             // TODO: read more about the Extended Type System (ETS) of Powershell and enhance this functionality
+            // TODO: check "3.7.5 Better conversion" of Windows Powershell Language Specification 3.0
             if (resultType == null)
             {
                 throw new ArgumentException("Result type can not be null.");
+            }
+
+            // result is no PSObject, so unpack the value if we deal with one
+            if (valueToConvert is PSObject &&
+                resultType != typeof(PSObject) &&
+                resultType != typeof(PSObject[]))
+            {
+                valueToConvert = ((PSObject)valueToConvert).BaseObject;
             }
 
             // check if the result is an array and we have something that needs to be casted
@@ -213,12 +223,6 @@ namespace System.Management.Automation
                 return PSObject.AsPSObject(valueToConvert);
             }
 
-            // result is no PSObject, so unpack the value if we deal with one
-            if (valueToConvert is PSObject)
-            {
-                valueToConvert = ((PSObject)valueToConvert).BaseObject;
-            }
-
             if (valueToConvert != null && resultType.IsAssignableFrom(valueToConvert.GetType()))
             {
                 return valueToConvert;
@@ -237,6 +241,12 @@ namespace System.Management.Automation
             if (resultType == typeof(SwitchParameter)) // switch parameters can simply be present
             {
                 return new SwitchParameter(true);
+            }
+
+            object result = null;
+            if (valueToConvert != null && TryConvertUsingTypeConverter(valueToConvert, resultType, out result))
+            {
+                return result;
             }
 
             return DefaultConvertOrCast(valueToConvert, resultType);
@@ -386,6 +396,25 @@ namespace System.Management.Automation
 
         #endregion
 
+        private static bool TryConvertUsingTypeConverter(object value, Type type, out object result)
+        {
+            TypeConverter converter = TypeDescriptor.GetConverter(type);
+            if (converter != null && converter.CanConvertFrom(value.GetType()))
+            {
+                try
+                {
+                    result = converter.ConvertFrom(value);
+                    return true;
+                }
+                catch
+                {
+                }
+            }
+
+            result = null;
+            return false;
+        }
+
         private static object DefaultConvertOrCast(object value, Type type)
         {
             // check for convertibles
@@ -408,7 +437,7 @@ namespace System.Management.Automation
             }
             catch (Exception e)
             {
-                var msg = String.Format("Value '{0}' can't be converted or casted to '{0}'",
+                var msg = String.Format("Value '{0}' can't be converted or casted to '{1}'",
                     value.ToString(), type.ToString());
                 throw new PSInvalidCastException(msg, e);
             }

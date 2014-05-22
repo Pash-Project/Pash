@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Collections.ObjectModel;
 using System.Collections;
 using System.Management.Automation.Runspaces;
+using System.Management.Automation.Host;
 
 namespace System.Management.Automation
 {
@@ -140,8 +141,8 @@ namespace System.Management.Automation
                 // 3. If we still had no success, throw an error
                 if (!success)
                 {
-                    throw new ParameterBindingException("The pipeline input cannot be bound to any parameter", 
-                        "PipelineInputCannotBeBound");
+                    // well PS throws a MethodInvocationException instead of a ParameterBindingException, so..
+                    throw new MethodInvocationException("The pipeline input cannot be bound to any parameter");
                 }
             }
 
@@ -176,7 +177,13 @@ namespace System.Management.Automation
                     ChooseParameterSet(DefaultParameterSet);
                     return;
                 }
-                // 2. Otherwise we could choose multiple sets, so throw an ambigiuous error
+                // 2. If the default set is the AllParameter set then choose it.
+                else if (DefaultParameterSet != null && (DefaultParameterSet.Name == ParameterAttribute.AllParameterSets))
+                {
+                    ChooseParameterSet(DefaultParameterSet);
+                    return;
+                }
+                // 3. Otherwise we could choose multiple sets, so throw an ambigiuous error
                 else
                 {
                     throw new ParameterBindingException("The parameter set to be used cannot be resolved.",
@@ -269,23 +276,44 @@ namespace System.Management.Automation
         private void HandleMissingMandatoryParameters(CommandParameterSetInfo parameterSet, bool considerPipeline, bool askUser)
         {
             // select mandatory parametes
-            var unsetMandatories = GetMandatoryUnboundParameters(parameterSet, considerPipeline);
-            foreach (var curParam in unsetMandatories)
+            var unsetMandatories = GetMandatoryUnboundParameters(parameterSet, considerPipeline).ToList();
+            // check if we got something to do, otherwise we're fine
+            if (unsetMandatories.Count == 0)
             {
-                object value = null;
-                // check if we should try to gather it
-                if (askUser)
+                return;
+            }
+            Dictionary<CommandParameterInfo, PSObject> values = null;
+            if (askUser)
+            {
+                // try to get this value from UI
+                values = GatherParameterValues(unsetMandatories);
+            }
+            if (values == null)
+            {
+                var parameterNames = from cmdInfo in unsetMandatories select "'" + cmdInfo.Name + "'";
+                var missingNames = String.Join(", ", parameterNames);
+                var msg = String.Format("Missing value for mandatory parameters {0}.", missingNames);
+                throw new ParameterBindingException(msg, "MissingMandatoryParameters");
+            }
+            foreach (var pair in values)
+            {
+                if (pair.Value == null)
                 {
-                    // try to get this value from UI
-                    GatherParameterValue(curParam);
+                    // WORKAROUND: PS throws a MethodInvocationException when binding pipeline parameters
+                    // that is when a user shouldn't be asked anymore... let's do the same
+                    if (askUser)
+                    {
+                        var msg = String.Format("Missing value for mandatory parameter '{0}'.", pair.Key.Name);
+                        throw new ParameterBindingException(msg, "MissingMandatoryParameter");
+                    }
+                    else
+                    {
+                        var msg = "The input object cannot be bound as it doesn't provide some mandatory information: "
+                            + pair.Key.Name;
+                        throw new MethodInvocationException(msg);
+                    }
                 }
-                // check if we had success, fail otherwise
-                if (value == null)
-                {
-                    var msg = String.Format("Missing value for mandatory parameter '{0}'.", curParam.Name);
-                    throw new ParameterBindingException(msg, "MissingMandatoryParameter");
-                }
-                BindParameter(curParam, value, true);
+                BindParameter(pair.Key, pair.Value, true);
             }
         }
 
@@ -347,10 +375,47 @@ namespace System.Management.Automation
         }
 
 
-        private object GatherParameterValue(CommandParameterInfo param)
+        private Dictionary<CommandParameterInfo, PSObject> GatherParameterValues(IEnumerable<CommandParameterInfo> parameters)
         {
-            // TODO: implement asking the user for a value
-            return null;
+            // check first if we have a host to interact with
+            if (_cmdlet.PSHostInternal == null)
+            {
+                return null;
+            }
+
+            var fieldDescs = new Collection<FieldDescription>(
+                (from param in parameters
+                 select new FieldDescription(param.Name, param.Name, param.ParameterType, param.HelpMessage,
+                                             PSObject.AsPSObject(null), param.IsMandatory, param.Attributes)
+                ).ToList()
+            );
+            //var caption = String.Format("Cmdlet {0} at position {1} in the pipeline", _cmdletInfo.Name, ???);
+            // we don't know the position in the pipeline
+            var caption = String.Format("Cmdlet {0} in the pipeline", _cmdletInfo.Name);
+            var message = "Please enter values for the following parameters:";
+            try
+            {
+                var values = _cmdlet.PSHostInternal.UI.Prompt(caption, message, fieldDescs);
+                var lookupDict = new Dictionary<string, CommandParameterInfo>();
+                foreach (var info in parameters)
+                {
+                    lookupDict[info.Name] = info;
+                }
+                var returnDict = new Dictionary<CommandParameterInfo, PSObject>();
+                foreach (var pair in values)
+                {
+                    returnDict[lookupDict[pair.Key]] = pair.Value;
+                }
+                return returnDict;
+            }
+            catch (HostException)
+            {
+                return null;
+            }
+            catch (NotImplementedException)
+            {
+                return null;
+            }
         }
 
         private IEnumerable<CommandParameterInfo> GetMandatoryUnboundParameters(CommandParameterSetInfo parameterSet, bool considerPipeline)
@@ -440,6 +505,7 @@ namespace System.Management.Automation
             {
                 value = LanguagePrimitives.ConvertTo(value, info.ParameterType);
             }
+            // TODO: validate value with Attributes (ValidateNotNullOrEmpty, etc)
             SetCommandValue(memberInfo, value);
             _boundParameters.Add(memberInfo);
         }
@@ -450,12 +516,24 @@ namespace System.Management.Automation
             var success = false;
             foreach (var param in parameters)
             {
-                var curValue = values.Properties[param.Name];
-                if (curValue != null)
+                var aliases = new List<string>(param.Aliases);
+                aliases.Add(param.Name);
+                foreach (var curAlias in aliases)
                 {
-                    // important: || success needs to be at the end, because we want to try to bind *every* parameter
-                    success = TryBindParameter(param, curValue, doConvert) || success;
+                    var propertyInfo = values.Properties[curAlias];
+                    if (propertyInfo == null)
+                    {
+                        continue;
+                    }
+                    var curValue = propertyInfo.Value;
+                    bool hadSuccess = TryBindParameter(param, curValue, doConvert);
+                    if (hadSuccess)
+                    {
+                        success = true;
+                        break;
+                    }
                 }
+
             }
             return success;
         }

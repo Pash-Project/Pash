@@ -42,11 +42,11 @@ namespace TestHost
         [Test]
         public void AddSnapInFromFileTest()
         {
-            string[] defSnapins = TestHost.Execute("Get-PSSnapIn").Split((string[])null,
+            string[] defSnapins = TestHost.Execute("Get-PSSnapIn | ForEach-Object { $_.Name }").Split((string[])null,
                 StringSplitOptions.RemoveEmptyEntries);
             string[] statements = new string[] {
                 AddSnapInCommand,
-                "Get-PSSnapIn"
+                "Get-PSSnapIn | ForEach-Object { $_.Name }"
             };
             var snapin = new PashTestSnapIn();
             var output = TestHost.Execute(statements).Split((string[]) null,

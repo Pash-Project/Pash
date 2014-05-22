@@ -72,11 +72,7 @@ namespace System.Management.Automation
         private void RegisterParameter(CommandParameterInfo parameterInfo)
         {
             // also add it to lookuptable and check for unuque names/aliases
-            var allNames = new List<string>();
-            if (parameterInfo.Aliases != null)
-            {
-                allNames.AddRange(parameterInfo.Aliases);
-            }
+            var allNames = parameterInfo.Aliases.ToList();
             allNames.Add(parameterInfo.Name);
             foreach (var curName in allNames)
             {
@@ -183,10 +179,6 @@ namespace System.Management.Automation
             // TODO: Only one parameter in a set should declare ValueFromPipeline = true. Multiple parameters may define ValueFromPipelineByPropertyName = true.
             // TODO: Currently due to the way parameters are loaded into sets from all set at the end the parameter end up in incorrect order.
 
-            // always have a parameter set for all parameters. even if we don't have any parameters or no parameters
-            // that are in all sets. This will nevertheless save various checks
-            paramSets.Add(ParameterAttribute.AllParameterSets, new Collection<CommandParameterInfo>());
-
             // get the name of the default parameter set
             string strDefaultParameterSetName = null;
             object[] cmdLetAttrs = cmdletType.GetCustomAttributes(typeof(CmdletAttribute), false);
@@ -199,6 +191,12 @@ namespace System.Management.Automation
                 {
                     paramSets.Add(strDefaultParameterSetName, new Collection<CommandParameterInfo>());
                 }
+            }
+
+            // always have a parameter set for all parameters. even if we don't have any parameters or no parameters
+            // that are in all sets. This will nevertheless save various checks
+            if (!paramSets.ContainsKey(ParameterAttribute.AllParameterSets)) {
+                paramSets.Add(ParameterAttribute.AllParameterSets, new Collection<CommandParameterInfo>());
             }
 
             // Add fields with ParameterAttribute

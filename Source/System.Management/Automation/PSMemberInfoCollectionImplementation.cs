@@ -8,7 +8,7 @@ namespace System.Management.Automation
 {
     internal class PSMemberInfoCollectionImplementation<T> : PSMemberInfoCollection<T>, IEnumerable<T>, IEnumerable where T : PSMemberInfo
     {
-        private Collection<PSMemberInfo> _collection;
+        private Collection<T> _collection;
         private PSObject _owner;
 
         public PSMemberInfoCollectionImplementation(object owner)
@@ -16,13 +16,12 @@ namespace System.Management.Automation
             // TODO: allow to provide an owner's reference Collection<PSMemberInfo> collection
 
             _owner = owner as PSObject;
-            _collection = new Collection<PSMemberInfo>();
+            _collection = new Collection<T>();
         }
 
         public override void Add(T member)
         {
-            PSMemberInfo mbrInfo = member.Copy();
-            _collection.Add(mbrInfo);
+            _collection.Add(member);
         }
 
         public override T this[string name]
@@ -36,21 +35,30 @@ namespace System.Management.Automation
             }
         }
 
-        // MUST: implement this to do the PSObject ValueFromPipelineByPropertyName 
         public override ReadOnlyPSMemberInfoCollection<T> Match(string name)
         {
-            throw new NotImplementedException();
+            return Match(name, PSMemberTypes.All);
         }
 
-        // MUST: implement this to do the PSObject ValueFromPipelineByPropertyName 
         public override ReadOnlyPSMemberInfoCollection<T> Match(string name, PSMemberTypes memberTypes)
         {
-            throw new NotImplementedException();
+            WildcardPattern pattern = new WildcardPattern(name, WildcardOptions.IgnoreCase);
+            return new ReadOnlyPSMemberInfoCollection<T>(
+                from value in _collection
+                where (value.MemberType & memberTypes) != 0 && pattern.IsMatch(value.Name)
+                select value
+            );
         }
 
         public override void Remove(string name)
         {
-            throw new NotImplementedException();
+            var item = this[name];
+            _collection.Remove(item);
+        }
+
+        public override IEnumerator<T> GetEnumerator()
+        {
+            return _collection.GetEnumerator();
         }
     }
 }

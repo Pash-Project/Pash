@@ -13,13 +13,13 @@ namespace ReferenceTests
         [SetUp]
         public void ImportTestInvokeScriptCmdlet()
         {
-            ReferenceHost.ImportModules(new string[] {  typeof(TestCommand).Assembly.Location });
+            ImportTestCmdlets();
         }
 
         [TearDown]
         public void ResetInitialSessionState()
         {
-            ReferenceHost.ImportModules(null);
+            CleanImports();
         }
 
         [Test]
@@ -27,7 +27,20 @@ namespace ReferenceTests
         {
             var cmd = CmdletName(typeof(TestNoMandatoriesCommand));
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual("Reversed:  " + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin("Reversed:  "), res);
+        }
+
+        [Test]
+        public void CmdletWithoutProvidedMandatoryThrows()
+        {
+            var cmd = CmdletName(typeof(TestWithMandatoryCommand));
+            var ex = Assert.Throws(typeof(ParameterBindingException),
+                                   delegate()
+                                   {
+                ReferenceHost.Execute(cmd);
+            }
+            ) as ParameterBindingException;
+            StringAssert.Contains("Missing", ex.ErrorRecord.FullyQualifiedErrorId);
         }
 
         [TestCase("'foo'", "Correct: 1 2")]
@@ -36,7 +49,7 @@ namespace ReferenceTests
         {
             var cmd = pipeInput + " | " + CmdletName(typeof(TestNoMandatoriesCommand)) + " -One '1' -Two '2'";
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual(expected + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin(expected), res);
         }
 
         [TestCase("-RandomString '4'", "Correct: 1 2")]
@@ -45,7 +58,7 @@ namespace ReferenceTests
         {
             var cmd = String.Format(CmdletName(typeof(TestNoMandatoriesCommand)) + " {0} '1' '2'", parameter);
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual(expected + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin(expected), res);
         }
 
         [TestCase("'foo'", "Correct: 2 1")] // right set was chosen, but positional bound by defualt set
@@ -54,7 +67,7 @@ namespace ReferenceTests
         {
             var cmd = pipeInput + " | " + CmdletName(typeof(TestNoMandatoriesCommand)) + " '1' '2'";
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual(expected + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin(expected), res);
         }
 
         [Test]
@@ -88,7 +101,7 @@ namespace ReferenceTests
         {
             var cmd = CmdletName(typeof(TestMandatoryInOneSetCommand)) + " 'works' 'foo'";
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual("works" + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin("works"), res);
         }
 
         [Test]
@@ -122,7 +135,7 @@ namespace ReferenceTests
         {
             var cmd = CmdletName(typeof(TestSwitchAndPositionalCommand)) + " -Switch 'test'";
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual("test" + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin("test"), res);
         }
 
         [Test]
@@ -143,7 +156,7 @@ namespace ReferenceTests
         {
             var cmd = CmdletName(typeof(TestDefaultParameterSetDoesntExistCommand));
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual("works" + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin("works"), res);
         }
 
         [Test]
@@ -164,7 +177,7 @@ namespace ReferenceTests
         {
             var cmd = CmdletName(typeof(TestNoMandatoriesCommand)) + " -One 1 -Tw 2"; // note Tw instead of "Two"
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual("Reversed: 1 2" + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin("Reversed: 1 2"), res);
         }
 
         [Test]
@@ -185,7 +198,128 @@ namespace ReferenceTests
         {
             var cmd = CmdletName(typeof(TestNoParametersCommand));
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual("works" + Environment.NewLine, res);
+            Assert.AreEqual(NewlineJoin("works"), res);
+        }
+
+        [Test]
+        public void DefaultSetIsAllParametersAndTwoParameterSetsWhenNoParameterPassedShouldExecuteCmdlet()
+        {
+            var cmd = CmdletName(typeof(TestDefaultSetIsAllParameterSetAndTwoParameterSetsCommand));
+            var res = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(NewlineJoin("First: null"), res);
+        }
+
+        [Test]
+        public void TwoParameterAmbiguousSetsWhenNoParameterPassedShouldNotExecuteCmdlet()
+        {
+            var cmd = CmdletName(typeof(TestTwoAmbiguousParameterSetsCommand));
+            var ex = Assert.Throws<ParameterBindingException>(() =>
+                {
+                    ReferenceHost.Execute(cmd);
+                }
+            );
+            StringAssert.Contains("Ambiguous", ex.ErrorRecord.FullyQualifiedErrorId);
+        }
+
+        [Test]
+        public void CmdletCanTakeParametersByPropertyName()
+        {
+            var cmd = "new-object psobject -property @{foO='abc'; bAr='def'} | "
+                + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand));
+            var expected = "abc def" + Environment.NewLine;
+            var result = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(expected, result);
+        }
+
+
+        [Test]
+        public void CmdletPipeParamByPropertyNameCantBePartial()
+        {
+            var cmd = "new-object psobject -property @{f='abc'; b='def'} | "
+                + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand));
+            Assert.Throws<MethodInvocationException>(() => {
+                ReferenceHost.Execute(cmd);
+            });
+        }
+
+        [Test]
+        public void CmdletPipeParamByPropertyNameCanBeAlias()
+        {
+            var cmd = "new-object psobject -property @{baz='abc'; b='def'} | "
+                + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand));
+            var expected = "abc " + Environment.NewLine;
+            var result = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void CmdletPipeParamByPropertyNameCanOnlyProvideOptional()
+        {
+            var cmd = "new-object psobject -property @{bar='def'} | "
+                + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand))
+                + " -Foo 'a'";
+            var expected = "a def" + Environment.NewLine;
+            var result = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(expected, result);
+        }
+
+        [TestCase(" -Foo 'a'", "a def")]
+        [TestCase(" -Bar 'a'", "abc a")]
+        public void CmdletPipeParamByPropertyNameIgnoresAlreadyBound(string parameters, string expected)
+        {
+            var cmd = "new-object psobject -property @{foo='abc'; bar='def'} | "
+                + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand))
+                + parameters;
+            var result = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(expected + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void CmdletPipeParamByPropertyFailsIfAllAreAlreadyBound()
+        {
+            var cmd = "new-object psobject -property @{foo='abc'; bar='def'} | "
+                + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand))
+                + " -Foo 'a' -Bar 'a'";
+            Assert.Throws<MethodInvocationException>(() => {
+                ReferenceHost.Execute(cmd);
+            });
+        }
+
+        [Test, Explicit("To be honest: I don't understand why PS writes the last output AND still throws and excpetion")]
+        public void CmdletPipeParamByPropertyCanProcessMultipleButThrowsOnError()
+        {
+            var cmd = NewlineJoin(new string[] {
+                "$a = new-object psobject -property @{foo='abc'; bar='def'}",
+                "$b = new-object psobject -property @{foo='ghi'}",
+                "$c = new-object psobject -property @{bar='jkl'}",
+                "$d = new-object psobject -property @{foo='mno'; bar='jkl'}",
+                "@($a, $b, $c, $d) | " + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand))
+            });
+            var expected = NewlineJoin(new string[] {
+                "abc def",
+                "ghi ",
+                "mno jkl"
+            });
+            Assert.Throws<MethodInvocationException>(() =>
+            {
+                ReferenceHost.Execute(cmd);
+            });
+            // stuff before and after third object should work
+            Assert.AreEqual(expected, ReferenceHost.LastResults);
+        }
+
+        [Test]
+        public void CmdletPipeParamPropertyPreferredOverConversion()
+        {
+            var cmdletName = CmdletName(typeof(TestParametersByPipelineWithPropertiesAndConversionCommand));
+            var createObjectCmdlet = CmdletName(typeof(TestCreateFooMessageObjectCommand));
+            var cmd = NewlineJoin(new string[]{
+                "$a = " + createObjectCmdlet + " hello",
+                "$a | " + cmdletName
+            });
+            var expected = "hello" + Environment.NewLine;
+            var result = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(expected, result);
         }
     }
 }

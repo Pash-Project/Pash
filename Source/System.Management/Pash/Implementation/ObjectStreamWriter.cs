@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using Pash.Implementation;
 using System.Management.Automation.Runspaces;
+using System.Management.Automation;
 
 namespace Pash.Implementation
 {
@@ -57,7 +58,8 @@ namespace Pash.Implementation
         public override int Write(object obj, bool enumerateCollection)
         {
             int numWritten = 0;
-            if (!enumerateCollection || (obj is string))
+            bool isString = obj is string || (obj is PSObject && ((PSObject)obj).BaseObject is string);
+            if (!enumerateCollection || isString)
             {
                 Write(obj);
                 numWritten = 1;
@@ -85,6 +87,10 @@ namespace Pash.Implementation
 
         private IEnumerator GetEnumerator(object obj)
         {
+            if (obj is PSObject)
+            {
+                obj = ((PSObject)obj).BaseObject;
+            }
             IEnumerable enumerable = obj as IEnumerable;
             if (enumerable != null)
             {

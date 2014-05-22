@@ -96,7 +96,7 @@ namespace System.Management.Automation
         {
             var psobj = PSObject.AsPSObject(errorRecord);
             // if merged with stdout, we can later on check to which stream the object usually belongs
-            psobj.Properties.Add(new PSNoteProperty("writeToErrorStream", true));
+            psobj.WriteToErrorStream = true;
             ErrorStream.Write(psobj);
             ExecutionContext.AddToErrorVariable(errorRecord);
             if (MergeErrorToOutput)
@@ -112,7 +112,9 @@ namespace System.Management.Automation
 
         public void WriteObject(object sendToPipeline, bool enumerateCollection)
         {
-            if (enumerateCollection && !(sendToPipeline is string))
+            var isString = sendToPipeline is string || 
+                           (sendToPipeline is PSObject && ((PSObject) sendToPipeline).BaseObject is string);
+            if (enumerateCollection && !(isString))
             {
                 IEnumerator enumerator = GetEnumerator(sendToPipeline);
                 if (enumerator != null)
@@ -148,13 +150,17 @@ namespace System.Management.Automation
 
         internal IEnumerator GetEnumerator(object obj)
         {
+            if (obj is PSObject)
+            {
+                obj = ((PSObject)obj).BaseObject;
+            }
             IEnumerable enumerable = obj as IEnumerable;
             if (enumerable != null)
             {
                 return enumerable.GetEnumerator();
             }
             IEnumerator enumerator = obj as IEnumerator;
-            if (obj != null)
+            if (enumerator != null)
             {
                 return enumerator;
             }

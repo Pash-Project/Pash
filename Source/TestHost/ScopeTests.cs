@@ -54,8 +54,8 @@ namespace TestHost
 
         //the following test corresponds to the VariableAccessTest, but with user input instead of using the internals
         [TestCase("x", "f")] //correct x is fetched in general (from function scope)
-        [TestCase("local:x", null, Explicit = true)] //local scope has no variable x
-        [TestCase("script:x", null, Explicit = true)] //sx is private in the script scope
+        [TestCase("local:x", "")] //local scope has no variable x
+        [TestCase("script:x", "")] //sx is private in the script scope
         [TestCase("global:x", "g")]
         [TestCase("y", "l")] //the overridden y in the local scope
         [TestCase("local:y", "l")] //also the local one, but explicitly

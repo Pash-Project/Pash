@@ -11,36 +11,36 @@ namespace TestHost
     class IntegerLiterals
     {
         [Test]
-        [TestCase("0", "System.Int32")]
-        [TestCase("2147483647", "System.Int32")] // int.MaxValue
-        [TestCase("2147483648", "System.Int64")] // int.MaxValue + 1
-        [TestCase("9223372036854775807", "System.Int64")] // long.MaxValue
-        [TestCase("9223372036854775808", "System.Decimal")] // long.MaxValue + 1
-        [TestCase("79228162514264337593543950335", "System.Decimal")] // decimal.MaxValue
-        [TestCase("79228162514264337593543950336", "System.Double")] // decimal.MaxValue + 1
-        [TestCase("1kb", "System.Int32")]
-        [TestCase("1mb", "System.Int32")]
-        [TestCase("1gb", "System.Int32")]
-        [TestCase("100gb", "System.Int64")]
-        [TestCase("1tb", "System.Int64")]
-        [TestCase("1pb", "System.Int64")]
-        public void SimpleIntegerLiteralShouldBeOfType(string literal, string expectedType)
+        [TestCase("0", typeof(System.Int32))]
+        [TestCase("2147483647", typeof(System.Int32))] // int.MaxValue
+        [TestCase("2147483648", typeof(System.Int64))] // int.MaxValue + 1
+        [TestCase("9223372036854775807", typeof(System.Int64))] // long.MaxValue
+        [TestCase("9223372036854775808", typeof(System.Decimal))] // long.MaxValue + 1
+        [TestCase("79228162514264337593543950335", typeof(System.Decimal))] // decimal.MaxValue
+        [TestCase("79228162514264337593543950336", typeof(System.Double))] // decimal.MaxValue + 1
+        [TestCase("1kb", typeof(System.Int32))]
+        [TestCase("1mb", typeof(System.Int32))]
+        [TestCase("1gb", typeof(System.Int32))]
+        [TestCase("100gb", typeof(System.Int64))]
+        [TestCase("1tb",typeof( System.Int64))]
+        [TestCase("1pb", typeof(System.Int64))]
+        public void SimpleIntegerLiteralShouldBeOfType(string literal, Type expectedType)
         {
-            var result = TestHost.Execute(true, string.Format("({0}).GetType()", literal));
-            Assert.AreEqual(expectedType + Environment.NewLine, result);
+            var result = TestHost.Execute(true, string.Format("({0}).GetType().Name", literal));
+            Assert.AreEqual(expectedType.Name + Environment.NewLine, result);
         }
 
         [Test]
         public void SimpleIntegerLiteralVeryLargeNumberShouldBeDouble()
         {
-            var result = TestHost.Execute(true, string.Format("({0}).GetType()", new string('9', 200)));
-            Assert.AreEqual("System.Double" + Environment.NewLine, result);
+            var result = TestHost.Execute(true, string.Format("({0}).GetType().Name", new string('9', 200)));
+            Assert.AreEqual(typeof(System.Double).Name + Environment.NewLine, result);
         }
 
         [Test]
         public void SimpleIntegerLiteralVeryVeryVeryLargeNumberShouldThrow()
         {
-            var result = TestHost.Execute(true, string.Format("({0}).GetType()", new string('9', 310)));
+            var result = TestHost.Execute(true, string.Format("({0}).GetType().Name", new string('9', 310)));
             StringAssert.Contains("Exception", result);
         }
 
@@ -51,8 +51,8 @@ namespace TestHost
             [Values("l", "L")]
             string typeSuffix)
         {
-            var result = TestHost.Execute(true, string.Format("({0}{1}).GetType()", literal, typeSuffix));
-            Assert.AreEqual("System.Int64" + Environment.NewLine, result);
+            var result = TestHost.Execute(true, string.Format("({0}{1}).GetType().Name", literal, typeSuffix));
+            Assert.AreEqual(typeof(System.Int64).Name + Environment.NewLine, result);
         }
 
         [Test]
@@ -65,15 +65,16 @@ namespace TestHost
         }
 
         [Test]
-        [TestCase("-1", "System.Int32")]
-        [TestCase("-2147483647", "System.Int32")] // int.MinValue + 1
-        [TestCase("-2147483648", "System.Int32")] // int.MinValue
-        [TestCase("-9223372036854775807", "System.Int64")] // long.MaxValue + 1
-        [TestCase("-9223372036854775808", "System.Int64")] // long.MaxValue
-        public void NegativeIntegerLiteralShouldBeOfType(string literal, string expectedType)
+        [TestCase("-1", typeof(System.Int32))]
+        [TestCase("-2147483647", typeof(System.Int32))] // int.MinValue + 1
+        [TestCase("-2147483648", typeof(System.Int32))] // int.MinValue
+        [TestCase("-2147483649", typeof(System.Int64))] // int.MinValue - 1
+        [TestCase("-9223372036854775807", typeof(System.Int64))] // long.MaxValue + 1
+        [TestCase("-9223372036854775808", typeof(System.Int64))] // long.MaxValue
+        public void NegativeIntegerLiteralShouldBeOfType(string literal, Type expectedType)
         {
-            var result = TestHost.Execute(true, string.Format("({0}).GetType()", literal));
-            Assert.AreEqual(expectedType + Environment.NewLine, result);
+            var result = TestHost.Execute(true, string.Format("({0}).GetType().Name", literal));
+            Assert.AreEqual(expectedType.Name + Environment.NewLine, result);
         }
 
         [TestCase("1kb", "1024")]

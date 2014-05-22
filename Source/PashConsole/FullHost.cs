@@ -23,7 +23,7 @@ namespace Pash
         public FullHost(bool interactive)
         {
             _interactive = interactive;
-            LocalHost = new LocalHost();
+            LocalHost = new LocalHost(true);
             _currentRunspace = RunspaceFactory.CreateRunspace(LocalHost);
             _currentRunspace.Open();
 
@@ -199,7 +199,7 @@ namespace Pash
                 {
                     success = false;
                     var psobj = PSObject.AsPSObject(pipelineError);
-                    // if merged with stdout, we can later on check to which stream the object usually belongs
+                    // the explicit (PS) way of setting internal psobj.WriteToErrorStream = true
                     psobj.Properties.Add(new PSNoteProperty("writeToErrorStream", true));
                     errors.Add(psobj);
                 }

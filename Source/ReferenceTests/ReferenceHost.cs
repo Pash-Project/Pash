@@ -12,6 +12,8 @@ namespace ReferenceTests
     {
         public static InitialSessionState InitialSessionState { get; set; }
         public static Runspace LastUsedRunspace { get; private set; }
+        public static Collection<PSObject> LastRawResults { get; private set; }
+        public static string LastResults { get; private set; }
 
 
         public static string Execute(string cmd)
@@ -21,37 +23,62 @@ namespace ReferenceTests
 
         public static string Execute(string[] commands)
         {
-            Collection<PSObject> results = null;
-            StringBuilder resultstr = new StringBuilder();
+            LastResults = "";
+            try
+            {
+                RawExecute(commands);
+            }
+            finally
+            {
+                if (LastRawResults != null)
+                {
+                    StringBuilder resultstr = new StringBuilder();
+                    foreach (var curPSObject in LastRawResults)
+                    {
+                        if (curPSObject != null)
+                        {
+                            resultstr.Append(curPSObject.ToString());
+                        }
+                        resultstr.Append(Environment.NewLine);
+                    }
+                    LastResults = resultstr.ToString();
+                }
+            }
+            return LastResults;
+        }
 
+        public static Collection<PSObject> RawExecute(string cmd)
+        {
+            return RawExecute(new string[] { cmd });
+        }
+
+        public static Collection<PSObject> RawExecute(string[] commands)
+        {
+            LastRawResults = null;
             LastUsedRunspace = InitialSessionState == null ?
                 RunspaceFactory.CreateRunspace() : RunspaceFactory.CreateRunspace(InitialSessionState);
             LastUsedRunspace.Open();
-            using (var pipeline = LastUsedRunspace.CreatePipeline())
+            foreach (var command in commands)
             {
-                foreach (var command in commands)
+                using (var pipeline = LastUsedRunspace.CreatePipeline())
                 {
                     pipeline.Commands.AddScript(command, true);
-                }
-                results = pipeline.Invoke();
-                if (pipeline.Error.Count > 0)
-                {
-                    throw new MethodInvocationException(String.Join(Environment.NewLine, pipeline.Error.ReadToEnd()));
+                    try
+                    {
+                        LastRawResults = pipeline.Invoke();
+                    }
+                    catch (Exception)
+                    {
+                        LastRawResults = pipeline.Output.ReadToEnd();
+                        throw;
+                    }
+                    if (pipeline.Error.Count > 0)
+                    {
+                        throw new MethodInvocationException(String.Join(Environment.NewLine, pipeline.Error.ReadToEnd()));
+                    }
                 }
             }
-            if (results == null)
-            {
-                return "";
-            }
-            foreach (var curPSObject in results)
-            {
-                if (curPSObject != null)
-                {
-                    resultstr.Append(curPSObject.ToString());
-                }
-                resultstr.Append(Environment.NewLine);
-            }
-            return resultstr.ToString();
+            return LastRawResults;
         }
 
         internal static void ImportModules(string[] modules)

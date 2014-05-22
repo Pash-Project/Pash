@@ -11,7 +11,7 @@ using System.Text;
 namespace Microsoft.PowerShell.Commands.Utility
 {
     [Cmdlet("New", "Object", DefaultParameterSetName = "Net")]
-    public sealed class NewObjectCommand : PSCmdlet
+    public sealed class NewObjectCommand : ObjectCommandBase
     {
         [Parameter(ParameterSetName = "Net", Mandatory = false, Position = 1)]
         public object[] ArgumentList { get; set; }
@@ -32,8 +32,47 @@ namespace Microsoft.PowerShell.Commands.Utility
         {
             Type type = new TypeName(this.TypeName).GetReflectionType();
 
-            var result = Activator.CreateInstance(type, this.ArgumentList);
+            var result = PSObject.AsPSObject(Activator.CreateInstance(type, this.ArgumentList));
+
+            if (Property != null)
+            {
+                AddProperties(result);
+            }
+
             WriteObject(result);
+        }
+
+        private void AddProperties(PSObject psobj)
+        {
+            foreach (var keyObj in Property.Keys)
+            {
+                var key = keyObj.ToString(); // should be a string anyway
+                var member = psobj.Members[key];
+                if (member == null)
+                {
+                    if (psobj.BaseObject is PSCustomObject)
+                    {
+                        var noteProperty = new PSNoteProperty(key, Property[key]);
+                        AddMemberToCollection(psobj.Properties, noteProperty, false);
+                        AddMemberToCollection(psobj.Members, noteProperty, false);
+                    }
+                    else
+                    {
+                        var msg = String.Format("A member with the name {0} doesn't exist", key);
+                        WriteError(new PSInvalidOperationException(msg).ErrorRecord);
+                    }
+                }
+                else if (member is PSMethodInfo)
+                {
+                    var method = member as PSMethodInfo;
+                    method.Invoke(Property[key]);
+                }
+                else if (member is PSPropertyInfo)
+                {
+                    var psproperty = member as PSPropertyInfo;
+                    psproperty.Value = Property[key];
+                }
+            }
         }
     }
 }

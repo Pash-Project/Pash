@@ -25,22 +25,22 @@ namespace ReferenceTests
         public void ExitInterruptsCommands()
         {
             var result = ReferenceHost.Execute("'foo'; exit 4; 'bar'");
-            Assert.AreEqual("foo" + Environment.NewLine, result);
+            Assert.AreEqual(NewlineJoin("foo"), result);
         }
 
         [Test]
         public void ExitInScriptOnlyEndsScript()
         {
-            var scriptname = CreateScript(NewlineJoin(new[] {
+            var scriptname = CreateScript(NewlineJoin(
                 "'foo'",
                 "exit 4",
                 "'bar'"
-            }));
-            var command = NewlineJoin(new[] {
+            ));
+            var command = NewlineJoin(
                 String.Format(". '{0}'", scriptname),
                 "$LastExitCode"
-            });
-            var expected = NewlineJoin(new[] { "foo", "4" });
+            );
+            var expected = NewlineJoin("foo", "4");
             var result = ReferenceHost.Execute(command);
             Assert.AreEqual(expected, result);
         }
@@ -50,14 +50,12 @@ namespace ReferenceTests
         [TestCase("3", "& { 3 }")]
         public void ExpressionsAreValidExitCodes(string expectedExitCode, string exitExpression)
         {
-            var scriptname = CreateScript(NewlineJoin(new[] {
-                "exit " + exitExpression
-            }));
-            var command = NewlineJoin(new[] {
+            var scriptname = CreateScript(NewlineJoin("exit " + exitExpression));
+            var command = NewlineJoin(
                 String.Format(". '{0}'", scriptname),
                 "$LastExitCode"
-            });
-            var expected = NewlineJoin(new[] { expectedExitCode });
+            );
+            var expected = NewlineJoin(expectedExitCode);
             var result = ReferenceHost.Execute(command);
             Assert.AreEqual(expected, result);
         }
@@ -68,15 +66,13 @@ namespace ReferenceTests
         [TestCase("True", "'some string'", false)]
         public void ExitCodeDefinesSuccess(string success, string exitCode, bool exitCodeValid)
         {
-            var scriptname = CreateScript(NewlineJoin(new[] {
-                "exit " + exitCode
-            }));
-            var command = NewlineJoin(new[] {
+            var scriptname = CreateScript(NewlineJoin("exit " + exitCode));
+            var command = NewlineJoin(
                 String.Format(". '{0}'", scriptname),
                 "$?",
                 "$LastExitCode"
-            });
-            var expected = NewlineJoin(new[] { success, exitCodeValid ? exitCode : "0" });
+            );
+            var expected = NewlineJoin(success, exitCodeValid ? exitCode : "0");
             var result = ReferenceHost.Execute(command);
             Assert.AreEqual(expected, result);
         }
@@ -84,15 +80,13 @@ namespace ReferenceTests
         [Test]
         public void ScriptWithoutExitIsSuccessfull()
         {
-            var scriptname = CreateScript(NewlineJoin(new[] {
-                "'foo'"
-            }));
-            var command = NewlineJoin(new[] {
+            var scriptname = CreateScript(NewlineJoin("'foo'"));
+            var command = NewlineJoin(
                 String.Format(". '{0}'", scriptname),
                 "$?",
                 "$LastExitCode"
-            });
-            var expected = NewlineJoin(new[] { "foo", "True", "" });
+            );
+            var expected = NewlineJoin("foo", "True", "");
             var result = ReferenceHost.Execute(command);
             Assert.AreEqual(expected, result);
         }
@@ -100,12 +94,12 @@ namespace ReferenceTests
         [Test, Explicit("Pipeline on-demand processing doesn't work")]
         public void ExitInScriptBlockExitsCompletely()
         {
-            var command = NewlineJoin(new[] {
+            var command = NewlineJoin(
                 "'foo'",
                 "& { 'bar'; exit; 'baz'; }",
                 "'blub'"
-            });
-            var expected = NewlineJoin(new[] { "foo", "bar" });
+            );
+            var expected = NewlineJoin("foo", "bar");
             var result = ReferenceHost.Execute(command);
             Assert.AreEqual(expected, result);
         }
@@ -113,13 +107,13 @@ namespace ReferenceTests
         [Test, Explicit("Pipeline on-demand processing doesn't work")]
         public void ExitInFunctionExitsCompletely()
         {
-            var command = NewlineJoin(new[] {
+            var command = NewlineJoin(
                 "function testfun { 'bar'; exit; 'baz'; }",
                 "'foo'",
                 "testfun",
                 "'blub'"
-            });
-            var expected = NewlineJoin(new[] { "foo", "bar" });
+            );
+            var expected = NewlineJoin("foo", "bar");
             var result = ReferenceHost.Execute(command);
             Assert.AreEqual(expected, result);
         }
@@ -138,7 +132,7 @@ namespace ReferenceTests
         {
             var process = CreatePowershellOrPashProcess("'foo'; & { exit 5; 'bar'; }; 'baz'");
             Assert.True(process.Start());
-            var expectedOutput = NewlineJoin(new[] { "foo" });
+            var expectedOutput = NewlineJoin("foo");
             var output = FinishProcess(process);
             Assert.AreEqual(5, process.ExitCode);
             Assert.AreEqual(expectedOutput, output);

@@ -1,8 +1,67 @@
 using System;
 using System.Management.Automation;
+using System.ComponentModel;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace TestPSSnapIn
 {
+    public class CustomTestClass
+    {
+        public string MessageProperty { get; set; }
+        public string MessageField { get; set; }
+
+        public CustomTestClass(string messageProperty, string messageField)
+        {
+            SetMessages(messageProperty, messageField);
+        }
+
+        public string Combine()
+        {
+            return MessageProperty + MessageField;
+        }
+
+        public void SetMessages(string messageProperty, string messageField)
+        {
+            MessageProperty = messageProperty;
+            MessageField = messageField;
+        }
+    }
+
+    public class InternalMessageClass
+    {
+        private string _msg;
+        public InternalMessageClass(string msg)
+        {
+            _msg = msg;
+        }
+        public string GetMessage()
+        {
+            return _msg;
+        }
+
+        public static explicit operator InternalMessageClass(FooMessageClass fooObject)
+        {
+            return new InternalMessageClass("cast_" + fooObject.GetInternalMessage());
+        }
+    }
+
+    public class FooMessageClass
+    {
+        public string _internalMsg;
+        public InternalMessageClass Foo;
+
+        public FooMessageClass(string msg)
+        {
+            Foo = new InternalMessageClass(msg);
+        }
+
+        public string GetInternalMessage()
+        {
+            return _internalMsg;
+        }
+    }
+
     [Cmdlet(VerbsDiagnostic.Test, "PSSnapin")]
     public class TestCommand : PSCmdlet
     {
@@ -12,6 +71,25 @@ namespace TestPSSnapIn
         protected override void ProcessRecord()
         {
             WriteObject(OutputString);
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "WithMandatory")]
+    public class TestWithMandatoryCommand : PSCmdlet
+    {
+        public const string HELP_MSG = "Just provide some Message";
+
+        [Parameter(Mandatory = true, HelpMessage = HELP_MSG)]
+        public string OutputString { get; set; }
+
+        public static string Transform(string value)
+        {
+            return ">" + value.ToUpper() + "<";
+        }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(Transform(OutputString));
         }
     }
 
@@ -183,6 +261,168 @@ namespace TestPSSnapIn
         protected override void ProcessRecord()
         {
             WriteObject("1:" + Arg1 + ", 2:" + Arg2);
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "DefaultSetIsAllParameterSetAndTwoParameterSets",
+        DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
+    public sealed class TestDefaultSetIsAllParameterSetAndTwoParameterSetsCommand : PSCmdlet
+    {
+        [Parameter(Position = 0)]
+        [ValidateNotNullOrEmpty]
+        public string First { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            if (First == null) {
+                WriteObject("First: null");
+            } else {
+                WriteObject("First:" + First);
+            }
+        }
+        
+        [Parameter(Position = 1, ParameterSetName = "Set1")]
+        [Parameter(Position = 1, ParameterSetName = "Set2")]
+        [ValidateNotNullOrEmpty]
+        public string Second { get; set; }
+
+        [Parameter(ParameterSetName = "Set1")]
+        public SwitchParameter ListAvailable { get; set; }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "TwoAmbiguousParameterSets")]
+    public sealed class TestTwoAmbiguousParameterSetsCommand : PSCmdlet
+    {
+        [Parameter(Position = 0)]
+        [ValidateNotNullOrEmpty]
+        public string First { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            if (First == null) {
+                WriteObject("First: null");
+            } else {
+                WriteObject("First:" + First);
+            }
+        }
+        
+        [Parameter(Position = 1, ParameterSetName = "Set1")]
+        [Parameter(Position = 1, ParameterSetName = "Set2")]
+        [ValidateNotNullOrEmpty]
+        public string Second { get; set; }
+
+        [Parameter(ParameterSetName = "Set1")]
+        public SwitchParameter ListAvailable { get; set; }
+    }
+ 
+    [Cmdlet(VerbsDiagnostic.Test, "CreateCustomObject")]
+    public class TestCreateCustomObjectCommand : PSCmdlet
+    {
+        [Parameter(Position = 0)]
+        public string CustomMessageProperty { get; set; }
+
+        [Parameter(Position = 1)]
+        public string CustomMessageField { get; set; }
+
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(new CustomTestClass(CustomMessageProperty ?? "", CustomMessageField ?? ""));
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "ParametersByPipelinePropertyNames")]
+    public class TestParametersByPipelinePropertyNamesCommand : PSCmdlet
+    {
+        [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 1)]
+        [Alias(new string[] { "Baz" })]
+        public string Foo { get; set; }
+
+        [Parameter(Mandatory = false, ValueFromPipelineByPropertyName = true, Position = 0)]
+        public string Bar { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(Foo + " " + Bar);
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "CreateFooMessageObject")]
+    public class TestCreateFooMessageObjectCommand : PSCmdlet
+    {
+        [Parameter(Mandatory = true, Position = 0)]
+        public string Msg { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(new FooMessageClass(Msg));
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "ParametersByPipelineWithPropertiesAndConversion")]
+    public class TestParametersByPipelineWithPropertiesAndConversionCommand : PSCmdlet
+    {
+        [Parameter(Mandatory = true, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
+        [Alias(new string[] { "Baz" })]
+        public InternalMessageClass Foo { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(Foo.GetMessage());
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "ParameterUsesCustomTypeWithTypeConverter")]
+    public sealed class TestParameterUsesCustomTypeWithTypeConverterCommand : PSCmdlet
+    {
+        [Parameter(Mandatory = true, Position = 0)]
+        public Custom CustomTypeParameter { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(string.Format("CustomType.Id='{0}'", CustomTypeParameter.Id));
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "IntegerArraySum")]
+    public sealed class TestIntegerArraySumCommand : PSCmdlet
+    {
+        [Parameter(Mandatory = true)]
+        public int[] IntArray { get; set; }
+
+        public static string Transform(int[] arr)
+        {
+            int s = 0;
+            foreach (var i in arr)
+            {
+                s += i;
+            }
+            return "l=" + arr.Length + ",s=" + s;
+        }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(Transform(IntArray));
+        }
+    }
+
+    [TypeConverter(typeof(CustomTypeConverter))]
+    public class Custom
+    {
+        public string Id { get; set; }
+    }
+
+    public class CustomTypeConverter : TypeConverter
+    {
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            return sourceType == typeof(string);
+        }
+
+        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        {
+            string stringValue = value as string;
+            return new Custom { Id = stringValue };
         }
     }
 }

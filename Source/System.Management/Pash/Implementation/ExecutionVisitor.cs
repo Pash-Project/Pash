@@ -357,9 +357,15 @@ namespace System.Management.Pash.Implementation
             expressionAst.Visit(subVisitor);
             var result = subVisitor._pipelineCommandRuntime.OutputStream.Read();
 
-            if (result.Count == 0) return null;
-            if (result.Count == 1) return result.Single();
-            return result;
+            if (result.Count == 0)
+            {
+                return null;
+            }
+            else if (result.Count == 1)
+            {
+                return result.Single();
+            }
+            return result.ToArray();
         }
 
         public override AstVisitAction VisitConstantExpression(ConstantExpressionAst constantExpressionAst)
@@ -395,11 +401,17 @@ namespace System.Management.Pash.Implementation
                     // if we only have that one expression and no commands, write expression to output and return
                     if (pipelineCommandCount == 1)
                     {
-                        _pipelineCommandRuntime.WriteObject(value, true);
+                        if (value != null)
+                        {
+                            _pipelineCommandRuntime.WriteObject(value, true);
+                        }
                         return AstVisitAction.SkipChildren;
                     }
                     // otherwise write value to input of pipeline to be processed
-                    pipeline.Input.Write(value, true);
+                    if (value != null)
+                    {
+                        pipeline.Input.Write(value, true);
+                    }
                     startAt = 1;
                 }
                 else // if there was no expression we take the input of the context's input stream
@@ -438,7 +450,7 @@ namespace System.Management.Pash.Implementation
                     // read output and error and write them as results of the current commandRuntime
                     foreach (var curResult in results)
                     {
-                        _pipelineCommandRuntime.WriteObject(curResult, true);
+                        _pipelineCommandRuntime.WriteObject(curResult);
                     }
                     var errors = pipeline.Error.NonBlockingRead();
                     foreach (var curError in errors)
@@ -477,8 +489,7 @@ namespace System.Management.Pash.Implementation
         {
             var variable = GetVariable(variableExpressionAst);
             var value = (variable != null) ? variable.Value : null;
-            var expandEnumerable = !variableExpressionAst.PreventEnumerationOnEvaluation;
-            this._pipelineCommandRuntime.WriteObject(value, expandEnumerable);
+            this._pipelineCommandRuntime.WriteObject(value);
 
             return AstVisitAction.SkipChildren;
         }
@@ -492,61 +503,84 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitAssignmentStatement(AssignmentStatementAst assignmentStatementAst)
         {
-            var rightValue = EvaluateAst(assignmentStatementAst.Right);
+            ExpressionAst expressionAst = assignmentStatementAst.Left;
+            var isEquals = assignmentStatementAst.Operator == TokenKind.Equals;
+            var isVariableAssignment = expressionAst is VariableExpressionAst;
+            var rightValueRes = EvaluateAst(assignmentStatementAst.Right);
+            // a little ugly, but we need to stay dynamic. It's crucial that a psobject isn't unpacked if it's simply
+            // assigned to a variable, otherwise we could lose some important properties
+            // TODO: this is more like a workaround. PSObject should implement implicit casting,
+            // then no checks and .BaseObject calls should be necessary anymore
+            bool unpackPSObject = !isEquals || !isVariableAssignment;
+            dynamic rightValue = (rightValueRes is PSObject && unpackPSObject) ?
+                ((PSObject)rightValueRes).BaseObject : rightValueRes;
             object newValue = rightValue;
 
-            ExpressionAst expressionAst = assignmentStatementAst.Left;
-            var variableExpressionAst = expressionAst as VariableExpressionAst;
-            if (variableExpressionAst == null) throw new NotImplementedException(expressionAst.ToString());
+            dynamic currentValueRes = isEquals ? null : EvaluateAst(assignmentStatementAst.Left);
+            dynamic currentValue = (currentValueRes != null && currentValueRes is PSObject && unpackPSObject) ?
+                                   ((PSObject)currentValueRes).BaseObject : currentValueRes;
 
             if (assignmentStatementAst.Operator == TokenKind.Equals)
             {
-                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, rightValue);
+                newValue = rightValue;
             }
-
             else if (assignmentStatementAst.Operator == TokenKind.PlusEquals)
             {
-                dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
-                dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
-                newValue = currentValue + assignmentValue;
-                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
+                newValue = currentValue + rightValue;
             }
-
             else if (assignmentStatementAst.Operator == TokenKind.MinusEquals)
             {
-                dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
-                dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
-                newValue = currentValue - assignmentValue;
-                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
+                newValue = currentValue - rightValue;
             }
-
             else if (assignmentStatementAst.Operator == TokenKind.MultiplyEquals)
             {
-                dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
-                dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
-                newValue = currentValue * assignmentValue;
-                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
+                newValue = currentValue * rightValue;
             }
-
             else if (assignmentStatementAst.Operator == TokenKind.DivideEquals)
             {
-                dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
-                dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
-                newValue = currentValue / assignmentValue;
-                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
+                newValue = currentValue / rightValue;
             }
-
             else if (assignmentStatementAst.Operator == TokenKind.RemainderEquals)
             {
-                dynamic currentValue = _context.GetVariableValue(variableExpressionAst.VariablePath.UserPath);
-                dynamic assignmentValue = ((PSObject)rightValue).BaseObject;
-                newValue = currentValue % assignmentValue;
-                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, newValue);
+                newValue = currentValue % rightValue;
+            }
+            else
+            {
+                throw new NotImplementedException("Unsupported operator: " + assignmentStatementAst.Operator.ToString());
             }
 
-            if (this._writeSideEffectsToPipeline) this._pipelineCommandRuntime.WriteObject(newValue);
+            if (this._writeSideEffectsToPipeline)
+            {
+                this._pipelineCommandRuntime.WriteObject(newValue);
+            }
+
+            if (isVariableAssignment)
+            {
+                _context.SetVariable(((VariableExpressionAst) expressionAst).VariablePath.UserPath, newValue);
+            }
+            else if (expressionAst is MemberExpressionAst)
+            {
+                SetMemberExpressionValue((MemberExpressionAst) expressionAst, newValue);
+            }
+            else
+            {
+                var msg = String.Format("The expression type '{0}' is currently not supported for assignments",
+                                        expressionAst.GetType().ToString());
+                throw new NotImplementedException(msg);
+            }
 
             return AstVisitAction.SkipChildren;
+        }
+
+        private void SetMemberExpressionValue(MemberExpressionAst memberExpressionAst, object value)
+        {
+            string memberName;
+            var member = GetPSObjectMemberFromMemberExpression(memberExpressionAst, out memberName);
+            if (member == null)
+            {
+                throw new PSArgumentNullException(String.Format("Member '{0}' to be assigned is null", memberName));
+            }
+            member.Value = value;
         }
 
         public override AstVisitAction VisitFunctionDefinition(FunctionDefinitionAst functionDefinitionAst)
@@ -557,7 +591,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitIndexExpression(IndexExpressionAst indexExpressionAst)
         {
-            var targetValue = EvaluateAst(indexExpressionAst.Target);
+            var targetValue = EvaluateAst(indexExpressionAst.Target, true);
 
             object index = EvaluateAst(indexExpressionAst.Index);
 
@@ -634,79 +668,63 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitInvokeMemberExpression(InvokeMemberExpressionAst methodCallAst)
         {
-            var expression = methodCallAst.Expression;
-
-            ObjectInfo objectInfo = GetObjectInfo(expression);
-
-            var arguments = methodCallAst.Arguments.Select(EvaluateAst).Select(o => o is PSObject ? ((PSObject)o).BaseObject : o);
-
-            if (methodCallAst.Member is StringConstantExpressionAst)
+            string memberName;
+            var method = GetPSObjectMemberFromMemberExpression(methodCallAst, out memberName) as PSMethodInfo;
+            if (method == null)
             {
-                var name = (methodCallAst.Member as StringConstantExpressionAst).Value;
-                var method = objectInfo.GetMethod(name, arguments, methodCallAst.Static);
-
-                var result = method.Invoke(objectInfo.Object, arguments.ToArray());
-
-                _pipelineCommandRuntime.WriteObject(result);
-                return AstVisitAction.SkipChildren;
+                throw new PSArgumentException(String.Format("The object has no method called '{0}'", memberName));
             }
-
-            throw new NotImplementedException(this.ToString());
+            var arguments = methodCallAst.Arguments.Select(EvaluateAst).Select(o => o is PSObject ? ((PSObject)o).BaseObject : o);
+            var result = method.Invoke(arguments.ToArray());
+            if (result != null)
+            {
+                _pipelineCommandRuntime.WriteObject(PSObject.AsPSObject(result));
+            }
+            return AstVisitAction.SkipChildren;
         }
 
-        private ObjectInfo GetObjectInfo(ExpressionAst expression)
+        private PSObject EvaluateAsPSObject(ExpressionAst expression)
         {
-            // we want an object. so if the expression is a variable including an enumerable object (e.g. collection)
+            // if the expression is a variable including an enumerable object (e.g. collection)
             // then we want the collection itself. The enumerable object should only be expanded when being processed
             // e.g. in a pipeline
-            var variableExpression = expression as VariableExpressionAst;
-            if (variableExpression != null)
+            return PSObject.AsPSObject(EvaluateAst(expression, false));
+        }
+
+        private PSMemberInfo GetPSObjectMemberFromMemberExpression(MemberExpressionAst memberExpressionAst, out string memberName)
+        {
+            var psobj = EvaluateAsPSObject(memberExpressionAst.Expression);
+            var memberNameObj = EvaluateAst(memberExpressionAst.Member, false);
+            if (memberNameObj == null)
             {
-                variableExpression.PreventEnumerationOnEvaluation = true;
+                throw new PSArgumentNullException("Member name evaluates to null");
             }
-            return new ObjectInfo(EvaluateAst(expression));
+            memberName = memberNameObj.ToString();
+            if (memberExpressionAst.Static)
+            {
+                return psobj.StaticMembers[memberName];
+            }
+            return psobj.Members[memberName];
         }
 
         public override AstVisitAction VisitMemberExpression(MemberExpressionAst memberExpressionAst)
         {
-            var expression = memberExpressionAst.Expression;
-
-            ObjectInfo objectInfo = GetObjectInfo(expression);
-
-            if (memberExpressionAst.Member is StringConstantExpressionAst)
-            {
-                object result = null;
-                var name = (memberExpressionAst.Member as StringConstantExpressionAst).Value;
-
-                var memberInfo = objectInfo.GetMember(name, memberExpressionAst.Static);
-
-                if (memberInfo != null)
-                {
-                    switch (memberInfo.MemberType)
-                    {
-                        case MemberTypes.Field:
-                            result = ((FieldInfo)memberInfo).GetValue(objectInfo.Object);
-                            break;
-
-                        case MemberTypes.Property:
-                            result = ((PropertyInfo)memberInfo).GetValue(objectInfo.Object, null);
-                            break;
-
-                        default:
-                            throw new NotImplementedException(this.ToString());
-                    }
-                }
-
-                _pipelineCommandRuntime.WriteObject(result);
-                return AstVisitAction.SkipChildren;
-            }
-
-            throw new NotImplementedException(this.ToString());
+            string memberName;
+            var member = GetPSObjectMemberFromMemberExpression(memberExpressionAst, out memberName);
+            var value = PSObject.AsPSObject((member == null) ? null : member.Value);
+            _pipelineCommandRuntime.WriteObject(value);
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitArrayLiteral(ArrayLiteralAst arrayLiteralAst)
         {
-            _pipelineCommandRuntime.WriteObject(arrayLiteralAst.Elements.Select(EvaluateAst).ToArray(), true);
+            var arrayList = new List<object>();
+            var preventEnum = arrayLiteralAst.Elements.Count > 1;
+            foreach (var el in arrayLiteralAst.Elements)
+            {
+                arrayList.Add(EvaluateAst(el));
+            }
+            _pipelineCommandRuntime.WriteObject(arrayList.ToArray(), false);
 
             return AstVisitAction.SkipChildren;
         }
@@ -770,11 +788,27 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitArrayExpression(ArrayExpressionAst arrayExpressionAst)
         {
-            foreach (var statement in arrayExpressionAst.SubExpression.Statements)
+            List<object> elements = new List<object>();
+            var numStatements = arrayExpressionAst.SubExpression.Statements.Count;
+            foreach (var stmt in arrayExpressionAst.SubExpression.Statements)
             {
-                var value = EvaluateAst(statement, false);
-                this._pipelineCommandRuntime.WriteObject(value, true);
+                var result = EvaluateAst(stmt, false);
+                // expand if only one element and it is enumerable
+                var enumerator = GetEnumerator(result, false);
+                if (numStatements > 1 || enumerator == null)
+                {
+                    elements.Add(result);
+                }
+                else
+                {
+                    while (enumerator.MoveNext())
+                    {
+                        elements.Add(enumerator.Current);
+                    }
+                }
             }
+
+            this._pipelineCommandRuntime.WriteObject(elements.ToArray());
 
             return AstVisitAction.SkipChildren;
         }
@@ -877,7 +911,12 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitForEachStatement(ForEachStatementAst forEachStatementAst)
         {
             object enumerable = EvaluateAst(forEachStatementAst.Condition);
-            IEnumerator enumerator = GetEnumerator(enumerable);
+            IEnumerator enumerator = GetEnumerator(enumerable, false);
+
+            if (enumerator == null)
+            {
+                enumerator = new [] { enumerable }.GetEnumerator();
+            }
 
             while (enumerator.MoveNext())
             {
@@ -888,13 +927,16 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
-        private IEnumerator GetEnumerator(object obj)
+        private IEnumerator GetEnumerator(object obj, bool enumerateString)
         {
             if (obj is PSObject)
             {
                 obj = ((PSObject)obj).BaseObject;
             }
-
+            if (!enumerateString && obj is string)
+            {
+                return null;
+            }
             return _pipelineCommandRuntime.GetEnumerator(obj);
         }
 

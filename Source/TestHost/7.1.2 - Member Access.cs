@@ -27,7 +27,7 @@ namespace TestHost
         }
 
         // Taken from the spec, section 7.1.2
-        [Test, Explicit]
+        [Test]
         public void InstanceProperty()
         {
             var result = TestHost.Execute(true, @"
@@ -85,32 +85,32 @@ $path::GetExtension('test.txt')
         [Test]
         public void NoParametersTest()
         {
-            var result = TestHost.Execute(@"'a'.GetType()");
-            Assert.AreEqual("System.String" + Environment.NewLine, result);
+            var result = TestHost.Execute(@"'a'.GetType().Name");
+            Assert.AreEqual(typeof(System.String).Name + Environment.NewLine, result);
         }
 
         [Test]
         [TestCase(@"[math]::Sqrt(2.0)				# call method with argument 2.0", Explicit = true)]
-        [TestCase(@"[char]::IsUpper(""a"")			# call method", Explicit = true, Description = "requires conversion")]
+        [TestCase(@"[char]::IsUpper(""a"")			# call method")]
         [TestCase(//@"$b = ""abc#$%XYZabc""",       // This hits some issues in the tokenizer.
                   @"$b = ""abcXYZabc""",            // punting for now
                   @"$b.ToUpper()					# call instance method")]
-        [TestCase(@"[math]::Sqrt(2) 				# convert 2 to 2.0 and call method", Explicit = true)]
+        [TestCase(@"[math]::Sqrt(2) 				# convert 2 to 2.0 and call method")]
         [TestCase(@"[math]::Sqrt(2D) 				# convert 2D to 2.0 and call method", Explicit = true)]
-        [TestCase(@"[math]::Sqrt($true) 			# convert $true to 1.0 and call method", Explicit = true)]
-        [TestCase(@"[math]::Sqrt(""20"") 			# convert ""20"" to 20 and call method", Explicit = true)]
+        [TestCase(@"[math]::Sqrt($true) 			# convert $true to 1.0 and call method")]
+        [TestCase(@"[math]::Sqrt(""20"") 			# convert ""20"" to 20 and call method")]
         [TestCase(@"$a = [math]::Sqrt				# get method descriptor for Sqrt
                     $a.Invoke(2.0)					# call Sqrt via the descriptor
                     $a = [math]::(""Sq""+""rt"")	# get method descriptor for Sqrt
                     $a.Invoke(2.0) 					# call Sqrt via the descriptor", Explicit = true)]
         [TestCase(@"$a = [char]::ToLower			# get method descriptor for ToLower
-                    $a.Invoke(""X"")				# call ToLower via the descriptor", Explicit = true)]
+                    $a.Invoke(""X"")				# call ToLower via the descriptor")]
         public void Section7_1_3_InvocationExpressions(params string[] input)
         {
             var result = TestHost.Execute(input);
         }
 
-        [Test, Explicit]
+        [Test]
         public void InstancePropertyNameIsVariable()
         {
             var result = TestHost.Execute(true, @"
@@ -154,15 +154,14 @@ $a.$property				# property name is a variable
             Assert.AreEqual(double.PositiveInfinity + Environment.NewLine, result);
         }
 
-        [Test, Explicit]
+        [Test]
         public void StaticPropertyNameIsAVariable()
         {
             var result = TestHost.Execute(true, @"
 $property = ""MinValue""
 [long]::$property					# property name is a variable
 ");
-
-            Assert.AreEqual("3" + Environment.NewLine, result);
+            Assert.AreEqual(long.MinValue + Environment.NewLine, result);
         }
 
         [Test, Explicit]

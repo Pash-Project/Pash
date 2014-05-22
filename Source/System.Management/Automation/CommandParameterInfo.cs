@@ -36,6 +36,7 @@ namespace System.Management.Automation
             ValueFromPipelineByPropertyName = paramAttr.ValueFromPipelineByPropertyName;
             ValueFromRemainingArguments = paramAttr.ValueFromRemainingArguments;
             IsMandatory = paramAttr.Mandatory;
+            HelpMessage = paramAttr.HelpMessage;
 
             List<Attribute> attributes = new List<Attribute>(1);
             attributes.Add(paramAttr);
@@ -47,6 +48,10 @@ namespace System.Management.Automation
                 List<string> aliases = new List<string>(aliasAttr.AliasNames);
                 Aliases = new ReadOnlyCollection<string>(aliases);
                 attributes.Add(aliasAttr);
+            }
+            else
+            {
+                Aliases = new ReadOnlyCollection<string>(new List<string>());
             }
 
             Attributes = new ReadOnlyCollection<Attribute>(attributes);

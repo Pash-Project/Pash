@@ -4,15 +4,25 @@
 
 using System;
 using System.Management.Automation;
+using Microsoft.PowerShell.Commands.Utility;
 
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Format", "List")]
-    public class FormatListCommand : PSCmdlet
+    public class FormatListCommand : FormatShapeCommandBase
     {
-        public FormatListCommand()
+        
+        [Parameter(Position = 0)]
+        public object[] Property { get; set; }
+
+        public FormatListCommand() : base(FormatShape.List)
         {
-            throw new NotImplementedException();
+        }
+
+        protected override void BeginProcessing()
+        {
+            base.BeginProcessing();
+            FormatManager.Options.Properties = Property;
         }
     }
 }

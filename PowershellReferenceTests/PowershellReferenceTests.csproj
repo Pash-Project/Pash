@@ -46,14 +46,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Source\ReferenceTests\ArrayTests.cs">
+      <Link>ArrayTests.cs</Link>
+    </Compile>
     <Compile Include="..\Source\ReferenceTests\CmdletParameterTests.cs">
       <Link>CmdletParameterTests.cs</Link>
     </Compile>
     <Compile Include="..\Source\ReferenceTests\ExitTests.cs">
       <Link>ExitTests.cs</Link>
     </Compile>
+    <Compile Include="..\Source\ReferenceTests\ObjectCommandTests.cs">
+      <Link>ObjectCommandTests.cs</Link>
+    </Compile>
     <Compile Include="..\Source\ReferenceTests\PipelineExecutionTests.cs">
       <Link>PipelineExecutionTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ReferenceTests\PSObjectTests.cs">
+      <Link>PSObjectTests.cs</Link>
     </Compile>
     <Compile Include="..\Source\ReferenceTests\ReferenceHost.cs">
       <Link>ReferenceHost.cs</Link>
@@ -63,6 +72,9 @@
     </Compile>
     <Compile Include="..\Source\ReferenceTests\ReturnTests.cs">
       <Link>ReturnTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ReferenceTests\TypeConverterTests.cs">
+      <Link>TypeConverterTests.cs</Link>
     </Compile>
     <Compile Include="..\Source\TestPSSnapIn\TestCommands.cs">
       <Link>TestCommands.cs</Link>
