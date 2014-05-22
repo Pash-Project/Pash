@@ -21,8 +21,7 @@ namespace System.Management.Automation
 
         public override void Add(T member)
         {
-            T mbrInfo = (T) member.Copy();
-            _collection.Add(mbrInfo);
+            _collection.Add(member);
         }
 
         public override T this[string name]

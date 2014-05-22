@@ -2,6 +2,7 @@ using System;
 using NUnit.Framework;
 using System.Management.Automation;
 using TestPSSnapIn;
+using System.Runtime.Remoting;
 
 namespace ReferenceTests
 {
@@ -166,6 +167,21 @@ namespace ReferenceTests
                 "$c.Invoke()"
             ));
             Assert.AreEqual(NewlineJoin("blablub"), result);
+        }
+
+        [Test]
+        public void PSObjectIsntCopiedAndPropertyIsUpdatable()
+        {
+            var result = ReferenceHost.Execute(NewlineJoin(
+                "$a = new-object psobject -property @{foo='a';bar='b';baz='c'}",
+                "$b = $a",
+                "$a.baz",
+                "$b.baz",
+                "$b.baz='d'",
+                "$a.baz",
+                "$b.baz"
+            ));
+            Assert.AreEqual(NewlineJoin("c", "c", "d", "d"), result);
         }
     }
 }
