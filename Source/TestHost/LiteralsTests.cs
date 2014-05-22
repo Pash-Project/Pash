@@ -17,7 +17,7 @@ namespace TestHost
         ////      
         ////          This operator is left associative.
         ////      
-        [Test(Description = "from the spec"), Explicit("NYI")]
+        [Test(Description = "from the spec")]
         public void AdditionExamples()
         {
             ////          12 + -10L               # long result 2
@@ -49,6 +49,26 @@ namespace TestHost
         public void VerbatimString()
         {
             Assert.AreEqual("xxx" + Environment.NewLine, TestHost.Execute("'xxx'"));
+        }
+
+        [Test]
+        [TestCase("1.1 + 2.3", "3.4")]
+        [TestCase("1 + 0.4", "1.4")]
+        [TestCase("0.4 + 1", "1.4")]
+        [TestCase("1.1 + \"2.3\"", "3.4")]
+        [TestCase("1.1 + 0xab", "172.1")]
+        [TestCase("0xab + 1.1", "172.1")]
+        [TestCase("-1.1 + 2.3", "1.2")]
+        [TestCase("1KB + 2.2", "1026.2")]
+        [TestCase("2.2 + 1KB", "1026.2")]
+        [TestCase("1.1kb + 1.2kb", "2355.2")]
+        [TestCase("-10.300D + 12", "1.700")]
+        [TestCase("-10.300D + 12.1", "1.800")]
+        [TestCase("12 + 10.300D", "22.300")]
+        [TestCase("12.1 + 10.300D", "22.400")]
+        public void AddReals(string input, string result)
+        {
+            Assert.AreEqual(result + Environment.NewLine, TestHost.Execute(input));
         }
     }
 }

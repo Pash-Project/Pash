@@ -61,7 +61,7 @@ namespace Extensions.Reflection
 
         public static bool IsSimple(this Type @t)
         {   
-            return (t.IsPrimitive || t == typeof(string));
+            return (t.IsPrimitive || t == typeof(string) || t == typeof(Decimal));
         }
     }
 }

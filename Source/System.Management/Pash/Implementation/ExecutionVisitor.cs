@@ -320,9 +320,30 @@ namespace System.Management.Pash.Implementation
 
             if (leftValue is string) return leftValue + rightValue.ToString();
 
-            if (leftValue is int) return (int)leftValue + Convert.ToInt32(rightValue);
+            if (leftValue is decimal) return (decimal)leftValue + Convert.ToDecimal(rightValue);
+
+            if (rightValue is decimal) return Convert.ToDecimal(leftValue) + (decimal)rightValue;
+
+            if (leftValue is double) return (double)leftValue + Convert.ToDouble(rightValue);
+
+            if (rightValue is double) return Convert.ToDouble(leftValue) + (double)rightValue;
+
+            if (leftValue is int) return (int)leftValue + ConvertToInt32(rightValue);
 
             throw new NotImplementedException(this.ToString());
+        }
+
+        private int ConvertToInt32(object rightValue)
+        {
+            if (rightValue is string)
+            {
+                string stringValue = (string)rightValue;
+                if (stringValue.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Convert.ToInt32(stringValue, 16);
+                }
+            }
+            return Convert.ToInt32(rightValue);
         }
 
         object EvaluateAst(Ast expressionAst)

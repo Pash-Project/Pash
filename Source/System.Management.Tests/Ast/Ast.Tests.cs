@@ -877,6 +877,22 @@ ls
         }
 
         [Test]
+        [TestCase("1mb", 1048576)]
+        [TestCase("1MB", 1048576)]
+        [TestCase("1kb", 1024)]
+        [TestCase("1gb", 1073741824)]
+        [TestCase("1tb", 1099511627776)]
+        [TestCase("1pb", 1125899906842624)]
+        public void IntegerWithNumericMultiplier(string expression, object result)
+        {
+            var expressionValue = ParseStatement(expression)
+                .PipelineElements[0]
+                .Expression
+                .Value;
+            Assert.AreEqual(result, expressionValue);
+        }
+
+        [Test]
         public void ExpandableStringLiteralExpression()
         {
             string value = ParseStatement("\"PS> \"")
@@ -962,6 +978,22 @@ ls
                 .Value;
 
             Assert.AreEqual(0xa, result);
+        }
+
+        [Test]
+        [TestCase("0x12kb", 18432)]
+        [TestCase("0x12mb", 18874368)]
+        [TestCase("0x12gb", 19327352832)]
+        [TestCase("0x12tb", 19791209299968)]
+        [TestCase("0x12pb", 20266198323167232)]
+        public void HexIntegerWithNumericMultiplierTest(string expression, object expectedResult)
+        {
+            var result = ParseStatement(expression)
+                .PipelineElements[0]
+                .Expression
+                .Value;
+
+            Assert.AreEqual(expectedResult, result);
         }
 
         [Test]
@@ -1607,6 +1639,236 @@ ls
                 Assert.AreEqual(1, extent.StartColumnNumber);
                 Assert.AreEqual(input.Length + 1, extent.EndColumnNumber);
                 Assert.AreEqual(null, extent.File);
+            }
+        }
+
+        [TestFixture]
+        public class RealLiteralExpressionTests
+        {
+            dynamic ParseConstantExpression(string input)
+            {
+                return ParseStatement(input)
+                    .PipelineElements[0]
+                    .Expression;
+            }
+
+            [Test]
+            public void Value()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("1.2");
+                Assert.AreEqual(1.2, expression.Value);
+            }
+
+            [Test]
+            public void StaticType()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("1.2");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            public void Text()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("1.2");
+                Assert.AreEqual("1.2", expression.Extent.Text);
+            }
+
+            [Test]
+            public void StaticTypeExponentWithNoSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("3.45e3");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            [Ignore("Grammar does not support this. PowerShell spec does not include this even though it is supported")]
+            public void StaticTypeDotPrecedesSingleDigitExponentWithNoSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("3.e3");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            public void StaticTypeStartingDotThenFollowedByExponentWithNoSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression(".45e35");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            public void StaticTypeExponentNoSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("2.45e35");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            public void StaticTypeSingleDigitExponentWithPositiveSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("32.2e+3");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            [Ignore("Grammar does not support this. PowerShell spec does not include this even though it is supported")]
+            public void StaticTypeDotPrecedingExponentWithPositiveSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("32.e+12");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            public void StaticTypeSingleDigitExponentWithNegativeSignSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("123.456e-2");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            public void StaticTypeExponentWithNegativeSignSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("123.456e-231");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            public void StaticTypeExponentInUpperCaseWithNegativeSignSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("123.456E-231");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            [Ignore("Grammar does not support this. PowerShell spec does not include this even though it is supported")]
+            public void StaticTypeDotPrecedingExponentWithNegativeSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("32.e+12");
+                Assert.AreEqual(typeof(double), expression.StaticType);
+            }
+
+            [Test]
+            public void TooBigForDouble()
+            {
+                Assert.Throws<OverflowException>(() => ParseConstantExpression("2.2e500"));
+            }
+
+            [Test]
+            [TestCase("1.5mb", 1572864)]
+            [TestCase("1.5MB", 1572864)]
+            [TestCase("1.5kb", 1536)]
+            [TestCase("1.5gb", 1610612736)]
+            [TestCase("0.5tb", 549755813888)]
+            [TestCase("0.5pb", 562949953421312)]
+            public void NumericMultiplier(string expression, double result)
+            {
+                ConstantExpressionAst constExpression = ParseConstantExpression(expression);
+                Assert.AreEqual(typeof(double), constExpression.StaticType);
+                Assert.AreEqual(result, constExpression.Value);
+            }
+        }
+
+        [TestFixture]
+        public class DecimalRealLiteralExpressionTests
+        {
+            dynamic ParseConstantExpression(string input)
+            {
+                return ParseStatement(input)
+                    .PipelineElements[0]
+                    .Expression;
+            }
+
+            [Test]
+            public void Value()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("1.2d");
+                Assert.AreEqual(1.2m, expression.Value);
+            }
+
+            [Test]
+            public void StaticType()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("1.2d");
+                Assert.AreEqual(typeof(decimal), expression.StaticType);
+            }
+
+            [Test]
+            public void Text()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("1.2d");
+                Assert.AreEqual("1.2d", expression.Extent.Text);
+            }
+
+            [Test]
+            public void StaticTypeExponentWithNoSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("3.45e3d");
+                Assert.AreEqual(typeof(decimal), expression.StaticType);
+            }
+
+            [Test]
+            [Ignore("Grammar does not support this. PowerShell spec does not include this even though it is supported")]
+            public void StaticTypeDotPrecedesSingleDigitExponentWithNoSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("3.e3d");
+                Assert.AreEqual(typeof(decimal), expression.StaticType);
+            }
+
+            [Test]
+            public void StaticTypeSingleDigitExponentWithPositiveSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("32.2e+3d");
+                Assert.AreEqual(typeof(decimal), expression.StaticType);
+            }
+
+            [Test]
+            [Ignore("Treats '32.' as integer.")]
+            public void StaticTypeDotPrecedingExponentWithPositiveSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("32.e+12d");
+                Assert.AreEqual(typeof(decimal), expression.StaticType);
+            }
+
+            [Test]
+            public void StaticTypeSingleDigitExponentWithNegativeSignSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("123.456e-2d");
+                Assert.AreEqual(typeof(decimal), expression.StaticType);
+            }
+
+            [Test]
+            public void StaticTypeExponentWithNegativeSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("123.456e-231D");
+                Assert.AreEqual(typeof(decimal), expression.StaticType);
+            }
+
+            [Test]
+            public void StaticTypeExponentInUpperCaseWithNegativeSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("123.456E-231d");
+                Assert.AreEqual(typeof(decimal), expression.StaticType);
+            }
+
+            [Test]
+            [Ignore("Grammar does not support this. PowerShell spec does not include this even though it is supported")]
+            public void StaticTypeDotPrecedingExponentWithNegativeSign()
+            {
+                ConstantExpressionAst expression = ParseConstantExpression("32.e+12d");
+                Assert.AreEqual(typeof(decimal), expression.StaticType);
+            }
+
+            [Test]
+            [TestCase("1.5Dmb", 1572864)]
+            [TestCase("1.5dMB", 1572864)]
+            [TestCase("1.5Dkb", 1536)]
+            [TestCase("1.5dgb", 1610612736)]
+            [TestCase("0.5Dtb", 549755813888.0)]
+            [TestCase("0.5Dpb", 562949953421312.0)]
+            public void NumericMultiplier(string expression, decimal result)
+            {
+                ConstantExpressionAst constExpression = ParseConstantExpression(expression);
+                Assert.AreEqual(typeof(decimal), constExpression.StaticType);
+                Assert.AreEqual(result, constExpression.Value);
             }
         }
     }

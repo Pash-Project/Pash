@@ -444,6 +444,7 @@
     <Compile Include="Pash\Implementation\ProviderRuntime.cs" />
     <Compile Include="Pash\Implementation\PSObjectPipelineReader.cs" />
     <Compile Include="Pash\Implementation\SessionStateGlobal.cs" />
+    <Compile Include="Pash\NumericMultiplier.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstBuilder.cs" />
     <Compile Include="Pash\ParserIntrinsics\BacktickLineContinuationTerminal.cs" />
     <Compile Include="Automation\Language\BinaryExpressionAst.cs" />
