@@ -485,7 +485,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitHashtable(HashtableAst hashtableAst)
         {
-            Hashtable hashTable = new Hashtable();
+            Hashtable hashTable = new Hashtable(StringComparer.InvariantCultureIgnoreCase);
 
             foreach (var pair in hashtableAst.KeyValuePairs)
             {
@@ -782,7 +782,6 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitArrayLiteral(ArrayLiteralAst arrayLiteralAst)
         {
             var arrayList = new List<object>();
-            var preventEnum = arrayLiteralAst.Elements.Count > 1;
             foreach (var el in arrayLiteralAst.Elements)
             {
                 arrayList.Add(EvaluateAst(el));

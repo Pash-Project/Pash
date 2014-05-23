@@ -110,59 +110,7 @@ namespace Microsoft.PowerShell.Commands.Utility
                 var defProps = psobj.GetDefaultDisplayPropertySet();
                 return defProps;
             }
-            var props = new Collection<PSPropertyInfo>();
-            foreach (var cur in Options.Properties)
-            {
-                props.Add(EvaluateProperty(psobj, cur));
-            }
-            return props;
-        }
-
-        private PSPropertyInfo EvaluateProperty(PSObject psobj, object property)
-        {
-            var propName = property as string;
-            if (propName != null)
-            {
-                var prop = psobj.Properties[propName];
-                return prop ?? new PSNoteProperty(propName, "");
-            }
-            // otherwise it is a scriptblock that can be evaluated
-            var scriptBlock = property as ScriptBlock;
-            if (scriptBlock == null)
-            {
-                var msg = String.Format("The property '{0}' couldn't be converted to a string or a ScriptBlock",
-                                        property.GetType().Name);
-                throw new PSInvalidOperationException(msg);
-            }
-            propName = scriptBlock.ToString();
-            var pipeline = ExecutionContext.CurrentRunspace.CreateNestedPipeline();
-            pipeline.Commands.Add(new Command(scriptBlock.Ast as ScriptBlockAst, true));
-            // TODO: hack? we need to set the $_ variable
-            var oldVar = ExecutionContext.GetVariable("_");
-            ExecutionContext.SetVariable("_", psobj);
-            Collection<PSObject> results = null;
-            try
-            {
-                results = pipeline.Invoke();
-            }
-            finally
-            {
-                ExecutionContext.SessionState.PSVariable.Set(oldVar);
-            }
-            PSObject value;
-            if (results.Count == 0)
-            {
-                value = PSObject.AsPSObject(null);
-            }
-            else if (results.Count == 1)
-            {
-                value = results[1];
-            }
-            else
-            {
-                value = PSObject.AsPSObject(new List<PSObject>(results).ToArray());
-            }
-            return new PSNoteProperty(propName, value);
+            return psobj.SelectProperties(Options.Properties, ExecutionContext);
         }
     }
 }
