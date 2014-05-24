@@ -1655,6 +1655,7 @@ ls
         }
 
         [TestFixture]
+        [SetCulture("en-US")]
         public class RealLiteralExpressionTests
         {
             dynamic ParseConstantExpression(string input)

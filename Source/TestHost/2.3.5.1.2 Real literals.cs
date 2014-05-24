@@ -8,6 +8,7 @@ using System.Text;
 namespace TestHost
 {
     [TestFixture]
+    [SetCulture("en-US")]
     class RealLiterals
     {
         [Test]

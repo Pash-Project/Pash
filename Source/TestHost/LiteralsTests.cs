@@ -8,6 +8,7 @@ using NUnit.Framework;
 namespace TestHost
 {
     [TestFixture]
+    [SetCulture("en-US")]
     public class LiteralsTests
     {
         ////  7.7.1 Addition
