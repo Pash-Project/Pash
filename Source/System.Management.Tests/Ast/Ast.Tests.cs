@@ -1655,8 +1655,7 @@ ls
         }
 
         [TestFixture]
-        [SetCulture("en-US")]
-        public class RealLiteralExpressionTests
+        public abstract class RealLiteralExpressionTests
         {
             dynamic ParseConstantExpression(string input)
             {
@@ -1781,7 +1780,19 @@ ls
         }
 
         [TestFixture]
-        public class DecimalRealLiteralExpressionTests
+        [SetCulture("en-US")]
+        public class USLocaleRealLiteralExpressionTests : RealLiteralExpressionTests
+        {
+        }
+
+        [TestFixture]
+        [SetCulture("de-DE")]
+        public class GermanLocaleRealLiteralExpressionTests : RealLiteralExpressionTests
+        {
+        }
+
+        [TestFixture]
+        public abstract class DecimalRealLiteralExpressionTests
         {
             dynamic ParseConstantExpression(string input)
             {
@@ -1883,6 +1894,18 @@ ls
                 Assert.AreEqual(typeof(decimal), constExpression.StaticType);
                 Assert.AreEqual(result, constExpression.Value);
             }
+        }
+
+        [TestFixture]
+        [SetCulture("en-US")]
+        public class USLocaleDecimalRealLiteralExpressionTests : DecimalRealLiteralExpressionTests
+        {
+        }
+
+        [TestFixture]
+        [SetCulture("de-DE")]
+        public class GermanLocaleDecimalRealLiteralExpressionTests : DecimalRealLiteralExpressionTests
+        {
         }
     }
 }

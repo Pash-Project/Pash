@@ -1672,7 +1672,7 @@ namespace Pash.ParserIntrinsics
             }
 
             double value;
-            if (!double.TryParse(digits, out value))
+            if (!double.TryParse(digits, NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out value))
             {
                 throw new OverflowException(string.Format("The real literal {0} is too large.", digits));
             }
