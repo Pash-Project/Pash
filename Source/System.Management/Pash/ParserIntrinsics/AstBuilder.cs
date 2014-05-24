@@ -77,7 +77,10 @@ namespace Pash.ParserIntrinsics
 
         private IEnumerable<ParameterAst> BuildParameterListAst(ParseTreeNode parseTreeNode)
         {
-            VerifyTerm(parseTreeNode, this._grammar.parameter_list);
+            // ISSUE: https://github.com/Pash-Project/Pash/issues/203
+            // Since parameter_list was changed to parameter_list_opt we need
+            // to anticipate a closing parenthesis here too.
+            VerifyTerm(parseTreeNode, this._grammar.parameter_list, this._grammar.ToTerm(")"));
 
             return from ParseTreeNode parameter in parseTreeNode.ChildNodes
                    where parameter.Term == this._grammar.script_parameter

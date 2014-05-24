@@ -754,8 +754,12 @@ namespace Pash.ParserIntrinsics
 
             ////        function_parameter_declaration:
             ////            new_lines_opt   (   parameter_list   new_lines_opt   )
+            // ISSUE: https://github.com/Pash-Project/Pash/issues/203
+            // parameter_list was changed to parameter_list_opt here, which
+            // is not in accordance with the published grammar, but otherwise
+            // an empty parameter list wouldn't be allowed.
             function_parameter_declaration.Rule =
-                 "(" + parameter_list + ")";
+                 "(" + parameter_list_opt + ")";
 
             ////        flow_control_statement:
             ////            break   label_expression_opt

@@ -37,6 +37,14 @@ To run tests
 
 We want tests to pass on all three platforms all the time, although that can be difficult to guarantee. If you can, set up virtual machines so you can test on each platform.
 
+For easier verification of compatibility with PowerShell there is a separate test infrastructure, `ReferenceTests` which can be run with either Pash or PowerShell. Every test in there should be written only against the public and documented PowerShell API. If new source files containing tests are added to `Source/ReferenceTests/ReferenceTests.csproj` they also have to be added to `PowershellReferenceTests/PowershellReferenceTests.csproj`. NUnit can then be run manually on `PowershellReferenceTests.nunit` to verify that every tests that passes in Pash also passes in PowerShell.
+
+Not every test needs to be duplicated as a reference test, but a few things probably warrant such an approach:
+
+* Changes to the grammar where the published one is erroneous
+* Dark corners and quirks of the language
+* Behavior we have trouble getting right
+
 
 Travis
 ----

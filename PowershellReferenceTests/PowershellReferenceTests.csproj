@@ -57,6 +57,8 @@
     </Compile>
     <Compile Include="..\Source\ReferenceTests\ObjectCommandTests.cs">
       <Link>ObjectCommandTests.cs</Link>
+    <Compile Include="..\Source\ReferenceTests\FunctionTests.cs">
+      <Link>FunctionTests.cs</Link>
     </Compile>
     <Compile Include="..\Source\ReferenceTests\PipelineExecutionTests.cs">
       <Link>PipelineExecutionTests.cs</Link>
