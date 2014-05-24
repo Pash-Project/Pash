@@ -4,14 +4,17 @@
   <!--=====================================================================-->
   <Target Name="Build">
     <MSBuild Projects="Source\Pash.sln" />
+    <MsBuild Projects="PowershellReferenceTests\PowershellReferenceTests.csproj" Condition="'$(OS)' == 'Windows_NT'"/>
   </Target>
 
   <Target Name="Clean">
     <MSBuild Projects="Source\Pash.sln" Targets="Clean" />
+    <MsBuild Projects="PowershellReferenceTests\PowershellReferenceTests.csproj" Condition="'$(OS)' == 'Windows_NT'"/>
   </Target>
 
   <Target Name="Rebuild">
     <MSBuild Projects="Source\Pash.sln" Targets="Rebuild" />
+    <MsBuild Projects="PowershellReferenceTests\PowershellReferenceTests.csproj" Condition="'$(OS)' == 'Windows_NT'"/>
   </Target>
 
 
@@ -26,12 +29,18 @@
 
     <Exec Command="Tools\NUnit-2.6.1\bin\nunit-console.exe -nologo Pash.nunit  -run=Libraries.Tests" />
     -->
-    <Exec Command="                        $(NUnitCommandLine)" Condition=" '$(OS)' == 'Windows_NT' "/>
-    <Exec Command="mono $(MonoCommandArgs) $(NUnitCommandLine)" Condition=" '$(OS)' != 'Windows_NT' "/>
+    <Exec Command="$(NUnitCommandLine) Pash.nunit"/>
+  </Target>
+
+  <Target Name="RefTest"
+          DependsOnTargets="Build"
+          >
+    <Exec Command="$(NUnitCommandLine) PowershellReferenceTests.nunit" Condition="'$(OS)' == 'Windows_NT'"/>
   </Target>
 
   <PropertyGroup>
-    <NUnitCommandLine>Tools\NUnit-2.6.1\bin\nunit-console.exe -nologo Pash.nunit</NUnitCommandLine>
+    <NUnitCommandLine>Tools\NUnit-2.6.1\bin\nunit-console.exe -nologo</NUnitCommandLine>
+    <NUnitCommandLine Condition="'$(OS)' != 'Windows_NT'">mono $(MonoCommandArgs) $(NUnitCommandLine)</NUnitCommandLine>
   </PropertyGroup>
 
   <PropertyGroup>
