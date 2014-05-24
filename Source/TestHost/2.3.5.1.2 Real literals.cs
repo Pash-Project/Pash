@@ -8,7 +8,7 @@ using System.Text;
 namespace TestHost
 {
     [TestFixture]
-    class RealLiterals
+    abstract class RealLiterals
     {
         [Test]
         [TestCase("1.2", typeof(System.Double))]
@@ -100,5 +100,17 @@ namespace TestHost
             var result = TestHost.Execute(true, literal);
             StringAssert.Contains(expectedResult, result);
         }
+    }
+
+    [TestFixture]
+    [SetCulture("en-US")]
+    class USLocaleRealLiterals : RealLiterals
+    {
+    }
+
+    [TestFixture]
+    [SetCulture("de-DE")]
+    class GermanLocaleRealLiterals : RealLiterals
+    {
     }
 }

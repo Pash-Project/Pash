@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using Pash.ParserIntrinsics;
 using System.IO;
 using System.Collections.ObjectModel;
+using System.Globalization;
 
 namespace System.Management.Pash.Implementation
 {
@@ -324,13 +325,22 @@ namespace System.Management.Pash.Implementation
 
             if (rightValue is decimal) return Convert.ToDecimal(leftValue) + (decimal)rightValue;
 
-            if (leftValue is double) return (double)leftValue + Convert.ToDouble(rightValue);
+            if (leftValue is double) return (double)leftValue + ConvertToDouble(rightValue);
 
             if (rightValue is double) return Convert.ToDouble(leftValue) + (double)rightValue;
 
             if (leftValue is int) return (int)leftValue + ConvertToInt32(rightValue);
 
             throw new NotImplementedException(this.ToString());
+        }
+
+        private double ConvertToDouble(object rightValue)
+        {
+            if (rightValue is string)
+            {
+                return double.Parse((string)rightValue, NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture);
+            }
+            return Convert.ToDouble(rightValue);
         }
 
         private int ConvertToInt32(object rightValue)
