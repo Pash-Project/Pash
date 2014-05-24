@@ -52,7 +52,7 @@ internal static class PSObjectExtensions
                 else if (keyStr.Equals("expression", StringComparison.InvariantCultureIgnoreCase))
                 {
                     // should be a script block, we will check this later
-                    property = hashtable[key];
+                    property = PSObject.Unwrap(hashtable[key]);
                 }
                 else
                 {
