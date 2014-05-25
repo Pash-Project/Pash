@@ -1534,7 +1534,7 @@ namespace Pash.ParserIntrinsics
 
             foreach (var field in nonTerminalFields)
             {
-                Debug.Assert(nonTerminalFields != null, "Don't pre-initalize the NonTerminal fields. We'll do that in reflection");
+                Debug.Assert(field.GetValue(this) == null, "Don't pre-initalize the NonTerminal fields. We'll do that in reflection");
 
                 var nonTerminal = new NonTerminal(field.Name);
 

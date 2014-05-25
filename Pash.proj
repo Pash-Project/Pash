@@ -19,8 +19,12 @@
 
 
   <!--=====================================================================-->
+  <Target Name="AssertAddin">
+    <MSBuild Projects="Source\NUnitAssertHandlerAddin\NUnitAssertHandlerAddin.csproj" Targets="Build" />
+  </Target>
+  
   <Target Name="Test"
-          DependsOnTargets="Build"
+          DependsOnTargets="Build;AssertAddin"
           >
     <!--
     When this issue is resolved: https://github.com/Pash-Project/Pash/issues/29
