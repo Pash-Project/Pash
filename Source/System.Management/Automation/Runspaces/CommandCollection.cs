@@ -13,7 +13,7 @@ namespace System.Management.Automation.Runspaces
 
         public void AddScript(string scriptContents)
         {
-            AddScript(scriptContents, true); //per default a script runs in  its own scope
+            AddScript(scriptContents, false); //per default a script runs in global scope
         }
 
         public void AddScript(string scriptContents, bool useLocalScope)
