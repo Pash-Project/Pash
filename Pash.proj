@@ -20,7 +20,7 @@
 
   <!--=====================================================================-->
   <Target Name="Test"
-          DependsOnTargets="Build"
+          DependsOnTargets="Build;TestDebugShow"
           >
     <!--
     When this issue is resolved: https://github.com/Pash-Project/Pash/issues/29
@@ -38,6 +38,15 @@
     <Exec Command="$(NUnitCommandLine) PowershellReferenceTests.nunit" Condition="'$(OS)' == 'Windows_NT'"/>
   </Target>
 
+  <Target Name="TestDebugDis" DependsOnTargets="Build">
+    <Exec Command="monodis --output=System.Management.Automation.dll.dis Source/PashConsole/bin/Debug/System.Management.Automation.dll"/>
+  </Target>
+
+  <Target Name="TestDebugShow" DependsOnTargets="TestDebugDis">
+    <Exec Command="fgrep -C 50 'System.Diagnostics.Debug::Assert' System.Management.Automation.dll.dis"/>
+  </Target>
+
+  
   <PropertyGroup>
     <NUnitCommandLine>Tools\NUnit-2.6.1\bin\nunit-console.exe -nologo</NUnitCommandLine>
     <NUnitCommandLine Condition="'$(OS)' != 'Windows_NT'">mono $(MonoCommandArgs) $(NUnitCommandLine)</NUnitCommandLine>
