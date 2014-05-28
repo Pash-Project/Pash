@@ -6,6 +6,6 @@ notifications:
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq mono-devel gtk-sharp2
+  - sudo apt-get install -qq mono-devel mono-utils gtk-sharp2
 
 script: "xbuild /target:test"
