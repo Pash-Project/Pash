@@ -63,5 +63,14 @@ namespace System.Management.Automation
         public string UserPath { get; private set; }
 
         public override string ToString() { return this.UserPath; }
+
+        internal string GetUnqualifiedUserPath()
+        {
+            if (IsDriveQualified)
+            {
+                return UserPath.Substring(DriveName.Length + 1);
+            }
+            return UserPath;
+        }
     }
 }
