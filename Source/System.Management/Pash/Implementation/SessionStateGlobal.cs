@@ -547,8 +547,7 @@ namespace Pash.Implementation
             if (string.IsNullOrEmpty(path))
                 path = CurrentLocation.Path;
 
-            string driveName = path.GetDrive();
-            PSDriveInfo drive = _executionContext.SessionState.Drive.Get(driveName);
+            PSDriveInfo drive = GetDrive(path);
 
             if (drive == null)
             {
@@ -560,6 +559,16 @@ namespace Pash.Implementation
                 return null;
 
             return GetProviderInstance(drive.Provider.Name);
+        }
+
+        private PSDriveInfo GetDrive(Path path)
+        {
+            string driveName = path.GetDrive();
+            if (!string.IsNullOrEmpty(driveName))
+            {
+                return _executionContext.SessionState.Drive.Get(driveName);
+            }
+            return null;
         }
 
         private bool ItemExists(CmdletProvider provider, string path, ProviderRuntime providerRuntime)

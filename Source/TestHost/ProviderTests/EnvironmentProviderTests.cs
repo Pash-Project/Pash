@@ -80,5 +80,15 @@ namespace TestHost.ProviderTests
 
             StringAssert.Contains("TestValue" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void GetSingleEnviromentVariableAfterOpeningEnvironmentDrive()
+        {
+            Environment.SetEnvironmentVariable(PashTestEnvironmentVariableName, "TestValue");
+            string command = string.Format("get-childitem {0} | foreach-object {{ $_.value }}", PashTestEnvironmentVariableName);
+            string result = TestHost.Execute("Set-Location env:", command);
+
+            StringAssert.Contains("TestValue" + Environment.NewLine, result);
+        }
     }
 }
