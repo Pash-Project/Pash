@@ -60,5 +60,25 @@ namespace TestHost.ProviderTests
             StringAssert.Contains("TestValue" + Environment.NewLine, result);
             StringAssert.Contains("TestValue2" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void GetSingleEnviromentVariableFromEnvironmentDrive()
+        {
+            Environment.SetEnvironmentVariable(PashTestEnvironmentVariableName, "TestValue");
+            string command = string.Format("get-childitem env:{0} | foreach-object {{ $_.value }}", PashTestEnvironmentVariableName);
+            string result = TestHost.Execute(true, command);
+
+            StringAssert.Contains("TestValue" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void GetSingleEnviromentVariableFromEnvironmentDriveWithSlashAfterDrive()
+        {
+            Environment.SetEnvironmentVariable(PashTestEnvironmentVariableName, "TestValue");
+            string command = string.Format("get-childitem env:{0}{1} | foreach-object {{ $_.value }}", Path.DirectorySeparatorChar, PashTestEnvironmentVariableName);
+            string result = TestHost.Execute(true, command);
+
+            StringAssert.Contains("TestValue" + Environment.NewLine, result);
+        }
     }
 }

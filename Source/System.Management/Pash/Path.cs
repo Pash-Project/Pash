@@ -91,6 +91,11 @@ namespace System.Management
             return new Path(CorrectSlash, WrongSlash, _rawPath.TrimEnd(char.Parse(CorrectSlash)));
         }
 
+        public Path TrimStartSlash()
+        {
+            return new Path(CorrectSlash, WrongSlash, _rawPath.TrimStart(char.Parse(CorrectSlash)));
+        }
+
         public int LastIndexOf(char value)
         {
             return _rawPath.LastIndexOf(value);
