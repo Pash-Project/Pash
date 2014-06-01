@@ -73,5 +73,14 @@ namespace Microsoft.PowerShell.Commands
                 }
             }
         }
+
+        protected override void GetItem(Path name)
+        {
+            Path path = PathIntrinsics.RemoveDriveName(name.TrimEndSlash());
+            if (String.IsNullOrEmpty(path))
+            {
+                GetChildItems(path, false);
+            }
+        }
     }
 }
