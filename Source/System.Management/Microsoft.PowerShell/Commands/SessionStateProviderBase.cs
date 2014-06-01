@@ -50,7 +50,7 @@ namespace Microsoft.PowerShell.Commands
 
         protected override bool ItemExists(Path path)
         {
-            if (string.IsNullOrEmpty(path))
+            if (string.IsNullOrEmpty(path) || path.IsRootPath())
             {
                 return true;
             }

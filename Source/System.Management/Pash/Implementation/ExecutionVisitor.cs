@@ -15,6 +15,8 @@ using Pash.ParserIntrinsics;
 using System.IO;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Management.Automation.Provider;
+using Microsoft.PowerShell.Commands;
 
 namespace System.Management.Pash.Implementation
 {
@@ -497,11 +499,40 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitVariableExpression(VariableExpressionAst variableExpressionAst)
         {
-            var variable = GetVariable(variableExpressionAst);
-            var value = (variable != null) ? variable.Value : null;
-            this._pipelineCommandRuntime.WriteObject(value);
+            if (variableExpressionAst.VariablePath.IsDriveQualified)
+            {
+                VisitDriveQualifiedVariableExpression(variableExpressionAst);
+            }
+            else
+            {
+                var variable = GetVariable(variableExpressionAst);
+                var value = (variable != null) ? variable.Value : null;
+                this._pipelineCommandRuntime.WriteObject(value);
+            }
 
             return AstVisitAction.SkipChildren;
+        }
+
+        private void VisitDriveQualifiedVariableExpression(VariableExpressionAst variableExpressionAst)
+        {
+            SessionStateProviderBase provider = GetSessionStateProvider(variableExpressionAst.VariablePath);
+            if (provider != null)
+            {
+                var path = new Path(variableExpressionAst.VariablePath.GetUnqualifiedUserPath());
+                object item = provider.GetSessionStateItem(path);
+                object value = provider.GetValueOfItem(item);
+                _pipelineCommandRuntime.WriteObject(value);
+            }
+        }
+
+        private SessionStateProviderBase GetSessionStateProvider(VariablePath variablePath)
+        {
+            PSDriveInfo driveInfo = _context.SessionState.Drive.Get(variablePath.DriveName);
+            if (driveInfo != null)
+            {
+                return _context.SessionStateGlobal.GetProviderInstance(driveInfo.Provider.Name) as SessionStateProviderBase;
+            }
+            return null;
         }
 
         private PSVariable GetVariable(VariableExpressionAst variableExpressionAst)
@@ -566,7 +597,7 @@ namespace System.Management.Pash.Implementation
 
             if (isVariableAssignment)
             {
-                _context.SetVariable(((VariableExpressionAst) expressionAst).VariablePath.UserPath, newValue);
+                SetVariableValue((VariableExpressionAst)expressionAst, newValue);
             }
             else if (expressionAst is MemberExpressionAst)
             {
@@ -580,6 +611,28 @@ namespace System.Management.Pash.Implementation
             }
 
             return AstVisitAction.SkipChildren;
+        }
+
+        private void SetVariableValue(VariableExpressionAst variableExpressionAst, object value)
+        {
+            if (variableExpressionAst.VariablePath.IsDriveQualified)
+            {
+                SetDriveVariableValue(variableExpressionAst, value);
+            }
+            else
+            {
+                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, value);
+            }
+        }
+
+        private void SetDriveVariableValue(VariableExpressionAst variableExpressionAst, object value)
+        {
+            SessionStateProviderBase provider = GetSessionStateProvider(variableExpressionAst.VariablePath);
+            if (provider != null)
+            {
+                var path = new Path(variableExpressionAst.VariablePath.GetUnqualifiedUserPath());
+                provider.SetSessionStateItem(path, value, false);
+            }
         }
 
         private void SetMemberExpressionValue(MemberExpressionAst memberExpressionAst, object value)
