@@ -1,6 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using NUnit.Framework;
 using System;
+using System.IO;
 
 namespace TestHost.Cmdlets
 {
@@ -8,37 +9,17 @@ namespace TestHost.Cmdlets
     public class SplitPathTests
     {
         [Test]
-        [Platform("Win")]
-        public void OneParentFolderUnderWindows()
+        public void OneParentFolder()
         {
-            string result = TestHost.Execute(@"Split-Path 'parent\child'");
+            string result = TestHost.Execute(string.Format(@"Split-Path 'parent{0}child'", Path.DirectorySeparatorChar));
 
             Assert.AreEqual(@"parent" + Environment.NewLine, result);
         }
 
         [Test]
-        [Platform("Unix")]
-        public void OneParentFolderUnderUnix()
+        public void TwoParentFolders()
         {
-            string result = TestHost.Execute(@"Split-Path 'parent/child'");
-
-            Assert.AreEqual(@"parent" + Environment.NewLine, result);
-        }
-
-        [Test]
-        [Platform("Win")]
-        public void TwoParentFoldersUnderWindows()
-        {
-            string result = TestHost.Execute(@"Split-Path parent1\child,parent2\child");
-
-            Assert.AreEqual(string.Format(@"parent1{0}parent2{0}", Environment.NewLine), result);
-        }
-
-        [Test]
-        [Platform("Unix")]
-        public void TwoParentFoldersUnderUnix()
-        {
-            string result = TestHost.Execute(@"Split-Path parent1/child,parent2/child");
+            string result = TestHost.Execute(string.Format(@"Split-Path parent1{0}child,parent2{0}child", Path.DirectorySeparatorChar));
 
             Assert.AreEqual(string.Format(@"parent1{0}parent2{0}", Environment.NewLine), result);
         }
