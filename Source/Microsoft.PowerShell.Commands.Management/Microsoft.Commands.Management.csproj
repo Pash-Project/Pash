@@ -81,6 +81,7 @@
     <Compile Include="RestartServiceCommand.cs" />
     <Compile Include="ResumeServiceCommand.cs" />
     <Compile Include="SetLocationCommand.cs" />
+    <Compile Include="SplitPathCommand.cs" />
     <Compile Include="StartServiceCommand.cs" />
     <Compile Include="StopProcessCommand.cs" />
     <Compile Include="StopServiceCommand.cs" />

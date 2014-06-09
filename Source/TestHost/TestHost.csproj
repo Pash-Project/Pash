@@ -73,6 +73,7 @@
   <ItemGroup>
     <Compile Include="2.3.5.1.1 Integer literals.cs" />
     <Compile Include="Cmdlets\JoinPathTests.cs" />
+    <Compile Include="Cmdlets\SplitPathTests.cs" />
     <Compile Include="Cmdlets\SortObjectTests.cs" />
     <Compile Include="Cmdlets\GetCommandTests.cs" />
     <Compile Include="Cmdlets\NewObjectCommandTests.cs" />

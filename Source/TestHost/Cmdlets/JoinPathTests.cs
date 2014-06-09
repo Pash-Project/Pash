@@ -1,6 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using NUnit.Framework;
 using System;
+using System.IO;
 
 namespace TestHost.Cmdlets
 {
@@ -8,39 +9,23 @@ namespace TestHost.Cmdlets
     public class JoinPathTests
     {
         [Test]
-        [Platform("Win")]
-        public void OneParentFolderAndChildFolderUnderWindows()
+        public void OneParentFolderAndChildFolder()
         {
             string result = TestHost.Execute(@"Join-Path 'parent' 'child'");
 
-            Assert.AreEqual(@"parent\child" + Environment.NewLine, result);
+            Assert.AreEqual(
+                string.Format(@"parent{1}child{0}", Environment.NewLine, Path.DirectorySeparatorChar),
+                result);
         }
 
         [Test]
-        [Platform("Unix")]
-        public void OneParentFolderAndChildFolderUnderUnix()
-        {
-            string result = TestHost.Execute(@"Join-Path 'parent' 'child'");
-
-            Assert.AreEqual(@"parent/child" + Environment.NewLine, result);
-        }
-
-        [Test]
-        [Platform("Win")]
-        public void TwoParentFoldersAndOneChildFolderUnderWindows()
+        public void TwoParentFoldersAndOneChildFolder()
         {
             string result = TestHost.Execute(@"Join-Path parent1,parent2 child");
 
-            Assert.AreEqual(string.Format(@"parent1\child{0}parent2\child{0}", Environment.NewLine), result);
-        }
-
-        [Test]
-        [Platform("Unix")]
-        public void TwoParentFoldersAndOneChildFolderUnderUnix()
-        {
-            string result = TestHost.Execute(@"Join-Path parent1,parent2 child");
-
-            Assert.AreEqual(string.Format(@"parent1/child{0}parent2/child{0}", Environment.NewLine), result);
+            Assert.AreEqual(
+                string.Format(@"parent1{1}child{0}parent2{1}child{0}", Environment.NewLine, Path.DirectorySeparatorChar),
+                result);
         }
     }
 }
