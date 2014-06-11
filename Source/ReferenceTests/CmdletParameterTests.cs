@@ -9,19 +9,6 @@ namespace ReferenceTests
     [TestFixture]
     public class ParametersTests : ReferenceTestBase
     {
-
-        [SetUp]
-        public void ImportTestInvokeScriptCmdlet()
-        {
-            ImportTestCmdlets();
-        }
-
-        [TearDown]
-        public void ResetInitialSessionState()
-        {
-            CleanImports();
-        }
-
         [Test]
         public void NoMandatoriesWithoutArgsTest()
         {

@@ -7,18 +7,6 @@ namespace ReferenceTests
 {
     public class ArrayTests : ReferenceTestBase
     {
-        [SetUp]
-        public void LoadCmdlets()
-        {
-            ImportTestCmdlets();
-        }
-
-        [TearDown]
-        public void CleanUp()
-        {
-            CleanImports();
-        }
-
         [TestCase("1,2,3")]
         [TestCase("@('foo',2,3)")]
         public void ArrayExpressionIsArrayType(string definition)

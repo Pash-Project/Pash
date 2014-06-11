@@ -9,19 +9,6 @@ namespace ReferenceTests
     [TestFixture]
     public class ObjectCommandTests : ReferenceTestBase
     {
-
-        [SetUp]
-        public void SetUp()
-        {
-            ImportTestCmdlets();
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            CleanImports();
-        }
-
         [Test]
         public void NewObjectCanCreatePSObject()
         {
