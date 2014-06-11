@@ -179,6 +179,32 @@ namespace TestHost
             Assert.AreEqual(expected, result);
         }
 
+        [Test]
+        public void FormatCommandUnpacksRecursiveArrayByOneLevel()
+        {
+            var cmd = "@(1,2,@(3,4,@(5,6),7),8) | format-table";
+            var result = TestHost.Execute(true, null, new TestHostUserInterface(150, 100), cmd);
+            var linestarts = new [] {
+                "1",
+                "2",
+                "3",
+                "4",
+                "", // 2nd level array will be formatted as a table, just like in PS, so it starts with a NL
+                " ", // line with table headers
+                " ", // line with header borders
+                " ", // line with Array-object data
+                "7",
+                "8",
+                "" // end of formatting document (NL)
+            };
+            var reslines = result.Split(new [] { Environment.NewLine }, StringSplitOptions.None);
+            Assert.AreEqual(linestarts.Length, reslines.Length);
+            for (int i = 0; i < reslines.Length; i++)
+            {
+                StringAssert.StartsWith(linestarts[i], reslines[i]);
+            }
+        }
+
         private string NewlineJoin(params string[] strs)
         {
             return String.Join(Environment.NewLine, strs) + Environment.NewLine;

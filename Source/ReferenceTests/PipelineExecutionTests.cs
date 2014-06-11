@@ -8,7 +8,7 @@ using TestPSSnapIn;
 namespace ReferenceTests
 {
     [TestFixture]
-    public class PipelineExecutionTets : ReferenceTestBase
+    public class PipelineExecutionTests : ReferenceTestBase
     {
         [Test]
         public void AllPhasesAreRunAsSingleCommand()
@@ -45,6 +45,13 @@ namespace ReferenceTests
             Assert.AreEqual(expected, result);
         }
 
+        [Test]
+        public void HashtableIsNotEnumerated()
+        {
+            var expected = NewlineJoin(typeof(System.Collections.Hashtable).FullName);
+            var result = ReferenceHost.Execute("@{foo='bar';bar=2} | foreach-object { $_.GetType().FullName }");
+            Assert.AreEqual(expected, result);
+        }
     }
 }
 
