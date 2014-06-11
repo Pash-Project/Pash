@@ -6,12 +6,6 @@ namespace ReferenceTests
     [TestFixture]
     public class ReturnTests : ReferenceTestBase
     {
-        [TearDown]
-        public void Cleanup()
-        {
-            RemoveCreatedScripts();
-        }
-
         [Test]
         public void ReturnWritesToPipeline()
         {

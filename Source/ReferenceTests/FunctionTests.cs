@@ -7,12 +7,6 @@ namespace ReferenceTests
     [TestFixture]
     public class FunctionTests : ReferenceTestBase
     {
-        [TearDown]
-        public void Cleanup()
-        {
-            RemoveCreatedScripts();
-        }
-
         [Test]
         public void FunctionDeclarationWithoutParameterList()
         {

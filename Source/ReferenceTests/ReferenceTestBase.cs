@@ -6,6 +6,7 @@ using System.IO;
 using System.Management.Automation;
 using System.Text.RegularExpressions;
 using TestPSSnapIn;
+using NUnit.Framework;
 
 namespace ReferenceTests
 {
@@ -25,6 +26,19 @@ namespace ReferenceTests
 #pragma warning disable 0429 
             _isMonoRuntime = ReferenceTestInfo.IS_PASH && Type.GetType("Mono.Runtime") != null;
 #pragma warning restore 0429
+        }
+
+        [SetUp]
+        public virtual void SetUp()
+        {
+            ImportTestCmdlets();
+        }
+
+        [TearDown]
+        public virtual void TearDown()
+        {
+            CleanImports();
+            RemoveCreatedScripts();
         }
 
         private String QuoteWithSpace(string input)

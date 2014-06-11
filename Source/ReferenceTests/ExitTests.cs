@@ -7,12 +7,6 @@ namespace ReferenceTests
     [TestFixture]
     public class ExitTests : ReferenceTestBase
     {
-        [TearDown]
-        public void Cleanup()
-        {
-            RemoveCreatedScripts();
-        }
-
         [Test]
         public void ExitWorks()
         {

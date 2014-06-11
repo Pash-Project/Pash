@@ -10,19 +10,6 @@ namespace ReferenceTests
     [TestFixture]
     public class PipelineExecutionTets : ReferenceTestBase
     {
-
-        [SetUp]
-        public void ImportTestInvokeScriptCmdlet()
-        {
-            ImportTestCmdlets();
-        }
-
-        [TearDown]
-        public void ResetInitialSessionState()
-        {
-            CleanImports();
-        }
-
         [Test]
         public void AllPhasesAreRunAsSingleCommand()
         {

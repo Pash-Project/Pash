@@ -9,18 +9,6 @@ namespace ReferenceTests
     [TestFixture]
     public class TypeConverterTests : ReferenceTestBase
     {
-        [SetUp]
-        public void SetUp()
-        {
-            ImportTestCmdlets();
-        }
-
-        [TearDown]
-        public void CleanUp()
-        {
-            RemoveCreatedScripts();
-        }
-
         [Test]
         public void ConvertFromStringToTypeWithTypeConverterUsesTypeConverter()
         {
