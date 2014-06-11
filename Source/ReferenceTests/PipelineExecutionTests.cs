@@ -52,6 +52,14 @@ namespace ReferenceTests
             var result = ReferenceHost.Execute("@{foo='bar';bar=2} | foreach-object { $_.GetType().FullName }");
             Assert.AreEqual(expected, result);
         }
+
+        [Test]
+        public void GeneratedEnumerableIsEnumeratedOnWriting()
+        {
+            var expected = NewlineJoin("10", "11", "12");
+            var result = ReferenceHost.Execute(CmdletName(typeof(TestWriteEnumerableToPipelineCommand)) + " 10 12");
+            Assert.AreEqual(expected, result);
+        }
     }
 }
 

@@ -359,6 +359,31 @@ namespace TestPSSnapIn
         }
     }
 
+    [Cmdlet(VerbsDiagnostic.Test, "WriteEnumerableToPipeline")]
+    public sealed class TestWriteEnumerableToPipelineCommand : PSCmdlet
+    {
+        [Parameter(Mandatory = true, Position = 0)]
+        public int Start { get; set; }
+
+        [Parameter(Mandatory = true, Position = 1)]
+        public int End { get; set; }
+
+        protected override void EndProcessing()
+        {
+            WriteObject(Generate(Start, i => i + 1, End), true);
+        }
+
+        private static IEnumerable<int> Generate(int start, Func<int, int> next, int end)
+        {
+            for (var item = start; !object.Equals(item, end); item = next(item))
+            {
+                yield return item;
+            }
+
+            yield return end;
+        }
+    }
+
     [Cmdlet(VerbsDiagnostic.Test, "ParametersByPipelineWithPropertiesAndConversion")]
     public class TestParametersByPipelineWithPropertiesAndConversionCommand : PSCmdlet
     {

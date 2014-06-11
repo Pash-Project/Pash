@@ -71,6 +71,13 @@ namespace ReferenceTests
             var cmd = GenerateObjectArrayCmd() + " | Select-Object";
             var result = ReferenceHost.RawExecute(cmd);
             AssertPersonObjectsEqual(_data, result);
+        }
+
+        [Test]
+        public void SelectObjectWithSelectedPropertyHasANewTypeName()
+        {
+            var cmd = GenerateObjectArrayCmd() + " | Select-Object -property age";
+            var result = ReferenceHost.RawExecute(cmd);
             Assert.Contains("Selected." + typeof(PSCustomObject).ToString(), result[0].TypeNames);
         }
 

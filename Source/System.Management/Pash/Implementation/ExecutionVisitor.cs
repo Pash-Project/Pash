@@ -489,7 +489,15 @@ namespace System.Management.Pash.Implementation
 
             foreach (var pair in hashtableAst.KeyValuePairs)
             {
-                hashTable.Add(EvaluateAst(pair.Item1), EvaluateAst(pair.Item2));
+                // if we don't have a custom psobject, make sure the value
+                var val = EvaluateAst(pair.Item2);
+                var psobjVal = val as PSObject;
+                if (psobjVal != null && psobjVal.ImmediateBaseObject != null &&
+                    psobjVal.ImmediateBaseObject.GetType() != typeof(PSCustomObject))
+                {
+                    val = psobjVal.ImmediateBaseObject;
+                }
+                hashTable.Add(EvaluateAst(pair.Item1), val);
             }
 
             this._pipelineCommandRuntime.WriteObject(hashTable);
