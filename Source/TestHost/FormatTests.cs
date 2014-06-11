@@ -68,10 +68,9 @@ namespace TestHost
         public void SimpleFormatListWorks()
         {
 
-            var cmd = "new-object psobject -property @{foo='bar'; barbaz=2} | Format-List";
+            var cmd = "new-object psobject -property @{barbaz=2} | Format-List";
             var expected = NewlineJoin(
                 "",
-                "foo    : bar",
                 "barbaz : 2",
                 ""
                 );
@@ -82,12 +81,12 @@ namespace TestHost
         [Test]
         public void SimpleFormatTableWorks()
         {
-            var cmd = "new-object psobject -property @{foo='bar'; barbaz=2} | Format-Table";
+            var cmd = "new-object psobject -property @{foo='bar'} | Format-Table";
             var expected = NewlineJoin(
                 "",
-                "foo".PadRight(9) + " " + "barbaz".PadLeft(9),
-                "---".PadRight(9) + " " + "------".PadLeft(9),
-                "bar".PadRight(9) + " " + "2".PadLeft(9),
+                "foo".PadRight(19),
+                "---".PadRight(19),
+                "bar".PadRight(19),
                 ""
                 );
             var result = TestHost.Execute(true, null, new TestHostUserInterface(20, 100), cmd);
@@ -117,18 +116,18 @@ namespace TestHost
         public void FirstRowInTableDeterminesAlignment()
         {
             var cmd = NewlineJoin(
-                "$b = new-object psobject -property @{foo='bar'; barbaz='foo'}",
-                "$a = new-object psobject -property @{foo='bar'; barbaz=2}",
+                "$b = new-object psobject -property @{barbaz='foo'}",
+                "$a = new-object psobject -property @{barbaz=2}",
                 "$b, $a | Format-Table"
             );
             // second column is now left aligned because the first object contains a string
             // with an int it's right aligned (check above)
             var expected = NewlineJoin(
                 "",
-                "foo".PadRight(9) + " " + "barbaz".PadRight(9),
-                "---".PadRight(9) + " " + "------".PadRight(9),
-                "bar".PadRight(9) + " " + "foo".PadRight(9),
-                "bar".PadRight(9) + " " + "2".PadRight(9),
+                "barbaz".PadRight(19),
+                "------".PadRight(19),
+                "foo".PadRight(19),
+                "2".PadRight(19),
                 ""
                 );
             var result = TestHost.Execute(true, null, new TestHostUserInterface(20, 100), cmd);
@@ -189,15 +188,13 @@ namespace TestHost
                 "2",
                 "3",
                 "4",
-                "", // 2nd level array will be formatted as a table, just like in PS, so it starts with a NL
                 " ", // line with table headers
                 " ", // line with header borders
                 " ", // line with Array-object data
                 "7",
                 "8",
-                "" // end of formatting document (NL)
             };
-            var reslines = result.Split(new [] { Environment.NewLine }, StringSplitOptions.None);
+            var reslines = result.Split(new [] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             Assert.AreEqual(linestarts.Length, reslines.Length);
             for (int i = 0; i < reslines.Length; i++)
             {

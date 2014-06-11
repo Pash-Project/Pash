@@ -193,8 +193,9 @@ namespace System.Management.Automation
             if (resultType.IsArray && valueToConvert != null && resultType != valueToConvert.GetType())
             {
                 var elementType = resultType.GetElementType();
-                var enumerableValue = valueToConvert as IList; // Powershell seems to only enumerate ILists
+                var enumerableValue = GetEnumerable(valueToConvert);
                 // check for simple packaging
+                // Powershell seems to neither enumerate dictionaries nor strings
                 if (enumerableValue == null)
                 {
                     var array = Array.CreateInstance(elementType, 1);
@@ -358,14 +359,13 @@ namespace System.Management.Automation
         public static IEnumerable GetEnumerable(object obj)
         {
             obj = PSObject.Unwrap(obj);
-
-            // we only check ILists, not IEnumerables, because in Powershell objects like strings, Hashtables,
-            // or Dictionaries aren't enumerated
-            if (obj is IList)
+            // Powershell seems to exclude dictionaries and strings from being enumerables
+            if (obj is IDictionary || obj is string)
             {
-                return obj as IEnumerable;
+                return null;
             }
-            return null;
+            // either return it as enumerable or null
+            return obj as IEnumerable;
         }
 
         /// <summary>
@@ -376,13 +376,21 @@ namespace System.Management.Automation
         public static IEnumerator GetEnumerator(object obj)
         {
             obj = PSObject.Unwrap(obj);
-
+            // Powershell seems to exclude dictionaries and strings from being enumerables
+            if (obj is IDictionary || obj is string)
+            {
+                return null;
+            }
+            var enumerable = GetEnumerable(obj);
+            if (enumerable != null)
+            {
+                return enumerable.GetEnumerator();
+            }
             if (obj is IEnumerator)
             {
                 return obj as IEnumerator;
             }
-            var enumerable = GetEnumerable(obj);
-            return enumerable == null ? null : enumerable.GetEnumerator();
+            return null;
         }
 
         #endregion
