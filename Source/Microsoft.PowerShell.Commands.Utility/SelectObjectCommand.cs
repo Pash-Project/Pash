@@ -19,6 +19,10 @@ namespace Microsoft.PowerShell.Commands
                 {
                     return false;
                 }
+                if (x == null && y == null)
+                {
+                    return true;
+                }
                 if (!x.Equals(y))
                 {
                     return false;
