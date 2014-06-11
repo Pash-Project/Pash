@@ -38,7 +38,7 @@ namespace Microsoft.PowerShell.Commands
                 _header = new List<string>();
                 if (!NoTypeInformation.IsPresent)
                 {
-                    lines.Add("#TYPE " + InputObject.GetType().FullName);
+                    lines.Add("#TYPE " + InputObject.BaseObject.GetType().FullName);
                 }
                 foreach (PSPropertyInfo prop in InputObject.Properties)
                 {
@@ -52,7 +52,7 @@ namespace Microsoft.PowerShell.Commands
             foreach (var propName in _header)
             {
                 var prop = InputObject.Properties[propName];
-                if (prop != null)
+                if (prop != null && PSObject.Unwrap(prop.Value) != null)
                 {
                     line.AppendFormat("\"{0}\"", prop.Value);
                 }

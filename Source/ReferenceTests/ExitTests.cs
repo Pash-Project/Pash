@@ -25,11 +25,11 @@ namespace ReferenceTests
         [Test]
         public void ExitInScriptOnlyEndsScript()
         {
-            var scriptname = CreateScript(NewlineJoin(
+            var scriptname = CreateFile(NewlineJoin(
                 "'foo'",
                 "exit 4",
                 "'bar'"
-            ));
+                ), "ps1");
             var command = NewlineJoin(
                 String.Format(". '{0}'", scriptname),
                 "$LastExitCode"
@@ -44,7 +44,7 @@ namespace ReferenceTests
         [TestCase("3", "& { 3 }")]
         public void ExpressionsAreValidExitCodes(string expectedExitCode, string exitExpression)
         {
-            var scriptname = CreateScript(NewlineJoin("exit " + exitExpression));
+            var scriptname = CreateFile(NewlineJoin("exit " + exitExpression), "ps1");
             var command = NewlineJoin(
                 String.Format(". '{0}'", scriptname),
                 "$LastExitCode"
@@ -60,7 +60,7 @@ namespace ReferenceTests
         [TestCase("True", "'some string'", false)]
         public void ExitCodeDefinesSuccess(string success, string exitCode, bool exitCodeValid)
         {
-            var scriptname = CreateScript(NewlineJoin("exit " + exitCode));
+            var scriptname = CreateFile(NewlineJoin("exit " + exitCode), "ps1");
             var command = NewlineJoin(
                 String.Format(". '{0}'", scriptname),
                 "$?",
@@ -74,7 +74,7 @@ namespace ReferenceTests
         [Test]
         public void ScriptWithoutExitIsSuccessfull()
         {
-            var scriptname = CreateScript(NewlineJoin("'foo'"));
+            var scriptname = CreateFile(NewlineJoin("'foo'"), "ps1");
             var command = NewlineJoin(
                 String.Format(". '{0}'", scriptname),
                 "$?",

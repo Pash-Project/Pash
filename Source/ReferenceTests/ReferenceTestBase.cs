@@ -7,19 +7,20 @@ using System.Management.Automation;
 using System.Text.RegularExpressions;
 using TestPSSnapIn;
 using NUnit.Framework;
+using System.Text;
 
 namespace ReferenceTests
 {
     public class ReferenceTestBase
     {
-        private List<string> _createdScripts;
+        private List<string> _createdFiels;
         private string _assemblyDirectory;
         private Regex _whiteSpaceRegex;
         private bool _isMonoRuntime;
 
         public ReferenceTestBase()
         {
-            _createdScripts = new List<string>();
+            _createdFiels = new List<string>();
             _assemblyDirectory = Path.GetDirectoryName(new Uri(GetType().Assembly.CodeBase).LocalPath);
             _whiteSpaceRegex = new Regex(@"\s");
             // prevents the project with Powershell to complain about the second part of the expression below
@@ -38,7 +39,7 @@ namespace ReferenceTests
         public virtual void TearDown()
         {
             CleanImports();
-            RemoveCreatedScripts();
+            RemoveCreatedFiles();
         }
 
         private String QuoteWithSpace(string input)
@@ -112,22 +113,28 @@ namespace ReferenceTests
             ReferenceHost.ImportModules(null);
         }
 
-        public string CreateScript(string script)
+        public string CreateFile(string script, string extension)
         {
-            string fileName = Path.Combine(_assemblyDirectory, String.Format("TempScript{0}.ps1", _createdScripts.Count));
-            File.WriteAllText(fileName, script);
-            _createdScripts.Add(fileName);
+            var fileName = String.Format("TempFile{0}.{1}", _createdFiels.Count, extension);
+            var filePath = Path.Combine(_assemblyDirectory, fileName);
+            File.WriteAllText(filePath, script);
+            _createdFiels.Add(filePath);
 
             return fileName;
         }
 
-        public void RemoveCreatedScripts()
+        public string[] ReadLinesFromFile(string filePath)
         {
-            foreach (var file in _createdScripts)
+            return File.ReadAllLines(filePath);
+        }
+
+        public void RemoveCreatedFiles()
+        {
+            foreach (var file in _createdFiels)
             {
                 File.Delete(file);
             }
-            _createdScripts.Clear();
+            _createdFiels.Clear();
         }
 
         public static string CmdletName(Type cmdletType)
@@ -140,6 +147,38 @@ namespace ReferenceTests
         public static string NewlineJoin(params string[] parts)
         {
             return String.Join(Environment.NewLine, parts) + Environment.NewLine;
+        }
+
+
+        public static string CreateObjectsCommand(Dictionary<string, object>[] data)
+        {
+            var sb = new StringBuilder("@(");
+            foreach (var person in data)
+            {
+                sb.Append("(new-object psobject -property @{");
+                foreach (var pair in person)
+                {
+                    sb.Append(pair.Key);
+                    sb.Append("=");
+                    if (pair.Value == null)
+                    {
+                        sb.Append("$null;");
+                    }
+                    else
+                    {
+                        sb.Append("\"");
+                        var val = pair.Value.ToString().Replace("\n", "`n").Replace("\r", "`r");
+                        val = val.Replace("\"", "`\"").Replace("\t", "`t");
+                        sb.Append(val);
+                        sb.Append("\";");
+                    }
+                }
+                sb.Remove(sb.Length - 1, 1);
+                sb.Append("}),");
+            }
+            sb.Remove(sb.Length - 1, 1);
+            sb.Append(")");
+            return sb.ToString();
         }
     }
 }

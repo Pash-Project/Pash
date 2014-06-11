@@ -37,8 +37,8 @@ namespace Microsoft.PowerShell.Commands
             if (NoClobber.ToBool())
             {
                 if (File.Exists(Path))
-                    WriteError(new ErrorRecord(
-                        new Exception("File already exists. Use -Force to override."),
+                    ThrowTerminatingError(new ErrorRecord(
+                        new IOException("File already exists. Use -Force to override."),
                         "FileExists",
                         ErrorCategory.ResourceExists,
                         null));

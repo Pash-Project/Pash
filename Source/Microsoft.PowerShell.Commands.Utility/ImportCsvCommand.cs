@@ -33,7 +33,7 @@ namespace Microsoft.PowerShell.Commands
         /// <summary>
         /// The path of the CSV file to import.
         /// </summary>
-        [Parameter(Position = 1,
+        [Parameter(Position = 0,
                    Mandatory = true,
                    ValueFromPipeline = true),
          Alias(new string[] { "PSPath" })]
@@ -80,27 +80,29 @@ namespace Microsoft.PowerShell.Commands
                 }
                 else
                 {
-                    var headerLine = file.ReadLine();
-                    if (headerLine == null)
+                    // first line is property names
+                    useHeader = ParseRowValuesFromStream(file).ToArray();
+                    if (useHeader.Length < 1)
                     {
                         return;
                     }
-                    // first line is property names
-                    useHeader = ParseValuesFromLine(headerLine).ToArray();
                 }
 
-                string line;
-                for (line = file.ReadLine(); line != null; line = file.ReadLine())
+                while (!file.EndOfStream)
                 {
+                    var values = ParseRowValuesFromStream(file);
+                    if (values.Count < 1)
+                    {
+                        continue;
+                    }
                     PSObject obj = new PSObject();
                     if (!String.IsNullOrEmpty(typename))
                     {
-                        obj.TypeNames.Add(typename);
+                        obj.TypeNames.Add("CSV:" + typename);
                     }
-                    var values = ParseValuesFromLine(line);
                     for (int i = 0; i < useHeader.Length; i++)
                     {
-                        string value = (i < values.Count) ? values[i] : "";
+                        string value = (i < values.Count) ? values[i] : null;
                         var psprop = new PSNoteProperty(useHeader[i], value);
                         obj.Properties.Add(psprop);
                         obj.Members.Add(psprop);
@@ -133,7 +135,7 @@ namespace Microsoft.PowerShell.Commands
             return new StreamReader(path, _useEncoding);
         }
 
-        private List<string> ParseValuesFromLine(string line)
+        private List<string> ParseRowValuesFromStream(StreamReader stream)
         {
             var values = new List<string>();
             char delim = Delimiter == 0 ? ',' : Delimiter;
@@ -142,14 +144,25 @@ namespace Microsoft.PowerShell.Commands
             bool inValue = false;
             // Powershell behavior: skip only double quotes at the beginning of a value and ignore delimiters
             // until the next double quotes
-            foreach (char c in line)
+            while(!stream.EndOfStream)
             {
+                char c = (char) stream.Read();
+                // check if the value is quoted
                 if (!inValue && c == '"')
                 {
                     waitForQuote = true;
+                    inValue = true;
                     continue;
                 }
+                // skip whitespaces at the beginning
+                if (!inValue && (c == ' ' || c == '\t'))
+                {
+                    continue;
+                }
+
+                // if we're here, we're definitely inside a value
                 inValue = true;
+                // check if the value ends
                 if (!waitForQuote && c == delim)
                 {
                     values.Add(curValue.ToString());
@@ -157,14 +170,35 @@ namespace Microsoft.PowerShell.Commands
                     inValue = false;
                     continue;
                 }
-                if (c == '"')
+                // check for line end
+                if (!waitForQuote && (c == '\n' || c == '\r'))
                 {
-                    waitForQuote = false;
-                    continue;
+                    if (c == '\r' && stream.Peek() == '\n')
+                    {
+                        stream.Read(); // advance one position if end of line is \r\n
+                    }
+                    break;
+                }
+                // check for quotes: take it if we're outside of quoting, otherwise check for end or escaped
+                if (c == '"' && waitForQuote)
+                {
+                    var nextIsQuote = stream.Peek() == '"';
+                    if (stream.EndOfStream || !nextIsQuote)
+                    {
+                        waitForQuote = false;
+                        continue;
+                    }
+                    // check for double quote: an "escaped" quote char in a quoted string
+                    if (nextIsQuote)
+                    {
+                        stream.Read(); //advance one position
+                    }
+                    // continue with appending the character
                 }
                 curValue.Append(c);
             }
-            values.Add(curValue.ToString()); // last value still in builder (no trailing delimiter)
+            // last value ist still in builder (no trailing delimiter)
+            values.Add(curValue.ToString());
             return values;
         }
 
