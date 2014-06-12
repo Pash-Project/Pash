@@ -58,6 +58,8 @@
     <Compile Include="ObjectCommandTests.cs" />
     <Compile Include="ArrayTests.cs" />
     <Compile Include="TypeConverterTests.cs" />
+    <Compile Include="GetMemberCommandTests.cs" />
+    <Compile Include="SelectObjectCommandTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

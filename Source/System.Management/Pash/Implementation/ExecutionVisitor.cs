@@ -485,11 +485,19 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitHashtable(HashtableAst hashtableAst)
         {
-            Hashtable hashTable = new Hashtable();
+            Hashtable hashTable = new Hashtable(StringComparer.InvariantCultureIgnoreCase);
 
             foreach (var pair in hashtableAst.KeyValuePairs)
             {
-                hashTable.Add(EvaluateAst(pair.Item1), EvaluateAst(pair.Item2));
+                // if we don't have a custom psobject, make sure the value
+                var val = EvaluateAst(pair.Item2);
+                var psobjVal = val as PSObject;
+                if (psobjVal != null && psobjVal.ImmediateBaseObject != null &&
+                    psobjVal.ImmediateBaseObject.GetType() != typeof(PSCustomObject))
+                {
+                    val = psobjVal.ImmediateBaseObject;
+                }
+                hashTable.Add(EvaluateAst(pair.Item1), val);
             }
 
             this._pipelineCommandRuntime.WriteObject(hashTable);
@@ -763,6 +771,16 @@ namespace System.Management.Pash.Implementation
                 throw new PSArgumentNullException("Member name evaluates to null");
             }
             memberName = memberNameObj.ToString();
+            // Powershell allows access to hastable values by member acccess
+            var hashtable = PSObject.Unwrap(psobj) as Hashtable;
+            if (hashtable != null)
+            {
+                if (hashtable.ContainsKey(memberName))
+                {
+                    return new PSNoteProperty(memberName, hashtable[memberName]);
+                }
+                // otherwise we look for regular members
+            }
             if (memberExpressionAst.Static)
             {
                 return psobj.StaticMembers[memberName];
@@ -782,7 +800,6 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitArrayLiteral(ArrayLiteralAst arrayLiteralAst)
         {
             var arrayList = new List<object>();
-            var preventEnum = arrayLiteralAst.Elements.Count > 1;
             foreach (var el in arrayLiteralAst.Elements)
             {
                 arrayList.Add(EvaluateAst(el));
@@ -857,7 +874,7 @@ namespace System.Management.Pash.Implementation
             {
                 var result = EvaluateAst(stmt, false);
                 // expand if only one element and it is enumerable
-                var enumerator = GetEnumerator(result, false);
+                var enumerator = LanguagePrimitives.GetEnumerator(result);
                 if (numStatements > 1 || enumerator == null)
                 {
                     elements.Add(result);
@@ -974,7 +991,7 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitForEachStatement(ForEachStatementAst forEachStatementAst)
         {
             object enumerable = EvaluateAst(forEachStatementAst.Condition);
-            IEnumerator enumerator = GetEnumerator(enumerable, false);
+            IEnumerator enumerator = LanguagePrimitives.GetEnumerator(enumerable);
 
             if (enumerator == null)
             {
@@ -988,19 +1005,6 @@ namespace System.Management.Pash.Implementation
             }
 
             return AstVisitAction.SkipChildren;
-        }
-
-        private IEnumerator GetEnumerator(object obj, bool enumerateString)
-        {
-            if (obj is PSObject)
-            {
-                obj = ((PSObject)obj).BaseObject;
-            }
-            if (!enumerateString && obj is string)
-            {
-                return null;
-            }
-            return _pipelineCommandRuntime.GetEnumerator(obj);
         }
 
         public override AstVisitAction VisitForStatement(ForStatementAst forStatementAst)

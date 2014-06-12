@@ -89,7 +89,7 @@ namespace System.Management.Automation
             }
             else
             {
-                IEnumerator enumerator = GetEnumerator(sendToPipeline);
+                IEnumerator enumerator = LanguagePrimitives.GetEnumerator(sendToPipeline);
                 if (enumerator != null)
                 {
                     while (enumerator.MoveNext())
@@ -122,20 +122,5 @@ namespace System.Management.Automation
 
         #endregion
 
-        private IEnumerator GetEnumerator(object obj)
-        {
-            IEnumerable enumerable = obj as IEnumerable;
-            if (enumerable != null)
-            {
-                return enumerable.GetEnumerator();
-            }
-            IEnumerator enumerator = obj as IEnumerator;
-            if (obj != null)
-            {
-                return enumerator;
-            }
-
-            return null;
-        }
     }
 }

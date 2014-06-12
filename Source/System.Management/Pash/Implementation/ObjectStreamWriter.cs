@@ -58,15 +58,14 @@ namespace Pash.Implementation
         public override int Write(object obj, bool enumerateCollection)
         {
             int numWritten = 0;
-            bool isString = obj is string || (obj is PSObject && ((PSObject)obj).BaseObject is string);
-            if (!enumerateCollection || isString)
+            if (!enumerateCollection)
             {
                 Write(obj);
                 numWritten = 1;
             }
             else
             {
-                IEnumerator enumerator = GetEnumerator(obj);
+                IEnumerator enumerator = LanguagePrimitives.GetEnumerator(obj);
                 if (enumerator != null)
                 {
                     while (enumerator.MoveNext())
@@ -83,26 +82,6 @@ namespace Pash.Implementation
             }
 
             return numWritten;
-        }
-
-        private IEnumerator GetEnumerator(object obj)
-        {
-            if (obj is PSObject)
-            {
-                obj = ((PSObject)obj).BaseObject;
-            }
-            IEnumerable enumerable = obj as IEnumerable;
-            if (enumerable != null)
-            {
-                return enumerable.GetEnumerator();
-            }
-            IEnumerator enumerator = obj as IEnumerator;
-            if (obj != null)
-            {
-                return enumerator;
-            }
-
-            return null;
         }
 
         public override string ToString()

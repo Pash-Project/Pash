@@ -3,6 +3,7 @@ using NUnit.Framework;
 using System.Management.Automation;
 using TestPSSnapIn;
 using System.Runtime.Remoting;
+using System.Collections.Generic;
 
 namespace ReferenceTests
 {
@@ -63,6 +64,21 @@ namespace ReferenceTests
             }));
             var expected = NewlineJoin(new string[] { "abc", "def" });
             Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void CreatePSObjectWithPropertiesAreRawObjects()
+        {
+            var expected = new Dictionary<string, object>() {{"foo", "abc"}, {"bar", 3}};
+            var results = ReferenceHost.RawExecute(NewlineJoin(new string[] {
+                "new-object psobject -property @{foo='abc'; bar=3}"
+            }));
+            Assert.AreEqual(1, results.Count);
+            var res = results[0];
+            foreach (var key in expected.Keys)
+            {
+                Assert.AreEqual(expected[key], res.Properties[key].Value);
+            }
         }
 
         [Test]

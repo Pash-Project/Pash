@@ -10,7 +10,7 @@ namespace Microsoft.PowerShell.Commands
     [Cmdlet("Get", "Member")]
     public class GetMemberCommand : PSCmdlet
     {
-        private HybridDictionary _membersCollection;
+        private HashSet<string> _displayedTypes;
 
         [Parameter(ValueFromPipeline = true)]
         public PSObject InputObject { get; set; }
@@ -27,73 +27,73 @@ namespace Microsoft.PowerShell.Commands
         public GetMemberCommand()
         {
             MemberType = PSMemberTypes.All;
-            _membersCollection = new HybridDictionary();
+            _displayedTypes = new HashSet<string>();
         }
 
         protected override void ProcessRecord()
         {
-            // MUST: implement the InputObject binding in the pipe
-            if ((InputObject == null) || (InputObject == AutomationNull.Value))
+            if (InputObject == null || InputObject.BaseObject == null)
+            {
                 return;
-
-            string fullName;
-
-            // TODO: deal with Static
-
-            if (InputObject.TypeNames.Count != 0)
-            {
-                fullName = this.InputObject.TypeNames[0];
-            }
-            else
-            {
-                fullName = "<null>";
             }
 
-            if (!_membersCollection.Contains(fullName))
-            {
-                _membersCollection.Add(fullName, "");
+            string fullName = InputObject.TypeNames.Count != 0 ? this.InputObject.TypeNames[0] : "<null>";
 
-                foreach (string name in Name)
+            if (_displayedTypes.Contains(fullName))
+            {
+                return;
+            }
+
+            _displayedTypes.Add(fullName);
+
+            if (Name == null)
+            {
+                Name = new string[] { "*" }; // select all members
+            }
+
+            foreach (string name in Name)
+            {
+                ReadOnlyPSMemberInfoCollection<PSMemberInfo> infos;
+
+                if (Static.IsPresent)
                 {
-                    ReadOnlyPSMemberInfoCollection<PSMemberInfo> infos;
-
-                    // TODO: deal with Static members
+                    infos = InputObject.StaticMembers.Match(name, this.MemberType);
+                }
+                else
+                {
                     infos = InputObject.Members.Match(name, this.MemberType);
+                }
 
-                    List<MemberDefinition> members = new List<MemberDefinition>();
-                    foreach (PSMemberInfo info in infos)
+                List<MemberDefinition> members = new List<MemberDefinition>();
+                foreach (PSMemberInfo info in infos)
+                {
+                    members.Add(new MemberDefinition(fullName, info.Name, info.MemberType, info.ToString()));
+                }
+
+                members.Sort((def1, def2) =>
+                {
+                    int diff = string.Compare(def1.MemberType.ToString(), def2.MemberType.ToString(),
+                                       StringComparison.CurrentCultureIgnoreCase);
+                    if (diff != 0)
                     {
-                        members.Add(new MemberDefinition(fullName, info.Name, info.MemberType, info.ToString()));
+                        return diff;
                     }
+                    return string.Compare(def1.Name, def2.Name, StringComparison.CurrentCultureIgnoreCase);
+                });
 
-                    members.Sort((def1, def2) =>
-                    {
-                        int diff =
-                            string.Compare(def1.MemberType.ToString(), def2.MemberType.ToString(),
-                                           StringComparison.CurrentCultureIgnoreCase);
-                        if (diff != 0)
-                        {
-                            return diff;
-                        }
-                        return
-                            string.Compare(def1.Name, def2.Name,
-                                           StringComparison.CurrentCultureIgnoreCase);
-                    });
-
-                    foreach (MemberDefinition definition in members)
-                    {
-                        WriteObject(definition);
-                    }
+                foreach (MemberDefinition definition in members)
+                {
+                    WriteObject(definition);
                 }
             }
         }
 
         protected override void EndProcessing()
         {
-            if (_membersCollection.Count == 0)
+            if (_displayedTypes.Count == 0)
             {
-                // TODO: WriteError
-                throw new Exception("No object specified");
+                WriteError(new ErrorRecord(new InvalidOperationException("No input object specified"),
+                                           "NoObjectInGetMember", ErrorCategory.CloseError, null));
             }
         }
     }

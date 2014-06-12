@@ -3,6 +3,8 @@ using System.Collections.ObjectModel;
 using System.Management.Automation;
 using Pash.Implementation;
 using Extensions.Reflection;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Microsoft.PowerShell.Commands.Utility
 {
@@ -23,6 +25,60 @@ namespace Microsoft.PowerShell.Commands.Utility
         }
 
         public Collection<FormatData> Process(PSObject psobj)
+        {
+            // unroll one level. But more than LanguagePrimitives would unroll!
+            var enumerator = LanguagePrimitives.GetEnumerator(psobj);
+            if (enumerator == null)
+            {
+                var baseObj = PSObject.Unwrap(psobj);
+                var enumerable = baseObj as IEnumerable;
+                if (!(baseObj is string) && enumerable != null)
+                {
+                    enumerator = enumerable.GetEnumerator();
+                }
+            }
+            if (enumerator == null)
+            {
+                return ProcessObject(psobj);
+            }
+            var results = new List<FormatData>();
+            while (enumerator.MoveNext())
+            {
+                var curPSobj = PSObject.AsPSObject(enumerator.Current);
+                results.AddRange(ProcessObject(curPSobj));
+            }
+            return new Collection<FormatData>(results);
+        }
+
+        public Collection<FormatData> End()
+        {
+            var formatData = new Collection<FormatData>();
+            if (_state.Equals(FormattingState.GroupStart))
+            {
+                // generator cannot be null
+                formatData.Add(_generator.GenerateGroupEnd());
+                _state = FormattingState.GroupEnd;
+            }
+            if (_state.Equals(FormattingState.GroupEnd) || _state.Equals(FormattingState.FormatStart))
+            {
+                formatData.Add(_generator.GenerateFormatEnd());
+                _state = FormattingState.FormatEnd;
+            }
+            return formatData;
+        }
+
+        public void SetExecutionContext(ExecutionContext context)
+        {
+            _executionContext = context;
+        }
+
+        private bool ShouldChangeGroup(PSObject obj)
+        {
+            // TODO: implement grouping
+            return false;
+        }
+
+        private Collection<FormatData> ProcessObject(PSObject psobj)
         {
             var formatData = new Collection<FormatData>();
             if (psobj.BaseObject is FormatData)
@@ -69,34 +125,6 @@ namespace Microsoft.PowerShell.Commands.Utility
             // we have to be in the state GroupStart where we can write the data itself
             formatData.Add(_generator.GenerateObjectFormatEntry(psobj));
             return formatData;
-        }
-
-        public Collection<FormatData> End()
-        {
-            var formatData = new Collection<FormatData>();
-            if (_state.Equals(FormattingState.GroupStart))
-            {
-                // generator cannot be null
-                formatData.Add(_generator.GenerateGroupEnd());
-                _state = FormattingState.GroupEnd;
-            }
-            if (_state.Equals(FormattingState.GroupEnd) || _state.Equals(FormattingState.FormatStart))
-            {
-                formatData.Add(_generator.GenerateFormatEnd());
-                _state = FormattingState.FormatEnd;
-            }
-            return formatData;
-        }
-
-        public void SetExecutionContext(ExecutionContext context)
-        {
-            _executionContext = context;
-        }
-
-        private bool ShouldChangeGroup(PSObject obj)
-        {
-            // TODO: implement grouping
-            return false;
         }
     }
 }

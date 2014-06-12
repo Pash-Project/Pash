@@ -112,11 +112,9 @@ namespace System.Management.Automation
 
         public void WriteObject(object sendToPipeline, bool enumerateCollection)
         {
-            var isString = sendToPipeline is string || 
-                           (sendToPipeline is PSObject && ((PSObject) sendToPipeline).BaseObject is string);
-            if (enumerateCollection && !(isString))
+            if (enumerateCollection)
             {
-                IEnumerator enumerator = GetEnumerator(sendToPipeline);
+                IEnumerator enumerator = LanguagePrimitives.GetEnumerator(sendToPipeline);
                 if (enumerator != null)
                 {
                     while (enumerator.MoveNext())
@@ -126,7 +124,6 @@ namespace System.Management.Automation
                     return;
                 }
             }
-
             WriteObject(sendToPipeline);
         }
 
@@ -147,25 +144,5 @@ namespace System.Management.Automation
         }
 
         #endregion
-
-        internal IEnumerator GetEnumerator(object obj)
-        {
-            if (obj is PSObject)
-            {
-                obj = ((PSObject)obj).BaseObject;
-            }
-            IEnumerable enumerable = obj as IEnumerable;
-            if (enumerable != null)
-            {
-                return enumerable.GetEnumerator();
-            }
-            IEnumerator enumerator = obj as IEnumerator;
-            if (enumerator != null)
-            {
-                return enumerator;
-            }
-
-            return null;
-        }
     }
 }

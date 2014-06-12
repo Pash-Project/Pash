@@ -134,6 +134,8 @@
     <Compile Include="Format\ListFormatEntryData.cs" />
     <Compile Include="Format\FormatObjectProperty.cs" />
     <Compile Include="Format\FormatManager.cs" />
+    <Compile Include="SelectObjectCommand.cs" />
+    <Compile Include="CollectForEndProcessingCommandBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

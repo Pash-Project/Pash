@@ -193,9 +193,10 @@ namespace System.Management.Automation
             if (resultType.IsArray && valueToConvert != null && resultType != valueToConvert.GetType())
             {
                 var elementType = resultType.GetElementType();
-                var enumerableValue = valueToConvert as IEnumerable;
+                var enumerableValue = GetEnumerable(valueToConvert);
                 // check for simple packaging
-                if (enumerableValue == null || enumerableValue is string) // nothing "real" enumerable
+                // Powershell seems to neither enumerate dictionaries nor strings
+                if (enumerableValue == null)
                 {
                     var array = Array.CreateInstance(elementType, 1);
                     array.SetValue(ConvertTo(valueToConvert, elementType, formatProvider), 0);
@@ -357,11 +358,13 @@ namespace System.Management.Automation
         /// <returns>The enumerator if it can work, null otherwise.</returns>
         public static IEnumerable GetEnumerable(object obj)
         {
-            PSObject _psobj = obj as PSObject;
-
-            if (_psobj != null)
-                obj = _psobj.BaseObject;
-
+            obj = PSObject.Unwrap(obj);
+            // Powershell seems to exclude dictionaries and strings from being enumerables
+            if (obj is IDictionary || obj is string)
+            {
+                return null;
+            }
+            // either return it as enumerable or null
             return obj as IEnumerable;
         }
 
@@ -372,12 +375,22 @@ namespace System.Management.Automation
         /// <returns>The enumerator if it can work, null otherwise.</returns>
         public static IEnumerator GetEnumerator(object obj)
         {
-            PSObject _psobj = obj as PSObject;
-
-            if (_psobj != null)
-                obj = _psobj.BaseObject;
-
-            return obj as IEnumerator;
+            obj = PSObject.Unwrap(obj);
+            // Powershell seems to exclude dictionaries and strings from being enumerables
+            if (obj is IDictionary || obj is string)
+            {
+                return null;
+            }
+            var enumerable = GetEnumerable(obj);
+            if (enumerable != null)
+            {
+                return enumerable.GetEnumerator();
+            }
+            if (obj is IEnumerator)
+            {
+                return obj as IEnumerator;
+            }
+            return null;
         }
 
         #endregion
