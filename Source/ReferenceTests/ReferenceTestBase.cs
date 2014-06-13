@@ -13,14 +13,14 @@ namespace ReferenceTests
 {
     public class ReferenceTestBase
     {
-        private List<string> _createdFiels;
+        private List<string> _createdFiles;
         private string _assemblyDirectory;
         private Regex _whiteSpaceRegex;
         private bool _isMonoRuntime;
 
         public ReferenceTestBase()
         {
-            _createdFiels = new List<string>();
+            _createdFiles = new List<string>();
             _assemblyDirectory = Path.GetDirectoryName(new Uri(GetType().Assembly.CodeBase).LocalPath);
             _whiteSpaceRegex = new Regex(@"\s");
             // prevents the project with Powershell to complain about the second part of the expression below
@@ -115,12 +115,13 @@ namespace ReferenceTests
 
         public string CreateFile(string script, string extension)
         {
-            var fileName = String.Format("TempFile{0}.{1}", _createdFiels.Count, extension);
-            var filePath = Path.Combine(_assemblyDirectory, fileName);
+            var tempDir = Path.GetTempPath();
+            var fileName = String.Format("TempFile{0}.{1}", _createdFiles.Count, extension);
+            var filePath = Path.Combine(tempDir, fileName);
             File.WriteAllText(filePath, script);
-            _createdFiels.Add(filePath);
+            _createdFiles.Add(filePath);
 
-            return fileName;
+            return filePath;
         }
 
         public string[] ReadLinesFromFile(string filePath)
@@ -130,11 +131,11 @@ namespace ReferenceTests
 
         public void RemoveCreatedFiles()
         {
-            foreach (var file in _createdFiels)
+            foreach (var file in _createdFiles)
             {
                 File.Delete(file);
             }
-            _createdFiels.Clear();
+            _createdFiles.Clear();
         }
 
         public static string CmdletName(Type cmdletType)

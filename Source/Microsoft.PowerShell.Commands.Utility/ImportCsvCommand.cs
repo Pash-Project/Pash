@@ -1,13 +1,13 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 
 using System;
+using System.Linq;
 using System.Management.Automation;
 using System.Diagnostics;
 using System.Text;
 using System.IO;
 using System.Collections.Generic;
 using System.Collections;
-using System.Net.Configuration;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -82,10 +82,22 @@ namespace Microsoft.PowerShell.Commands
                 {
                     // first line is property names
                     useHeader = ParseRowValuesFromStream(file).ToArray();
-                    if (useHeader.Length < 1)
+                    if (useHeader.Length < 1 || file.EndOfStream) // empty file
                     {
+                        file.Close();
                         return;
                     }
+                }
+
+                // validate header
+                if (useHeader.Distinct().Count() != useHeader.Count() ||
+                    useHeader.Contains("") ||
+                    useHeader.Contains(null)
+                    )
+                {
+                    file.Close();
+                    var er = new PSArgumentException("Invalid CSV header with duplicate or empty values!").ErrorRecord;
+                    ThrowTerminatingError(er);
                 }
 
                 while (!file.EndOfStream)

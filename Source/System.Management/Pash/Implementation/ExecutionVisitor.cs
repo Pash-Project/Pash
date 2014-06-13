@@ -17,7 +17,6 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Management.Automation.Provider;
 using Microsoft.PowerShell.Commands;
-using System.Collections.Specialized;
 
 namespace System.Management.Pash.Implementation
 {

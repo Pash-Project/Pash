@@ -44,7 +44,7 @@ namespace Microsoft.PowerShell.Commands
                 {
                     _header.Add(prop.Name);
                 }
-                var escaped = (from h in _header select String.Format("\"{0}\"", h)).ToArray();
+                var escaped = (from h in _header select SimpleEscapeString(h)).ToArray();
                 lines.Add(String.Join(delim.ToString(), escaped));
             }
 
@@ -54,7 +54,7 @@ namespace Microsoft.PowerShell.Commands
                 var prop = InputObject.Properties[propName];
                 if (prop != null && PSObject.Unwrap(prop.Value) != null)
                 {
-                    line.AppendFormat("\"{0}\"", prop.Value);
+                    line.Append(SimpleEscapeString(prop.Value.ToString()));
                 }
                 line.Append(delim);
             }
@@ -63,6 +63,11 @@ namespace Microsoft.PowerShell.Commands
             lines.Add(line.ToString());
 
             return lines;
+        }
+
+        private string SimpleEscapeString(string val)
+        {
+            return String.Format("\"{0}\"", val.Replace("\"", "\"\""));
         }
     }
 }
