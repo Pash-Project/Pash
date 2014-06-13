@@ -40,7 +40,14 @@ namespace Pash.Implementation
             catch (PowerShellGrammar.ParseException exception)
             {
                 // nicer error message
-                throw new ParseException("Parse error at " + exception.LogMessage.Location.ToUiString(), exception);
+                var msgfmt = "Parse error at {0}: {1}";
+                var location = exception.LogMessage.Location.ToUiString();
+                var reason = exception.LogMessage.Message;
+                if (reason.Length > 100)
+                {
+                    reason = reason.Substring(0, 97) + "...";
+                }
+                throw new ParseException(String.Format(msgfmt, location, reason) , exception);
             }
         }
 

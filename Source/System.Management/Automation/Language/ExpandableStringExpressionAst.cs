@@ -14,16 +14,22 @@ namespace System.Management.Automation.Language
         public ExpandableStringExpressionAst(IScriptExtent extent, string value, StringConstantType stringConstantType)
             : base(extent)
         {
-            this.Value = value;
             this.StringConstantType = stringConstantType;
-
             ParseExpandableString(value);
         }
 
         public ReadOnlyCollection<ExpressionAst> NestedExpressions { get; private set; }
         public override Type StaticType { get { return typeof(string); } }
         public StringConstantType StringConstantType { get; private set; }
-        public string Value { get; private set; }
+
+        private List<object> _stringParts = new List<object>();
+        public string Value
+        {
+            get
+            {
+                return String.Join("", _stringParts);
+            }
+        }
 
         internal override IEnumerable<Ast> Children
         {
@@ -58,31 +64,42 @@ namespace System.Management.Automation.Language
             var parser = new ExpandableStringParser(Extent, value);
             parser.Parse();
             this.NestedExpressions = parser.NestedExpressions;
+
+            int currentIndex = 0;
+            foreach (var nestedEx in NestedExpressions)
+            {
+                int nestedExpressionStartIndex = GetRelativeStartIndex(nestedEx);
+                var strval = value.Substring(currentIndex, nestedExpressionStartIndex - currentIndex);
+                if (strval.Length > 0)
+                {
+                    _stringParts.Add(StringExpressionHelper.ResolveEscapeCharacters(strval, StringConstantType));
+                }
+                _stringParts.Add(nestedEx);
+                currentIndex = GetRelativeEndIndex(nestedEx);
+            }
+            if (currentIndex < value.Length)
+            {
+                _stringParts.Add(StringExpressionHelper.ResolveEscapeCharacters(value.Substring(currentIndex),
+                                                                                StringConstantType));
+            }
         }
 
         internal string ExpandString(IEnumerable<object> expandedValues)
         {
             var expandedString = new StringBuilder();
-            int currentIndex = 0;
+            var exValEnumerator = expandedValues.GetEnumerator();
 
-            List<object> values = expandedValues.ToList();
-            for (int i = 0; i < values.Count; ++i)
+            foreach (var strPart in _stringParts)
             {
-                Ast nestedExpressionAst = NestedExpressions[i];
-                object expandedValue = values[i];
-
-                int nestedExpressionStartIndex = GetRelativeStartIndex(nestedExpressionAst);
-                expandedString.Append(Value.Substring(currentIndex, nestedExpressionStartIndex - currentIndex));
-                expandedString.Append(expandedValue);
-
-                currentIndex = GetRelativeEndIndex(nestedExpressionAst);
+                if (strPart is ExpressionAst && exValEnumerator.MoveNext())
+                {
+                    expandedString.Append(exValEnumerator.Current);
+                }
+                else
+                {
+                    expandedString.Append(strPart);
+                }
             }
-
-            if (currentIndex < Value.Length)
-            {
-                expandedString.Append(Value.Substring(currentIndex));
-            }
-
             return expandedString.ToString();
         }
 

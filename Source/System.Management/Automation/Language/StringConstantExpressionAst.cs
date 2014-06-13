@@ -15,7 +15,17 @@ namespace System.Management.Automation.Language
 
         public override Type StaticType { get { return typeof(string); } }
         public StringConstantType StringConstantType { get; private set; }
-        public new string Value { get; private set; }
+        private string _resolvedValue;
+        public new string Value {
+            get
+            {
+                return _resolvedValue;
+            }
+            set
+            {
+                _resolvedValue = StringExpressionHelper.ResolveEscapeCharacters(value, StringConstantType);
+            }
+        }
 
         public override string ToString()
         {
