@@ -1907,5 +1907,31 @@ ls
         public class GermanLocaleDecimalRealLiteralExpressionTests : DecimalRealLiteralExpressionTests
         {
         }
+
+        [TestFixture]
+        public class SubExpressionTests
+        {
+            dynamic ParseExpression(string input)
+            {
+                return ParseStatement(input)
+                    .PipelineElements[0]
+                    .Expression;
+            }
+
+            [Test]
+            public void IntegerAdditionSubExpression()
+            {
+                SubExpressionAst subExpressionAst = ParseExpression("$(1+2)");
+                var pipelineAst = subExpressionAst.SubExpression.Statements[0] as PipelineAst;
+                var commandExpressionAst = pipelineAst.PipelineElements[0] as CommandExpressionAst;
+                var binaryExpressionAst = commandExpressionAst.Expression as BinaryExpressionAst;
+                var leftExpressionAst = binaryExpressionAst.Left as ConstantExpressionAst;
+                var rightExpressionAst = binaryExpressionAst.Right as ConstantExpressionAst;
+
+                Assert.AreEqual(TokenKind.Plus, binaryExpressionAst.Operator);
+                Assert.AreEqual(leftExpressionAst.Value, 1);
+                Assert.AreEqual(rightExpressionAst.Value, 2);
+            }
+        }
     }
 }

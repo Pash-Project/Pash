@@ -1301,7 +1301,7 @@ namespace Pash.ParserIntrinsics
 
             if (childNode.Term == this._grammar.sub_expression)
             {
-                throw new NotImplementedException(childNode.Term.Name);
+                return BuildSubExpression(childNode);
             }
 
             if (childNode.Term == this._grammar.array_expression)
@@ -1335,6 +1335,15 @@ namespace Pash.ParserIntrinsics
             }
 
             throw new InvalidOperationException(childNode.Term.Name);
+        }
+
+        ExpressionAst BuildSubExpression(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.sub_expression);
+
+            return new SubExpressionAst(
+                new ScriptExtent(parseTreeNode),
+                BuildStatementListAst(parseTreeNode.ChildNodes[1]));
         }
 
         ArrayExpressionAst BuildArrayExpressionAst(ParseTreeNode parseTreeNode)
