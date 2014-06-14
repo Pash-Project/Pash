@@ -92,6 +92,7 @@
     <Compile Include="2.3.5.1.2 Real literals.cs" />
     <Compile Include="ProviderTests\EnvironmentProviderTests.cs" />
     <Compile Include="ScriptParameterTests.cs" />
+    <Compile Include="7.1.6 - SubexpressionOperator.cs" />
     <Compile Include="TestHelpers\TestCommand.cs" />
     <Compile Include="TestHelpers\TestInvokeScriptCommand.cs" />
     <Compile Include="TestHost.cs" />

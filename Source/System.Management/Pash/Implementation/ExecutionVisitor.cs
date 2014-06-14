@@ -1223,7 +1223,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitSubExpression(SubExpressionAst subExpressionAst)
         {
-            throw new NotImplementedException(); //VisitSubExpression(subExpressionAst);
+            return VisitStatementBlock(subExpressionAst.SubExpression);
         }
 
         public override AstVisitAction VisitSwitchStatement(SwitchStatementAst switchStatementAst)
