@@ -49,5 +49,23 @@ namespace TestHost
 
             Assert.AreEqual("Object[]" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void VariableAssignmentSubExpressionReturnsNull()
+        {
+            string result = TestHost.Execute("$($i = 10) -eq $null");
+
+            Assert.AreEqual("True" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void VariableAssignedToResultOfVariableAssignmentSubExpressionIsNull()
+        {
+            string result = TestHost.Execute(
+                "$f = $($i = 10)",
+                "$f -eq $null");
+
+            Assert.AreEqual("True" + Environment.NewLine, result);
+        }
     }
 }

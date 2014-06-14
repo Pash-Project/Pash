@@ -1223,7 +1223,20 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitSubExpression(SubExpressionAst subExpressionAst)
         {
-            return VisitStatementBlock(subExpressionAst.SubExpression);
+            object[] results = (from statementAst in subExpressionAst.SubExpression.Statements
+                                let result = EvaluateAst(statementAst, false)
+                                where result != null
+                                select result).ToArray();
+
+            if (results.Length == 1)
+            {
+                _pipelineCommandRuntime.WriteObject(results.Single());
+            }
+            else if (results.Length > 0)
+            {
+                _pipelineCommandRuntime.WriteObject(results);
+            }
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitSwitchStatement(SwitchStatementAst switchStatementAst)
