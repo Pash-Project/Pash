@@ -44,7 +44,7 @@ namespace ReferenceTests
         public void ReturnEndsScriptAndWritesToPipeline()
         {
             var expected = NewlineJoin("foo", "bar", "bla");
-            var scriptname = CreateScript("'foo'; return 'bar'; 'baz'");
+            var scriptname = CreateFile("'foo'; return 'bar'; 'baz'", "ps1");
             var command = NewlineJoin(String.Format("& '{0}'", scriptname), "'bla'");
             var result = ReferenceHost.Execute(command);
             Assert.AreEqual(expected, result);

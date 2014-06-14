@@ -282,7 +282,7 @@ namespace System.Management.Automation
         public string ToString(string format, IFormatProvider formatProvider)
         {
             // TODO: a better implementation with format and formatProvider
-            return ImmediateBaseObject.ToString();
+            return (ImmediateBaseObject == null) ? "" : ImmediateBaseObject.ToString();
         }
 
         public int CompareTo(object obj)

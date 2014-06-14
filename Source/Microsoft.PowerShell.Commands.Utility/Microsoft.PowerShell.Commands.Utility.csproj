@@ -136,6 +136,8 @@
     <Compile Include="Format\FormatManager.cs" />
     <Compile Include="SelectObjectCommand.cs" />
     <Compile Include="CollectForEndProcessingCommandBase.cs" />
+    <Compile Include="GenerateCsvCommandBase.cs" />
+    <Compile Include="ConvertToCsvCommand.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

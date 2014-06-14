@@ -7,6 +7,7 @@ using System.IO;
 using System.Text;
 using System.Reflection.Emit;
 using System.Reflection;
+using System.Collections.Generic;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -24,12 +25,11 @@ namespace Microsoft.PowerShell.Commands
     /// RELATED POSIX COMMANDS
     ///   n/a 
     /// </summary>
-    [Cmdlet("Export", "Csv", SupportsShouldProcess = true)]
-    public sealed class ExportCsvCommand : PSCmdlet
+    [Cmdlet(VerbsData.Export, "Csv", SupportsShouldProcess = true)]
+    public sealed class ExportCsvCommand : GenerateCsvCommandBase
     {
 
         private StreamWriter file;
-        private bool typeWritten;
 
 
         protected override void BeginProcessing()
@@ -37,38 +37,34 @@ namespace Microsoft.PowerShell.Commands
             if (NoClobber.ToBool())
             {
                 if (File.Exists(Path))
-                    WriteError(new ErrorRecord(
-                        new Exception("File already exists. Use -Force to override."),
+                    ThrowTerminatingError(new ErrorRecord(
+                        new IOException("File already exists. Use -Force to override."),
                         "FileExists",
                         ErrorCategory.ResourceExists,
                         null));
             }
-
-            file = new StreamWriter(Path);
+            System.Text.Encoding useEnc = System.Text.Encoding.ASCII;
+            if (!String.IsNullOrEmpty(Encoding))
+            {
+                try
+                {
+                    useEnc = System.Text.Encoding.GetEncoding(Encoding);
+                }
+                catch (ArgumentException)
+                {
+                    // shouldn't happen as Encoding gets validated
+                    var msg = String.Format("Invalid encoding '{0}'", Encoding);
+                    ThrowTerminatingError(new PSArgumentException(msg).ErrorRecord);
+                }
+            }
+            file = new StreamWriter(Path, false, useEnc);
         }
 
 
         protected override void ProcessRecord()
         {
-            StringBuilder line = new StringBuilder();
-
-            if ((!NoTypeInformation.ToBool()) && (!typeWritten))
-            {
-                file.WriteLine("#TYPE " + InputObject.GetType().ToString());
-                typeWritten = true;
-            }
-
-            foreach (PSPropertyInfo _prop in InputObject.Properties)
-            {
-                line.Append(_prop.Value.ToString());
-                line.Append(',');
-            }
-
-            // Remove the trailing comma
-            line.Remove((line.Length - 1), 1);
-
-            file.WriteLine(line.ToString());
-
+            var lines = ProcessObject(InputObject);
+            lines.ForEach(file.WriteLine);
         }
 
         protected override void EndProcessing()
@@ -91,22 +87,10 @@ namespace Microsoft.PowerShell.Commands
         public SwitchParameter Force { get; set; }
 
         /// <summary>
-        /// The object to be exported as a CSV file.
-        /// </summary>
-        [Parameter(ValueFromPipeline = true, Mandatory = true)]
-        public PSObject InputObject { get; set; }
-
-        /// <summary>
         /// Do not override any files or damage any existing data.
         /// </summary>
         [Parameter]
         public SwitchParameter NoClobber { get; set; }
-
-        /// <summary>
-        /// Omits type information from the generated CSV file. By the default the first line of the CSV file contains type information.
-        /// </summary>
-        [Parameter]
-        public SwitchParameter NoTypeInformation { get; set; }
 
         /// <summary>
         /// The location for which you want to save the CSV file.
