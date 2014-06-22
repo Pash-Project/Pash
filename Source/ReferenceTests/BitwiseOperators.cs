@@ -25,5 +25,17 @@ namespace ReferenceTests
             var result = ReferenceHost.Execute(input);
             Assert.AreEqual(expectedResult + Environment.NewLine, result);
         }
+
+        [Test]
+        public void BitwiseOperationInsideMethodCall()
+        {
+            string result = ReferenceHost.Execute(
+@"$type = [System.Object]
+$type.GetMethods([System.Reflection.BindingFlags]::Instance -bor [System.Reflection.BindingFlags]::Public) | Foreach-Object { $_.Name }
+"
+                );
+
+            StringAssert.Contains("GetHashCode" + Environment.NewLine, result);
+        }
     }
 }
