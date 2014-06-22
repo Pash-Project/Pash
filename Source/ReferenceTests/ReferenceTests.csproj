@@ -44,6 +44,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BitwiseOperators.cs" />
     <Compile Include="CmdletParameterTests.cs" />
     <Compile Include="DefaultScriptScopeTests.cs" />
     <Compile Include="FunctionTests.cs" />

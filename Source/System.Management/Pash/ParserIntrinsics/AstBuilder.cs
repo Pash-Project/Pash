@@ -710,6 +710,16 @@ namespace Pash.ParserIntrinsics
             {
                 return BuildComparisonExpressionAst(parseTreeNode.ChildNodes.Single());
             }
+            else if (parseTreeNode.ChildNodes[0].Term == this._grammar.bitwise_expression)
+            {
+                return new BinaryExpressionAst(
+                    new ScriptExtent(parseTreeNode),
+                    BuildBitwiseExpressionAst(parseTreeNode.ChildNodes[0]),
+                    GetBinaryOperatorTokenKind(parseTreeNode.ChildNodes[1]),
+                    BuildComparisonExpressionAst(parseTreeNode.ChildNodes[2]),
+                    new ScriptExtent(parseTreeNode.ChildNodes[1])
+                    );
+            }
 
             throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
         }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Management.Automation.Language;
+using Pash;
 using Pash.Implementation;
 using System.Management.Automation;
 using System.Reflection;
@@ -123,8 +124,11 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Not:
                 case TokenKind.Bnot:
                 case TokenKind.Band:
+                    return BitwiseOperation.And(leftOperand, rightOperand);
                 case TokenKind.Bor:
+                    return BitwiseOperation.Or(leftOperand, rightOperand);
                 case TokenKind.Bxor:
+                    return BitwiseOperation.Xor(leftOperand, rightOperand);
                 case TokenKind.Join:
                 case TokenKind.Ilike:
                 case TokenKind.Inotlike:
