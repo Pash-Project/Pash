@@ -87,6 +87,11 @@ namespace System.Management.Automation
             }
             else if (numArgs > numParams)
             {
+                if (numParams == 0)
+                {
+                    return false;
+                }
+
                 var lastParam = paras[numParams - 1];
                 if (!IsParamsParameter(lastParam))
                 {
