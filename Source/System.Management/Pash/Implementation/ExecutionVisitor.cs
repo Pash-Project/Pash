@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Management.Automation.Language;
+using Pash;
 using Pash.Implementation;
 using System.Management.Automation;
 using System.Reflection;
@@ -110,6 +111,15 @@ namespace System.Management.Pash.Implementation
                     if (leftOperandInt.HasValue) return leftOperandInt <= rightOperandInt;
                     throw new NotImplementedException(binaryExpressionAst.ToString());
 
+                case TokenKind.Band:
+                    return BitwiseOperation.And(leftOperand, rightOperand);
+                case TokenKind.Bor:
+                    return BitwiseOperation.Or(leftOperand, rightOperand);
+                case TokenKind.Bxor:
+                    return BitwiseOperation.Xor(leftOperand, rightOperand);
+                case TokenKind.Imatch:
+                    return Match(leftOperand, rightOperand);
+
                 case TokenKind.Multiply:
                 case TokenKind.Divide:
                 case TokenKind.Minus:
@@ -122,15 +132,9 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Format:
                 case TokenKind.Not:
                 case TokenKind.Bnot:
-                case TokenKind.Band:
-                case TokenKind.Bor:
-                case TokenKind.Bxor:
                 case TokenKind.Join:
                 case TokenKind.Ilike:
                 case TokenKind.Inotlike:
-                case TokenKind.Imatch:
-                    return Match(leftOperand, rightOperand);
-
                 case TokenKind.Inotmatch:
                 case TokenKind.Ireplace:
                 case TokenKind.Icontains:

@@ -1230,6 +1230,33 @@ ls
         }
 
         [Test]
+        [TestCase("0x0F0F -band 0xFE", TokenKind.Band)]
+        [TestCase("0x0F0F -bor 0xFE", TokenKind.Bor)]
+        [TestCase("0x0F0F -bxor 0xFE", TokenKind.Bxor)]
+        public void BitwiseOperator(string input, TokenKind expectedOperator)
+        {
+            BinaryExpressionAst binaryExpressionAst = ParseStatement(input)
+                .PipelineElements[0]
+                .Expression;
+
+            Assert.AreEqual(expectedOperator, binaryExpressionAst.Operator);
+        }
+
+        [Test]
+        public void BitwiseOperatorInisdeMemberInvoke()
+        {
+            string input = "$obj.GetType().GetMethods(0x0F -bor 0xFE)";
+            BinaryExpressionAst binaryExpressionAst = ParseStatement(input)
+                .PipelineElements[0]
+                .Expression
+                .Arguments[0];
+
+            Assert.AreEqual(TokenKind.Bor, binaryExpressionAst.Operator);
+            Assert.AreEqual(254, ((ConstantExpressionAst)binaryExpressionAst.Right).Value);
+            Assert.AreEqual(15, ((ConstantExpressionAst)binaryExpressionAst.Left).Value);
+        }
+
+        [Test]
         public void NotOperator()
         {
             UnaryExpressionAst unaryExpressionAst = ParseStatement("-not $true")
