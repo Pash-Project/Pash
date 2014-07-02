@@ -30,5 +30,28 @@ namespace ReferenceTests
 
             StringAssert.Contains("Microsoft.Build.Evaluation.Project" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void AddTypeDefinition()
+        {
+            string result = ReferenceHost.Execute(
+@"$source = 'public class AddTypeDefinitionTestClass { }'
+Add-Type -typedefinition $source
+[AddTypeDefinitionTestClass].FullName"
+);
+            StringAssert.Contains("AddTypeDefinitionTestClass" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void AddTypeDefinitionAndCallMethodOnNewInstance()
+        {
+            string result = ReferenceHost.Execute(
+@"$source = 'public class AddTypeDefinitionAndCallMethodOnNewInstanceTestClass { public string WriteLine() { return ""Test""; } }'
+Add-Type -typedefinition $source
+$obj = New-Object AddTypeDefinitionAndCallMethodOnNewInstanceTestClass
+$obj.WriteLine()"
+);
+            StringAssert.Contains("Test" + Environment.NewLine, result);
+        }
     }
 }

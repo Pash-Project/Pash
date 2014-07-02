@@ -5,6 +5,7 @@ using System.Collections;
 using System.Management.Automation;
 using System.Management.Automation.Language;
 using System.Reflection;
+using Microsoft.CSharp;
 using Microsoft.PowerShell.Commands.Utility;
 
 namespace Microsoft.PowerShell.Commands
@@ -93,11 +94,20 @@ namespace Microsoft.PowerShell.Commands
         [ParameterAttribute(ParameterSetName="FromMember")]
         public string[] UsingNamespace { get; set; }
 
+        public AddTypeCommand()
+        {
+            CodeDomProvider = new CSharpCodeProvider();
+        }
+
         protected override void ProcessRecord()
         {
             if (AssemblyName != null)
             {
                 AddAssemblies();
+            }
+            else if (!String.IsNullOrEmpty(TypeDefinition))
+            {
+                AddTypeDefinition();
             }
         }
 
@@ -107,6 +117,19 @@ namespace Microsoft.PowerShell.Commands
             {
                 Assembly.Load(name);
             }
+        }
+
+        private void AddTypeDefinition()
+        {
+            CompilerResults results = CodeDomProvider.CompileAssemblyFromSource(GetCompilerParameters(), TypeDefinition);
+        }
+
+        private CompilerParameters GetCompilerParameters()
+        {
+            return new CompilerParameters
+            {
+                GenerateInMemory = true
+            };
         }
     }
 }
