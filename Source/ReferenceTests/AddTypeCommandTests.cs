@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using NUnit.Framework;
 
 namespace ReferenceTests
@@ -52,6 +53,32 @@ $obj = New-Object AddTypeDefinitionAndCallMethodOnNewInstanceTestClass
 $obj.WriteLine()"
 );
             StringAssert.Contains("Test" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void AddTypeDefinitionWithReferencedAssemblies()
+        {
+            string result = ReferenceHost.Execute(
+@"$source = 'public class AddTypeDefinitionWithReferencedAssembliesTestClass { public string WriteLine() { return ""Name="" + typeof(System.Xml.XmlDocument).Name; } }'
+Add-Type -typedefinition $source -ReferencedAssemblies 'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'
+$obj = New-Object AddTypeDefinitionWithReferencedAssembliesTestClass
+$obj.WriteLine()"
+);
+            StringAssert.Contains("Name=XmlDocument" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void AddTypeDefinitionWithReferencedAssembliesByFileName()
+        {
+            string fileName = Assembly.ReflectionOnlyLoad("System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089").Location;
+            string result = ReferenceHost.Execute(
+                NewlineJoin(
+"$source = 'public class AddTypeDefinitionWithReferencedAssembliesByFileNameTestClass { public string WriteLine() { return \"Name=\" + typeof(System.Xml.XmlDocument).Name; } }'",
+"Add-Type -typedefinition $source -ReferencedAssemblies '" + fileName + "'",
+"$obj = New-Object AddTypeDefinitionWithReferencedAssembliesByFileNameTestClass",
+"$obj.WriteLine()")
+);
+            StringAssert.Contains("Name=XmlDocument" + Environment.NewLine, result);
         }
 
         [Test]

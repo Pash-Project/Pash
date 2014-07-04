@@ -133,10 +133,31 @@ namespace Microsoft.PowerShell.Commands
 
         private CompilerParameters GetCompilerParameters()
         {
-            return new CompilerParameters
+            var parameters = new CompilerParameters();
+            parameters.GenerateInMemory = true;
+            parameters.ReferencedAssemblies.AddRange(GetReferencedAssemblies());
+            return parameters;
+        }
+
+        private string[] GetReferencedAssemblies()
+        {
+            if (ReferencedAssemblies == null)
+                return new string[0];
+
+            return (from reference in ReferencedAssemblies
+                    select GetAssemblyPath(reference)).ToArray();
+        }
+
+        private string GetAssemblyPath(string reference)
+        {
+            try
             {
-                GenerateInMemory = true
-            };
+                return Assembly.ReflectionOnlyLoad(reference).Location;
+            }
+            catch
+            {
+                return Assembly.ReflectionOnlyLoadFrom(reference).Location;
+            }
         }
 
         private void AddMemberDefinition()
