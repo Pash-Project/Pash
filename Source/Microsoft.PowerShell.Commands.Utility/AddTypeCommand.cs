@@ -129,6 +129,7 @@ namespace Microsoft.PowerShell.Commands
         private void AddTypeDefinition()
         {
             CompilerResults results = CodeDomProvider.CompileAssemblyFromSource(GetCompilerParameters(), TypeDefinition);
+            ReportResults(results);
         }
 
         private CompilerParameters GetCompilerParameters()
@@ -137,6 +138,35 @@ namespace Microsoft.PowerShell.Commands
             parameters.GenerateInMemory = true;
             parameters.ReferencedAssemblies.AddRange(GetReferencedAssemblies());
             return parameters;
+        }
+
+        private void ReportResults(CompilerResults results)
+        {
+            foreach (CompilerError error in results.Errors)
+            {
+                WriteError(CreateErrorRecord(error));
+            }
+
+            if (results.Errors.HasErrors)
+            {
+                var exception = new InvalidOperationException("Cannot add type. There were compilation errors.");
+                var errorRecord = new ErrorRecord(exception, GetErrorId("COMPILER_ERRORS"), ErrorCategory.InvalidData, null);
+                ThrowTerminatingError(errorRecord);
+            }
+        }
+
+        private string GetErrorId(string id)
+        {
+            return String.Format("{0},{1}", id, GetType().FullName);
+        }
+
+        private ErrorRecord CreateErrorRecord(CompilerError error)
+        {
+            return new ErrorRecord(
+                new Exception(error.ToString()),
+                GetErrorId("SOURCE_CODE_ERROR"),
+                ErrorCategory.InvalidData,
+                null);
         }
 
         private string[] GetReferencedAssemblies()
@@ -163,7 +193,8 @@ namespace Microsoft.PowerShell.Commands
         private void AddMemberDefinition()
         {
             CodeCompileUnit compileUnit = GenerateMemberDefinitionCodeDom();
-            CodeDomProvider.CompileAssemblyFromDom(GetCompilerParameters(), compileUnit);
+            CompilerResults results = CodeDomProvider.CompileAssemblyFromDom(GetCompilerParameters(), compileUnit);
+            ReportResults(results);
         }
 
         private CodeCompileUnit GenerateMemberDefinitionCodeDom()

@@ -1,6 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Collections.Generic;
+using System.Management.Automation;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
@@ -41,6 +42,20 @@ Add-Type -typedefinition $source
 [AddTypeDefinitionTestClass].FullName"
 );
             StringAssert.Contains("AddTypeDefinitionTestClass" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void AddTypeDefinitionWithInvalidCSharpCode()
+        {
+            Exception ex = Assert.Throws(Is.InstanceOf(typeof(Exception)), () => {
+                ReferenceHost.RawExecute("Add-Type -TypeDefinition 'public class ErrorTest --'");
+            });
+            Assert.AreEqual("Cannot add type. There were compilation errors.", ex.Message);
+            // TODO: Exception should be CmdletInvocationException
+            // TODO: Does not work with pash. Pash does not have the error records in the pipeline.
+            // They are in a nested pipeline but do not reach the main pipeline
+            //ErrorRecord[] errorRecords = ReferenceHost.GetLastRawErrorRecords();
+            //Assert.AreEqual(3, errorRecords.Length, "Should be 3 compiler errors");
         }
 
         [Test]
@@ -131,6 +146,20 @@ $obj.WriteLine()
 "
 );
             StringAssert.Contains("System.Diagnostics.Debugger" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void AddMemberDefinitionWithInvalidCSharp()
+        {
+            Exception ex = Assert.Throws(Is.InstanceOf(typeof(Exception)), () => {
+                ReferenceHost.RawExecute("add-type -name Test -memberdefinition 'public WriteLine() ---'");
+            });
+            Assert.AreEqual("Cannot add type. There were compilation errors.", ex.Message);
+            // TODO: Exception should be CmdletInvocationException
+            // TODO: Does not work with pash. Pash does not have the error records in the pipeline.
+            // They are in a nested pipeline but do not reach the main pipeline
+            //ErrorRecord[] errorRecords = ReferenceHost.GetLastRawErrorRecords();
+            //Assert.AreEqual(2, errorRecords.Length, "Should be 2 compiler errors");
         }
     }
 }
