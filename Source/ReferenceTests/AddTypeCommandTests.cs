@@ -1,6 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Management.Automation;
 using System.Linq;
 using System.Reflection;
@@ -11,6 +12,25 @@ namespace ReferenceTests
     [TestFixture]
     public class AddTypeCommandTests : ReferenceTestBase
     {
+        string tempFileName;
+
+        [TearDown]
+        public void RemoveTempFile()
+        {
+            if (tempFileName != null && File.Exists(tempFileName))
+            {
+                File.Delete(tempFileName);
+            }
+        }
+
+        private string CreateTempFile(string fileName, string contents)
+        {
+            string directory = Path.GetTempPath();
+            tempFileName = Path.Combine(Path.GetTempPath(), fileName);
+            File.WriteAllText(tempFileName, contents);
+            return tempFileName;
+        }
+
         [Test]
         public void AddTypeAddsAssemblyToCurrentAppDomain()
         {
@@ -160,6 +180,49 @@ $obj.WriteLine()
             // They are in a nested pipeline but do not reach the main pipeline
             //ErrorRecord[] errorRecords = ReferenceHost.GetLastRawErrorRecords();
             //Assert.AreEqual(2, errorRecords.Length, "Should be 2 compiler errors");
+        }
+
+        [Test]
+        public void AddTypeFromCSharpSourceFile()
+        {
+            string fileName = CreateTempFile("AddTypeFromCSharpSourceFile.cs",
+@"namespace AddTypeCommandTests
+{
+    public class AddTypeFromCSharpSourceFileTestClass
+    {
+        public string WriteLine() { return ""Test""; }
+    }
+}");
+            string result = ReferenceHost.Execute(
+                NewlineJoin(
+"Add-Type -Path '" + fileName + "'",
+"$obj = New-Object AddTypeCommandTests.AddTypeFromCSharpSourceFileTestClass",
+ "$obj.WriteLine()"));
+
+            StringAssert.Contains("Test" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void AddTypeFromCSharpSourceFileWithInvalidCode()
+        {
+            string fileName = CreateTempFile("AddTypeFromCSharpSourceFileWithInvalidCode.cs", @"public class ErrorTest --");
+            Exception ex = Assert.Throws(Is.InstanceOf(typeof(Exception)), () =>
+            {
+                ReferenceHost.RawExecute("Add-Type -Path '" + fileName + "'");
+            });
+            Assert.AreEqual("Cannot add type. There were compilation errors.", ex.Message);
+        }
+
+        [Test]
+        public void AddTypeFromAssemblyUsingFullPathToAssembly()
+        {
+            Assembly assembly = Assembly.ReflectionOnlyLoad("Microsoft.Build.Engine, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+            string result = ReferenceHost.Execute(
+                NewlineJoin(
+                "Add-Type -Path '" + assembly.Location + "'",
+                "[Microsoft.Build.BuildEngine.Project].FullName"));
+
+            StringAssert.Contains("Microsoft.Build.BuildEngine.Project" + Environment.NewLine, result);
         }
     }
 }
