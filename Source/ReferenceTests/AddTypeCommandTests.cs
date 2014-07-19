@@ -230,13 +230,11 @@ $obj.WriteLine()
         {
             string result = ReferenceHost.Execute(
                 NewlineJoin(
-@"$acctype = add-type -assemblyname ""accessibility, version=4.0.0.0, culture=neutral,publickeytoken=b03f5f7f11d50a3a"",""Microsoft.CSharp, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" -passthru",
+@"$acctype = add-type -assemblyname ""Accessibility, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"",""Microsoft.CSharp, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" -passthru",
 "$acctype | foreach-object { $_.FullName }",
-"'$acctype.GetType().FullName=' + $acctype.GetType().FullName",
-"'$acctype[0].GetType().FullName=' + $acctype[0].GetType().FullName"));
+"'$acctype.GetType().FullName=' + $acctype.GetType().FullName"));
 
             StringAssert.Contains("$acctype.GetType().FullName=System.Object[]" + Environment.NewLine, result);
-            StringAssert.Contains("$acctype[0].GetType().FullName=System.RuntimeType" + Environment.NewLine, result);
             StringAssert.Contains("Microsoft.CSharp.RuntimeBinder.Binder" + Environment.NewLine, result);
             StringAssert.Contains("Accessibility.IAccessible" + Environment.NewLine, result);
         }
@@ -258,10 +256,8 @@ $obj.WriteLine()
                 NewlineJoin(
 "$source = 'public class AddTypeDefinitionWithPassThruTestClass { }'",
 "$type = Add-Type -passthru -typedefinition $source",
-"'$type.GetType().FullName=' + $type.GetType().FullName",
 "'$type.FullName=' + $type.FullName"));
 
-            StringAssert.Contains("$type.GetType().FullName=System.RuntimeType" + Environment.NewLine, result);
             StringAssert.Contains("$type.FullName=AddTypeDefinitionWithPassThruTestClass" + Environment.NewLine, result);
         }
 
@@ -273,11 +269,9 @@ $obj.WriteLine()
 "$source = 'public class AddTwoTypeDefinitionsWithPassThruTestClass1 { } public class AddTwoTypeDefinitionsWithPassThruTestClass2 { }'",
 "$types = Add-Type -Passthru -typedefinition $source",
 "$types | foreach-object { $_.FullName }",
-"'$types.GetType().FullName=' + $types.GetType().FullName",
-"'$types[0].GetType().FullName=' + $types[0].GetType().FullName"));
+"'$types.GetType().FullName=' + $types.GetType().FullName"));
 
             StringAssert.Contains("$types.GetType().FullName=System.Object[]" + Environment.NewLine, result);
-            StringAssert.Contains("$types[0].GetType().FullName=System.RuntimeType" + Environment.NewLine, result);
             StringAssert.Contains("AddTwoTypeDefinitionsWithPassThruTestClass1" + Environment.NewLine, result);
             StringAssert.Contains("AddTwoTypeDefinitionsWithPassThruTestClass2" + Environment.NewLine, result);
         }
@@ -289,10 +283,8 @@ $obj.WriteLine()
                 NewlineJoin(
 "$method = 'public string WriteLine() { return \"Test\"; }'",
 "$type = Add-Type -PassThru -MemberDefinition $method -Name 'AddMemberDefinitionSpecifyingTypeNamespaceTestClass' -Namespace 'AddTypeCommandNamespace'",
-"'$type.GetType().FullName=' + $type.GetType().FullName",
 "'$type.FullName=' + $type.FullName"));
 
-            StringAssert.Contains("$type.GetType().FullName=System.RuntimeType" + Environment.NewLine, result);
             StringAssert.Contains("$type.FullName=AddTypeCommandNamespace.AddMemberDefinitionSpecifyingTypeNamespaceTestClass" + Environment.NewLine, result);
         }
     }

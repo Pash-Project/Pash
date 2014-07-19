@@ -47,13 +47,13 @@ namespace TestHost.Cmdlets
                 "'error[0].FullyQualifiedErrorId=' + $error[0].FullyQualifiedErrorId",
                 "$compilerErrorCount = 0",
                 "$error | ForEach-Object { if ( $_.FullyQualifiedErrorId -eq 'SOURCE_CODE_ERROR,Microsoft.PowerShell.Commands.AddTypeCommand') { $compilerErrorCount += 1 } }",
-                "'CompilerErrors=' + $compilerErrorCount"
+                "if ($compilerErrorCount -gt 0) { 'Compiler error reported' }"
             );
 
             StringAssert.Contains("error[0].Exception.Message=Cannot add type. There were compilation errors.", result);
             // TODO: Original error record information is lost.
             //StringAssert.Contains("error[0].FullyQualifiedErrorId=COMPILER_ERRORS,Microsoft.PowerShell.Commands.AddTypeCommand", result);
-            StringAssert.Contains("CompilerErrors=3", result);
+            StringAssert.Contains("Compiler error reported", result);
         }
 
         [Test]
@@ -65,13 +65,13 @@ namespace TestHost.Cmdlets
                 "'error[0].FullyQualifiedErrorId=' + $error[0].FullyQualifiedErrorId",
                 "$compilerErrorCount = 0",
                 "$error | ForEach-Object { if ( $_.FullyQualifiedErrorId -eq 'SOURCE_CODE_ERROR,Microsoft.PowerShell.Commands.AddTypeCommand') { $compilerErrorCount += 1 } }",
-                "'CompilerErrors=' + $compilerErrorCount"
+                "if ($compilerErrorCount -gt 0) { 'Multiple Compiler Errors' }"
             );
 
             StringAssert.Contains("error[0].Exception.Message=Cannot add type. There were compilation errors.", result);
             // TODO: Original error record information is lost.
             //StringAssert.Contains("error[0].FullyQualifiedErrorId=COMPILER_ERRORS,Microsoft.PowerShell.Commands.AddTypeCommand", result);
-            StringAssert.Contains("CompilerErrors=2", result);
+            StringAssert.Contains("Multiple Compiler Errors", result);
         }
 
         [Test]
@@ -84,13 +84,13 @@ namespace TestHost.Cmdlets
                 "'error[0].FullyQualifiedErrorId=' + $error[0].FullyQualifiedErrorId",
                 "$compilerErrorCount = 0",
                 "$error | ForEach-Object { if ( $_.FullyQualifiedErrorId -eq 'SOURCE_CODE_ERROR,Microsoft.PowerShell.Commands.AddTypeCommand') { $compilerErrorCount += 1 } }",
-                "'CompilerErrors=' + $compilerErrorCount"
+                "if ($compilerErrorCount -gt 0) { 'Compiler error reported' }"
             );
 
             StringAssert.Contains("error[0].Exception.Message=Cannot add type. There were compilation errors.", result);
             // TODO: Original error record information is lost.
             //StringAssert.Contains("error[0].FullyQualifiedErrorId=COMPILER_ERRORS,Microsoft.PowerShell.Commands.AddTypeCommand", result);
-            StringAssert.Contains("CompilerErrors=3", result);
+            StringAssert.Contains("Compiler error reported", result);
         }
     }
 }
