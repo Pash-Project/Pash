@@ -97,6 +97,8 @@ namespace Microsoft.PowerShell.Commands
         [ParameterAttribute(ParameterSetName="FromMember")]
         public string[] UsingNamespace { get; set; }
 
+        private List<Assembly> assembliesAdded = new List<Assembly>();
+
         public AddTypeCommand()
         {
             CodeDomProvider = new CSharpCodeProvider();
@@ -126,14 +128,17 @@ namespace Microsoft.PowerShell.Commands
         {
             foreach (string name in AssemblyName)
             {
-                Assembly.Load(name);
+                assembliesAdded.Add(Assembly.Load(name));
             }
+
+            WriteTypesAdded();
         }
 
         private void AddTypeDefinition()
         {
             CompilerResults results = CodeDomProvider.CompileAssemblyFromSource(GetCompilerParameters(), TypeDefinition);
             ReportResults(results);
+            WriteTypesAdded(results);
         }
 
         private CompilerParameters GetCompilerParameters()
@@ -199,6 +204,8 @@ namespace Microsoft.PowerShell.Commands
             CodeCompileUnit compileUnit = GenerateMemberDefinitionCodeDom();
             CompilerResults results = CodeDomProvider.CompileAssemblyFromDom(GetCompilerParameters(), compileUnit);
             ReportResults(results);
+
+            WriteTypesAdded(results);
         }
 
         private CodeCompileUnit GenerateMemberDefinitionCodeDom()
@@ -266,6 +273,47 @@ namespace Microsoft.PowerShell.Commands
         {
             string fileExtension = System.IO.Path.GetExtension(paths[0]);
             return String.Equals(".dll", fileExtension, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void WriteTypesAdded()
+        {
+            if (!PassThru.IsPresent)
+                return;
+
+            object[] typesAdded = GetTypesAdded();
+            WriteTypesAdded(typesAdded);
+
+            assembliesAdded.Clear();
+        }
+
+        private void WriteTypesAdded(object[] typesAdded)
+        {
+            if (typesAdded.Length == 1)
+            {
+                WriteObject(typesAdded[0]);
+            }
+            else
+            {
+                WriteObject(typesAdded);
+            }
+        }
+
+        private object[] GetTypesAdded()
+        {
+            return (from assembly in assembliesAdded
+                    let types = assembly.GetTypes()
+                    from type in types
+                    select type).ToArray<object>();
+        }
+
+        private void WriteTypesAdded(CompilerResults results)
+        {
+            if (results.Errors.HasErrors || !PassThru.IsPresent)
+                return;
+
+            assembliesAdded.Add(results.CompiledAssembly);
+
+            WriteTypesAdded();
         }
     }
 }
