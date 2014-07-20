@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Text;
@@ -13,6 +14,7 @@ namespace ReferenceTests
         public static InitialSessionState InitialSessionState { get; set; }
         public static Runspace LastUsedRunspace { get; private set; }
         public static Collection<PSObject> LastRawResults { get; private set; }
+        public static Collection<object> LastRawErrorResults { get; private set; }
         public static string LastResults { get; private set; }
 
 
@@ -70,6 +72,10 @@ namespace ReferenceTests
                     catch (Exception)
                     {
                         LastRawResults = pipeline.Output.ReadToEnd();
+                        if (pipeline.Error.Count > 0)
+                        {
+                            LastRawErrorResults = pipeline.Error.ReadToEnd();
+                        }
                         throw;
                     }
                     if (pipeline.Error.Count > 0)
@@ -93,6 +99,16 @@ namespace ReferenceTests
                 sessionState.ImportPSModule(modules);
                 ReferenceHost.InitialSessionState = sessionState;
             }
+        }
+
+        public static ErrorRecord[] GetLastRawErrorRecords()
+        {
+            if (LastRawErrorResults == null)
+                return new ErrorRecord[0];
+
+            return (from obj in LastRawErrorResults
+                    let error = (PSObject)obj
+                    select (ErrorRecord)error.BaseObject).ToArray();
         }
     }
 }

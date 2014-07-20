@@ -149,6 +149,13 @@ namespace System.Management.Automation.Language
 
             if (type != null) return type;
 
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                type = assembly.GetType(this.Name, false, true);
+                if (type != null)
+                    return type;
+            }
+
             // TODO: Parse generic types.
 
             throw new ArgumentException(String.Format("Unknown type '{0}'. The type cannot be resolved", Name));
