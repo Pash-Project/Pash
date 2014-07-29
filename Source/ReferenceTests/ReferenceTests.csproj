@@ -66,6 +66,7 @@
     <Compile Include="CsvCommandTests.cs" />
     <Compile Include="StringTests.cs" />
     <Compile Include="FileSystemProviderTests.cs" />
+    <Compile Include="OutFileTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

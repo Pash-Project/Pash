@@ -2,13 +2,14 @@
 using System;
 using System.Management.Automation;
 using Microsoft.PowerShell.Commands.Internal.Format;
+using Microsoft.PowerShell.Commands.Utility;
 
 namespace Microsoft.PowerShell.Commands
 {
     // TODO: nice explanation here - http://www.computerperformance.co.uk/powershell/powershell_file_outfile.htm
 
     [Cmdlet("Out", "File", SupportsShouldProcess = true)]
-    public class OutFileCommand : FrontEndCommandBase
+    public class OutFileCommand : OutCommandBase
     {
         [Parameter]
         public SwitchParameter Append { get; set; }
@@ -32,9 +33,24 @@ namespace Microsoft.PowerShell.Commands
         [Parameter, ValidateRange(2, 0x7fffffff)]
         public int Width { get; set; }
 
-        public OutFileCommand()
+        protected override void BeginProcessing()
         {
-            throw new NotImplementedException();
+            System.Text.Encoding useEnc = System.Text.Encoding.UTF8;
+            if (!String.IsNullOrEmpty(Encoding))
+            {
+                try
+                {
+                    useEnc = System.Text.Encoding.GetEncoding(Encoding);
+                }
+                catch (ArgumentException)
+                {
+                    // shouldn't happen as Encoding gets validated
+                    var msg = String.Format("Invalid encoding '{0}'", Encoding);
+                    ThrowTerminatingError(new PSArgumentException(msg).ErrorRecord);
+                }
+            }
+            int width = Width == 0 ? -1 : Width;
+            OutputWriter = new FileOutputWriter(FilePath, Append, !NoClobber, useEnc, width);
         }
     }
 }

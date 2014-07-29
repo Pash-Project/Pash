@@ -43,20 +43,19 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void EndProcessing()
         {
-            if (_formatManager == null)
+            if (_formatManager != null)
             {
-                return;
+                var data = _formatManager.End();
+                if (data.Count > 0)
+                {
+                    var processor = FormatProcessor.Get(OutputWriter, data[0].Shape);
+                    foreach (var formatPayload in data)
+                    {
+                        processor.ProcessPayload(formatPayload);
+                    }
+                }
             }
-            var data = _formatManager.End();
-            if (data.Count < 1)
-            {
-                return;
-            }
-            var processor = FormatProcessor.Get(OutputWriter, data[0].Shape);
-            foreach (var formatPayload in data)
-            {
-                processor.ProcessPayload(formatPayload);
-            }
+            OutputWriter.Close();
         }
     }
 }
