@@ -26,10 +26,8 @@ namespace Microsoft.PowerShell.Commands.Microsoft.PowerShell.Commands.Provider
         /// </summary>
         protected override void ProcessRecord()
         {
-            foreach (String _path in Path)
-            {
-                InvokeProvider.Item.New(_path, Name, ItemType, Value);
-            }
+            var results = InvokeProvider.Item.New(Path, Name, ItemType, Value, Force);
+            WriteObject(results, true);
         }
 
         /// <summary>

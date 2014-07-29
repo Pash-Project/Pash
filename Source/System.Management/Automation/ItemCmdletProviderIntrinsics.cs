@@ -2,15 +2,36 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Management.Automation.Internal;
+using System.Management.Automation.Provider;
+using System.IO;
+using Pash.Implementation;
 
 namespace System.Management.Automation
 {
     public sealed class ItemCmdletProviderIntrinsics
     {
         private InternalCommand _cmdlet;
+
         internal ItemCmdletProviderIntrinsics(Cmdlet cmdlet)
         {
             _cmdlet = cmdlet;
+        }
+
+        private ContainerCmdletProvider GetContainerProviderByPath(string path, string name, out Path normalizedPath)
+        {
+            PSDriveInfo drive;
+            var provider = _cmdlet.State.SessionStateGlobal.GetProviderByPath(path, out drive) as ContainerCmdletProvider;
+            if (provider == null)
+            {
+                throw new PSInvalidOperationException(String.Format("The provider for path '{0}' is not a ContainerProvider", path));
+            }
+            normalizedPath = new Path(path);
+            if (!String.IsNullOrEmpty(name))
+            {
+                normalizedPath = normalizedPath.Combine(name);
+            }
+            normalizedPath = normalizedPath.MakePath(drive.Name).NormalizeSlashes();
+            return provider;
         }
 
         public Collection<PSObject> Clear(string path) { throw new NotImplementedException(); }
@@ -20,7 +41,27 @@ namespace System.Management.Automation
         public void Invoke(string path) { throw new NotImplementedException(); }
         public bool IsContainer(string path) { throw new NotImplementedException(); }
         public Collection<PSObject> Move(string path, string destination) { throw new NotImplementedException(); }
-        public Collection<PSObject> New(string path, string name, string itemTypeName, object content) { throw new NotImplementedException(); }
+
+        public Collection<PSObject> New(string path, string name, string itemTypeName, object content)
+        {
+            return New(new [] { path }, name, itemTypeName, content, false);
+        }
+
+        public Collection<PSObject> New(string[] paths, string name, string itemTypeName, object content, bool force)
+        {
+            // TODO: support globbing (e.g. * in filename)
+            Path normalizedPath;
+            var runtime = new ProviderRuntime(_cmdlet.ExecutionContext);
+            runtime.Force = force;
+            foreach (var path in paths)
+            {
+                var provider = GetContainerProviderByPath(path, name, out normalizedPath);
+                provider.NewItem(normalizedPath, itemTypeName, content, runtime);
+            }
+            runtime.ThrowFirstErrorOrContinue();
+            return runtime.RetreiveAllProviderData();
+        }
+
         public void Remove(string path, bool recurse) { throw new NotImplementedException(); }
         public Collection<PSObject> Rename(string path, string newName) { throw new NotImplementedException(); }
         public Collection<PSObject> Set(string path, object value) { throw new NotImplementedException(); }

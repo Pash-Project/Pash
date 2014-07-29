@@ -14,6 +14,7 @@ namespace ReferenceTests
     public class ReferenceTestBase
     {
         private List<string> _createdFiles;
+        private List<string> _createdDirs;
         private string _assemblyDirectory;
         private Regex _whiteSpaceRegex;
         private bool _isMonoRuntime;
@@ -21,6 +22,7 @@ namespace ReferenceTests
         public ReferenceTestBase()
         {
             _createdFiles = new List<string>();
+            _createdDirs = new List<string>();
             _assemblyDirectory = Path.GetDirectoryName(new Uri(GetType().Assembly.CodeBase).LocalPath);
             _whiteSpaceRegex = new Regex(@"\s");
             // prevents the project with Powershell to complain about the second part of the expression below
@@ -129,13 +131,34 @@ namespace ReferenceTests
             return File.ReadAllLines(filePath);
         }
 
+        public void AddCleanupFile(string file)
+        {
+            _createdFiles.Add(file);
+        }
+
+        public void AddCleanupDir(string dir)
+        {
+            _createdDirs.Add(dir);
+        }
+
         public void RemoveCreatedFiles()
         {
             foreach (var file in _createdFiles)
             {
-                File.Delete(file);
+                if (new FileInfo(file).Exists)
+                {
+                    File.Delete(file);
+                }
             }
             _createdFiles.Clear();
+            foreach (var dir in _createdDirs)
+            {
+                if (new DirectoryInfo(dir).Exists)
+                {
+                    Directory.Delete(dir, false);
+                }
+            }
+            _createdDirs.Clear();
         }
 
         public static string CmdletName(Type cmdletType)

@@ -28,19 +28,25 @@ namespace System.Management.Automation
             _message = message;
         }
 
+        internal ProviderInvocationException(ErrorRecord errorRecord)
+            : base(errorRecord.Exception.Message, errorRecord.Exception)
+        {
+            _errorRecord = errorRecord;
+        }
+
         protected ProviderInvocationException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            errorRecord = null;
+            _errorRecord = null;
         }
 
         //todo: implement
-        private ErrorRecord errorRecord;
+        private ErrorRecord _errorRecord;
         public override ErrorRecord ErrorRecord
         {
             get
             {
-                return errorRecord;
+                return _errorRecord;
             }
         }
 
