@@ -10,7 +10,7 @@ namespace ReferenceTests
         [Test]
         public void CanCreateDir()
         {
-            var dir = Path.Combine(Path.GetTempPath(), "__tempdir" + Path.DirectorySeparatorChar);
+            var dir = Path.Combine(Path.GetTempPath(), "__tempdir");
             AddCleanupDir(dir);
             var items = ReferenceHost.Execute(NewlineJoin(
                 String.Format("New-Item -path '{0}' -type directory | foreach-object {{$_.FullName}}", dir))
@@ -24,7 +24,7 @@ namespace ReferenceTests
         public void CanCreateRecursiveDir()
         {
             var parentDir = Path.Combine(Path.GetTempPath (), "__tempdir");
-            var recDir = Path.Combine(parentDir, "recursive" + Path.DirectorySeparatorChar);
+            var recDir = Path.Combine(parentDir, "recursive");
             AddCleanupDir(recDir);
             AddCleanupDir(parentDir);
             var items = ReferenceHost.Execute (NewlineJoin (

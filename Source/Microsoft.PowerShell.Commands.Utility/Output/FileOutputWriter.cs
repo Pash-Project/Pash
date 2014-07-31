@@ -41,7 +41,7 @@ namespace Microsoft.PowerShell.Commands.Utility
 
         public override void WriteLine(string output)
         {
-            _streamWriter.Write(output);
+            _streamWriter.WriteLine(output);
         }
     }
 }

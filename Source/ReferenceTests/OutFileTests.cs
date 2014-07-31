@@ -14,7 +14,7 @@ namespace ReferenceTests
             var fname = Path.Combine(Path.GetTempPath(), "__outfileTest");
             AddCleanupFile(fname);
             ReferenceHost.Execute("'foobar' | Out-File " + fname);
-            Assert.AreEqual("foobar", String.Join("\n", ReadLinesFromFile(fname)));
+            Assert.AreEqual(NewlineJoin("foobar"), NewlineJoin(ReadLinesFromFile(fname)));
         }
 
         [Test]
@@ -24,7 +24,7 @@ namespace ReferenceTests
             AddCleanupFile(fname);
             ReferenceHost.Execute("'foobar' | Out-File " + fname);
             ReferenceHost.Execute("'baz' | Out-File " + fname + " -Append");
-            Assert.AreEqual("foobarbaz", String.Join("\n", ReadLinesFromFile(fname)));
+            Assert.AreEqual(NewlineJoin("foobar", "baz"), NewlineJoin(ReadLinesFromFile(fname)));
         }
 
         [Test]
@@ -44,7 +44,7 @@ namespace ReferenceTests
             AddCleanupFile(fname);
             // no clobber in first call to make sure it can create a file with arg
             ReferenceHost.Execute("'foobar' | Out-File " + fname + " -NoClobber");
-            Assert.Throws(Is.InstanceOf(typeof(IOException)), delegate {
+            Assert.Throws(Is.InstanceOf(typeof(Exception)), delegate {
                 ReferenceHost.Execute("'baz' | Out-File " + fname + " -NoClobber");
             });
         }
