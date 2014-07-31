@@ -190,6 +190,7 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal _unary_join_expression = null; // Initialized by reflection.
         public readonly NonTerminal pre_increment_expression = null; // Initialized by reflection.
         public readonly NonTerminal pre_decrement_expression = null; // Initialized by reflection.
+        public readonly NonTerminal _unary_operator_expression = null;
         public readonly NonTerminal cast_expression = null; // Initialized by reflection.
         public readonly NonTerminal primary_expression = null; // Initialized by reflection.
         public readonly NonTerminal value = null; // Initialized by reflection.
@@ -1083,6 +1084,37 @@ namespace Pash.ParserIntrinsics
             ////            cast_expression
             ////            -split   new_lines_opt   unary_expression
             ////            -join   new_lines_opt   unary_expression
+            ///
+
+            // TODO: the following expresion covers all the different cases mentioned above as the original
+            // implementation increases the creation time of the grammar extremely (about 5 seconds)
+            // If someone has good ideas and is an grammar pro, feel free to change this again!
+            expression_with_unary_operator.Rule = _unary_operator_expression + unary_expression;
+            _unary_operator_expression.Rule =
+                _operator_not
+                |
+                ","
+                |
+                "!"
+                |
+                _operator_bnot
+                |
+                "+"
+                |
+                dash
+                |
+                "-split"
+                |
+                "-join"
+                |
+                "++"
+                |
+                dashdash
+                |
+                cast_expression;
+
+            /* Original code that splits the rule in different expressions:
+
             expression_with_unary_operator.Rule =
                 _unary_array_expression
                 |
@@ -1129,6 +1161,7 @@ namespace Pash.ParserIntrinsics
             ////            type_literal   unary_expression
             cast_expression.Rule =
                 type_literal + unary_expression;
+            */
 
             ////        primary_expression:
             ////            value
