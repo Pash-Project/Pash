@@ -55,7 +55,10 @@ namespace Microsoft.PowerShell.Commands
                     }
                 }
             }
-            OutputWriter.Close();
+            if (OutputWriter != null)
+            {
+                OutputWriter.Close();
+            }
         }
     }
 }
