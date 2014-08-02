@@ -25,8 +25,9 @@ Open the solution at `Source/Pash.sln` and run. Or at the command line:
 
 On **Windows**, use `MSBuild` instead of `xbuild`; the `mono` part is unecessary, and you'll probably need to add these to your PATH.
 
+If you're experiencing difficulties with reading Pash output, e.g. it looks like `[%?%p1%{8}%...` - try adding `TERM=xterm`, like `TERM=xterm mono Source/PashConsole/bin/Debug/Pash.exe`. In particular, this is a known issue on Fedora systems.
 
-Tests
+Unit Tests
 ----
 
 We use NUnit. In `master`, all tests pass all the time.
@@ -37,6 +38,8 @@ To run tests
 
 We want tests to pass on all three platforms all the time, although that can be difficult to guarantee. If you can, set up virtual machines so you can test on each platform.
 
+PowerShell Reference Tests
+----
 For easier verification of compatibility with PowerShell there is a separate test infrastructure, `ReferenceTests` which can be run with either Pash or PowerShell. Every test in there should be written only against the public and documented PowerShell API. If new source files containing tests are added to `Source/ReferenceTests/ReferenceTests.csproj` they are automatically picked up by the PowerShell reference test project. The tests can then be run via `msbuild /t:RefTest` to verify that every tests that passes in Pash also passes in PowerShell.
 
 Not every test needs to be duplicated as a reference test, but a few things probably warrant such an approach:
