@@ -168,6 +168,16 @@ namespace ReferenceTests
             _createdDirs.Clear();
         }
 
+        public static void ExecuteAndCompareTypedResult(string cmd, object expected)
+        {
+            var results = ReferenceHost.RawExecute(cmd);
+            Assert.AreEqual(1, results.Count);
+            var res = results[0].BaseObject;
+            Assert.AreSame(expected.GetType(), res.GetType());
+            Assert.AreEqual(expected, res);
+        }
+
+
         public static string CmdletName(Type cmdletType)
         {
             var attribute = System.Attribute.GetCustomAttribute(cmdletType, typeof(CmdletAttribute))

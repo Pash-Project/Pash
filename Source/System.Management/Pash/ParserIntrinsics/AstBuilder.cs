@@ -756,7 +756,7 @@ namespace Pash.ParserIntrinsics
                 this._grammar.comparison_operator,
                 this._grammar._logical_expression_operator,
                 this._grammar._bitwise_expression_operator,
-                this._grammar._additive_expression_operator,
+                // this._grammar._additive_expression_operator,
                 this._grammar._multiplicative_expression_operator
                 );
 
@@ -793,13 +793,24 @@ namespace Pash.ParserIntrinsics
         ExpressionAst BuildMultiplicativeExpressionAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.multiplicative_expression);
-
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.format_expression)
             {
                 return BuildFormatExpressionAst(parseTreeNode.ChildNodes.Single());
             }
+            else
+            {
+                var leftOperand = parseTreeNode.ChildNodes[0];
+                var operatorNode = parseTreeNode.ChildNodes[1];
+                var rightOperand = parseTreeNode.ChildNodes[2];
 
-            throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+                return new BinaryExpressionAst(
+                    new ScriptExtent(parseTreeNode),
+                    BuildMultiplicativeExpressionAst(leftOperand),
+                    ParseMultiplicativeOperator(operatorNode),
+                    BuildFormatExpressionAst(rightOperand),
+                    new ScriptExtent(operatorNode)
+                    );
+            }
         }
 
         ExpressionAst BuildFormatExpressionAst(ParseTreeNode parseTreeNode)
@@ -1251,8 +1262,44 @@ namespace Pash.ParserIntrinsics
             {
                 return BuildFormatArgumentExpressionAst(parseTreeNode.ChildNodes.Single());
             }
+            else
+            {
+                var leftOperand = parseTreeNode.ChildNodes[0];
+                var operatorNode = parseTreeNode.ChildNodes[1];
+                var rightOperand = parseTreeNode.ChildNodes[2];
 
-            throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+                return new BinaryExpressionAst(
+                    new ScriptExtent(parseTreeNode),
+                    BuildMultiplicativeArgumentExpressionAst(leftOperand),
+                    ParseMultiplicativeOperator(operatorNode),
+                    BuildFormatArgumentExpressionAst(rightOperand),
+                    new ScriptExtent(operatorNode)
+                    );
+            }
+        }
+
+        private TokenKind ParseMultiplicativeOperator(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, _grammar._multiplicative_expression_operator);
+            KeyTerm keyTerm = (KeyTerm) parseTreeNode.ChildNodes.Single().Term as KeyTerm;
+            if (keyTerm != null)
+            {
+                string symbol = keyTerm.Text;
+                if (symbol.Equals("*"))
+                {
+                    return TokenKind.Multiply;
+                }
+                else if (symbol.Equals("/"))
+                {
+                    return TokenKind.Divide;
+                }
+                else if (symbol.Equals("%"))
+                {
+                    return TokenKind.Rem;
+                }
+            }
+            throw new NotSupportedException(String.Format("Unsupported operator node '{0}'",
+                                                          parseTreeNode.ToString()));
         }
 
         ExpressionAst BuildFormatArgumentExpressionAst(ParseTreeNode parseTreeNode)

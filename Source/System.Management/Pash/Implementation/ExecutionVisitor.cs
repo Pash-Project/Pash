@@ -129,6 +129,9 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Minus:
                     return Subtract(leftOperand, rightOperand);
 
+                case TokenKind.Rem:
+                    return Remainder(leftOperand, rightOperand);
+
                 case TokenKind.Equals:
                 case TokenKind.PlusEquals:
                 case TokenKind.MinusEquals:
@@ -212,7 +215,7 @@ namespace System.Management.Pash.Implementation
             _context.SetVariable("Matches", PSObject.AsPSObject(matches));
         }
 
-        IEnumerable<int> Range(int start, int end)
+        private IEnumerable<int> Range(int start, int end)
         {
             //// Description:
             ////
@@ -307,7 +310,7 @@ namespace System.Management.Pash.Implementation
             }
         }
 
-        public object Add(object leftValue, object rightValue)
+        private object Add(object leftValue, object rightValue)
         {
             leftValue = PSObject.Unwrap(leftValue);
             rightValue = PSObject.Unwrap(rightValue);
@@ -325,6 +328,8 @@ namespace System.Management.Pash.Implementation
             ////          -10.300D + 12           # decimal result 1.700
             ////          10.6 + 12               # double result 22.6
             ////          12 + "0xabc"            # int result 2760
+
+            // string concatenation 7.7.2
             if (leftValue is string)
             {
                 if (rightValue is object[])
@@ -333,23 +338,54 @@ namespace System.Management.Pash.Implementation
                 }
                 return leftValue + rightValue.ToString();
             }
+            // TODO: implement array concatenation (7.7.3)
+            // TODO: implement hashtable concatenation (7.7.4)
+
+            // arithmetic expression (7.7.1)
             Func<dynamic, dynamic, dynamic> addOp = (dynamic x, dynamic y) => checked(x + y);
             return ArithmeticOperation(leftValue, rightValue, "+", addOp);
         }
 
-        public object Multiply(object leftValue, object rightValue)
+        private object Multiply(object leftValue, object rightValue)
         {
-            throw new NotImplementedException();
+            // string replication (7.6.2)
+            if (leftValue is string)
+            {
+                var num = (int) LanguagePrimitives.ConvertTo(rightValue, typeof(int));
+                var sb = new StringBuilder();
+                for (int i = 0; i < num; i++)
+                {
+                    sb.Append(leftValue);
+                }
+                return sb.ToString();
+            }
+
+            // TODO: implement array replication (7.6.3)
+
+            // arithmetic expression (7.6.1)
+            Func<dynamic, dynamic, dynamic> mulOp = (dynamic x, dynamic y) => checked(x * y);
+            return ArithmeticOperation(leftValue, rightValue, "*", mulOp);
         }
 
-        public object Divide(object leftValue, object rightValue)
+        private object Divide(object leftValue, object rightValue)
         {
-            throw new NotImplementedException();
+            // arithmetic division (7.6.4)
+            Func<dynamic, dynamic, dynamic> divOp = (dynamic x, dynamic y) => checked(x / y);
+            return ArithmeticOperation(leftValue, rightValue, "/", divOp);
         }
 
-        public object Subtract(object leftValue, object rightValue)
+        private object Remainder(object leftValue, object rightValue)
         {
-            throw new NotImplementedException();
+            // arithmetic remainder (7.6.5)
+            Func<dynamic, dynamic, dynamic> remOp = (dynamic x, dynamic y) => checked(x % y);
+            return ArithmeticOperation(leftValue, rightValue, "%", remOp);
+        }
+
+        private object Subtract(object leftValue, object rightValue)
+        {
+            // arithmetic expression (7.7.5)
+            Func<dynamic, dynamic, dynamic> subOp = (dynamic x, dynamic y) => checked(x - y);
+            return ArithmeticOperation(leftValue, rightValue, "-", subOp);
         }
 
         private object ArithmeticOperation(object leftUnconverted, object rightUnconverted, string op,

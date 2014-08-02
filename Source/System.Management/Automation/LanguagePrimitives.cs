@@ -685,7 +685,7 @@ namespace System.Management.Automation
             {
                 return castMethod.Invoke(null, new object[] { value });
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 var msg = String.Format("Value '{0}' can't be converted or casted to '{1}'",
                     value.ToString(), type.ToString());
