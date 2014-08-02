@@ -121,8 +121,14 @@ namespace System.Management.Pash.Implementation
                     return Match(leftOperand, rightOperand);
 
                 case TokenKind.Multiply:
+                    return Multiply(leftOperand, rightOperand);
+
                 case TokenKind.Divide:
+                    return Divide(leftOperand, rightOperand);
+
                 case TokenKind.Minus:
+                    return Subtract(leftOperand, rightOperand);
+
                 case TokenKind.Equals:
                 case TokenKind.PlusEquals:
                 case TokenKind.MinusEquals:
@@ -303,8 +309,8 @@ namespace System.Management.Pash.Implementation
 
         public object Add(object leftValue, object rightValue)
         {
-            if (leftValue is PSObject) leftValue = ((PSObject)leftValue).ImmediateBaseObject;
-            if (rightValue is PSObject) rightValue = ((PSObject)rightValue).ImmediateBaseObject;
+            leftValue = PSObject.Unwrap(leftValue);
+            rightValue = PSObject.Unwrap(rightValue);
 
             ////  7.7.1 Addition
             ////      Description:
@@ -313,53 +319,78 @@ namespace System.Management.Pash.Implementation
             ////      
             ////          This operator is left associative.
             ////      
-            ////      Examples:
+            ////      Examples: See ReferenceTests.AdditiveOperatorTests_7_7
             ////      
             ////          12 + -10L               # long result 2
             ////          -10.300D + 12           # decimal result 1.700
             ////          10.6 + 12               # double result 22.6
             ////          12 + "0xabc"            # int result 2760
-
-            if (leftValue == null && rightValue == null) return null;
-
-            if (leftValue == null) return rightValue;
-            if (rightValue == null) return leftValue;
-
-            if (leftValue is string) return leftValue + rightValue.ToString();
-
-            if (leftValue is decimal) return (decimal)leftValue + Convert.ToDecimal(rightValue);
-
-            if (rightValue is decimal) return Convert.ToDecimal(leftValue) + (decimal)rightValue;
-
-            if (leftValue is double) return (double)leftValue + ConvertToDouble(rightValue);
-
-            if (rightValue is double) return Convert.ToDouble(leftValue) + (double)rightValue;
-
-            if (leftValue is int) return (int)leftValue + ConvertToInt32(rightValue);
-
-            throw new NotImplementedException(this.ToString());
-        }
-
-        private double ConvertToDouble(object rightValue)
-        {
-            if (rightValue is string)
+            if (leftValue is string)
             {
-                return double.Parse((string)rightValue, NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture);
-            }
-            return Convert.ToDouble(rightValue);
-        }
-
-        private int ConvertToInt32(object rightValue)
-        {
-            if (rightValue is string)
-            {
-                string stringValue = (string)rightValue;
-                if (stringValue.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+                if (rightValue is object[])
                 {
-                    return Convert.ToInt32(stringValue, 16);
+                    return leftValue + String.Join(" ", (object[])rightValue);
+                }
+                return leftValue + rightValue.ToString();
+            }
+            Func<dynamic, dynamic, dynamic> addOp = (dynamic x, dynamic y) => checked(x + y);
+            return ArithmeticOperation(leftValue, rightValue, "+", addOp);
+        }
+
+        public object Multiply(object leftValue, object rightValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object Divide(object leftValue, object rightValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object Subtract(object leftValue, object rightValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        private object ArithmeticOperation(object leftUnconverted, object rightUnconverted, string op,
+                                           Func<dynamic, dynamic, dynamic> operation)
+        {
+            dynamic left, right;
+            if (!LanguagePrimitives.UsualArithmeticConversion(leftUnconverted, rightUnconverted, 
+                                                              out left, out right))
+            {
+                var msg = String.Format("Operation [{0}] {1} [{2}] is not defined",
+                                        leftUnconverted.GetType().FullName, op,
+                                        rightUnconverted.GetType().FullName);
+                throw new PSInvalidOperationException(msg);
+            }
+
+            // operation should include checked() operations
+            if (left is int && right is int)
+            {
+                try
+                {
+                    operation(left, right);
+                }
+                catch (OverflowException)
+                {
+                    left = (long)left;
+                    right = (long)right;
                 }
             }
-            return Convert.ToInt32(rightValue);
+            if (left is long && right is long)
+            {
+                try
+                {
+                    return operation(left, right);
+                }
+                catch (OverflowException)
+                {
+                    left = (double)left;
+                    right = (double)right;
+                }
+            }
+            return operation(left, right);
         }
 
         object EvaluateAst(Ast expressionAst)

@@ -7,6 +7,7 @@ using System.Management.Automation;
 using System.Collections.ObjectModel;
 using Mono.Terminal;
 using System.IO;
+using Extensions.Reflection;
 
 namespace Pash.Implementation
 {
@@ -121,7 +122,8 @@ namespace Pash.Implementation
                 return PromptValue(label, type, attributes, helpMessage);
             }
             object converted;
-            if (LanguagePrimitives.TryConvertTo(value, type, out converted))
+            if (!(type.IsNumeric() && String.IsNullOrWhiteSpace(value)) &&
+                LanguagePrimitives.TryConvertTo(value, type, out converted))
             {
                 // TODO: we should validate the value with the defined Attributes here
                 return converted;

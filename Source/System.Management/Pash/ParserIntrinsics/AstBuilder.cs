@@ -783,7 +783,7 @@ namespace Pash.ParserIntrinsics
                 return new BinaryExpressionAst(
                     new ScriptExtent(parseTreeNode),
                     BuildAdditiveExpressionAst(leftOperand),
-                    operatorNode.Term == this._grammar.dash ? TokenKind.Minus : TokenKind.Plus,
+                    operatorNode.ChildNodes.Single().Term == this._grammar.dash ? TokenKind.Minus : TokenKind.Plus,
                     BuildMultiplicativeExpressionAst(rightOperand),
                     new ScriptExtent(operatorNode)
                     );
