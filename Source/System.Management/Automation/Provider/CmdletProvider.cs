@@ -21,11 +21,38 @@ namespace System.Management.Automation.Provider
 
         public PSCredential Credential { get; private set; }
         protected object DynamicParameters { get; private set; }
-        public Collection<string> Exclude { get; private set; }
-        public string Filter { get; private set; }
-        public SwitchParameter Force { get; private set; }
+        public Collection<string> Exclude
+        {
+            get
+            {
+                return ProviderRuntime.Exclude;
+            }
+        }
+
+        public string Filter
+        {
+            get
+            {
+                return ProviderRuntime.Filter;
+            }
+        }
+
+        public SwitchParameter Force
+        {
+            get
+            {
+                return ProviderRuntime.Force;
+            }
+        }
         public PSHost Host { get; private set; }
-        public Collection<string> Include { get; private set; }
+        public Collection<string> Include
+        {
+            get
+            {
+                return ProviderRuntime.Include;
+            }
+        }
+
         public CommandInvocationIntrinsics InvokeCommand { get; private set; }
         public ProviderIntrinsics InvokeProvider { get; private set; }
         protected internal ProviderInfo ProviderInfo { get; private set; }
@@ -42,7 +69,11 @@ namespace System.Management.Automation.Provider
 
         public bool ShouldContinue(string query, string caption) { throw new NotImplementedException(); }
         public bool ShouldContinue(string query, string caption, ref bool yesToAll, ref bool noToAll) { throw new NotImplementedException(); }
-        public bool ShouldProcess(string target) { throw new NotImplementedException(); }
+        public bool ShouldProcess(string target)
+        { 
+            // TODO: implement behavior
+            return true;
+        }
         public bool ShouldProcess(string target, string action) { throw new NotImplementedException(); }
         public bool ShouldProcess(string verboseDescription, string verboseWarning, string caption) { throw new NotImplementedException(); }
         public bool ShouldProcess(string verboseDescription, string verboseWarning, string caption, out ShouldProcessReason shouldProcessReason) { throw new NotImplementedException(); }
@@ -73,7 +104,10 @@ namespace System.Management.Automation.Provider
         protected internal virtual void StopProcessing() { throw new NotImplementedException(); }
         public void ThrowTerminatingError(ErrorRecord errorRecord) { throw new NotImplementedException(); }
         public void WriteDebug(string text) { throw new NotImplementedException(); }
-        public void WriteError(ErrorRecord errorRecord) { throw new NotImplementedException(); }
+        public void WriteError(ErrorRecord errorRecord)
+        {
+            ProviderRuntime.WriteError(errorRecord);
+        }
 
         public void WriteItemObject(object item, Path path, bool isContainer)
         {

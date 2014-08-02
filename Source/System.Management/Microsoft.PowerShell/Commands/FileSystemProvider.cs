@@ -17,6 +17,12 @@ namespace Microsoft.PowerShell.Commands
         IPropertyCmdletProvider,
         ISecurityDescriptorCmdletProvider
     {
+        private enum ItemType {
+            Unknown,
+            Directory,
+            File
+        };
+
         public const string ProviderName = "FileSystem";
 
         public FileSystemProvider()
@@ -222,6 +228,52 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void InvokeDefaultAction(Path path) { throw new NotImplementedException(); }
 
+        protected override void NewItem(System.Management.Path path, string itemTypeName, object newItemValue)
+        {
+            path = NormalizePath(path);
+            var type = GetItemType(itemTypeName);
+            if (type.Equals(ItemType.Unknown))
+            {
+                throw new PSInvalidOperationException("Cannot create an item of unknown type");
+            }
+            System.IO.FileMode mode = System.IO.FileMode.CreateNew;
+            if (Force.IsPresent)
+            {
+                mode = System.IO.FileMode.Create;
+                CreateIntermediateDirectories(path);
+            }
+            if (type.Equals(ItemType.Directory))
+            {
+                var dirinfo = new System.IO.DirectoryInfo(path.ToString());
+                dirinfo.Create();
+                WriteItemObject(dirinfo, path, true);
+                return;
+            }
+            // else ItemType is File
+            if (!ShouldProcess(path))
+            {
+                return;
+            }
+            try
+            {
+                using (var stream = new System.IO.FileStream(path, mode, System.IO.FileAccess.Write, System.IO.FileShare.None))
+                {
+                    if (newItemValue != null)
+                    {
+                        var writer = new System.IO.StreamWriter(stream);
+                        writer.Write(newItemValue.ToString());
+                        writer.Flush();
+                        writer.Close();
+                    }
+                }
+                WriteItemObject(new System.IO.FileInfo(path), path, false);
+            }
+            catch (System.IO.IOException ex)
+            {
+                WriteError(new ErrorRecord(ex, "NewItem", ErrorCategory.WriteError, path));
+            }
+        }
+
         protected override bool IsItemContainer(Path path)
         {
             path = NormalizePath(path);
@@ -290,6 +342,22 @@ namespace Microsoft.PowerShell.Commands
                 }
             }
             return providerInfo;
+        }
+
+        void CreateIntermediateDirectories(string path)
+        {
+            var dirinfo = new System.IO.DirectoryInfo(path).Parent;
+            var createStack = new Stack<System.IO.DirectoryInfo>();
+            while (dirinfo != null && !dirinfo.Exists)
+            {
+                createStack.Push(dirinfo);
+                dirinfo = dirinfo.Parent;
+            }
+            while (createStack.Count > 0)
+            {
+                dirinfo = createStack.Pop();
+                dirinfo.Create();
+            }
         }
 
         #region IContentCmdletProvider Members
@@ -383,6 +451,20 @@ namespace Microsoft.PowerShell.Commands
         }
 
         #endregion
+
+        private ItemType GetItemType(string type)
+        {
+            var pattern = new WildcardPattern(type + "*", WildcardOptions.IgnoreCase);
+            if (pattern.IsMatch("directory") || pattern.IsMatch("container"))
+            {
+                return ItemType.Directory;
+            }
+            else if (pattern.IsMatch("file"))
+            {
+                return ItemType.File;
+            }
+            return ItemType.Unknown;
+        }
 
         private System.IO.FileSystemInfo GetFileSystemInfo(Path path, ref bool isContainer, bool showHidden)
         {

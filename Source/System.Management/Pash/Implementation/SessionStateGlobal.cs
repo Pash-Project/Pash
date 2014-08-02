@@ -506,6 +506,7 @@ namespace Pash.Implementation
             return null;
         }
 
+        // TODO: it would be nice if these functions would be in the intrinsics itself, not called from there
         internal Collection<PSObject> GetChildItems(string path, bool recurse)
         {
             ProviderRuntime providerRuntime = new ProviderRuntime(_executionContext);
@@ -518,7 +519,8 @@ namespace Pash.Implementation
             if (string.IsNullOrEmpty(path))
                 path = CurrentLocation.Path;
 
-            CmdletProvider provider = GetProviderByPath(path);
+            PSDriveInfo drive;
+            CmdletProvider provider = GetProviderByPath(path, out drive);
 
             if ((path != null) && (ItemExists(provider, path, providerRuntime)))
             {
@@ -541,13 +543,13 @@ namespace Pash.Implementation
             return providerRuntime.RetreiveAllProviderData();
         }
 
-        private CmdletProvider GetProviderByPath(Path path)
+        internal CmdletProvider GetProviderByPath(Path path, out PSDriveInfo drive)
         {
             // MUST: implement for "dir"
             if (string.IsNullOrEmpty(path))
                 path = CurrentLocation.Path;
 
-            PSDriveInfo drive = GetDrive(path);
+            drive = GetDrive(path);
 
             if (drive == null)
             {

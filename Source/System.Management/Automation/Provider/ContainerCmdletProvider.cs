@@ -28,24 +28,58 @@ namespace System.Management.Automation.Provider
         protected virtual object RenameItemDynamicParameters(Path path, Path newName) { throw new NotImplementedException(); }
 
         // internals
-        //internal void CopyItem(Path path, Path copyPath, bool recurse, CmdletProviderContext context);
-        //internal object CopyItemDynamicParameters(Path path, Path destination, bool recurse, CmdletProviderContext context);
-        //internal void GetChildItems(Path path, bool recurse, CmdletProviderContext context);
-        //internal object GetChildItemsDynamicParameters(Path path, bool recurse, CmdletProviderContext context);
-        //internal void GetChildNames(Path path, ReturnContainers returnContainers, CmdletProviderContext context);
-        //internal object GetChildNamesDynamicParameters(Path path, CmdletProviderContext context);
-        //internal bool HasChildItems(Path path, CmdletProviderContext context);
-        //internal void NewItem(Path path, Path type, object newItemValue, CmdletProviderContext context);
-        //internal object NewItemDynamicParameters(Path path, Path type, object newItemValue, CmdletProviderContext context);
-        //internal void RemoveItem(Path path, bool recurse, CmdletProviderContext context);
-        //internal object RemoveItemDynamicParameters(Path path, bool recurse, CmdletProviderContext context);
-        //internal void RenameItem(Path path, string newName, CmdletProviderContext context);
-        //internal object RenameItemDynamicParameters(Path path, string newName, CmdletProviderContext context);
-
-        internal void GetChildItems(Path path, bool recurse, ProviderRuntime providerRuntime)
+        internal void CopyItem(Path path, Path copyPath, bool recurse, ProviderRuntime runtime)
         {
-            ProviderRuntime = providerRuntime;
+            ProviderRuntime = runtime;
+            CopyItem(path, copyPath, recurse);
+        }
+
+        //internal object CopyItemDynamicParameters(Path path, Path destination, bool recurse, CmdletProviderContext context);
+
+        internal void GetChildItems(Path path, bool recurse, ProviderRuntime runtime)
+        {
+            ProviderRuntime = runtime;
             GetChildItems(path, recurse);
         }
+
+        //internal object GetChildItemsDynamicParameters(Path path, bool recurse, CmdletProviderContext context);
+
+        internal void GetChildNames(Path path, ReturnContainers returnContainers, ProviderRuntime runtime)
+        {
+            ProviderRuntime = runtime;
+            GetChildNames(path, returnContainers);
+        }
+
+        //internal object GetChildNamesDynamicParameters(Path path, CmdletProviderContext context);
+
+        internal bool HasChildItems(Path path, ProviderRuntime runtime)
+        {
+            ProviderRuntime = runtime;
+            return HasChildItems(path);
+        }
+
+        internal void NewItem(Path path, string type, object newItemValue, ProviderRuntime runtime)
+        {
+            ProviderRuntime = runtime;
+            NewItem(path, type, newItemValue);
+        }
+
+        //internal object NewItemDynamicParameters(Path path, Path type, object newItemValue, CmdletProviderContext context);
+
+        internal void RemoveItem(Path path, bool recurse, ProviderRuntime runtime)
+        {
+            ProviderRuntime = runtime;
+            RemoveItem(path, recurse);
+        }
+
+        //internal object RemoveItemDynamicParameters(Path path, bool recurse, CmdletProviderContext context);
+
+        internal void RenameItem(Path path, string newName, ProviderRuntime runtime)
+        {
+            ProviderRuntime = runtime;
+            RenameItem(path, newName);
+        }
+
+        //internal object RenameItemDynamicParameters(Path path, string newName, CmdletProviderContext context);
     }
 }

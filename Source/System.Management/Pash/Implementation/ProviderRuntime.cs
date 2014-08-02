@@ -54,5 +54,25 @@ namespace Pash.Implementation
                 _outputData.Add(PSObject.AsPSObject(obj));
             }
         }
+
+        internal void WriteError(ErrorRecord errorRecord)
+        {
+            if (_cmdlet != null)
+            {
+                _cmdlet.WriteError(errorRecord);
+            }
+            else
+            {
+                _errorData.Add(errorRecord);
+            }
+        }
+
+        public void ThrowFirstErrorOrContinue()
+        {
+            if (_errorData.Count > 0)
+            {
+                throw new ProviderInvocationException(_errorData[0]);
+            }
+        }
     }
 }
