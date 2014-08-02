@@ -886,35 +886,52 @@ namespace Pash.ParserIntrinsics
         ExpressionAst BuildExpressionWithUnaryOperatorAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.expression_with_unary_operator);
-
-            var childNode = parseTreeNode.ChildNodes.Single();
-
-            if (childNode.Term == this._grammar._unary_dash_expression)
+            // See Pash issue #214
+            var subNode = parseTreeNode.ChildNodes.Single();
+            // cast expression is not part of the joined expression, or double cast
+            // like [string][int]"5" wouldn't work for any reason
+            if (subNode.Term == this._grammar.cast_expression)
             {
-                return BuildUnaryDashExpressionAst(childNode);
+                return BuildCastExpression(subNode);
             }
+            // otherwise it's a joined unary operator expression
+            VerifyTerm(subNode, this._grammar._joined_unary_operator_expression);
 
-            else if (childNode.Term == this._grammar.pre_increment_expression)
+            var operatorTerm = subNode.ChildNodes[0].ChildNodes.Single().Term;
+            var operatorKeyTerm = operatorTerm as KeyTerm;
+
+            if (operatorTerm == this._grammar.dash)
             {
-                return BuildPreIncrementExpressionAst(childNode);
+                return BuildUnaryDashExpressionAst(subNode);
             }
-
-            else if (childNode.Term == this._grammar.cast_expression)
+            else if (operatorTerm == this._grammar.type_literal) /* cast expression */
             {
-                return BuildCastExpression(childNode);
+                return BuildCastExpression(subNode);
             }
-
-            else if (childNode.Term == this._grammar._unary_not_expression)
+            else if (operatorTerm == this._grammar._operator_not)
             {
-                return BuildUnaryNotExpressionAst(childNode);
+                return BuildUnaryNotExpressionAst(subNode);
             }
+            else if (operatorKeyTerm != null && operatorKeyTerm.Text.Equals("++"))
+            {
+                return BuildPreIncrementExpressionAst(subNode);
+            }
+            /* left to be implemented:
+             * operatorTerm == _operator_bnot
+             * operatorTerm == dashdash  // pre decrement
+             * operatorKeyTerm != null && operatorKeyTerm.Text.Equals(",") //unary array
+             * operatorKeyTerm != null && operatorKeyTerm.Text.Equals("!") //bang expression
+             * operatorKeyTerm != null && operatorKeyTerm.Text.Equals("+") //unary plus
+             * operatorKeyTerm != null && operatorKeyTerm.Text.Equals("-split") //split array
+             * operatorKeyTerm != null && operatorKeyTerm.Text.Equals("-join") //join array
+             */
 
-            throw new NotImplementedException(parseTreeNode.ToString());
+            throw new NotImplementedException(subNode.ToString());
         }
 
         ExpressionAst BuildCastExpression(ParseTreeNode parseTreeNode)
         {
-            VerifyTerm(parseTreeNode, this._grammar.cast_expression);
+            // VerifyTerm(parseTreeNode, this._grammar.cast_expression);
 
             return new ConvertExpressionAst(
                 new ScriptExtent(parseTreeNode),
@@ -1006,7 +1023,7 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildPreIncrementExpressionAst(ParseTreeNode parseTreeNode)
         {
-            VerifyTerm(parseTreeNode, this._grammar.pre_increment_expression);
+            // VerifyTerm(parseTreeNode, this._grammar.pre_increment_expression);
 
             return new UnaryExpressionAst(
                 new ScriptExtent(parseTreeNode),
