@@ -10,7 +10,7 @@ Join http://groups.google.com/group/pash-project.
 Status
 ------
 
-**Pre-alpha**. This project is not yet useful for any real work.
+**Alpha**. This project is useful in certain constrained applications, e.g. the [NuGet Console in Xamarin Studio](http://lastexitcode.com/blog/2014/06/22/NuGetPowerShellConsoleForXamarinStudio/).
 
 Getting Started
 ---------------
@@ -19,12 +19,10 @@ Getting Started
 
 Assuming you have MonoDevelop installed:
 
-1. `git clone https://github.com/Pash-Project/Pash/`
+1. `git clone ...`
 2. `cd Pash`
 3. `xbuild`
 4. `mono Source/PashConsole/bin/Debug/Pash.exe`
-
-If you're experiencing difficulties with reading Pash output, e.g. it looks like `[%?%p1%{8}%...` - try adding `TERM=xterm`, like `TERM=xterm mono Source/PashConsole/bin/Debug/Pash.exe`. In particular, this is a known issue on Fedora systems.
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for more details.
 
@@ -45,20 +43,18 @@ History
 
 Pash was created by Igor Moochnick and published at http://pash.sourceforge.net/ in 2008. After the original release, development ceased.
 
-In 2012, Jay Bazuzi started exploring the project to see what potential it held.
-
-2012-08: Replace GOLDParser with Irony.
-
+In 2012, Jay Bazuzi moved the project to GitHub and got things going again. A bunch of generous contributors have since joined in, keeping the project moving forward a bit at a time.
 
 Media
 -----
 
 - [Igor's original announcement](http://igorshare.wordpress.com/2008/04/06/pash-cross-platform-powershell-is-out-in-the-wild-announcement/)
 
-- [Followup blog post](http://igorshare.wordpress.com/2008/04/08/more-on-pash-mono-and-codecamp-9/), Igor's last message about Pash: 
+- [Followup blog post](http://igorshare.wordpress.com/2008/04/08/more-on-pash-mono-and-codecamp-9/), Igor's last message about Pash.
 
 - [Mention](http://blogs.msdn.com/b/powershell/archive/2008/04/08/powershell-on-linux-solaris-mac-etc.aspx) on the official PowerShell Blog: 
 
+- [Nuget Console in Xamarin Studio announcement](http://lastexitcode.com/blog/2014/06/22/NuGetPowerShellConsoleForXamarinStudio/)
 
 Gratitude
 ---------
