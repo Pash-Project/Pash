@@ -49,12 +49,12 @@ namespace ReferenceTests
             return LastResults;
         }
 
-        public static Collection<PSObject> RawExecute(string cmd)
+        public static Collection<PSObject> RawExecute(string cmd, bool throwMethodInvocationException = true)
         {
-            return RawExecute(new string[] { cmd });
+            return RawExecute(new string[] { cmd }, throwMethodInvocationException);
         }
 
-        public static Collection<PSObject> RawExecute(string[] commands)
+        public static Collection<PSObject> RawExecute(string[] commands, bool throwMethodInvocationException = true)
         {
             LastRawResults = null;
             LastUsedRunspace = InitialSessionState == null ?
@@ -78,7 +78,7 @@ namespace ReferenceTests
                         }
                         throw;
                     }
-                    if (pipeline.Error.Count > 0)
+                    if (throwMethodInvocationException && pipeline.Error.Count > 0)
                     {
                         throw new MethodInvocationException(String.Join(Environment.NewLine, pipeline.Error.ReadToEnd()));
                     }

@@ -67,9 +67,8 @@ Add-Type -typedefinition $source
         public void AddTypeDefinitionWithInvalidCSharpCode()
         {
             Exception ex = Assert.Throws(Is.InstanceOf(typeof(Exception)), () => {
-                ReferenceHost.RawExecute("Add-Type -TypeDefinition 'public class ErrorTest --'");
+                ReferenceHost.RawExecute("Add-Type -TypeDefinition 'public class ErrorTest --'", false);
             });
-            Assert.AreEqual("Cannot add type. There were compilation errors.", ex.Message);
             // TODO: Exception should be CmdletInvocationException
             // TODO: Does not work with pash. Pash does not have the error records in the pipeline.
             // They are in a nested pipeline but do not reach the main pipeline
@@ -171,9 +170,8 @@ $obj.WriteLine()
         public void AddMemberDefinitionWithInvalidCSharp()
         {
             Exception ex = Assert.Throws(Is.InstanceOf(typeof(Exception)), () => {
-                ReferenceHost.RawExecute("add-type -name Test -memberdefinition 'public WriteLine() ---'");
+                ReferenceHost.RawExecute("add-type -name Test -memberdefinition 'public WriteLine() ---'", false);
             });
-            Assert.AreEqual("Cannot add type. There were compilation errors.", ex.Message);
             // TODO: Exception should be CmdletInvocationException
             // TODO: Does not work with pash. Pash does not have the error records in the pipeline.
             // They are in a nested pipeline but do not reach the main pipeline
@@ -207,9 +205,8 @@ $obj.WriteLine()
             string fileName = CreateTempFile("AddTypeFromCSharpSourceFileWithInvalidCode.cs", @"public class ErrorTest --");
             Exception ex = Assert.Throws(Is.InstanceOf(typeof(Exception)), () =>
             {
-                ReferenceHost.RawExecute("Add-Type -Path '" + fileName + "'");
+                ReferenceHost.RawExecute("Add-Type -Path '" + fileName + "'", false);
             });
-            Assert.AreEqual("Cannot add type. There were compilation errors.", ex.Message);
         }
 
         [Test]
