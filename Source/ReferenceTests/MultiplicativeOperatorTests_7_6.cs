@@ -20,41 +20,53 @@ namespace ReferenceTests
             ExecuteAndCompareTypedResult("-10.300D * 12", (decimal) -123.600m);
         }
 
-        /*
-        string replication 7.6.2
-        "red" * "3" # string replicated 3 times
-        "red" * 4 # string replicated 4 times
-        "red" * 0 # results in an empty string
-        "red" * 2.3450D # string replicated twice
-        "red" * 2.7 # string replicated 3 times
-*/
+
+        [TestCase("\"red\" * \"3\"", "redredred")]
+        [TestCase("\"red\" * 4", "redredredred")]
+        [TestCase("\"red\" * 0", "")]
+        [TestCase("\"red\" * 2.7", "redredred")]
         public void StringReplication_Spec_7_6_2(string cmd, string result)
         {
             ExecuteAndCompareTypedResult(cmd, result);
         }
 
-        /*
+        public void StringReplication_Spec_7_6_2_decimal()
+        {
+            ExecuteAndCompareTypedResult("\"red\" * 2.3450D", "redred");
+        }
 
-        division 7.6.4
-        10/-10          # int result -1.2
-        12/-10          # double result -1.2
-        12/-10D         # decimal result 1.2
-        12/10.6         # double result 1.13207547169811
-        12/"0xabc"      # double result 0.00436681222707424
-*/
+        [TestCase("10/-10", (int) -1)]
+        [TestCase("12/-10", (double) -1.2)]
+        [TestCase("12/10.6", (double) 1.13207547169811)]
+        [TestCase("12/\"0xabc\"", (double) 0.00436681222707424)]
         public void Division_Spec_7_6_4(string cmd, object result)
         {
             ExecuteAndCompareTypedResult(cmd, result);
         }
-        /*
-        remainder 7.6.5
-        10 % 3                      # int result 1
-        10.0 % 0.3                  # double result 0.1
-        10.00D % "0x4"              # decimal result 2.00
-        */
+
+        [Test]
+        public void Division_Spec_7_6_4_decimal()
+        {
+            ExecuteAndCompareTypedResult("12/-10.0D", (decimal) -1.2m);
+        }
+
+        [TestCase("10 % 3", (int) 1)]
+        [TestCase("10.0 % 0.33", (double) 0.1)]
         public void Remainder_Spec_7_6_5(string cmd, object result)
         {
             ExecuteAndCompareTypedResult(cmd, result);
+        }
+
+        [Test]
+        public void Remainder_Spec_7_6_5_decimal()
+        {
+            ExecuteAndCompareTypedResult("10.00D % \"0x4\"", (decimal) 2.00m);
+        }
+
+        [Test]
+        public void Remainder_Spec_7_6_5_decimal2()
+        {
+            ExecuteAndCompareTypedResult("10.00D % 0.33D", (decimal) 0.10m);
         }
     }
 }

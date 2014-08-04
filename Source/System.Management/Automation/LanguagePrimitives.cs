@@ -456,12 +456,12 @@ namespace System.Management.Automation
                 if (leftType == type)
                 {
                     leftConverted = left;
-                    return TryConvertTo(right, type, out rightConverted);
+                    return TryConvertToNumericTryHexFirst(right, type, out rightConverted);
                 }
                 if (rightType == type)
                 {
                     rightConverted = right;
-                    return TryConvertTo(left, type, out leftConverted);
+                    return TryConvertToNumericTryHexFirst(left, type, out leftConverted);
                 }
             }
             // Otherwise, if one operand designates a value of type float, the values designated by both operands are
@@ -492,6 +492,16 @@ namespace System.Management.Automation
                 }
             }
             return false;
+        }
+
+        internal static bool TryConvertToNumericTryHexFirst(object obj, Type type, out dynamic converted)
+        {
+            var input = obj;
+            if (obj is string && ((string)obj).StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            {
+                TryConvertTo(obj, typeof(long), out input);
+            }
+            return TryConvertTo(input, type, out converted);
         }
 
         private static bool UsualArithmeticConversionOneOperand(ref object left, ref object right)

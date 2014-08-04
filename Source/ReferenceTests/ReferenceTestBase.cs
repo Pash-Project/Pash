@@ -173,8 +173,18 @@ namespace ReferenceTests
             var results = ReferenceHost.RawExecute(cmd);
             Assert.AreEqual(1, results.Count);
             var res = results[0].BaseObject;
-            Assert.AreSame(expected.GetType(), res.GetType());
-            Assert.AreEqual(expected, res);
+            var restype = res.GetType();
+            Assert.AreSame(expected.GetType(), restype);
+            if (restype == typeof(double))
+            {
+                var dres = (double) res;
+                var diff = dres - ((double)expected);
+                Assert.Less(diff, Math.Abs(dres) * 0.00001);
+            }
+            else
+            {
+                Assert.AreEqual(expected, res);
+            }
         }
 
 

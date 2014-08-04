@@ -351,7 +351,14 @@ namespace System.Management.Pash.Implementation
             // string replication (7.6.2)
             if (leftValue is string)
             {
-                var num = (int) LanguagePrimitives.ConvertTo(rightValue, typeof(int));
+                // we want integers, but if the original number is a float, it needs to be rounded.
+                // so we check for hex strings first and then try to get a double
+                dynamic parsed;
+                if (!LanguagePrimitives.TryConvertToNumericTryHexFirst(rightValue, typeof(double), out parsed))
+                {
+                    ThrowInvalidArithmeticOperationException(leftValue, rightValue, "%");
+                }
+                long num = (long) (parsed + 0.5);
                 var sb = new StringBuilder();
                 for (int i = 0; i < num; i++)
                 {
@@ -388,6 +395,14 @@ namespace System.Management.Pash.Implementation
             return ArithmeticOperation(leftValue, rightValue, "-", subOp);
         }
 
+        private void ThrowInvalidArithmeticOperationException(object left, object right, string op)
+        {
+            var msg = String.Format("Operation [{0}] {1} [{2}] is not defined",
+                                    left.GetType().FullName, op,
+                                    right.GetType().FullName);
+            throw new PSInvalidOperationException(msg);
+        }
+
         private object ArithmeticOperation(object leftUnconverted, object rightUnconverted, string op,
                                            Func<dynamic, dynamic, dynamic> operation)
         {
@@ -395,10 +410,7 @@ namespace System.Management.Pash.Implementation
             if (!LanguagePrimitives.UsualArithmeticConversion(leftUnconverted, rightUnconverted, 
                                                               out left, out right))
             {
-                var msg = String.Format("Operation [{0}] {1} [{2}] is not defined",
-                                        leftUnconverted.GetType().FullName, op,
-                                        rightUnconverted.GetType().FullName);
-                throw new PSInvalidOperationException(msg);
+                ThrowInvalidArithmeticOperationException(leftUnconverted, rightUnconverted, op);
             }
 
             // operation should include checked() operations
