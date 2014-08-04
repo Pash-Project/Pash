@@ -7,11 +7,9 @@ namespace Pash.Implementation
     internal sealed class AliasIntrinsics
     {
         private SessionStateScope<AliasInfo> _scope;
-        private SessionState _sessionState;
 
-        internal AliasIntrinsics(SessionState sessionState, SessionStateScope<AliasInfo> aliasScope)
+        internal AliasIntrinsics(SessionStateScope<AliasInfo> aliasScope)
         {
-            _sessionState = sessionState;
             _scope = aliasScope;
         }
 

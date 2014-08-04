@@ -30,7 +30,6 @@ namespace Pash.Implementation
         private Dictionary<string, List<ProviderInfo>> _providers;
         private Dictionary<string, List<CmdletProvider>> _providerInstances;
         private Dictionary<ProviderInfo, PSDriveInfo> _providersCurrentDrive;
-        private Dictionary<string, Stack<PathInfo>> _workingLocationStack;
         private Dictionary<string, PSSnapInInfo> _snapins;
 
         private ExecutionContext _executionContext;
@@ -42,7 +41,6 @@ namespace Pash.Implementation
             _providers = new Dictionary<string, List<ProviderInfo>>(StringComparer.CurrentCultureIgnoreCase);
             _providerInstances = new Dictionary<string, List<CmdletProvider>>(StringComparer.CurrentCultureIgnoreCase);
             _providersCurrentDrive = new Dictionary<ProviderInfo, PSDriveInfo>();
-            _workingLocationStack = new Dictionary<string, Stack<PathInfo>>(StringComparer.CurrentCultureIgnoreCase);
             _snapins = new Dictionary<string, PSSnapInInfo>(StringComparer.CurrentCultureIgnoreCase);
         }
 

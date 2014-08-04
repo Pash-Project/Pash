@@ -7,12 +7,10 @@ namespace System.Management.Automation
 {
     public sealed class PSVariableIntrinsics
     {
-        private SessionState _sessionState;
         private SessionStateScope<PSVariable> _scope;
 
-        internal PSVariableIntrinsics(SessionState sessionState, SessionStateScope<PSVariable> variableScope)
+        internal PSVariableIntrinsics(SessionStateScope<PSVariable> variableScope)
         {
-            _sessionState = sessionState;
             _scope = variableScope;
         }
 

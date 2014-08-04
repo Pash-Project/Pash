@@ -502,9 +502,7 @@ namespace Pash.ParserIntrinsics
                 new ScriptExtent(parseTreeNode),
                 clauses,
                 elseClause
-                );
-
-            throw new NotImplementedException(parseTreeNode.ToString());
+            );
         }
 
         Tuple<PipelineBaseAst, StatementBlockAst> BuildIfStatementClauseAst(ParseTreeNode parseTreeNode)
@@ -540,8 +538,6 @@ namespace Pash.ParserIntrinsics
             {
                 return BuildStatementListAst(parseTreeNode.ChildNodes[1]);
             }
-
-            throw new InvalidOperationException(parseTreeNode.ToString());
         }
 
         PipelineBaseAst BuildPipelineAst(ParseTreeNode parseTreeNode)
@@ -698,8 +694,6 @@ namespace Pash.ParserIntrinsics
                     new ScriptExtent(parseTreeNode.ChildNodes[1])
                     );
             }
-
-            throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
         }
 
         ExpressionAst BuildBitwiseExpressionAst(ParseTreeNode parseTreeNode)
@@ -1418,8 +1412,6 @@ namespace Pash.ParserIntrinsics
 
 
             VerifyTerm(parseTreeNode, this._grammar.type_spec);
-
-            var firstNode = parseTreeNode.ChildNodes.First();
 
             var typeNameNode = parseTreeNode.ChildNodes.First();
 

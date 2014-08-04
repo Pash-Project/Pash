@@ -62,13 +62,13 @@ namespace System.Management.Automation
             _driveScope = new SessionStateScope<PSDriveInfo>(drives, SessionStateCategory.Drive);
 
             IsScriptScope = false;
-            Function = new FunctionIntrinsics(this, _functionScope);
-            Alias = new AliasIntrinsics(this, _aliasScope);
+            Function = new FunctionIntrinsics(_functionScope);
+            Alias = new AliasIntrinsics(_aliasScope);
 
             Drive = new DriveManagementIntrinsics(this, _driveScope);
             Path = new PathIntrinsics(SessionStateGlobal);
             Provider = new CmdletProviderManagementIntrinsics(SessionStateGlobal);
-            PSVariable = new PSVariableIntrinsics(this, _variableScope);
+            PSVariable = new PSVariableIntrinsics(_variableScope);
         }
 
 
