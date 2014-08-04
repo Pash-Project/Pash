@@ -119,15 +119,15 @@ namespace System.Management.Automation
             }
 
             if (pattern.Length == 0)
-                return ".*";
+                return "^$";
 
             // TODO: make this smarter / beef it up
 
             pattern = pattern.Replace(".", "\\.")
                              .Replace("*", ".*")
-                             .Replace("?", ".?");
+                             .Replace("?", ".");
 
-            return pattern;
+            return "^" + pattern + "$";
         }
     }
 }
