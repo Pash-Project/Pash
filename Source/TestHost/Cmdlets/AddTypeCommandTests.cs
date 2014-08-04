@@ -42,16 +42,12 @@ namespace TestHost.Cmdlets
         {
             string result = TestHost.ExecuteWithZeroErrors(
                 "Add-Type -TypeDefinition 'public class ErrorTest --'",
-                "'error[0].Exception.Message=' + $error[0].Exception.Message",
-                "'error[0].FullyQualifiedErrorId=' + $error[0].FullyQualifiedErrorId",
                 "$compilerErrorCount = 0",
                 "$error | ForEach-Object { if ( $_.FullyQualifiedErrorId -eq 'SOURCE_CODE_ERROR,Microsoft.PowerShell.Commands.AddTypeCommand') { $compilerErrorCount += 1 } }",
                 "if ($compilerErrorCount -gt 0) { 'Compiler error reported' }"
             );
 
-            StringAssert.Contains("error[0].Exception.Message=Cannot add type. There were compilation errors.", result);
             // TODO: Original error record information is lost.
-            //StringAssert.Contains("error[0].FullyQualifiedErrorId=COMPILER_ERRORS,Microsoft.PowerShell.Commands.AddTypeCommand", result);
             StringAssert.Contains("Compiler error reported", result);
         }
 
@@ -60,16 +56,12 @@ namespace TestHost.Cmdlets
         {
             string result = TestHost.ExecuteWithZeroErrors(
                 "add-type -name Test -memberdefinition 'public WriteLine() ---'",
-                "'error[0].Exception.Message=' + $error[0].Exception.Message",
-                "'error[0].FullyQualifiedErrorId=' + $error[0].FullyQualifiedErrorId",
                 "$compilerErrorCount = 0",
                 "$error | ForEach-Object { if ( $_.FullyQualifiedErrorId -eq 'SOURCE_CODE_ERROR,Microsoft.PowerShell.Commands.AddTypeCommand') { $compilerErrorCount += 1 } }",
                 "if ($compilerErrorCount -gt 0) { 'Multiple Compiler Errors' }"
             );
 
-            StringAssert.Contains("error[0].Exception.Message=Cannot add type. There were compilation errors.", result);
             // TODO: Original error record information is lost.
-            //StringAssert.Contains("error[0].FullyQualifiedErrorId=COMPILER_ERRORS,Microsoft.PowerShell.Commands.AddTypeCommand", result);
             StringAssert.Contains("Multiple Compiler Errors", result);
         }
 
@@ -79,14 +71,11 @@ namespace TestHost.Cmdlets
             string fileName = CreateTempFile("AddTypeDefinitionFromFileWithInvalidCSharpCode.cs", "public class ErrorTest --");
             string result = TestHost.ExecuteWithZeroErrors(
                 "Add-Type -Path '" + fileName + "'",
-                "'error[0].Exception.Message=' + $error[0].Exception.Message",
-                "'error[0].FullyQualifiedErrorId=' + $error[0].FullyQualifiedErrorId",
                 "$compilerErrorCount = 0",
                 "$error | ForEach-Object { if ( $_.FullyQualifiedErrorId -eq 'SOURCE_CODE_ERROR,Microsoft.PowerShell.Commands.AddTypeCommand') { $compilerErrorCount += 1 } }",
                 "if ($compilerErrorCount -gt 0) { 'Compiler error reported' }"
             );
 
-            StringAssert.Contains("error[0].Exception.Message=Cannot add type. There were compilation errors.", result);
             // TODO: Original error record information is lost.
             //StringAssert.Contains("error[0].FullyQualifiedErrorId=COMPILER_ERRORS,Microsoft.PowerShell.Commands.AddTypeCommand", result);
             StringAssert.Contains("Compiler error reported", result);
