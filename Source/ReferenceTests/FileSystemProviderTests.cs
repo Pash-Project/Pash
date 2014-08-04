@@ -14,6 +14,20 @@ namespace ReferenceTests
             AddCleanupDir(dir);
             var items = ReferenceHost.Execute(NewlineJoin(
                 String.Format("New-Item -path '{0}' -type directory | foreach-object {{$_.FullName}}", dir))
+                                              );
+            var dirinfo = new DirectoryInfo(dir);
+            Assert.True(dirinfo.Exists, "Directory was not created");
+            Assert.AreEqual(NewlineJoin(dirinfo.FullName), items);
+        }
+
+        [Test]
+        public void CanCreateRelativeDir()
+        {
+            Environment.CurrentDirectory = Path.GetTempPath();
+            var dir = Path.Combine(".", "__tempdir");
+            AddCleanupDir(dir);
+            var items = ReferenceHost.Execute(NewlineJoin(
+                String.Format("New-Item -path '{0}' -type directory | foreach-object {{$_.FullName}}", dir))
             );
             var dirinfo = new DirectoryInfo(dir);
             Assert.True(dirinfo.Exists, "Directory was not created");

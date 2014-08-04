@@ -18,6 +18,7 @@ namespace ReferenceTests
         private string _assemblyDirectory;
         private Regex _whiteSpaceRegex;
         private bool _isMonoRuntime;
+        private string _startDir;
 
         public ReferenceTestBase()
         {
@@ -35,6 +36,7 @@ namespace ReferenceTests
         public virtual void SetUp()
         {
             ImportTestCmdlets();
+            _startDir = Environment.CurrentDirectory;
         }
 
         [TearDown]
@@ -42,6 +44,10 @@ namespace ReferenceTests
         {
             CleanImports();
             RemoveCreatedFiles();
+            if (!String.IsNullOrEmpty(_startDir) && !_startDir.Equals(Environment.CurrentDirectory))
+            {
+                Environment.CurrentDirectory = _startDir;
+            }
         }
 
         private String QuoteWithSpace(string input)
