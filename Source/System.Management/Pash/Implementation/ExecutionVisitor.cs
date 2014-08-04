@@ -18,6 +18,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Management.Automation.Provider;
 using Microsoft.PowerShell.Commands;
+using Extensions.Reflection;
 
 namespace System.Management.Pash.Implementation
 {
@@ -342,7 +343,7 @@ namespace System.Management.Pash.Implementation
             // TODO: implement hashtable concatenation (7.7.4)
 
             // arithmetic expression (7.7.1)
-            Func<dynamic, dynamic, dynamic> addOp = (dynamic x, dynamic y) => checked(x + y);
+            Func<dynamic, dynamic, dynamic> addOp = (dynamic x, dynamic y) => x + y;
             return ArithmeticOperation(leftValue, rightValue, "+", addOp);
         }
 
@@ -370,28 +371,28 @@ namespace System.Management.Pash.Implementation
             // TODO: implement array replication (7.6.3)
 
             // arithmetic expression (7.6.1)
-            Func<dynamic, dynamic, dynamic> mulOp = (dynamic x, dynamic y) => checked(x * y);
+            Func<dynamic, dynamic, dynamic> mulOp = (dynamic x, dynamic y) => x * y;
             return ArithmeticOperation(leftValue, rightValue, "*", mulOp);
         }
 
         private object Divide(object leftValue, object rightValue)
         {
             // arithmetic division (7.6.4)
-            Func<dynamic, dynamic, dynamic> divOp = (dynamic x, dynamic y) => checked(x / y);
+            Func<dynamic, dynamic, dynamic> divOp = (dynamic x, dynamic y) => x / y;
             return ArithmeticOperation(leftValue, rightValue, "/", divOp);
         }
 
         private object Remainder(object leftValue, object rightValue)
         {
             // arithmetic remainder (7.6.5)
-            Func<dynamic, dynamic, dynamic> remOp = (dynamic x, dynamic y) => checked(x % y);
+            Func<dynamic, dynamic, dynamic> remOp = (dynamic x, dynamic y) => x % y;
             return ArithmeticOperation(leftValue, rightValue, "%", remOp);
         }
 
         private object Subtract(object leftValue, object rightValue)
         {
             // arithmetic expression (7.7.5)
-            Func<dynamic, dynamic, dynamic> subOp = (dynamic x, dynamic y) => checked(x - y);
+            Func<dynamic, dynamic, dynamic> subOp = (dynamic x, dynamic y) => x - y;
             return ArithmeticOperation(leftValue, rightValue, "-", subOp);
         }
 
@@ -406,38 +407,39 @@ namespace System.Management.Pash.Implementation
         private object ArithmeticOperation(object leftUnconverted, object rightUnconverted, string op,
                                            Func<dynamic, dynamic, dynamic> operation)
         {
-            dynamic left, right;
+            object left, right;
             if (!LanguagePrimitives.UsualArithmeticConversion(leftUnconverted, rightUnconverted, 
                                                               out left, out right))
             {
                 ThrowInvalidArithmeticOperationException(leftUnconverted, rightUnconverted, op);
             }
 
-            // operation should include checked() operations
-            if (left is int && right is int)
+            if (!left.GetType().IsNumericFloat() && !right.GetType().IsNumericFloat())
             {
-                try
+                // we want to support operations like 1/3 and avoid type overflow, e.g. 123456*1234567
+                // TODO: I'm not completely convinced to do everythign as double operations.
+                //       However, the other way would be to used checked operations, catch exceptions
+                //       and to try again. And this wouldn't even allow things like 1/3
+                bool expectedLong = left is long || right is long;
+                var dleft = (double) LanguagePrimitives.ConvertTo(left, typeof(double));
+                var dright = (double) LanguagePrimitives.ConvertTo(right, typeof(double));
+                double res = operation(dleft, dright);
+                if (Math.Abs((res % 1.0)) > 0.000001)
                 {
-                    operation(left, right);
+                    return res;
                 }
-                catch (OverflowException)
+                //eligible for int/long
+                if (res <= int.MaxValue && res >= int.MinValue && !expectedLong)
                 {
-                    left = (long)left;
-                    right = (long)right;
+                    return (int)res;
                 }
+                else if (res <= long.MaxValue && res >= long.MinValue)
+                {
+                    return (long)res;
+                }
+                return res;
             }
-            if (left is long && right is long)
-            {
-                try
-                {
-                    return operation(left, right);
-                }
-                catch (OverflowException)
-                {
-                    left = (double)left;
-                    right = (double)right;
-                }
-            }
+            // other types than integer numerics can be done directly
             return operation(left, right);
         }
 

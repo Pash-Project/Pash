@@ -427,7 +427,8 @@ namespace System.Management.Automation
 
         #endregion
 
-        internal static bool UsualArithmeticConversion(object left, object right, out dynamic leftConverted, out dynamic rightConverted)
+        internal static bool UsualArithmeticConversion(object left, object right, out object leftConverted,
+                                                       out object rightConverted)
         {
             left = PSObject.Unwrap(left);
             right = PSObject.Unwrap(right);
@@ -494,7 +495,7 @@ namespace System.Management.Automation
             return false;
         }
 
-        internal static bool TryConvertToNumericTryHexFirst(object obj, Type type, out dynamic converted)
+        internal static bool TryConvertToNumericTryHexFirst(object obj, Type type, out object converted)
         {
             var input = obj;
             if (obj is string && ((string)obj).StartsWith("0x", StringComparison.OrdinalIgnoreCase))
@@ -618,16 +619,14 @@ namespace System.Management.Automation
                 return DefaultConvertOrCast(0, numericType);
             }
             value = value.Trim();
-            var typeCode = Type.GetTypeCode(numericType);
             var intStyle = NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign | NumberStyles.AllowThousands;
             var floatStyle = NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint;
-            var isFloat = (typeCode == TypeCode.Decimal) || (typeCode == TypeCode.Double) || (typeCode == TypeCode.Single);
-            if (!isFloat && value.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            if (!numericType.IsNumericFloat() && value.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
             {
                 intStyle = NumberStyles.AllowHexSpecifier;
                 value = value.Substring(2);
             }
-            switch (typeCode)
+            switch (Type.GetTypeCode(numericType))
             {
                 case TypeCode.Byte:
                     return Byte.Parse(value, intStyle);

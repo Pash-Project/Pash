@@ -179,7 +179,8 @@ namespace ReferenceTests
             {
                 var dres = (double) res;
                 var diff = dres - ((double)expected);
-                Assert.Less(diff, Math.Abs(dres) * 0.00001);
+                var msg = String.Format("Not equal: {0} != {1}", expected, dres);
+                Assert.Less(diff, Math.Abs(dres) * 0.00001, msg);
             }
             else
             {
