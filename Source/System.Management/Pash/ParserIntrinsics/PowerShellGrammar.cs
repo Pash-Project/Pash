@@ -269,7 +269,6 @@ namespace Pash.ParserIntrinsics
             {
                 if (!IsNewlineExpected(validateTokenEventArgs))
                 {
-                    var current = validateTokenEventArgs.Context.CurrentToken;
                     validateTokenEventArgs.ReplaceToken(this.skipped_new_line);
                 }
             };

@@ -15,16 +15,17 @@ namespace ReferenceTests
     {
         private List<string> _createdFiles;
         private List<string> _createdDirs;
-        private string _assemblyDirectory;
         private Regex _whiteSpaceRegex;
         private bool _isMonoRuntime;
         private string _startDir;
+
+        public string AssemblyDirectory { get; set; }
 
         public ReferenceTestBase()
         {
             _createdFiles = new List<string>();
             _createdDirs = new List<string>();
-            _assemblyDirectory = Path.GetDirectoryName(new Uri(GetType().Assembly.CodeBase).LocalPath);
+            AssemblyDirectory = Path.GetDirectoryName(new Uri(GetType().Assembly.CodeBase).LocalPath);
             _whiteSpaceRegex = new Regex(@"\s");
             // prevents the project with Powershell to complain about the second part of the expression below
 #pragma warning disable 0429 

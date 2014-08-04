@@ -90,7 +90,7 @@ $path::GetExtension('test.txt')
         }
 
         [Test]
-        [TestCase(@"[math]::Sqrt(2.0)				# call method with argument 2.0", Explicit = true)]
+        [TestCase(@"[math]::Sqrt(2.0)				# call method with argument 2.0")]
         [TestCase(@"[char]::IsUpper(""a"")			# call method")]
         [TestCase(//@"$b = ""abc#$%XYZabc""",       // This hits some issues in the tokenizer.
                   @"$b = ""abcXYZabc""",            // punting for now
@@ -102,12 +102,14 @@ $path::GetExtension('test.txt')
         [TestCase(@"$a = [math]::Sqrt				# get method descriptor for Sqrt
                     $a.Invoke(2.0)					# call Sqrt via the descriptor
                     $a = [math]::(""Sq""+""rt"")	# get method descriptor for Sqrt
-                    $a.Invoke(2.0) 					# call Sqrt via the descriptor", Explicit = true)]
+                    $a.Invoke(2.0) 					# call Sqrt via the descriptor")]
         [TestCase(@"$a = [char]::ToLower			# get method descriptor for ToLower
                     $a.Invoke(""X"")				# call ToLower via the descriptor")]
         public void Section7_1_3_InvocationExpressions(params string[] input)
         {
-            var result = TestHost.Execute(input);
+            Assert.DoesNotThrow(delegate() {
+                TestHost.Execute(input);
+            });
         }
 
         [Test]

@@ -382,13 +382,17 @@ namespace TestHost
             [Test]
             public void ByProperty()
             {
-                var result = TestHost.Execute("Get-ChildItem | Sort-Object Name");
+                Assert.DoesNotThrow(delegate() {
+                    TestHost.Execute("Get-ChildItem | Sort-Object Name");
+                });
             }
 
             [Test]
             public void ByPropertyLowercase()
             {
-                var result = TestHost.Execute("Get-ChildItem | Sort-Object name");
+                Assert.DoesNotThrow(delegate() {
+                    TestHost.Execute("Get-ChildItem | Sort-Object name");
+                });
             }
         }
 

@@ -7,12 +7,10 @@ namespace Pash.Implementation
 {
     internal sealed class FunctionIntrinsics
     {
-        private SessionState _sessionState;
         private SessionStateScope<FunctionInfo> _scope;
 
-        internal FunctionIntrinsics(SessionState sessionState, SessionStateScope<FunctionInfo> functionScope)
+        internal FunctionIntrinsics(SessionStateScope<FunctionInfo> functionScope)
         {
-            _sessionState = sessionState;
             _scope = functionScope;
         }
 

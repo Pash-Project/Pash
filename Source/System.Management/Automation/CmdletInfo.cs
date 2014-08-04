@@ -24,7 +24,6 @@ namespace System.Management.Automation
         internal Dictionary<string, string> UniqueSetParameters { get; private set; }
         internal Dictionary<string, CommandParameterInfo> ParameterInfoLookupTable { get; private set; }
 
-        private ExecutionContext _context;
         private Exception _validationException;
 
         internal CmdletInfo(string name, Type implementingType, string helpFile, PSSnapInInfo PSSnapin, ExecutionContext context)
@@ -42,7 +41,6 @@ namespace System.Management.Automation
             ImplementingType = implementingType;
             HelpFile = helpFile;
             PSSnapIn = PSSnapin;
-            _context = context;
             _validationException = null;
             GetParameterSetInfo(implementingType);
         }

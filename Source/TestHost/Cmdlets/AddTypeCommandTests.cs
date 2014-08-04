@@ -32,7 +32,6 @@ namespace TestHost.Cmdlets
 
         private string CreateTempFile(string fileName, string contents)
         {
-            string directory = Path.GetTempPath();
             tempFileName = Path.Combine(Path.GetTempPath(), fileName);
             File.WriteAllText(tempFileName, contents);
             return tempFileName;

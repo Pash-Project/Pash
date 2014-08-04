@@ -19,7 +19,9 @@ namespace ParserTests
         [Test]
         public void ConfigScriptIsValid()
         {
-            var result = ParseInput(File.ReadAllText("config.ps1"));
+            Assert.DoesNotThrow(delegate {
+                ParseInput(File.ReadAllText("config.ps1"));
+            });
         }
 
         [Test, Description("Did this tokenize as 1 long string?")]
@@ -164,7 +166,9 @@ ls
         [Test]
         public void CommandInvocationOperatorTest()
         {
-            var result = ParseInput("& 'ls'");
+            Assert.DoesNotThrow(delegate {
+                ParseInput("& 'ls'");
+            });
         }
 
         [Test]
@@ -185,9 +189,7 @@ ls
         public void ATest()
         {
             var scriptBlockAst = ParseInput("function F { 'hi' } ; F");
-
-            FunctionDefinitionAst functionDefinitionAst = scriptBlockAst.EndBlock.Statements[0];
-            PipelineAst pipelineAst = scriptBlockAst.EndBlock.Statements[1];
+            Assert.AreEqual(2, scriptBlockAst.EndBlock.Statements.Count);
         }
 
         [Test]
@@ -933,12 +935,8 @@ ls
         [Test]
         public void NewlineContinuationTest()
         {
-            var expression = ParseStatement(
-@"'x' + `
-'y'"
-                )
-                .PipelineElements[0]
-                .Expression;
+            var exp = ParseStatement(@"'x' + `" + Environment.NewLine + "'y'").PipelineElements[0].Expression;
+            Assert.NotNull(exp);
         }
 
         [Test]
@@ -1093,9 +1091,8 @@ ls
             [Test]
             public void StaticProperty()
             {
-                MemberExpressionAst memberExpressionAst = ParseStatement("[System.Int32]::MaxValue")
-                    .PipelineElements[0]
-                    .Expression;
+                var exp = ParseStatement("[System.Int32]::MaxValue").PipelineElements[0].Expression;
+                Assert.NotNull(exp);
             }
 
             [Test]
@@ -1321,7 +1318,9 @@ ls
         [Test]
         public void For()
         {
-            ForStatementAst forStatementAst = ParseStatement("for ($i = 0; $i -ile 10; $i++) {Write-Host $i}");
+            Assert.DoesNotThrow(delegate {
+                ParseStatement("for ($i = 0; $i -ile 10; $i++) {Write-Host $i}");
+            });
         }
 
         [Test]
