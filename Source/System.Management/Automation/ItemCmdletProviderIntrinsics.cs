@@ -30,7 +30,7 @@ namespace System.Management.Automation
             {
                 normalizedPath = normalizedPath.Combine(name);
             }
-            normalizedPath = normalizedPath.MakePath(drive.Name).NormalizeSlashes();
+            normalizedPath = normalizedPath.NormalizeSlashes();
             return provider;
         }
 
