@@ -1439,10 +1439,21 @@ namespace Pash.ParserIntrinsics
         ArrayExpressionAst BuildArrayExpressionAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.array_expression);
-
+            StatementBlockAst statements;
+            // check if we have statements or it's empty
+            if (parseTreeNode.ChildNodes[1].Term == _grammar.statement_list)
+            {
+                statements = BuildStatementListAst(parseTreeNode.ChildNodes[1]);
+            }
+            else
+            {
+                // otherwise make such an Ast without statements
+                statements = new StatementBlockAst(new ScriptExtent(parseTreeNode.ChildNodes[1]),
+                                                   new StatementAst[] { }, new TrapStatementAst[] { });
+            }
             return new ArrayExpressionAst(
                 new ScriptExtent(parseTreeNode),
-                BuildStatementListAst(parseTreeNode.ChildNodes[1])
+                statements
                 );
         }
 

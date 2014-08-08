@@ -31,7 +31,12 @@ namespace ReferenceTests
                 _stdHTString,
                 "$h1.Keys"
                 );
-            ExecuteAndCompareTypedResult(cmd, _stdHT.Keys);
+            var results = ReferenceHost.RawExecute(cmd);
+            Assert.AreEqual(results.Count, _stdHT.Keys.Count);
+            foreach (var key in _stdHT.Keys)
+            {
+                results.ShouldContain(key);
+            }
         }
 
 		[Test]
@@ -72,15 +77,20 @@ namespace ReferenceTests
         {
             var cmd = NewlineJoin(
                 _stdHTString,
-                "foreach($e in $h1.Keys) { \"Key is \" + $e + \", ValueType is \" + $h1[$e] }"
+                "foreach($e in $h1.Keys) { \"Key is \" + $e + \", Value is \" + $h1[$e] }"
             );
             string[] expected = new string[3];
             int i = 0;
-            foreach (var key in _stdHT)
+            foreach (var key in _stdHT.Keys)
             {
-                expected[i++] = "Key is " + key + ", ValueType is " + _stdHT[key];
+                expected[i++] = "Key is " + key.ToString() + ", Value is " + _stdHT[key];
             }
-            ExecuteAndCompareTypedResult(cmd, expected);
+            var results = ReferenceHost.RawExecute(cmd);
+            Assert.AreEqual(expected.Length, results.Count);
+            foreach (var str in expected)
+            {
+                results.ShouldContain(str);
+            }
         }
 
     }
