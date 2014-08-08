@@ -365,8 +365,13 @@ namespace System.Management.Pash.Implementation
             // hashtable concatenation (7.7.4)
             if (leftValue is Hashtable && rightValue is Hashtable)
             {
-                var resultHash = new Hashtable((Hashtable)leftValue, StringComparer.InvariantCultureIgnoreCase);
+                var resultHash = new Hashtable(StringComparer.InvariantCultureIgnoreCase);
+                var leftHash = (Hashtable) leftValue;
                 var rightHash = (Hashtable) rightValue;
+                foreach (var key in leftHash.Keys)
+                {
+                    resultHash[key] = leftHash[key];
+                }
                 foreach (var key in rightHash.Keys)
                 {
                     if (resultHash.ContainsKey(key))

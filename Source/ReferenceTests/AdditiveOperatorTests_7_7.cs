@@ -45,7 +45,7 @@ namespace ReferenceTests
         [TestCase("$a + 12.5,$true", new object[] { 10, 20, 12.5, true })]
         [TestCase("$a + (new-object 'System.Double[,]' 2,3)", new object[] { 10, 20, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 })]
         [TestCase("(new-object 'System.Double[,]' 2,3) + $a", new object[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 20 })]
-        public void ArrayConcatenation_Spec_7_7_3(string cmd, object expected)
+        public void ArrayConcatenation_Spec_7_7_3(string cmd, object[] expected)
         {
             cmd = "$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20;" + cmd;
             ExecuteAndCompareTypedResult(cmd, expected);
@@ -61,9 +61,9 @@ namespace ReferenceTests
                 "$h3"
                 );
             var expected = new Hashtable(StringComparer.InvariantCultureIgnoreCase);
-            expected["firstname"] = "James";
+            expected["FirstName"] = "James";
             expected["LastName"] = "Anderson";
-            expected["Dept"] = "PersoNNel";
+            expected["Dept"] = "Personnel";
             ExecuteAndCompareTypedResult(cmd, expected);
         }
 
@@ -72,8 +72,8 @@ namespace ReferenceTests
         {
             var cmd = NewlineJoin(
                 "$h1 = @{ FirstName = \"James\"; LastName = \"Anderson\" }",
-                "$h2 = @{ Dept = \"Personnel\", firstname = \"John\" }",
-                "$h3 = $h1 + $h2",
+                "$h2 = @{ Dept = \"Personnel\"; firstname = \"John\" }",
+                "$h3 = $h1 + $h2;",
                 "$h3"
                 );
             Assert.Throws(Is.InstanceOf(typeof(Exception)), delegate {
