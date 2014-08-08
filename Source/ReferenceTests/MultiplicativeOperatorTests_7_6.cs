@@ -1,5 +1,6 @@
 using System;
 using NUnit.Framework;
+using System.Runtime.InteropServices;
 
 namespace ReferenceTests
 {
@@ -33,6 +34,24 @@ namespace ReferenceTests
         public void StringReplication_Spec_7_6_2_decimal()
         {
             ExecuteAndCompareTypedResult("\"red\" * 2.3450D", "redred");
+        }
+
+        [TestCase("$a * \"3\"", new object[] {10, 20, 10, 20, 10, 20})]
+        [TestCase("$a * 4", new object[] {10, 20, 10, 20, 10, 20, 10, 20})]
+        [TestCase("$a * 0", new object[] {})]
+        [TestCase("$a * 2.7", new object[] {10, 20, 10, 20, 10, 20})]
+        [TestCase("(new-object 'System.Double[,]' 2,3) * 2", new object[] {null, null, null, null})]
+        public void ArrayReplication_Spec_7_6_3(string cmd, object result)
+        {
+            cmd = "$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20;" + cmd;
+            ExecuteAndCompareTypedResult(cmd, result);
+        }
+
+        [Test]
+        public void ArrayReplication_Spec_7_6_3_decimal()
+        {
+            var cmd = "$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20; $a * 2.3450D";
+            ExecuteAndCompareTypedResult(cmd, new object[] {10, 20, 10, 20, 10, 20});
         }
 
         [TestCase("10/-10", (int) -1)]

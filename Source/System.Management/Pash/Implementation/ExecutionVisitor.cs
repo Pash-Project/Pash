@@ -19,6 +19,7 @@ using System.Globalization;
 using System.Management.Automation.Provider;
 using Microsoft.PowerShell.Commands;
 using Extensions.Reflection;
+using System.Security.Policy;
 
 namespace System.Management.Pash.Implementation
 {
@@ -311,10 +312,10 @@ namespace System.Management.Pash.Implementation
             }
         }
 
-        private object Add(object leftValue, object rightValue)
+        private object Add(object leftValuePacked, object rightValuePacked)
         {
-            leftValue = PSObject.Unwrap(leftValue);
-            rightValue = PSObject.Unwrap(rightValue);
+            var leftValue = PSObject.Unwrap(leftValuePacked);
+            var rightValue = PSObject.Unwrap(rightValuePacked);
 
             ////  7.7.1 Addition
             ////      Description:
@@ -339,8 +340,44 @@ namespace System.Management.Pash.Implementation
                 }
                 return leftValue + rightValue.ToString();
             }
-            // TODO: implement array concatenation (7.7.3)
-            // TODO: implement hashtable concatenation (7.7.4)
+            // array concatenation (7.7.3)
+            if (leftValue is Array)
+            {
+                var resultList = new List<object>();
+                var enumerable = LanguagePrimitives.GetEnumerable(rightValuePacked);
+                foreach (var el in ((Array) leftValue))
+                {
+                    resultList.Add(el);
+                }
+                if (enumerable == null)
+                {
+                    resultList.Add(rightValuePacked);
+                }
+                else
+                {
+                    foreach (var el in enumerable)
+                    {
+                        resultList.Add(el);
+                    }
+                }
+                return resultList.ToArray();
+            }
+            // hashtable concatenation (7.7.4)
+            if (leftValue is Hashtable && rightValue is Hashtable)
+            {
+                var resultHash = new Hashtable((Hashtable)leftValue, StringComparer.InvariantCultureIgnoreCase);
+                var rightHash = (Hashtable) rightValue;
+                foreach (var key in rightHash.Keys)
+                {
+                    if (resultHash.ContainsKey(key))
+                    {
+                        var fmt = "Cannot concat hashtables: The key '{0}' is already used in the left Hashtable";
+                        throw new InvalidOperationException(String.Format(fmt, key.ToString()));
+                    }
+                    resultHash[key] = rightHash[key];
+                }
+                return resultHash;
+            }
 
             // arithmetic expression (7.7.1)
             Func<dynamic, dynamic, dynamic> addOp = (dynamic x, dynamic y) => x + y;
@@ -352,14 +389,11 @@ namespace System.Management.Pash.Implementation
             // string replication (7.6.2)
             if (leftValue is string)
             {
-                // we want integers, but if the original number is a float, it needs to be rounded.
-                // so we check for hex strings first and then try to get a double
-                dynamic parsed;
-                if (!LanguagePrimitives.TryConvertToNumericTryHexFirst(rightValue, typeof(double), out parsed))
+                long num;
+                if (!LanguagePrimitives.TryConvertTo<long>(rightValue, out num))
                 {
-                    ThrowInvalidArithmeticOperationException(leftValue, rightValue, "%");
+                    ThrowInvalidArithmeticOperationException(leftValue, rightValue, "*");
                 }
-                long num = (long) (parsed + 0.5);
                 var sb = new StringBuilder();
                 for (int i = 0; i < num; i++)
                 {
@@ -368,7 +402,26 @@ namespace System.Management.Pash.Implementation
                 return sb.ToString();
             }
 
-            // TODO: implement array replication (7.6.3)
+            // array replication (7.6.3)
+            if (leftValue is Array)
+            {
+                long num;
+                if (!LanguagePrimitives.TryConvertTo<long>(rightValue, out num))
+                {
+                    ThrowInvalidArithmeticOperationException(leftValue, rightValue, "*");
+                }
+                var leftArray = (Array)leftValue;
+                var resultArray = new object[leftArray.Length * num];
+                int curIdx = 0;
+                for (int i = 0; i < num; i++)
+                {
+                    foreach (var el in leftArray)
+                    {
+                        resultArray[curIdx++] = el;
+                    }
+                }
+                return resultArray;
+            }
 
             // arithmetic expression (7.6.1)
             Func<dynamic, dynamic, dynamic> mulOp = (dynamic x, dynamic y) => x * y;

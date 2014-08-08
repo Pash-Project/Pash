@@ -1,5 +1,6 @@
 using System;
 using NUnit.Framework;
+using System.Collections;
 
 namespace ReferenceTests
 {
@@ -38,6 +39,46 @@ namespace ReferenceTests
         public void StringConcatenation_Spec_7_7_2(string cmd, string expected)
         {
             ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
+        [TestCase("$a + \"red\"", new object[] { 10, 20, "red" })]
+        [TestCase("$a + 12.5,$true", new object[] { 10, 20, 12.5, true })]
+        [TestCase("$a + (new-object 'System.Double[,]' 2,3)", new object[] { 10, 20, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 })]
+        [TestCase("(new-object 'System.Double[,]' 2,3) + $a", new object[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 20 })]
+        public void ArrayConcatenation_Spec_7_7_3(string cmd, object expected)
+        {
+            cmd = "$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20;" + cmd;
+            ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
+        [Test]
+        public void HashtableConcatenation_Spec_7_7_4()
+        {
+            var cmd = NewlineJoin(
+                "$h1 = @{ FirstName = \"James\"; LastName = \"Anderson\" }",
+                "$h2 = @{ Dept = \"Personnel\" }",
+                "$h3 = $h1 + $h2",
+                "$h3"
+                );
+            var expected = new Hashtable(StringComparer.InvariantCultureIgnoreCase);
+            expected["firstname"] = "James";
+            expected["LastName"] = "Anderson";
+            expected["Dept"] = "PersoNNel";
+            ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
+        [Test]
+        public void HashtableConcatenationFailsWithSameKey()
+        {
+            var cmd = NewlineJoin(
+                "$h1 = @{ FirstName = \"James\"; LastName = \"Anderson\" }",
+                "$h2 = @{ Dept = \"Personnel\", firstname = \"John\" }",
+                "$h3 = $h1 + $h2",
+                "$h3"
+                );
+            Assert.Throws(Is.InstanceOf(typeof(Exception)), delegate {
+                ReferenceHost.Execute(cmd);
+            });
         }
 
         [TestCase("12 - -10L", (long) 22)]
