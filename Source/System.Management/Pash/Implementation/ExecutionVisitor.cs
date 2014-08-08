@@ -20,6 +20,7 @@ using System.Management.Automation.Provider;
 using Microsoft.PowerShell.Commands;
 using Extensions.Reflection;
 using System.Security.Policy;
+using System.Security.Cryptography;
 
 namespace System.Management.Pash.Implementation
 {
@@ -28,6 +29,9 @@ namespace System.Management.Pash.Implementation
         readonly ExecutionContext _context;
         readonly PipelineCommandRuntime _pipelineCommandRuntime;
         readonly bool _writeSideEffectsToPipeline;
+        readonly HashSet<string> _hashtableAccessibleMembers = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) {
+            "Count", "Keys", "Values", "Remove"
+        };
 
         public ExecutionVisitor(ExecutionContext context, PipelineCommandRuntime pipelineCommandRuntime, bool writeSideEffectsToPipeline = false)
         {
@@ -793,7 +797,18 @@ namespace System.Management.Pash.Implementation
         private void SetMemberExpressionValue(MemberExpressionAst memberExpressionAst, object value)
         {
             string memberName;
-            var member = GetPSObjectMemberFromMemberExpression(memberExpressionAst, out memberName);
+            var psobj = EvaluateAsPSObject(memberExpressionAst.Expression);
+            var unwraped = PSObject.Unwrap(psobj);
+            var memberNameObj = EvaluateAst(memberExpressionAst.Member, false);
+            // check for Hashtable first
+            if (unwraped is Hashtable && memberNameObj != null &&
+                !_hashtableAccessibleMembers.Contains(memberNameObj.ToString()))
+            { 
+                ((Hashtable) unwraped)[memberNameObj] = value;
+                return;
+            }
+            // else ot's a PSObject
+            var member = GetPSObjectMember(psobj, memberNameObj, memberExpressionAst.Static, out memberName);
             if (member == null)
             {
                 throw new PSArgumentNullException(String.Format("Member '{0}' to be assigned is null", memberName));
@@ -938,7 +953,9 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitInvokeMemberExpression(InvokeMemberExpressionAst methodCallAst)
         {
             string memberName;
-            var method = GetPSObjectMemberFromMemberExpression(methodCallAst, out memberName) as PSMethodInfo;
+            var psobj = EvaluateAsPSObject(methodCallAst.Expression);
+            var memberNameObj = EvaluateAst(methodCallAst.Member, false);
+            var method = GetPSObjectMember(psobj, memberNameObj, methodCallAst.Static, out memberName) as PSMethodInfo;
             if (method == null)
             {
                 throw new PSArgumentException(String.Format("The object has no method called '{0}'", memberName));
@@ -960,26 +977,16 @@ namespace System.Management.Pash.Implementation
             return PSObject.AsPSObject(EvaluateAst(expression, false));
         }
 
-        private PSMemberInfo GetPSObjectMemberFromMemberExpression(MemberExpressionAst memberExpressionAst, out string memberName)
+        private PSMemberInfo GetPSObjectMember(PSObject psobj, object memberNameObj, bool isStatic, out string memberName)
         {
-            var psobj = EvaluateAsPSObject(memberExpressionAst.Expression);
-            var memberNameObj = EvaluateAst(memberExpressionAst.Member, false);
+
             if (memberNameObj == null)
             {
                 throw new PSArgumentNullException("Member name evaluates to null");
             }
             memberName = memberNameObj.ToString();
             // Powershell allows access to hastable values by member acccess
-            var hashtable = PSObject.Unwrap(psobj) as Hashtable;
-            if (hashtable != null)
-            {
-                if (hashtable.ContainsKey(memberName))
-                {
-                    return new PSNoteProperty(memberName, hashtable[memberName]);
-                }
-                // otherwise we look for regular members
-            }
-            if (memberExpressionAst.Static)
+            if (isStatic)
             {
                 return psobj.StaticMembers[memberName];
             }
@@ -989,9 +996,22 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitMemberExpression(MemberExpressionAst memberExpressionAst)
         {
             string memberName;
-            var member = GetPSObjectMemberFromMemberExpression(memberExpressionAst, out memberName);
-            var value = PSObject.AsPSObject((member == null) ? null : member.Value);
-            _pipelineCommandRuntime.WriteObject(value);
+            var psobj = EvaluateAsPSObject(memberExpressionAst.Expression);
+            var unwraped = PSObject.Unwrap(psobj);
+            var memberNameObj = EvaluateAst(memberExpressionAst.Member, false);
+            // check for Hastable first
+            if (unwraped is Hashtable && memberNameObj != null &&
+                !_hashtableAccessibleMembers.Contains(memberNameObj.ToString()))
+            {
+                var hashtable = (Hashtable)unwraped;
+                _pipelineCommandRuntime.WriteObject(hashtable[memberNameObj]);
+            }
+            else // otherwise a PSObject
+            {
+                var member = GetPSObjectMember(psobj, memberNameObj, memberExpressionAst.Static, out memberName);
+                var value = PSObject.AsPSObject((member == null) ? null : member.Value);
+                _pipelineCommandRuntime.WriteObject(value);
+            }
             return AstVisitAction.SkipChildren;
         }
 

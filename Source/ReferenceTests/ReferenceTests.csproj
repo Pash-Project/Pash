@@ -84,6 +84,7 @@
     <Compile Include="AdditiveOperatorTests_7_7.cs" />
     <Compile Include="MultiplicativeOperatorTests_7_6.cs" />
     <Compile Include="IndexTests.cs" />
+    <Compile Include="HashtableTests_10.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

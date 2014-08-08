@@ -178,6 +178,11 @@ namespace ReferenceTests
             {
                 var expected = expectedValues[i];
                 var res = results[i].BaseObject;
+                if (expected == null)
+                {
+                    Assert.IsNull(res);
+                    continue;
+                }
                 var restype = res.GetType();
                 Assert.AreSame(expected.GetType(), restype);
                 if (restype == typeof(double))

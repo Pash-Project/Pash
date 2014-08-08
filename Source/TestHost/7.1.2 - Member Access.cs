@@ -125,19 +125,6 @@ $a.$property				# property name is a variable
         }
 
         [Test]
-        public void Hastable()
-        {
-            var result = TestHost.Execute(true, @"
-                        $h1 = @{ FirstName = ""James""; LastName = ""Anderson""; IDNum = 123 }
-                        $h1.FirstName                       # designates the key FirstName
-                        $h1[""LastName""]                       # the associated value for key LastName
-                        $h1.Keys.Count								# gets the collection of keys
-");
-
-            Assert.AreEqual("James" + Environment.NewLine + "Anderson" + Environment.NewLine + 3 + Environment.NewLine, result);
-        }
-
-        [Test]
         public void StaticProperty()
         {
             var result = TestHost.Execute(true, @"

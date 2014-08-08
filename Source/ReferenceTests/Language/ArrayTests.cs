@@ -17,6 +17,13 @@ namespace ReferenceTests
         }
 
         [Test]
+        public void EmptyArrayWorks()
+        {
+            var cmd = "$a = @(); $a.Length";
+            Assert.AreEqual(NewlineJoin("0"), ReferenceHost.Execute(cmd));
+        }
+
+        [Test]
         public void ArrayInVariableGetsEvaluatedWhenPassedToPipeline()
         {
             var cmd = String.Format("$a = @(1,2,3); $a");
