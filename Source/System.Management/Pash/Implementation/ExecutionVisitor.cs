@@ -500,7 +500,7 @@ namespace System.Management.Pash.Implementation
                     {
                         if (value != null)
                         {
-                            _pipelineCommandRuntime.WriteObject(value, true);
+                            _pipelineCommandRuntime.WriteObject(value, false);
                         }
                         return AstVisitAction.SkipChildren;
                     }
@@ -694,7 +694,11 @@ namespace System.Management.Pash.Implementation
             }
             else if (expressionAst is MemberExpressionAst)
             {
-                SetMemberExpressionValue((MemberExpressionAst) expressionAst, newValue);
+                SetMemberExpressionValue((MemberExpressionAst)expressionAst, newValue);
+            }
+            else if (expressionAst is IndexExpressionAst)
+            {
+                SetIndexExpressionValue((IndexExpressionAst)expressionAst, newValue);
             }
             else
             {
@@ -739,6 +743,37 @@ namespace System.Management.Pash.Implementation
             member.Value = value;
         }
 
+        private void SetIndexExpressionValue(IndexExpressionAst indexExpressionAst, object value)
+        {
+            var target = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Target));
+            var index = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Index, false));
+            if (target is Array)
+            {
+                Array targetArray = (Array)target;
+                var indexArray = (long[])LanguagePrimitives.ConvertTo(index, typeof(long[]));
+                if (indexArray.Length == 1 && indexArray[0] < 0)
+                {
+                    indexArray[0] = targetArray.Length + indexArray[0];
+                }
+                var convertedValue = LanguagePrimitives.ConvertTo(value, targetArray.GetType().GetElementType());
+                targetArray.SetValue(convertedValue, indexArray);
+            }
+            else if (target is IList)
+            {
+                var intIndx = (int)LanguagePrimitives.ConvertTo(index, typeof(int));
+                ((IList)target)[intIndx] = value;
+            }
+            else if (target is IDictionary)
+            {
+                ((IDictionary)target)[index] = value;
+            }
+            else
+            {
+                var msg = String.Format("Cannot index member of type '{0}' for assignment", target.GetType());
+                throw new NotImplementedException(msg);
+            }
+        }
+
         public override AstVisitAction VisitFunctionDefinition(FunctionDefinitionAst functionDefinitionAst)
         {
             _context.SessionState.Function.Set(functionDefinitionAst.Name, functionDefinitionAst.Body.GetScriptBlock());
@@ -747,22 +782,42 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitIndexExpression(IndexExpressionAst indexExpressionAst)
         {
-            var targetValue = EvaluateAst(indexExpressionAst.Target, true);
+            var targetValue = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Target, true));
 
-            object index = EvaluateAst(indexExpressionAst.Index);
+            object index = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Index));
 
             if (targetValue is PSObject) targetValue = ((PSObject)targetValue).BaseObject;
 
             var stringTargetValue = targetValue as string;
             if (stringTargetValue != null)
             {
-                var result = stringTargetValue[(int)index];
+                var intIdx = (int)LanguagePrimitives.ConvertTo(index, typeof(int));
+                var result = stringTargetValue[intIdx];
                 this._pipelineCommandRuntime.WriteObject(result);
+            }
+            else if (targetValue is Array)
+            {
+                var indices = (long[]) LanguagePrimitives.ConvertTo(index, typeof(long[]));
+                var array = (Array)targetValue;
+                if (indices.Length == 1 && indices[0] < 0)
+                {
+                    indices[0] = array.Length + indices[0];
+                }
+                object val = null;
+                try
+                {
+                    val = array.GetValue(indices);
+                }
+                catch (IndexOutOfRangeException) // just write null to pipeline
+                {
+                }
+                this._pipelineCommandRuntime.WriteObject(val);
             }
 
             else if (targetValue is IList)
             {
-                var result = (targetValue as IList)[(int)index];
+                var intIdx = (int)LanguagePrimitives.ConvertTo(index, typeof(int));
+                var result = (targetValue as IList)[intIdx];
                 this._pipelineCommandRuntime.WriteObject(result);
             }
 
@@ -1265,7 +1320,7 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitParenExpression(ParenExpressionAst parenExpressionAst)
         {
             var value = EvaluateAst(parenExpressionAst.Pipeline);
-            this._pipelineCommandRuntime.WriteObject(value, true);
+            this._pipelineCommandRuntime.WriteObject(value);
             return AstVisitAction.SkipChildren;
         }
 
@@ -1282,15 +1337,59 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitScriptBlock(ScriptBlockAst scriptBlockAst)
         {
+            // We execute this in a subcontext, because single enumerable results are 
+            // evaluated and its values are written to pipeline (i.e. ". {1,2,3}" writes
+            // all three values to pipeline
+            // therefore we have to catch exceptions for now to read and write
+            // the subVisitors' output stream, so that already written results appear
+            // also in this OutputStream
+            // TODO: is there a better way? Maybe evaluation of enumerable results should be
+            // somewhere else? Can't be when writing the input pipe of a pipeline, because
+            // it would enumerates many objects that should be enumerated
+            var subVisitor = this.CloneSub(false);
+            object returnResult = null;
+            Exception exception = null;
             try
             {
-                scriptBlockAst.EndBlock.Visit(this);
+                scriptBlockAst.EndBlock.Visit(subVisitor);
             }
             catch (ReturnException e)
             {
-                _pipelineCommandRuntime.WriteObject(e.Value);
+                // return exception is okay
+                returnResult = e.Value; // we first need to read the other results
             }
-
+            catch (Exception e)
+            {
+                // others need to be rethrown
+                exception = e;
+            }
+            // now read errrot and output and write in out streams
+            foreach (var error in subVisitor._pipelineCommandRuntime.ErrorStream.Read())
+            {
+                // we need to use ErrorStream.Write instead of WriteError to avoid
+                // adding it to the error variable twice!
+                _pipelineCommandRuntime.ErrorStream.Write(error);
+            }
+            var result = subVisitor._pipelineCommandRuntime.OutputStream.Read();
+            if (result.Count == 1)
+            {
+                // this is the actual thing of this whole work: enumerate a single value!
+                _pipelineCommandRuntime.WriteObject(result.Single(), true);
+            }
+            else if (result.Count > 1)
+            {
+                _pipelineCommandRuntime.WriteObject(result, true);
+            }
+            // rethrow exception if we had one
+            if (exception != null)
+            {
+                throw exception;
+            }
+            // if the exception was a return excpetion, also write the returnResult, if existing
+            if (PSObject.Unwrap(returnResult) != null)
+            {
+                _pipelineCommandRuntime.WriteObject(returnResult, true);
+            }
             return AstVisitAction.SkipChildren;
         }
 
