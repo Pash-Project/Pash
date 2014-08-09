@@ -426,9 +426,21 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.for_statement);
 
-            var initializerAst = BuildPipelineAst(parseTreeNode.ChildNodes[2].ChildNodes[0]);
-            var conditionAst = BuildPipelineAst(parseTreeNode.ChildNodes[2].ChildNodes[1]);
-            var iteratorAst = BuildPipelineAst(parseTreeNode.ChildNodes[2].ChildNodes[2]);
+            var headerAst = parseTreeNode.ChildNodes[2];
+
+            var initializerAst =
+                headerAst.ChildNodes.Count >= 1
+                    ? BuildPipelineAst(parseTreeNode.ChildNodes[2].ChildNodes[0])
+                    : null;
+            var conditionAst =
+                headerAst.ChildNodes.Count >= 2
+                    ? BuildPipelineAst(parseTreeNode.ChildNodes[2].ChildNodes[1])
+                    : null;
+            var iteratorAst =
+                headerAst.ChildNodes.Count == 3
+                    ? BuildPipelineAst(parseTreeNode.ChildNodes[2].ChildNodes[2])
+                    : null;
+
             var bodyAst = BuildStatementBlockAst(parseTreeNode.ChildNodes[4]);
 
             return new ForStatementAst(

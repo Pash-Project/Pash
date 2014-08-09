@@ -1035,12 +1035,18 @@ namespace System.Management.Pash.Implementation
              * expression tests True.
              */
 
-            EvaluateAst(forStatementAst.Initializer);
+            if (forStatementAst.Initializer != null)
+            {
+                EvaluateAst(forStatementAst.Initializer);
+            }
 
-            while ((bool)((PSObject)EvaluateAst(forStatementAst.Condition)).BaseObject)
+            while (forStatementAst.Condition != null ? (bool)((PSObject)EvaluateAst(forStatementAst.Condition)).BaseObject : true)
             {
                 this._pipelineCommandRuntime.WriteObject(EvaluateAst(forStatementAst.Body, false), true);
-                EvaluateAst(forStatementAst.Iterator);
+                if (forStatementAst.Iterator != null)
+                {
+                    EvaluateAst(forStatementAst.Iterator);
+                }
             }
 
             return AstVisitAction.SkipChildren;

@@ -1319,9 +1319,27 @@ ls
         }
 
         [Test]
-        public void For()
+        public void For3Arguments()
         {
             ForStatementAst forStatementAst = ParseStatement("for ($i = 0; $i -ile 10; $i++) {Write-Host $i}");
+        }
+
+        [Test]
+        public void For2Arguments()
+        {
+            ForStatementAst forStatementAst = ParseStatement("for ($i = 0; $i -ile 10) {Write-Host $i}");
+        }
+
+        [Test]
+        public void For1Argument()
+        {
+            ForStatementAst forStatementAst = ParseStatement("for ($i = 0) {Write-Host $i}");
+        }
+
+        [Test]
+        public void ForEmpty()
+        {
+            ForStatementAst forStatementAst = ParseStatement("for () {Write-Host $i}");
         }
 
         [Test]
