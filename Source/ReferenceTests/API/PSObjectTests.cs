@@ -125,5 +125,25 @@ namespace ReferenceTests
             var realMemberNames = GetPublicInstanceMembers(type).Concat(GetPublicInstanceMethods(type));
             Assert.That(memberNames, Is.EquivalentTo(realMemberNames));
         }
+
+        [Test]
+        public void AsPSObjectCannotWrapNull()
+        {
+            // TODO: check for exception type
+            Assert.Throws(Is.InstanceOf(typeof(Exception)), delegate
+            {
+                PSObject.AsPSObject(null);
+            });
+        }
+
+        [Test]
+        public void PSObjectCannotConstructNull()
+        {
+            // TODO: check for exception type
+            Assert.Throws(Is.InstanceOf(typeof(Exception)), delegate
+            {
+                new PSObject(null);
+            });
+        }
     }
 }

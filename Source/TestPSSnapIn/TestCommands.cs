@@ -202,6 +202,16 @@ namespace TestPSSnapIn
         }
     }
 
+    [Cmdlet(VerbsDiagnostic.Test, "WriteNullObject")]
+    public class TestWriteNullCommand : PSCmdlet
+    {
+        protected override void ProcessRecord()
+        {
+            WriteObject(null);
+        }
+    }
+
+
     [Cmdlet(VerbsDiagnostic.Test, "SwitchAndPositional")]
     public class TestSwitchAndPositionalCommand : PSCmdlet
     {
