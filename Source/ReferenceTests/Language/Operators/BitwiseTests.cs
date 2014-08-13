@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace ReferenceTests
 {
     [TestFixture]
-    class BitwiseOperators : ReferenceTestBase
+    class BitwiseTests : ReferenceTestBase
     {
         [Test]
         [TestCase("0x0F0F -band 0xFE", "14", Description = "# int with value 0xE")]

@@ -46,7 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Source\ReferenceTests\*.cs" Exclude="..\Source\ReferenceTests\ReferenceTestInfo.cs"/>
+    <Compile Include="..\Source\ReferenceTests\**\*.cs" Exclude="..\Source\ReferenceTests\ReferenceTestInfo.cs;..\Source\ReferenceTests\Properties\AssemblyInfo.cs"/>
     <Compile Include="..\Source\TestPSSnapIn\TestCommands.cs"/>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReferenceTestInfo.cs" />

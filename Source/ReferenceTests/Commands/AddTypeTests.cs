@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace ReferenceTests
 {
     [TestFixture]
-    public class AddTypeCommandTests : ReferenceTestBase
+    public class AddTypeTests : ReferenceTestBase
     {
         string tempFileName;
 
