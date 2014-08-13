@@ -7,7 +7,7 @@ using Microsoft.PowerShell.Commands;
 namespace ReferenceTests
 {
     [TestFixture]
-    public class GetMemberCommandTests : ReferenceTestBase
+    public class GetMemberTests : ReferenceTestBase
     {
         [Test]
         public void GetMemberWorks()

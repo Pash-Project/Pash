@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace ReferenceTests
 {
     [TestFixture]
-    public class SelectObjectCommandTests
+    public class SelectObjectTests
     {
         private string[] _allDataProps = new [] { "name", "age", "sex" };
         private Dictionary<string, object>[] _data = new []

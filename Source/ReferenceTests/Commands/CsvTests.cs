@@ -7,7 +7,7 @@ using System.IO;
 namespace ReferenceTests
 {
     [TestFixture]
-    public class CsvCommandTests : ReferenceTestBase
+    public class CsvTests : ReferenceTestBase
     {
         private string[] _commonProperties = new [] { "name", "age", "sex" };
         private Dictionary<string, object>[] _data = new []
