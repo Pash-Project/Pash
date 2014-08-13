@@ -5,6 +5,7 @@ using System.Linq;
 using System.Management.Automation.Language;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace System.Management.Automation.Language
 {
@@ -46,7 +47,9 @@ namespace System.Management.Automation.Language
             //adsisearcher	System.DirectoryServices.DirectorySearcher
             //accelerators	System.Management.Automation.TypeAccelerators
         };
+        private static readonly Regex _arrayRegex = new Regex(@"^\[,*\]$");
 
+        private int _dimensions = 0;
         readonly Type Type;
 
         public TypeName(Type type)
@@ -57,6 +60,27 @@ namespace System.Management.Automation.Language
         public TypeName(string name)
         {
             this.Name = name;
+            if (Name.EndsWith("]")) // parse array or generic type
+            {
+                var beginBracket = Name.IndexOf('[');
+                if (beginBracket > 0)
+                {
+                    var brackets = Name.Substring(beginBracket, Name.Length - beginBracket);
+                    if (_arrayRegex.IsMatch(brackets))
+                    {
+                        Name = Name.Substring(0, beginBracket);
+                        _dimensions = brackets.Length - 1;
+                    }
+                }
+                // TODO: support generic args
+                // otherwise we do nothing for now
+            }
+        }
+
+        internal TypeName(string name, int dimensions)
+        {
+            Name = name;
+            _dimensions = dimensions;
         }
 
         public string AssemblyName
@@ -79,8 +103,10 @@ namespace System.Management.Automation.Language
 
         public bool IsArray
         {
-            get;
-            private set;
+            get
+            {
+                return _dimensions > 0;
+            }
         }
 
         public bool IsGeneric
@@ -101,6 +127,16 @@ namespace System.Management.Automation.Language
         }
 
         public Type GetReflectionType()
+        {
+            var rawType = GetRawReflectionType();
+            if (_dimensions < 1)
+            {
+                return rawType;
+            }
+            return rawType.MakeArrayType(_dimensions);
+        }
+
+        private Type GetRawReflectionType()
         {
             // We act correspondingly to the notes in §3.9 of PowerShell Language Specification.
             Type type;

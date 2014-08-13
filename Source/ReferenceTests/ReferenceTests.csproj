@@ -74,6 +74,7 @@
     <Compile Include="Language\Operators\MultiplicativeOperatorTests_7_6.cs" />
     <Compile Include="Language\IndexTests.cs" />
     <Compile Include="Language\HashtableTests_10.cs" />
+    <Compile Include="Language\Operators\ConversionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

@@ -958,7 +958,7 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildCastExpression(ParseTreeNode parseTreeNode)
         {
-            // VerifyTerm(parseTreeNode, this._grammar.cast_expression);
+            VerifyTerm(parseTreeNode, this._grammar.cast_expression);
 
             return new ConvertExpressionAst(
                 new ScriptExtent(parseTreeNode),
@@ -1505,9 +1505,20 @@ namespace Pash.ParserIntrinsics
 
         TypeName BuildTypeName(ParseTreeNode parseTreeNode)
         {
-            VerifyTerm(parseTreeNode, this._grammar.type_name);
-
-            return new TypeName(parseTreeNode.Token.Text);
+            VerifyTerm(parseTreeNode, this._grammar.type_name, _grammar._type_spec_array);
+            int dimensions = 0;
+            string name;
+            if (parseTreeNode.Term == _grammar._type_spec_array)
+            {
+                name = parseTreeNode.ChildNodes[0].Token.Text;
+                name = name.Substring(0, name.Length - 1); // omit "["
+                dimensions = parseTreeNode.ChildNodes[1].ChildNodes.Count + 1; // one dimension + 1 for each comma
+            }
+            else // usual type name
+            {
+                name = parseTreeNode.Token.Text;
+            }
+            return new TypeName(name, dimensions);
         }
 
         HashtableAst BuildHashLiteralExpressionAst(ParseTreeNode parseTreeNode)

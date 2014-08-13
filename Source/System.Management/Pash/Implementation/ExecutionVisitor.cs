@@ -1211,15 +1211,8 @@ namespace System.Management.Pash.Implementation
 
             var value = EvaluateAst(convertExpressionAst.Child);
 
-            if (type.IsEnum)
-            {
-                var result = Enum.Parse(type, (string)value);
-
-                this._pipelineCommandRuntime.WriteObject(result);
-                return AstVisitAction.SkipChildren;
-            }
-
-            throw new NotImplementedException(); //VisitConvertExpression(convertExpressionAst);
+            _pipelineCommandRuntime.WriteObject(LanguagePrimitives.ConvertTo(value, type));
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitDataStatement(DataStatementAst dataStatementAst)
