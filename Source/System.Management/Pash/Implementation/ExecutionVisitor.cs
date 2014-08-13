@@ -820,21 +820,27 @@ namespace System.Management.Pash.Implementation
         {
             var target = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Target));
             var index = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Index, false));
-            if (target is Array)
+            var arrayTarget = target as Array;
+            if (arrayTarget != null && arrayTarget.Rank > 1)
             {
-                Array targetArray = (Array)target;
-                var indexArray = (long[])LanguagePrimitives.ConvertTo(index, typeof(long[]));
-                if (indexArray.Length == 1 && indexArray[0] < 0)
-                {
-                    indexArray[0] = targetArray.Length + indexArray[0];
-                }
-                var convertedValue = LanguagePrimitives.ConvertTo(value, targetArray.GetType().GetElementType());
-                targetArray.SetValue(convertedValue, indexArray);
+                var rawIndices = (int[])LanguagePrimitives.ConvertTo(index, typeof(int[]));
+                var indices = ConvertNegativeIndicesForMultidimensionalArray(arrayTarget, rawIndices);
+                var convertedValue = LanguagePrimitives.ConvertTo(value, arrayTarget.GetType().GetElementType());
+                arrayTarget.SetValue(convertedValue, indices);
+                return;
             }
-            else if (target is IList)
+            // we don't support assignment to slices (, yet?), so throw an error
+            if (index is Array && ((Array)index).Length > 1)
             {
-                var intIndx = (int)LanguagePrimitives.ConvertTo(index, typeof(int));
-                ((IList)target)[intIndx] = value;
+                throw new PSInvalidOperationException("Assignment to slices is not supported");
+            }
+            // otherwise do assignments
+            var iListTarget = target as IList;
+            if (iListTarget != null) // covers also arrays
+            {
+                var intIdx = (int)LanguagePrimitives.ConvertTo(index, typeof(int));
+                intIdx = intIdx < 0 ? intIdx + iListTarget.Count : intIdx;
+                iListTarget[intIdx] = value;
             }
             else if (target is IDictionary)
             {
@@ -842,8 +848,8 @@ namespace System.Management.Pash.Implementation
             }
             else
             {
-                var msg = String.Format("Cannot index member of type '{0}' for assignment", target.GetType());
-                throw new NotImplementedException(msg);
+                var msg = String.Format("Cannot set index for type '{0}'", target.GetType().FullName);
+                throw new PSInvalidOperationException(msg);
             }
         }
 
@@ -861,48 +867,84 @@ namespace System.Management.Pash.Implementation
 
             if (targetValue is PSObject) targetValue = ((PSObject)targetValue).BaseObject;
 
-            var stringTargetValue = targetValue as string;
-            if (stringTargetValue != null)
+            // Check dicts/hashtables first
+            var dictTarget = targetValue as IDictionary;
+            if (dictTarget != null)
             {
-                var intIdx = (int)LanguagePrimitives.ConvertTo(index, typeof(int));
-                var result = stringTargetValue[intIdx];
-                this._pipelineCommandRuntime.WriteObject(result);
-            }
-            else if (targetValue is Array)
-            {
-                var indices = (long[]) LanguagePrimitives.ConvertTo(index, typeof(long[]));
-                var array = (Array)targetValue;
-                if (indices.Length == 1 && indices[0] < 0)
+                var idxobjects = index is object[] ? (object[])index : new object[] { index };
+                foreach (var idxobj in idxobjects)
                 {
-                    indices[0] = array.Length + indices[0];
+                    var res = dictTarget[PSObject.Unwrap(idxobj)];
+                    if (res != null)
+                    {
+                        _pipelineCommandRuntime.WriteObject(res);
+                    }
                 }
-                object val = null;
+                return AstVisitAction.SkipChildren;
+            }
+
+            // otherwise we need int indexing
+            var indices = (int[]) LanguagePrimitives.ConvertTo(index, typeof(int[]));
+
+            // check for real multidimensional array access first
+            var arrayTarget = targetValue as Array;
+            if (arrayTarget != null && arrayTarget.Rank > 1)
+            {
+                int[] convIndices = ConvertNegativeIndicesForMultidimensionalArray(arrayTarget, indices);
                 try
                 {
-                    val = array.GetValue(indices);
+                    this._pipelineCommandRuntime.WriteObject(arrayTarget.GetValue(convIndices));
                 }
-                catch (IndexOutOfRangeException) // just write null to pipeline
+                catch (IndexOutOfRangeException) // just write nothing to pipeline
                 {
                 }
-                this._pipelineCommandRuntime.WriteObject(val);
+                return AstVisitAction.SkipChildren;
             }
 
-            else if (targetValue is IList)
+            // if we have a string, we need to access it as an char[]
+            if (targetValue is string)
             {
-                var intIdx = (int)LanguagePrimitives.ConvertTo(index, typeof(int));
-                var result = (targetValue as IList)[intIdx];
-                this._pipelineCommandRuntime.WriteObject(result);
+                targetValue = ((string)targetValue).ToCharArray();
             }
 
-            else if (targetValue is IDictionary)
+            // now we can access arrays, list, and string (charArrays) all the same by using the IList interface
+            var iListTarget = targetValue as IList;
+            if (iListTarget == null)
             {
-                var result = (targetValue as IDictionary)[index];
-                this._pipelineCommandRuntime.WriteObject(result);
+                var msg = String.Format("Cannot index an object of type '{0}'.", targetValue.GetType().FullName);
+                throw new PSInvalidOperationException(msg);
             }
 
-            else throw new NotImplementedException(indexExpressionAst.ToString() + " " + targetValue.GetType());
+            var numItems = iListTarget.Count;
+            // now get all elements from the index list
+            foreach (int curIdx in indices)
+            {
+                // support negative indices
+                var idx = curIdx < 0 ? curIdx + numItems : curIdx;
+                // check if it's a valid index, otherwise ignore
+                if (idx >= 0 && idx < numItems)
+                {
+                    _pipelineCommandRuntime.WriteObject(iListTarget[idx]);
+                }
+            }
 
             return AstVisitAction.SkipChildren;
+        }
+
+        private int[] ConvertNegativeIndicesForMultidimensionalArray(Array array, int[] rawIndices)
+        {
+            if (array.Rank != rawIndices.Length)
+            {
+                var msg = String.Format("The index [{0}] is invalid to access an {1}-dimensional array",
+                                        String.Join(",", rawIndices), array.Rank);
+                throw new PSInvalidOperationException(msg);
+            }
+            var convIndices = new int[array.Rank];
+            for (int i = 0; i < rawIndices.Length; i++)
+            {
+                convIndices[i] = rawIndices[i] < 0 ? rawIndices[i] + array.GetLength(i) : rawIndices[i];
+            }
+            return convIndices;
         }
 
         public override AstVisitAction VisitIfStatement(IfStatementAst ifStatementAst)

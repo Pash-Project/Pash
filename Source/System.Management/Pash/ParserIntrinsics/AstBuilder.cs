@@ -858,6 +858,11 @@ namespace Pash.ParserIntrinsics
 
             if (parseTreeNode.ChildNodes.Count == 1)
             {
+                // To avoid mistakes in recursion with ArrayLiteralAsts as last array element, we need to repack it
+                if (unaryExpression is ArrayLiteralAst)
+                {
+                    return new ArrayLiteralAst(new ScriptExtent(parseTreeNode), new [] { unaryExpression });
+                }
                 return unaryExpression;
             }
             if (parseTreeNode.ChildNodes.Count == 3)
@@ -932,6 +937,11 @@ namespace Pash.ParserIntrinsics
             else if (operatorKeyTerm != null && operatorKeyTerm.Text.Equals("++"))
             {
                 return BuildPreIncrementExpressionAst(subNode);
+            }
+            else if (operatorKeyTerm != null && operatorKeyTerm.Text.Equals(",")) //unary array
+            {
+                var unaryExpression = BuildUnaryExpressionAst(subNode.ChildNodes[1]);
+                return new ArrayLiteralAst(new ScriptExtent(subNode), new [] {unaryExpression});
             }
             /* left to be implemented:
              * operatorTerm == _operator_bnot

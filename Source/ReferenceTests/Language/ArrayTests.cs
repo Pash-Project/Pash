@@ -2,12 +2,14 @@ using System;
 using NUnit.Framework;
 using System.Management.Automation;
 using TestPSSnapIn;
+using System.Runtime.InteropServices;
 
 namespace ReferenceTests
 {
     public class ArrayTests : ReferenceTestBase
     {
         [TestCase("1,2,3")]
+        [TestCase(",2")]
         [TestCase("@('foo',2,3)")]
         public void ArrayExpressionIsArrayType(string definition)
         {
@@ -37,6 +39,14 @@ namespace ReferenceTests
             var results = ReferenceHost.RawExecute("@(@(@('foo')))");
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(PSObject.AsPSObject("foo"), results[0]);
+        }
+
+        [Test]
+        public void NestedOneDimensionalArrayEvaluatesInArrayList()
+        {
+            var cmd = "$a = 1,2,@(4),,3; $a.Length; $a[2].GetType().FullName; $a[3].GetType().FullName";
+            var objArrayName = typeof(object[]).FullName;
+            Assert.AreEqual(NewlineJoin("4",objArrayName, objArrayName), ReferenceHost.Execute(cmd));
         }
 
         [Test]
