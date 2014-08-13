@@ -44,17 +44,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddTypeCommandTests.cs" />
-    <Compile Include="BitwiseOperators.cs" />
-    <Compile Include="CmdletParameterTests.cs" />
-    <Compile Include="DefaultScriptScopeTests.cs" />
-    <Compile Include="FunctionTests.cs" />
-    <Compile Include="InvocationTests.cs" />
+    <Compile Include="Commands\AddTypeTests.cs" />
+    <Compile Include="Language\Operators\BitwiseTests.cs" />
+    <Compile Include="Language\CmdletParameterTests.cs" />
+    <Compile Include="API\DefaultScriptScopeTests.cs" />
+    <Compile Include="Language\FunctionTests.cs" />
+    <Compile Include="Language\InvocationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReferenceHost.cs" />
-    <Compile Include="PipelineExecutionTests.cs" />
+    <Compile Include="Language\PipelineExecutionTests.cs" />
     <Compile Include="ReferenceTestBase.cs" />
-    <Compile Include="ExitTests.cs" />
+    <Compile Include="Language\ExitTests.cs" />
     <Compile Include="ReferenceTestInfo.cs" />
     <Compile Include="ReturnTests.cs" />
     <Compile Include="PSObjectTests.cs" />
@@ -68,6 +68,17 @@
     <Compile Include="FileSystemProviderTests.cs" />
     <Compile Include="OutFileTests.cs" />
     <Compile Include="WildcardPatternTests.cs" />
+    <Compile Include="Language\ReturnTests.cs" />
+    <Compile Include="API\PSObjectTests.cs" />
+    <Compile Include="Commands\ObjectTests.cs" />
+    <Compile Include="Language\ArrayTests.cs" />
+    <Compile Include="API\TypeConverterTests.cs" />
+    <Compile Include="Commands\GetMemberTests.cs" />
+    <Compile Include="Commands\SelectObjectTests.cs" />
+    <Compile Include="Commands\CsvTests.cs" />
+    <Compile Include="Language\StringTests.cs" />
+    <Compile Include="Providers\FileSystemProviderTests.cs" />
+    <Compile Include="Commands\OutFileTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
