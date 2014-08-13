@@ -102,7 +102,7 @@ namespace Pash.Implementation
             Collection<PSObject> colRet = new Collection<PSObject>();
             foreach (object obj in collection)
             {
-                colRet.Add(PSObject.AsPSObject(obj));
+                colRet.Add(PSObject.WrapOrNull(obj));
             }
             return colRet;
         }

@@ -222,7 +222,7 @@ namespace System.Management.Automation
             // TODO: use PSTypeConverters for the following!
             if (resultType == typeof(PSObject))
             {
-                return PSObject.AsPSObject(valueToConvert);
+                return PSObject.WrapOrNull(valueToConvert);
             }
 
             if (valueToConvert != null && resultType.IsAssignableFrom(valueToConvert.GetType()))

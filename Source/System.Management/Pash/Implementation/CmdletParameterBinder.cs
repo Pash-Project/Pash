@@ -386,7 +386,7 @@ namespace System.Management.Automation
             var fieldDescs = new Collection<FieldDescription>(
                 (from param in parameters
                  select new FieldDescription(param.Name, param.Name, param.ParameterType, param.HelpMessage,
-                                             PSObject.AsPSObject(null), param.IsMandatory, param.Attributes)
+                                             null, param.IsMandatory, param.Attributes)
                 ).ToList()
             );
             //var caption = String.Format("Cmdlet {0} at position {1} in the pipeline", _cmdletInfo.Name, ???);

@@ -556,20 +556,24 @@ namespace System.Management.Pash.Implementation
                 if (expression != null)
                 {
                     // evaluate it and get results
-                    var value = EvaluateAst(expression.Expression, _writeSideEffectsToPipeline);
+                    var subVisitor = this.CloneSub(_writeSideEffectsToPipeline);
+                    expression.Expression.Visit(subVisitor);
+                    var results = subVisitor._pipelineCommandRuntime.OutputStream.Read();
                     // if we only have that one expression and no commands, write expression to output and return
                     if (pipelineCommandCount == 1)
                     {
-                        if (value != null)
-                        {
-                            _pipelineCommandRuntime.WriteObject(value, false);
-                        }
+                        _pipelineCommandRuntime.WriteObject(results, true);
                         return AstVisitAction.SkipChildren;
                     }
                     // otherwise write value to input of pipeline to be processed
-                    if (value != null)
+                    if (results.Count == 1)
                     {
-                        pipeline.Input.Write(value, true);
+                        // "unroll" an input array: write all enumerated elements seperately to the pipeline
+                        pipeline.Input.Write(results[0], true);
+                    }
+                    else
+                    {
+                        pipeline.Input.Write(results, true);
                     }
                     startAt = 1;
                 }
@@ -807,7 +811,7 @@ namespace System.Management.Pash.Implementation
                 ((Hashtable) unwraped)[memberNameObj] = value;
                 return;
             }
-            // else ot's a PSObject
+            // else it's a PSObject
             var member = GetPSObjectMember(psobj, memberNameObj, memberExpressionAst.Static, out memberName);
             if (member == null)
             {
@@ -888,13 +892,15 @@ namespace System.Management.Pash.Implementation
             if (arrayTarget != null && arrayTarget.Rank > 1)
             {
                 int[] convIndices = ConvertNegativeIndicesForMultidimensionalArray(arrayTarget, indices);
+                object arrayValue = null;
                 try
                 {
-                    this._pipelineCommandRuntime.WriteObject(arrayTarget.GetValue(convIndices));
+                    arrayValue = arrayTarget.GetValue(convIndices);
                 }
                 catch (IndexOutOfRangeException) // just write nothing to pipeline
                 {
                 }
+                this._pipelineCommandRuntime.WriteObject(arrayValue);
                 return AstVisitAction.SkipChildren;
             }
 
@@ -914,6 +920,7 @@ namespace System.Management.Pash.Implementation
 
             var numItems = iListTarget.Count;
             // now get all elements from the index list
+            bool writtenFromList = false;
             foreach (int curIdx in indices)
             {
                 // support negative indices
@@ -922,9 +929,13 @@ namespace System.Management.Pash.Implementation
                 if (idx >= 0 && idx < numItems)
                 {
                     _pipelineCommandRuntime.WriteObject(iListTarget[idx]);
+                    writtenFromList = true;
                 }
             }
-
+            if (!writtenFromList)
+            {
+                _pipelineCommandRuntime.WriteObject(null);
+            }
             return AstVisitAction.SkipChildren;
         }
 
@@ -993,6 +1004,10 @@ namespace System.Management.Pash.Implementation
         {
             string memberName;
             var psobj = EvaluateAsPSObject(methodCallAst.Expression);
+            if (psobj == null)
+            {
+                throw new PSInvalidOperationException("Cannot invoke a method of a NULL expression");
+            }
             var memberNameObj = EvaluateAst(methodCallAst.Member, false);
             var method = GetPSObjectMember(psobj, memberNameObj, methodCallAst.Static, out memberName) as PSMethodInfo;
             if (method == null)
@@ -1013,7 +1028,7 @@ namespace System.Management.Pash.Implementation
             // if the expression is a variable including an enumerable object (e.g. collection)
             // then we want the collection itself. The enumerable object should only be expanded when being processed
             // e.g. in a pipeline
-            return PSObject.AsPSObject(EvaluateAst(expression, false));
+            return PSObject.WrapOrNull(EvaluateAst(expression, false));
         }
 
         private PSMemberInfo GetPSObjectMember(PSObject psobj, object memberNameObj, bool isStatic, out string memberName)
@@ -1024,6 +1039,10 @@ namespace System.Management.Pash.Implementation
                 throw new PSArgumentNullException("Member name evaluates to null");
             }
             memberName = memberNameObj.ToString();
+            if (psobj == null)
+            {
+                return null;
+            }
             // Powershell allows access to hastable values by member acccess
             if (isStatic)
             {
@@ -1048,7 +1067,7 @@ namespace System.Management.Pash.Implementation
             else // otherwise a PSObject
             {
                 var member = GetPSObjectMember(psobj, memberNameObj, memberExpressionAst.Static, out memberName);
-                var value = PSObject.AsPSObject((member == null) ? null : member.Value);
+                var value = (member == null) ? null : PSObject.AsPSObject(member.Value);
                 _pipelineCommandRuntime.WriteObject(value);
             }
             return AstVisitAction.SkipChildren;

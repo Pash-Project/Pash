@@ -23,7 +23,8 @@ namespace Microsoft.PowerShell.Commands.Utility
                 // getting the value might throw an exception!
                 try
                 {
-                    value = PSObject.AsPSObject(curEntry.Value).ToString();
+                    var objValue = curEntry.Value;
+                    value = objValue == null ? "" : PSObject.AsPSObject(objValue).ToString();
                 }
                 catch (GetValueException)
                 {
