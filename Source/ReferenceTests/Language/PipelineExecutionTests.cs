@@ -69,6 +69,14 @@ namespace ReferenceTests
             Assert.AreEqual(NewlineJoin(""), result);
         }
 
+        [Test]
+        public void ProcessRecordWorksWithNulls()
+        {
+            var cmd = "@($null, $null, $null, $null) | " + CmdletName(typeof(TestCountProcessRecordCommand));
+            var result = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(NewlineJoin("4"), result);
+        }
+
     }
 }
 
