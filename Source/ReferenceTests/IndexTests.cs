@@ -15,15 +15,14 @@ namespace ReferenceTests
         [TestCase("1+1", "c")]
         [TestCase("-2", "b")]
         [TestCase("-1", "c")]
-        [TestCase("20", null)]
+        [TestCase("20", "")]
         public void ArrayIndexingWorks(string idxExp, string expected)
         {
             var cmd = String.Format(NewlineJoin(
                 "$a = @('a', 'b', 'c')",
                 "$a[{0}]"), idxExp);
             var result = ReferenceHost.Execute(cmd);
-            expected = expected == null ? "" : NewlineJoin(expected);
-            Assert.AreEqual(expected, result);
+            Assert.AreEqual(NewlineJoin(expected), result);
         }
 
         [TestCase("0", "a")]
@@ -70,7 +69,7 @@ namespace ReferenceTests
         [TestCase("1,\"0x1\"", "40")]
         [TestCase("-1,-2", "30")]
         [TestCase("0.9,1", "40")]
-        [TestCase("@(6,7)", null)]
+        [TestCase("@(6,7)", "")]
         public void MultidimensionalArrayIndexingWorks(string idxExp, string expected)
         {
             var cmd = String.Format(NewlineJoin(
@@ -80,9 +79,8 @@ namespace ReferenceTests
                 "$b[1,0] = 30",
                 "$b[1,1] = 40",
                 "$b[{0}]"), idxExp);
-            expected = expected == null ? "" : NewlineJoin(expected);
             var result = ReferenceHost.Execute(cmd);
-            Assert.AreEqual(expected, result);
+            Assert.AreEqual(NewlineJoin(expected), result);
         }
 
         [TestCase("1,0", "50")]
@@ -124,7 +122,7 @@ namespace ReferenceTests
        
         [TestCase("'a'", "1")]
         [TestCase("$idx", "2")]
-        [TestCase("'fpp'", null)]
+        [TestCase("'fpp'", "")]
         public void IndexingHashtablesWorks(string idxExp, string expected)
         {
             var cmd = String.Format(NewlineJoin(
@@ -132,12 +130,11 @@ namespace ReferenceTests
                 "$b = @{{a='1';b='2'}}",
                 "$b[{0}]"), idxExp);
             var result = ReferenceHost.Execute(cmd);
-            expected = expected == null ? "" : NewlineJoin(expected);
-            Assert.AreEqual(expected, result);
+            Assert.AreEqual(NewlineJoin(expected), result);
         }
 
-        [TestCase("@('a', 3, 'c', -1, $idx)", new [] {"foo", "bar"})]
-        [TestCase("'a',,'b'", new [] {"foo"})] // second element is an array!
+        [TestCase("@('a', 3, 'c', -1, $idx)", new [] {"foo", "", "", "", "bar"})]
+        [TestCase("'a',,'b'", new [] {"foo", ""})] // second element is an array!
         public void HashtableCanBeIndexedWithArray(string idxExp, string[] expected)
         {
             var cmd = String.Format(NewlineJoin(

@@ -177,12 +177,12 @@ namespace ReferenceTests
             for (int i = 0; i < expectedValues.Length; i++)
             {
                 var expected = expectedValues[i];
-                var res = results[i].BaseObject;
                 if (expected == null)
                 {
-                    Assert.IsNull(res);
+                    Assert.IsNull(results[i]);
                     continue;
                 }
+                var res = results[i].BaseObject;
                 var restype = res.GetType();
                 Assert.AreSame(expected.GetType(), restype);
                 if (restype == typeof(double))

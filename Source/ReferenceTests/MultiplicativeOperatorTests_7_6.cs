@@ -40,7 +40,8 @@ namespace ReferenceTests
         [TestCase("$a * 4", new object[] {10, 20, 10, 20, 10, 20, 10, 20})]
         [TestCase("$a * 0", new object[] {})]
         [TestCase("$a * 2.7", new object[] {10, 20, 10, 20, 10, 20})]
-        [TestCase("(new-object 'System.Double[,]' 2,3) * 2", new object[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0})]
+        // The following is explicit as PS doesn't match its own specification
+        [TestCase("(new-object 'System.Double[,]' 2,3) * 2", new object[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, Explicit = true)]
         public void ArrayReplication_Spec_7_6_3(string cmd, object[] result)
         {
             cmd = "$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20;" + cmd;

@@ -875,10 +875,7 @@ namespace System.Management.Pash.Implementation
                 foreach (var idxobj in idxobjects)
                 {
                     var res = dictTarget[PSObject.Unwrap(idxobj)];
-                    if (res != null)
-                    {
-                        _pipelineCommandRuntime.WriteObject(res);
-                    }
+                    _pipelineCommandRuntime.WriteObject(res);
                 }
                 return AstVisitAction.SkipChildren;
             }

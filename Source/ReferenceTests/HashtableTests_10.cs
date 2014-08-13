@@ -3,6 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using System.Collections;
 using System.Runtime.InteropServices;
+using System.Management.Automation;
 
 namespace ReferenceTests
 {
@@ -35,7 +36,7 @@ namespace ReferenceTests
             Assert.AreEqual(results.Count, _stdHT.Keys.Count);
             foreach (var key in _stdHT.Keys)
             {
-                results.ShouldContain(key);
+                Assert.True(results.Contains(key), key + " is not in the results");
             }
         }
 
@@ -89,7 +90,7 @@ namespace ReferenceTests
             Assert.AreEqual(expected.Length, results.Count);
             foreach (var str in expected)
             {
-                results.ShouldContain(str);
+                Assert.True(results.Contains(PSObject.AsPSObject(str)), str + " is not in the results");
             }
         }
 
