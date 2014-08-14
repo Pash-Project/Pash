@@ -44,6 +44,14 @@ namespace ReferenceTests
         }
 
         [Test]
+        public void RangeIndexingWorks()
+        {
+            var cmd = "(1..10)[4]";
+            var result = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(NewlineJoin("5"), result);
+        }
+
+        [Test]
         public void ArrayAssignmentWithTooHighIndexThrows()
         {
             // TODO: check for correct error

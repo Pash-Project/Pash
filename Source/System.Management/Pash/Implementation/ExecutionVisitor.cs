@@ -54,7 +54,10 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitBinaryExpression(BinaryExpressionAst binaryExpressionAst)
         {
-            this._pipelineCommandRuntime.WriteObject(EvaluateBinaryExpression(binaryExpressionAst), true);
+            // Important: never enumerate when writing to pipeline
+            // Array replication is a binary expression. Replicated arrays might be huge, writing all
+            // elements to pipeline can cause crucial performance issues if the array is needed again
+            this._pipelineCommandRuntime.WriteObject(EvaluateBinaryExpression(binaryExpressionAst), false);
             return AstVisitAction.SkipChildren;
         }
 
@@ -233,7 +236,7 @@ namespace System.Management.Pash.Implementation
             //// bound, while the operand designating the higher value after conversion is the upper bound. 
             if (start < end)
             {
-                return Extensions.Enumerable._.Generate(start, i => i + 1, end);
+                return Extensions.Enumerable._.Generate(start, i => i + 1, end).ToArray();
             }
 
             //// Both bounds may be the same, in which case, the resulting array has length 1. 
@@ -243,7 +246,7 @@ namespace System.Management.Pash.Implementation
             //// operand designates the upper bound, the sequence is in descending order.
             if (end < start)
             {
-                return Extensions.Enumerable._.Generate(start, i => i - 1, end);
+                return Extensions.Enumerable._.Generate(start, i => i - 1, end).ToArray();
             }
 
             //// [Note: Conceptually, this operator is a shortcut for the corresponding binary comma operator 
@@ -420,14 +423,11 @@ namespace System.Management.Pash.Implementation
                     ThrowInvalidArithmeticOperationException(leftValue, rightValue, "*");
                 }
                 var leftArray = (Array)leftValue;
-                var resultArray = new object[leftArray.Length * num];
-                int curIdx = 0;
-                for (int i = 0; i < num; i++)
+                long length = leftArray.Length;
+                var resultArray = Array.CreateInstance(leftArray.GetType().GetElementType(), length * num);
+                for (long i = 0; i < num; i++)
                 {
-                    foreach (var el in leftArray)
-                    {
-                        resultArray[curIdx++] = el;
-                    }
+                    Array.Copy(leftArray, 0, resultArray, i * length, length);
                 }
                 return resultArray;
             }

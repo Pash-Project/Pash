@@ -55,6 +55,14 @@ namespace ReferenceTests
             ExecuteAndCompareTypedResult(cmd, new object[] {10, 20, 10, 20});
         }
 
+        [Test]
+        public void ArrayReplicationKeepsType()
+        {
+            var cmd = "(([byte[]]5)*2).GetType().FullName";
+            var result = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(NewlineJoin(typeof(byte[]).FullName), result);
+        }
+
         [TestCase("10/-10", (int) -1)]
         [TestCase("12/-10", (double) -1.2)]
         [TestCase("12/10.6", (double) 1.13207547169811)]
