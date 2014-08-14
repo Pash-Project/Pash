@@ -95,7 +95,7 @@ namespace System.Management.Automation
 
             // if we didn't find it by name or alias, try to find it by prefix
             var candidates = (from key in ParameterInfoLookupTable.Keys
-                              where key.StartsWith(name)
+                              where key.StartsWith(name, StringComparison.OrdinalIgnoreCase)
                               select key).ToList();
             if (candidates.Count < 1)
             {
