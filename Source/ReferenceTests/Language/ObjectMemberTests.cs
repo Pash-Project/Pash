@@ -110,6 +110,32 @@ namespace ReferenceTests
         }
 
         [Test]
+        public void AccessingMemberOfNullThrows()
+        {
+            // TODO: check exception type
+            Assert.Throws(Is.InstanceOf(typeof(Exception)), delegate {
+                ReferenceHost.Execute("$a.Bar = 0");
+            });
+        }
+
+        [Test]
+        public void InvokingMemberOfNullThrows()
+        {
+            // TODO: check exception type
+            Assert.Throws(Is.InstanceOf(typeof(Exception)), delegate {
+                ReferenceHost.Execute("$a.GetType()");
+            });
+        }
+
+        [Test]
+        public void AccessingMemberOfNullDoesntThrow()
+        {
+            Assert.DoesNotThrow(delegate {
+                ReferenceHost.Execute("$null.Foo; $a.Bar");
+            });
+        }
+
+        [Test]
         public void CanGetCSharpObjectMethodAndInvokeLater()
         {
             var result = ReferenceHost.Execute(NewlineJoin(

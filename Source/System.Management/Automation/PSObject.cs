@@ -211,6 +211,10 @@ namespace System.Management.Automation
 
         protected void Initialize(object obj)
         {
+            if (obj == null)
+            {
+                throw new PSArgumentNullException("Argument \"obj\" is null"); 
+            }
             _members = new PSMemberInfoCollectionImplementation<PSMemberInfo>(this);
             ImmediateBaseObject = obj;
         }
@@ -273,7 +277,16 @@ namespace System.Management.Automation
             return new PSObject(obj);
         }
 
-        public static object Unwrap(object obj)
+        internal static PSObject WrapOrNull(object obj)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
+            return AsPSObject(obj);
+        }
+
+        internal static object Unwrap(object obj)
         {
             var psobj = obj as PSObject;
             return psobj == null ? obj : psobj.BaseObject;

@@ -37,6 +37,13 @@ namespace TestHost.Cmdlets
         }
 
         [Test]
+        public void MultidimensionalArray()
+        {
+            Assert.AreEqual("2" + Environment.NewLine,
+                            TestHost.Execute("(New-Object 'system.int32[,]' 2,2).Rank"));
+        }
+
+        [Test]
         public void ValueTypes()
         {
             Assert.AreEqual("False" + Environment.NewLine, TestHost.Execute("New-Object Boolean"));

@@ -18,6 +18,9 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Management.Automation.Provider;
 using Microsoft.PowerShell.Commands;
+using Extensions.Reflection;
+using System.Security.Policy;
+using System.Security.Cryptography;
 
 namespace System.Management.Pash.Implementation
 {
@@ -26,6 +29,9 @@ namespace System.Management.Pash.Implementation
         readonly ExecutionContext _context;
         readonly PipelineCommandRuntime _pipelineCommandRuntime;
         readonly bool _writeSideEffectsToPipeline;
+        readonly HashSet<string> _hashtableAccessibleMembers = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) {
+            "Count", "Keys", "Values", "Remove"
+        };
 
         public ExecutionVisitor(ExecutionContext context, PipelineCommandRuntime pipelineCommandRuntime, bool writeSideEffectsToPipeline = false)
         {
@@ -48,7 +54,10 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitBinaryExpression(BinaryExpressionAst binaryExpressionAst)
         {
-            this._pipelineCommandRuntime.WriteObject(EvaluateBinaryExpression(binaryExpressionAst), true);
+            // Important: never enumerate when writing to pipeline
+            // Array replication is a binary expression. Replicated arrays might be huge, writing all
+            // elements to pipeline can cause crucial performance issues if the array is needed again
+            this._pipelineCommandRuntime.WriteObject(EvaluateBinaryExpression(binaryExpressionAst), false);
             return AstVisitAction.SkipChildren;
         }
 
@@ -121,8 +130,17 @@ namespace System.Management.Pash.Implementation
                     return Match(leftOperand, rightOperand);
 
                 case TokenKind.Multiply:
+                    return Multiply(leftOperand, rightOperand);
+
                 case TokenKind.Divide:
+                    return Divide(leftOperand, rightOperand);
+
                 case TokenKind.Minus:
+                    return Subtract(leftOperand, rightOperand);
+
+                case TokenKind.Rem:
+                    return Remainder(leftOperand, rightOperand);
+
                 case TokenKind.Equals:
                 case TokenKind.PlusEquals:
                 case TokenKind.MinusEquals:
@@ -206,7 +224,7 @@ namespace System.Management.Pash.Implementation
             _context.SetVariable("Matches", PSObject.AsPSObject(matches));
         }
 
-        IEnumerable<int> Range(int start, int end)
+        private IEnumerable<int> Range(int start, int end)
         {
             //// Description:
             ////
@@ -218,7 +236,7 @@ namespace System.Management.Pash.Implementation
             //// bound, while the operand designating the higher value after conversion is the upper bound. 
             if (start < end)
             {
-                return Extensions.Enumerable._.Generate(start, i => i + 1, end);
+                return Extensions.Enumerable._.Generate(start, i => i + 1, end).ToArray();
             }
 
             //// Both bounds may be the same, in which case, the resulting array has length 1. 
@@ -228,7 +246,7 @@ namespace System.Management.Pash.Implementation
             //// operand designates the upper bound, the sequence is in descending order.
             if (end < start)
             {
-                return Extensions.Enumerable._.Generate(start, i => i - 1, end);
+                return Extensions.Enumerable._.Generate(start, i => i - 1, end).ToArray();
             }
 
             //// [Note: Conceptually, this operator is a shortcut for the corresponding binary comma operator 
@@ -301,10 +319,10 @@ namespace System.Management.Pash.Implementation
             }
         }
 
-        public object Add(object leftValue, object rightValue)
+        private object Add(object leftValuePacked, object rightValuePacked)
         {
-            if (leftValue is PSObject) leftValue = ((PSObject)leftValue).ImmediateBaseObject;
-            if (rightValue is PSObject) rightValue = ((PSObject)rightValue).ImmediateBaseObject;
+            var leftValue = PSObject.Unwrap(leftValuePacked);
+            var rightValue = PSObject.Unwrap(rightValuePacked);
 
             ////  7.7.1 Addition
             ////      Description:
@@ -313,53 +331,178 @@ namespace System.Management.Pash.Implementation
             ////      
             ////          This operator is left associative.
             ////      
-            ////      Examples:
+            ////      Examples: See ReferenceTests.AdditiveOperatorTests_7_7
             ////      
             ////          12 + -10L               # long result 2
             ////          -10.300D + 12           # decimal result 1.700
             ////          10.6 + 12               # double result 22.6
             ////          12 + "0xabc"            # int result 2760
 
-            if (leftValue == null && rightValue == null) return null;
-
-            if (leftValue == null) return rightValue;
-            if (rightValue == null) return leftValue;
-
-            if (leftValue is string) return leftValue + rightValue.ToString();
-
-            if (leftValue is decimal) return (decimal)leftValue + Convert.ToDecimal(rightValue);
-
-            if (rightValue is decimal) return Convert.ToDecimal(leftValue) + (decimal)rightValue;
-
-            if (leftValue is double) return (double)leftValue + ConvertToDouble(rightValue);
-
-            if (rightValue is double) return Convert.ToDouble(leftValue) + (double)rightValue;
-
-            if (leftValue is int) return (int)leftValue + ConvertToInt32(rightValue);
-
-            throw new NotImplementedException(this.ToString());
-        }
-
-        private double ConvertToDouble(object rightValue)
-        {
-            if (rightValue is string)
+            // string concatenation 7.7.2
+            if (leftValue is string)
             {
-                return double.Parse((string)rightValue, NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture);
-            }
-            return Convert.ToDouble(rightValue);
-        }
-
-        private int ConvertToInt32(object rightValue)
-        {
-            if (rightValue is string)
-            {
-                string stringValue = (string)rightValue;
-                if (stringValue.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+                if (rightValue is object[])
                 {
-                    return Convert.ToInt32(stringValue, 16);
+                    return leftValue + String.Join(" ", (object[])rightValue);
                 }
+                return leftValue + rightValue.ToString();
             }
-            return Convert.ToInt32(rightValue);
+            // array concatenation (7.7.3)
+            if (leftValue is Array)
+            {
+                var resultList = new List<object>();
+                var enumerable = LanguagePrimitives.GetEnumerable(rightValuePacked);
+                foreach (var el in ((Array) leftValue))
+                {
+                    resultList.Add(el);
+                }
+                if (enumerable == null)
+                {
+                    resultList.Add(rightValuePacked);
+                }
+                else
+                {
+                    foreach (var el in enumerable)
+                    {
+                        resultList.Add(el);
+                    }
+                }
+                return resultList.ToArray();
+            }
+            // hashtable concatenation (7.7.4)
+            if (leftValue is Hashtable && rightValue is Hashtable)
+            {
+                var resultHash = new Hashtable(StringComparer.InvariantCultureIgnoreCase);
+                var leftHash = (Hashtable) leftValue;
+                var rightHash = (Hashtable) rightValue;
+                foreach (var key in leftHash.Keys)
+                {
+                    resultHash[key] = leftHash[key];
+                }
+                foreach (var key in rightHash.Keys)
+                {
+                    if (resultHash.ContainsKey(key))
+                    {
+                        var fmt = "Cannot concat hashtables: The key '{0}' is already used in the left Hashtable";
+                        throw new InvalidOperationException(String.Format(fmt, key.ToString()));
+                    }
+                    resultHash[key] = rightHash[key];
+                }
+                return resultHash;
+            }
+
+            // arithmetic expression (7.7.1)
+            Func<dynamic, dynamic, dynamic> addOp = (dynamic x, dynamic y) => x + y;
+            return ArithmeticOperation(leftValue, rightValue, "+", addOp);
+        }
+
+        private object Multiply(object leftValue, object rightValue)
+        {
+            // string replication (7.6.2)
+            if (leftValue is string)
+            {
+                long num;
+                if (!LanguagePrimitives.TryConvertTo<long>(rightValue, out num))
+                {
+                    ThrowInvalidArithmeticOperationException(leftValue, rightValue, "*");
+                }
+                var sb = new StringBuilder();
+                for (int i = 0; i < num; i++)
+                {
+                    sb.Append(leftValue);
+                }
+                return sb.ToString();
+            }
+
+            // array replication (7.6.3)
+            if (leftValue is Array)
+            {
+                long num;
+                if (!LanguagePrimitives.TryConvertTo<long>(rightValue, out num))
+                {
+                    ThrowInvalidArithmeticOperationException(leftValue, rightValue, "*");
+                }
+                var leftArray = (Array)leftValue;
+                long length = leftArray.Length;
+                var resultArray = Array.CreateInstance(leftArray.GetType().GetElementType(), length * num);
+                for (long i = 0; i < num; i++)
+                {
+                    Array.Copy(leftArray, 0, resultArray, i * length, length);
+                }
+                return resultArray;
+            }
+
+            // arithmetic expression (7.6.1)
+            Func<dynamic, dynamic, dynamic> mulOp = (dynamic x, dynamic y) => x * y;
+            return ArithmeticOperation(leftValue, rightValue, "*", mulOp);
+        }
+
+        private object Divide(object leftValue, object rightValue)
+        {
+            // arithmetic division (7.6.4)
+            Func<dynamic, dynamic, dynamic> divOp = (dynamic x, dynamic y) => x / y;
+            return ArithmeticOperation(leftValue, rightValue, "/", divOp);
+        }
+
+        private object Remainder(object leftValue, object rightValue)
+        {
+            // arithmetic remainder (7.6.5)
+            Func<dynamic, dynamic, dynamic> remOp = (dynamic x, dynamic y) => x % y;
+            return ArithmeticOperation(leftValue, rightValue, "%", remOp);
+        }
+
+        private object Subtract(object leftValue, object rightValue)
+        {
+            // arithmetic expression (7.7.5)
+            Func<dynamic, dynamic, dynamic> subOp = (dynamic x, dynamic y) => x - y;
+            return ArithmeticOperation(leftValue, rightValue, "-", subOp);
+        }
+
+        private void ThrowInvalidArithmeticOperationException(object left, object right, string op)
+        {
+            var msg = String.Format("Operation [{0}] {1} [{2}] is not defined",
+                                    left.GetType().FullName, op,
+                                    right.GetType().FullName);
+            throw new PSInvalidOperationException(msg);
+        }
+
+        private object ArithmeticOperation(object leftUnconverted, object rightUnconverted, string op,
+                                           Func<dynamic, dynamic, dynamic> operation)
+        {
+            object left, right;
+            if (!LanguagePrimitives.UsualArithmeticConversion(leftUnconverted, rightUnconverted, 
+                                                              out left, out right))
+            {
+                ThrowInvalidArithmeticOperationException(leftUnconverted, rightUnconverted, op);
+            }
+
+            if (!left.GetType().IsNumericFloat() && !right.GetType().IsNumericFloat())
+            {
+                // we want to support operations like 1/3 and avoid type overflow, e.g. 123456*1234567
+                // TODO: I'm not completely convinced to do everythign as double operations.
+                //       However, the other way would be to used checked operations, catch exceptions
+                //       and to try again. And this wouldn't even allow things like 1/3
+                bool expectedLong = left is long || right is long;
+                var dleft = (double) LanguagePrimitives.ConvertTo(left, typeof(double));
+                var dright = (double) LanguagePrimitives.ConvertTo(right, typeof(double));
+                double res = operation(dleft, dright);
+                if (Math.Abs((res % 1.0)) > 0.000001)
+                {
+                    return res;
+                }
+                //eligible for int/long
+                if (res <= int.MaxValue && res >= int.MinValue && !expectedLong)
+                {
+                    return (int)res;
+                }
+                else if (res <= long.MaxValue && res >= long.MinValue)
+                {
+                    return (long)res;
+                }
+                return res;
+            }
+            // other types than integer numerics can be done directly
+            return operation(left, right);
         }
 
         object EvaluateAst(Ast expressionAst)
@@ -413,20 +556,24 @@ namespace System.Management.Pash.Implementation
                 if (expression != null)
                 {
                     // evaluate it and get results
-                    var value = EvaluateAst(expression.Expression, _writeSideEffectsToPipeline);
+                    var subVisitor = this.CloneSub(_writeSideEffectsToPipeline);
+                    expression.Expression.Visit(subVisitor);
+                    var results = subVisitor._pipelineCommandRuntime.OutputStream.Read();
                     // if we only have that one expression and no commands, write expression to output and return
                     if (pipelineCommandCount == 1)
                     {
-                        if (value != null)
-                        {
-                            _pipelineCommandRuntime.WriteObject(value, true);
-                        }
+                        _pipelineCommandRuntime.WriteObject(results, true);
                         return AstVisitAction.SkipChildren;
                     }
                     // otherwise write value to input of pipeline to be processed
-                    if (value != null)
+                    if (results.Count == 1)
                     {
-                        pipeline.Input.Write(value, true);
+                        // "unroll" an input array: write all enumerated elements seperately to the pipeline
+                        pipeline.Input.Write(results[0], true);
+                    }
+                    else
+                    {
+                        pipeline.Input.Write(results, true);
                     }
                     startAt = 1;
                 }
@@ -613,7 +760,11 @@ namespace System.Management.Pash.Implementation
             }
             else if (expressionAst is MemberExpressionAst)
             {
-                SetMemberExpressionValue((MemberExpressionAst) expressionAst, newValue);
+                SetMemberExpressionValue((MemberExpressionAst)expressionAst, newValue);
+            }
+            else if (expressionAst is IndexExpressionAst)
+            {
+                SetIndexExpressionValue((IndexExpressionAst)expressionAst, newValue);
             }
             else
             {
@@ -650,12 +801,60 @@ namespace System.Management.Pash.Implementation
         private void SetMemberExpressionValue(MemberExpressionAst memberExpressionAst, object value)
         {
             string memberName;
-            var member = GetPSObjectMemberFromMemberExpression(memberExpressionAst, out memberName);
+            var psobj = EvaluateAsPSObject(memberExpressionAst.Expression);
+            var unwraped = PSObject.Unwrap(psobj);
+            var memberNameObj = EvaluateAst(memberExpressionAst.Member, false);
+            // check for Hashtable first
+            if (unwraped is Hashtable && memberNameObj != null &&
+                !_hashtableAccessibleMembers.Contains(memberNameObj.ToString()))
+            { 
+                ((Hashtable) unwraped)[memberNameObj] = value;
+                return;
+            }
+            // else it's a PSObject
+            var member = GetPSObjectMember(psobj, memberNameObj, memberExpressionAst.Static, out memberName);
             if (member == null)
             {
                 throw new PSArgumentNullException(String.Format("Member '{0}' to be assigned is null", memberName));
             }
             member.Value = value;
+        }
+
+        private void SetIndexExpressionValue(IndexExpressionAst indexExpressionAst, object value)
+        {
+            var target = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Target));
+            var index = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Index, false));
+            var arrayTarget = target as Array;
+            if (arrayTarget != null && arrayTarget.Rank > 1)
+            {
+                var rawIndices = (int[])LanguagePrimitives.ConvertTo(index, typeof(int[]));
+                var indices = ConvertNegativeIndicesForMultidimensionalArray(arrayTarget, rawIndices);
+                var convertedValue = LanguagePrimitives.ConvertTo(value, arrayTarget.GetType().GetElementType());
+                arrayTarget.SetValue(convertedValue, indices);
+                return;
+            }
+            // we don't support assignment to slices (, yet?), so throw an error
+            if (index is Array && ((Array)index).Length > 1)
+            {
+                throw new PSInvalidOperationException("Assignment to slices is not supported");
+            }
+            // otherwise do assignments
+            var iListTarget = target as IList;
+            if (iListTarget != null) // covers also arrays
+            {
+                var intIdx = (int)LanguagePrimitives.ConvertTo(index, typeof(int));
+                intIdx = intIdx < 0 ? intIdx + iListTarget.Count : intIdx;
+                iListTarget[intIdx] = value;
+            }
+            else if (target is IDictionary)
+            {
+                ((IDictionary)target)[index] = value;
+            }
+            else
+            {
+                var msg = String.Format("Cannot set index for type '{0}'", target.GetType().FullName);
+                throw new PSInvalidOperationException(msg);
+            }
         }
 
         public override AstVisitAction VisitFunctionDefinition(FunctionDefinitionAst functionDefinitionAst)
@@ -666,34 +865,94 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitIndexExpression(IndexExpressionAst indexExpressionAst)
         {
-            var targetValue = EvaluateAst(indexExpressionAst.Target, true);
+            var targetValue = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Target, true));
 
-            object index = EvaluateAst(indexExpressionAst.Index);
+            object index = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Index));
 
             if (targetValue is PSObject) targetValue = ((PSObject)targetValue).BaseObject;
 
-            var stringTargetValue = targetValue as string;
-            if (stringTargetValue != null)
+            // Check dicts/hashtables first
+            var dictTarget = targetValue as IDictionary;
+            if (dictTarget != null)
             {
-                var result = stringTargetValue[(int)index];
-                this._pipelineCommandRuntime.WriteObject(result);
+                var idxobjects = index is object[] ? (object[])index : new object[] { index };
+                foreach (var idxobj in idxobjects)
+                {
+                    var res = dictTarget[PSObject.Unwrap(idxobj)];
+                    _pipelineCommandRuntime.WriteObject(res);
+                }
+                return AstVisitAction.SkipChildren;
             }
 
-            else if (targetValue is IList)
+            // otherwise we need int indexing
+            var indices = (int[]) LanguagePrimitives.ConvertTo(index, typeof(int[]));
+
+            // check for real multidimensional array access first
+            var arrayTarget = targetValue as Array;
+            if (arrayTarget != null && arrayTarget.Rank > 1)
             {
-                var result = (targetValue as IList)[(int)index];
-                this._pipelineCommandRuntime.WriteObject(result);
+                int[] convIndices = ConvertNegativeIndicesForMultidimensionalArray(arrayTarget, indices);
+                object arrayValue = null;
+                try
+                {
+                    arrayValue = arrayTarget.GetValue(convIndices);
+                }
+                catch (IndexOutOfRangeException) // just write nothing to pipeline
+                {
+                }
+                this._pipelineCommandRuntime.WriteObject(arrayValue);
+                return AstVisitAction.SkipChildren;
             }
 
-            else if (targetValue is IDictionary)
+            // if we have a string, we need to access it as an char[]
+            if (targetValue is string)
             {
-                var result = (targetValue as IDictionary)[index];
-                this._pipelineCommandRuntime.WriteObject(result);
+                targetValue = ((string)targetValue).ToCharArray();
             }
 
-            else throw new NotImplementedException(indexExpressionAst.ToString() + " " + targetValue.GetType());
+            // now we can access arrays, list, and string (charArrays) all the same by using the IList interface
+            var iListTarget = targetValue as IList;
+            if (iListTarget == null)
+            {
+                var msg = String.Format("Cannot index an object of type '{0}'.", targetValue.GetType().FullName);
+                throw new PSInvalidOperationException(msg);
+            }
 
+            var numItems = iListTarget.Count;
+            // now get all elements from the index list
+            bool writtenFromList = false;
+            foreach (int curIdx in indices)
+            {
+                // support negative indices
+                var idx = curIdx < 0 ? curIdx + numItems : curIdx;
+                // check if it's a valid index, otherwise ignore
+                if (idx >= 0 && idx < numItems)
+                {
+                    _pipelineCommandRuntime.WriteObject(iListTarget[idx]);
+                    writtenFromList = true;
+                }
+            }
+            if (!writtenFromList)
+            {
+                _pipelineCommandRuntime.WriteObject(null);
+            }
             return AstVisitAction.SkipChildren;
+        }
+
+        private int[] ConvertNegativeIndicesForMultidimensionalArray(Array array, int[] rawIndices)
+        {
+            if (array.Rank != rawIndices.Length)
+            {
+                var msg = String.Format("The index [{0}] is invalid to access an {1}-dimensional array",
+                                        String.Join(",", rawIndices), array.Rank);
+                throw new PSInvalidOperationException(msg);
+            }
+            var convIndices = new int[array.Rank];
+            for (int i = 0; i < rawIndices.Length; i++)
+            {
+                convIndices[i] = rawIndices[i] < 0 ? rawIndices[i] + array.GetLength(i) : rawIndices[i];
+            }
+            return convIndices;
         }
 
         public override AstVisitAction VisitIfStatement(IfStatementAst ifStatementAst)
@@ -744,7 +1003,13 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitInvokeMemberExpression(InvokeMemberExpressionAst methodCallAst)
         {
             string memberName;
-            var method = GetPSObjectMemberFromMemberExpression(methodCallAst, out memberName) as PSMethodInfo;
+            var psobj = EvaluateAsPSObject(methodCallAst.Expression);
+            if (psobj == null)
+            {
+                throw new PSInvalidOperationException("Cannot invoke a method of a NULL expression");
+            }
+            var memberNameObj = EvaluateAst(methodCallAst.Member, false);
+            var method = GetPSObjectMember(psobj, memberNameObj, methodCallAst.Static, out memberName) as PSMethodInfo;
             if (method == null)
             {
                 throw new PSArgumentException(String.Format("The object has no method called '{0}'", memberName));
@@ -763,29 +1028,23 @@ namespace System.Management.Pash.Implementation
             // if the expression is a variable including an enumerable object (e.g. collection)
             // then we want the collection itself. The enumerable object should only be expanded when being processed
             // e.g. in a pipeline
-            return PSObject.AsPSObject(EvaluateAst(expression, false));
+            return PSObject.WrapOrNull(EvaluateAst(expression, false));
         }
 
-        private PSMemberInfo GetPSObjectMemberFromMemberExpression(MemberExpressionAst memberExpressionAst, out string memberName)
+        private PSMemberInfo GetPSObjectMember(PSObject psobj, object memberNameObj, bool isStatic, out string memberName)
         {
-            var psobj = EvaluateAsPSObject(memberExpressionAst.Expression);
-            var memberNameObj = EvaluateAst(memberExpressionAst.Member, false);
+
             if (memberNameObj == null)
             {
                 throw new PSArgumentNullException("Member name evaluates to null");
             }
             memberName = memberNameObj.ToString();
-            // Powershell allows access to hastable values by member acccess
-            var hashtable = PSObject.Unwrap(psobj) as Hashtable;
-            if (hashtable != null)
+            if (psobj == null)
             {
-                if (hashtable.ContainsKey(memberName))
-                {
-                    return new PSNoteProperty(memberName, hashtable[memberName]);
-                }
-                // otherwise we look for regular members
+                return null;
             }
-            if (memberExpressionAst.Static)
+            // Powershell allows access to hastable values by member acccess
+            if (isStatic)
             {
                 return psobj.StaticMembers[memberName];
             }
@@ -795,9 +1054,22 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitMemberExpression(MemberExpressionAst memberExpressionAst)
         {
             string memberName;
-            var member = GetPSObjectMemberFromMemberExpression(memberExpressionAst, out memberName);
-            var value = PSObject.AsPSObject((member == null) ? null : member.Value);
-            _pipelineCommandRuntime.WriteObject(value);
+            var psobj = EvaluateAsPSObject(memberExpressionAst.Expression);
+            var unwraped = PSObject.Unwrap(psobj);
+            var memberNameObj = EvaluateAst(memberExpressionAst.Member, false);
+            // check for Hastable first
+            if (unwraped is Hashtable && memberNameObj != null &&
+                !_hashtableAccessibleMembers.Contains(memberNameObj.ToString()))
+            {
+                var hashtable = (Hashtable)unwraped;
+                _pipelineCommandRuntime.WriteObject(hashtable[memberNameObj]);
+            }
+            else // otherwise a PSObject
+            {
+                var member = GetPSObjectMember(psobj, memberNameObj, memberExpressionAst.Static, out memberName);
+                var value = (member == null) ? null : PSObject.AsPSObject(member.Value);
+                _pipelineCommandRuntime.WriteObject(value);
+            }
             return AstVisitAction.SkipChildren;
         }
 
@@ -939,15 +1211,8 @@ namespace System.Management.Pash.Implementation
 
             var value = EvaluateAst(convertExpressionAst.Child);
 
-            if (type.IsEnum)
-            {
-                var result = Enum.Parse(type, (string)value);
-
-                this._pipelineCommandRuntime.WriteObject(result);
-                return AstVisitAction.SkipChildren;
-            }
-
-            throw new NotImplementedException(); //VisitConvertExpression(convertExpressionAst);
+            _pipelineCommandRuntime.WriteObject(LanguagePrimitives.ConvertTo(value, type));
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitDataStatement(DataStatementAst dataStatementAst)
@@ -1184,7 +1449,7 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitParenExpression(ParenExpressionAst parenExpressionAst)
         {
             var value = EvaluateAst(parenExpressionAst.Pipeline);
-            this._pipelineCommandRuntime.WriteObject(value, true);
+            this._pipelineCommandRuntime.WriteObject(value);
             return AstVisitAction.SkipChildren;
         }
 
@@ -1201,15 +1466,59 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitScriptBlock(ScriptBlockAst scriptBlockAst)
         {
+            // We execute this in a subcontext, because single enumerable results are 
+            // evaluated and its values are written to pipeline (i.e. ". {1,2,3}" writes
+            // all three values to pipeline
+            // therefore we have to catch exceptions for now to read and write
+            // the subVisitors' output stream, so that already written results appear
+            // also in this OutputStream
+            // TODO: is there a better way? Maybe evaluation of enumerable results should be
+            // somewhere else? Can't be when writing the input pipe of a pipeline, because
+            // it would enumerates many objects that should be enumerated
+            var subVisitor = this.CloneSub(false);
+            object returnResult = null;
+            Exception exception = null;
             try
             {
-                scriptBlockAst.EndBlock.Visit(this);
+                scriptBlockAst.EndBlock.Visit(subVisitor);
             }
             catch (ReturnException e)
             {
-                _pipelineCommandRuntime.WriteObject(e.Value);
+                // return exception is okay
+                returnResult = e.Value; // we first need to read the other results
             }
-
+            catch (Exception e)
+            {
+                // others need to be rethrown
+                exception = e;
+            }
+            // now read errrot and output and write in out streams
+            foreach (var error in subVisitor._pipelineCommandRuntime.ErrorStream.Read())
+            {
+                // we need to use ErrorStream.Write instead of WriteError to avoid
+                // adding it to the error variable twice!
+                _pipelineCommandRuntime.ErrorStream.Write(error);
+            }
+            var result = subVisitor._pipelineCommandRuntime.OutputStream.Read();
+            if (result.Count == 1)
+            {
+                // this is the actual thing of this whole work: enumerate a single value!
+                _pipelineCommandRuntime.WriteObject(result.Single(), true);
+            }
+            else if (result.Count > 1)
+            {
+                _pipelineCommandRuntime.WriteObject(result, true);
+            }
+            // rethrow exception if we had one
+            if (exception != null)
+            {
+                throw exception;
+            }
+            // if the exception was a return excpetion, also write the returnResult, if existing
+            if (PSObject.Unwrap(returnResult) != null)
+            {
+                _pipelineCommandRuntime.WriteObject(returnResult, true);
+            }
             return AstVisitAction.SkipChildren;
         }
 

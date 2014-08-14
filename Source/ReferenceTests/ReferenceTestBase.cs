@@ -3,11 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Management.Automation;
 using System.Text.RegularExpressions;
 using TestPSSnapIn;
 using NUnit.Framework;
 using System.Text;
+using System.Collections;
 
 namespace ReferenceTests
 {
@@ -167,6 +169,36 @@ namespace ReferenceTests
             }
             _createdDirs.Clear();
         }
+
+        public static void ExecuteAndCompareTypedResult(string cmd, params object[] expectedValues)
+        {
+            var results = ReferenceHost.RawExecute(cmd);
+            Assert.AreEqual(expectedValues.Length, results.Count);
+            for (int i = 0; i < expectedValues.Length; i++)
+            {
+                var expected = expectedValues[i];
+                if (expected == null)
+                {
+                    Assert.IsNull(results[i]);
+                    continue;
+                }
+                var res = results[i].BaseObject;
+                var restype = res.GetType();
+                Assert.AreSame(expected.GetType(), restype);
+                if (restype == typeof(double))
+                {
+                    var dres = (double)res;
+                    var diff = dres - ((double)expected);
+                    var msg = String.Format("Not equal: {0} != {1}", expected, dres);
+                    Assert.LessOrEqual(diff, Math.Abs(dres) * 0.00001, msg);
+                }
+                else
+                {
+                    Assert.AreEqual(expected, res);
+                }
+            }
+        }
+
 
         public static string CmdletName(Type cmdletType)
         {

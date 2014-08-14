@@ -202,6 +202,35 @@ namespace TestPSSnapIn
         }
     }
 
+    [Cmdlet(VerbsDiagnostic.Test, "WriteNullObject")]
+    public class TestWriteNullCommand : PSCmdlet
+    {
+        protected override void ProcessRecord()
+        {
+            WriteObject(null);
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "CountProcessRecord")]
+    public class TestCountProcessRecordCommand : PSCmdlet
+    {
+        private int _invocations = 0;
+
+        [Parameter(Position = 0, ValueFromPipeline = true)]
+        public PSObject RandomObject;
+
+        protected override void ProcessRecord()
+        {
+            _invocations++;
+        }
+
+        protected override void EndProcessing()
+        {
+            WriteObject(_invocations);
+        }
+    }
+
+
     [Cmdlet(VerbsDiagnostic.Test, "SwitchAndPositional")]
     public class TestSwitchAndPositionalCommand : PSCmdlet
     {

@@ -58,7 +58,7 @@ namespace Pash.Implementation
             Collection<object> c = new Collection<object>();
 
             // nothing to read
-            if (_objectsStream.Count < 0)
+            if (_objectsStream.Count < 1)
                 return c;
 
             int count = optCount ?? _objectsStream.Count;

@@ -60,6 +60,23 @@ namespace ReferenceTests
             var result = ReferenceHost.Execute(CmdletName(typeof(TestWriteEnumerableToPipelineCommand)) + " 10 12");
             Assert.AreEqual(expected, result);
         }
+
+        [Test]
+        public void CmdletCanWriteNullToPipeline()
+        {
+            var cmd = CmdletName(typeof(TestWriteNullCommand));
+            var result = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(NewlineJoin(""), result);
+        }
+
+        [Test]
+        public void ProcessRecordWorksWithNulls()
+        {
+            var cmd = "@($null, $null, $null, $null) | " + CmdletName(typeof(TestCountProcessRecordCommand));
+            var result = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(NewlineJoin("4"), result);
+        }
+
     }
 }
 

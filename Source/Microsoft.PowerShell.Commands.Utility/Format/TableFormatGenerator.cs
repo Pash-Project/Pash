@@ -68,7 +68,8 @@ namespace Microsoft.PowerShell.Commands.Utility
                     }
                     _currentAlignments[i] = align;
                 }
-                row.Add(new FormatObjectProperty(curData.Name, PSObject.AsPSObject(value).ToString(),
+                var strValue = value == null ? "" : PSObject.AsPSObject(value).ToString();
+                row.Add(new FormatObjectProperty(curData.Name, strValue,
                                                  _currentAlignments[i]));
             }
 

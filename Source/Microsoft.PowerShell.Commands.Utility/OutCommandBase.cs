@@ -19,10 +19,14 @@ namespace Microsoft.PowerShell.Commands
         protected override void ProcessRecord()
         {
             Collection<FormatData> data;
-            if (InputObject.BaseObject is FormatData)
+            if (InputObject == null)
+            {
+                return;
+            }
+            else if (InputObject.BaseObject is FormatData)
             {
                 data = new Collection<FormatData>();
-                data.Add((FormatData) InputObject.BaseObject);
+                data.Add((FormatData)InputObject.BaseObject);
             }
             else
             {

@@ -20,6 +20,13 @@ namespace ReferenceTests
         }
 
         [Test]
+        public void NewObjectWithAcceleratedArrayType()
+        {
+            var result = ReferenceHost.Execute("(new-object 'regex[]' 4).GetType().GetElementType().FullName");
+            Assert.AreEqual(NewlineJoin(typeof(System.Text.RegularExpressions.Regex).FullName), result);
+        }
+
+        [Test]
         public void CreatePSObjectWithPropertiesByHashtable()
         {
             var result = ReferenceHost.Execute(NewlineJoin(new string[] {

@@ -107,7 +107,7 @@ namespace System.Management.Automation
 
         public void WriteObject(object sendToPipeline)
         {
-            OutputStream.Write(PSObject.AsPSObject(sendToPipeline));
+            OutputStream.Write(PSObject.WrapOrNull(sendToPipeline));
         }
 
         public void WriteObject(object sendToPipeline, bool enumerateCollection)

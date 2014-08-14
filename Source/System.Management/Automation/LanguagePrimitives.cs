@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Extensions.Reflection;
 
 namespace System.Management.Automation
 {
@@ -221,7 +222,7 @@ namespace System.Management.Automation
             // TODO: use PSTypeConverters for the following!
             if (resultType == typeof(PSObject))
             {
-                return PSObject.AsPSObject(valueToConvert);
+                return PSObject.WrapOrNull(valueToConvert);
             }
 
             if (valueToConvert != null && resultType.IsAssignableFrom(valueToConvert.GetType()))
@@ -239,6 +240,19 @@ namespace System.Management.Automation
                 return Enum.Parse(resultType, valueToConvert.ToString(), true);
             }
 
+            if (valueToConvert != null && resultType.IsNumeric())
+            {
+                try
+                {
+                    return ConvertToNumeric(valueToConvert, resultType);
+                }
+                catch (Exception)
+                {
+                    throw new PSInvalidCastException(String.Format("Couldn't convert from '{0}' to numeric type",
+                                                                 valueToConvert.ToString()));
+                }
+            }
+
             if (resultType == typeof(SwitchParameter)) // switch parameters can simply be present
             {
                 return new SwitchParameter(true);
@@ -249,9 +263,13 @@ namespace System.Management.Automation
             {
                 return result;
             }
-
+            /* TODO: further conversion methods:
+             * Parse Method: If the source type is string and the destination type has a method called Parse, that
+             * method is called to perform the conversion.
+             * Constructors: If the destination type has a constructor taking a single argument whose type is that of
+             * the source type, that constructor is called to perform the conversion.
+            */
             return DefaultConvertOrCast(valueToConvert, resultType);
-
         }
 
         #endregion
@@ -408,6 +426,234 @@ namespace System.Management.Automation
         }
 
         #endregion
+
+        internal static bool UsualArithmeticConversion(object left, object right, out object leftConverted,
+                                                       out object rightConverted)
+        {
+            left = PSObject.Unwrap(left);
+            right = PSObject.Unwrap(right);
+            Type leftType = left.GetType();
+            Type rightType = right.GetType();
+            leftConverted = null;
+            rightConverted = null;
+            // 6.15 Usual arithmetic conversions
+            // If neither operand designates a value having numeric type, then
+            if (!leftType.IsNumeric() && !rightType.IsNumeric() &&
+                !UsualArithmeticConversionOneOperand(ref left, ref right))
+            {
+                return false;
+            }
+
+            // Numeric conversions:
+            // If one operand designates a value of type decimal, the value designated by the other operand is converted
+            // to that type, if necessary. The result has type decimal.
+            // Otherwise, if one operand designates a value of type double, the value designated by the 
+            // other operand is converted to that type, if necessary. The result has type double.
+            // Otherwise, if one operand designates a value of type long, the value designated by the other operand 
+            // value is converted to that type, if necessary. The result has the type first in the sequence long and
+            // double that can represent its value.
+            foreach (var type in new [] {typeof(decimal), typeof(double), typeof(long)})
+            {
+                if (leftType == type)
+                {
+                    leftConverted = left;
+                    return TryConvertToNumericTryHexFirst(right, type, out rightConverted);
+                }
+                if (rightType == type)
+                {
+                    rightConverted = right;
+                    return TryConvertToNumericTryHexFirst(left, type, out leftConverted);
+                }
+            }
+            // Otherwise, if one operand designates a value of type float, the values designated by both operands are
+            // converted to type double, if necessary. The result has type double.
+            if (left is float || right is float)
+            {
+                return TryConvertTo(left, typeof(double), out leftConverted) &&
+                       TryConvertTo(right, typeof(double), out rightConverted);
+            }
+            // Otherwise, the values designated by both operands are converted to type int, if necessary. The result 
+            // has the first in the sequence int, long, double that can represent its value without truncation.
+            return TryConvertTo(left, typeof(int), out leftConverted) &&
+                   TryConvertTo(right, typeof(int), out rightConverted);
+        }
+
+        internal static bool TryParseNumeric(string str, out object parsed)
+        {
+            parsed = null;
+            foreach (var type in new [] {typeof(int), typeof(long), typeof(double)})
+            {
+                try
+                {
+                    parsed = ParseStringToNumeric(str, type);
+                    return true;
+                }
+                catch (InvalidCastException)
+                {
+                }
+            }
+            return false;
+        }
+
+        internal static bool TryConvertToNumericTryHexFirst(object obj, Type type, out object converted)
+        {
+            var input = obj;
+            if (obj is string && ((string)obj).StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            {
+                TryConvertTo(obj, typeof(long), out input);
+            }
+            return TryConvertTo(input, type, out converted);
+        }
+
+        private static bool UsualArithmeticConversionOneOperand(ref object left, ref object right)
+        {
+            //If the left operand designates a value of type bool, the conversion is in error.
+            if (left is bool)
+            {
+                return false;
+            }
+            // Otherwise, all operands designating the value $null are converted to zero of type int and the
+            // process continues with the numeric conversions listed below.
+            bool converted = false;
+            if (left == null)
+            {
+                left = (int)0;
+                converted = true;
+            }
+            if (right == null)
+            {
+                right = (int)0;
+                converted = true;
+            }
+            if (converted)
+            {
+                return true;
+            }
+            // Otherwise, if the left operand designates a value of type char and the right operand designates a
+            // value of type bool, the conversion is in error.
+            if (left is char && right is bool)
+            {
+                return false;
+            }
+            // Otherwise, if the left operand designates a value of type string but does not represent a number (§6.16),
+            // the conversion is in error.
+            object leftParsed, rightParsed;
+            if (left is string)
+            {
+                if (!TryParseNumeric((string)left, out leftParsed))
+                {
+                    return false;
+                }
+                left = leftParsed;
+            }
+            // Otherwise, if the right operand designates a value of type string but does not represent a number (§6.16),
+            // the conversion is in error.
+            if (right is string)
+            {
+                if (!TryParseNumeric((string)right, out rightParsed))
+                {
+                    return false;
+                }
+                right = rightParsed;
+            }
+            // Otherwise, all operands designating values of type string are converted to numbers (§6.16), and the
+            // process continues with the numeric conversions listed below.
+            if (left is string || right is string)
+            {
+                return true;
+            }
+            // Otherwise, the conversion is in error.
+            return false;
+        }
+
+        private static object ConvertToNumeric(object value, Type numericType)
+        {
+            if (value is string)
+            {
+                return ParseStringToNumeric((string)value, numericType);
+            }
+            switch (Type.GetTypeCode(numericType))
+            {
+                case TypeCode.Byte:
+                    return Convert.ToByte(value);
+                case TypeCode.SByte:
+                    return Convert.ToSByte(value);
+                case TypeCode.UInt16:
+                    return Convert.ToUInt16(value);
+                case TypeCode.UInt32:
+                    return Convert.ToUInt32(value);
+                case TypeCode.UInt64:
+                    return Convert.ToUInt64(value);
+                case TypeCode.Int16:
+                    return Convert.ToInt16(value);
+                case TypeCode.Int32:
+                    return Convert.ToInt32(value);
+                case TypeCode.Int64:
+                    return Convert.ToInt64(value);
+                case TypeCode.Decimal:
+                    return Convert.ToDecimal(value);
+                case TypeCode.Double:
+                    return Convert.ToDouble(value);
+                case TypeCode.Single:
+                    return Convert.ToSingle(value);
+            }
+            throw new InvalidCastException("Cannot convert to non-numeric type " + numericType.ToString());
+        }
+
+        private static object ParseStringToNumeric(string value, Type numericType)
+        {
+            /*
+            6.16 Conversion from string to numeric type
+            [...]
+            An empty string is converted to the value zero. [...]
+            A string containing only white space and/or line terminators is converted to the value zero.
+            One leading + or - sign is permitted.
+            An integer number may have a hexadecimal prefix (0x or 0X).
+            An optionally signed exponent is permitted.
+            Type suffixes and multipliers are not permitted.
+            The case-distinct strings "-Infinity", "Infinity", and "NaN" are recognized as the values -inf, +inf, 
+            and NaN, respectively.
+            */
+            if (String.IsNullOrWhiteSpace(value))
+            {
+                return DefaultConvertOrCast(0, numericType);
+            }
+            value = value.Trim();
+            var intStyle = NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign | NumberStyles.AllowThousands;
+            var floatStyle = NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint;
+            if (!numericType.IsNumericFloat() && value.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            {
+                intStyle = NumberStyles.AllowHexSpecifier;
+                value = value.Substring(2);
+            }
+            switch (Type.GetTypeCode(numericType))
+            {
+                case TypeCode.Byte:
+                    return Byte.Parse(value, intStyle);
+                case TypeCode.SByte:
+                    return SByte.Parse(value, intStyle);
+                case TypeCode.UInt16:
+                    return UInt16.Parse(value, intStyle);
+                case TypeCode.UInt32:
+                    return UInt32.Parse(value, intStyle);
+                case TypeCode.UInt64:
+                    return UInt64.Parse(value, intStyle);
+                case TypeCode.Int16:
+                    return Int16.Parse(value, intStyle);
+                case TypeCode.Int32:
+                    return Int32.Parse(value, intStyle);
+                case TypeCode.Int64:
+                    return Int64.Parse(value, intStyle);
+                case TypeCode.Decimal:
+                    return Decimal.Parse(value, floatStyle, CultureInfo.InvariantCulture);
+                case TypeCode.Double:
+                    return Double.Parse(value, floatStyle, CultureInfo.InvariantCulture);
+                case TypeCode.Single:
+                    return Single.Parse(value, floatStyle, CultureInfo.InvariantCulture);
+            }
+            var msg = String.Format("Cannot convert '{0}' to non-numeric type {1}", value, numericType.ToString());
+            throw new InvalidCastException(msg);
+        }
 
         private static bool TryConvertUsingTypeConverter(object value, Type type, out object result)
         {

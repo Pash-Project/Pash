@@ -58,7 +58,7 @@
     <Compile Include="ReferenceTestBase.cs" />
     <Compile Include="Language\ExitTests.cs" />
     <Compile Include="ReferenceTestInfo.cs" />
-    <Compile Include="WildcardPatternTests.cs" />
+    <Compile Include="API\WildcardPatternTests.cs" />
     <Compile Include="Language\ReturnTests.cs" />
     <Compile Include="API\PSObjectTests.cs" />
     <Compile Include="Commands\NewObjectTests.cs" />
@@ -70,6 +70,11 @@
     <Compile Include="Language\StringTests.cs" />
     <Compile Include="Providers\FileSystemProviderTests.cs" />
     <Compile Include="Commands\OutFileTests.cs" />
+    <Compile Include="Language\Operators\AdditiveOperatorTests_7_7.cs" />
+    <Compile Include="Language\Operators\MultiplicativeOperatorTests_7_6.cs" />
+    <Compile Include="Language\IndexTests.cs" />
+    <Compile Include="Language\HashtableTests_10.cs" />
+    <Compile Include="Language\Operators\ConversionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

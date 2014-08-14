@@ -235,6 +235,7 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal type_literal_opt = null; // Initialized by reflection.
         public readonly NonTerminal type_spec = null; // Initialized by reflection.
         public readonly NonTerminal _type_spec_array = null; // Initialized by reflection.
+        public readonly NonTerminal _type_spec_array_separators = null; // Initialized by reflection.
         public readonly NonTerminal _type_spec_generic = null; // Initialized by reflection.
         public readonly NonTerminal dimension = null; // Initialized by reflection.
         public readonly NonTerminal generic_type_arguments = null; // Initialized by reflection.
@@ -1461,14 +1462,15 @@ namespace Pash.ParserIntrinsics
             ////            dimension   ,
             type_spec.Rule =
                 // TODO:
-                //_type_spec_array
-                //|
+                _type_spec_array
+                |
                 //_type_spec_generic
                 //|
                 type_name
                 ;
 
-            _type_spec_array.Rule = array_type_name + MakeStarRule(_type_spec_array, ToTerm(",")) + "]";
+            _type_spec_array.Rule = array_type_name + _type_spec_array_separators + "]";
+            _type_spec_array_separators.Rule = MakeStarRule(_type_spec_array_separators, ToTerm(","));
 
             _type_spec_generic.Rule = generic_type_name + generic_type_arguments + "]";
 

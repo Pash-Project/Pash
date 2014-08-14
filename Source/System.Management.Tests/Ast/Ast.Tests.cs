@@ -1316,6 +1316,18 @@ ls
         }
 
         [Test]
+        public void CastWithArray()
+        {
+            ConvertExpressionAst convertExpressionAst = ParseStatement("[Byte[]] 5")
+                .PipelineElements[0]
+                .Expression;
+
+            Assert.AreEqual(true, convertExpressionAst.Type.TypeName.IsArray);
+            Assert.AreEqual("Byte", convertExpressionAst.Type.TypeName.Name);
+            Assert.AreEqual(5, ((ConstantExpressionAst)convertExpressionAst.Child).Value);
+        }
+
+        [Test]
         public void For3Arguments()
         {
             Assert.DoesNotThrow(delegate {
