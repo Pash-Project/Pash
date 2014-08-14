@@ -126,6 +126,14 @@ namespace ReferenceTests
         }
 
         [Test]
+        public void NamedParameterOnlyNeedsCaseInsensitiveStart()
+        {
+            var cmd = CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand)) + " -f 'test'";
+            var res = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(NewlineJoin("test "), res);
+        }
+
+        [Test]
         public void CmdletParameterWithSameAliasDontWork()
         {
             var cmd = CmdletName(typeof(TestSameAliasesCommand));
