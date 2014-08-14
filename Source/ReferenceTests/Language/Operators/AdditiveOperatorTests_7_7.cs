@@ -22,6 +22,14 @@ namespace ReferenceTests
             ExecuteAndCompareTypedResult("-10.300D + 12", (decimal)1.7m);
         }
 
+        [TestCase("2+2", 2.0d)]
+        [TestCase("5-1", 2.0d)]
+        public void AdditiveArgumentExpressionWorks(string argExp, object expected)
+        {
+            var cmd = String.Format("[Math]::Sqrt({0})", argExp);
+            ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
         [Test]
         public void AdditionOverflowAutomaticConversion()
         {

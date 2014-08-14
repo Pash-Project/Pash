@@ -21,6 +21,14 @@ namespace ReferenceTests
             ExecuteAndCompareTypedResult("-10.300D * 12", (decimal) -123.600m);
         }
 
+        [TestCase("2*2", 2.0d)]
+        [TestCase("8/2", 2.0d)]
+        [TestCase("9%5", 2.0d)]
+        public void MultiplicativeArgumentExpressionWorks(string argExp, object expected)
+        {
+            var cmd = String.Format("[Math]::Sqrt({0})", argExp);
+            ExecuteAndCompareTypedResult(cmd, expected);
+        }
 
         [TestCase("\"red\" * \"3\"", "redredred")]
         [TestCase("\"red\" * 4", "redredredred")]
