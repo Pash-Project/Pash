@@ -362,12 +362,12 @@ namespace System.Management.Pash.Implementation
             return Convert.ToInt32(rightValue);
         }
 
-        object EvaluateAst(Ast expressionAst)
+        public object EvaluateAst(Ast expressionAst)
         {
             return EvaluateAst(expressionAst, true);
         }
 
-        object EvaluateAst(Ast expressionAst, bool writeSideEffectsToPipeline)
+        public object EvaluateAst(Ast expressionAst, bool writeSideEffectsToPipeline)
         {
             var subVisitor = this.CloneSub(writeSideEffectsToPipeline);
             expressionAst.Visit(subVisitor);

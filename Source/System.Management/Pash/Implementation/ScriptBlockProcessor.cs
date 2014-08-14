@@ -21,6 +21,7 @@ namespace Pash.Implementation
         private ExecutionContext _originalContext;
         private bool _fromFile;
         private int? _exitCode;
+        private ExecutionVisitor _scopedExecutionVisitor;
 
 
         public ScriptBlockProcessor(IScriptBlockInfo scriptBlockInfo, CommandInfo commandInfo)
@@ -50,7 +51,7 @@ namespace Pash.Implementation
             {
                 return parameter.Value;
             }
-            return GetDefaultParameterValue(scriptParameter);
+            return _scopedExecutionVisitor.EvaluateAst(scriptParameter.DefaultValue);;
         }
 
         private CommandParameter GetParameterByPosition(int position)
@@ -62,20 +63,11 @@ namespace Pash.Implementation
             return null;
         }
 
-        private object GetDefaultParameterValue(ParameterAst scriptParameter)
-        {
-            var constantExpression = scriptParameter.DefaultValue as ConstantExpressionAst;
-            if (constantExpression != null)
-            {
-                return constantExpression.Value;
-            }
-            return null;
-        }
-
         private void CreateOwnScope()
         {
             _originalContext = ExecutionContext;
             _scopedContext = ExecutionContext.Clone(_scriptBlockInfo.ScopeUsage);
+            _scopedExecutionVisitor = new ExecutionVisitor(_scopedContext, CommandRuntime, false);
         }
 
         private void SwitchToOwnScope()
@@ -129,7 +121,7 @@ namespace Pash.Implementation
             SwitchToOwnScope();
             try
             {
-                _scriptBlockInfo.ScriptBlock.Ast.Visit(new ExecutionVisitor(ExecutionContext, CommandRuntime, false));
+                _scriptBlockInfo.ScriptBlock.Ast.Visit(_scopedExecutionVisitor);
             }
             catch (ExitException e)
             {

@@ -14,6 +14,18 @@ namespace ReferenceTests
                 delegate() { ReferenceHost.Execute("function f() { 'x' }"); }
             );
         }
+
+        [Test]
+        public void FunctionParamsDefaultValueCanBeExpression()
+        {
+            var cmd = NewlineJoin(
+                "function f { param($test=(get-location).path)",
+                "$test",
+                "}",
+                "f");
+            var result = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(NewlineJoin(Environment.CurrentDirectory), result);
+        }
     }
 }
 
