@@ -453,7 +453,7 @@ namespace Pash.ParserIntrinsics
         ////        exponent_part:
         ////            e   sign_opt   decimal_digits
         public readonly RegexBasedTerminal exponent_part = null; // Initialized by reflection
-        const string exponent_part_pattern = "(?<exponent_part>" + "[e|E]" + sign_pattern + "?" + decimal_digits_pattern + ")";
+        const string exponent_part_pattern = "(?<exponent_part>" + "e" + sign_pattern + "?" + decimal_digits_pattern + ")";
 
 
         ////        sign:   one of
