@@ -1821,6 +1821,17 @@ ls
             }
 
             [Test]
+            public void IncorrectExponentPartPattern()
+            {
+                // The grammar incorrectly accepted 1|2 as a real literal, but
+                // would generate an OverflowException for it. Thus, we test
+                // that the grammar does not even attempt to parse it as a real
+                // literal and gives us the expected PipelineAst instead.
+                ScriptBlockAst ast = ParseInput("1|2");
+                Assert.IsInstanceOfType(typeof(PipelineAst), ast.EndBlock.Statements[0]);
+            }
+
+            [Test]
             [TestCase("1.5mb", 1572864)]
             [TestCase("1.5MB", 1572864)]
             [TestCase("1.5kb", 1536)]
