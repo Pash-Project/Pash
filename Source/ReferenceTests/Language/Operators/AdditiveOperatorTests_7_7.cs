@@ -25,8 +25,10 @@ namespace ReferenceTests
             ExecuteAndCompareTypedResult("-10.300D + 12", (decimal)1.7m);
         }
 
-        [TestCase("[int]::MaxValue + 1", typeof(long))]
-        [TestCase("[int]::MinValue - 1", typeof(long))]
+        [TestCase("[int]::MaxValue + 1", typeof(long), Explicit = true,
+         Reason = "PS behaves different to its own specification as the result here is double")]
+        [TestCase("[int]::MinValue - 1", typeof(long), Explicit = true,
+         Reason = "PS behaves different to its own specification as the result here is double")]
         [TestCase("[long]::MaxValue + 1", typeof(double))]
         [TestCase("[long]::MinValue - 1", typeof(double))]
         public void OverflowIsCorrectlyCasted(string cmd, Type resultType)
