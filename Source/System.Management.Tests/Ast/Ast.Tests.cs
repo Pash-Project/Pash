@@ -1828,7 +1828,7 @@ ls
                 // that the grammar does not even attempt to parse it as a real
                 // literal and gives us the expected PipelineAst instead.
                 ScriptBlockAst ast = ParseInput("1|2");
-                Assert.IsInstanceOfType(typeof(PipelineAst), ast.EndBlock.Statements[0]);
+                Assert.IsInstanceOf(typeof(PipelineAst), ast.EndBlock.Statements[0]);
             }
 
             [Test]
