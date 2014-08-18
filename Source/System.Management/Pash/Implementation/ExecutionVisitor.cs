@@ -448,19 +448,14 @@ namespace System.Management.Pash.Implementation
             }
             dynamic left = convLeft;
             dynamic right = convRight;
-            // we are overflow safe for ints and longs, but need to check if the result
-            // needs to be double
-            if ((convLeft is int || convLeft is long) && (convRight is int || convRight is long))
+            // if left is decimal, do decimal operation
+            if (convLeft is decimal)
             {
-                if (left % right == 0)
-                {
-                    return left / right;
-                }
-                // otherwise we have a remainder, convert to double
-                left = (double)left;
-                right = (double)right;
+                return left / right;
             }
-            return left / right;
+            // otherwise int/long/double. Making sure double conversion takes place
+            // iff integer division would have a remainder
+            return left % right == 0 ? left / right : ((double)left) / right;
         }
 
         private object Remainder(object leftValue, object rightValue)
