@@ -31,11 +31,12 @@ namespace TestHost
             Assert.AreEqual(expected, result);
         }
 
-        [Test]
-        public void EmptyPSObjectDoesntThrow()
+        [TestCase("Format-Table")]
+        [TestCase("Format-List")]
+        public void EmptyPSObjectDoesntThrow(string fmtCmd)
         {
             Assert.DoesNotThrow(delegate {
-                TestHost.ExecuteWithZeroErrors("New-Object psobject");
+                TestHost.Execute("New-Object psobject | " + fmtCmd);
             });
         }
 
