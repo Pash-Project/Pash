@@ -33,9 +33,21 @@ namespace ReferenceTests
         [TestCase("[long]::MinValue - 1", typeof(double))]
         public void OverflowIsCorrectlyCasted(string cmd, Type resultType)
         {
-            var results = ReferenceHost.RawExecute(cmd);
-            Assert.AreEqual(1, results.Count);
-            Assert.AreSame(resultType, results[0].BaseObject.GetType());
+            ExecuteAndCompareType(cmd, resultType);
+        }
+
+        [TestCase("0 - \"4294967296\"", typeof(long))]
+        [TestCase("4294967296 + \"9223372036854775808\"", typeof(decimal))] // second is long.MaxValue + 1
+        public void ConversionWithOverflowWorksIfOneOperandIsTyped(string cmd, Type result)
+        {
+            ExecuteAndCompareType(cmd, result);
+        }
+
+        [Test]
+        public void SignedHexValueOverflowIsDecimal()
+        {
+            // thex hex string is long::minvalue
+            ExecuteAndCompareType("0 - \"-0x8000000000000000\"", typeof(decimal));
         }
 
         [TestCase("2+2", 2.0d)]

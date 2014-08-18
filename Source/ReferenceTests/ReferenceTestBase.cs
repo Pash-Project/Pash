@@ -170,6 +170,16 @@ namespace ReferenceTests
             _createdDirs.Clear();
         }
 
+        public static void ExecuteAndCompareType(string cmd, params Type[] expectedTypes)
+        {
+            var results = ReferenceHost.RawExecute(cmd);
+            Assert.AreEqual(expectedTypes.Length, results.Count);
+            for (int i = 0; i < expectedTypes.Length; i++)
+            {
+                Assert.AreSame(expectedTypes[i], results[i].BaseObject.GetType());
+            }
+        }
+
         public static void ExecuteAndCompareTypedResult(string cmd, params object[] expectedValues)
         {
             var results = ReferenceHost.RawExecute(cmd);
