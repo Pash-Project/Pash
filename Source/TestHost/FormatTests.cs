@@ -31,6 +31,14 @@ namespace TestHost
             Assert.AreEqual(expected, result);
         }
 
+        [Test]
+        public void EmptyPSObjectDoesntThrow()
+        {
+            Assert.DoesNotThrow(delegate {
+                TestHost.ExecuteWithZeroErrors("New-Object psobject");
+            });
+        }
+
         [Test, Combinatorial]
         public void SimpleDataDoesntNeedDocumentStructure(
             [Values("1", "-1", "'foo'", "2147483647000")]
