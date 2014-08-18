@@ -27,6 +27,10 @@ namespace Microsoft.PowerShell.Commands.Utility
             {
                 throw new PSInvalidOperationException("TableFormatProcessor can only process TableFormatEntryData");
             }
+            if (tableEntry.Row.Count < 1) // don't print empty rows
+            {
+                return;
+            }
             OutputWriter.WriteToErrorStream = data.WriteToErrorStream;
             if (_currentColumns == null)
             {

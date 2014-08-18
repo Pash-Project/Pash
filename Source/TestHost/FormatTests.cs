@@ -31,6 +31,15 @@ namespace TestHost
             Assert.AreEqual(expected, result);
         }
 
+        [TestCase("Format-Table")]
+        [TestCase("Format-List")]
+        public void EmptyPSObjectDoesntThrow(string fmtCmd)
+        {
+            Assert.DoesNotThrow(delegate {
+                TestHost.Execute("New-Object psobject | " + fmtCmd);
+            });
+        }
+
         [Test, Combinatorial]
         public void SimpleDataDoesntNeedDocumentStructure(
             [Values("1", "-1", "'foo'", "2147483647000")]

@@ -24,6 +24,10 @@ namespace Microsoft.PowerShell.Commands.Utility
             {
                 throw new PSInvalidOperationException("ListFormatProcessor can only process ListFormatEntryData");
             }
+            if (list.Entries.Count < 1)
+            {
+                return;
+            }
             OutputWriter.WriteToErrorStream = data.WriteToErrorStream;
             OutputWriter.WriteLine(""); // a blank line in front of every entry
             int maxPropNameWidth = list.Entries.Max(entry => entry.PropertyName.Length);
