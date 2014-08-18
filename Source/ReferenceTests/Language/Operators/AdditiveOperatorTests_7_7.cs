@@ -10,6 +10,9 @@ namespace ReferenceTests
         [TestCase("12 + -10L", (long) 2)] // 12 + -10L  # long result 2
         [TestCase("10.6 + 12", (double) 22.6)] // 10.6 + 12 # double result 22.6
         [TestCase("12 + \"0xabc\"", (int) 2760)] // 12 + "0xabc" # int result 2760
+        [TestCase("12 + \"-0xabc\"", (int) -2736)]
+        [TestCase("12 + \"+0xabc\"", (int) 2760)]
+        [TestCase("111111111111111111 + 0", 111111111111111111)]
         public void Addition_Spec_7_7_1(string cmd, object expected)
         {
             ExecuteAndCompareTypedResult(cmd, expected);
@@ -20,6 +23,31 @@ namespace ReferenceTests
         {
             // decimals aren't constante expressions, we need a seperate test
             ExecuteAndCompareTypedResult("-10.300D + 12", (decimal)1.7m);
+        }
+
+        [TestCase("[int]::MaxValue + 1", typeof(long), Explicit = true,
+         Reason = "PS behaves different to its own specification as the result here is double")]
+        [TestCase("[int]::MinValue - 1", typeof(long), Explicit = true,
+         Reason = "PS behaves different to its own specification as the result here is double")]
+        [TestCase("[long]::MaxValue + 1", typeof(double))]
+        [TestCase("[long]::MinValue - 1", typeof(double))]
+        public void OverflowIsCorrectlyCasted(string cmd, Type resultType)
+        {
+            ExecuteAndCompareType(cmd, resultType);
+        }
+
+        [TestCase("0 - \"4294967296\"", typeof(long))]
+        [TestCase("4294967296 + \"9223372036854775808\"", typeof(decimal))] // second is long.MaxValue + 1
+        public void ConversionWithOverflowWorksIfOneOperandIsTyped(string cmd, Type result)
+        {
+            ExecuteAndCompareType(cmd, result);
+        }
+
+        [Test]
+        public void SignedHexValueOverflowIsDecimal()
+        {
+            // thex hex string is long::minvalue
+            ExecuteAndCompareType("0 - \"-0x8000000000000000\"", typeof(decimal));
         }
 
         [TestCase("2+2", 2.0d)]
@@ -92,6 +120,8 @@ namespace ReferenceTests
         [TestCase("12 - -10L", (long) 22)]
         [TestCase("10.5 - 12", (double) -1.5)]
         [TestCase("12 - \"0xabc\"", (int) -2736)]
+        [TestCase("12 - \"+0xabc\"", (int) -2736)]
+        [TestCase("12 - \"-0xabc\"", (int) 2760)]
         public void Subtraction_Spec_7_7_5(string cmd, object expected)
         {
             ExecuteAndCompareTypedResult(cmd, expected);

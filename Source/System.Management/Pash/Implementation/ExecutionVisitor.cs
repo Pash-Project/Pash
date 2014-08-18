@@ -392,7 +392,7 @@ namespace System.Management.Pash.Implementation
             }
 
             // arithmetic expression (7.7.1)
-            Func<dynamic, dynamic, dynamic> addOp = (dynamic x, dynamic y) => x + y;
+            Func<dynamic, dynamic, dynamic> addOp = (dynamic x, dynamic y) => checked(x + y);
             return ArithmeticOperation(leftValue, rightValue, "+", addOp);
         }
 
@@ -433,28 +433,42 @@ namespace System.Management.Pash.Implementation
             }
 
             // arithmetic expression (7.6.1)
-            Func<dynamic, dynamic, dynamic> mulOp = (dynamic x, dynamic y) => x * y;
+            Func<dynamic, dynamic, dynamic> mulOp = (dynamic x, dynamic y) => checked(x * y);
             return ArithmeticOperation(leftValue, rightValue, "*", mulOp);
         }
 
         private object Divide(object leftValue, object rightValue)
         {
             // arithmetic division (7.6.4)
-            Func<dynamic, dynamic, dynamic> divOp = (dynamic x, dynamic y) => x / y;
-            return ArithmeticOperation(leftValue, rightValue, "/", divOp);
+            object convLeft, convRight;
+            if (!LanguagePrimitives.UsualArithmeticConversion(leftValue, rightValue, 
+                                                              out convLeft, out convRight))
+            {
+                ThrowInvalidArithmeticOperationException(leftValue, rightValue, "/");
+            }
+            dynamic left = convLeft;
+            dynamic right = convRight;
+            // if left is decimal, do decimal operation
+            if (convLeft is decimal)
+            {
+                return left / right;
+            }
+            // otherwise int/long/double. Making sure double conversion takes place
+            // iff integer division would have a remainder
+            return left % right == 0 ? left / right : ((double)left) / right;
         }
 
         private object Remainder(object leftValue, object rightValue)
         {
             // arithmetic remainder (7.6.5)
-            Func<dynamic, dynamic, dynamic> remOp = (dynamic x, dynamic y) => x % y;
+            Func<dynamic, dynamic, dynamic> remOp = (dynamic x, dynamic y) => checked(x % y);
             return ArithmeticOperation(leftValue, rightValue, "%", remOp);
         }
 
         private object Subtract(object leftValue, object rightValue)
         {
             // arithmetic expression (7.7.5)
-            Func<dynamic, dynamic, dynamic> subOp = (dynamic x, dynamic y) => x - y;
+            Func<dynamic, dynamic, dynamic> subOp = (dynamic x, dynamic y) => checked(x - y);
             return ArithmeticOperation(leftValue, rightValue, "-", subOp);
         }
 
@@ -467,7 +481,7 @@ namespace System.Management.Pash.Implementation
         }
 
         private object ArithmeticOperation(object leftUnconverted, object rightUnconverted, string op,
-                                           Func<dynamic, dynamic, dynamic> operation)
+                                           Func<dynamic, dynamic, dynamic> checkedOperation)
         {
             object left, right;
             if (!LanguagePrimitives.UsualArithmeticConversion(leftUnconverted, rightUnconverted, 
@@ -475,34 +489,33 @@ namespace System.Management.Pash.Implementation
             {
                 ThrowInvalidArithmeticOperationException(leftUnconverted, rightUnconverted, op);
             }
-
-            if (!left.GetType().IsNumericFloat() && !right.GetType().IsNumericFloat())
+            if (left is int && right is int)
             {
-                // we want to support operations like 1/3 and avoid type overflow, e.g. 123456*1234567
-                // TODO: I'm not completely convinced to do everythign as double operations.
-                //       However, the other way would be to used checked operations, catch exceptions
-                //       and to try again. And this wouldn't even allow things like 1/3
-                bool expectedLong = left is long || right is long;
-                var dleft = (double) LanguagePrimitives.ConvertTo(left, typeof(double));
-                var dright = (double) LanguagePrimitives.ConvertTo(right, typeof(double));
-                double res = operation(dleft, dright);
-                if (Math.Abs((res % 1.0)) > 0.000001)
+                try
                 {
-                    return res;
+                    return checkedOperation(left, right);
                 }
-                //eligible for int/long
-                if (res <= int.MaxValue && res >= int.MinValue && !expectedLong)
+                catch (OverflowException)
                 {
-                    return (int)res;
+                    left = (long)((int) left); // int cast -> object to int, then to long
+                    right = (long)((int) right);
                 }
-                else if (res <= long.MaxValue && res >= long.MinValue)
-                {
-                    return (long)res;
-                }
-                return res;
             }
-            // other types than integer numerics can be done directly
-            return operation(left, right);
+            if ((left is int || left is long) && (right is int || right is long))
+            {
+                try
+                {
+                    return checkedOperation(left, right);
+                }
+                catch (OverflowException)
+                {
+                    // first dynamic cast, as the objects might be ints or longs
+                    left = (double) ((dynamic) left);
+                    right = (double) ((dynamic)right);
+                }
+            }
+            // otherwise its float, double, decimal, which cannot overflow
+            return checkedOperation(left, right);
         }
 
         public object EvaluateAst(Ast expressionAst)

@@ -10,11 +10,16 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Extensions.Reflection;
+using System.Text.RegularExpressions;
 
 namespace System.Management.Automation
 {
     public static class LanguagePrimitives
     {
+        private static readonly Regex _signedHexRegex = new Regex(@"^\s*[\+-]?0[xX][0-9a-fA-F]+\s*$");
+        private static readonly Type[] _numericConversionTypeOrder = new Type[] {
+            typeof(int), typeof(long), typeof(decimal), typeof(double)
+        };
         #region Equals primitives
 
         /// <summary>
@@ -445,6 +450,14 @@ namespace System.Management.Automation
             }
 
             // Numeric conversions:
+            // Otherwise, if one operand designates a value of type float, the values designated by both operands are
+            // converted to type double, if necessary. The result has type double.
+            if (leftType == typeof(float) || rightType  == typeof(float))
+            {
+                return TryConvertToAnyNumericWithLeastType(left, typeof(double), out leftConverted) &&
+                    TryConvertToAnyNumericWithLeastType(right, typeof(double), out rightConverted);
+            }
+
             // If one operand designates a value of type decimal, the value designated by the other operand is converted
             // to that type, if necessary. The result has type decimal.
             // Otherwise, if one operand designates a value of type double, the value designated by the 
@@ -452,57 +465,103 @@ namespace System.Management.Automation
             // Otherwise, if one operand designates a value of type long, the value designated by the other operand 
             // value is converted to that type, if necessary. The result has the type first in the sequence long and
             // double that can represent its value.
-            foreach (var type in new [] {typeof(decimal), typeof(double), typeof(long)})
+            // Otherwise, the values designated by both operands are converted to type int, if necessary.
+            foreach (var type in new [] {typeof(decimal), typeof(double), typeof(long), typeof(int)})
             {
+                // NOTE: the specification tells us, that if e.g. the left is int, the right should be
+                // converted to int. However, if it doesn't fit in an int, we need to try more!
                 if (leftType == type)
                 {
                     leftConverted = left;
-                    return TryConvertToNumericTryHexFirst(right, type, out rightConverted);
+                    return TryConvertToAnyNumericWithLeastType(right, type, out rightConverted);
                 }
                 if (rightType == type)
                 {
                     rightConverted = right;
-                    return TryConvertToNumericTryHexFirst(left, type, out leftConverted);
+                    return TryConvertToAnyNumericWithLeastType(left, type, out leftConverted);
                 }
             }
-            // Otherwise, if one operand designates a value of type float, the values designated by both operands are
-            // converted to type double, if necessary. The result has type double.
-            if (left is float || right is float)
-            {
-                return TryConvertTo(left, typeof(double), out leftConverted) &&
-                       TryConvertTo(right, typeof(double), out rightConverted);
-            }
-            // Otherwise, the values designated by both operands are converted to type int, if necessary. The result 
-            // has the first in the sequence int, long, double that can represent its value without truncation.
-            return TryConvertTo(left, typeof(int), out leftConverted) &&
-                   TryConvertTo(right, typeof(int), out rightConverted);
-        }
-
-        internal static bool TryParseNumeric(string str, out object parsed)
-        {
-            parsed = null;
-            foreach (var type in new [] {typeof(int), typeof(long), typeof(double)})
-            {
-                try
-                {
-                    parsed = ParseStringToNumeric(str, type);
-                    return true;
-                }
-                catch (InvalidCastException)
-                {
-                }
-            }
+            // shouldn't happen as one operand should be of one of the numeric types
             return false;
         }
 
-        internal static bool TryConvertToNumericTryHexFirst(object obj, Type type, out object converted)
+        private static bool TryParseSignedHexString(string str, out object parsed)
         {
-            var input = obj;
-            if (obj is string && ((string)obj).StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            parsed = null;
+            str = str.Trim();
+            char firstChar = str[0];
+            int sign = 1;
+            int prefixLen = 2;
+            if (firstChar == '-')
             {
-                TryConvertTo(obj, typeof(long), out input);
+                sign = -1;
+                prefixLen = 3;
             }
-            return TryConvertTo(input, type, out converted);
+            else if (firstChar == '+')
+            {
+                prefixLen = 3;
+            }
+            str = str.Substring(prefixLen);
+            long intermediate;
+            if (!long.TryParse(str, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out intermediate))
+            {
+                return false;
+            }
+            // long.MinValue * -1 would cause an overflow;
+            if (intermediate == long.MinValue && sign == -1)
+            {
+                parsed = ((decimal)intermediate) * sign;
+                return true;
+            }
+            intermediate *= sign;
+            // check if the result can be an int
+            if (intermediate >= int.MinValue && intermediate <= int.MaxValue)
+            {
+                parsed = (int)intermediate;
+            }
+            else // otherwise it's the long value
+            {
+                parsed = intermediate;
+            }
+            return true;
+        }
+
+        private static bool TryConvertToAnyNumericWithLeastType(object obj, out object converted)
+        {
+            return TryConvertToAnyNumericWithLeastType(obj, _numericConversionTypeOrder[0], out converted);
+        }
+
+        private static bool TryConvertToAnyNumericWithLeastType(object obj, Type leastType, out object converted)
+        {
+            // This method tries to convert some object to a numeric. It tries to cast to types in this order:
+            // int, long, decimal, double. It begins with with the type designated by leastType
+            var input = obj;
+            converted = null;
+            var str = obj as string;
+            var tryFromTypeIdx = Array.IndexOf(_numericConversionTypeOrder, leastType);
+            if (str != null && _signedHexRegex.IsMatch(str))
+            {
+                if (!TryParseSignedHexString(str, out input))
+                {
+                    return false;
+                }
+                // if we got for example a long, we don't even need to try to convert to int
+                // so we can begin later on at a higher index
+                var newTypeIdx = Array.IndexOf(_numericConversionTypeOrder, input.GetType());
+                if (newTypeIdx > tryFromTypeIdx)
+                {
+                    tryFromTypeIdx = newTypeIdx;
+                }
+            }
+            // try to convert to the types in their order beginning at leastType
+            for (int i = tryFromTypeIdx; i < _numericConversionTypeOrder.Length; i++)
+            {
+                if (TryConvertTo(input, _numericConversionTypeOrder[i], out converted))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private static bool UsualArithmeticConversionOneOperand(ref object left, ref object right)
@@ -540,7 +599,7 @@ namespace System.Management.Automation
             object leftParsed, rightParsed;
             if (left is string)
             {
-                if (!TryParseNumeric((string)left, out leftParsed))
+                if (!TryConvertToAnyNumericWithLeastType((string)left, out leftParsed))
                 {
                     return false;
                 }
@@ -550,7 +609,7 @@ namespace System.Management.Automation
             // the conversion is in error.
             if (right is string)
             {
-                if (!TryParseNumeric((string)right, out rightParsed))
+                if (!TryConvertToAnyNumericWithLeastType((string)right, out rightParsed))
                 {
                     return false;
                 }

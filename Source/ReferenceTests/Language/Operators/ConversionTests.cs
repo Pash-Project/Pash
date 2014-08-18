@@ -26,6 +26,22 @@ namespace ReferenceTests
         }
 
         [Test]
+        public void CanConvertHexStringToInt()
+        {
+            ExecuteAndCompareTypedResult("[int]'0x1a'", (int)26);
+        }
+
+        [TestCase("'-0x1a'")]
+        [TestCase("'+0x1a'")]
+        public void ConvertSignedHexStringToIntThrows(string signedHexStr)
+        {
+            // TODO: check for correct exception type
+            Assert.Throws(Is.InstanceOf(typeof(Exception)), delegate {
+                ReferenceHost.Execute("[int]" + signedHexStr);
+            });
+        }
+
+        [Test]
         public void ConversionToArrayWorks()
         {
             ExecuteAndCompareTypedResult("([int[]]4.7).GetType()", typeof(int[]));
