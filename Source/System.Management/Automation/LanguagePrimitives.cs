@@ -10,11 +10,13 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Extensions.Reflection;
+using System.Text.RegularExpressions;
 
 namespace System.Management.Automation
 {
     public static class LanguagePrimitives
     {
+        private static readonly Regex _signedHexRegex = new Regex(@"^\s*[\+-]?0[xX][0-9a-fA-F]+\s*$");
         #region Equals primitives
 
         /// <summary>
@@ -469,17 +471,51 @@ namespace System.Management.Automation
             // converted to type double, if necessary. The result has type double.
             if (left is float || right is float)
             {
-                return TryConvertTo(left, typeof(double), out leftConverted) &&
-                       TryConvertTo(right, typeof(double), out rightConverted);
+                return TryConvertToNumericTryHexFirst(left, typeof(double), out leftConverted) &&
+                       TryConvertToNumericTryHexFirst(right, typeof(double), out rightConverted);
             }
             // Otherwise, the values designated by both operands are converted to type int, if necessary. The result 
             // has the first in the sequence int, long, double that can represent its value without truncation.
-            return TryConvertTo(left, typeof(int), out leftConverted) &&
-                   TryConvertTo(right, typeof(int), out rightConverted);
+            return TryConvertToNumericTryHexFirst(left, typeof(int), out leftConverted) &&
+                   TryConvertToNumericTryHexFirst(right, typeof(int), out rightConverted);
         }
 
-        internal static bool TryParseNumeric(string str, out object parsed)
+        private static bool TryParseSignedHexString(string str, out long parsed)
         {
+            parsed = 0;
+            str = str.Trim();
+            char firstChar = str[0];
+            int sign = 1;
+            int prefixLen = 2;
+            if (firstChar == '-')
+            {
+                sign = -1;
+                prefixLen = 3;
+            }
+            else if (firstChar == '+')
+            {
+                prefixLen = 3;
+            }
+            str = str.Substring(prefixLen);
+            long intermediate;
+            if (!long.TryParse(str, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out intermediate))
+            {
+                return false;
+            }
+            parsed = sign * intermediate;
+            return true;
+        }
+
+        private static bool TryParseNumeric(string str, out object parsed)
+        {
+            // in arithmetics, signed hex strings are allowed
+            if (_signedHexRegex.IsMatch(str))
+            {
+                long parsedLong;
+                var res = TryParseSignedHexString(str, out parsedLong);
+                parsed = parsedLong;
+                return res;
+            }
             parsed = null;
             foreach (var type in new [] {typeof(int), typeof(long), typeof(double)})
             {
@@ -495,12 +531,19 @@ namespace System.Management.Automation
             return false;
         }
 
-        internal static bool TryConvertToNumericTryHexFirst(object obj, Type type, out object converted)
+        private static bool TryConvertToNumericTryHexFirst(object obj, Type type, out object converted)
         {
             var input = obj;
-            if (obj is string && ((string)obj).StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            converted = null;
+            var str = obj as string;
+            if (str != null && _signedHexRegex.IsMatch(str))
             {
-                TryConvertTo(obj, typeof(long), out input);
+                long parsedLong;
+                if (!TryParseSignedHexString(str, out parsedLong))
+                {
+                    return false;
+                }
+                input = parsedLong;
             }
             return TryConvertTo(input, type, out converted);
         }

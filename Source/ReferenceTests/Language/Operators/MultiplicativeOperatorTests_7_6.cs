@@ -10,6 +10,8 @@ namespace ReferenceTests
         [TestCase("12 * -10L", (long) -120)]
         [TestCase("10.5 * 13", (double) 136.5)]
         [TestCase("12 * \"0xabc\"", (int) 32976)]
+        [TestCase("12 * \"+0xabc\"", (int) 32976)]
+        [TestCase("12 * \"-0xabc\"", (int) -32976)]
         public void Multiplication_Spec_7_6_1(string cmd, object result)
         {
             ExecuteAndCompareTypedResult(cmd, result);
@@ -75,6 +77,9 @@ namespace ReferenceTests
         [TestCase("12/-10", (double) -1.2)]
         [TestCase("12/10.6", (double) 1.13207547169811)]
         [TestCase("12/\"0xabc\"", (double) 0.00436681222707424)]
+        [TestCase("12/\"+0xabc\"", (double) 0.00436681222707424)]
+        [TestCase("12/\"-0xabc\"", (double) -0.00436681222707424)]
+        [TestCase("100000000000001 / 100000000000000", (double) 1.00000000000001)]
         public void Division_Spec_7_6_4(string cmd, object result)
         {
             ExecuteAndCompareTypedResult(cmd, result);
