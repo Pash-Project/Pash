@@ -12,7 +12,7 @@ namespace ReferenceTests.Integration
     [TestFixture]
     public class RosettaCode : ReferenceTestBase
     {
-        [Test, Explicit("ReferenceTestHost complains about not having interactive facilities")]
+        [Test, Explicit("Wrong output because arrays are not converted correctly to strings")]
         // Taken from http://rosettacode.org/wiki/Array_concatenation#PowerShell
         public void ArrayConcatenation()
         {
@@ -21,7 +21,7 @@ namespace ReferenceTests.Integration
                 "$b = 4,5,6",
                 "",
                 "$c = $a + $b",
-                "Write-Host $c");
+                "\"$c\"");
             var expected = NewlineJoin("1 2 3 4 5 6");
             var actual = ReferenceHost.Execute(code);
             Assert.AreEqual(expected, actual);
