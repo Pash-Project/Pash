@@ -49,9 +49,8 @@ namespace Pash.Implementation
 
         private IEnumerable<string> GetFilesystemExpansions(string cmdStart, string replacableEnd)
         {
-            char firstChar = replacableEnd.Length < 1 ? (char) 0 : replacableEnd[0];
-
             replacableEnd = StripQuotes(replacableEnd);
+            var dirCmd = String.IsNullOrEmpty(cmdStart) ? "cd " : cmdStart;
 
             var p = new System.Management.Path(replacableEnd).NormalizeSlashes();
             var startPath = new System.Management.Path(".");
@@ -80,27 +79,31 @@ namespace Pash.Implementation
                 return Enumerable.Empty<string>();
             }
             var expansions = new List<string>();
+            bool includeHidden = lookFor.StartsWith(".");
             var pattern = new WildcardPattern(lookFor + "*");
             // add directories
             expansions.AddRange(
                 from subdir in dirinfo.GetDirectories()
                 where pattern.IsMatch(subdir.Name)
-                select startPath.Combine(subdir.Name).AppendSlashAtEnd().ToString()
+                select dirCmd + QuoteIfNecessary(startPath.Combine(subdir.Name).AppendSlashAtEnd())
             );
             // add files
             expansions.AddRange(
                 from subdir in dirinfo.GetFiles()
                 where pattern.IsMatch(subdir.Name)
-                select startPath.Combine(subdir.Name).ToString()
+                select QuoteIfNecessary(startPath.Combine(subdir.Name))
             );
-            for (int i = 0; i < expansions.Count; i++)
-            {
-                if (expansions[i].Contains(' '))
-                {
-                    expansions[i] = String.Format("'{0}'", expansions[i]);
-                }
-            }
             return expansions;
+        }
+
+        private string QuoteIfNecessary(string str)
+        {
+            if (String.IsNullOrEmpty(str))
+            {
+                return "";
+            }
+            bool isQuoted = _quoteChars.Contains(str[0]);
+            return str.Contains(' ') && !isQuoted ? String.Format("'{0}'", str) : str;
         }
 
         private string StripQuotes(string str)
