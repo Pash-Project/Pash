@@ -116,6 +116,7 @@
     <Compile Include="TestHostRawUserInterface.cs" />
     <Compile Include="FormatTests.cs" />
     <Compile Include="CmdletUserInputTests.cs" />
+    <Compile Include="TabExpanderTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.PowerShell.Commands.Management\Microsoft.Commands.Management.csproj">

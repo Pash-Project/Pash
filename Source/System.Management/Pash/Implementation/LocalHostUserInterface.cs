@@ -63,8 +63,6 @@ namespace Pash.Implementation
         #region Private stuff
         private void HandleControlC(object sender, ConsoleCancelEventArgs e)
         {
-            WriteLine("Ctrl-C pressed");
-
             try
             {
                 var runningPipeline = _parentHost.OpenRunspace.GetCurrentlyRunningPipeline();
