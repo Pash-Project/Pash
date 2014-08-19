@@ -16,14 +16,16 @@ namespace Mono.Terminal
         private string _softPrefix;
         private string[] _expandandedItems;
         private int _selectedItem = NOT_INITIALIZED;
+        private bool _userWasAsked;
 
         private int _maxWrittenX;
         private int _maxWrittenY;
+        private int _lastRenderNumRows;
+        private bool _abortedOrAccepted;
 
         public int RenderStartX { get; private set; }
         public int RenderStartY { get; private set; }
         public bool Running { get; private set; }
-        public string AcceptedCommand { get; private set; }
 
         public TabExpansionEvent TabExpansionEvent;
 
@@ -34,6 +36,11 @@ namespace Mono.Terminal
 
         public bool HandleKey(ConsoleKeyInfo keyInfo)
         {
+            if (keyInfo.Modifiers != 0)
+            {
+                return false;
+            }
+
             switch (keyInfo.Key)
             {
             case ConsoleKey.Enter:
@@ -52,36 +59,86 @@ namespace Mono.Terminal
             case ConsoleKey.Escape:
                 Abort(true);
                 return true;
+            case ConsoleKey.DownArrow:
+            case ConsoleKey.UpArrow:
+            case ConsoleKey.LeftArrow:
+            case ConsoleKey.RightArrow:
+                return ChangeSelection(keyInfo.Key);
             default:
                 return false;
             }
         }
 
+        private bool ChangeSelection(ConsoleKey key)
+        {
+            if (_selectedItem < NO_ITEM_SELECTED || _lastRenderNumRows < 1)
+            {
+                return false; // just in case
+            }
+            // nothing selected? then select first
+            if (_selectedItem == NO_ITEM_SELECTED)
+            {
+                _selectedItem = 0;
+                return true;
+            }
+            // otherwise select depending on last rendering
+            if (key == ConsoleKey.UpArrow && _selectedItem > 0)
+            {
+                _selectedItem--;
+            }
+            else if (key == ConsoleKey.DownArrow && _selectedItem < _expandandedItems.Length - 1)
+            {
+                _selectedItem++;
+            }
+            else if (key == ConsoleKey.LeftArrow)
+            {
+                int newsel = _selectedItem - _lastRenderNumRows;
+                if (newsel >= 0)
+                {
+                    _selectedItem = newsel;
+                }
+            }
+            else if (key == ConsoleKey.RightArrow)
+            {
+                int newsel = _selectedItem + _lastRenderNumRows;
+                if (newsel <= _expandandedItems.Length -1)
+                {
+                    _selectedItem = newsel;
+                }
+            }
+            return true;
+        }
+
         public void Start(string prefix)
         {
             Running = true;
-            if (prefix.Equals(GetExpandedCommand()) && !prefix.Equals(AcceptedCommand))
+            if (!_abortedOrAccepted && prefix.Equals(GetExpandedCommand()))
             {
                 return;
             }
-            AcceptedCommand = null;
+            _abortedOrAccepted = false;
             int spacePos = prefix.LastIndexOf(' ');
             _hardPrefix = spacePos < 0 ? "" : prefix.Substring(0, spacePos);
             _softPrefix = prefix.Substring(spacePos + 1);
             _selectedItem = NOT_INITIALIZED;
+            _userWasAsked = false;
         }
 
         public void Accept()
         {
             // finished
-            AcceptedCommand = GetExpandedCommand();
+            _abortedOrAccepted = true;
             Running = false;
         }
 
         public void ChooseNext()
         {
             bool selectNextItem = true;
-            if (_selectedItem == NOT_INITIALIZED)
+            if (_selectedItem == ASKING_USER)
+            {
+                _userWasAsked = true;
+            }
+            else if (_selectedItem == NOT_INITIALIZED)
             {
                 if (TabExpansionEvent == null)
                 {
@@ -92,6 +149,7 @@ namespace Mono.Terminal
                 _selectedItem = NO_ITEM_SELECTED;
                 selectNextItem = false;
             }
+
             if (_expandandedItems == null || _expandandedItems.Length < 1)
             {
                 return;
@@ -114,6 +172,7 @@ namespace Mono.Terminal
             Running = false;
             if (resetSelection)
             {
+                _abortedOrAccepted = true;
                 _selectedItem = NOT_INITIALIZED;
             }
         }
@@ -121,7 +180,7 @@ namespace Mono.Terminal
         public string GetExpandedCommand()
         {
             string chosenPrefix;
-            if (_selectedItem == NOT_INITIALIZED)
+            if (_selectedItem < NO_ITEM_SELECTED)
             {
                 chosenPrefix = _softPrefix;
             }
@@ -151,21 +210,23 @@ namespace Mono.Terminal
                 return;
             }
 
-            int colwidth = _expandandedItems.Max(item => item.Length) + 1;
+            int colwidth = _expandandedItems.Max(item => item.Length) + 2;
             if (colwidth >= bufferWidth)
             {
                 colwidth = bufferWidth - 1;
             }
             int cols = bufferWidth / colwidth;
             cols = cols > 0 ? cols : 1;
-            int lines = numItems / cols;
-            lines = numItems % cols == 0 ? lines : lines + 1;
+            int rows = numItems / cols;
+            rows = numItems % cols == 0 ? rows : rows + 1;
 
             // Check if we have too many items and need to ask the user
-            if (_selectedItem == NO_ITEM_SELECTED && lines > Console.BufferHeight / 4 * 3)
+            if (_selectedItem == NO_ITEM_SELECTED && 
+                rows > Console.BufferHeight / 4 * 3 && 
+                !_userWasAsked)
             {
                 string msg = String.Format("Want to see all {0} items in {1} lines? [Enter/Escape]",
-                                           numItems, lines);
+                                           numItems, rows);
                 WriteAt(0, RenderStartY + 1, msg, true);
                 _selectedItem = ASKING_USER;
                 return;
@@ -180,39 +241,38 @@ namespace Mono.Terminal
                 return;
             }
 
+            _lastRenderNumRows = rows;
+
             // print items
             // if we have more items than we can show, we need to calculate the scroll position
-            int startShowItems = 0;
+            int startShowRow = 0;
+            int numShownLines = rows;
             int maxItemLines = bufferHeight - linesWithShownCommand;
-            int selectionInLine = _selectedItem % lines;
-            if (_selectedItem % lines > maxItemLines)
+            int selectionInLine = _selectedItem % rows;
+            if (selectionInLine >= maxItemLines - linesWithShownCommand)
             {
-                int skipLines = selectionInLine - maxItemLines;
-                startShowItems = skipLines * cols;
+                startShowRow = selectionInLine - maxItemLines + 1;
+                numShownLines = rows - startShowRow;
             }
-            int numShowItems = numItems - startShowItems;
-            int shownLines = numShowItems / cols;
-            shownLines = numShowItems % cols == 0 ? shownLines : shownLines + 1;
-            shownLines = shownLines < maxItemLines ? shownLines : maxItemLines;
+            numShownLines = numShownLines > maxItemLines ? maxItemLines : numShownLines;
+            int lastShownLine = numShownLines + startShowRow -1;
 
             // scroll buffer, adjust start position
-            int scroll = MakeSureTextFitsInBuffer(showItemsOnLine + shownLines, "");
+            int scroll = MakeSureTextFitsInBuffer(showItemsOnLine + numShownLines, "");
             showItemsOnLine -= scroll;
 
-            // now show numShowItems items from startShowItems on from line showItemsOnLine
-            int curItemLine = showItemsOnLine;
-            for (int i = startShowItems; i < shownLines; i++)
+            // now show items
+            for (int i = 0; i < numItems; i++)
             {
-                for (int j = 0; j < cols; j++)
+                int col = i / rows;
+                int row = i % rows;
+                if (row < startShowRow || row > lastShownLine)
                 {
-                    if (i < numItems)
-                    {
-                        bool invertColors = i == _selectedItem; // highlight current selection
-                        WriteAt((i % cols) * colwidth, curItemLine, _expandandedItems[i], false, invertColors);
-                    }
-                    i++;
+                    continue;
                 }
-                curItemLine++;
+                row -= startShowRow; // adjust row to relative row shown
+                bool highlight = i == _selectedItem;
+                WriteAt(col * colwidth, row + showItemsOnLine, _expandandedItems[i], false, highlight);
             }
         }
 
@@ -244,25 +304,16 @@ namespace Mono.Terminal
             }
             for (int charIdx = 0; ; charIdx++)
             {
-                char curChar;
-                int startComp = 0;
-                if (charIdx < _softPrefix.Length)
+                if (charIdx >= _expandandedItems[0].Length)
                 {
-                    curChar = _softPrefix[charIdx];
+                    break;
                 }
-                else
-                {
-                    if (charIdx >= _expandandedItems[0].Length)
-                    {
-                        break;
-                    }
-                    curChar = _expandandedItems[0][charIdx];
-                    startComp = 1;
-                }
+                char curChar = _expandandedItems[0][charIdx];
+
                 bool doBreak = false;
-                for (int i = startComp; i < _expandandedItems.Length; i++)
+                for (int i = 1; i < _expandandedItems.Length; i++)
                 {
-                    if (i >= _expandandedItems[i].Length ||
+                    if (charIdx >= _expandandedItems[i].Length ||
                         _expandandedItems[i][charIdx] != curChar)
                     {
                         doBreak = true;
@@ -275,7 +326,7 @@ namespace Mono.Terminal
                 }
                 commonPrefix.Append(curChar);
             }
-            return commonPrefix.ToString();
+            return commonPrefix.Length > 0 ? commonPrefix.ToString() : _softPrefix;
         }
 
         private int MakeSureTextFitsInBuffer(int theoreticalPos, string str)
@@ -288,11 +339,12 @@ namespace Mono.Terminal
                 return 0;
             }
             // TODO: check for auto-scrolling if cursor is in last line
-            int doScroll = endPos - buffHeight + 1;
+            int doScroll = endPos - buffHeight;
+            doScroll = doScroll > Console.CursorTop ? Console.CursorTop : doScroll; //limit to be able to reset cursor
             int resetCursorX = Console.CursorLeft;
             int resetCursorY = Console.CursorTop - doScroll;
             Console.SetCursorPosition(buffWidth - 1, buffHeight - 1);
-            for (int i = 0; i < endPos - buffHeight + 1; i++)
+            for (int i = 0; i < doScroll; i++)
             {
                 Console.WriteLine();
             }

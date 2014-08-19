@@ -481,7 +481,8 @@
     <Compile Include="Automation\Host\HostException.cs" />
     <Compile Include="Extensions\PSObjectExtensions.cs" />
     <Compile Include="Automation\Language\StringExpressionHelper.cs" />
-    <Compile Include="Pash\Implementation\TabExpander.cs" />
+    <Compile Include="Pash\Implementation\TabExpanderUI.cs" />
+    <Compile Include="Pash\Implementation\TabExpansionProvider.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

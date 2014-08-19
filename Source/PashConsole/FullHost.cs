@@ -86,6 +86,7 @@ namespace Pash
             {
                 bool? useUnixLikeConsole = GetBoolVariable (PashVariables.UseUnixLikeConsole);
                 localUI.UseUnixLikeInput = useUnixLikeConsole ?? localUI.UseUnixLikeInput;
+                localUI.InitTabExpansion();
             }
 
             if (String.IsNullOrEmpty(commands))

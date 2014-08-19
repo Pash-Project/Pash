@@ -65,7 +65,6 @@ namespace TestHost
             _tabExpander.Start("foobara");
             _tabExpander.ChooseNext();
             Assert.AreEqual("foobarabaz", _tabExpander.GetExpandedCommand());
-            Assert.AreEqual("foobarabaz", _tabExpander.AcceptedCommand);
             Assert.AreEqual(false, _tabExpander.Running);
         }
 
@@ -96,15 +95,39 @@ namespace TestHost
         }
 
         [Test]
-        public void StartingWithAcceptedWordResets()
+        public void StartingAfterAcceptingResets()
         {
             _tabExpander.Start("b");
             _tabExpander.ChooseNext(); // common prefix "ba"
             _tabExpander.ChooseNext(); // first choice "bar"
             _tabExpander.Accept();
             _tabExpander.Start(_tabExpander.GetExpandedCommand());
-            _tabExpander.ChooseNext(); // was resetted, common prefix is again "bar"
+            _tabExpander.ChooseNext(); // was resetted, common prefix is "bar"
             Assert.AreEqual("bar", _tabExpander.GetExpandedCommand());
+        }
+
+        [Test]
+        public void StartingAfterAbortingResets()
+        {
+            _tabExpander.Start("b");
+            _tabExpander.ChooseNext(); // common prefix "ba"
+            _tabExpander.ChooseNext(); // first choice "bar"
+            _tabExpander.Abort(true);
+            _tabExpander.Start(_tabExpander.GetExpandedCommand()); // expandedn command is "b"
+            _tabExpander.ChooseNext(); // was resetted, common prefix is "ba"
+            Assert.AreEqual("ba", _tabExpander.GetExpandedCommand());
+        }
+
+        [Test]
+        public void StartingAfterSoftAbortingDoesntReset()
+        {
+            _tabExpander.Start("b");
+            _tabExpander.ChooseNext(); // common prefix "ba"
+            _tabExpander.ChooseNext(); // first choice "bar"
+            _tabExpander.Abort(false);
+            _tabExpander.Start(_tabExpander.GetExpandedCommand()); // expandedn command is still "bar"
+            _tabExpander.ChooseNext(); // was only softly aborted, go to "barabar"
+            Assert.AreEqual("barabar", _tabExpander.GetExpandedCommand());
         }
 
         [TestCase(false, "foo")]
@@ -131,7 +154,6 @@ namespace TestHost
             _tabExpander.Accept();
             Assert.AreEqual(false, _tabExpander.Running);
             Assert.AreEqual(expected, _tabExpander.GetExpandedCommand());
-            Assert.AreEqual(expected, _tabExpander.AcceptedCommand);
         }
     }
 }

@@ -47,7 +47,7 @@ namespace System.Management
 
         public static implicit operator string(Path path)
         {
-            return path._rawPath;
+            return path == null ? null : path._rawPath;
         }
 
         public static implicit operator Path(string path)

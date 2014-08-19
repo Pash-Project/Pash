@@ -204,6 +204,11 @@ namespace Mono.Terminal {
             //log = File.CreateText ("log"); 
         }
 
+        public void SetTabExpansionFunction(TabExpansionEvent expansionEvent)
+        {
+            _tabExpander.TabExpansionEvent = expansionEvent;
+        }
+
         void CmdDebug()
         {
             history.Dump();

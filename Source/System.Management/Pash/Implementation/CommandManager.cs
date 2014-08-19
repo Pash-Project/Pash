@@ -190,8 +190,10 @@ namespace Pash.Implementation
 
         internal IEnumerable<CommandInfo> FindCommands(string pattern)
         {
+            var wildcard = new WildcardPattern(pattern, WildcardOptions.IgnoreCase);
             return from List<CmdletInfo> cmdletInfoList in _cmdLets.Values
                    from CmdletInfo info in cmdletInfoList
+                   where wildcard.IsMatch(info.Name)
                    select info;
         }
 
