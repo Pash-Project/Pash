@@ -15,7 +15,6 @@ namespace ReferenceTests
             new Dictionary<string, object> {{"name", "John Doe"}, {"age", "45"}, {"sex", "m"}},
             new Dictionary<string, object> {{"name", "Foobar\t"}, {"age", "25"}, {"sex", "f"}, {"randomfield", "blub"}},
             new Dictionary<string, object> {{"name", "Joe,"}, {"age", "23"}, {"sex", "m"}},
-            new Dictionary<string, object> {{"name", ""}, {"age", null}, {"sex", null}},
             new Dictionary<string, object> {{"name", "'Jack"}, {"age", "15"}, {"sex", "m'"}},
             new Dictionary<string, object> {{"name", "Any,bo\"\"dy"}, {"age", "8\"9"}, {"sex", ""}},
             new Dictionary<string, object> {{"name", "Ma\"\"ry"}, {"age", null}, {"sex", null}},
@@ -44,7 +43,6 @@ namespace ReferenceTests
                 "John Doe,45,m", // a normal data set
                 "Foobar\t,\t\t25,f,randomdata,", // tabs are stripped only at beginning, extra data is ignored and shouldn't cause an error
                 "\"Joe,\",23,m", //delimiter is in quotes 
-                "", //newlines are also taken as objects
                 "'Jack,15,m'", // single quotes don't introduce a string as double quotes
                 "\"Any,\"bo\"\"dy, 8\"9,", // escape only if beginning with quote. missing value => empty string
                 "\"Ma\"\"\"\"ry\"", // missing fields, early NL => other fields are null. "" in quotes => escaped quote
@@ -96,7 +94,7 @@ namespace ReferenceTests
             Assert.AreEqual(null, results[1].Properties["his sex"].Value);
         }
 
-        [TestCase("")] // empty field name
+        [TestCase(""), Explicit("Starting with PowerShell v3 this case results in the respective column being dropped if it occurs at the end of the line. Otherwise a generated name will be used for the header.")] // empty field name
         [TestCase("name")] // twice the same name
         public void ImportCsvNeedsValidHeader(string invalidHeader)
         {
@@ -141,7 +139,6 @@ namespace ReferenceTests
                 "\"John Doe\",\"45\",\"m\"",
                 "\"Foobar\t\",\"25\",\"f\"",
                 "\"Joe,\",\"23\",\"m\"",
-                "\"\",,",
                 "\"'Jack\",\"15\",\"m'\"",
                 "\"Any,bo\"\"\"\"dy\",\"8\"\"9\",\"\"",
                 "\"Ma\"\"\"\"ry\",,",
