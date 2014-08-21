@@ -959,11 +959,31 @@ ls
             [TestCase("1pb", 1125899906842624, typeof(System.Int64))]
             [TestCase("9876543210kb", 10113580247040, typeof(System.Int64))]
             [TestCase("12lkb", 12288, typeof(System.Int64))]
+            // long with overflow into double
+            [TestCase("9223372036854775807pb", 1.0384593717069655e34, typeof(System.Double))]
+            // decimal with overflow into double
+            [TestCase("79228162514264337593543950335kb", 8.1129638414606682e31, typeof(System.Double))]
+            // double with multiplier
+            [TestCase("1000000000000000000000000000000kb", 1.024e33, typeof(System.Double))]
+            [TestCase("1000000000000000000000000000000pb", 1.125899906842624e45, typeof(System.Double))]
             public void IntegerWithNumericMultiplier(string expression, object result, Type type)
             {
                 var ast = ParseConstantExpression(expression);
                 Assert.AreEqual(result, ast.Value);
                 Assert.AreEqual(type, ast.StaticType);
+            }
+
+            // int with overflow into decimal
+            [TestCase("2147483647pb", "2417851638103358442569728")]
+            // long with overflow into decimal
+            [TestCase("9223372036854775807kb", "9444732965739290426368")]
+            // decimal without overflow
+            [TestCase("10000000000000000000kb", "10240000000000000000000")]
+            public void IntegerWithNumericMultiplierDecimalResult(string expression, string result)
+            {
+                var ast = ParseConstantExpression(expression);
+                Assert.AreEqual(Decimal.Parse(result), ast.Value);
+                Assert.AreEqual(typeof(System.Decimal), ast.StaticType);
             }
 
             [Test]
@@ -996,6 +1016,7 @@ ls
             [TestCase("0x12gb", 19327352832)]
             [TestCase("0x12tb", 19791209299968)]
             [TestCase("0x12pb", 20266198323167232)]
+            [TestCase("0x800000000000000pb", 649037107316853453566312041152512.0)]
             public void HexIntegerWithNumericMultiplierTest(string expression, object expectedResult)
             {
                 var result = ParseConstantExpression(expression).Value;

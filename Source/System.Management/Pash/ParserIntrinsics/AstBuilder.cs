@@ -1679,10 +1679,10 @@ namespace Pash.ParserIntrinsics
                     double doubleValue;
                     if (decimal.TryParse(digits, out decimalValue))
                         // • Otherwise, if its value can be represented by type decimal (§2.3.5.1.2), that is its type.
-                        value = decimalValue;
+                        value = NumericMultiplier.Multiply(decimalValue, multiplier);
                     else if (double.TryParse(digits, out doubleValue))
                         // • Otherwise, it is represented by type double (§2.3.5.1.2).
-                        value = doubleValue;
+                        value = NumericMultiplier.Multiply(doubleValue, multiplier);
                     else
                         // For PowerShell compatibility throw an error here instead of saturating the double to infinity.
                         throw new OverflowException(string.Format("The integer literal {0} is too large.", matches.Value));
