@@ -1703,7 +1703,14 @@ namespace Pash.ParserIntrinsics
             }
             else
             {
-                throw new NotImplementedException("Decimal type suffix not yet implemented");
+                // The spec doesn't explicitly mention this case, but it seems to be handled
+                // similar to a long suffix.
+                decimal decimalValue;
+
+                if (decimal.TryParse(digits, out decimalValue))
+                    value = NumericMultiplier.Multiply(decimalValue, multiplier);
+                else
+                    throw new ArithmeticException(string.Format("The integer literal {0} is invalid because it does not fit into a decimal.", matches.Value));
             }
 
             return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), value);

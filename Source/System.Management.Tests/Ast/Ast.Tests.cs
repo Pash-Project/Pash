@@ -903,13 +903,14 @@ ls
             }
 
             [Test]
-            [TestCase("0d", "0", Explicit = true, Reason = "Decimal suffix not implemented yet")]
-            [TestCase("1d", "1", Explicit = true, Reason = "Decimal suffix not implemented yet")]
-            [TestCase("-1d", "-1", Explicit = true, Reason = "Decimal suffix not implemented yet")]
+            [TestCase("0d", "0")]
+            [TestCase("1d", "1")]
+            [TestCase("-1d", "-1")]
             // decimal.MaxValue
             [TestCase("79228162514264337593543950335", "79228162514264337593543950335")]
             // decimal.MinValue
             [TestCase("-79228162514264337593543950335", "-79228162514264337593543950335")]
+            [TestCase("-9223372036854775808d", "-9223372036854775808", Explicit = true, Reason = "Returns a long")]
             public void IntegerLiteralDecimalExpression(string expression, string value)
             {
                 var ast = ParseConstantExpression(expression);
@@ -963,6 +964,7 @@ ls
             [TestCase("9223372036854775807pb", 1.0384593717069655e34, typeof(System.Double))]
             // decimal with overflow into double
             [TestCase("79228162514264337593543950335kb", 8.1129638414606682e31, typeof(System.Double))]
+            [TestCase("79228162514264337593543950335dkb", 8.1129638414606682e31, typeof(System.Double))]
             // double with multiplier
             [TestCase("1000000000000000000000000000000kb", 1.024e33, typeof(System.Double))]
             [TestCase("1000000000000000000000000000000pb", 1.125899906842624e45, typeof(System.Double))]
@@ -979,11 +981,32 @@ ls
             [TestCase("9223372036854775807kb", "9444732965739290426368")]
             // decimal without overflow
             [TestCase("10000000000000000000kb", "10240000000000000000000")]
+            // decimal literal without overflow
+            [TestCase("1dpb", "1125899906842624")]
             public void IntegerWithNumericMultiplierDecimalResult(string expression, string result)
             {
                 var ast = ParseConstantExpression(expression);
                 Assert.AreEqual(Decimal.Parse(result), ast.Value);
                 Assert.AreEqual(typeof(System.Decimal), ast.StaticType);
+            }
+
+            [Test, Combinatorial]
+            public void DecimalIntegerLiteralShouldBeDecimal(
+                [Values("0", "2147483647", "2147483648", "9223372036854775807", "9223372036854775808")]
+                string literal,
+                [Values("d", "D")]
+                string typeSuffix)
+            {
+                var type = ParseConstantExpression(literal + typeSuffix).StaticType;
+                Assert.AreEqual(type, typeof(System.Decimal));
+            }
+
+            [Test, ExpectedException(typeof(ArithmeticException))]
+            [TestCase("d")]
+            [TestCase("D")]
+            public void DecimalIntegerLiteralLargeNumberShouldThrow(string typeSuffix)
+            {
+                ParseExpression("79228162514264337593543950336" + typeSuffix);
             }
 
             [Test]
