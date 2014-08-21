@@ -967,10 +967,27 @@ ls
             }
 
             [Test]
-            public void HexIntegerTest()
+            [TestCase("0x0", 0x0, typeof(System.Int32))]
+            [TestCase("0xa", 0xa, typeof(System.Int32))]
+            [TestCase("0x7fffffff", 0x7fffffff, typeof(System.Int32))]
+            [TestCase("0x100000000", 0x100000000L, typeof(System.Int64))]
+            [TestCase("0x7fffffffffffffff", 0x7fffffffffffffffL, typeof(System.Int64))]
+            [TestCase("0x80000000", -2147483648, typeof(System.Int32))]
+            [TestCase("0xffffffff", -1, typeof(System.Int32))]
+            [TestCase("0x8000000000000000", -9223372036854775808, typeof(System.Int64))]
+            [TestCase("0xffffffffffffffff", -1, typeof(System.Int64))]
+            public void HexIntegerLiteralExpression(string literal, object result, Type type)
             {
-                var result = ParseConstantExpression("0xA").Value;
-                Assert.AreEqual(0xa, result);
+                var ast = ParseConstantExpression(literal);
+                Assert.AreEqual(result, ast.Value);
+                Assert.AreEqual(type, ast.StaticType);
+                Assert.AreEqual(literal, ast.Extent.Text);
+            }
+
+            [Test, ExpectedException(typeof(OverflowException))]
+            public void HexIntegerLiteralTooBigForLong()
+            {
+                ParseConstantExpression("0x10000000000000000");
             }
 
             [Test]

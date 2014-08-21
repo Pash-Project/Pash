@@ -1630,6 +1630,30 @@ namespace Pash.ParserIntrinsics
             throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
         }
 
+        private bool ParseIntOrLongLiteral(string literal, string multiplier, NumberStyles style,
+            out object parsed)
+        {
+            int intValue;
+            long longValue;
+
+            // Note: TryParse will only ever return false here if the conversion overflows because
+            // all other conditions are impossible when the supplied string consists only of digits.
+            if (int.TryParse(literal, style, CultureInfo.InvariantCulture, out intValue))
+            {
+                parsed = NumericMultiplier.Multiply(intValue, multiplier);
+                return true;
+            }
+
+            if (long.TryParse(literal, style, CultureInfo.InvariantCulture, out longValue))
+            {
+                parsed = NumericMultiplier.Multiply(longValue, multiplier);
+                return true;
+            }
+
+            parsed = null;
+            return false;
+        }
+
         ConstantExpressionAst BuildDecimalIntegerLiteralAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.decimal_integer_literal);
@@ -1647,29 +1671,22 @@ namespace Pash.ParserIntrinsics
             if (typeSuffix == string.Empty)
             {
                 // For an integer literal with no long-type-suffix
-
-                int intValue;
-                long longValue;
-                decimal decimalValue;
-                double doubleValue;
-
-                // Note: TryParse will only ever return false here if the conversion overflows because
-                // all other conditions are impossible when the supplied string consists only of digits.
-                if (int.TryParse(digits, out intValue))
-                    // • If its value can be represented by type int (§4.2.3), that is its type;
-                    value = NumericMultiplier.Multiply(intValue, multiplier);
-                else if (long.TryParse(digits, out longValue))
-                    // • Otherwise, if its value can be represented by type long (§4.2.3), that is its type.
-                    value = NumericMultiplier.Multiply(longValue, multiplier);
-                else if (decimal.TryParse(digits, out decimalValue))
-                    // • Otherwise, if its value can be represented by type decimal (§2.3.5.1.2), that is its type.
-                    value = decimalValue;
-                else if (double.TryParse(digits, out doubleValue))
-                    // • Otherwise, it is represented by type double (§2.3.5.1.2).
-                    value = doubleValue;
-                else
-                    // For PowerShell compatibility throw an error here instead of saturating the double to infinity.
-                    throw new OverflowException(string.Format("The integer literal {0} is too large.", matches.Value));
+                // • If its value can be represented by type int (§4.2.3), that is its type;
+                // • Otherwise, if its value can be represented by type long (§4.2.3), that is its type.
+                if (!ParseIntOrLongLiteral(digits, multiplier, NumberStyles.Integer, out value))
+                {
+                    decimal decimalValue;
+                    double doubleValue;
+                    if (decimal.TryParse(digits, out decimalValue))
+                        // • Otherwise, if its value can be represented by type decimal (§2.3.5.1.2), that is its type.
+                        value = decimalValue;
+                    else if (double.TryParse(digits, out doubleValue))
+                        // • Otherwise, it is represented by type double (§2.3.5.1.2).
+                        value = doubleValue;
+                    else
+                        // For PowerShell compatibility throw an error here instead of saturating the double to infinity.
+                        throw new OverflowException(string.Format("The integer literal {0} is too large.", matches.Value));
+                }
             }
             else if (longTypeSuffix != string.Empty)
             {
@@ -1700,7 +1717,11 @@ namespace Pash.ParserIntrinsics
             string digits = matches.Groups[this._grammar.hexadecimal_digits.Name].Value;
             string multiplier = matches.Groups[this._grammar.numeric_multiplier.Name].Value;
 
-            object value = NumericMultiplier.Multiply(Convert.ToInt32(digits, 16), multiplier);
+            object value;
+            // Hex literals can only be int or long.
+            if (!ParseIntOrLongLiteral(digits, multiplier, NumberStyles.AllowHexSpecifier, out value))
+                throw new OverflowException(string.Format("The integer literal {0} is too large.", matches.Value));
+
             return new ConstantExpressionAst(new ScriptExtent(parseTreeNode), value);
         }
 
