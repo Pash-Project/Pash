@@ -71,7 +71,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="2.3.5.1.1 Integer literals.cs" />
     <Compile Include="Cmdlets\AddTypeCommandTests.cs" />
     <Compile Include="Cmdlets\JoinPathTests.cs" />
     <Compile Include="Cmdlets\SplitPathTests.cs" />
