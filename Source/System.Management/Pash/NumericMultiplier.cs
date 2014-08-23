@@ -13,6 +13,9 @@ namespace Pash
 
         internal static long GetValue(string multiplier)
         {
+            if (string.IsNullOrEmpty(multiplier))
+                return 1;
+
             multiplier = multiplier.ToLowerInvariant();
             switch (multiplier)
             {
@@ -31,60 +34,59 @@ namespace Pash
             }
         }
 
+        internal static object Multiply(double value, string multiplier)
+        {
+            return value * GetValue(multiplier);
+        }
+
+        internal static object Multiply(decimal value, string multiplier)
+        {
+            decimal result;
+            if (Multiply<decimal>(value, GetValue(multiplier), out result))
+                return result;
+
+            return Multiply((double)value, multiplier);
+        }
+
         internal static object Multiply(long value, string multiplier)
         {
-            if (string.IsNullOrEmpty(multiplier))
-                return value;
+            long result;
+            if (Multiply<long>(value, GetValue(multiplier), out result))
+                return result;
 
-            return value * GetValue(multiplier);
+            return Multiply((decimal)value, multiplier);
         }
 
         internal static object Multiply(int value, string multiplier)
         {
-            if (string.IsNullOrEmpty(multiplier))
-                return value;
-
-            int multiplierValue;
-            if (GetInt32MultiplierValue(multiplier, out multiplierValue))
+            long result;
+            if (Multiply<long>(value, GetValue(multiplier), out result))
             {
-                return Multiply(value, multiplierValue);
+                // Literals like 1kb are of type int, so return an int if the
+                // result fits in one.
+                if (result <= Int32.MaxValue && result >= Int32.MinValue)
+                    return (int)result;
+
+                return result;
             }
 
-            return value * GetValue(multiplier);
+            return Multiply((long)value, multiplier);
         }
 
-        static bool GetInt32MultiplierValue(string multiplier, out int multiplierValue)
-        {
-            multiplier = multiplier.ToLowerInvariant();
-            switch (multiplier)
-            {
-                case "kb":
-                    multiplierValue = Kilobyte;
-                    return true;
-                case "mb":
-                    multiplierValue = Megabyte;
-                    return true;
-                case "gb":
-                    multiplierValue = Gigabyte;
-                    return true;
-                default:
-                    multiplierValue = 1;
-                    return false;
-            }
-        }
-
-        static object Multiply(int x, int y)
+        static bool Multiply<T>(dynamic x, dynamic y, out T result)
         {
             try
             {
                 checked
                 {
-                    return x * y;
+                    result = x * y;
+                    return true;
                 }
             }
             catch (OverflowException)
             {
-                return (long)x * y;
+                result = default(T);
+                return false;
             }
         }
     }

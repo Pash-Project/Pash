@@ -851,59 +851,200 @@ ls
         [TestFixture]
         public class IntegerLiteralExpressionTests
         {
-            ConstantExpressionAst _constantExpressionAst;
-
-            [TestFixtureSetUp]
-            public void Setup()
+            ConstantExpressionAst ParseConstantExpression(string input)
             {
-                this._constantExpressionAst = ParseStatement("1")
-                    .PipelineElements[0]
-                    .Expression;
+                return ParseExpression(input);
             }
 
             [Test]
-            public void Value()
+            [TestCase("0", 0, typeof(System.Int32))]
+            [TestCase("1", 1, typeof(System.Int32))]
+            // int.MaxValue
+            [TestCase("2147483647", 2147483647, typeof(System.Int32))]
+            // int.MaxValue + 1
+            [TestCase("2147483648", 2147483648, typeof(System.Int64))]
+            // long.MaxValue
+            [TestCase("9223372036854775807", 9223372036854775807, typeof(System.Int64))]
+            // long.MaxValue + 1
+            [TestCase("9223372036854775808", 9223372036854775808, typeof(System.Decimal))]
+            // decimal values are not allowed as attribute arguments, so they are tested
+            // separately (see IntegerLiteralDecimalExpression)
+            // decimal.MaxValue + 1
+            [TestCase("79228162514264337593543950336", 79228162514264337593543950336d, typeof(System.Double))]
+            public void IntegerLiteralExpression(string expression, object value, Type type)
             {
-                Assert.AreEqual(1, this._constantExpressionAst.Value);
+                var ast = ParseConstantExpression(expression);
+                Assert.AreEqual(value, ast.Value);
+                Assert.AreEqual(type, ast.StaticType);
+                Assert.AreEqual(expression, ast.Extent.Text);
             }
 
             [Test]
-            public void StaticType()
+            [TestCase("-1", -1, typeof(System.Int32))]
+            // int.MinValue + 1
+            [TestCase("-2147483647", -2147483647, typeof(System.Int32))]
+            // int.MinValue
+            [TestCase("-2147483648", -2147483648, typeof(System.Int32))]
+            // int.MinValue - 1
+            [TestCase("-2147483649", -2147483649, typeof(System.Int64))]
+            // int.MinValue as long literal should be long
+            [TestCase("-2147483648l", -2147483648L, typeof(System.Int64), Explicit = true, Reason = "Returns an int")]
+            // long.MinValue
+            [TestCase("-9223372036854775807", -9223372036854775807, typeof(System.Int64))]
+            // long.MinValue - 1
+            [TestCase("-9223372036854775808", -9223372036854775808, typeof(System.Int64))]
+            // decimal.MinValue - 1
+            [TestCase("-79228162514264337593543950336", -79228162514264337593543950336d, typeof(System.Double))]
+            public void NegativeIntegerLiteralExpression(string literal, object value, Type type)
             {
-                Assert.AreEqual(typeof(int), this._constantExpressionAst.StaticType);
+                var ast = ParseConstantExpression(literal);
+                Assert.AreEqual(value, ast.Value);
+                Assert.AreEqual(type, ast.StaticType);
             }
 
             [Test]
-            public void Text()
+            [TestCase("0d", "0")]
+            [TestCase("1d", "1")]
+            [TestCase("-1d", "-1")]
+            // decimal.MaxValue
+            [TestCase("79228162514264337593543950335", "79228162514264337593543950335")]
+            // decimal.MinValue
+            [TestCase("-79228162514264337593543950335", "-79228162514264337593543950335")]
+            [TestCase("-9223372036854775808d", "-9223372036854775808", Explicit = true, Reason = "Returns a long")]
+            public void IntegerLiteralDecimalExpression(string expression, string value)
             {
-                Assert.AreEqual("1", this._constantExpressionAst.Extent.Text);
+                var ast = ParseConstantExpression(expression);
+                Assert.AreEqual(Decimal.Parse(value), ast.Value);
+                Assert.AreEqual(typeof(System.Decimal), ast.StaticType);
             }
-        }
 
-        [Test]
-        public void HexIntegerLiteralTest()
-        {
-            int value = ParseStatement("0xa")
-                .PipelineElements[0]
-                .Expression
-                .Value;
-            Assert.AreEqual(0xA, value);
-        }
+            [Test]
+            public void IntegerLiteralVeryLargeNumberShouldBeDouble()
+            {
+                var type = ParseConstantExpression(new string('9', 200)).StaticType;
+                Assert.AreEqual(typeof(System.Double), type);
+            }
 
-        [Test]
-        [TestCase("1mb", 1048576)]
-        [TestCase("1MB", 1048576)]
-        [TestCase("1kb", 1024)]
-        [TestCase("1gb", 1073741824)]
-        [TestCase("1tb", 1099511627776)]
-        [TestCase("1pb", 1125899906842624)]
-        public void IntegerWithNumericMultiplier(string expression, object result)
-        {
-            var expressionValue = ParseStatement(expression)
-                .PipelineElements[0]
-                .Expression
-                .Value;
-            Assert.AreEqual(result, expressionValue);
+            [Test, ExpectedException(typeof(OverflowException))]
+            public void IntegerLiteralVeryVeryVeryLargeNumberShouldThrow()
+            {
+                ParseConstantExpression(new string('9', 310));
+            }
+
+            [Test, Combinatorial]
+            public void LongIntegerLiteralShouldBeInt64(
+                [Values("0", "2147483647", "2147483648", "9223372036854775807")]
+                string literal,
+                [Values("l", "L")]
+                string typeSuffix)
+            {
+                var type = ParseConstantExpression(literal + typeSuffix).StaticType;
+                Assert.AreEqual(type, typeof(System.Int64));
+            }
+
+            [Test, ExpectedException(typeof(ArithmeticException))]
+            [TestCase("l")]
+            [TestCase("L")]
+            public void LongIntegerLiteralLargeNumberShouldThrow(string typeSuffix)
+            {
+                ParseConstantExpression("9223372036854775808" + typeSuffix);
+            }
+
+            [Test]
+            [TestCase("1kb", 1024, typeof(System.Int32))]
+            [TestCase("1mb", 1048576, typeof(System.Int32))]
+            [TestCase("1MB", 1048576, typeof(System.Int32))]
+            [TestCase("1gb", 1073741824, typeof(System.Int32))]
+            [TestCase("100gb", 107374182400, typeof(System.Int64))]
+            [TestCase("1tb", 1099511627776, typeof(System.Int64))]
+            [TestCase("1pb", 1125899906842624, typeof(System.Int64))]
+            [TestCase("9876543210kb", 10113580247040, typeof(System.Int64))]
+            [TestCase("12lkb", 12288, typeof(System.Int64))]
+            // long with overflow into double
+            [TestCase("9223372036854775807pb", 1.0384593717069655e34, typeof(System.Double))]
+            // decimal with overflow into double
+            [TestCase("79228162514264337593543950335kb", 8.1129638414606682e31, typeof(System.Double))]
+            [TestCase("79228162514264337593543950335dkb", 8.1129638414606682e31, typeof(System.Double))]
+            // double with multiplier
+            [TestCase("1000000000000000000000000000000kb", 1.024e33, typeof(System.Double))]
+            [TestCase("1000000000000000000000000000000pb", 1.125899906842624e45, typeof(System.Double))]
+            public void IntegerWithNumericMultiplier(string expression, object result, Type type)
+            {
+                var ast = ParseConstantExpression(expression);
+                Assert.AreEqual(result, ast.Value);
+                Assert.AreEqual(type, ast.StaticType);
+            }
+
+            // int with overflow into decimal
+            [TestCase("2147483647pb", "2417851638103358442569728")]
+            // long with overflow into decimal
+            [TestCase("9223372036854775807kb", "9444732965739290426368")]
+            // decimal without overflow
+            [TestCase("10000000000000000000kb", "10240000000000000000000")]
+            // decimal literal without overflow
+            [TestCase("1dpb", "1125899906842624")]
+            public void IntegerWithNumericMultiplierDecimalResult(string expression, string result)
+            {
+                var ast = ParseConstantExpression(expression);
+                Assert.AreEqual(Decimal.Parse(result), ast.Value);
+                Assert.AreEqual(typeof(System.Decimal), ast.StaticType);
+            }
+
+            [Test, Combinatorial]
+            public void DecimalIntegerLiteralShouldBeDecimal(
+                [Values("0", "2147483647", "2147483648", "9223372036854775807", "9223372036854775808")]
+                string literal,
+                [Values("d", "D")]
+                string typeSuffix)
+            {
+                var type = ParseConstantExpression(literal + typeSuffix).StaticType;
+                Assert.AreEqual(type, typeof(System.Decimal));
+            }
+
+            [Test, ExpectedException(typeof(ArithmeticException))]
+            [TestCase("d")]
+            [TestCase("D")]
+            public void DecimalIntegerLiteralLargeNumberShouldThrow(string typeSuffix)
+            {
+                ParseExpression("79228162514264337593543950336" + typeSuffix);
+            }
+
+            [Test]
+            [TestCase("0x0", 0x0, typeof(System.Int32))]
+            [TestCase("0xa", 0xa, typeof(System.Int32))]
+            [TestCase("0x7fffffff", 0x7fffffff, typeof(System.Int32))]
+            [TestCase("0x100000000", 0x100000000L, typeof(System.Int64))]
+            [TestCase("0x7fffffffffffffff", 0x7fffffffffffffffL, typeof(System.Int64))]
+            [TestCase("0x80000000", -2147483648, typeof(System.Int32))]
+            [TestCase("0xffffffff", -1, typeof(System.Int32))]
+            [TestCase("0x8000000000000000", -9223372036854775808, typeof(System.Int64))]
+            [TestCase("0xffffffffffffffff", -1, typeof(System.Int64))]
+            public void HexIntegerLiteralExpression(string literal, object result, Type type)
+            {
+                var ast = ParseConstantExpression(literal);
+                Assert.AreEqual(result, ast.Value);
+                Assert.AreEqual(type, ast.StaticType);
+                Assert.AreEqual(literal, ast.Extent.Text);
+            }
+
+            [Test, ExpectedException(typeof(OverflowException))]
+            public void HexIntegerLiteralTooBigForLong()
+            {
+                ParseConstantExpression("0x10000000000000000");
+            }
+
+            [Test]
+            [TestCase("0x12kb", 18432)]
+            [TestCase("0x12mb", 18874368)]
+            [TestCase("0x12gb", 19327352832)]
+            [TestCase("0x12tb", 19791209299968)]
+            [TestCase("0x12pb", 20266198323167232)]
+            [TestCase("0x800000000000000pb", 649037107316853453566312041152512.0)]
+            public void HexIntegerWithNumericMultiplierTest(string expression, object expectedResult)
+            {
+                var result = ParseConstantExpression(expression).Value;
+                Assert.AreEqual(expectedResult, result);
+            }
         }
 
         [Test]
@@ -977,33 +1118,6 @@ ls
                 .Value;
 
             Assert.AreEqual(-1, result);
-        }
-
-        [Test]
-        public void HexIntegerTest()
-        {
-            var result = ParseStatement("0xA")
-                .PipelineElements[0]
-                .Expression
-                .Value;
-
-            Assert.AreEqual(0xa, result);
-        }
-
-        [Test]
-        [TestCase("0x12kb", 18432)]
-        [TestCase("0x12mb", 18874368)]
-        [TestCase("0x12gb", 19327352832)]
-        [TestCase("0x12tb", 19791209299968)]
-        [TestCase("0x12pb", 20266198323167232)]
-        public void HexIntegerWithNumericMultiplierTest(string expression, object expectedResult)
-        {
-            var result = ParseStatement(expression)
-                .PipelineElements[0]
-                .Expression
-                .Value;
-
-            Assert.AreEqual(expectedResult, result);
         }
 
         [Test]
@@ -1083,6 +1197,13 @@ ls
             return ParseInput(input)
                 .EndBlock
                 .Statements[0];
+        }
+
+        static dynamic ParseExpression(string input)
+        {
+            return ParseStatement(input)
+                .PipelineElements[0]
+                .Expression;
         }
 
         [TestFixture]
@@ -1978,13 +2099,6 @@ ls
         [TestFixture]
         public class SubExpressionTests
         {
-            dynamic ParseExpression(string input)
-            {
-                return ParseStatement(input)
-                    .PipelineElements[0]
-                    .Expression;
-            }
-
             [Test]
             public void IntegerAdditionSubExpression()
             {
