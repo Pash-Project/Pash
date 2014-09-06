@@ -43,7 +43,7 @@ namespace ReferenceTests
                 Assert.IsFalse(WildcardPattern.ContainsWildcardCharacters(input));
         }
 
-        [Test, Explicit]
+        [Test]
         [TestCase("`[", false)]
         [TestCase("`[a", false)]
         [TestCase("a`[", false)]
@@ -99,7 +99,7 @@ namespace ReferenceTests
                 Assert.IsFalse(WildcardPattern.ContainsWildcardCharacters(input));
         }
 
-        [Test, Explicit]
+        [Test]
         [TestCase("````*", true)]
         [TestCase("`````*", false)]
         [TestCase("````````````*", true)]
