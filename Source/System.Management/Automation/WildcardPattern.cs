@@ -33,7 +33,8 @@ namespace System.Management.Automation
                 return false;
             }
 
-            return pattern.IndexOfAny(new char[] { '?', '*', '[', ']' }) != -1;
+            var index = pattern.IndexOfAny(new char[] { '?', '*', '[', ']' });
+            return index >= 0 && !IsEscaped(pattern, index - 1);
         }
 
         /// <summary>
@@ -128,6 +129,25 @@ namespace System.Management.Automation
                              .Replace("?", ".");
 
             return "^" + pattern + "$";
+        }
+
+        private static bool IsEscaped(string pattern, int index)
+        {
+            var result = false;
+
+            for(int i = index; i >= 0; i--)
+            {
+                if (pattern[i] == '`')
+                {
+                    result = !result;
+                }
+                else
+                {
+                    return result;
+                }
+            }
+
+            return result;
         }
     }
 }
