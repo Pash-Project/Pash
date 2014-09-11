@@ -70,6 +70,11 @@ namespace System.Management.Automation
             _scope.Set(name, new PSVariable(qualName.UnqualifiedName, value), true, true);
         }
 
+        internal IEnumerable<string> Find(string pattern)
+        {
+            return _scope.Find(pattern, true);
+        }
+
         internal Dictionary<string, PSVariable> GetAll()
         {
             return _scope.GetAll();

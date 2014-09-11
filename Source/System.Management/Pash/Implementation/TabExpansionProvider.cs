@@ -21,25 +21,37 @@ namespace Pash.Implementation
         public string[] DoTabExpansion(string cmdStart, string replacableEnd)
         {
             var expansions = new List<string>();
+            // check if we're inside a cmdlet invocation command
+            var cmdlet = CheckForCommandWithCmdlet(cmdStart);
+            // either complete the current cmdlet command or show available commands
+            if (cmdlet != null)
+            {
+                expansions.AddRange(GetCmdletParameterExpansions(cmdlet, replacableEnd));
+            }
+            else if (_runspace != null)
+            {
+                // doing expansion for commands and functions only makes sense if we're not "inside" a cmdlet
+                expansions.AddRange(GetCommandExpansions(cmdStart, replacableEnd));
+                expansions.AddRange(GetFunctionExpansions(cmdStart, replacableEnd));
+            }
 
-            expansions.AddRange(GetCmdletParameterExpansion(cmdStart, replacableEnd));
-            expansions.AddRange(GetCommandExpansions(cmdStart, replacableEnd));
+            // provide expansion for files
             expansions.AddRange(GetFilesystemExpansions(cmdStart, replacableEnd));
+
+            // last but not least, provide extension for variables
             if (_runspace != null)
             {
-                expansions.AddRange(GetFunctionExpansions(cmdStart, replacableEnd));
                 expansions.AddRange(GetVariableExpansions(cmdStart, replacableEnd));
             }
             var expArray = expansions.ToArray();
             return expArray;
         }
 
-        private IEnumerable<string> GetCmdletParameterExpansion(string cmdStart, string replacableEnd)
+        private CmdletInfo CheckForCommandWithCmdlet(string cmdStart)
         {
-            // either we try to find all parameters or a specific one
-            if (!replacableEnd.StartsWith("-") && replacableEnd.Length > 0)
+            if (_runspace == null)
             {
-                return Enumerable.Empty<string>();
+                return null;
             }
             // first find out by checking cmdStart if we're in a cmdlet by scanning from right to left for a cmdlet name
             var cmdRest = cmdStart.Trim();
@@ -47,31 +59,28 @@ namespace Pash.Implementation
             {
                 int pos = cmdRest.LastUnquotedIndexOf(' ') + 1;
                 var rest = cmdRest.Substring(pos).Trim();
+                // check if we reached the end of the possible cmd, e.g. in pipeline, parenthesis, multiple cmdlets
                 if (rest.StartsWith("|") || rest.StartsWith("(") || rest.StartsWith(";"))
                 {
-                    break;
+                    return null;
                 }
+                // only check the current term if it has the correct form
                 if (Regex.IsMatch(rest, @"^\w+[\w-]+$"))
                 {
-                    var cmds = _runspace.CommandManager.FindCommands(rest);
-                    var numCmds = cmds.Count();
-                    if (numCmds > 1)
+                    try
                     {
-                        break;
+                        var cmd = _runspace.CommandManager.FindCommand(rest);
+                        return cmd as CmdletInfo; // either null or the cmdletInfo
                     }
-                    else if (numCmds == 1)
+                    catch (CommandNotFoundException)
                     {
-                        var cmd = cmds.First() as CmdletInfo;
-                        if (cmd != null) // found a cmdlet
-                        {
-                            // get all matching parameters
-                            return GetCmdletParameterExpansions(cmd, replacableEnd);
-                        }
+                        // do nothing, check next term (could be a parameter for example)
                     }
                 }
+                // check rest for cmdlet terms
                 cmdRest = cmdRest.Substring(0, pos -1);
             }
-            return Enumerable.Empty<string>();
+            return null;
         }
 
         private IEnumerable<string> GetCmdletParameterExpansions(CmdletInfo info, string prefix)
@@ -101,23 +110,25 @@ namespace Pash.Implementation
         private IEnumerable<string> GetVariableExpansions(string cmdStart, string replacableEnd)
         {
             // TODO: add support for scope prefixes like "global:"
-            if (!replacableEnd.StartsWith("$"))
+            // check if it's the beginning of a variable or we should provide all variables
+            // everything else doesn't make sense
+            if (replacableEnd.StartsWith("$"))
+            {
+                replacableEnd = replacableEnd.Substring(1);
+            }
+            else if (replacableEnd.Length > 0)
             {
                 return Enumerable.Empty<string>();
             }
-            replacableEnd = replacableEnd.Substring(1);
-            var pattern = new WildcardPattern(replacableEnd + "*", WildcardOptions.IgnoreCase);
-            var varnames = _runspace.ExecutionContext.SessionState.PSVariable.GetAll().Keys;
-            return from vname in varnames where pattern.IsMatch(vname)
-                orderby vname ascending select "$" + vname;
+
+            var varnames = _runspace.ExecutionContext.SessionState.PSVariable.Find(replacableEnd + "*");
+            return from vname in varnames orderby vname ascending select "$" + vname;
         }
 
         private IEnumerable<string> GetFunctionExpansions(string cmdStart, string replacableEnd)
         {
-            // TODO: add support for scope prefixes like "global:"
-            var pattern = new WildcardPattern(replacableEnd + "*", WildcardOptions.IgnoreCase);
-            var funnames = _runspace.ExecutionContext.SessionState.Function.GetAll().Keys;
-            return from fun in funnames where pattern.IsMatch(fun) orderby fun ascending select fun;
+            var funnames = _runspace.ExecutionContext.SessionState.Function.Find(replacableEnd + "*");
+            return from fun in funnames orderby fun ascending select fun;
         }
 
         private IEnumerable<string> GetFilesystemExpansions(string cmdStart, string replacableEnd)
