@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Mono.Terminal
 {
@@ -117,9 +118,14 @@ namespace Mono.Terminal
                 return;
             }
             _abortedOrAccepted = false;
-            int spacePos = prefix.LastIndexOf(' ');
-            _hardPrefix = spacePos < 0 ? "" : prefix.Substring(0, spacePos);
-            _softPrefix = prefix.Substring(spacePos + 1);
+            if (prefix == null)
+            {
+                prefix = ""; // just in case
+            }
+            // split the last (quoted) word from the whole prefix as the soft/replacable prefix
+            int splitPos = GetCmdSplitPos(prefix);
+            _hardPrefix = prefix.Substring(0, splitPos);
+            _softPrefix = prefix.Substring(splitPos);
             _selectedItem = NOT_INITIALIZED;
             _userWasAsked = false;
         }
@@ -192,7 +198,7 @@ namespace Mono.Terminal
             {
                 chosenPrefix = _expandandedItems[_selectedItem];
             }
-            return String.IsNullOrEmpty(_hardPrefix) ? chosenPrefix : _hardPrefix + " " + chosenPrefix;
+            return _hardPrefix + chosenPrefix;
         }
 
         public void Render(int startX, int startY)
@@ -327,6 +333,30 @@ namespace Mono.Terminal
                 commonPrefix.Append(curChar);
             }
             return commonPrefix.Length > 0 ? commonPrefix.ToString() : _softPrefix;
+        }
+
+        private int GetCmdSplitPos(string cmd)
+        {
+            bool inDQuotes = false;
+            bool inSQuotes = false;
+            int lastSplit = -1;
+            for (int i = 0; i < cmd.Length; i++)
+            {
+                char cur = cmd[i];
+                if (cur == ' ' && !inDQuotes && !inSQuotes)
+                {
+                    lastSplit = i;
+                }
+                if (cur == '\'' && !inDQuotes)
+                {
+                    inSQuotes = !inSQuotes;
+                }
+                if (cur == '"' && !inSQuotes)
+                {
+                    inDQuotes = !inDQuotes;
+                }
+            }
+            return lastSplit + 1;
         }
 
         private int MakeSureTextFitsInBuffer(int theoreticalPos, string str)

@@ -12,7 +12,7 @@ namespace Pash.Implementation
     internal class TabExpansionProvider
     {
         private CommandManager _commandManager;
-        private char[] _quoteChars = new char[] { '`', '\'', '"'};
+        private char[] _quoteChars = new char[] {'\'', '"'};
         private ExpansionProviderFunction[] _expansionProviders;
 
         public TabExpansionProvider(CommandManager cmdManager)
@@ -50,7 +50,6 @@ namespace Pash.Implementation
         private IEnumerable<string> GetFilesystemExpansions(string cmdStart, string replacableEnd)
         {
             replacableEnd = StripQuotes(replacableEnd);
-            var dirCmd = String.IsNullOrEmpty(cmdStart) ? "cd " : cmdStart;
 
             var p = new System.Management.Path(replacableEnd).NormalizeSlashes();
             var startPath = new System.Management.Path(".");
@@ -79,18 +78,21 @@ namespace Pash.Implementation
                 return Enumerable.Empty<string>();
             }
             var expansions = new List<string>();
-            bool includeHidden = lookFor.StartsWith(".");
             var pattern = new WildcardPattern(lookFor + "*");
+            bool allowHidden = lookFor.Length > 0;
+
             // add directories
             expansions.AddRange(
                 from subdir in dirinfo.GetDirectories()
-                where pattern.IsMatch(subdir.Name)
-                select dirCmd + QuoteIfNecessary(startPath.Combine(subdir.Name).AppendSlashAtEnd())
+                where pattern.IsMatch(subdir.Name) &&
+                      (allowHidden || (subdir.Attributes & FileAttributes.Hidden) == 0)
+                select QuoteIfNecessary(startPath.Combine(subdir.Name).AppendSlashAtEnd())
             );
             // add files
             expansions.AddRange(
                 from subdir in dirinfo.GetFiles()
-                where pattern.IsMatch(subdir.Name)
+                where pattern.IsMatch(subdir.Name) &&
+                     (allowHidden || (subdir.Attributes & FileAttributes.Hidden) == 0)
                 select QuoteIfNecessary(startPath.Combine(subdir.Name))
             );
             return expansions;

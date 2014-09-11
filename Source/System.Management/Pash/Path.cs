@@ -101,7 +101,17 @@ namespace System.Management
             return _rawPath.LastIndexOf(value);
         }
 
+        public int LastIndexOf(string value)
+        {
+            return _rawPath.LastIndexOf(value);
+        }
+
         public int IndexOf(char value)
+        {
+            return _rawPath.IndexOf(value);
+        }
+
+        public int IndexOf(string value)
         {
             return _rawPath.IndexOf(value);
         }
@@ -111,7 +121,7 @@ namespace System.Management
             Path path = this.NormalizeSlashes()
                 .TrimEndSlash();
 
-            int iLastSlash = path.LastIndexOf('\\');
+            int iLastSlash = path.LastIndexOf(CorrectSlash);
             if (iLastSlash == -1)
             {
                 return path;
@@ -143,7 +153,7 @@ namespace System.Management
             {
                 newPath = path._rawPath.Substring(0, iLastSlash);
             }
-            else if (iLastSlash == 1)
+            else if (iLastSlash == 0)
             {
                 newPath = new Path(CorrectSlash, WrongSlash, CorrectSlash);
             }
