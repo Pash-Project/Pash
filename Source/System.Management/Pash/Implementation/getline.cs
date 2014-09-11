@@ -763,6 +763,7 @@ namespace Mono.Terminal {
                     _tabExpander.Start(text.ToString());
                     bool skipKeyHandling = _tabExpander.HandleKey(cki);
                     RenderTabExpander();
+                    max_rendered = 0;
                     if (skipKeyHandling)
                     {
                         continue;

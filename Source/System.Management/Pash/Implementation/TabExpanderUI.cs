@@ -340,7 +340,7 @@ namespace Mono.Terminal
         {
             int buffHeight = Console.BufferHeight;
             int buffWidth = Console.BufferWidth;
-            int endPos = theoreticalPos + str.Length / buffWidth;
+            int endPos = theoreticalPos + str.Length / buffWidth + 1;
             if (endPos < buffHeight)
             {
                 return 0;
@@ -350,12 +350,12 @@ namespace Mono.Terminal
             doScroll = doScroll > Console.CursorTop ? Console.CursorTop : doScroll; //limit to be able to reset cursor
             int resetCursorX = Console.CursorLeft;
             int resetCursorY = Console.CursorTop - doScroll;
-            Console.SetCursorPosition(buffWidth - 1, buffHeight - 1);
+            SaveSetCursorPosition(buffWidth - 1, buffHeight - 1);
             for (int i = 0; i < doScroll; i++)
             {
                 Console.WriteLine();
             }
-            Console.SetCursorPosition(resetCursorX, resetCursorY);
+            SaveSetCursorPosition(resetCursorX, resetCursorY);
             RenderStartY -= doScroll;
             _maxWrittenY -= doScroll;
             return doScroll;
@@ -386,7 +386,7 @@ namespace Mono.Terminal
                 Console.ForegroundColor = bgColor;
                 Console.BackgroundColor = fgColor;
             }
-            Console.SetCursorPosition(posX, posY);
+            SaveSetCursorPosition(posX, posY);
             string writeText = wrap ? text : FittedText(text, Console.BufferWidth - posX);
             Console.Write(writeText);
             _maxWrittenX = Console.CursorLeft > _maxWrittenX ? Console.CursorLeft : _maxWrittenX;
@@ -398,7 +398,16 @@ namespace Mono.Terminal
                 Console.ForegroundColor = fgColor;
                 Console.BackgroundColor = bgColor;
             }
-            Console.SetCursorPosition(cursorX, cursorY);
+            SaveSetCursorPosition(cursorX, cursorY);
+        }
+
+        private void SaveSetCursorPosition(int x, int y)
+        {
+            x = x < 0 ? 0 : x;
+            x = x >= Console.BufferWidth ? Console.BufferWidth - 1 : x;
+            y = y < 0 ? 0 : y;
+            y = y >= Console.BufferHeight ? Console.BufferHeight - 1 : y;
+            Console.SetCursorPosition(x, y);
         }
 
         private string FittedText(string text, int width)

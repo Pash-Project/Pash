@@ -88,12 +88,14 @@ namespace Pash.Implementation
                 return Enumerable.Empty<string>();
             }
             var pattern = new WildcardPattern(prefix + "*", WildcardOptions.IgnoreCase);
-            return from key in info.ParameterInfoLookupTable.Keys where pattern.IsMatch(key) select "-" + key;
+            return from key in info.ParameterInfoLookupTable.Keys where pattern.IsMatch(key)
+                orderby key ascending select "-" + key;
         }
 
         private IEnumerable<string> GetCommandExpansions(string cmdStart, string replacableEnd)
         {
-            return from cmd in _runspace.CommandManager.FindCommands(replacableEnd + "*") select cmd.Name + " ";
+            return from cmd in _runspace.CommandManager.FindCommands(replacableEnd + "*")
+                orderby cmd.Name ascending select cmd.Name + " ";
         }
 
         private IEnumerable<string> GetVariableExpansions(string cmdStart, string replacableEnd)
@@ -106,7 +108,8 @@ namespace Pash.Implementation
             replacableEnd = replacableEnd.Substring(1);
             var pattern = new WildcardPattern(replacableEnd + "*", WildcardOptions.IgnoreCase);
             var varnames = _runspace.ExecutionContext.SessionState.PSVariable.GetAll().Keys;
-            return from vname in varnames where pattern.IsMatch(vname) select "$" + vname;
+            return from vname in varnames where pattern.IsMatch(vname)
+                orderby vname ascending select "$" + vname;
         }
 
         private IEnumerable<string> GetFunctionExpansions(string cmdStart, string replacableEnd)
@@ -114,7 +117,7 @@ namespace Pash.Implementation
             // TODO: add support for scope prefixes like "global:"
             var pattern = new WildcardPattern(replacableEnd + "*", WildcardOptions.IgnoreCase);
             var funnames = _runspace.ExecutionContext.SessionState.Function.GetAll().Keys;
-            return from fun in funnames where pattern.IsMatch(fun) select fun;
+            return from fun in funnames where pattern.IsMatch(fun) orderby fun ascending select fun;
         }
 
         private IEnumerable<string> GetFilesystemExpansions(string cmdStart, string replacableEnd)
@@ -156,14 +159,16 @@ namespace Pash.Implementation
                 from subdir in dirinfo.GetDirectories()
                 where pattern.IsMatch(subdir.Name) &&
                       (allowHidden || (subdir.Attributes & FileAttributes.Hidden) == 0)
+                orderby subdir.Name ascending
                 select QuoteIfNecessary(startPath.Combine(subdir.Name).AppendSlashAtEnd())
             );
             // add files
             expansions.AddRange(
-                from subdir in dirinfo.GetFiles()
-                where pattern.IsMatch(subdir.Name) &&
-                     (allowHidden || (subdir.Attributes & FileAttributes.Hidden) == 0)
-                select QuoteIfNecessary(startPath.Combine(subdir.Name))
+                from file in dirinfo.GetFiles()
+                where pattern.IsMatch(file.Name) &&
+                (allowHidden || (file.Attributes & FileAttributes.Hidden) == 0)
+                orderby file.Name ascending
+                select QuoteIfNecessary(startPath.Combine(file.Name))
             );
             return expansions;
         }
