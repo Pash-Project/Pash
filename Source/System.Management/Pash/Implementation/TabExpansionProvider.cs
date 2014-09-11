@@ -7,32 +7,27 @@ using System.Management.Automation;
 
 namespace Pash.Implementation
 {
-    internal delegate IEnumerable<string> ExpansionProviderFunction(string cmdStart, string replacableEnd);
-
     internal class TabExpansionProvider
     {
-        private CommandManager _commandManager;
+        private LocalRunspace _runspace;
         private char[] _quoteChars = new char[] {'\'', '"'};
-        private ExpansionProviderFunction[] _expansionProviders;
 
-        public TabExpansionProvider(CommandManager cmdManager)
+        public TabExpansionProvider(LocalRunspace runspace)
         {
-            _commandManager = cmdManager;
-            _expansionProviders = new ExpansionProviderFunction[] {
-                GetCommandExpansions,
-                GetFilesystemExpansions
-            };
+            _runspace = runspace;
         }
 
         public string[] DoTabExpansion(string cmdStart, string replacableEnd)
         {
             var expansions = new List<string>();
 
-            foreach (var expProvider in _expansionProviders)
+            expansions.AddRange(GetFilesystemExpansions(cmdStart, replacableEnd));
+            if (_runspace != null)
             {
-                expansions.AddRange(expProvider(cmdStart, replacableEnd));
+                expansions.AddRange(GetCommandExpansions(cmdStart, replacableEnd));
+                expansions.AddRange(GetFunctionExpansions(cmdStart, replacableEnd));
+                expansions.AddRange(GetVariableExpansions(cmdStart, replacableEnd));
             }
-
             var expArray = expansions.ToArray();
             Array.Sort(expArray);
             return expArray;
@@ -40,11 +35,28 @@ namespace Pash.Implementation
 
         private IEnumerable<string> GetCommandExpansions(string cmdStart, string replacableEnd)
         {
-            if (_commandManager != null && String.IsNullOrEmpty(cmdStart))
+            return from cmd in _runspace.CommandManager.FindCommands(replacableEnd + "*") select cmd.Name + " ";
+        }
+
+        private IEnumerable<string> GetVariableExpansions(string cmdStart, string replacableEnd)
+        {
+            // TODO: add support for scope prefixes like "global:"
+            if (!replacableEnd.StartsWith("$"))
             {
-                return from cmd in _commandManager.FindCommands(replacableEnd + "*") select cmd.Name + " ";
+                return Enumerable.Empty<string>();
             }
-            return Enumerable.Empty<string>();
+            replacableEnd = replacableEnd.Substring(1);
+            var pattern = new WildcardPattern(replacableEnd + "*", WildcardOptions.IgnoreCase);
+            var varnames = _runspace.ExecutionContext.SessionState.PSVariable.GetAll().Keys;
+            return from vname in varnames where pattern.IsMatch(vname) select "$" + vname;
+        }
+
+        private IEnumerable<string> GetFunctionExpansions(string cmdStart, string replacableEnd)
+        {
+            // TODO: add support for scope prefixes like "global:"
+            var pattern = new WildcardPattern(replacableEnd + "*", WildcardOptions.IgnoreCase);
+            var funnames = _runspace.ExecutionContext.SessionState.Function.GetAll().Keys;
+            return from fun in funnames where pattern.IsMatch(fun) select fun;
         }
 
         private IEnumerable<string> GetFilesystemExpansions(string cmdStart, string replacableEnd)

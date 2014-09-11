@@ -76,8 +76,7 @@ namespace Pash.Implementation
                 return;
             }
             var localRunspace = _parentHost == null ? null : _parentHost.OpenRunspace as LocalRunspace;
-            var cmdManager = localRunspace == null ? null : localRunspace.CommandManager;
-            _tabExpansionProvider = new TabExpansionProvider(cmdManager);
+            _tabExpansionProvider = new TabExpansionProvider(localRunspace);
             _getlineEditor.SetTabExpansionFunction(_tabExpansionProvider.DoTabExpansion);
         }
 
