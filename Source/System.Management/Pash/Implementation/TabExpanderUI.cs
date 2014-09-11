@@ -33,6 +33,7 @@ namespace Mono.Terminal
         public TabExpanderUI()
         {
             Running = false;
+            _abortedOrAccepted = true;
         }
 
         public bool HandleKey(ConsoleKeyInfo keyInfo)
@@ -123,7 +124,7 @@ namespace Mono.Terminal
                 prefix = ""; // just in case
             }
             // split the last (quoted) word from the whole prefix as the soft/replacable prefix
-            int splitPos = GetCmdSplitPos(prefix);
+            int splitPos = prefix.LastUnquotedIndexOf(' ') + 1;
             _hardPrefix = prefix.Substring(0, splitPos);
             _softPrefix = prefix.Substring(splitPos);
             _selectedItem = NOT_INITIALIZED;
@@ -333,30 +334,6 @@ namespace Mono.Terminal
                 commonPrefix.Append(curChar);
             }
             return commonPrefix.Length > 0 ? commonPrefix.ToString() : _softPrefix;
-        }
-
-        private int GetCmdSplitPos(string cmd)
-        {
-            bool inDQuotes = false;
-            bool inSQuotes = false;
-            int lastSplit = -1;
-            for (int i = 0; i < cmd.Length; i++)
-            {
-                char cur = cmd[i];
-                if (cur == ' ' && !inDQuotes && !inSQuotes)
-                {
-                    lastSplit = i;
-                }
-                if (cur == '\'' && !inDQuotes)
-                {
-                    inSQuotes = !inSQuotes;
-                }
-                if (cur == '"' && !inSQuotes)
-                {
-                    inDQuotes = !inDQuotes;
-                }
-            }
-            return lastSplit + 1;
         }
 
         private int MakeSureTextFitsInBuffer(int theoreticalPos, string str)

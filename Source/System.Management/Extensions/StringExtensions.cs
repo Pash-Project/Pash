@@ -6,7 +6,7 @@ using System.Text;
 using System.Security;
 
 // this is useful in so many places that I'm putting it in the root namespace
-static class FormatStringExtensions
+static class StringExtensions
 {
     #region Format
 
@@ -118,6 +118,34 @@ static class FormatStringExtensions
     //     format is invalid.-or- The index of a format item is less than zero, or greater
     //     than two.
     public static string FormatString(this string format, object arg0, object arg1, object arg2) { return string.Format(format, arg0, arg1, arg2); }
+
+    #endregion
+
+    #region IndexOf
+
+    public static int LastUnquotedIndexOf(this string cmd, char find)
+    {
+        bool inDQuotes = false;
+        bool inSQuotes = false;
+        int lastSplit = -1;
+        for (int i = 0; i < cmd.Length; i++)
+        {
+            char cur = cmd[i];
+            if (cur == find && !inDQuotes && !inSQuotes)
+            {
+                lastSplit = i;
+            }
+            if (cur == '\'' && !inDQuotes)
+            {
+                inSQuotes = !inSQuotes;
+            }
+            if (cur == '"' && !inSQuotes)
+            {
+                inDQuotes = !inDQuotes;
+            }
+        }
+        return lastSplit;
+    }
 
     #endregion
 }

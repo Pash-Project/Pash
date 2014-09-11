@@ -396,7 +396,6 @@
     <Compile Include="Extensions\JoinStringExtensions.cs" />
     <Compile Include="Extensions\QueueExtensions.cs" />
     <Compile Include="Extensions\Reflection.cs" />
-    <Compile Include="Extensions\FormatStringExtensions.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AddPSSnapinCommand.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AliasProvider.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AliasProviderDynamicParameters.cs" />
@@ -483,6 +482,7 @@
     <Compile Include="Automation\Language\StringExpressionHelper.cs" />
     <Compile Include="Pash\Implementation\TabExpanderUI.cs" />
     <Compile Include="Pash\Implementation\TabExpansionProvider.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Management;
 using System.IO;
 using System.Management.Automation;
+using System.Text.RegularExpressions;
 
 namespace Pash.Implementation
 {
@@ -21,16 +22,73 @@ namespace Pash.Implementation
         {
             var expansions = new List<string>();
 
+            expansions.AddRange(GetCmdletParameterExpansion(cmdStart, replacableEnd));
+            expansions.AddRange(GetCommandExpansions(cmdStart, replacableEnd));
             expansions.AddRange(GetFilesystemExpansions(cmdStart, replacableEnd));
             if (_runspace != null)
             {
-                expansions.AddRange(GetCommandExpansions(cmdStart, replacableEnd));
                 expansions.AddRange(GetFunctionExpansions(cmdStart, replacableEnd));
                 expansions.AddRange(GetVariableExpansions(cmdStart, replacableEnd));
             }
             var expArray = expansions.ToArray();
-            Array.Sort(expArray);
             return expArray;
+        }
+
+        private IEnumerable<string> GetCmdletParameterExpansion(string cmdStart, string replacableEnd)
+        {
+            // either we try to find all parameters or a specific one
+            if (!replacableEnd.StartsWith("-") && replacableEnd.Length > 0)
+            {
+                return Enumerable.Empty<string>();
+            }
+            // first find out by checking cmdStart if we're in a cmdlet by scanning from right to left for a cmdlet name
+            var cmdRest = cmdStart.Trim();
+            while (cmdRest.Length > 0)
+            {
+                int pos = cmdRest.LastUnquotedIndexOf(' ') + 1;
+                var rest = cmdRest.Substring(pos).Trim();
+                if (rest.StartsWith("|") || rest.StartsWith("(") || rest.StartsWith(";"))
+                {
+                    break;
+                }
+                if (Regex.IsMatch(rest, @"^\w+[\w-]+$"))
+                {
+                    var cmds = _runspace.CommandManager.FindCommands(rest);
+                    var numCmds = cmds.Count();
+                    if (numCmds > 1)
+                    {
+                        break;
+                    }
+                    else if (numCmds == 1)
+                    {
+                        var cmd = cmds.First() as CmdletInfo;
+                        if (cmd != null) // found a cmdlet
+                        {
+                            // get all matching parameters
+                            return GetCmdletParameterExpansions(cmd, replacableEnd);
+                        }
+                    }
+                }
+                cmdRest = cmdRest.Substring(0, pos -1);
+            }
+            return Enumerable.Empty<string>();
+        }
+
+        private IEnumerable<string> GetCmdletParameterExpansions(CmdletInfo info, string prefix)
+        {
+
+            if (prefix.StartsWith("-"))
+            {
+                // get only a specific
+                prefix = prefix.Substring(1);
+            }
+            else if (prefix.Length > 0)
+            {
+                // we only deal with empty prefix or those that began with "-"
+                return Enumerable.Empty<string>();
+            }
+            var pattern = new WildcardPattern(prefix + "*", WildcardOptions.IgnoreCase);
+            return from key in info.ParameterInfoLookupTable.Keys where pattern.IsMatch(key) select "-" + key;
         }
 
         private IEnumerable<string> GetCommandExpansions(string cmdStart, string replacableEnd)
