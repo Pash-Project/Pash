@@ -222,7 +222,8 @@ namespace Mono.Terminal {
             _tabExpander.Render(home_col, home_row);
             home_col = _tabExpander.RenderStartX;
             UpdateHomeRow(_tabExpander.RenderStartY);
-            SetText(_tabExpander.Running ? _tabExpander.GetExpandedCommand() : text.ToString());
+            SetText(_tabExpander.Running || _tabExpander.HasSelection ?
+                    _tabExpander.GetExpandedCommand() : text.ToString());
         }
 
         void Render()
@@ -770,7 +771,7 @@ namespace Mono.Terminal {
                     _tabExpander.Start(text.ToString());
                     bool skipKeyHandling = _tabExpander.HandleKey(cki);
                     RenderTabExpander();
-                    max_rendered = 0;
+                    max_rendered =  _tabExpander.GetExpandedCommand().Length;
                     if (skipKeyHandling)
                     {
                         continue;

@@ -57,7 +57,7 @@ namespace Pash.Implementation
                 int pos = cmdRest.LastUnquotedIndexOf(' ') + 1;
                 var rest = cmdRest.Substring(pos).Trim();
                 // check if we reached the end of the possible cmd, e.g. in pipeline, parenthesis, multiple cmdlets
-                if (rest.StartsWith("|") || rest.StartsWith("(") || rest.StartsWith(";"))
+                if (rest.StartsWith("|") || rest.StartsWith("(") || rest.EndsWith(";"))
                 {
                     return null;
                 }
@@ -153,7 +153,7 @@ namespace Pash.Implementation
             if (p.ToString().Contains(p.CorrectSlash))
             {
                 // we already deal with a path
-                if (!p.HasDrive() && !p.StartsWith("."))
+                if (!p.HasDrive() && !Regex.IsMatch(p, @"^\.+" + p.CorrectSlash))
                 {
                     p = new System.Management.Path(".").Combine(p);
                 }
