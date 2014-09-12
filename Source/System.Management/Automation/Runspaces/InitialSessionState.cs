@@ -212,7 +212,7 @@ namespace System.Management.Automation.Runspaces
             initialSessionState.Variables.Add(new SessionStateVariableEntry("false", false, "", ScopedItemOptions.Constant));
             initialSessionState.Variables.Add(new SessionStateVariableEntry("null", null, "", ScopedItemOptions.Constant));
             initialSessionState.Variables.Add(new SessionStateVariableEntry("Error", new Collection<ErrorRecord>(), "Last errors", ScopedItemOptions.Constant));
-            initialSessionState.Variables.Add(new SessionStateVariableEntry("_", true, "Last command success", ScopedItemOptions.Constant));
+            initialSessionState.Variables.Add(new SessionStateVariableEntry("?", true, "Last command success", ScopedItemOptions.Constant));
         }
 
         static private void AddDefaultCommands(InitialSessionState initialSessionState)
