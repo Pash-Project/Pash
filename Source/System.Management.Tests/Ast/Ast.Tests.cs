@@ -16,14 +16,6 @@ namespace ParserTests
     [TestFixture]
     public class AstTests
     {
-        [Test]
-        public void ConfigScriptIsValid()
-        {
-            Assert.DoesNotThrow(delegate {
-                ParseInput(File.ReadAllText("config.ps1"));
-            });
-        }
-
         [Test, Description("Did this tokenize as 1 long string?")]
         public void TwoStrings()
         {
