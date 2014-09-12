@@ -47,7 +47,7 @@ namespace System.Management
 
         public static implicit operator string(Path path)
         {
-            return path._rawPath;
+            return path == null ? null : path._rawPath;
         }
 
         public static implicit operator Path(string path)
@@ -101,7 +101,17 @@ namespace System.Management
             return _rawPath.LastIndexOf(value);
         }
 
+        public int LastIndexOf(string value)
+        {
+            return _rawPath.LastIndexOf(value);
+        }
+
         public int IndexOf(char value)
+        {
+            return _rawPath.IndexOf(value);
+        }
+
+        public int IndexOf(string value)
         {
             return _rawPath.IndexOf(value);
         }
@@ -111,7 +121,7 @@ namespace System.Management
             Path path = this.NormalizeSlashes()
                 .TrimEndSlash();
 
-            int iLastSlash = path.LastIndexOf('\\');
+            int iLastSlash = path.LastIndexOf(CorrectSlash);
             if (iLastSlash == -1)
             {
                 return path;
@@ -143,7 +153,7 @@ namespace System.Management
             {
                 newPath = path._rawPath.Substring(0, iLastSlash);
             }
-            else if (iLastSlash == 1)
+            else if (iLastSlash == 0)
             {
                 newPath = new Path(CorrectSlash, WrongSlash, CorrectSlash);
             }
@@ -371,6 +381,33 @@ namespace System.Management
             }
 
             return fullPath.NormalizeSlashes();
+        }
+
+        public Path ResolveTilde()
+        {
+            if (!_rawPath.StartsWith("~"))
+            {
+                return this;
+            }
+
+            // TODO: this function should use the (currently not implemented) value of ProviderInfo.Home of the current
+            // provider. maybe that value should be passed as an argument
+
+            // Older Mono versions (sadly the one that's currently still
+            // available) have a bug where GetFolderPath returns an empty
+            // string for most SpecialFolder values, but only on
+            // non-Windows.
+            // See: https://bugzilla.xamarin.com/show_bug.cgi?id=2873
+
+            Path homepath= Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+            // HACK: Use $Env:HOME until Mono 2.10 dies out.
+            if (homepath == "")
+            {
+                homepath = Environment.GetEnvironmentVariable("HOME");
+            }
+            homepath = homepath.AppendSlashAtEnd();
+            return homepath.Combine(_rawPath.Substring(1));
         }
 
         public override string ToString()

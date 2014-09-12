@@ -16,6 +16,7 @@ namespace Pash.Implementation
         private bool _useUnixLikeInput;
         private LineEditor _getlineEditor;
         private LocalHost _parentHost;
+        private TabExpansionProvider _tabExpansionProvider;
 
         public bool InteractiveIO { get; set; }
 
@@ -30,15 +31,23 @@ namespace Pash.Implementation
                 if (value != _useUnixLikeInput)
                 {
                     _useUnixLikeInput = value;
-                    _getlineEditor = _useUnixLikeInput ? new LineEditor("Pash") : null;
+                    if (_useUnixLikeInput)
+                    {
+                        _getlineEditor = new LineEditor("Pash");
+                        InitTabExpansion();
+                    }
+                    else
+                    {
+                        _getlineEditor = null;
+                    }
                 }
             }
         }
 
         public LocalHostUserInterface(LocalHost parent, bool interactiveIO)
         {
-            UseUnixLikeInput = Environment.OSVersion.Platform != System.PlatformID.Win32NT && Console.WindowWidth > 0;
             _parentHost = parent;
+            UseUnixLikeInput = Environment.OSVersion.Platform != System.PlatformID.Win32NT && Console.WindowWidth > 0;
             InteractiveIO = interactiveIO;
 
             // Set up the control-C handler.
@@ -60,11 +69,20 @@ namespace Pash.Implementation
             InteractiveIO = false;
         }
 
+        public void InitTabExpansion()
+        {
+            if (_getlineEditor == null)
+            {
+                return;
+            }
+            var localRunspace = _parentHost == null ? null : _parentHost.OpenRunspace as LocalRunspace;
+            _tabExpansionProvider = new TabExpansionProvider(localRunspace);
+            _getlineEditor.SetTabExpansionFunction(_tabExpansionProvider.GetAllExpansions);
+        }
+
         #region Private stuff
         private void HandleControlC(object sender, ConsoleCancelEventArgs e)
         {
-            WriteLine("Ctrl-C pressed");
-
             try
             {
                 var runningPipeline = _parentHost.OpenRunspace.GetCurrentlyRunningPipeline();

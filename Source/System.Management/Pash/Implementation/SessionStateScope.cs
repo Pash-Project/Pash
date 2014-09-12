@@ -115,6 +115,41 @@ namespace Pash.Implementation
             return default(T);
         }
 
+        public IEnumerable<string> Find(string pattern, bool isQualified)
+        {
+            if (pattern == null)
+            {
+                throw new MethodInvocationException("The value of the argument \"pattern\" is null");
+            }
+            //if the name is qualified, look for the specified scope
+            if (isQualified)
+            {
+                var qualName = new QualifiedName(pattern);
+                if (!String.IsNullOrEmpty(qualName.ScopeSpecifier))
+                {
+                    SessionStateScope<T> affectedScope = GetScope(qualName.ScopeSpecifier, false);
+                    var wildcard = new WildcardPattern(qualName.UnqualifiedName, WildcardOptions.IgnoreCase);
+                    return from pair in affectedScope.Items 
+                           where wildcard.IsMatch(pair.Key) && 
+                            (affectedScope == this || !pair.Value.ItemOptions.HasFlag(ScopedItemOptions.Private))
+                           select qualName.ScopeSpecifier + ":" + pair.Key;
+                }
+            }
+            var wildcardPattern = new WildcardPattern(pattern, WildcardOptions.IgnoreCase);
+            var visibleItems = new List<string>();
+            //now check recursively the parent scopes for non-private, not overriden variables
+            foreach (var curScope in new ScopeHierarchyIterator(this))
+            {
+                visibleItems.AddRange(from pair in curScope.Items
+                                      where wildcardPattern.IsMatch(pair.Key) &&
+                                            !visibleItems.Contains(pair.Key) && 
+                                           (!pair.Value.ItemOptions.HasFlag(ScopedItemOptions.Private) ||
+                                            curScope == this)
+                                      select pair.Key);
+            }
+            return visibleItems;
+        }
+
         public void Set(string name, T value, bool isQualified, bool overwrite)
         {
             if (name == null)

@@ -64,7 +64,10 @@ namespace System.Management.Automation
             sb.Append('$');
             sb.Append(Name);
             sb.Append(" = ");
-            sb.Append(Value.ToString());
+            if (Value != null)
+            {
+                sb.Append(Value.ToString());
+            }
 
             return sb.ToString();
         }

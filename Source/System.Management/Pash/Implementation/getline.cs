@@ -31,6 +31,7 @@ using System.Text;
 using System.IO;
 using System.Threading;
 using System.Reflection;
+using Extensions.Enumerable;
 
 namespace Mono.Terminal {
 
@@ -46,11 +47,7 @@ namespace Mono.Terminal {
                 Result = result;
             }
         }
-        
-        public delegate Completion AutoCompleteHandler (string text, int pos);
-        
-        //static StreamWriter log;
-        
+
         // The text being edited.
         StringBuilder text;
 
@@ -60,7 +57,7 @@ namespace Mono.Terminal {
         // The prompt specified, and the prompt shown to the user.
         string prompt;
         string shown_prompt;
-        
+
         // The current cursor position, indexes into "text", for an index
         // into rendered_text, use TextToRenderPos
         int cursor;
@@ -94,44 +91,48 @@ namespace Mono.Terminal {
 
         // The position where we found the match.
         int match_at;
-        
+
         // Used to implement the Kill semantics (multiple Alt-Ds accumulate)
         KeyHandler last_handler;
+
+        TabExpanderUI _tabExpander = null;
+
         
         delegate void KeyHandler ();
-        
-        struct Handler {
+
+        struct Handler
+        {
             public ConsoleKeyInfo CKI;
             public KeyHandler KeyHandler;
 
-            public Handler (ConsoleKey key, KeyHandler h)
+            public Handler(ConsoleKey key, KeyHandler h)
             {
-                CKI = new ConsoleKeyInfo ((char) 0, key, false, false, false);
+                CKI = new ConsoleKeyInfo((char)0, key, false, false, false);
                 KeyHandler = h;
             }
 
-            public Handler (char c, KeyHandler h)
+            public Handler(char c, KeyHandler h)
             {
                 KeyHandler = h;
                 // Use the "Zoom" as a flag that we only have a character.
-                CKI = new ConsoleKeyInfo (c, ConsoleKey.Zoom, false, false, false);
+                CKI = new ConsoleKeyInfo(c, ConsoleKey.Zoom, false, false, false);
             }
 
-            public Handler (ConsoleKeyInfo cki, KeyHandler h)
+            public Handler(ConsoleKeyInfo cki, KeyHandler h)
             {
                 CKI = cki;
                 KeyHandler = h;
             }
-            
-            public static Handler Control (char c, KeyHandler h)
+
+            public static Handler Control(char c, KeyHandler h)
             {
-                return new Handler ((char) (c - 'A' + 1), h);
+                return new Handler((char)(c - 'A' + 1), h);
             }
 
-            public static Handler Alt (char c, ConsoleKey k, KeyHandler h)
+            public static Handler Alt(char c, ConsoleKey k, KeyHandler h)
             {
-                ConsoleKeyInfo cki = new ConsoleKeyInfo ((char) c, k, false, true, false);
-                return new Handler (cki, h);
+                ConsoleKeyInfo cki = new ConsoleKeyInfo((char)c, k, false, true, false);
+                return new Handler(cki, h);
             }
         }
 
@@ -147,13 +148,13 @@ namespace Mono.Terminal {
         ///    When there are multiple results, the result should be the full
         ///    text
         /// </remarks>
-        public AutoCompleteHandler AutoCompleteEvent;
-        
-        static Handler [] handlers;
+        static Handler[] handlers;
 
-        public LineEditor (string name) : this (name, 100) { }
-        
-        public LineEditor (string name, int histsize)
+        public LineEditor(string name) : this (name, 100)
+        {
+        }
+
+        public LineEditor(string name, int histsize)
         {
             handlers = new Handler [] {
                 new Handler (ConsoleKey.Home,       CmdHome),
@@ -166,7 +167,8 @@ namespace Mono.Terminal {
                 new Handler (ConsoleKey.Backspace,  CmdBackspace),
                 new Handler (ConsoleKey.Delete,     CmdSafeDeleteChar),
                 new Handler (ConsoleKey.Tab,        CmdTabOrComplete),
-                
+                new Handler (ConsoleKey.Escape,     CmdSkip),
+
                 // Emacs keys
                 Handler.Control ('A', CmdHome),
                 Handler.Control ('E', CmdEnd),
@@ -182,10 +184,10 @@ namespace Mono.Terminal {
                 Handler.Control ('G', delegate {} ),
                 Handler.Alt ('B', ConsoleKey.B, CmdBackwardWord),
                 Handler.Alt ('F', ConsoleKey.F, CmdForwardWord),
-                
+
                 Handler.Alt ('D', ConsoleKey.D, CmdDeleteWord),
                 Handler.Alt ((char) 8, ConsoleKey.Backspace, CmdDeleteBackword),
-                
+
                 // DEBUG
                 //Handler.Control ('T', CmdDebug),
 
@@ -193,41 +195,62 @@ namespace Mono.Terminal {
                 Handler.Control ('Q', delegate { HandleChar (Console.ReadKey (true).KeyChar); })
             };
 
-            rendered_text = new StringBuilder ();
-            text = new StringBuilder ();
+            rendered_text = new StringBuilder();
+            text = new StringBuilder();
 
-            history = new History (name, histsize);
-            
+            history = new History(name, histsize);
+            _tabExpander = new TabExpanderUI();
+
             //if (File.Exists ("log"))File.Delete ("log");
             //log = File.CreateText ("log"); 
         }
 
-        void CmdDebug ()
+        public void SetTabExpansionFunction(TabExpansionEvent expansionEvent)
         {
-            history.Dump ();
-            Console.WriteLine ();
-            Render ();
+            _tabExpander.TabExpansionEvent = expansionEvent;
         }
 
-        void Render ()
+        void CmdDebug()
         {
-            Console.Write (shown_prompt);
-            Console.Write (rendered_text);
+            history.Dump();
+            Console.WriteLine();
+            Render();
+        }
 
-            int max = System.Math.Max (rendered_text.Length + shown_prompt.Length, max_rendered);
-            
+        void RenderTabExpander()
+        {
+            _tabExpander.Render(home_col, home_row);
+            home_col = _tabExpander.RenderStartX;
+            UpdateHomeRow(_tabExpander.RenderStartY);
+            SetText(_tabExpander.Running || _tabExpander.HasSelection ?
+                    _tabExpander.GetExpandedCommand() : text.ToString());
+        }
+
+        void Render()
+        {
+            Console.Write(shown_prompt);
+            Console.Write(rendered_text);
+
+            int max = System.Math.Max(rendered_text.Length + shown_prompt.Length, max_rendered);
+        
             for (int i = rendered_text.Length + shown_prompt.Length; i < max_rendered; i++)
-                Console.Write (' ');
+                Console.Write(' ');
             max_rendered = shown_prompt.Length + rendered_text.Length;
 
             // Write one more to ensure that we always wrap around properly if we are at the
             // end of a line.
-            Console.Write (' ');
+            Console.Write(' ');
+            // if we wraped around, set the cursor back to end of last line, or UpdateHomeRow will make an error
+            if (Console.CursorLeft == 0)
+            {
+                Console.CursorTop--;
+                Console.CursorLeft = Console.BufferWidth - 1;
+            }
 
-            UpdateHomeRow (max + home_col);
+            UpdateHomeRow(max + home_col);
         }
 
-        void UpdateHomeRow (int screenpos)
+        void UpdateHomeRow(int screenpos)
         {
             int lines = 1 + (screenpos / Console.WindowWidth);
 
@@ -235,194 +258,147 @@ namespace Mono.Terminal {
             if (home_row < 0)
                 home_row = 0;
         }
-        
 
-        void RenderFrom (int pos)
+        void RenderFrom(int pos)
         {
-            int rpos = TextToRenderPos (pos);
+            int rpos = TextToRenderPos(pos);
             int i;
-            
+
             for (i = rpos; i < rendered_text.Length; i++)
-                Console.Write (rendered_text [i]);
+                Console.Write(rendered_text[i]);
 
             if ((shown_prompt.Length + rendered_text.Length) > max_rendered)
                 max_rendered = shown_prompt.Length + rendered_text.Length;
-            else {
+            else
+            {
                 int max_extra = max_rendered - shown_prompt.Length;
                 for (; i < max_extra; i++)
-                    Console.Write (' ');
+                    Console.Write(' ');
             }
         }
 
-        void ComputeRendered ()
+        void ComputeRendered()
         {
             rendered_text.Length = 0;
 
-            for (int i = 0; i < text.Length; i++){
-                int c = (int) text [i];
-                if (c < 26){
+            for (int i = 0; i < text.Length; i++)
+            {
+                int c = (int)text[i];
+                if (c < 26)
+                {
                     if (c == '\t')
-                        rendered_text.Append ("    ");
-                    else {
-                        rendered_text.Append ('^');
-                        rendered_text.Append ((char) (c + (int) 'A' - 1));
+                        rendered_text.Append("    ");
+                    else
+                    {
+                        rendered_text.Append('^');
+                        rendered_text.Append((char)(c + (int)'A' - 1));
                     }
-                } else
-                    rendered_text.Append ((char)c);
+                }
+                else
+                    rendered_text.Append((char)c);
             }
         }
 
-        int TextToRenderPos (int pos)
+        int TextToRenderPos(int pos)
         {
             int p = 0;
 
-            for (int i = 0; i < pos; i++){
+            for (int i = 0; i < pos; i++)
+            {
                 int c;
 
-                c = (int) text [i];
-                
-                if (c < 26){
+                c = (int)text[i];
+
+                if (c < 26)
+                {
                     if (c == 9)
                         p += 4;
                     else
                         p += 2;
-                } else
+                }
+                else
                     p++;
             }
 
             return p;
         }
 
-        int TextToScreenPos (int pos)
+        int TextToScreenPos(int pos)
         {
-            return shown_prompt.Length + TextToRenderPos (pos) + home_col;
+            return shown_prompt.Length + TextToRenderPos(pos) + home_col;
         }
-        
+
         string Prompt {
             get { return prompt; }
             set { prompt = value; }
         }
 
         int LineCount {
-            get {
-                return (shown_prompt.Length + rendered_text.Length)/Console.WindowWidth;
+            get
+            {
+                return (home_col + shown_prompt.Length + rendered_text.Length) / Console.WindowWidth;
             }
         }
 
-        void ForceCursor (int newpos)
+        void ForceCursor(int newpos)
         {
             cursor = newpos;
 
-            int actual_pos = shown_prompt.Length + TextToRenderPos (cursor) + home_col;
-            int row = home_row + (actual_pos/Console.WindowWidth);
+            int actual_pos = shown_prompt.Length + TextToRenderPos(cursor) + home_col;
+            int row = home_row + (actual_pos / Console.WindowWidth);
             int col = actual_pos % Console.WindowWidth;
 
             if (row >= Console.BufferHeight)
-                row = Console.BufferHeight-1;
-            Console.SetCursorPosition (col, row);
-            
-            //log.WriteLine ("Going to cursor={0} row={1} col={2} actual={3} prompt={4} ttr={5} old={6}", newpos, row, col, actual_pos, prompt.Length, TextToRenderPos (cursor), cursor);
-            //log.Flush ();
+                row = Console.BufferHeight - 1;
+            Console.SetCursorPosition(col, row);
         }
 
-        void UpdateCursor (int newpos)
+        void UpdateCursor(int newpos)
         {
             if (cursor == newpos)
                 return;
 
-            ForceCursor (newpos);
+            ForceCursor(newpos);
         }
 
-        void InsertChar (char c)
+        void InsertChar(char c)
         {
             int prev_lines = LineCount;
-            text = text.Insert (cursor, c);
-            ComputeRendered ();
-            if (prev_lines != LineCount){
+            text = text.Insert(cursor, c);
+            ComputeRendered();
+            if (prev_lines != LineCount)
+            {
 
-                Console.SetCursorPosition (home_col, home_row);
-                Render ();
-                ForceCursor (++cursor);
-            } else {
-                RenderFrom (cursor);
-                ForceCursor (++cursor);
-                UpdateHomeRow (TextToScreenPos (cursor));
+                Console.SetCursorPosition(home_col, home_row);
+                Render();
+                ForceCursor(++cursor);
+            }
+            else
+            {
+                RenderFrom(cursor);
+                ForceCursor(++cursor);
+                UpdateHomeRow(TextToScreenPos(cursor));
             }
         }
-
         //
         // Commands
         //
-        void CmdDone ()
+        void CmdDone()
         {
             done = true;
         }
 
-        void CmdTabOrComplete ()
+        void CmdTabOrComplete()
         {
-            bool complete = false;
-
-            if (AutoCompleteEvent != null){
-                if (TabAtStartCompletes)
-                    complete = true;
-                else {
-                    for (int i = 0; i < cursor; i++){
-                        if (!Char.IsWhiteSpace (text [i])){
-                            complete = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (complete){
-                    Completion completion = AutoCompleteEvent (text.ToString (), cursor);
-                    string [] completions = completion.Result;
-                    if (completions == null)
-                        return;
-                    
-                    int ncompletions = completions.Length;
-                    if (ncompletions == 0)
-                        return;
-                    
-                    if (completions.Length == 1){
-                        InsertTextAtCursor (completions [0]);
-                    } else {
-                        int last = -1;
-                        
-                        for (int p = 0; p < completions [0].Length; p++){
-                            char c = completions [0][p];
-
-
-                            for (int i = 1; i < ncompletions; i++){
-                                if (completions [i].Length < p)
-                                    goto mismatch;
-                            
-                                if (completions [i][p] != c){
-                                    goto mismatch;
-                                }
-                            }
-                            last = p;
-                        }
-                    mismatch:
-                        if (last != -1){
-                            InsertTextAtCursor (completions [0].Substring (0, last+1));
-                        }
-                        Console.WriteLine ();
-                        foreach (string s in completions){
-                            Console.Write (completion.Prefix);
-                            Console.Write (s);
-                            Console.Write (' ');
-                        }
-                        Console.WriteLine ();
-                        Render ();
-                        ForceCursor (cursor);
-                    }
-                } else
-                    HandleChar ('\t');
-            } else
-                HandleChar ('\t');
+            _tabExpander.Start(text.ToString());
+            _tabExpander.ChooseNext(); //start it
+            RenderTabExpander();
         }
-        
+
+        void CmdSkip()
+        {
+        }
+
         void CmdHome ()
         {
             UpdateCursor (0);
@@ -787,24 +763,32 @@ namespace Mono.Terminal {
                 ConsoleModifiers mod;
                 
                 cki = Console.ReadKey (true);
-                if (cki.Key == ConsoleKey.Escape){
-                    cki = Console.ReadKey (true);
-
-                    mod = ConsoleModifiers.Alt;
-                } else
-                    mod = cki.Modifiers;
+                mod = cki.Modifiers;
                 
                 bool handled = false;
+                if (_tabExpander.Running)
+                {
+                    _tabExpander.Start(text.ToString());
+                    bool skipKeyHandling = _tabExpander.HandleKey(cki);
+                    RenderTabExpander();
+                    max_rendered =  _tabExpander.GetExpandedCommand().Length;
+                    if (skipKeyHandling)
+                    {
+                        continue;
+                    }
+                }
 
                 foreach (Handler handler in handlers){
                     ConsoleKeyInfo t = handler.CKI;
 
-                    if (t.Key == cki.Key && t.Modifiers == mod){
-                        handled = true;
-                        handler.KeyHandler ();
-                        last_handler = handler.KeyHandler;
-                        break;
-                    } else if (t.KeyChar == cki.KeyChar && t.Key == ConsoleKey.Zoom){
+                    if ((t.Key == cki.Key && t.Modifiers == mod) ||
+                        (t.KeyChar == cki.KeyChar && t.Key == ConsoleKey.Zoom)
+                        ){
+                        if (_tabExpander.Running)
+                        {
+                            _tabExpander.Abort(true);
+                            RenderTabExpander();
+                        }
                         handled = true;
                         handler.KeyHandler ();
                         last_handler = handler.KeyHandler;
@@ -821,8 +805,15 @@ namespace Mono.Terminal {
                     continue;
                 }
 
-                if (cki.KeyChar != (char) 0)
-                    HandleChar (cki.KeyChar);
+                if (cki.KeyChar != (char)0)
+                {
+                    if (_tabExpander.Running && _tabExpander.HasSelection)
+                    {
+                        _tabExpander.Accept();
+                        RenderTabExpander();
+                    }
+                    HandleChar(cki.KeyChar);
+                }
             } 
         }
 
@@ -875,6 +866,8 @@ namespace Mono.Terminal {
                     EditLoop ();
                 } catch (ThreadAbortException){
                     searching = 0;
+                    _tabExpander.Abort(true);
+                    RenderTabExpander();
                     Thread.ResetAbort ();
                     text.Clear();
                     break;
