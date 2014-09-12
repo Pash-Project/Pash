@@ -46,7 +46,8 @@ namespace TestHost
 
         private void CreateFile(string name, bool hidden = false)
         {
-            File.Create(name);
+            name = CorrectSlash(name);
+            File.Create(name).Close();
             if (hidden)
             {
                 File.SetAttributes(name, FileAttributes.Hidden);
@@ -56,6 +57,7 @@ namespace TestHost
 
         private void CreateDir(string name, bool hidden = false)
         {
+            name = CorrectSlash(name);
             var di = Directory.CreateDirectory(name);
             if (hidden)
             {
@@ -92,11 +94,16 @@ namespace TestHost
             Directory.Delete(_createdTempDir);
         }
 
+        private string CorrectSlash(string path)
+        {
+            return path.Replace('/', Path.DirectorySeparatorChar);
+        }
+
         private void CorrectSlashes(string[] paths)
         {
             for (int i = 0; i < paths.Length; i++)
             {
-                paths[i] = paths[i].Replace('/', Path.DirectorySeparatorChar);
+                paths[i] = CorrectSlash(paths[i]);
             }
         }
 
@@ -119,6 +126,7 @@ namespace TestHost
             CreateFile("foodir/bar");
             CreateDir("bardir");
 
+            CorrectSlashes(expected);
             var expansions = _tabExp.GetFilesystemExpansions("", prefix);
             expansions.ShouldEqual(expected);
         }
@@ -141,6 +149,7 @@ namespace TestHost
             CreateDir("bardir");
             CreateDir(".bardir", true);
 
+            CorrectSlashes(expected);
             var expansions = _tabExp.GetFilesystemExpansions("", prefix);
             expansions.ShouldEqual(expected);
         }

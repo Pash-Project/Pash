@@ -153,7 +153,12 @@ namespace Pash.Implementation
             if (p.ToString().Contains(p.CorrectSlash))
             {
                 // we already deal with a path
-                if (!p.HasDrive() && !Regex.IsMatch(p, @"^\.+" + p.CorrectSlash))
+                var escapedSlash = p.CorrectSlash;
+                if (escapedSlash.Equals(@"\"))
+                {
+                    escapedSlash = @"\\";
+                }
+                if (!p.HasDrive() && !Regex.IsMatch(p, @"^\.+" + escapedSlash))
                 {
                     p = new System.Management.Path(".").Combine(p);
                 }
