@@ -997,7 +997,7 @@ namespace System.Management.Pash.Implementation
 
                 else throw new NotImplementedException(clause.Item1.ToString());
 
-                this._pipelineCommandRuntime.WriteObject(EvaluateAst(clause.Item2, false));
+                this._pipelineCommandRuntime.WriteObject(EvaluateAst(clause.Item2));
                 return AstVisitAction.SkipChildren;
             }
 
