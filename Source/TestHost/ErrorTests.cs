@@ -15,7 +15,7 @@ namespace TestHost
         [TestFixtureSetUp]
         public void LoadCmdletHelpers()
         {
-            InitialSessionState sessionState = InitialSessionState.Create();
+            InitialSessionState sessionState = InitialSessionState.CreateDefault();
             string fileName = typeof(InitialSessionStateTests).Assembly.Location;
             sessionState.ImportPSModule(new string[] { fileName });
             TestHost.InitialSessionState = sessionState;
