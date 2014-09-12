@@ -328,7 +328,7 @@ namespace Mono.Terminal {
         int LineCount {
             get
             {
-                return (shown_prompt.Length + rendered_text.Length) / Console.WindowWidth;
+                return (home_col + shown_prompt.Length + rendered_text.Length) / Console.WindowWidth;
             }
         }
 
