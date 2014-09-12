@@ -234,12 +234,12 @@ namespace Mono.Terminal
             {
                 string msg = String.Format("Want to see all {0} items in {1} lines? [Enter/Escape]",
                                            numItems, rows);
-                WriteAt(0, RenderStartY + 1, msg, true);
+                WriteAt(0, RenderStartY + 1, msg, -1);
                 _selectedItem = ASKING_USER;
                 return;
             }
 
-            WriteAt(RenderStartX, RenderStartY, GetExpandedCommand(), true);
+            WriteAt(RenderStartX, RenderStartY, GetExpandedCommand(), -1);
             int linesWithShownCommand = _maxWrittenY + 1 - RenderStartY;
             int showItemsOnLine = RenderStartY + linesWithShownCommand;
 
@@ -279,7 +279,7 @@ namespace Mono.Terminal
                 }
                 row -= startShowRow; // adjust row to relative row shown
                 bool highlight = i == _selectedItem;
-                WriteAt(col * colwidth, row + showItemsOnLine, _expandandedItems[i], false, highlight);
+                WriteAt(col * colwidth, row + showItemsOnLine, _expandandedItems[i], colwidth -1, highlight);
             }
         }
 
@@ -361,12 +361,12 @@ namespace Mono.Terminal
             return doScroll;
         }
 
-        private void WriteAt(int posX, int posY, string text, bool wrap)
+        private void WriteAt(int posX, int posY, string text, int maxWidth)
         {
-            WriteAt(posX, posY, text, wrap, false);
+            WriteAt(posX, posY, text, maxWidth, false);
         }
 
-        private void WriteAt(int posX, int posY, string text, bool wrap, bool colorInverse)
+        private void WriteAt(int posX, int posY, string text, int maxWidth, bool colorInverse)
         {
             // backups
             int cursorX = Console.CursorLeft;
@@ -375,7 +375,7 @@ namespace Mono.Terminal
             ConsoleColor bgColor = Console.BackgroundColor;
 
             // scroll buffer
-            string adjustToText = wrap ? text : "";
+            string adjustToText = maxWidth < 0 ? text : "";
             int scrolledLines = MakeSureTextFitsInBuffer(posY, adjustToText);
             posY -= scrolledLines;
             cursorY -= scrolledLines;
@@ -387,7 +387,7 @@ namespace Mono.Terminal
                 Console.BackgroundColor = fgColor;
             }
             SaveSetCursorPosition(posX, posY);
-            string writeText = wrap ? text : FittedText(text, Console.BufferWidth - posX);
+            string writeText = maxWidth < 0 ? text : FittedText(text, maxWidth); // -1 is line end
             Console.Write(writeText);
             _maxWrittenX = Console.CursorLeft > _maxWrittenX ? Console.CursorLeft : _maxWrittenX;
             _maxWrittenY = Console.CursorTop > _maxWrittenY ? Console.CursorTop : _maxWrittenY;
@@ -412,7 +412,6 @@ namespace Mono.Terminal
 
         private string FittedText(string text, int width)
         {
-            width -= 1; //newline char at EOL
             if (width < 1)
             {
                 throw new Exception("Invalid Bufer width!");
@@ -425,7 +424,7 @@ namespace Mono.Terminal
             {
                 return text.PadRight(width);
             }
-            return text.Substring(0, width) + "...";
+            return text.Substring(0, width - 3) + "...";
         }
     }
 

@@ -77,6 +77,10 @@ namespace Pash.Implementation
                         // do nothing, check next term (could be a parameter for example)
                     }
                 }
+                if (pos == 0)
+                {
+                    break;
+                }
                 // check rest for cmdlet terms
                 cmdRest = cmdRest.Substring(0, pos -1);
             }

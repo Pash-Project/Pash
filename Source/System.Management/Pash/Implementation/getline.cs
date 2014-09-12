@@ -31,6 +31,7 @@ using System.Text;
 using System.IO;
 using System.Threading;
 using System.Reflection;
+using Extensions.Enumerable;
 
 namespace Mono.Terminal {
 
@@ -238,6 +239,12 @@ namespace Mono.Terminal {
             // Write one more to ensure that we always wrap around properly if we are at the
             // end of a line.
             Console.Write(' ');
+            // if we wraped around, set the cursor back to end of last line, or UpdateHomeRow will make an error
+            if (Console.CursorLeft == 0)
+            {
+                Console.CursorTop--;
+                Console.CursorLeft = Console.BufferWidth - 1;
+            }
 
             UpdateHomeRow(max + home_col);
         }
@@ -797,6 +804,7 @@ namespace Mono.Terminal {
 
                 if (cki.KeyChar != (char)0)
                 {
+                    _tabExpander.Abort(false);
                     HandleChar(cki.KeyChar);
                 }
             } 
