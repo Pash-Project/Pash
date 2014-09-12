@@ -65,8 +65,16 @@ namespace Mono.Terminal
             case ConsoleKey.UpArrow:
             case ConsoleKey.LeftArrow:
             case ConsoleKey.RightArrow:
+                if (_selectedItem == ASKING_USER)
+                {
+                    Abort(true);
+                }
                 return ChangeSelection(keyInfo.Key);
             default:
+                if (_selectedItem == ASKING_USER)
+                {
+                    Abort(true);
+                }
                 return false;
             }
         }
