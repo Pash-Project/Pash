@@ -30,6 +30,13 @@ namespace Mono.Terminal
 
         public TabExpansionEvent TabExpansionEvent;
 
+        public bool HasSelection {
+            get
+            {
+                return _selectedItem >= 0;
+            }
+        }
+
         public TabExpanderUI()
         {
             Running = false;
@@ -81,15 +88,9 @@ namespace Mono.Terminal
 
         private bool ChangeSelection(ConsoleKey key)
         {
-            if (_selectedItem < NO_ITEM_SELECTED || _lastRenderNumRows < 1)
+            if (_selectedItem < 0 || _lastRenderNumRows < 1)
             {
-                return false; // just in case
-            }
-            // nothing selected? then select first
-            if (_selectedItem == NO_ITEM_SELECTED)
-            {
-                _selectedItem = 0;
-                return true;
+                return false; //  only handle selection if something is already selected
             }
             // otherwise select depending on last rendering
             if (key == ConsoleKey.UpArrow && _selectedItem > 0)
@@ -102,18 +103,20 @@ namespace Mono.Terminal
             }
             else if (key == ConsoleKey.LeftArrow)
             {
-                int newsel = _selectedItem - _lastRenderNumRows;
-                if (newsel >= 0)
+                _selectedItem -= _lastRenderNumRows;
+                // check for underflow
+                if (_selectedItem < 0)
                 {
-                    _selectedItem = newsel;
+                    _selectedItem += _expandandedItems.Length;
                 }
             }
             else if (key == ConsoleKey.RightArrow)
             {
-                int newsel = _selectedItem + _lastRenderNumRows;
-                if (newsel <= _expandandedItems.Length -1)
+                _selectedItem += _lastRenderNumRows;
+                // check for overflow
+                if (_selectedItem >= _expandandedItems.Length)
                 {
-                    _selectedItem = newsel;
+                    _selectedItem -= _expandandedItems.Length;
                 }
             }
             return true;

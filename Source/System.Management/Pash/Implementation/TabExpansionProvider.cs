@@ -18,7 +18,7 @@ namespace Pash.Implementation
             _runspace = runspace;
         }
 
-        public string[] DoTabExpansion(string cmdStart, string replacableEnd)
+        public string[] GetAllExpansions(string cmdStart, string replacableEnd)
         {
             var expansions = new List<string>();
             // check if we're inside a cmdlet invocation command
@@ -28,7 +28,7 @@ namespace Pash.Implementation
             {
                 expansions.AddRange(GetCmdletParameterExpansions(cmdlet, replacableEnd));
             }
-            else if (_runspace != null)
+            else
             {
                 // doing expansion for commands and functions only makes sense if we're not "inside" a cmdlet
                 expansions.AddRange(GetCommandExpansions(cmdStart, replacableEnd));
@@ -39,15 +39,12 @@ namespace Pash.Implementation
             expansions.AddRange(GetFilesystemExpansions(cmdStart, replacableEnd));
 
             // last but not least, provide extension for variables
-            if (_runspace != null)
-            {
-                expansions.AddRange(GetVariableExpansions(cmdStart, replacableEnd));
-            }
+            expansions.AddRange(GetVariableExpansions(cmdStart, replacableEnd));
             var expArray = expansions.ToArray();
             return expArray;
         }
 
-        private CmdletInfo CheckForCommandWithCmdlet(string cmdStart)
+        public CmdletInfo CheckForCommandWithCmdlet(string cmdStart)
         {
             if (_runspace == null)
             {
@@ -87,7 +84,7 @@ namespace Pash.Implementation
             return null;
         }
 
-        private IEnumerable<string> GetCmdletParameterExpansions(CmdletInfo info, string prefix)
+        public IEnumerable<string> GetCmdletParameterExpansions(CmdletInfo info, string prefix)
         {
 
             if (prefix.StartsWith("-"))
@@ -105,15 +102,22 @@ namespace Pash.Implementation
                 orderby key ascending select "-" + key;
         }
 
-        private IEnumerable<string> GetCommandExpansions(string cmdStart, string replacableEnd)
+        public IEnumerable<string> GetCommandExpansions(string cmdStart, string replacableEnd)
         {
+            if (_runspace == null)
+            {
+                return Enumerable.Empty<string>();
+            }
             return from cmd in _runspace.CommandManager.FindCommands(replacableEnd + "*")
                 orderby cmd.Name ascending select cmd.Name + " ";
         }
 
-        private IEnumerable<string> GetVariableExpansions(string cmdStart, string replacableEnd)
+        public IEnumerable<string> GetVariableExpansions(string cmdStart, string replacableEnd)
         {
-            // TODO: add support for scope prefixes like "global:"
+            if (_runspace == null)
+            {
+                return Enumerable.Empty<string>();
+            }
             // check if it's the beginning of a variable or we should provide all variables
             // everything else doesn't make sense
             if (replacableEnd.StartsWith("$"))
@@ -129,13 +133,17 @@ namespace Pash.Implementation
             return from vname in varnames orderby vname ascending select "$" + vname;
         }
 
-        private IEnumerable<string> GetFunctionExpansions(string cmdStart, string replacableEnd)
+        public IEnumerable<string> GetFunctionExpansions(string cmdStart, string replacableEnd)
         {
+            if (_runspace == null)
+            {
+                return Enumerable.Empty<string>();
+            }
             var funnames = _runspace.ExecutionContext.SessionState.Function.Find(replacableEnd + "*");
             return from fun in funnames orderby fun ascending select fun;
         }
 
-        private IEnumerable<string> GetFilesystemExpansions(string cmdStart, string replacableEnd)
+        public IEnumerable<string> GetFilesystemExpansions(string cmdStart, string replacableEnd)
         {
             replacableEnd = StripQuotes(replacableEnd);
 

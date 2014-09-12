@@ -222,7 +222,7 @@ namespace Mono.Terminal {
             _tabExpander.Render(home_col, home_row);
             home_col = _tabExpander.RenderStartX;
             UpdateHomeRow(_tabExpander.RenderStartY);
-            SetText(_tabExpander.GetExpandedCommand());
+            SetText(_tabExpander.Running ? _tabExpander.GetExpandedCommand() : text.ToString());
         }
 
         void Render()
@@ -780,12 +780,14 @@ namespace Mono.Terminal {
                 foreach (Handler handler in handlers){
                     ConsoleKeyInfo t = handler.CKI;
 
-                    if (t.Key == cki.Key && t.Modifiers == mod){
-                        handled = true;
-                        handler.KeyHandler ();
-                        last_handler = handler.KeyHandler;
-                        break;
-                    } else if (t.KeyChar == cki.KeyChar && t.Key == ConsoleKey.Zoom){
+                    if ((t.Key == cki.Key && t.Modifiers == mod) ||
+                        (t.KeyChar == cki.KeyChar && t.Key == ConsoleKey.Zoom)
+                        ){
+                        if (_tabExpander.Running)
+                        {
+                            _tabExpander.Abort(true);
+                            RenderTabExpander();
+                        }
                         handled = true;
                         handler.KeyHandler ();
                         last_handler = handler.KeyHandler;
@@ -804,7 +806,11 @@ namespace Mono.Terminal {
 
                 if (cki.KeyChar != (char)0)
                 {
-                    _tabExpander.Abort(false);
+                    if (_tabExpander.Running && _tabExpander.HasSelection)
+                    {
+                        _tabExpander.Accept();
+                        RenderTabExpander();
+                    }
                     HandleChar(cki.KeyChar);
                 }
             } 

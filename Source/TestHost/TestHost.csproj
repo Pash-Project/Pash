@@ -117,6 +117,7 @@
     <Compile Include="FormatTests.cs" />
     <Compile Include="CmdletUserInputTests.cs" />
     <Compile Include="TabExpanderTest.cs" />
+    <Compile Include="TabExpansionProviderTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.PowerShell.Commands.Management\Microsoft.Commands.Management.csproj">

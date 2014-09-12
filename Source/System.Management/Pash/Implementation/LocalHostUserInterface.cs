@@ -77,7 +77,7 @@ namespace Pash.Implementation
             }
             var localRunspace = _parentHost == null ? null : _parentHost.OpenRunspace as LocalRunspace;
             _tabExpansionProvider = new TabExpansionProvider(localRunspace);
-            _getlineEditor.SetTabExpansionFunction(_tabExpansionProvider.DoTabExpansion);
+            _getlineEditor.SetTabExpansionFunction(_tabExpansionProvider.GetAllExpansions);
         }
 
         #region Private stuff
