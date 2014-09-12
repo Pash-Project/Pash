@@ -135,10 +135,10 @@ namespace Pash.Implementation
         {
             replacableEnd = StripQuotes(replacableEnd);
 
-            var p = new System.Management.Path(replacableEnd).NormalizeSlashes();
+            var p = new System.Management.Path(replacableEnd).NormalizeSlashes().ResolveTilde();
             var startPath = new System.Management.Path(".");
             string lookFor = replacableEnd;
-            if (replacableEnd.Contains(p.CorrectSlash))
+            if (p.ToString().Contains(p.CorrectSlash))
             {
                 // we already deal with a path
                 if (!p.HasDrive() && !p.StartsWith("."))

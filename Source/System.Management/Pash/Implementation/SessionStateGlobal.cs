@@ -612,24 +612,10 @@ namespace Pash.Implementation
                 throw new NullReferenceException("Path can't be null");
             }
 
-            if (path == "~")
-            {
-                // Older Mono versions (sadly the one that's currently still
-                // available) have a bug where GetFolderPath returns an empty
-                // string for most SpecialFolder values, but only on
-                // non-Windows.
-                // See: https://bugzilla.xamarin.com/show_bug.cgi?id=2873
-
-                path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-
-                // HACK: Use $Env:HOME until Mono 2.10 dies out.
-                if (path == "")
-                    path = Environment.GetEnvironmentVariable("HOME");
-            }
-
             PSDriveInfo nextDrive = CurrentDrive;
 
-            path = path.NormalizeSlashes();
+
+            path = path.NormalizeSlashes().ResolveTilde();
 
             string driveName = null;
             if (path.TryGetDriveName(out driveName))
