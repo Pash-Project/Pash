@@ -19,8 +19,7 @@ namespace Pash.Implementation
 
     internal class SessionStateGlobal
     {
-        //TODO: I don't think that this information should stay here. Maybe RunspaceConfiguration or InitialSessionState
-        //would be better place, once they are implemented
+        //TODO: This and related stuff should be moved to InitialSessionState.CreateDefault
         private string[] _defaultSnapins = new string[] {
             "Microsoft.PowerShell.PSCorePSSnapIn, System.Management.Automation",
             "Microsoft.PowerShell.PSUtilityPSSnapIn, Microsoft.PowerShell.Commands.Utility",

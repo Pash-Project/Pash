@@ -26,11 +26,16 @@ namespace System.Management.Automation
         }
 
         internal AliasInfo(string name, string definition, CommandManager cmdManager, ScopedItemOptions options)
+            :  this(name, definition, "", cmdManager, options)
+        {
+        }
+
+        internal AliasInfo(string name, string definition, string description, CommandManager cmdManager, ScopedItemOptions options)
             : base(name, CommandTypes.Alias)
         {
 
             Options = options;
-
+            Description = description;
             SetDefinition(definition, cmdManager);
         }
 

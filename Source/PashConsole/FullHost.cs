@@ -28,14 +28,6 @@ namespace Pash
             _currentRunspace.Open();
 
             // TODO: check user directory for a config script and fall back to the default one of the installation
-            // need to use .CodeBase property, as .Location gets the wrong path if the assembly was shadow-copied
-            var localAssemblyPath = new Uri(Assembly.GetCallingAssembly().CodeBase).LocalPath;
-            Execute(FormatConfigCommand(localAssemblyPath));
-        }
-
-        static internal string FormatConfigCommand(string path)
-        {
-            return ". \"" + Path.Combine(Path.GetDirectoryName(path), "config.ps1") + "\"";
         }
 
         void Execute(string cmd)

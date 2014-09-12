@@ -13,12 +13,12 @@ namespace System.Management.Automation.Runspaces
 
         public static Runspace CreateRunspace()
         {
-            return CreateRunspace(DefaultRunspaceConfiguration);
+            return CreateRunspace(InitialSessionState.CreateDefault());
         }
 
         public static Runspace CreateRunspace(PSHost host)
         {
-            return CreateRunspace(host, DefaultRunspaceConfiguration);
+            return CreateRunspace(host, InitialSessionState.CreateDefault());
         }
 
         public static Runspace CreateRunspace(RunspaceConfiguration runspaceConfiguration)

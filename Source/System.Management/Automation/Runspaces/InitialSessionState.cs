@@ -6,20 +6,21 @@ using System.Text;
 using System.Threading;
 using System.Collections.ObjectModel;
 using Microsoft.PowerShell.Commands;
+using System.Management.Automation.Runspaces;
 
 namespace System.Management.Automation.Runspaces
 {
     public class InitialSessionState
     {
         PSLanguageMode langmode;
-        InitialSessionStateEntryCollection<SessionStateCommandEntry> sessionstatentry;
+        InitialSessionStateEntryCollection<SessionStateCommandEntry> _commandEntries;
         InitialSessionStateEntryCollection<SessionStateProviderEntry> sessionstatprovider;
         InitialSessionStateEntryCollection<SessionStateVariableEntry> variables;
         List<ModuleSpecification> modules = new List<ModuleSpecification>();
 
         protected InitialSessionState()
         {
-            sessionstatentry = new InitialSessionStateEntryCollection<SessionStateCommandEntry>();
+            _commandEntries = new InitialSessionStateEntryCollection<SessionStateCommandEntry>();
             sessionstatprovider = new InitialSessionStateEntryCollection<SessionStateProviderEntry>();
             variables = new InitialSessionStateEntryCollection<SessionStateVariableEntry>();
         }
@@ -62,7 +63,7 @@ namespace System.Management.Automation.Runspaces
         {
             get
             {
-                return sessionstatentry;
+                return _commandEntries;
             }
         }
 
@@ -192,6 +193,9 @@ namespace System.Management.Automation.Runspaces
         {
             InitialSessionState initialSessionState = new InitialSessionState();
 
+            // TODO: I think this is also the correct location for importing the default snapins, not in SessionStateGlobal
+
+            AddDefaultVariables(initialSessionState);
             AddDefaultCommands(initialSessionState);
 
             return initialSessionState;
@@ -199,11 +203,16 @@ namespace System.Management.Automation.Runspaces
 
         public static InitialSessionState CreateDefault2()
         {
-            InitialSessionState initialSessionState = new InitialSessionState();
+            return CreateDefault();
+        }
 
-            AddDefaultCommands(initialSessionState);
-
-            return initialSessionState;
+        static private void AddDefaultVariables(InitialSessionState initialSessionState)
+        {
+            initialSessionState.Variables.Add(new SessionStateVariableEntry("true", true, "", ScopedItemOptions.Constant));
+            initialSessionState.Variables.Add(new SessionStateVariableEntry("false", false, "", ScopedItemOptions.Constant));
+            initialSessionState.Variables.Add(new SessionStateVariableEntry("null", null, "", ScopedItemOptions.Constant));
+            initialSessionState.Variables.Add(new SessionStateVariableEntry("Error", new Collection<ErrorRecord>(), "Last errors", ScopedItemOptions.Constant));
+            initialSessionState.Variables.Add(new SessionStateVariableEntry("_", true, "Last command success", ScopedItemOptions.Constant));
         }
 
         static private void AddDefaultCommands(InitialSessionState initialSessionState)
@@ -241,11 +250,16 @@ namespace System.Management.Automation.Runspaces
             initialSessionState.Commands.Add(new SessionStateFunctionEntry("Z:", "Set-Location Z:"));
             initialSessionState.Commands.Add(new SessionStateFunctionEntry("cd..", "Set-Location .."));
             initialSessionState.Commands.Add(new SessionStateFunctionEntry("cd\\", "Set-Location \\"));
+
+
+            /* not yet working
             initialSessionState.Commands.Add(new SessionStateFunctionEntry("prompt", "$(if (test-path variable:/PSDebugContext) { '[DBG]: ' } else { '' }) + 'PS ' + $(Get-Location) + $(if ($nestedpromptlevel -ge 1) { '>>' }) + '> '"));
             initialSessionState.Commands.Add(new SessionStateFunctionEntry("ImportSystemModules", "\r\n $SnapIns = @(Get-PSSnapin -Registered -ErrorAction SilentlyContinue)"));
             initialSessionState.Commands.Add(new SessionStateFunctionEntry("Clear-Host", "$space = New-Object System.Management.Automation.Host.BufferCell\n$space.Character = ' '\n$space.ForegroundColor = $host.ui.rawui.ForegroundColor\n$space.BackgroundColor = $host.ui.rawui.BackgroundColor\n$rect = New-Object System.Management.Automation.Host.Rectangle\n$rect.Top = $rect.Bottom = $rect.Right = $rect.Left = -1\n$origin = New-Object System.Management.Automation.Host.Coordinates\n$Host.UI.RawUI.CursorPosition = $origin\n$Host.UI.RawUI.SetBufferContents($rect, $space)\n"));
             initialSessionState.Commands.Add(new SessionStateFunctionEntry("more", "param([string[]]$paths)\n\n$OutputEncoding = [System.Console]::OutputEncoding\n\nif($paths)\n{\n    foreach ($file in $paths)\n    {\n        Get-Content $file | more.com\n    }\n}\nelse\n{\n    $input | more.com\n}\n"));
             initialSessionState.Commands.Add(new SessionStateFunctionEntry("Get-Verb", "\r\nparam(\r\n    [Parameter(ValueFromPipeline=$true)]\r\n    [string[]]\r\n    $verb = '*'\r\n)\r\nbegin {\r\n    $allVerbs = [PSObject].Assembly.GetTypes() |\r\n        Where-Object {$_.Name -match '^Verbs.'} |\r\n        Get-Member -type Properties -static |\r\n        Select-Object @{\r\n            Name='Verb'\r\n            Expression = {$_.Name}\r\n        }, @{\r\n            Name='Group'\r\n            Expression = {\r\n                $str = \"$($_.TypeName)\"\r\n                $str.Substring($str.LastIndexOf('Verbs') + 5)\r\n            }                \r\n        }        \r\n}\r\nprocess {\r\n    foreach ($v in $verb) {\r\n        $allVerbs | Where-Object { $_.Verb -like $v }\r\n    }       \r\n}\r\n"));
+            */
+            initialSessionState.Commands.Add(new SessionStateFunctionEntry("Prompt", "'PASH ' + (Get-Location) + '> '"));
             // TODO:
             // "TabExpansion"
             // "help"

@@ -1,3 +1,10 @@
+# DEPRECATED
+
+#This file is currently not in use. It would be nice, if we could use it, but it slows down the startup by about 200ms.
+#While this is okay for the Pash shell, it's really bad for the tests, as they will take way to long.
+#Unless a better solution is found, we won't use this file anymore, but therefore use InitialSessionState.CreateDefault()
+
+
 
 function Prompt {
     'PASH ' + (Get-Location) + '> '

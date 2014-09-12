@@ -40,7 +40,6 @@ namespace System.Management.Automation
         internal SessionState(SessionStateGlobal sessionStateGlobal)
                : this(sessionStateGlobal, null, null, null, null)
         {
-            defaultInit();
         }
 
         // creates a new scope and sets the parent session state's scope as predecessor        
@@ -71,13 +70,5 @@ namespace System.Management.Automation
             PSVariable = new PSVariableIntrinsics(_variableScope);
         }
 
-
-        private void defaultInit()
-        {
-            PSVariable.Set(new PSVariable("true", true, ScopedItemOptions.Constant));
-            PSVariable.Set(new PSVariable("false", false, ScopedItemOptions.Constant));
-            PSVariable.Set(new PSVariable("null", null, ScopedItemOptions.Constant));
-            PSVariable.Set(new PSVariable("Error", new Collection<ErrorRecord>(), ScopedItemOptions.Constant));
-        }
     }
 }
