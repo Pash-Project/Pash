@@ -1,4 +1,4 @@
-[Pash](https://github.com/Pash-Project/Pash/) [![Build Status](https://secure.travis-ci.org/Pash-Project/Pash.png?branch=master )](http://travis-ci.org/Pash-Project/Pash)
+[Pash](https://github.com/Pash-Project/Pash/) [![Linux Build Status (Travis-CI)](https://secure.travis-ci.org/Pash-Project/Pash.png?branch=master )](http://travis-ci.org/Pash-Project/Pash) [![Windows Build Status (AppVeyor)](https://ci.appveyor.com/api/projects/status/w6027t7hoqblsvow/branch/master)](https://ci.appveyor.com/project/JayBazuzi/pash/branch/master)
 ====
 
 An Open Source reimplementation of Windows PowerShell.  
