@@ -6,7 +6,7 @@ using System.Management.Automation;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 
-namespace ReferenceTests
+namespace ReferenceTests.API
 {
 // prevents the compiler from complaining about unused fields, etc
 #pragma warning disable 169, 414, 0649

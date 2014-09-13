@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using System.Management;
 
-namespace ReferenceTests
+namespace ReferenceTests.Language
 {
     [TestFixture]
     public class IndexTests : ReferenceTestBase

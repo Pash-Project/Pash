@@ -5,7 +5,7 @@ using TestPSSnapIn;
 using System.Runtime.Remoting;
 using System.Collections.Generic;
 
-namespace ReferenceTests
+namespace ReferenceTests.Language
 {
     [TestFixture]
     public class ObjectMemberTests : ReferenceTestBase

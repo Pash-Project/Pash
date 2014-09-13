@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using System.IO;
 
-namespace ReferenceTests
+namespace ReferenceTests.Commands
 {
     [TestFixture]
     public class OutFileTests : ReferenceTestBase

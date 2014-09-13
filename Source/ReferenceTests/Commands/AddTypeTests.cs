@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 
-namespace ReferenceTests
+namespace ReferenceTests.Commands
 {
     [TestFixture]
     public class AddTypeTests : ReferenceTestBase

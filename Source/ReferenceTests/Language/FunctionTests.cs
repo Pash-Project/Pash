@@ -2,7 +2,7 @@
 using System;
 using NUnit.Framework;
 
-namespace ReferenceTests
+namespace ReferenceTests.Language
 {
     [TestFixture]
     public class FunctionTests : ReferenceTestBase

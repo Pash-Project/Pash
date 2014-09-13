@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 using System.Management.Automation;
 using System.Collections.Generic;
 
-namespace ReferenceTests
+namespace ReferenceTests.Commands
 {
     [TestFixture]
     public class SelectObjectTests

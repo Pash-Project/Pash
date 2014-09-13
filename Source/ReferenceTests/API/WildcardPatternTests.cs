@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using System.Management.Automation;
 
-namespace ReferenceTests
+namespace ReferenceTests.API
 {
     [TestFixture]
     public class WildcardPatternTests

@@ -4,7 +4,7 @@ using NUnit.Framework;
 using System.Management.Automation;
 using Microsoft.PowerShell.Commands;
 
-namespace ReferenceTests
+namespace ReferenceTests.Commands
 {
     [TestFixture]
     public class GetMemberTests : ReferenceTestBase

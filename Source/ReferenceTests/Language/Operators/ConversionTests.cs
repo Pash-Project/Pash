@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using System.Runtime.Serialization.Formatters;
 
-namespace ReferenceTests
+namespace ReferenceTests.Language.Operators
 {
     [TestFixture]
     public class ConversionTests : ReferenceTestBase

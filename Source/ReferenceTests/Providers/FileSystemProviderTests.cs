@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using System.IO;
 
-namespace ReferenceTests
+namespace ReferenceTests.Providers
 {
     [TestFixture]
     public class FileSystemProviderTests : ReferenceTestBase

@@ -5,7 +5,7 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using NUnit.Framework;
 
-namespace ReferenceTests
+namespace ReferenceTests.API
 {
     [TestFixture]
     class DefaultScriptScopeTests
