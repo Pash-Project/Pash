@@ -3,12 +3,14 @@ using System.Diagnostics;
 using NUnit.Framework;
 using System.IO;
 using Pash;
+using System.Collections.Generic;
 
 namespace TestHost
 {
     [TestFixture]
     public class FullHostTests
     {
+        private List<string> _tempFiles;
         internal TestHostUserInterface HostUI;
         internal FullHost FullHost;
 
@@ -17,6 +19,22 @@ namespace TestHost
             HostUI = new TestHostUserInterface();
             FullHost = new FullHost(interactive);
             FullHost.LocalHost.SetHostUserInterface(HostUI);
+        }
+
+        [SetUp]
+        public void SetUp()
+        {
+            _tempFiles = new List<string>();
+        }
+
+        [TearDown]
+        public void RemoveTempfiles()
+        {
+            foreach (var file in _tempFiles)
+            {
+                File.Delete(file);
+            }
+            _tempFiles.Clear();
         }
 
         [Test]
@@ -63,6 +81,39 @@ namespace TestHost
             Assert.AreEqual(2, outlines.Length); // 2x output of command, no prompt
             outlines.ShouldContain("foo");
             outlines.ShouldContain("bar");
+        }
+
+        [Test]
+        public void LoadProfileWorks()
+        {
+            CreateFreshHostAndUI(false);
+            HostUI.SetInput("exit"); // just in case
+            var tmpfile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".ps1");
+            File.Create(tmpfile).Close();
+            _tempFiles.Add(tmpfile);
+            File.WriteAllText(tmpfile, "function myfun { Write-Host 'test'; }");
+            FullHost.LoadProfile(tmpfile);
+            FullHost.Run("myfun"); // this should exist now
+            var outlines = HostUI.GetOutput().Split(new string[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
+            Assert.AreEqual(1, outlines.Length);
+            Assert.AreEqual("test", outlines[0]);
+        }
+
+        [Test]
+        public void ProfileVariableGetsSetCorrectly()
+        {
+            CreateFreshHostAndUI(false);
+            HostUI.SetInput("exit"); // just in case
+            FullHost.SetProfileVariable("cuch", "cuah", "auch", "auah");
+            FullHost.Run("$profile; $profile.CurrentUserCurrentHost; $profile.CurrentUserAllHosts; "
+                        + "$profile.AllUsersCurrentHost; $profile.AllUsersAllHosts;");
+            var outlines = HostUI.GetOutput().Split(new string[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
+            Assert.AreEqual(5, outlines.Length);
+            Assert.AreEqual("cuch", outlines[0]);
+            Assert.AreEqual("cuch", outlines[1]);
+            Assert.AreEqual("cuah", outlines[2]);
+            Assert.AreEqual("auch", outlines[3]);
+            Assert.AreEqual("auah", outlines[4]);
         }
     }
 }

@@ -144,8 +144,8 @@ namespace Pash.Implementation
                 ((LocalHost)PSHost).OpenRunspace = this;
             }
             CommandManager = new CommandManager(this);
-            InitializeSession();
             InitializeDefaultSnapins();
+            InitializeSession();
         }
 
         public override void OpenAsync()
@@ -197,7 +197,30 @@ namespace Pash.Implementation
                 return;
 
             AddInitialSessionVariables();
+            AddInitialSessionCommands();
             CommandManager.ImportModules(_initialSessionState.Modules);
+        }
+
+        private void AddInitialSessionCommands()
+        {
+
+            foreach (SessionStateCommandEntry cmdEntry in _initialSessionState.Commands)
+            {
+                if (cmdEntry is SessionStateAliasEntry)
+                {
+                    var aliasEntry = (SessionStateAliasEntry)cmdEntry;
+                    var aliasInfo = new AliasInfo(aliasEntry.Name, aliasEntry.Definition, aliasEntry.Description,
+                                                  CommandManager, aliasEntry.Options);
+                    ExecutionContext.SessionState.Alias.Set(aliasInfo, "global");
+                }
+                else if (cmdEntry is SessionStateFunctionEntry)
+                {
+                    var funEntry = (SessionStateFunctionEntry)cmdEntry;
+                    var scriptBlock = new ScriptBlock(CommandManager.ParseInput(funEntry.Definition));
+                    var funInfo = new FunctionInfo(funEntry.Name, scriptBlock, funEntry.Options);
+                    ExecutionContext.SessionState.Function.Set(funInfo);
+                }
+            }
         }
 
         private void AddInitialSessionVariables()

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Pash.Implementation;
+using System.Management.Automation;
 
 namespace System.Management.Automation
 {
@@ -11,13 +12,26 @@ namespace System.Management.Automation
     /// </summary>
     public class AliasInfo : CommandInfo, IScopedItem
     {
+        private CommandManager _cmdManager;
         private string _definition;
         public override string Definition { get { return _definition; } }
         public string Description { get; set; }
         public ScopedItemOptions Options { get; set; }
 
         // TODO: what is the difference?
-        public CommandInfo ReferencedCommand { get; private set; }
+        private CommandInfo _referencedCommand;
+        public CommandInfo ReferencedCommand 
+        { 
+            get
+            {
+                if (_referencedCommand == null)
+                {
+                    Resolve();
+                }
+                return _referencedCommand;
+            }
+        }
+
         public CommandInfo ResolvedCommand { get; private set; }
 
         internal AliasInfo(string name, string definition, CommandManager cmdManager)
@@ -26,33 +40,36 @@ namespace System.Management.Automation
         }
 
         internal AliasInfo(string name, string definition, CommandManager cmdManager, ScopedItemOptions options)
+            :  this(name, definition, "", cmdManager, options)
+        {
+        }
+
+        internal AliasInfo(string name, string definition, string description, CommandManager cmdManager, ScopedItemOptions options)
             : base(name, CommandTypes.Alias)
         {
-
+            _cmdManager = cmdManager;
             Options = options;
-
-            SetDefinition(definition, cmdManager);
+            Description = description;
+            _definition = definition;
         }
 
         // internals
         //internal string UnresolvedCommandName { get; }
-        internal void SetDefinition(string definition, CommandManager cmdManager)
+        internal void Resolve()
         {
-            _definition = definition;
-
             //only set referenced command if found
             //aliases only cause errors when they are used, not at instanciation
             CommandInfo refInfo = null;
             try
             {
-                refInfo = cmdManager.FindCommand(definition);
+                refInfo = _cmdManager.FindCommand(Definition);
             }
             catch (CommandNotFoundException)
             {
             }
 
-            ReferencedCommand = refInfo;
-            ResolvedCommand = ReferencedCommand;
+            _referencedCommand = refInfo;
+            ResolvedCommand = _referencedCommand;
         }
         //internal void SetOptions(ScopedItemOptions newOptions, bool force);
 

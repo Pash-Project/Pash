@@ -8,6 +8,7 @@ using Pash.Implementation;
 using System.Reflection;
 using System.IO;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Pash
 {
@@ -27,15 +28,60 @@ namespace Pash
             _currentRunspace = RunspaceFactory.CreateRunspace(LocalHost);
             _currentRunspace.Open();
 
-            // TODO: check user directory for a config script and fall back to the default one of the installation
-            // need to use .CodeBase property, as .Location gets the wrong path if the assembly was shadow-copied
-            var localAssemblyPath = new Uri(Assembly.GetCallingAssembly().CodeBase).LocalPath;
-            Execute(FormatConfigCommand(localAssemblyPath));
+            LoadProfiles();
         }
 
-        static internal string FormatConfigCommand(string path)
+        internal void LoadProfiles()
         {
-            return ". \"" + Path.Combine(Path.GetDirectoryName(path), "config.ps1") + "\"";
+            // currently we only support the current user, current host (semantics of other things in Pash need to
+            // be discussed first)
+            var curUserCurHost = GetCurrentUserCurrentHostProfilePath();
+            LoadProfile(curUserCurHost);
+
+            // finally set the variable with all used profiles
+            SetProfileVariable(curUserCurHost, "", "", "");
+        }
+
+        internal void LoadProfile(string path)
+        {
+            if (File.Exists(path))
+            {
+                Execute(String.Format(". '{0}'", path));
+            }
+        }
+
+        private string GetCurrentUserCurrentHostProfilePath()
+        {
+            if (Environment.OSVersion.Platform == System.PlatformID.Win32NT)
+            {
+                // similar to where the powershell profile would be
+                var docDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                return Path.Combine(docDir, "Pash_profile.ps1");
+            }
+            else
+            {
+                // on unix systems it's usually a dotfile in home directory
+                var homeDir = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+                return Path.Combine(homeDir, ".Pash_profile.ps1");
+            }
+        }
+
+        internal void SetProfileVariable(string curUserCurHost, string curUserAllHosts, string allUsersCurHost, string allUsersAllHosts)
+        {
+            var profileObj = new PSObject(curUserCurHost);
+            var profiles = new Dictionary<string, string> {
+                { "CurrentUserCurrentHost", curUserCurHost },
+                { "CurrentUserAllHosts", curUserAllHosts },
+                { "AllUsersCurrentHost", allUsersCurHost },
+                { "AllUsersAllHosts", allUsersAllHosts }
+            };
+            foreach (var pair in profiles)
+            {
+                var prop = new PSNoteProperty(pair.Key, pair.Value);
+                profileObj.Properties.Add(prop);
+                profileObj.Members.Add(prop);
+            }
+            _currentRunspace.SessionStateProxy.SetVariable("Profile", profileObj);
         }
 
         void Execute(string cmd)

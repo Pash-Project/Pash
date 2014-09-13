@@ -19,7 +19,7 @@ namespace TestHost
         [SetUp]
         public void InitSessionState()
         {
-            var ss = InitialSessionState.Create();
+            var ss = InitialSessionState.CreateDefault();
             ss.ImportPSModule(new string[] { typeof(TestWithMandatoryCommand).Assembly.Location });
             TestHost.InitialSessionState = ss;
         }

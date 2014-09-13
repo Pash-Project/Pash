@@ -155,7 +155,12 @@ namespace Pash.Implementation
         {
             if (_runspace.ExecutionContext.SessionState.Alias.Exists(command))
             {
-                return _runspace.ExecutionContext.SessionState.Alias.Get(command).ReferencedCommand;
+                var aliasInfo = _runspace.ExecutionContext.SessionState.Alias.Get(command);
+                if (aliasInfo.ReferencedCommand == null)
+                {
+                    throw new CommandNotFoundException(string.Format("Command '{0}' not found.", aliasInfo.Definition));
+                }
+                return aliasInfo.ReferencedCommand;
             }
 
             CommandInfo function = _runspace.ExecutionContext.SessionState.Function.Get(command);
