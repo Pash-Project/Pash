@@ -70,10 +70,8 @@ Add-Type -typedefinition $source
                 ReferenceHost.RawExecute("Add-Type -TypeDefinition 'public class ErrorTest --'", false);
             });
             // TODO: Exception should be CmdletInvocationException
-            // TODO: Does not work with pash. Pash does not have the error records in the pipeline.
-            // They are in a nested pipeline but do not reach the main pipeline
-            //ErrorRecord[] errorRecords = ReferenceHost.GetLastRawErrorRecords();
-            //Assert.AreEqual(3, errorRecords.Length, "Should be 3 compiler errors");
+            ErrorRecord[] errorRecords = ReferenceHost.GetLastRawErrorRecords();
+            Assert.AreEqual(3, errorRecords.Length, "Should be 3 compiler errors");
         }
 
         [Test]
@@ -173,10 +171,8 @@ $obj.WriteLine()
                 ReferenceHost.RawExecute("add-type -name Test -memberdefinition 'public WriteLine() ---'", false);
             });
             // TODO: Exception should be CmdletInvocationException
-            // TODO: Does not work with pash. Pash does not have the error records in the pipeline.
-            // They are in a nested pipeline but do not reach the main pipeline
-            //ErrorRecord[] errorRecords = ReferenceHost.GetLastRawErrorRecords();
-            //Assert.AreEqual(2, errorRecords.Length, "Should be 2 compiler errors");
+            ErrorRecord[] errorRecords = ReferenceHost.GetLastRawErrorRecords();
+            Assert.AreEqual(2, errorRecords.Length, "Should be 2 compiler errors");
         }
 
         [Test]

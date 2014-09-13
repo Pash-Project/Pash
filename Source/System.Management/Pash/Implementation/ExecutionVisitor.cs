@@ -459,23 +459,34 @@ namespace System.Management.Pash.Implementation
 
                 // now execute the pipeline
                 _context.PushPipeline(pipeline);
+                // rerouting the output and error stream would be easier, but Pipeline doesn't
+                // have an interface for this. So let's catch the exception for now, read the streams
+                // and rethrow it afterwards
+                Exception exception = null;
+                Collection<PSObject> pipeResults = null;
                 try
                 {
-                    var results = pipeline.Invoke();
-                    // read output and error and write them as results of the current commandRuntime
-                    foreach (var curResult in results)
-                    {
-                        _pipelineCommandRuntime.WriteObject(curResult);
-                    }
-                    var errors = pipeline.Error.NonBlockingRead();
-                    foreach (var curError in errors)
-                    {
-                        _pipelineCommandRuntime.ErrorStream.Write(curError);
-                    }
+                    pipeResults = pipeline.Invoke();
                 }
-                finally
+                catch (Exception e)
                 {
-                    _context.PopPipeline();
+                    exception = e;
+                    pipeResults = pipeline.Output.NonBlockingRead();
+                }
+                // read output and error and write them as results of the current commandRuntime
+                foreach (var curResult in pipeResults)
+                {
+                    _pipelineCommandRuntime.WriteObject(curResult);
+                }
+                var errors = pipeline.Error.NonBlockingRead();
+                foreach (var curError in errors)
+                {
+                    _pipelineCommandRuntime.ErrorStream.Write(curError);
+                }
+                _context.PopPipeline();
+                if (exception != null)
+                {
+                    throw exception;
                 }
             }
             finally
