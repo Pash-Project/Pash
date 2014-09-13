@@ -1344,13 +1344,7 @@ namespace System.Management.Pash.Implementation
                 // others need to be rethrown
                 exception = e;
             }
-            // now read errrot and output and write in out streams
-            foreach (var error in subVisitor._pipelineCommandRuntime.ErrorStream.Read())
-            {
-                // we need to use ErrorStream.Write instead of WriteError to avoid
-                // adding it to the error variable twice!
-                _pipelineCommandRuntime.ErrorStream.Write(error);
-            }
+            subVisitor._pipelineCommandRuntime.ErrorStream.Redirect(_pipelineCommandRuntime.ErrorStream);
             var result = subVisitor._pipelineCommandRuntime.OutputStream.Read();
             if (result.Count == 1)
             {
@@ -1477,8 +1471,16 @@ namespace System.Management.Pash.Implementation
 
         private void SetUnderscoreVariable(Exception ex)
         {
-            var error = new ErrorRecord(ex, "", ErrorCategory.InvalidOperation, null);
-            _context.SetVariable("_", error);
+            ErrorRecord rec = null;
+            if (ex is IContainsErrorRecord)
+            {
+                rec = ((IContainsErrorRecord)ex).ErrorRecord;
+            }
+            else
+            {
+                rec = new ErrorRecord(ex, "", ErrorCategory.InvalidOperation, null);
+            }
+            _context.SetVariable("_", rec);
         }
 
         public override AstVisitAction VisitTypeConstraint(TypeConstraintAst typeConstraintAst)

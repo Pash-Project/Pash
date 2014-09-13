@@ -42,6 +42,12 @@ namespace System.Management.Automation
         {
         }
 
+        public CmdletInvocationException(ErrorRecord errorRecord)
+            : base("Cmdlet invocation failed")
+        {
+            this.errorRecord = errorRecord;
+        }
+
         //todo: implement
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)

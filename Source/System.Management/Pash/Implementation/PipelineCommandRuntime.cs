@@ -77,11 +77,7 @@ namespace System.Management.Automation
 
         public void ThrowTerminatingError(ErrorRecord errorRecord)
         {
-            if (errorRecord.Exception != null)
-            {
-                throw errorRecord.Exception;
-            }
-            throw new InvalidOperationException(errorRecord.ToString());
+            throw new CmdletInvocationException(errorRecord);
         }
 
         public void WriteCommandDetail(string text)

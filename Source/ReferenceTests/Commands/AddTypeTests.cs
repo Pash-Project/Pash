@@ -171,8 +171,22 @@ $obj.WriteLine()
                 ReferenceHost.RawExecute("add-type -name Test -memberdefinition 'public WriteLine() ---'", false);
             });
             // TODO: Exception should be CmdletInvocationException
-            ErrorRecord[] errorRecords = ReferenceHost.GetLastRawErrorRecords();
-            Assert.AreEqual(2, errorRecords.Length, "Should be 2 compiler errors");
+ //           ErrorRecord[] errorRecords = ReferenceHost.GetLastRawErrorRecords();
+ //           Assert.AreEqual(2, errorRecords.Length, "Should be 2 compiler errors");
+        }
+
+        [Test]
+        public void ExecuteWithError()
+        {
+            string cmd = NewlineJoin("trap { $_.FullyQualifiedErrorId }", "add-type -name Test -memberdefinition 'public WriteLine() ---'");
+            try
+            {
+                var res = ReferenceHost.Execute(cmd);
+            }
+            catch (Exception ex)
+            {
+            }
+            Assert.AreEqual("COMPILER_ERRORS,Microsoft.PowerShell.Commands.AddTypeCommand" + Environment.NewLine, ReferenceHost.LastResults);
         }
 
         [Test]
