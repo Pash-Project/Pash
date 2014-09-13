@@ -4,7 +4,7 @@ using System.Management.Automation;
 using NUnit.Framework;
 using TestPSSnapIn;
 
-namespace ReferenceTests
+namespace ReferenceTests.API
 {
     [TestFixture]
     public class TypeConverterTests : ReferenceTestBase

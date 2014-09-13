@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using System.Runtime.InteropServices;
 
-namespace ReferenceTests
+namespace ReferenceTests.Language.Operators
 {
     [TestFixture]
     public class MultiplicativeOperatorTests_7_6 : ReferenceTestBase

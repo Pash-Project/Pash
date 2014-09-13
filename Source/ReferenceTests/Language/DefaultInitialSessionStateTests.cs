@@ -3,7 +3,7 @@ using NUnit.Framework;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
 
-namespace ReferenceTests
+namespace ReferenceTests.Language
 {
     [TestFixture]
     public class DefaultInitialSessionStateTests : ReferenceTestBase

@@ -4,7 +4,7 @@ using System;
 using System.Management.Automation;
 using TestPSSnapIn;
 
-namespace ReferenceTests
+namespace ReferenceTests.Language
 {
     [TestFixture]
     public class CmdletParameterTests : ReferenceTestBase

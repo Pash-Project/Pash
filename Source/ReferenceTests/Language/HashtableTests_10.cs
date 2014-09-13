@@ -5,7 +5,7 @@ using System.Collections;
 using System.Runtime.InteropServices;
 using System.Management.Automation;
 
-namespace ReferenceTests
+namespace ReferenceTests.Language
 {
     [TestFixture]
     public class HashtableTests_10 : ReferenceTestBase

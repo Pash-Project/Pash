@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Management.Automation;
 using System.IO;
 
-namespace ReferenceTests
+namespace ReferenceTests.Commands
 {
     [TestFixture]
     public class CsvTests : ReferenceTestBase

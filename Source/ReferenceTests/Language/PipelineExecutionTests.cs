@@ -5,7 +5,7 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using TestPSSnapIn;
 
-namespace ReferenceTests
+namespace ReferenceTests.Language
 {
     [TestFixture]
     public class PipelineExecutionTests : ReferenceTestBase

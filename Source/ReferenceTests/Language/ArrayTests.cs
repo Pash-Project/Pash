@@ -4,7 +4,7 @@ using System.Management.Automation;
 using TestPSSnapIn;
 using System.Runtime.InteropServices;
 
-namespace ReferenceTests
+namespace ReferenceTests.Language
 {
     public class ArrayTests : ReferenceTestBase
     {

@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using System.Collections;
 
-namespace ReferenceTests
+namespace ReferenceTests.Language.Operators
 {
     [TestFixture]
     public class AdditiveOperatorTests_7_7 : ReferenceTestBase
