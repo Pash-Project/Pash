@@ -421,6 +421,8 @@
     </Compile>
     <Compile Include="Microsoft.PowerShell\PSCorePSSnapIn.cs" />
     <Compile Include="Pash\BitwiseOperation.cs" />
+    <Compile Include="Pash\Implementation\CommonCmdlet.cs" />
+    <Compile Include="Pash\Implementation\CommonCmdletParameters.cs" />
     <Compile Include="Pash\Implementation\getline.cs" />
     <Compile Include="Pash\Implementation\CommandManager.cs" />
     <Compile Include="Pash\Implementation\CommandProcessor.cs" />

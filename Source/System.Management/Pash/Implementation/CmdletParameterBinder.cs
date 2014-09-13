@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Collections;
 using System.Management.Automation.Runspaces;
 using System.Management.Automation.Host;
+using Pash.Implementation;
 
 namespace System.Management.Automation
 {
@@ -15,6 +16,7 @@ namespace System.Management.Automation
         private Dictionary<MemberInfo, object> _defaultValues;
         private Collection<MemberInfo> _boundParameters;
         private Dictionary<MemberInfo, object> _commandLineValuesBackup;
+        private List<MemberInfo> _commonParameters;
         private CmdletInfo _cmdletInfo;
         private Cmdlet _cmdlet;
         private CommandParameterSetInfo _activeSet;
@@ -54,6 +56,8 @@ namespace System.Management.Automation
             _activeSet = null;
             _defaultSet = null;
             _hasDefaultSet = true;
+            _commonParameters = (from parameter in CommonCmdletParameters.CommonParameterSetInfo.Parameters
+                                 select parameter.MemberInfo).ToList();
         }
 
         /// <summary>
@@ -551,12 +555,12 @@ namespace System.Management.Automation
                 if (info.MemberType == MemberTypes.Field)
                 {
                     FieldInfo fieldInfo = info as FieldInfo;
-                    fieldInfo.SetValue(_cmdlet, value);
+                    fieldInfo.SetValue(GetCmdlet(info), value);
                 }
                 else if (info.MemberType == MemberTypes.Property)
                 {
                     PropertyInfo propertyInfo = info as PropertyInfo;
-                    propertyInfo.SetValue(_cmdlet, value, null);
+                    propertyInfo.SetValue(GetCmdlet(info), value, null);
                 }
                 else
                 {
@@ -575,17 +579,26 @@ namespace System.Management.Automation
             if (info.MemberType == MemberTypes.Field)
             {
                 FieldInfo fieldInfo = info as FieldInfo;
-                return fieldInfo.GetValue(_cmdlet);
+                return fieldInfo.GetValue(GetCmdlet(info));
             }
             else if (info.MemberType == MemberTypes.Property)
             {
                 PropertyInfo propertyInfo = info as PropertyInfo;
-                return propertyInfo.GetValue(_cmdlet, null);
+                return propertyInfo.GetValue(GetCmdlet(info), null);
             }
             else
             {
                 throw new Exception("SetValue only implemented for fields and properties");
             }
+        }
+
+        private object GetCmdlet(MemberInfo info)
+        {
+            if (_commonParameters.Contains(info))
+            {
+                return _cmdlet.CommonParameters;
+            }
+            return _cmdlet;
         }
 
         /// <summary>

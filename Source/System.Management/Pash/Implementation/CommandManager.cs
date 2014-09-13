@@ -210,6 +210,7 @@ namespace Pash.Implementation
                    select new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, _runspace.ExecutionContext);
             foreach (CmdletInfo curCmdlet in cmdlets)
             {
+                curCmdlet.AddCommonParameters();
                 RegisterCmdlet(curCmdlet);
             }
             return cmdlets;

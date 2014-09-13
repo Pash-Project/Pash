@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using System;
 using System.Management.Automation;
+using System.Linq;
 using TestPSSnapIn;
 
 namespace ReferenceTests
@@ -315,6 +316,18 @@ namespace ReferenceTests
             var expected = "hello" + Environment.NewLine;
             var result = ReferenceHost.Execute(cmd);
             Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void VerboseCommonParameterAvailableFromGetCommandCmdlet()
+        {
+            PSObject result = ReferenceHost.RawExecute("Get-Command | where-object { $_.Name -eq 'Get-Command' }").First();
+            var info = (CmdletInfo)result.BaseObject;
+            CommandParameterSetInfo parameterSetInfo = info.ParameterSets[0];
+            CommandParameterInfo verboseParameter = parameterSetInfo.Parameters.FirstOrDefault(parameter => parameter.Name == "Verbose");
+
+            Assert.IsNotNull(verboseParameter);
+            Assert.IsTrue(verboseParameter.Aliases.Contains("vb"));
         }
     }
 }

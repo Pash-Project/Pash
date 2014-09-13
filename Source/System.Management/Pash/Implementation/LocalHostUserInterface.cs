@@ -330,12 +330,12 @@ namespace Pash.Implementation
 
         public override void WriteVerboseLine(string message)
         {
-            Console.WriteLine(String.Format("VERBOSE: {0}", message));
+            WriteLine(ConsoleColor.Yellow, ConsoleColor.Black, String.Format("VERBOSE: {0}", message));
         }
 
         public override void WriteWarningLine(string message)
         {
-            Console.WriteLine(String.Format("WARNING: {0}", message));
+            WriteLine(ConsoleColor.Yellow, ConsoleColor.Black, String.Format("WARNING: {0}", message));
         }
 
         public override void WriteLine()
