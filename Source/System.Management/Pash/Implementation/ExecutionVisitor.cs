@@ -129,6 +129,9 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Imatch:
                     return Match(leftOperand, rightOperand);
 
+                case TokenKind.Inotmatch:
+                    return NotMatch(leftOperand, rightOperand);
+
                 case TokenKind.Multiply:
                     return ArithmeticOperations.Multiply(leftOperand, rightOperand);
 
@@ -153,7 +156,6 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Join:
                 case TokenKind.Ilike:
                 case TokenKind.Inotlike:
-                case TokenKind.Inotmatch:
                 case TokenKind.Ireplace:
                 case TokenKind.Icontains:
                 case TokenKind.Inotcontains:
@@ -199,6 +201,17 @@ namespace System.Management.Pash.Implementation
             SetMatchesVariable(regex, match);
 
             return match.Success;
+        }
+
+        private bool NotMatch(object leftOperand, object rightOperand)
+        {
+            if (!(leftOperand is string) || !(rightOperand is string))
+                throw new NotImplementedException(string.Format("{0} -match {1}", leftOperand, rightOperand));
+
+            Regex regex = new Regex((string)rightOperand, RegexOptions.IgnoreCase);
+            Match match = regex.Match((string)leftOperand);
+
+            return !match.Success;
         }
 
         private void SetMatchesVariable(Regex regex, Match match)
