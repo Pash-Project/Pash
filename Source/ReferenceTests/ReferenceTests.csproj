@@ -78,6 +78,7 @@
     <Compile Include="Language\Operators\ConversionTests.cs" />
     <Compile Include="Integration\CodeGolf.cs" />
     <Compile Include="Language\DefaultInitialSessionStateTests.cs" />
+    <Compile Include="Language\Operators\ArithmeticAssignmentTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

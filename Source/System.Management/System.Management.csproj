@@ -483,6 +483,7 @@
     <Compile Include="Pash\Implementation\TabExpanderUI.cs" />
     <Compile Include="Pash\Implementation\TabExpansionProvider.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Pash\Implementation\ArithmeticOperations.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
