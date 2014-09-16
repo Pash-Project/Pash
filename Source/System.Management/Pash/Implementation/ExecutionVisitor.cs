@@ -126,11 +126,15 @@ namespace System.Management.Pash.Implementation
                     return BitwiseOperation.Or(leftOperand, rightOperand);
                 case TokenKind.Bxor:
                     return BitwiseOperation.Xor(leftOperand, rightOperand);
-                case TokenKind.Imatch:
-                    return Match(leftOperand, rightOperand);
 
+                case TokenKind.Imatch:
+                    return Match(leftOperand, rightOperand, RegexOptions.IgnoreCase);
                 case TokenKind.Inotmatch:
-                    return NotMatch(leftOperand, rightOperand);
+                    return NotMatch(leftOperand, rightOperand, RegexOptions.IgnoreCase);
+                case TokenKind.Cmatch:
+                    return Match(leftOperand, rightOperand, RegexOptions.None);
+                case TokenKind.Cnotmatch:
+                    return NotMatch(leftOperand, rightOperand, RegexOptions.None);
 
                 case TokenKind.Multiply:
                     return ArithmeticOperations.Multiply(leftOperand, rightOperand);
@@ -170,8 +174,6 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Cle:
                 case TokenKind.Clike:
                 case TokenKind.Cnotlike:
-                case TokenKind.Cmatch:
-                case TokenKind.Cnotmatch:
                 case TokenKind.Creplace:
                 case TokenKind.Ccontains:
                 case TokenKind.Cnotcontains:
@@ -190,12 +192,12 @@ namespace System.Management.Pash.Implementation
             }
         }
 
-        private bool Match(object leftOperand, object rightOperand)
+        private bool Match(object leftOperand, object rightOperand, RegexOptions regexOptions)
         {
             if (!(leftOperand is string) || !(rightOperand is string))
                 throw new NotImplementedException(string.Format("{0} -match {1}", leftOperand, rightOperand));
 
-            Regex regex = new Regex((string)rightOperand, RegexOptions.IgnoreCase);
+            Regex regex = new Regex((string)rightOperand, regexOptions);
             Match match = regex.Match((string)leftOperand);
 
             SetMatchesVariable(regex, match);
@@ -203,12 +205,12 @@ namespace System.Management.Pash.Implementation
             return match.Success;
         }
 
-        private bool NotMatch(object leftOperand, object rightOperand)
+        private bool NotMatch(object leftOperand, object rightOperand, RegexOptions regexOptions)
         {
             if (!(leftOperand is string) || !(rightOperand is string))
                 throw new NotImplementedException(string.Format("{0} -match {1}", leftOperand, rightOperand));
 
-            Regex regex = new Regex((string)rightOperand, RegexOptions.IgnoreCase);
+            Regex regex = new Regex((string)rightOperand, regexOptions);
             Match match = regex.Match((string)leftOperand);
 
             return !match.Success;

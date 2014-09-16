@@ -11,6 +11,8 @@ namespace TestHost
         [TestCase(@"'Tuesday' -match 'mon'", "False")]
         [TestCase(@"$test = 'Monday'; $pattern = 'mon'; $test -match $pattern", "True")]
         [TestCase(@"'Monday' -notmatch 'man'", "True")]
+        [TestCase(@"'Monday' -cmatch 'mon'", "False")]
+        [TestCase(@"'Monday' -cnotmatch 'Mon'", "False")]
         public void Match(string input, string expected)
         {
             string result = TestHost.Execute(input);
