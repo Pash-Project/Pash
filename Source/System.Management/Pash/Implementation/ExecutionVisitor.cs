@@ -84,8 +84,12 @@ namespace System.Management.Pash.Implementation
                     return ArithmeticOperations.Add(leftOperand, rightOperand);
 
                 case TokenKind.Ieq:
+                case TokenKind.Ceq:
                     if (leftOperand is string)
-                        return String.Equals(leftOperand as string, rightOperand as string, StringComparison.InvariantCultureIgnoreCase);
+                    {
+                        StringComparison ignoreCaseComparision = (TokenKind.Ceq == binaryExpressionAst.Operator) ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
+                        return String.Equals(leftOperand as string, rightOperand as string, ignoreCaseComparision);
+                    }
                     return Object.Equals(leftOperand, rightOperand);
 
                 case TokenKind.Ine:
@@ -166,7 +170,6 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Iin:
                 case TokenKind.Inotin:
                 case TokenKind.Isplit:
-                case TokenKind.Ceq:
                 case TokenKind.Cne:
                 case TokenKind.Cge:
                 case TokenKind.Cgt:
