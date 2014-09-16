@@ -93,8 +93,13 @@ namespace System.Management.Pash.Implementation
                     return Object.Equals(leftOperand, rightOperand);
 
                 case TokenKind.Ine:
-                    if (leftOperandInt.HasValue) return leftOperandInt != rightOperandInt;
-                    throw new NotImplementedException(binaryExpressionAst.ToString());
+                case TokenKind.Cne:
+                    if (leftOperand is string)
+                    {
+                        StringComparison ignoreCaseComparision = (TokenKind.Cne == binaryExpressionAst.Operator) ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
+                        return !String.Equals(leftOperand as string, rightOperand as string, ignoreCaseComparision);
+                    }
+                    return !Object.Equals(leftOperand, rightOperand);
 
                 case TokenKind.Igt:
                     if (leftOperandInt.HasValue) return leftOperandInt > rightOperandInt;
@@ -170,7 +175,6 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Iin:
                 case TokenKind.Inotin:
                 case TokenKind.Isplit:
-                case TokenKind.Cne:
                 case TokenKind.Cge:
                 case TokenKind.Cgt:
                 case TokenKind.Clt:

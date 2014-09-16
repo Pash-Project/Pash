@@ -88,6 +88,8 @@ namespace TestHost
         [TestCase(@"'abc' -eq 'ghi'", "False")]
         [TestCase(@"'abc' -ceq 'abc'", "True")]
         [TestCase(@"'abc' -ceq 'Abc'", "False")]
+        [TestCase(@"'abc' -cne 'Abc'", "True")]
+        [TestCase(@"'abc' -cne 'abc'", "False")]
         [TestCase(@"$true -eq $true", "True")]
         [TestCase(@"$true -eq $false", "False")]
         [TestCase(@"$test = $null; $test -eq $null", "True")]
