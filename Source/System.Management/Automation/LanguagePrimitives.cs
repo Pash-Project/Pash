@@ -235,9 +235,34 @@ namespace System.Management.Automation
                 return valueToConvert;
             }
 
-            if (valueToConvert != null && resultType == typeof(String))
+            if (resultType == typeof(String))
             {
-                return valueToConvert.ToString();
+                if (valueToConvert != null)
+                {
+                    return valueToConvert.ToString();
+                }
+                return "";
+            }
+
+            if (resultType == typeof(bool))
+            {
+                if (valueToConvert == null)
+                {
+                    return false;
+                }
+                else if (valueToConvert is string)
+                {
+                    return ((string)valueToConvert).Length != 0;
+                }
+                else if (valueToConvert is Array)
+                {
+                    return ((Array)valueToConvert).Length != 0;
+                }
+                else if (valueToConvert.GetType().IsNumeric())
+                {
+                    return ((dynamic)valueToConvert) != 0;
+                }
+                return true; // any object that's not null
             }
 
             if (valueToConvert != null && resultType.IsEnum) // enums have to be parsed
@@ -245,7 +270,7 @@ namespace System.Management.Automation
                 return Enum.Parse(resultType, valueToConvert.ToString(), true);
             }
 
-            if (valueToConvert != null && resultType.IsNumeric())
+            if (resultType.IsNumeric())
             {
                 try
                 {
