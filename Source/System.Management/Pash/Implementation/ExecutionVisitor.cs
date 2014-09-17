@@ -84,13 +84,22 @@ namespace System.Management.Pash.Implementation
                     return ArithmeticOperations.Add(leftOperand, rightOperand);
 
                 case TokenKind.Ieq:
+                case TokenKind.Ceq:
                     if (leftOperand is string)
-                        return String.Equals(leftOperand as string, rightOperand as string, StringComparison.InvariantCultureIgnoreCase);
+                    {
+                        StringComparison ignoreCaseComparision = (TokenKind.Ceq == binaryExpressionAst.Operator) ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
+                        return String.Equals(leftOperand as string, rightOperand as string, ignoreCaseComparision);
+                    }
                     return Object.Equals(leftOperand, rightOperand);
 
                 case TokenKind.Ine:
-                    if (leftOperandInt.HasValue) return leftOperandInt != rightOperandInt;
-                    throw new NotImplementedException(binaryExpressionAst.ToString());
+                case TokenKind.Cne:
+                    if (leftOperand is string)
+                    {
+                        StringComparison ignoreCaseComparision = (TokenKind.Cne == binaryExpressionAst.Operator) ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
+                        return !String.Equals(leftOperand as string, rightOperand as string, ignoreCaseComparision);
+                    }
+                    return !Object.Equals(leftOperand, rightOperand);
 
                 case TokenKind.Igt:
                     if (leftOperandInt.HasValue) return leftOperandInt > rightOperandInt;
@@ -126,8 +135,15 @@ namespace System.Management.Pash.Implementation
                     return BitwiseOperation.Or(leftOperand, rightOperand);
                 case TokenKind.Bxor:
                     return BitwiseOperation.Xor(leftOperand, rightOperand);
+
                 case TokenKind.Imatch:
-                    return Match(leftOperand, rightOperand);
+                    return Match(leftOperand, rightOperand, RegexOptions.IgnoreCase);
+                case TokenKind.Inotmatch:
+                    return NotMatch(leftOperand, rightOperand, RegexOptions.IgnoreCase);
+                case TokenKind.Cmatch:
+                    return Match(leftOperand, rightOperand, RegexOptions.None);
+                case TokenKind.Cnotmatch:
+                    return NotMatch(leftOperand, rightOperand, RegexOptions.None);
 
                 case TokenKind.Multiply:
                     return ArithmeticOperations.Multiply(leftOperand, rightOperand);
@@ -153,23 +169,18 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Join:
                 case TokenKind.Ilike:
                 case TokenKind.Inotlike:
-                case TokenKind.Inotmatch:
                 case TokenKind.Ireplace:
                 case TokenKind.Icontains:
                 case TokenKind.Inotcontains:
                 case TokenKind.Iin:
                 case TokenKind.Inotin:
                 case TokenKind.Isplit:
-                case TokenKind.Ceq:
-                case TokenKind.Cne:
                 case TokenKind.Cge:
                 case TokenKind.Cgt:
                 case TokenKind.Clt:
                 case TokenKind.Cle:
                 case TokenKind.Clike:
                 case TokenKind.Cnotlike:
-                case TokenKind.Cmatch:
-                case TokenKind.Cnotmatch:
                 case TokenKind.Creplace:
                 case TokenKind.Ccontains:
                 case TokenKind.Cnotcontains:
@@ -188,17 +199,28 @@ namespace System.Management.Pash.Implementation
             }
         }
 
-        private bool Match(object leftOperand, object rightOperand)
+        private bool Match(object leftOperand, object rightOperand, RegexOptions regexOptions)
         {
             if (!(leftOperand is string) || !(rightOperand is string))
                 throw new NotImplementedException(string.Format("{0} -match {1}", leftOperand, rightOperand));
 
-            Regex regex = new Regex((string)rightOperand, RegexOptions.IgnoreCase);
+            Regex regex = new Regex((string)rightOperand, regexOptions);
             Match match = regex.Match((string)leftOperand);
 
             SetMatchesVariable(regex, match);
 
             return match.Success;
+        }
+
+        private bool NotMatch(object leftOperand, object rightOperand, RegexOptions regexOptions)
+        {
+            if (!(leftOperand is string) || !(rightOperand is string))
+                throw new NotImplementedException(string.Format("{0} -match {1}", leftOperand, rightOperand));
+
+            Regex regex = new Regex((string)rightOperand, regexOptions);
+            Match match = regex.Match((string)leftOperand);
+
+            return !match.Success;
         }
 
         private void SetMatchesVariable(Regex regex, Match match)
