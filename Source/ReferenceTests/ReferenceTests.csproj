@@ -79,6 +79,7 @@
     <Compile Include="Integration\CodeGolf.cs" />
     <Compile Include="Language\DefaultInitialSessionStateTests.cs" />
     <Compile Include="Language\Operators\ArithmeticAssignmentTests.cs" />
+    <Compile Include="Language\Operators\UnaryOperatorTests_7_2.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

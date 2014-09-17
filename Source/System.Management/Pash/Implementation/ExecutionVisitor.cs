@@ -929,6 +929,7 @@ namespace System.Management.Pash.Implementation
 
             switch (unaryExpressionAst.TokenKind)
             {
+                // TODO: the following two cases should not just deal
                 case TokenKind.PostfixPlusPlus:
 
                     if (childVariable == null) throw new NotImplementedException(unaryExpressionAst.ToString());
@@ -953,12 +954,10 @@ namespace System.Management.Pash.Implementation
 
                     break;
 
-                case TokenKind.Not:
-
-                    if (childVariable == null) throw new NotImplementedException(unaryExpressionAst.ToString());
-
-                    VisitUnaryNotVariableExpression(childVariable);
-
+            case TokenKind.Not:
+                    var value = EvaluateAst(unaryExpressionAst.Child, _writeSideEffectsToPipeline);
+                    var boolValue = (bool) LanguagePrimitives.ConvertTo(value, typeof(bool));
+                    _pipelineCommandRuntime.WriteObject(!boolValue);
                     break;
 
                 default:
@@ -966,16 +965,6 @@ namespace System.Management.Pash.Implementation
             }
 
             return AstVisitAction.SkipChildren;
-        }
-
-        private void VisitUnaryNotVariableExpression(PSVariable childVariable)
-        {
-            object childVariableValue = childVariable.GetBaseObjectValue();
-            if (childVariableValue is bool)
-            {
-                this._pipelineCommandRuntime.WriteObject(!(bool)childVariableValue);
-            }
-            else throw new NotImplementedException(childVariable.Value.ToString());
         }
 
         public override AstVisitAction VisitArrayExpression(ArrayExpressionAst arrayExpressionAst)
