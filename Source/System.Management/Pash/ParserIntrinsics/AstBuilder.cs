@@ -933,7 +933,7 @@ namespace Pash.ParserIntrinsics
             else if (operatorTerm == this._grammar._operator_not ||
                      (operatorKeyTerm != null && operatorKeyTerm.Text.Equals("!")))
             {
-                // bang expresion is alternative spelling for -not
+                // bang expression is alternative spelling for -not
                 return BuildUnaryNotExpressionAst(subNode);
             }
             else if (operatorKeyTerm != null && operatorKeyTerm.Text.Equals("++"))
