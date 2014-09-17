@@ -246,23 +246,7 @@ namespace System.Management.Automation
 
             if (resultType == typeof(bool))
             {
-                if (valueToConvert == null)
-                {
-                    return false;
-                }
-                else if (valueToConvert is string)
-                {
-                    return ((string)valueToConvert).Length != 0;
-                }
-                else if (valueToConvert is Array)
-                {
-                    return ((Array)valueToConvert).Length != 0;
-                }
-                else if (valueToConvert.GetType().IsNumeric())
-                {
-                    return ((dynamic)valueToConvert) != 0;
-                }
-                return true; // any object that's not null
+                return ConvertToBool(valueToConvert);                
             }
 
             if (valueToConvert != null && resultType.IsEnum) // enums have to be parsed
@@ -451,8 +435,8 @@ namespace System.Management.Automation
         /// <param name="obj">The given object</param>
         /// <returns>True is it's true, false otherwise.</returns>
         public static bool IsTrue(object obj)
-        {//todo test numbers
-            return (!((obj == null) || (obj as String == String.Empty)));
+        {
+            return ConvertToBool(obj);
         }
 
         #endregion
@@ -508,6 +492,52 @@ namespace System.Management.Automation
             }
             // shouldn't happen as one operand should be of one of the numeric types
             return false;
+        }
+
+        private static bool ConvertToBool(object rawValue)
+        {
+            rawValue = PSObject.Unwrap(rawValue); // just make this sure
+            if (rawValue == null)
+            {
+                return false;
+            }
+            if (rawValue is bool)
+            {
+                return ((bool)rawValue);
+            }
+            else if (rawValue is string)
+            {
+                return ((string)rawValue).Length != 0;
+            }
+            else if (rawValue is IList)
+            {
+                var list = rawValue as IList;
+                if (list.Count > 1)
+                {
+                    return true;
+                }
+                else if (list.Count == 1)
+                {
+                    return ConvertToBool(list[0]);
+                }
+                else // empty list
+                {
+                    return false;
+                }
+            }
+            else if (rawValue.GetType().IsNumeric())
+            {
+                return ((dynamic)rawValue) != 0;
+            }
+            else if (rawValue is char)
+            {
+                return ((char)rawValue) != ((char)0);
+            }
+            else if (rawValue is SwitchParameter)
+            {
+                return ((SwitchParameter)rawValue).IsPresent;
+            }
+            return true; // any object that's not null
         }
 
         private static bool TryParseSignedHexString(string str, out object parsed)
