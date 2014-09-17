@@ -75,10 +75,12 @@
     <Compile Include="Language\Operators\MultiplicativeOperatorTests_7_6.cs" />
     <Compile Include="Language\IndexTests.cs" />
     <Compile Include="Language\HashtableTests_10.cs" />
-    <Compile Include="Language\Operators\ConversionTests.cs" />
     <Compile Include="Integration\CodeGolf.cs" />
     <Compile Include="Language\DefaultInitialSessionStateTests.cs" />
     <Compile Include="Language\Operators\ArithmeticAssignmentTests.cs" />
+    <Compile Include="Language\Operators\UnaryOperatorTests_7_2.cs" />
+    <Compile Include="Language\Operators\GeneralConversionTests.cs" />
+    <Compile Include="Language\Operators\Conversion_Tests_6.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

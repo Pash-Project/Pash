@@ -5,7 +5,7 @@ using System.Runtime.Serialization.Formatters;
 namespace ReferenceTests.Language.Operators
 {
     [TestFixture]
-    public class ConversionTests : ReferenceTestBase
+    public class GeneralConversionTests : ReferenceTestBase
     {
         [TestCase("[string]$notExisting", "")]
         [TestCase("[string]$null", "")]
@@ -42,28 +42,6 @@ namespace ReferenceTests.Language.Operators
         public void CanConvertHexStringToInt()
         {
             ExecuteAndCompareTypedResult("[int]'0x1a'", (int)26);
-        }
-
-        [TestCase("[bool]1", true)]
-        [TestCase("[bool]-1", true)]
-        [TestCase("[bool]0", false)]
-        [TestCase("[bool]0.0D", false)]
-        [TestCase("[bool]0.1D", true)]
-        [TestCase("[bool]0.0", false)]
-        [TestCase("[bool]0.1", true)]
-        [TestCase("[bool]$null", false)]
-        [TestCase("[bool]$notExisting", false)]
-        [TestCase("[bool]@()", false)]
-        [TestCase("[bool]@(1)", true)]
-        [TestCase("[bool]@{}", true)]
-        [TestCase("[bool]@{a='b'}", true)]
-        [TestCase("[bool]''", false)]
-        [TestCase("[bool]'false'", true)]
-        [TestCase("[bool][Boolean]$true", true)]
-        [TestCase("[bool][Boolean]$false", false)]
-        public void ConvertToBoolWorks(string cmd, bool expected)
-        {
-            ExecuteAndCompareTypedResult(cmd, expected);
         }
 
         [TestCase("'-0x1a'")]

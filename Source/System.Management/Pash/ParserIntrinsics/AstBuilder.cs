@@ -930,8 +930,10 @@ namespace Pash.ParserIntrinsics
             {
                 return BuildCastExpression(subNode);
             }
-            else if (operatorTerm == this._grammar._operator_not)
+            else if (operatorTerm == this._grammar._operator_not ||
+                     (operatorKeyTerm != null && operatorKeyTerm.Text.Equals("!")))
             {
+                // bang expression is alternative spelling for -not
                 return BuildUnaryNotExpressionAst(subNode);
             }
             else if (operatorKeyTerm != null && operatorKeyTerm.Text.Equals("++"))
@@ -946,8 +948,6 @@ namespace Pash.ParserIntrinsics
             /* left to be implemented:
              * operatorTerm == _operator_bnot
              * operatorTerm == dashdash  // pre decrement
-             * operatorKeyTerm != null && operatorKeyTerm.Text.Equals(",") //unary array
-             * operatorKeyTerm != null && operatorKeyTerm.Text.Equals("!") //bang expression
              * operatorKeyTerm != null && operatorKeyTerm.Text.Equals("+") //unary plus
              * operatorKeyTerm != null && operatorKeyTerm.Text.Equals("-split") //split array
              * operatorKeyTerm != null && operatorKeyTerm.Text.Equals("-join") //join array
