@@ -653,7 +653,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("joined unary operator expression not yet implemented")]
+        [Test]
         // Taken from http://rosettacode.org/wiki/Logical_operations#PowerShell
         public void LogicalOperations()
         {

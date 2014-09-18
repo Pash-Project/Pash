@@ -120,7 +120,7 @@ if ($true)
         [TestCase(@"[math]::Sqrt(2.0)				# call method with argument 2.0")]
         [TestCase(@"[char]::IsUpper(""a"")			# call method")]
         [TestCase(@"$b = ""abc#$%XYZabc"" 
-                    $b.ToUpper()					# call instance method", Explicit = true)]
+                    $b.ToUpper()					# call instance method")]
         [TestCase(@"[math]::Sqrt(2) 				# convert 2 to 2.0 and call method")]
         [TestCase(@"[math]::Sqrt(2D) 				# convert 2D to 2.0 and call method")]
         [TestCase(@"[math]::Sqrt($true) 			# convert $true to 1.0 and call method")]
@@ -136,7 +136,7 @@ if ($true)
             AssertIsValidInput(input);
         }
 
-        [TestCase(@"$a = [int[]](10,20,30)		# [int[]], Length 3", Explicit = true)]
+        [TestCase(@"$a = [int[]](10,20,30)		# [int[]], Length 3")]
         [TestCase(@"$a[1]								# returns int 20")]
         [TestCase(@"$a[20]							# no such position, returns $null")]
         [TestCase(@"$a[-1]							# returns int 30, i.e., $a[$a.Length-1]")]
@@ -145,7 +145,7 @@ if ($true)
         [TestCase(@"$a = New-Object 'double[,]' 3,2")]
         [TestCase(@"$a[0,0] = 10.5					# changes 0.0 to 10.5")]
         [TestCase(@"$a[0,0]++						# changes 10.5 to 10.6")]
-        [TestCase(@"$list = (""red"",$true,10),20,(1.2, ""yes""", Explicit = true)]
+        [TestCase(@"$list = (""red"",$true,10),20,(1.2, ""yes"")")]
         [TestCase(@"$list[2][1]						# returns string ""yes""")]
         [TestCase(@"$a = @{ A = 10 },@{ B = $true },@{ C = 123.45 }")]
         [TestCase(@"$a[1][""B""]						# $a[1] is a Hashtable, where B is a key")]
@@ -169,9 +169,9 @@ if ($true)
 
 
         [Test]
-        [TestCase(@"[int[]](30,40,50,60,70,80,90)", Explicit = true)]
+        [TestCase(@"[int[]](30,40,50,60,70,80,90)")]
 
-        [TestCase(@"$a = [int[]](30,40,50,60,70,80,90)", Explicit = true)]
+        [TestCase(@"$a = [int[]](30,40,50,60,70,80,90)")]
         [TestCase(@"$a[1,3,5]					# slice has Length 3, value 40,60,80")]
         [TestCase(@"++$a[1,3,5][1]				# preincrement 60 in array 40,60,80")]
         [TestCase(@"$a[,5]						# slice with Length 1")]
@@ -230,7 +230,7 @@ if ($true)
             AssertIsValidInput(input);
         }
 
-        [Test, Explicit("Punting for now")]
+        [Test]
         public void StringWithDollarSign()
         {
             // This `$%` threw off the tokenizer
