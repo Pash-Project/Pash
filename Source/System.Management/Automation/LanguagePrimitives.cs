@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Extensions.Reflection;
 using System.Text.RegularExpressions;
+using System.Text;
+using System.Management.Automation.Language;
 
 namespace System.Management.Automation
 {
@@ -84,7 +86,7 @@ namespace System.Management.Automation
 
         #endregion
 
-        #region Conversation primitives
+        #region Conversion primitives
 
         /// <summary>
         /// Tries to convert between types.
@@ -157,7 +159,6 @@ namespace System.Management.Automation
 
             return true;
         }
-
 
         /// <summary>
         /// Convert between types.
@@ -235,18 +236,14 @@ namespace System.Management.Automation
                 return valueToConvert;
             }
 
-            if (resultType == typeof(String))
+            if (resultType == typeof(string))
             {
-                if (valueToConvert != null)
-                {
-                    return valueToConvert.ToString();
-                }
-                return "";
+                return ConvertToString(valueToConvert, formatProvider);
             }
 
             if (resultType == typeof(bool))
             {
-                return ConvertToBool(valueToConvert);                
+                return ConvertToBool(valueToConvert);
             }
 
             if (valueToConvert != null && resultType.IsEnum) // enums have to be parsed
@@ -284,6 +281,11 @@ namespace System.Management.Automation
              * the source type, that constructor is called to perform the conversion.
             */
             return DefaultConvertOrCast(valueToConvert, resultType);
+        }
+
+        public static T ConvertTo<T>(object valueToConvert)
+        {
+            return (T)ConvertTo(valueToConvert, typeof(T));
         }
 
         #endregion
@@ -538,6 +540,99 @@ namespace System.Management.Automation
                 return ((SwitchParameter)rawValue).IsPresent;
             }
             return true; // any object that's not null
+        }
+
+        private static string ConvertToString(object rawValue, IFormatProvider formatProvider)
+        {
+            rawValue = PSObject.Unwrap(rawValue);
+            // A value of null type is converted to the empty string.
+            if (rawValue == null)
+            {
+                return string.Empty;
+            }
+            // The bool value $false is converted to "False"; the bool value $true is converted to "True".
+            if (rawValue is bool)
+            {
+                return (bool)rawValue ? "True" : "False";
+            }
+            // A char type value is converted to a 1-character string containing that char.
+            if (rawValue is char)
+            {
+                return new string((char)rawValue, 1);
+            }
+            // A numeric type value is converted to a string having the form of a corresponding numeric literal.
+            // However, the result has no leading or trailing spaces, no leading plus sign, integers have base 10, and
+            // there is no type suffix. For a decimal conversion, the scale is preserved. For values of -∞, +∞, and
+            // NaN, the resulting strings are "-Infinity", "Infinity", and "NaN", respectively.
+            if (rawValue is byte || rawValue is short || rawValue is int || rawValue is long)
+            {
+                return Convert.ToInt64(rawValue).ToString(formatProvider);
+            }
+            if (rawValue is decimal)
+            {
+                return ((decimal)rawValue).ToString(formatProvider);
+            }
+            if (rawValue is float)
+            {
+                return ((float)rawValue).ToString(formatProvider);
+            }
+            if (rawValue is double)
+            {
+                return ((double)rawValue).ToString(formatProvider);
+            }
+            // For an enumeration type value, the result is a string containing the name of each enumeration
+            // constant encoded in that value, separated by commas.
+            if (rawValue is Enum)
+            {
+                // Nicely enough, this is the format specified by the G format specifier. Except for the spaces
+                // after the comma. But PowerShell seems to do exactly the same.
+                return ((Enum)rawValue).ToString("G");
+            }
+            // For a 1-dimensional array, the result is a string containing the value of each element in that array, from
+            // start to end, converted to string, with elements being separated by the current Output Field
+            // Separator (§2.3.2.2). For an array having elements that are themselves arrays, only the top-level
+            // elements are converted. The string used to represent the value of an element that is an array, is
+            // implementation defined. For a multi-dimensional array, it is flattened (§9.12) and then treated as a
+            // 1-dimensional array.
+            // Windows PowerShell: For other enumerable types, the source value is treated like a 1-dimensional
+            // array.
+            if (rawValue is IEnumerable)
+            {
+                var arr = (IEnumerable)rawValue;
+                var runspace = Runspaces.Runspace.DefaultRunspace;
+                var ofsV = runspace.SessionStateProxy.GetVariable("OFS");
+                var ofs = ofsV != null ? ofsV.ToString() : " ";
+
+                var sb = new StringBuilder();
+                bool first = true;
+                // foreach visits multidimensional arrays in row-major order, thereby handling the flattening for us
+                foreach (var o in arr)
+                {
+                    if (!first)
+                    {
+                        sb.Append(ofs);
+                    }
+                    sb.Append(o.ToString());
+                    first = false;
+                }
+
+                return sb.ToString();
+            }
+            // A scriptblock type value is converted to a string containing the text of that block without the
+            // delimiting { and } characters.
+            if (rawValue is ScriptBlock)
+            {
+                var scriptBlock = (ScriptBlock)rawValue;
+                var ast = (ScriptBlockAst)scriptBlock.Ast;
+                // TODO: I would have thought ast.EndBlock.Extent.Text would suffice here, but this corresponds to only the first token in the script block
+            }
+
+            // For other reference type values, if the reference type supports such a conversion, that conversion is
+            // used; otherwise, the conversion is in error.
+            // Windows PowerShell: The string used to represent the value of an element that is an array has the
+            // form System.type[], System.type[,], and so on.
+            // Windows PowerShell: For other reference types, the method ToString is called.
+            return Convert.ToString(rawValue, formatProvider);
         }
 
         private static bool TryParseSignedHexString(string str, out object parsed)
