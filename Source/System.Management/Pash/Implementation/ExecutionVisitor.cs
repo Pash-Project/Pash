@@ -85,19 +85,29 @@ namespace System.Management.Pash.Implementation
 
                 case TokenKind.Ieq:
                 case TokenKind.Ceq:
-                    if (leftOperand is string)
+                    if (leftOperand is string || rightOperand is string)
                     {
-                        StringComparison ignoreCaseComparision = (TokenKind.Ceq == binaryExpressionAst.Operator) ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
-                        return String.Equals(leftOperand as string, rightOperand as string, ignoreCaseComparision);
+                        StringComparison ignoreCaseComparision =
+                            (TokenKind.Ceq == binaryExpressionAst.Operator)
+                            ? StringComparison.CurrentCulture
+                            : StringComparison.CurrentCultureIgnoreCase;
+                        var left = LanguagePrimitives.ConvertTo<string>(leftOperand);
+                        var right = LanguagePrimitives.ConvertTo<string>(rightOperand);
+                        return String.Equals(left, right, ignoreCaseComparision);
                     }
                     return Object.Equals(leftOperand, rightOperand);
 
                 case TokenKind.Ine:
                 case TokenKind.Cne:
-                    if (leftOperand is string)
+                    if (leftOperand is string || rightOperand is string)
                     {
-                        StringComparison ignoreCaseComparision = (TokenKind.Cne == binaryExpressionAst.Operator) ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
-                        return !String.Equals(leftOperand as string, rightOperand as string, ignoreCaseComparision);
+                        StringComparison ignoreCaseComparision =
+                            (TokenKind.Cne == binaryExpressionAst.Operator)
+                            ? StringComparison.CurrentCulture
+                            : StringComparison.CurrentCultureIgnoreCase;
+                        var left = LanguagePrimitives.ConvertTo<string>(leftOperand);
+                        var right = LanguagePrimitives.ConvertTo<string>(rightOperand);
+                        return !String.Equals(left, right, ignoreCaseComparision);
                     }
                     return !Object.Equals(leftOperand, rightOperand);
 

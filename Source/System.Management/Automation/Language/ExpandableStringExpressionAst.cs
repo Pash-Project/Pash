@@ -93,7 +93,7 @@ namespace System.Management.Automation.Language
             {
                 if (strPart is ExpressionAst && exValEnumerator.MoveNext())
                 {
-                    expandedString.Append(exValEnumerator.Current);
+                    expandedString.Append(LanguagePrimitives.ConvertTo<string>(exValEnumerator.Current));
                 }
                 else
                 {

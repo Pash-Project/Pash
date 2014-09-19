@@ -33,11 +33,7 @@ namespace System.Management.Pash.Implementation
             // string concatenation 7.7.2
             if (leftValue is string)
             {
-                if (rightValue is object[])
-                {
-                    return leftValue + String.Join(" ", (object[])rightValue);
-                }
-                return leftValue + rightValue.ToString();
+                return leftValue + LanguagePrimitives.ConvertTo<string>(rightValue);
             }
             // array concatenation (7.7.3)
             if (leftValue is Array)

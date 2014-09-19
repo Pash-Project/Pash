@@ -69,14 +69,8 @@ namespace System.Management.Automation
 
             if (_strfirst != null)
             {
-                String _strsecond = second as String;
-                if (_strsecond != null)
-                {
-                    return (0 == String.Compare(_strsecond, _strfirst, ignoreCase, formatProvider as CultureInfo));
-                }
-
-                return (0 == String.Compare(ConvertTo(second, typeof(String), formatProvider).ToString(), _strfirst, ignoreCase, formatProvider as CultureInfo));
-
+                var _strsecond = (String)ConvertTo(second, typeof(String), formatProvider);
+                return (0 == String.Compare(_strsecond, _strfirst, ignoreCase, formatProvider as CultureInfo));
             }
 
             // If all else fails, stardard object comparison
