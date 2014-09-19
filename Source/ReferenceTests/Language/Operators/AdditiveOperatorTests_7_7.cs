@@ -72,6 +72,8 @@ namespace ReferenceTests.Language.Operators
         [TestCase("\"red\" + 123", "red123")] // "red" + 123  # "red123"
         [TestCase("\"red\" + 123.456e+5", "red12345600")] // "red" + 123.456e+5 # "red12345600"
         [TestCase("\"red\" + (20, 30, 40)", "red20 30 40")] // "red" + (20,30,40) # "red20 30 40"
+        [TestCase("$OFS='x'; \"red\" + (20, 30, 40)", "red20x30x40")]
+        [TestCase("'red' + [System.Linq.Enumerable]::Range(1, 3)", "red1 2 3")]
         public void StringConcatenation_Spec_7_7_2(string cmd, string expected)
         {
             ExecuteAndCompareTypedResult(cmd, expected);
