@@ -9,7 +9,7 @@ namespace ReferenceTests.Language.Operators
         [TestCase("[bool]1", true)]
         [TestCase("[bool]-1", true)]
         [TestCase("[bool]0", false)]
-        [TestCase("[bool][char]0", false, Explicit = true)]
+        [TestCase("[bool][char]0", false)]
         [TestCase("[bool]0.0D", false)]
         [TestCase("[bool]0.1D", true)]
         [TestCase("[bool]0.0", false)]

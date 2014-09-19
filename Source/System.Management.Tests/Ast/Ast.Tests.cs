@@ -410,7 +410,7 @@ ls
                 Assert.IsNull(variablePath.DriveName);
             }
 
-            [Test, Explicit]
+            [Test]
             public void QuestionMark()
             {
                 VariablePath variablePath = ParseInput("$?").

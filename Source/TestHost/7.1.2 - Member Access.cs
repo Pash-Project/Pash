@@ -96,7 +96,7 @@ $path::GetExtension('test.txt')
                   @"$b = ""abcXYZabc""",            // punting for now
                   @"$b.ToUpper()					# call instance method")]
         [TestCase(@"[math]::Sqrt(2) 				# convert 2 to 2.0 and call method")]
-        [TestCase(@"[math]::Sqrt(2D) 				# convert 2D to 2.0 and call method", Explicit = true)]
+        [TestCase(@"[math]::Sqrt(2D) 				# convert 2D to 2.0 and call method")]
         [TestCase(@"[math]::Sqrt($true) 			# convert $true to 1.0 and call method")]
         [TestCase(@"[math]::Sqrt(""20"") 			# convert ""20"" to 20 and call method")]
         [TestCase(@"$a = [math]::Sqrt				# get method descriptor for Sqrt
