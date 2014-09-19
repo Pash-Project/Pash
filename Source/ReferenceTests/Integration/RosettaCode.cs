@@ -12,7 +12,7 @@ namespace ReferenceTests.Integration
     [TestFixture]
     public class RosettaCode : ReferenceTestBase
     {
-        [Test, Explicit("Wrong output because arrays are not converted correctly to strings")]
+        [Test]
         // Taken from http://rosettacode.org/wiki/Array_concatenation#PowerShell
         public void ArrayConcatenation()
         {
