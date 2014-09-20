@@ -636,7 +636,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Decimal type suffix not yet implemented")]
+        [Test]
         // Taken from http://rosettacode.org/wiki/Literals/Integer#PowerShell
         public void LiteralsInteger()
         {
