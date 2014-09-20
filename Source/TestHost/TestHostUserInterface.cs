@@ -103,12 +103,12 @@ namespace TestHost
 
         public override void WriteVerboseLine(string message)
         {
-            throw new NotImplementedException();
+            this.Log.AppendLine(message);
         }
 
         public override void WriteWarningLine(string message)
         {
-            throw new NotImplementedException();
+            this.Log.AppendLine(message);
         }
 
         public string GetOutput()

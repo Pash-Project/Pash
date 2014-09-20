@@ -78,6 +78,7 @@
     <Compile Include="Cmdlets\GetCommandTests.cs" />
     <Compile Include="Cmdlets\NewObjectCommandTests.cs" />
     <Compile Include="7.1.7 - ArraySubexpressionOperator.cs" />
+    <Compile Include="Cmdlets\VerboseCommonParameterTests.cs" />
     <Compile Include="DotSourceTests.cs" />
     <Compile Include="FileSystemTests\ShellExecutionTest.cs" />
     <Compile Include="InitialSessionStateTests.cs" />
@@ -95,6 +96,7 @@
     <Compile Include="7.1.6 - SubexpressionOperator.cs" />
     <Compile Include="TestHelpers\TestCommand.cs" />
     <Compile Include="TestHelpers\TestInvokeScriptCommand.cs" />
+    <Compile Include="TestHelpers\TestVerboseOutputCommand.cs" />
     <Compile Include="TestHost.cs" />
     <Compile Include="TestHostUserInterface.cs" />
     <Compile Include="Tests.cs" />

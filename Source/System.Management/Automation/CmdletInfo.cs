@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Text;
+using Pash;
 using Pash.Implementation;
 
 namespace System.Management.Automation
@@ -315,6 +316,15 @@ namespace System.Management.Automation
         internal ReadOnlyCollection<CommandParameterSetInfo> GetNonDefaultParameterSets()
         {
             return new ReadOnlyCollection<CommandParameterSetInfo>(ParameterSets.Where(x => !x.IsDefault).ToList());
+        }
+
+        internal void AddCommonParameters()
+        {
+            ParameterSets = CommonCmdletParameters.AddCommonParameters(ParameterSets);
+            foreach (CommandParameterInfo parameterInfo in CommonCmdletParameters.CommonParameterSetInfo.Parameters)
+            {
+                RegisterParameter(parameterInfo);
+            }
         }
     }
 }

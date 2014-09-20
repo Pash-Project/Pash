@@ -6,6 +6,7 @@ using System.Resources;
 using System.Collections;
 using System.Threading;
 using ExecutionContext = Pash.Implementation.ExecutionContext;
+using Pash.Implementation;
 
 namespace System.Management.Automation
 {
@@ -15,9 +16,11 @@ namespace System.Management.Automation
     public class Cmdlet : InternalCommand
     {
         internal string ParameterSetName { get; set; }
+        internal CommonParametersCmdlet CommonParameters { get; set; }
 
         protected Cmdlet()
         {
+            CommonParameters = new CommonParametersCmdlet();
         }
 
         public bool Stopping
@@ -207,7 +210,11 @@ namespace System.Management.Automation
             {
                 throw new NotImplementedException("WriteVerbose");
             }
-            CommandRuntime.WriteVerbose(text);
+
+            if (CommonParameters.Verbose)
+            {
+                CommandRuntime.WriteVerbose(text);
+            }
         }
 
         public void WriteWarning(string text)

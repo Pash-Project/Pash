@@ -137,10 +137,12 @@ namespace System.Management.Automation
 
         public void WriteVerbose(string text)
         {
+            ExecutionContext.LocalHost.UI.WriteVerboseLine(text);
         }
 
         public void WriteWarning(string text)
         {
+            ExecutionContext.LocalHost.UI.WriteWarningLine(text);
         }
 
         #endregion

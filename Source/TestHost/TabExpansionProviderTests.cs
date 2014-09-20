@@ -1,10 +1,12 @@
 using System;
-using NUnit.Framework;
-using System.Management.Automation.Runspaces;
-using Pash.Implementation;
-using System.Management.Automation;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Management.Automation;
+using System.Management.Automation.Runspaces;
+
+using NUnit.Framework;
+using Pash.Implementation;
 
 namespace TestHost
 {
@@ -192,15 +194,23 @@ namespace TestHost
             }
         }
 
-        [TestCase("", new [] { "-LiteralPath", "-PassThru", "-Path", "-PSPath", "-StackName" } )]
         [TestCase("-p", new [] { "-PassThru", "-Path", "-PSPath"} )]
         [TestCase("p", new string[] { } )]
         [TestCase("-ps", new [] { "-PSPath",} )]
         public void TabExpansionCanExpandCmdletParameters(string prefix, string[] expected)
         {
             var cmdlet = _tabExp.CheckForCommandWithCmdlet("Set-Location");
-            var expansions = _tabExp.GetCmdletParameterExpansions(cmdlet, prefix);
+            var expansions = _tabExp.GetCmdletParameterExpansions(cmdlet, prefix).ToArray();
             expansions.ShouldEqual(expected);
+        }
+
+        [TestCase("", new [] { "-LiteralPath", "-PassThru", "-Path", "-PSPath", "-StackName" } )]
+        public void TabExpansionCanExpandCmdletParametersIgnoreExtraCommonParameterExpansions(string prefix, string[] expected)
+        {
+            var cmdlet = _tabExp.CheckForCommandWithCmdlet("Set-Location");
+            var expansions = _tabExp.GetCmdletParameterExpansions(cmdlet, prefix);
+
+            CollectionAssert.IsSubsetOf(expected, expansions);
         }
 
         [TestCase("my", new [] { "MyFun2", "MyFunction" })]
