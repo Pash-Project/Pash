@@ -141,7 +141,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Format operator not implemented")]
+        [Test, Explicit("Value '2007' can't be converted or casted to 'System.DateTime'")]
         [SetCulture("en-US")]
         // Taken from http://rosettacode.org/wiki/Date_format#PowerShell
         public void DateFormat()
@@ -433,7 +433,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Format operator not yet implemented")]
+        [Test]
         [SetCulture("en-US")]
         // Taken from http://rosettacode.org/wiki/Formatted_numeric_output#PowerShell
         public void FormattedNumericOutput()
@@ -636,7 +636,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Decimal type suffix not yet implemented")]
+        [Test]
         // Taken from http://rosettacode.org/wiki/Literals/Integer#PowerShell
         public void LiteralsInteger()
         {
@@ -976,12 +976,12 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Format operator not implemented yet")]
+        [Test]
         // Taken from http://rosettacode.org/wiki/Non-decimal_radices/Output#PowerShell
         public void NonDecimalRadicesOutput()
         {
             var code = NewlineJoin(
-                "foreach ($n in 0..5    ) {",
+                "foreach ($n in 0..5) {",
                 "    \"Base 2:  \" + [Convert]::ToString($n, 2)",
                 "    \"Base 8:  \" + [Convert]::ToString($n, 8)",
                 "    \"Base 10: \" + $n",
@@ -1020,7 +1020,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Format operator not implemented yet")]
+        [Test]
         // Adapted from http://rosettacode.org/wiki/Quine#PowerShell
         public void Quine()
         {
@@ -1555,7 +1555,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Format operator not implemented")]
+        [Test, Explicit("Wrong result")]
         [SetCulture("de-DE")]
         // Taken from http://rosettacode.org/wiki/Trigonometric_functions#PowerShell
         public void TrigonometricFunctions()

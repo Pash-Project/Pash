@@ -282,7 +282,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Aliases are still missing")]
+        [Test]
         [SetCulture("en-US")]
         // Adapted from http://codegolf.stackexchange.com/a/1233/15
         public void CoinToss()

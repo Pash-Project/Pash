@@ -822,7 +822,16 @@ namespace Pash.ParserIntrinsics
                 return BuildRangeExpressionAst(parseTreeNode.ChildNodes.Single());
             }
 
-            throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
+            var leftOperand = parseTreeNode.ChildNodes[0];
+            var operatorNode = parseTreeNode.ChildNodes[1];
+            var rightOperand = parseTreeNode.ChildNodes[2];
+
+            return new BinaryExpressionAst(
+                new ScriptExtent(parseTreeNode),
+                BuildFormatExpressionAst(leftOperand),
+                TokenKind.Format,
+                BuildRangeExpressionAst(rightOperand),
+                new ScriptExtent(operatorNode));
         }
 
         ExpressionAst BuildRangeExpressionAst(ParseTreeNode parseTreeNode)
