@@ -321,8 +321,9 @@ namespace ReferenceTests
         [Test]
         public void VerboseCommonParameterAvailableFromGetCommandCmdlet()
         {
-            PSObject result = ReferenceHost.RawExecute("Get-Command | where-object { $_.Name -eq 'Get-Command' }").First();
-            var info = (CmdletInfo)result.BaseObject;
+            CmdletInfo info = ReferenceHost.RawExecute("Get-Command")
+                .Select(psObject => psObject.BaseObject as CmdletInfo)
+                .FirstOrDefault(cmdletInfo => (cmdletInfo != null) && (cmdletInfo.Name == "Get-Command"));
             CommandParameterSetInfo parameterSetInfo = info.ParameterSets[0];
             CommandParameterInfo verboseParameter = parameterSetInfo.Parameters.FirstOrDefault(parameter => parameter.Name == "Verbose");
 
