@@ -167,13 +167,19 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Rem:
                     return ArithmeticOperations.Remainder(leftOperand, rightOperand);
 
+                case TokenKind.Format:
+                    {
+                        var left = LanguagePrimitives.ConvertTo<string>(leftOperand);
+                        var right = LanguagePrimitives.ConvertTo<object[]>(rightOperand);
+                        return string.Format(left, right);
+                    }
+
                 case TokenKind.Equals:
                 case TokenKind.PlusEquals:
                 case TokenKind.MinusEquals:
                 case TokenKind.MultiplyEquals:
                 case TokenKind.DivideEquals:
                 case TokenKind.RemainderEquals:
-                case TokenKind.Format:
                 case TokenKind.Not:
                 case TokenKind.Bnot:
                 case TokenKind.Join:
