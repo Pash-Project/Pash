@@ -1,6 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using System.Globalization;
+using System.Xml;
 
 namespace ReferenceTests.Language.Operators
 {
@@ -357,6 +358,24 @@ namespace ReferenceTests.Language.Operators
         public void ConvertToArray_Spec_6_9_OtherEnumerableType()
         {
             ExecuteAndCompareTypedResult("[string[]][System.Linq.Enumerable]::Range(1,5)", "1", "2", "3", "4", "5");
+        }
+
+        [Test]
+        public void ConvertToXml_Spec_6_10_StringToXmlWorks()
+        {
+            var results = ReferenceHost.RawExecute("[xml]'<foo bar=\"baz\"></foo>'");
+            Assert.AreEqual(1, results.Count);
+            var result = results[0];
+            Assert.AreEqual(typeof(XmlDocument), result.BaseObject.GetType());
+        }
+
+        [Test, Explicit("Seemingly PowerShell doesn't parse the scriptblock and thus doesn't care about syntax errors here.")]
+        public void ConvertToXml_Spec_6_10_ScriptblockToXmlWorksByConvertingToStringFirst()
+        {
+            var results = ReferenceHost.RawExecute("[xml]{<foo bar='baz'></foo>}");
+            Assert.AreEqual(1, results.Count);
+            var result = results[0];
+            Assert.AreEqual(typeof(XmlDocument), result.BaseObject.GetType());
         }
 
         [Test, Combinatorial]

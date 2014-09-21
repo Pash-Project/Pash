@@ -13,6 +13,7 @@ using Extensions.Reflection;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Management.Automation.Language;
+using System.Xml;
 
 namespace System.Management.Automation
 {
@@ -247,6 +248,13 @@ namespace System.Management.Automation
                 return ConvertToString(valueToConvert, formatProvider);
             }
 
+            if (resultType == typeof(XmlDocument))
+            {
+                var doc = new XmlDocument();
+                doc.LoadXml(ConvertTo<string>(valueToConvert));
+                return doc;
+            }
+
             if (resultType == typeof(bool))
             {
                 return ConvertToBool(valueToConvert);
@@ -399,8 +407,8 @@ namespace System.Management.Automation
         public static IEnumerable GetEnumerable(object obj)
         {
             obj = PSObject.Unwrap(obj);
-            // Powershell seems to exclude dictionaries and strings from being enumerables
-            if (obj is IDictionary || obj is string)
+            // Powershell seems to exclude a few types from from being enumerables
+            if (obj is IDictionary || obj is string || obj is XmlDocument)
             {
                 return null;
             }
