@@ -1,5 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
+using System.Globalization;
 
 namespace ReferenceTests.Language.Operators
 {
@@ -197,6 +198,86 @@ namespace ReferenceTests.Language.Operators
             ExecuteAndCompareTypedResult(cmd);
         }
 
+        [TestCase("[float]$false", 0f)]
+        [TestCase("[float]$true", 1f)]
+        [TestCase("[float][char]9731", 9731f, Explicit = true, Reason = "Conversion from char fails")]
+        [TestCase("[float]42", 42f)]
+        [TestCase("[float]16777216", 16777216f)]
+        [TestCase("[float]$null", 0f)]
+        [TestCase("[float]'0.0'", 0f)]
+        [TestCase("[float]'0.5'", 0.5f)]
+        [TestCase("[float]'16777216'", 16777216f)]
+        [TestCase("[float]'16777216.0'", 16777216f)]
+        [TestCase("[float]'-Infinity'", float.NegativeInfinity)]
+        [TestCase("[float]'Infinity'", float.PositiveInfinity)]
+        [TestCase("[float]'NaN'", float.NaN)]
+        public void ConvertToFloat_Spec_6_5(string cmd, float expected)
+        {
+            ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
+        [ExpectedException]
+        [TestCase("[float]'-infinity'")]
+        [TestCase("[float]'infinity'")]
+        [TestCase("[float]'Nan'")]
+        [TestCase("[float]'xyz'")]
+        public void ConvertToFloat_Spec_Erors_6_5(string cmd)
+        {
+            ExecuteAndCompareTypedResult(cmd);
+        }
+
+        [TestCase("[double]$false", 0)]
+        [TestCase("[double]$true", 1)]
+        [TestCase("[double][char]9731", 9731, Explicit = true, Reason = "Conversion from char fails")]
+        [TestCase("[double]42", 42)]
+        [TestCase("[double]9007199254740992", 9007199254740992)]
+        [TestCase("[double]$null", 0)]
+        [TestCase("[double]'0.0'", 0)]
+        [TestCase("[double]'0.5'", 0.5)]
+        [TestCase("[double]'9007199254740992'", 9007199254740992)]
+        [TestCase("[double]'9007199254740992.0'", 9007199254740992)]
+        [TestCase("[double]'-Infinity'", double.NegativeInfinity)]
+        [TestCase("[double]'Infinity'", double.PositiveInfinity)]
+        [TestCase("[double]'NaN'", double.NaN)]
+        public void ConvertToDouble_Spec_6_5(string cmd, double expected)
+        {
+            ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
+        [ExpectedException]
+        [TestCase("[double]'-infinity'")]
+        [TestCase("[double]'infinity'")]
+        [TestCase("[double]'Nan'")]
+        [TestCase("[double]'xyz'")]
+        public void ConvertToDouble_Spec_Erors_6_5(string cmd)
+        {
+            ExecuteAndCompareTypedResult(cmd);
+        }
+
+        [TestCase("[decimal]$false", "0")]
+        [TestCase("[decimal]$true", "1")]
+        [TestCase("[decimal][char]9731", "9731", Explicit = true, Reason = "Conversion from char fails")]
+        [TestCase("[decimal]42", "42")]
+        [TestCase("[decimal]9007199254740992", "9007199254740992")]
+        [TestCase("[decimal]9223372036854775807", "9223372036854775807")]
+        [TestCase("[decimal]$null", "0")]
+        [TestCase("[decimal]'0.0'", "0")]
+        [TestCase("[decimal]'0.5'", "0.5")]
+        [TestCase("[decimal]'0.500'", "0.5")]
+        [TestCase("[decimal]'9007199254740992'", "9007199254740992")]
+        [TestCase("[decimal]'9223372036854775807.0'", "9223372036854775807")]
+        public void ConvertToDecimal_Spec_6_6(string cmd, string expected)
+        {
+            ExecuteAndCompareTypedResult(cmd, decimal.Parse(expected, CultureInfo.InvariantCulture));
+        }
+
+        [ExpectedException]
+        [TestCase("[decimal]'xyz'")]
+        public void ConvertToDecimal_Spec_Erors_6_6(string cmd)
+        {
+            ExecuteAndCompareTypedResult(cmd);
+        }
+
         [TestCase("[string]$null", "")]
         [TestCase("[string][char]9731", "☃")]
         [TestCase("[string]1", "1")]
@@ -263,6 +344,51 @@ namespace ReferenceTests.Language.Operators
                 prefix + "4242424242424242" +
                 (trailingSpace ? " " : "") + "'";
             long expected = prefix == "0x" ? 0x4242424242424242 : 4242424242424242;
+            if (prefix == "-") { expected *= -1; }
+            ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
+        [Test, Combinatorial, Explicit("Doesn't cope with any leading sign")]
+        public void ConvertToFloatFromString_Spec_6_16(
+            [Values(false, true)] bool leadingSpace,
+            [Values(false, true)] bool trailingSpace,
+            [Values("", "+", "-")] string prefix)
+        {
+            string cmd = "[float]'" +
+                (leadingSpace ? "  " : "") +
+                prefix + "0.75" +
+                (trailingSpace ? " " : "") + "'";
+            float expected = 0.75f;
+            if (prefix == "-") { expected *= -1; }
+            ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
+        [Test, Combinatorial, Explicit("Doesn't cope with any leading sign")]
+        public void ConvertToDoubleFromString_Spec_6_16(
+            [Values(false, true)] bool leadingSpace,
+            [Values(false, true)] bool trailingSpace,
+            [Values("", "+", "-")] string prefix)
+        {
+            string cmd = "[double]'" +
+                (leadingSpace ? "  " : "") +
+                prefix + "0.75" +
+                (trailingSpace ? " " : "") + "'";
+            double expected = 0.75;
+            if (prefix == "-") { expected *= -1; }
+            ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
+        [Test, Combinatorial, Explicit("Doesn't cope with any leading sign")]
+        public void ConvertToDecimalFromString_Spec_6_16(
+            [Values(false, true)] bool leadingSpace,
+            [Values(false, true)] bool trailingSpace,
+            [Values("", "+", "-")] string prefix)
+        {
+            string cmd = "[decimal]'" +
+                (leadingSpace ? "  " : "") +
+                prefix + "0.75" +
+                (trailingSpace ? " " : "") + "'";
+            decimal expected = 0.75m;
             if (prefix == "-") { expected *= -1; }
             ExecuteAndCompareTypedResult(cmd, expected);
         }
