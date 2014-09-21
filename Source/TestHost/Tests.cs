@@ -220,38 +220,6 @@ namespace TestHost
         }
 
         [Test]
-        public void Ranges()
-        {
-            //// 7.4 Range operator
-            //// Examples:
-            //// 
-            ////     1..10              # ascending range 1..10
-            {
-                var result = TestHost.Execute("1..10");
-
-                var expected = Enumerable.Range(1, 10).JoinString(Environment.NewLine) + Environment.NewLine;
-
-                Assert.AreEqual(expected, result);
-            }
-
-            //CollectionAssert.AreEqual(new[] { 3, 2, 1 }, (int[])TestHost.Execute("3..1"));
-
-            //////    -500..-495          # descending range -500..-495
-            //CollectionAssert.AreEqual(new[] { -500, -499, -498, -497, -496, -495 }, (int[])TestHost.Execute("-500..-495"));
-
-            //////     16..16             # seqeunce of 1
-            //CollectionAssert.AreEqual(new[] { 16 }, (int[])TestHost.Execute("16..16"));
-
-            ////     
-            ////     $x = 1.5
-            ////     $x..5.40D          # ascending range 2..5
-            ////     
-            ////     $true..3           # ascending range 1..3
-            ////     -2..$null          # ascending range -2..0
-            ////    "0xf".."0xa"        # descending range 15..10           
-        }
-
-        [Test]
         public void SequenceInPipeline()
         {
             //// 7.4 Range operator

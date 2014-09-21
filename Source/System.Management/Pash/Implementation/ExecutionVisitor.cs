@@ -78,7 +78,7 @@ namespace System.Management.Pash.Implementation
             switch (binaryExpressionAst.Operator)
             {
                 case TokenKind.DotDot:
-                    return Range((int)leftOperand, (int)rightOperand);
+                    return Range(LanguagePrimitives.ConvertTo<int>(leftOperand), LanguagePrimitives.ConvertTo<int>(rightOperand));
 
                 case TokenKind.Plus:
                     return ArithmeticOperations.Add(leftOperand, rightOperand);
