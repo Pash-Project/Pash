@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using System.Globalization;
 using System.Xml;
+using System.Text.RegularExpressions;
 
 namespace ReferenceTests.Language.Operators
 {
@@ -376,6 +377,27 @@ namespace ReferenceTests.Language.Operators
             Assert.AreEqual(1, results.Count);
             var result = results[0];
             Assert.AreEqual(typeof(XmlDocument), result.BaseObject.GetType());
+        }
+
+        [TestCase("[regex]'abc*'")]
+        [TestCase("[regex]5")]
+        public void ConvertToRegex_Spec_6_11(string cmd)
+        {
+            var results = ReferenceHost.RawExecute(cmd);
+            Assert.AreEqual(1, results.Count);
+            var result = results[0];
+            Assert.AreEqual(typeof(Regex), result.BaseObject.GetType());
+        }
+
+        [Test, SetCulture("de-DE")]
+        public void ConvertToRegex_Spec_6_11_ConversionToStringUsesInvariantCulture()
+        {
+            var results = ReferenceHost.RawExecute("[regex]1.2");
+            Assert.AreEqual(1, results.Count);
+            var result = results[0];
+            Assert.AreEqual(typeof(Regex), result.BaseObject.GetType());
+            var regex = (Regex)result.BaseObject;
+            Assert.True(regex.IsMatch("1*2"));
         }
 
         [Test, Combinatorial]

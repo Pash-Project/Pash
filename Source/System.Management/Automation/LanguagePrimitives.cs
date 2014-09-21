@@ -255,6 +255,11 @@ namespace System.Management.Automation
                 return doc;
             }
 
+            if (resultType == typeof(Regex))
+            {
+                return new Regex(ConvertTo<string>(valueToConvert));
+            }
+
             if (resultType == typeof(bool))
             {
                 return ConvertToBool(valueToConvert);
