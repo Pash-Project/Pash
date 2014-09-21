@@ -301,6 +301,64 @@ namespace ReferenceTests.Language.Operators
             ExecuteAndCompareTypedResult(cmd, expected);
         }
 
+        [Test, ExpectedException, Explicit]
+        public void ConvertToArray_Spec_6_9_TargetTypeMayNotBeMultidimensional()
+        {
+            ReferenceHost.RawExecute("[int[,]]5");
+        }
+
+        [Test]
+        public void ConvertToArray_Spec_6_9_NullIsRetainedAsIs()
+        {
+            ExecuteAndCompareTypedResult("[int[]]$null", new object[] { null });
+        }
+
+        [Test]
+        public void ConvertToArray_Spec_6_9_ScalarEndsUpInNewArray()
+        {
+            // TODO: can this be tested easier with RawExecute and via NUnit directly? I couldn't figure out how.
+            ExecuteAndCompareTypedResult("([int[]]5).Length", 1);
+            ExecuteAndCompareTypedResult("([int[]]5)[0]", 5);
+        }
+
+        [Test]
+        public void ConvertToArray_Spec_6_9_ScalarEndsUpInNewArrayWithConversion()
+        {
+            // TODO: can this be tested easier with RawExecute and via NUnit directly? I couldn't figure out how.
+            ExecuteAndCompareTypedResult("([int[]]'5').Length", 1);
+            ExecuteAndCompareTypedResult("([int[]]'5')[0]", 5);
+        }
+
+        [Test]
+        public void ConvertToArray_Spec_6_9_OneDimensionalArrayElementsGetConverted()
+        {
+            ExecuteAndCompareTypedResult("[double[]](1..5)", 1.0, 2.0, 3.0, 4.0, 5.0);
+        }
+
+        [Test, Explicit("This one fails in PowerShell, contrary to the spec")]
+        public void ConvertToArray_Spec_6_9_MultiDimensionalArrayGetsFlattened()
+        {
+            ExecuteAndCompareTypedResult("$a = New-Object 'int[,]' 2,2; $a[0,0] = 10; $a[0,1] = 20; $a[1,0] = 30; $a[1,1] = 40; [int[]]$a", 10, 20, 30, 40);
+        }
+
+        [Test, Explicit("This one fails in PowerShell, contrary to the spec")]
+        public void ConvertToArray_Spec_6_9_MultiDimensionalArrayGetsFlattenedAndElementsConverted()
+        {
+            ExecuteAndCompareTypedResult("$a = New-Object 'int[,]' 2,2; $a[0,0] = 10; $a[0,1] = 20; $a[1,0] = 30; $a[1,1] = 40; [string[]]$a", "10", "20", "30", "40");
+        }
+
+        [Test, Explicit("#287")]
+        public void ConvertToArray_Spec_6_9_StringToCharArrayWorks()
+        {
+            ExecuteAndCompareTypedResult("[char[]]'abc\u9731'", 'a', 'b', 'c', '\u9731');
+        }
+
+        [Test]
+        public void ConvertToArray_Spec_6_9_OtherEnumerableType()
+        {
+            ExecuteAndCompareTypedResult("[string[]][System.Linq.Enumerable]::Range(1,5)", "1", "2", "3", "4", "5");
+        }
+
         [Test, Combinatorial]
         public void ConvertToByteFromString_Spec_6_16(
             [Values(false, true)] bool leadingSpace,
