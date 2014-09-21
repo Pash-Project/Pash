@@ -230,6 +230,11 @@ namespace System.Management.Automation
                 return valueToConvert;
             }
 
+            if (resultType == typeof(char))
+            {
+                return ConvertToChar(valueToConvert);
+            }
+
             if (resultType == typeof(string))
             {
                 return ConvertToString(valueToConvert, formatProvider);
@@ -534,6 +539,58 @@ namespace System.Management.Automation
                 return ((SwitchParameter)rawValue).IsPresent;
             }
             return true; // any object that's not null
+        }
+
+        private static char ConvertToChar(object rawValue)
+        {
+            // A value of null type is converted to the character U+0000.
+            if (rawValue == null)
+            {
+                return (char)0;
+            }
+            // The conversion of a value of type bool, decimal, float, or double is in error.
+            if (rawValue is bool || rawValue is decimal || rawValue is float || rawValue is double)
+            {
+                throw new PSInvalidCastException(string.Format("Cannot convert {0} from {1} to char.", rawValue, rawValue.GetType()));
+            }
+            // An integer type value whose value can be represented in type char has that value; otherwise, the
+            // conversion is in error.
+            if (rawValue is byte || rawValue is short || rawValue is int || rawValue is long)
+            {
+                var value = Convert.ToInt64(rawValue);
+                if (value < char.MinValue || value > char.MaxValue)
+                {
+                    throw new PSInvalidCastException(string.Format("Value {0} was too large or to small for conversion to char", value));
+                }
+                return (char)value;
+            }
+            if (rawValue is ushort || rawValue is uint || rawValue is ulong)
+            {
+                var value = Convert.ToUInt64(rawValue);
+                if (value > 0xFFFF)
+                {
+                    throw new PSInvalidCastException(string.Format("Value {0} was too large for conversion to char", value));
+                }
+                return (char)value;
+            }
+            // The conversion of a string value having a length other than 1 is in error.
+            // A string value having a length 1 is converted to a char having that one character's value.
+            if (rawValue is string)
+            {
+                var s = (string)rawValue;
+                if (s.Length != 1)
+                {
+                    throw new PSInvalidCastException(string.Format("Cannot convert string of length {0} to char.", s.Length));
+                }
+                return s[0];
+            }
+            // A numeric type value whose value after rounding of any fractional part can be represented in the
+            // destination type has that rounded value; otherwise, the conversion is in error.
+            // TODO: How is this supposed to work? All floating-point types are already errors. [char]33.0 doesn't work in PowerShell either.
+
+            // For other reference type values, if the reference type supports such a conversion, that conversion is
+            // used; otherwise, the conversion is in error.
+            return Convert.ToChar(rawValue);
         }
 
         private static string ConvertToString(object rawValue, IFormatProvider formatProvider)

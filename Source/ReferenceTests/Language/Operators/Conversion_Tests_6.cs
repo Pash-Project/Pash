@@ -33,6 +33,39 @@ namespace ReferenceTests.Language.Operators
             ExecuteAndCompareTypedResult(cmd, expected);
         }
 
+        [TestCase("[char]$null", '\u0000')]
+        [TestCase("[char]97", 'a')]
+        [TestCase("[char]9731", '☃')]
+        [TestCase("[char][byte]97", 'a')]
+        [TestCase("[char][System.Int16]97", 'a')]
+        [TestCase("[char]97L", 'a')]
+        [TestCase("[char]'x'", 'x')]
+        public void ConvertToChar_Spec_6_3(string cmd, char expected)
+        {
+            ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
+        [ExpectedException]
+        [TestCase("[char]$true")]
+        [TestCase("[char]$false")]
+        [TestCase("[char]0.5")]
+        [TestCase("[char]1.0")]
+        [TestCase("[char][float]0.5")]
+        [TestCase("[char][float]1.0")]
+        [TestCase("[char]0.5d")]
+        [TestCase("[char]1.0d")]
+        [TestCase("[char]-1")]
+        [TestCase("[char]65536")]
+        [TestCase("[char]-1L")]
+        [TestCase("[char]65536L")]
+        [TestCase("[char]''")]
+        [TestCase("[char]'ab'")]
+        [TestCase("[char](1,2)")]
+        public void ConvertToChar_Spec_Errors_6_3(string cmd)
+        {
+            ExecuteAndCompareTypedResult(cmd);
+        }
+
         [TestCase("[string]$null", "")]
         [TestCase("[string][char]9731", "☃")]
         [TestCase("[string]1", "1")]
