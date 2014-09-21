@@ -400,6 +400,15 @@ namespace ReferenceTests.Language.Operators
             Assert.True(regex.IsMatch("1*2"));
         }
 
+        [TestCase("[System.ConsoleColor]'Red'", ConsoleColor.Red)]
+        [TestCase("[System.ConsoleColor]'12'", ConsoleColor.Red)]
+        [TestCase("[System.ConsoleColor]'Red, Green'", ConsoleColor.Yellow)]
+        [TestCase("[System.ConsoleColor]'Red,Green'", ConsoleColor.Yellow)]
+        public void ConvertToEnum_Spec_6_13(string cmd, Enum expected)
+        {
+            ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
         [Test, Combinatorial]
         public void ConvertToByteFromString_Spec_6_16(
             [Values(false, true)] bool leadingSpace,
