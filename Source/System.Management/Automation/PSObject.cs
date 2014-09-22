@@ -140,10 +140,6 @@ namespace System.Management.Automation
         private List<PSMethod> GetMethods(bool isInstance)
         {
             var baseObject = ImmediateBaseObject;
-            if (baseObject == null)
-            {
-                return new List<PSMethod>();
-            }
             var type = (baseObject is Type && !isInstance) ? (Type) baseObject : baseObject.GetType();
             var instanceObject = isInstance ? baseObject : null;
             BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy;
@@ -155,10 +151,6 @@ namespace System.Management.Automation
         private List<PSProperty> GetProperties(bool isInstance)
         {
             var baseObject = ImmediateBaseObject;
-            if (baseObject == null)
-            {
-                return new List<PSProperty>();
-            }
             var type = (baseObject is Type && !isInstance) ? (Type) baseObject : baseObject.GetType();
             var instanceObject = isInstance ? baseObject : null;
             BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy;
@@ -242,28 +234,16 @@ namespace System.Management.Automation
             {
                 obj = ((PSObject)obj).ImmediateBaseObject;
             }
-            if (ImmediateBaseObject == null)
-            {
-                return obj == null;
-            }
             return ImmediateBaseObject.Equals(obj);
         }
 
         public override int GetHashCode()
         {
-            if (ImmediateBaseObject == null)
-            {
-                return 0;
-            }
             return ImmediateBaseObject.GetHashCode();
         }
 
         public override string ToString()
         {
-            if (ImmediateBaseObject == null)
-            {
-                return "";
-            }
             return ImmediateBaseObject.ToString();
         }
 
@@ -295,7 +275,7 @@ namespace System.Management.Automation
         public string ToString(string format, IFormatProvider formatProvider)
         {
             // TODO: a better implementation with format and formatProvider
-            return (ImmediateBaseObject == null) ? "" : ImmediateBaseObject.ToString();
+            return ImmediateBaseObject.ToString();
         }
 
         public int CompareTo(object obj)
