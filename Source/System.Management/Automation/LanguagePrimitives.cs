@@ -194,6 +194,12 @@ namespace System.Management.Automation
             if (resultType.IsArray && valueToConvert != null && resultType != valueToConvert.GetType())
             {
                 var elementType = resultType.GetElementType();
+
+                if (elementType == typeof(char) && valueToConvert is string)
+                {
+                    return ((string)valueToConvert).ToCharArray();
+                }
+
                 var enumerableValue = GetEnumerable(valueToConvert);
                 // check for simple packaging
                 // Powershell seems to neither enumerate dictionaries nor strings
@@ -203,6 +209,7 @@ namespace System.Management.Automation
                     array.SetValue(ConvertTo(valueToConvert, elementType, formatProvider), 0);
                     return array;
                 }
+
                 // otherwise we have some IEnumerable thing. recursively create a list and copy to array
                 // a list first, because we don't know the number of arguments
                 var list = (IList) Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType));

@@ -347,7 +347,7 @@ namespace ReferenceTests.Language.Operators
             ExecuteAndCompareTypedResult("$a = New-Object 'int[,]' 2,2; $a[0,0] = 10; $a[0,1] = 20; $a[1,0] = 30; $a[1,1] = 40; [string[]]$a", "10", "20", "30", "40");
         }
 
-        [Test, Explicit("#287")]
+        [Test]
         public void ConvertToArray_Spec_6_9_StringToCharArrayWorks()
         {
             ExecuteAndCompareTypedResult("[char[]]'abc\u9731'", 'a', 'b', 'c', '\u9731');
