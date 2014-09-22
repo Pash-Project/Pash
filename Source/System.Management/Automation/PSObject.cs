@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Collections;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace System.Management.Automation
 {
@@ -244,7 +245,12 @@ namespace System.Management.Automation
 
         public override string ToString()
         {
-            return ImmediateBaseObject.ToString();
+            return (string)LanguagePrimitives.ConvertTo(ImmediateBaseObject, typeof(string), Thread.CurrentThread.CurrentCulture);
+        }
+
+        public string ToString(string format, IFormatProvider formatProvider)
+        {
+            return (string)LanguagePrimitives.ConvertTo(ImmediateBaseObject, typeof(string), formatProvider);
         }
 
         public static PSObject AsPSObject(object obj)
@@ -270,12 +276,6 @@ namespace System.Management.Automation
         {
             var psobj = obj as PSObject;
             return psobj == null ? obj : psobj.BaseObject;
-        }
-
-        public string ToString(string format, IFormatProvider formatProvider)
-        {
-            // TODO: a better implementation with format and formatProvider
-            return ImmediateBaseObject.ToString();
         }
 
         public int CompareTo(object obj)

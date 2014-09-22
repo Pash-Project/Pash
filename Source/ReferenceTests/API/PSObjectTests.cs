@@ -145,5 +145,20 @@ namespace ReferenceTests.API
                 new PSObject(null);
             });
         }
+
+        [Test]
+        [TestCase(new int[] { 1, 2 }, "1 2")]
+        [TestCase(new object[] { 1, "foo" }, "1 foo")]
+        [TestCase(new object[] { 1, new object[] { 1, 2 } }, "1 System.Object[]")]
+        public void PSObjectToStringConvertsArrayCorrectly(object input, string expected)
+        {
+            Assert.AreEqual(expected, new PSObject(input).ToString());
+        }
+
+        [Test, SetCulture("de-DE")]
+        public void PSObjectToStringUsesCurrentCulture()
+        {
+            Assert.AreEqual("1 2,5", new PSObject(new object[] { 1, 2.5 }).ToString());
+        }
     }
 }

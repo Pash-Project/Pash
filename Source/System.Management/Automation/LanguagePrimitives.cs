@@ -679,11 +679,14 @@ namespace System.Management.Automation
                 // foreach visits multidimensional arrays in row-major order, thereby handling the flattening for us
                 foreach (var o in arr)
                 {
+                    // Since PSObject.ToString uses this very method as well we have to be careful not to
+                    // accidentally handle nested arrays the same way.
+                    var obj = PSObject.Unwrap(o);
                     if (!first)
                     {
                         sb.Append(ofs);
                     }
-                    sb.Append(o.ToString());
+                    sb.Append(obj.ToString());
                     first = false;
                 }
 
