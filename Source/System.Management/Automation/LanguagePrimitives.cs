@@ -13,6 +13,7 @@ using Extensions.Reflection;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Management.Automation.Language;
+using System.Xml;
 
 namespace System.Management.Automation
 {
@@ -194,6 +195,12 @@ namespace System.Management.Automation
             if (resultType.IsArray && valueToConvert != null && resultType != valueToConvert.GetType())
             {
                 var elementType = resultType.GetElementType();
+
+                if (elementType == typeof(char) && valueToConvert is string)
+                {
+                    return ((string)valueToConvert).ToCharArray();
+                }
+
                 var enumerableValue = GetEnumerable(valueToConvert);
                 // check for simple packaging
                 // Powershell seems to neither enumerate dictionaries nor strings
@@ -203,6 +210,7 @@ namespace System.Management.Automation
                     array.SetValue(ConvertTo(valueToConvert, elementType, formatProvider), 0);
                     return array;
                 }
+
                 // otherwise we have some IEnumerable thing. recursively create a list and copy to array
                 // a list first, because we don't know the number of arguments
                 var list = (IList) Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType));
@@ -230,9 +238,26 @@ namespace System.Management.Automation
                 return valueToConvert;
             }
 
+            if (resultType == typeof(char))
+            {
+                return ConvertToChar(valueToConvert);
+            }
+
             if (resultType == typeof(string))
             {
                 return ConvertToString(valueToConvert, formatProvider);
+            }
+
+            if (resultType == typeof(XmlDocument))
+            {
+                var doc = new XmlDocument();
+                doc.LoadXml(ConvertTo<string>(valueToConvert));
+                return doc;
+            }
+
+            if (resultType == typeof(Regex))
+            {
+                return new Regex(ConvertTo<string>(valueToConvert));
             }
 
             if (resultType == typeof(bool))
@@ -387,8 +412,8 @@ namespace System.Management.Automation
         public static IEnumerable GetEnumerable(object obj)
         {
             obj = PSObject.Unwrap(obj);
-            // Powershell seems to exclude dictionaries and strings from being enumerables
-            if (obj is IDictionary || obj is string)
+            // Powershell seems to exclude a few types from from being enumerables
+            if (obj is IDictionary || obj is string || obj is XmlDocument)
             {
                 return null;
             }
@@ -536,6 +561,58 @@ namespace System.Management.Automation
             return true; // any object that's not null
         }
 
+        private static char ConvertToChar(object rawValue)
+        {
+            // A value of null type is converted to the character U+0000.
+            if (rawValue == null)
+            {
+                return (char)0;
+            }
+            // The conversion of a value of type bool, decimal, float, or double is in error.
+            if (rawValue is bool || rawValue is decimal || rawValue is float || rawValue is double)
+            {
+                throw new PSInvalidCastException(string.Format("Cannot convert {0} from {1} to char.", rawValue, rawValue.GetType()));
+            }
+            // An integer type value whose value can be represented in type char has that value; otherwise, the
+            // conversion is in error.
+            if (rawValue is byte || rawValue is short || rawValue is int || rawValue is long)
+            {
+                var value = Convert.ToInt64(rawValue);
+                if (value < char.MinValue || value > char.MaxValue)
+                {
+                    throw new PSInvalidCastException(string.Format("Value {0} was too large or to small for conversion to char", value));
+                }
+                return (char)value;
+            }
+            if (rawValue is ushort || rawValue is uint || rawValue is ulong)
+            {
+                var value = Convert.ToUInt64(rawValue);
+                if (value > 0xFFFF)
+                {
+                    throw new PSInvalidCastException(string.Format("Value {0} was too large for conversion to char", value));
+                }
+                return (char)value;
+            }
+            // The conversion of a string value having a length other than 1 is in error.
+            // A string value having a length 1 is converted to a char having that one character's value.
+            if (rawValue is string)
+            {
+                var s = (string)rawValue;
+                if (s.Length != 1)
+                {
+                    throw new PSInvalidCastException(string.Format("Cannot convert string of length {0} to char.", s.Length));
+                }
+                return s[0];
+            }
+            // A numeric type value whose value after rounding of any fractional part can be represented in the
+            // destination type has that rounded value; otherwise, the conversion is in error.
+            // TODO: How is this supposed to work? All floating-point types are already errors. [char]33.0 doesn't work in PowerShell either.
+
+            // For other reference type values, if the reference type supports such a conversion, that conversion is
+            // used; otherwise, the conversion is in error.
+            return Convert.ToChar(rawValue);
+        }
+
         private static string ConvertToString(object rawValue, IFormatProvider formatProvider)
         {
             rawValue = PSObject.Unwrap(rawValue);
@@ -602,11 +679,14 @@ namespace System.Management.Automation
                 // foreach visits multidimensional arrays in row-major order, thereby handling the flattening for us
                 foreach (var o in arr)
                 {
+                    // Since PSObject.ToString uses this very method as well we have to be careful not to
+                    // accidentally handle nested arrays the same way.
+                    var obj = PSObject.Unwrap(o);
                     if (!first)
                     {
                         sb.Append(ofs);
                     }
-                    sb.Append(o.ToString());
+                    sb.Append(obj.ToString());
                     first = false;
                 }
 
