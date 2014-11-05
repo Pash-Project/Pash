@@ -42,6 +42,15 @@ namespace ReferenceTests.Language
         }
 
         [Test]
+        public void ErrorVariableAlsoHasErrorRecords(string phase)
+        {
+            ReferenceHost.RawExecute("Test-CreateError", false);
+            var errorVarVal = ReferenceHost.GetVariableValue("error") as ArrayList;
+            Assert.NotNull(errorVarVal, "Error var not set or not a ArrayList");
+            Assert.That(errorVarVal[0], Is.InstanceOf<ErrorRecord>());
+        }
+
+        [Test]
         public void CreateErrorCmdletCanThrowTerminating()
         {
             var e = Assert.Throws<CmdletInvocationException>(delegate {

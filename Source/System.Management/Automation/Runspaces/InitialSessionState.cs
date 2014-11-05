@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Collections.ObjectModel;
 using Microsoft.PowerShell.Commands;
 using System.Management.Automation.Runspaces;
+using System.Collections;
+using System.Collections.ObjectModel;
 
 namespace System.Management.Automation.Runspaces
 {
@@ -211,7 +212,7 @@ namespace System.Management.Automation.Runspaces
             initialSessionState.Variables.Add(new SessionStateVariableEntry("true", true, "", ScopedItemOptions.Constant));
             initialSessionState.Variables.Add(new SessionStateVariableEntry("false", false, "", ScopedItemOptions.Constant));
             initialSessionState.Variables.Add(new SessionStateVariableEntry("null", null, "", ScopedItemOptions.Constant));
-            initialSessionState.Variables.Add(new SessionStateVariableEntry("Error", new Collection<ErrorRecord>(), "Last errors", ScopedItemOptions.Constant));
+            initialSessionState.Variables.Add(new SessionStateVariableEntry("Error", new ArrayList(), "Last errors", ScopedItemOptions.Constant));
             initialSessionState.Variables.Add(new SessionStateVariableEntry("?", true, "Last command success", ScopedItemOptions.Constant));
         }
 

@@ -163,9 +163,7 @@ namespace Pash.Implementation
             {
                 // in case of throw statement, parse error, or "ThrowTerminatingError"
                 // just add to error variable, the error stream and rethrow that thing
-                var errorRecord = (ex is IContainsErrorRecord) ?
-                    ((IContainsErrorRecord) ex).ErrorRecord : new ErrorRecord(ex, errorId, ErrorCategory.InvalidOperation, null);
-                context.AddToErrorVariable(errorRecord);
+                context.AddToErrorVariable(ex);
                 context.SetVariable("global:?", false); // last command was definitely not successfull
                 throw;
             }
