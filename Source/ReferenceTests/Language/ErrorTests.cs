@@ -42,7 +42,7 @@ namespace ReferenceTests.Language
         }
 
         [Test]
-        public void ErrorVariableAlsoHasErrorRecords(string phase)
+        public void ErrorVariableAlsoHasErrorRecords()
         {
             ReferenceHost.RawExecute("Test-CreateError", false);
             var errorVarVal = ReferenceHost.GetVariableValue("error") as ArrayList;
