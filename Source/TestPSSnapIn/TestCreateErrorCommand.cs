@@ -3,7 +3,7 @@
 using System;
 using System.Management.Automation;
 
-namespace TestHost.TestHelpers
+namespace TestPSSnapIn
 {
     public class TestException : Exception
     {

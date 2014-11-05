@@ -3,9 +3,9 @@ using System;
 using System.Management.Automation.Runspaces;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
-using Pash.Implementation;
 using System.Text;
-using TestHost.TestHelpers;
+using TestPSSnapIn;
+using System.Collections;
 
 namespace ReferenceTests.Language
 {
@@ -18,10 +18,10 @@ namespace ReferenceTests.Language
             Assert.Throws<ParseException>(delegate {
                 ReferenceHost.Execute(@"""foo"" |; ");
             });
-            var errorVarVal = ReferenceHost.GetVariableValue("error") as Collection<ErrorRecord>;
-            Assert.NotNull(errorVarVal, "Error var not set or not a collection of error records");
-            errorVarVal.ShouldNotBeEmpty();
-            Assert.True(errorVarVal[0].Exception is ParseException);
+            var errorVarVal = ReferenceHost.GetVariableValue("error") as ArrayList;
+            Assert.NotNull(errorVarVal, "Error var not set or not a ArrayList");
+            Assert.That(errorVarVal.Count, Is.EqualTo(1));
+            Assert.True(errorVarVal[0] is ParseException);
          }
 
         [Test]
@@ -31,14 +31,14 @@ namespace ReferenceTests.Language
             Assert.Throws<ParseException>(delegate {
                 ReferenceHost.Execute(@"""foo"" |; ");
             });
-            var errorVarVal = ReferenceHost.GetVariableValue("error") as Collection<ErrorRecord>;
-            Assert.NotNull(errorVarVal, "Error var not set or not a collection of error records");
-            errorVarVal.ShouldNotBeEmpty();
+            var errorVarVal = ReferenceHost.GetVariableValue("error") as ArrayList;
+            Assert.NotNull(errorVarVal, "Error var not set or not a ArrayList");
+            Assert.That(errorVarVal.Count, Is.EqualTo(1));
 
             ReferenceHost.RawExecuteInLastRunspace("$error.Clear()");
-            errorVarVal = ReferenceHost.GetVariableValue("error") as Collection<ErrorRecord>;
-            Assert.NotNull(errorVarVal, "Error var not set or not a collection of error records");
-            errorVarVal.ShouldBeEmpty();
+            errorVarVal = ReferenceHost.GetVariableValue("error") as ArrayList;
+            Assert.NotNull(errorVarVal, "Error var not set or not a ArrayList");
+            Assert.That(errorVarVal, Is.Empty);
         }
 
         [Test]
