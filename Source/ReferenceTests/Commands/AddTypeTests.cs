@@ -69,8 +69,8 @@ Add-Type -typedefinition $source
             Assert.Throws<CmdletInvocationException>(delegate {
                 ReferenceHost.RawExecute("Add-Type -TypeDefinition 'public class ErrorTest --'", false);
             });
-            ErrorRecord[] errorRecords = ReferenceHost.GetLastRawErrorRecords();
             // TODO: fix that we currently only get one error result that we throw
+            // ErrorRecord[] errorRecords = ReferenceHost.GetLastRawErrorRecords();
             // Assert.AreEqual(3, errorRecords.Length, "Should be 3 compiler errors");
         }
 

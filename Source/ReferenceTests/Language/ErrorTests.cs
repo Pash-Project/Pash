@@ -50,6 +50,17 @@ namespace ReferenceTests.Language
             Assert.That(e.InnerException, Is.InstanceOf<TestException>());
         }
 
+        [TestCase("begin")]
+        [TestCase("process")]
+        [TestCase("end")]
+        public void CreateErrorCmdletCanThrowExceptionAndGetsConverted(string phase)
+        {
+            var e = Assert.Throws<CmdletInvocationException>(delegate {
+                ReferenceHost.Execute("Test-CreateError -Exception -Phase " + phase);
+            });
+            Assert.That(e.InnerException, Is.InstanceOf<TestException>());
+        }
+
         [Test]
         public void CreateErrorCmdletCanWriteError()
         {
