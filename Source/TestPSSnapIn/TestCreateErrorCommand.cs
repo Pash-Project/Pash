@@ -5,9 +5,26 @@ using System.Management.Automation;
 
 namespace TestHost.TestHelpers
 {
+    public class TestException : Exception
+    {
+        public TestException(string message)
+            : base(message)
+        {
+        }
+
+        public ErrorRecord ErrorRecord
+        {
+            get
+            {
+                return new ErrorRecord(this, "Test", ErrorCategory.NotSpecified, null);
+            }
+        }
+    }
+
     [Cmdlet("Test", "CreateError")]
     public class TestCreateErrorCommand : PSCmdlet
     {
+
         public enum Phases
         {
             Process,
@@ -25,21 +42,27 @@ namespace TestHost.TestHelpers
         public SwitchParameter Terminating { get; set; }
 
         [Parameter]
+        public SwitchParameter Exception { get; set; }
+
+        [Parameter]
         public SwitchParameter NoError { get; set; }
 
         private void DoError()
         {
-            var err = new TestException(Message ?? "testerror").ErrorRecord;
             if (NoError.IsPresent)
             {
-                if (Message != null)
-                {
-                    Host.UI.WriteLine(Message);
-                }
+                return;
             }
-            else if (Terminating.IsPresent)
+
+            var ex = new TestException(Message ?? "testerror");
+            var err = ex.ErrorRecord;
+            if (Terminating.IsPresent)
             {
                 ThrowTerminatingError(err);
+            }
+            else if (Exception.IsPresent)
+            {
+                throw ex;
             }
             else
             {
@@ -49,6 +72,10 @@ namespace TestHost.TestHelpers
 
         protected override void BeginProcessing()
         {
+            if (!NoError.IsPresent)
+            {
+                WriteObject("begin");
+            }
             if (Phase.Equals(Phases.Begin))
             {
                 DoError();
@@ -57,11 +84,14 @@ namespace TestHost.TestHelpers
 
         protected override void ProcessRecord()
         {
+            if (!NoError.IsPresent)
+            {
+                WriteObject("process");
+            }
             if (Phase.Equals(Phases.Process))
             {
                 DoError();
             }
-            // write input object to pipeline for further processing
             if (Message != null)
             {
                 WriteObject(Message);
@@ -70,6 +100,10 @@ namespace TestHost.TestHelpers
 
         protected override void EndProcessing()
         {
+            if (!NoError.IsPresent)
+            {
+                WriteObject("end");
+            }
             if (Phase.Equals(Phases.End))
             {
                 DoError();

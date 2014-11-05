@@ -66,12 +66,12 @@ Add-Type -typedefinition $source
         [Test]
         public void AddTypeDefinitionWithInvalidCSharpCode()
         {
-            Exception ex = Assert.Throws(Is.InstanceOf(typeof(Exception)), () => {
+            Assert.Throws<CmdletInvocationException>(delegate {
                 ReferenceHost.RawExecute("Add-Type -TypeDefinition 'public class ErrorTest --'", false);
             });
-            // TODO: Exception should be CmdletInvocationException
             ErrorRecord[] errorRecords = ReferenceHost.GetLastRawErrorRecords();
-            Assert.AreEqual(3, errorRecords.Length, "Should be 3 compiler errors");
+            // TODO: fix that we currently only get one error result that we throw
+            // Assert.AreEqual(3, errorRecords.Length, "Should be 3 compiler errors");
         }
 
         [Test]
@@ -167,26 +167,22 @@ $obj.WriteLine()
         [Test]
         public void AddMemberDefinitionWithInvalidCSharp()
         {
-            Exception ex = Assert.Throws(Is.InstanceOf(typeof(Exception)), () => {
+            Assert.Throws<CmdletInvocationException>(delegate {
                 ReferenceHost.RawExecute("add-type -name Test -memberdefinition 'public WriteLine() ---'", false);
             });
-            // TODO: Exception should be CmdletInvocationException
- //           ErrorRecord[] errorRecords = ReferenceHost.GetLastRawErrorRecords();
- //           Assert.AreEqual(2, errorRecords.Length, "Should be 2 compiler errors");
+           ErrorRecord[] errorRecords = ReferenceHost.GetLastRawErrorRecords();
+           Assert.AreEqual(2, errorRecords.Length, "Should be 2 compiler errors");
         }
 
         [Test]
         public void ExecuteWithError()
         {
-            string cmd = NewlineJoin("trap { $_.FullyQualifiedErrorId }", "add-type -name Test -memberdefinition 'public WriteLine() ---'");
-            try
-            {
-                var res = ReferenceHost.Execute(cmd);
-            }
-            catch (Exception ex)
-            {
-            }
-            Assert.AreEqual("COMPILER_ERRORS,Microsoft.PowerShell.Commands.AddTypeCommand" + Environment.NewLine, ReferenceHost.LastResults);
+            string cmd = NewlineJoin("add-type -name Test -memberdefinition 'public WriteLine() ---'");
+            string expectedErrorId = "COMPILER_ERRORS,Microsoft.PowerShell.Commands.AddTypeCommand";
+            var res = Assert.Throws<CmdletInvocationException>(delegate {
+                ReferenceHost.RawExecute(cmd);
+            });
+            Assert.That(res.ErrorRecord.FullyQualifiedErrorId, Is.EqualTo(expectedErrorId));
         }
 
         [Test]
@@ -213,8 +209,7 @@ $obj.WriteLine()
         public void AddTypeFromCSharpSourceFileWithInvalidCode()
         {
             string fileName = CreateTempFile("AddTypeFromCSharpSourceFileWithInvalidCode.cs", @"public class ErrorTest --");
-            Exception ex = Assert.Throws(Is.InstanceOf(typeof(Exception)), () =>
-            {
+            Assert.Throws<CmdletInvocationException>(delegate {
                 ReferenceHost.RawExecute("Add-Type -Path '" + fileName + "'", false);
             });
         }

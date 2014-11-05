@@ -1330,6 +1330,7 @@ namespace System.Management.Pash.Implementation
             var subVisitor = this.CloneSub(false);
             object returnResult = null;
             Exception exception = null;
+            subVisitor._pipelineCommandRuntime.ErrorStream.Redirect(_pipelineCommandRuntime.ErrorStream);
             try
             {
                 scriptBlockAst.EndBlock.Visit(subVisitor);
@@ -1344,7 +1345,6 @@ namespace System.Management.Pash.Implementation
                 // others need to be rethrown
                 exception = e;
             }
-            subVisitor._pipelineCommandRuntime.ErrorStream.Redirect(_pipelineCommandRuntime.ErrorStream);
             var result = subVisitor._pipelineCommandRuntime.OutputStream.Read();
             if (result.Count == 1)
             {

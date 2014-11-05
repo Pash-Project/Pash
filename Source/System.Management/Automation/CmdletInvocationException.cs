@@ -43,7 +43,7 @@ namespace System.Management.Automation
         }
 
         public CmdletInvocationException(ErrorRecord errorRecord)
-            : base("Cmdlet invocation failed")
+            : base(errorRecord.Exception.Message, errorRecord.Exception)
         {
             this.errorRecord = errorRecord;
         }
