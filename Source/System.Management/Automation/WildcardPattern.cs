@@ -80,7 +80,8 @@ namespace System.Management.Automation
 
         private static string UnescapeWildcardsIn(string pattern, string[] wildcards)
         {
-            for(int i=0; i<wildcards.Length;i++){
+            for (int i = 0; i < wildcards.Length; i++)
+            {
                 pattern = UnescapeWildcardIn(pattern, wildcards[i]);
             }
 
@@ -90,27 +91,39 @@ namespace System.Management.Automation
         private static string UnescapeWildcardIn(string pattern, string wildcard)
         {
             int indexOfWildcard = pattern.IndexOf(wildcard, StringComparison.Ordinal);
-            var indexOfFirstBacktick = GetIndexOfFirstBacktick(pattern, indexOfWildcard);
-            return pattern.Replace(
-                CreateWildcardStringToReplace(wildcard, indexOfFirstBacktick, indexOfWildcard),
-                CreateReplacementString(wildcard, indexOfWildcard, indexOfFirstBacktick));
-        }
 
-        static string CreateWildcardStringToReplace(string wildcard, int indexOfFirstBacktick, int indexOfWildcard)
-        {
-            return new String('`', indexOfWildcard - indexOfFirstBacktick) + wildcard;
-        }
-
-        static string CreateReplacementString(string wildcard, int indexOfWildcard, int indexOfFirstBacktick)
-        {
-            return indexOfWildcard - indexOfFirstBacktick > 0 ? "`" + wildcard : wildcard;
-        }
-
-        static int GetIndexOfFirstBacktick(string pattern, int index)
-        {
-            while (index > 0 && pattern[--index] == '`')
+            if (IsWildcardTheFirstCharacterOrDoesNotExist(indexOfWildcard))
             {
+                return pattern;
             }
+
+            var indexOfFirstBacktick = GetIndexOfFirstBacktickBeforeWildcard(pattern, indexOfWildcard);
+
+            return pattern.Replace(
+                new String('`', indexOfWildcard - indexOfFirstBacktick) + wildcard,
+                indexOfWildcard - indexOfFirstBacktick > 1 ? "`" + wildcard : wildcard);
+        }
+
+        private static bool IsWildcardTheFirstCharacterOrDoesNotExist(int indexOfWildcard)
+        {
+            return indexOfWildcard < 1;
+        }
+
+        private static int GetIndexOfFirstBacktickBeforeWildcard(string pattern, int index)
+        {
+            for (int i = index - 1, j = index; i >= 0; j = i, i--)
+            {
+                if (pattern[i] != '`')
+                {
+                    return j;
+                }
+
+                if (i == 0)
+                {
+                    return 0;
+                }
+            }
+
             return index;
         }
 
