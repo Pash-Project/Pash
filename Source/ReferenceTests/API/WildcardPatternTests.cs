@@ -191,7 +191,7 @@ namespace ReferenceTests.API
             Assert.AreEqual(expected, WildcardPattern.Unescape(input));
         }
 
-        [Test, Explicit]
+        [Test]
         [TestCase("``*", "`*")]
         [TestCase("```*", "`*")]
 

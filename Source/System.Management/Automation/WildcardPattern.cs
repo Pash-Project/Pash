@@ -75,12 +75,43 @@ namespace System.Management.Automation
         {
             // This block of code is actually about the same speed as a linear search because Mono (and probably .NET) seem to use the
             // Tuned Boyer-Moore text searching algorithm for Sting.Replace()
-            return
-                pattern.Replace("`*", "*")
-                       .Replace("`?", "?")
-                       .Replace("`[", "[")
-                       .Replace("`]", "]");
+            return UnescapeWildcardsIn(pattern, new[] { "*", "?", "]", "[" });
+        }
 
+        private static string UnescapeWildcardsIn(string pattern, string[] wildcards)
+        {
+            for(int i=0; i<wildcards.Length;i++){
+                pattern = UnescapeWildcardIn(pattern, wildcards[i]);
+            }
+
+            return pattern;
+        }
+
+        private static string UnescapeWildcardIn(string pattern, string wildcard)
+        {
+            int indexOfWildcard = pattern.IndexOf(wildcard, StringComparison.Ordinal);
+            var indexOfFirstBacktick = GetIndexOfFirstBacktick(pattern, indexOfWildcard);
+            return pattern.Replace(
+                CreateWildcardStringToReplace(wildcard, indexOfFirstBacktick, indexOfWildcard),
+                CreateReplacementString(wildcard, indexOfWildcard, indexOfFirstBacktick));
+        }
+
+        static string CreateWildcardStringToReplace(string wildcard, int indexOfFirstBacktick, int indexOfWildcard)
+        {
+            return new String('`', indexOfWildcard - indexOfFirstBacktick) + wildcard;
+        }
+
+        static string CreateReplacementString(string wildcard, int indexOfWildcard, int indexOfFirstBacktick)
+        {
+            return indexOfWildcard - indexOfFirstBacktick > 0 ? "`" + wildcard : wildcard;
+        }
+
+        static int GetIndexOfFirstBacktick(string pattern, int index)
+        {
+            while (index > 0 && pattern[--index] == '`')
+            {
+            }
+            return index;
         }
 
         private bool Clear()
