@@ -148,13 +148,20 @@ namespace System.Management.Tests
             Assert.AreEqual(expected, result);
         }
 
-        [Test]
-        public void ConvertToCanHandleSwitchParameters()
+        [TestCase(3, true)]
+        [TestCase(0.01, true)]
+        [TestCase(0.0, false)]
+        [TestCase(0, false)]
+        [TestCase(false, false)]
+        [TestCase(null, false)]
+        [TestCase(true, true)]
+        [TestCase(-1.0, true)]
+        public void ConvertToCanHandleSwitchParameters(object value, bool expectedValue)
         {
-            var result = LanguagePrimitives.ConvertTo(3, typeof(SwitchParameter));
-            var expected = new SwitchParameter(true);
+            var result = LanguagePrimitives.ConvertTo(value, typeof(SwitchParameter));
+            var expected = new SwitchParameter(expectedValue);
             Assert.AreEqual(expected.GetType(), result.GetType());
-            Assert.AreEqual(expected, result);
+            Assert.AreEqual(expected.IsPresent, ((SwitchParameter)result).IsPresent);
         }
 
         [Test]

@@ -246,6 +246,33 @@ namespace TestPSSnapIn
         }
     }
 
+    [Cmdlet(VerbsDiagnostic.Test, "WriteTwoMessages")]
+    public class TestWriteTwoMessagesCommand : PSCmdlet
+    {
+        [Parameter]
+        public string Msg1 { get; set; }
+
+        [Parameter]
+        public string Msg2 { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject("1: " + Msg1 + ", 2: " + Msg2);
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "SwitchParameter")]
+    public class TestSwitchParameterCommand : PSCmdlet
+    {
+        [Parameter]
+        public SwitchParameter Switch { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(Switch.IsPresent);
+        }
+    }
+
     [Cmdlet(VerbsDiagnostic.Test, "SameAliases")]
     public class TestSameAliasesCommand : PSCmdlet
     {

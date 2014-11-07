@@ -307,7 +307,8 @@ namespace System.Management.Pash.Implementation
             if (commandElement is CommandParameterAst)
             {
                 var commandParameterAst = commandElement as CommandParameterAst;
-                return new CommandParameter(commandParameterAst.ParameterName, commandParameterAst.Argument,
+                object arg = commandParameterAst.Argument == null ? null : EvaluateAst(commandParameterAst.Argument);
+                return new CommandParameter(commandParameterAst.ParameterName, arg,
                                             commandParameterAst.RequiresArgument);
             }
 

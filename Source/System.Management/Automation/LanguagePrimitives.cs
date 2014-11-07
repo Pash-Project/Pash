@@ -283,9 +283,20 @@ namespace System.Management.Automation
                 }
             }
 
-            if (resultType == typeof(SwitchParameter)) // switch parameters can simply be present
+            if (resultType == typeof(SwitchParameter))
             {
-                return new SwitchParameter(true);
+                if (valueToConvert == null)
+                {
+                    return new SwitchParameter(false);
+                }
+                if (valueToConvert.GetType().IsNumeric())
+                {
+                    return new SwitchParameter(((dynamic) valueToConvert) != 0);
+                }
+                if (valueToConvert is bool)
+                {
+                    return new SwitchParameter((bool) valueToConvert);
+                }
             }
 
             object result = null;

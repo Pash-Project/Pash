@@ -85,6 +85,14 @@ namespace ReferenceTests.Language
         }
 
         [Test]
+        public void ArgumentsCanBeBoundExplicitlyWithSpace()
+        {
+            var cmd = CmdletName(typeof(TestWriteTwoMessagesCommand)) + " -Msg1: -Msg2 -Msg2: 'foo'";
+            var res = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(NewlineJoin("1: -Msg2, 2: foo"), res);
+        }
+
+        [Test]
         public void TwoParameterSetsWithSameArgumentsAreNotAmbiguous()
         {
             var cmd = CmdletName(typeof(TestMandatoryInOneSetCommand)) + " 'works' 'foo'";
@@ -124,6 +132,19 @@ namespace ReferenceTests.Language
             var cmd = CmdletName(typeof(TestSwitchAndPositionalCommand)) + " -Switch 'test'";
             var res = ReferenceHost.Execute(cmd);
             Assert.AreEqual(NewlineJoin("test"), res);
+        }
+
+        [TestCase("$true", true)]
+        [TestCase("$false", false)]
+        [TestCase("$null", false)]
+        [TestCase("0.0", false)]
+        [TestCase("0.01", true)]
+        public void SwitchParameterWithExplicitValue(string value, bool expected)
+        {
+            var cmd = CmdletName(typeof(TestSwitchParameterCommand)) + " -Switch:" + value;
+            var res = ReferenceHost.RawExecute(cmd);
+            Assert.That(res.Count, Is.EqualTo(1));
+            Assert.That(res[0].BaseObject, Is.EqualTo(expected));
         }
 
         [Test]
