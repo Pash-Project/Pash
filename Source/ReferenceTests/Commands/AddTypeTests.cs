@@ -171,7 +171,7 @@ $obj.WriteLine()
                 ReferenceHost.RawExecute("add-type -name Test -memberdefinition 'public WriteLine() ---'", false);
             });
            ErrorRecord[] errorRecords = ReferenceHost.GetLastRawErrorRecords();
-           Assert.AreEqual(2, errorRecords.Length, "Should be 2 compiler errors");
+           Assert.That(errorRecords, Is.Not.Empty);
         }
 
         [Test]
