@@ -84,6 +84,7 @@
     <Compile Include="Language\Operators\GeneralConversionTests.cs" />
     <Compile Include="Language\Operators\Conversion_Tests_6.cs" />
     <Compile Include="Parsing\CommandParsingTests.cs" />
+    <Compile Include="API\LanguagePrimitivesTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
