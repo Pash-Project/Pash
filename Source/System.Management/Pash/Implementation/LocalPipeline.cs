@@ -125,8 +125,6 @@ namespace Pash.Implementation
                 Input.Write(null);
             }
 
-            string errorId = "BuildingPipelineProcessorFailed";
-
             ExecutionContext context = _runspace.ExecutionContext.Clone();
             RerouteExecutionContext(context);
             try
@@ -142,7 +140,6 @@ namespace Pash.Implementation
                 _runspace.AddRunningPipeline(this);
                 SetPipelineState(PipelineState.Running);
 
-                errorId = "TerminatingError";
                 pipelineProcessor.Execute(context);
                 SetPipelineState(PipelineState.Completed);
             }
