@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 
-namespace System.Management.Tests
+namespace ReferenceTests.API
 {
     public class TestParent {
         private string _msg;
@@ -128,7 +128,7 @@ namespace System.Management.Tests
                 }
             );
 
-            Assert.AreEqual("Value 'foo' can't be converted or casted to 'System.Management.Tests.TestChild'", ex.Message);
+            Assert.That(ex.Message, Contains.Substring(typeof(TestChild).FullName));
         }
 
         [Test]
@@ -148,20 +148,29 @@ namespace System.Management.Tests
             Assert.AreEqual(expected, result);
         }
 
-        [TestCase(3, true)]
-        [TestCase(0.01, true)]
-        [TestCase(0.0, false)]
-        [TestCase(0, false)]
+
         [TestCase(false, false)]
         [TestCase(null, false)]
         [TestCase(true, true)]
-        [TestCase(-1.0, true)]
         public void ConvertToCanHandleSwitchParameters(object value, bool expectedValue)
         {
             var result = LanguagePrimitives.ConvertTo(value, typeof(SwitchParameter));
             var expected = new SwitchParameter(expectedValue);
             Assert.AreEqual(expected.GetType(), result.GetType());
             Assert.AreEqual(expected.IsPresent, ((SwitchParameter)result).IsPresent);
+        }
+
+        [TestCase(3)]
+        [TestCase(0.0)]
+        [TestCase(0.0)]
+        [TestCase(0)]
+        [TestCase(-1.0)]
+        public void ConvertToDoesntConvertFromNumericToSwitchParameter(object value)
+        {
+            Assert.Throws<PSInvalidCastException>(delegate
+            {
+                LanguagePrimitives.ConvertTo(value, typeof(SwitchParameter));
+            });
         }
 
         [Test]

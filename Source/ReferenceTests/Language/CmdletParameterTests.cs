@@ -136,7 +136,7 @@ namespace ReferenceTests.Language
 
         [TestCase("$true", true)]
         [TestCase("$false", false)]
-        [TestCase("$null", false)]
+        [TestCase("$null", true)]
         [TestCase("0.0", false)]
         [TestCase("0.01", true)]
         public void SwitchParameterWithExplicitValue(string value, bool expected)

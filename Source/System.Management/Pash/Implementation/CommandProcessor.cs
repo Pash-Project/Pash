@@ -4,6 +4,7 @@ using Pash.Implementation;
 using System.Management.Automation.Runspaces;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using Extensions.Reflection;
 
 namespace System.Management.Automation
 {
@@ -97,16 +98,29 @@ namespace System.Management.Automation
                 var current = oldParameters[i];
                 var peek = (i < numParams - 1) ? oldParameters[i + 1] : null;
                 var hasValidName = !String.IsNullOrEmpty(current.Name);
-                // if we have a switch parameter that did not explicitly has an argument, set it to true
-                if (hasValidName && IsSwitchParameter(current.Name) && !current.HasExplicitArgument)
+                // if we have a switch parameter, set default value or pre-convert to bool if numeric
+                if (hasValidName && IsSwitchParameter(current.Name))
                 {
-                    Parameters.Add(current.Name, true);
+                    // if null (=unset) it's true; even if it's explicitly set to null
+                    object value = current.Value;
+                    if (current.Value == null)
+                    {
+                        Parameters.Add(current.Name, true);
+                        continue;
+                    }
+                    // strange thing in PS: While LanguagePrimitives aren't able to convert from numerics to
+                    // SwitchParameter, it does work with parameters. So we check it here
+                    else if (PSObject.Unwrap(current.Value).GetType().IsNumeric())
+                    {
+                        value = LanguagePrimitives.ConvertTo<bool>(current.Value);
+                    }
+                    Parameters.Add(current.Name, value);
                 }
                 // if the current parameter has no argument (and not explicilty set to null), try to merge the next
                 else if (peek != null &&
                          hasValidName &&
                          current.Value == null &&
-                         !current.HasExplicitArgument &&
+
                          String.IsNullOrEmpty(peek.Name))
                 {
                     Parameters.Add(current.Name, peek.Value);

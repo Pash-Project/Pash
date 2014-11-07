@@ -289,11 +289,7 @@ namespace System.Management.Automation
                 {
                     return new SwitchParameter(false);
                 }
-                if (valueToConvert.GetType().IsNumeric())
-                {
-                    return new SwitchParameter(((dynamic) valueToConvert) != 0);
-                }
-                if (valueToConvert is bool)
+                else if (valueToConvert is bool)
                 {
                     return new SwitchParameter((bool) valueToConvert);
                 }
