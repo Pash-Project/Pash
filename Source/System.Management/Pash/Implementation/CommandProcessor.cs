@@ -96,15 +96,23 @@ namespace System.Management.Automation
             {
                 var current = oldParameters[i];
                 var peek = (i < numParams - 1) ? oldParameters[i + 1] : null;
-                if (peek != null &&
-                    !String.IsNullOrEmpty(current.Name) &&
-                    current.Value == null &&
-                    !IsSwitchParameter(current.Name) &&
-                    String.IsNullOrEmpty(peek.Name))
+                var hasValidName = !String.IsNullOrEmpty(current.Name);
+                // if we have a switch parameter that did not explicitly has an argument, set it to true
+                if (hasValidName && IsSwitchParameter(current.Name) && !current.HasExplicitArgument)
+                {
+                    Parameters.Add(current.Name, true);
+                }
+                // if the current parameter has no argument (and not explicilty set to null), try to merge the next
+                else if (peek != null &&
+                         hasValidName &&
+                         current.Value == null &&
+                         !current.HasExplicitArgument &&
+                         String.IsNullOrEmpty(peek.Name))
                 {
                     Parameters.Add(current.Name, peek.Value);
                     i++; // skip next element as it was merged
                 }
+                // otherwise we have a usual parameter/argument set
                 else
                 {
                     Parameters.Add(current);
