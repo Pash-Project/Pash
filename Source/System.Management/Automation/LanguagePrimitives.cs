@@ -910,7 +910,7 @@ namespace System.Management.Automation
             }
             value = value.Trim();
             var intStyle = NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign | NumberStyles.AllowThousands;
-            var floatStyle = NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint;
+            var floatStyle = NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign;
             if (!numericType.IsNumericFloat() && value.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
             {
                 intStyle = NumberStyles.AllowHexSpecifier;

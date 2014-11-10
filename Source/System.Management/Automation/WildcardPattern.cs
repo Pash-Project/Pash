@@ -75,12 +75,56 @@ namespace System.Management.Automation
         {
             // This block of code is actually about the same speed as a linear search because Mono (and probably .NET) seem to use the
             // Tuned Boyer-Moore text searching algorithm for Sting.Replace()
-            return
-                pattern.Replace("`*", "*")
-                       .Replace("`?", "?")
-                       .Replace("`[", "[")
-                       .Replace("`]", "]");
+            return UnescapeWildcardsIn(pattern, new[] { "*", "?", "]", "[" });
+        }
 
+        private static string UnescapeWildcardsIn(string pattern, string[] wildcards)
+        {
+            for (int i = 0; i < wildcards.Length; i++)
+            {
+                pattern = UnescapeWildcardIn(pattern, wildcards[i]);
+            }
+
+            return pattern;
+        }
+
+        private static string UnescapeWildcardIn(string pattern, string wildcard)
+        {
+            int indexOfWildcard = pattern.IndexOf(wildcard, StringComparison.Ordinal);
+
+            if (IsWildcardTheFirstCharacterOrDoesNotExist(indexOfWildcard))
+            {
+                return pattern;
+            }
+
+            var indexOfFirstBacktick = GetIndexOfFirstBacktickBeforeWildcard(pattern, indexOfWildcard);
+
+            return pattern.Replace(
+                new String('`', indexOfWildcard - indexOfFirstBacktick) + wildcard,
+                indexOfWildcard - indexOfFirstBacktick > 1 ? "`" + wildcard : wildcard);
+        }
+
+        private static bool IsWildcardTheFirstCharacterOrDoesNotExist(int indexOfWildcard)
+        {
+            return indexOfWildcard < 1;
+        }
+
+        private static int GetIndexOfFirstBacktickBeforeWildcard(string pattern, int index)
+        {
+            for (int i = index - 1, j = index; i >= 0; j = i, i--)
+            {
+                if (pattern[i] != '`')
+                {
+                    return j;
+                }
+
+                if (i == 0)
+                {
+                    return 0;
+                }
+            }
+
+            return index;
         }
 
         private bool Clear()
