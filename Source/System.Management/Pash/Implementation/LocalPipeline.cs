@@ -125,8 +125,6 @@ namespace Pash.Implementation
                 Input.Write(null);
             }
 
-            string errorId = "BuildingPipelineProcessorFailed";
-
             ExecutionContext context = _runspace.ExecutionContext.Clone();
             RerouteExecutionContext(context);
             try
@@ -142,7 +140,6 @@ namespace Pash.Implementation
                 _runspace.AddRunningPipeline(this);
                 SetPipelineState(PipelineState.Running);
 
-                errorId = "TerminatingError";
                 pipelineProcessor.Execute(context);
                 SetPipelineState(PipelineState.Completed);
             }
@@ -162,10 +159,8 @@ namespace Pash.Implementation
             catch (Exception ex)
             {
                 // in case of throw statement, parse error, or "ThrowTerminatingError"
-                // just add to error variable and rethrow that thing
-                var errorRecord = (ex is IContainsErrorRecord) ?
-                    ((IContainsErrorRecord) ex).ErrorRecord : new ErrorRecord(ex, errorId, ErrorCategory.InvalidOperation, null);
-                context.AddToErrorVariable(errorRecord);
+                // just add to error variable, the error stream and rethrow that thing
+                context.AddToErrorVariable(ex);
                 context.SetVariable("global:?", false); // last command was definitely not successfull
                 throw;
             }

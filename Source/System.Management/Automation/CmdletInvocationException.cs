@@ -40,6 +40,14 @@ namespace System.Management.Automation
         public CmdletInvocationException(string message, Exception innerException)
             : base(message, innerException)
         {
+            var errorId = innerException.GetType().Name + "," + innerException.Source;
+            this.errorRecord = new ErrorRecord(innerException, errorId, ErrorCategory.NotSpecified, null);
+        }
+
+        public CmdletInvocationException(ErrorRecord errorRecord)
+            : base(errorRecord.Exception.Message, errorRecord.Exception)
+        {
+            this.errorRecord = errorRecord;
         }
 
         //todo: implement

@@ -44,7 +44,18 @@ namespace System.Management.Automation
         {
             if (!_beganProcessing)
             {
-                Command.DoBeginProcessing();
+                try
+                {
+                    Command.DoBeginProcessing();
+                }
+                catch (CmdletInvocationException)
+                {
+                    throw;
+                }
+                catch(Exception e)
+                {
+                    throw new CmdletInvocationException(e.Message, e);
+                }
                 _beganProcessing = true;
             }
         }
@@ -68,7 +79,18 @@ namespace System.Management.Automation
             {
                 // TODO: determine the correct second arg: true if this commandProcessor is the first command in pipeline
                 _argumentBinder.BindPipelineParameters(curInput, true);
-                Command.DoProcessRecord();
+                try
+                {
+                    Command.DoProcessRecord();
+                }
+                catch (CmdletInvocationException)
+                {
+                    throw;
+                }
+                catch(Exception e)
+                {
+                    throw new CmdletInvocationException(e.Message, e);
+                }
             }
             _argumentBinder.RestoreCommandLineParameterValues();
         }
@@ -78,8 +100,20 @@ namespace System.Management.Automation
         /// </summary>
         public override void EndProcessing()
         {
-            Command.DoEndProcessing();
-            ExecutionContext.SetVariable("global:?", true); // only false if we got an exception
+            ExecutionContext.SetVariable("global:?", false); // we set it true if we succeed
+            try
+            {
+                Command.DoEndProcessing();
+                ExecutionContext.SetVariable("global:?", true); // only false if we got an exception
+            }
+            catch (CmdletInvocationException)
+            {
+                throw;
+            }
+            catch(Exception e)
+            {
+                throw new CmdletInvocationException(e.Message, e);
+            }
         }
 
         /// <summary>

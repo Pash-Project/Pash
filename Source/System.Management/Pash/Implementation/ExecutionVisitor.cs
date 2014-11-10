@@ -461,23 +461,34 @@ namespace System.Management.Pash.Implementation
 
                 // now execute the pipeline
                 _context.PushPipeline(pipeline);
+                // rerouting the output and error stream would be easier, but Pipeline doesn't
+                // have an interface for this. So let's catch the exception for now, read the streams
+                // and rethrow it afterwards
+                Exception exception = null;
+                Collection<PSObject> pipeResults = null;
                 try
                 {
-                    var results = pipeline.Invoke();
-                    // read output and error and write them as results of the current commandRuntime
-                    foreach (var curResult in results)
-                    {
-                        _pipelineCommandRuntime.WriteObject(curResult);
-                    }
-                    var errors = pipeline.Error.NonBlockingRead();
-                    foreach (var curError in errors)
-                    {
-                        _pipelineCommandRuntime.ErrorStream.Write(curError);
-                    }
+                    pipeResults = pipeline.Invoke();
                 }
-                finally
+                catch (Exception e)
                 {
-                    _context.PopPipeline();
+                    exception = e;
+                    pipeResults = pipeline.Output.NonBlockingRead();
+                }
+                // read output and error and write them as results of the current commandRuntime
+                foreach (var curResult in pipeResults)
+                {
+                    _pipelineCommandRuntime.WriteObject(curResult);
+                }
+                var errors = pipeline.Error.NonBlockingRead();
+                foreach (var curError in errors)
+                {
+                    _pipelineCommandRuntime.ErrorStream.Write(curError);
+                }
+                _context.PopPipeline();
+                if (exception != null)
+                {
+                    throw exception;
                 }
             }
             finally
@@ -1321,6 +1332,7 @@ namespace System.Management.Pash.Implementation
             var subVisitor = this.CloneSub(false);
             object returnResult = null;
             Exception exception = null;
+            subVisitor._pipelineCommandRuntime.ErrorStream.Redirect(_pipelineCommandRuntime.ErrorStream);
             try
             {
                 scriptBlockAst.EndBlock.Visit(subVisitor);
@@ -1334,13 +1346,6 @@ namespace System.Management.Pash.Implementation
             {
                 // others need to be rethrown
                 exception = e;
-            }
-            // now read errrot and output and write in out streams
-            foreach (var error in subVisitor._pipelineCommandRuntime.ErrorStream.Read())
-            {
-                // we need to use ErrorStream.Write instead of WriteError to avoid
-                // adding it to the error variable twice!
-                _pipelineCommandRuntime.ErrorStream.Write(error);
             }
             var result = subVisitor._pipelineCommandRuntime.OutputStream.Read();
             if (result.Count == 1)
@@ -1468,8 +1473,16 @@ namespace System.Management.Pash.Implementation
 
         private void SetUnderscoreVariable(Exception ex)
         {
-            var error = new ErrorRecord(ex, "", ErrorCategory.InvalidOperation, null);
-            _context.SetVariable("_", error);
+            ErrorRecord rec = null;
+            if (ex is IContainsErrorRecord)
+            {
+                rec = ((IContainsErrorRecord)ex).ErrorRecord;
+            }
+            else
+            {
+                rec = new ErrorRecord(ex, "", ErrorCategory.InvalidOperation, null);
+            }
+            _context.SetVariable("_", rec);
         }
 
         public override AstVisitAction VisitTypeConstraint(TypeConstraintAst typeConstraintAst)

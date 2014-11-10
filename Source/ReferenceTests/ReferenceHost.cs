@@ -18,17 +18,17 @@ namespace ReferenceTests
         public static string LastResults { get; private set; }
 
 
-        public static string Execute(string cmd)
+        public static string Execute(string cmd, bool throwMethodInvocationException = true)
         {
-            return Execute(new string[] { cmd });
+            return Execute(new string[] { cmd }, throwMethodInvocationException);
         }
 
-        public static string Execute(string[] commands)
+        public static string Execute(string[] commands, bool throwMethodInvocationException = true)
         {
             LastResults = "";
             try
             {
-                RawExecute(commands);
+                RawExecute(commands, throwMethodInvocationException);
             }
             finally
             {
@@ -57,9 +57,20 @@ namespace ReferenceTests
         public static Collection<PSObject> RawExecute(string[] commands, bool throwMethodInvocationException = true)
         {
             LastRawResults = null;
+            LastRawErrorResults = null;
             LastUsedRunspace = InitialSessionState == null ?
                 RunspaceFactory.CreateRunspace() : RunspaceFactory.CreateRunspace(InitialSessionState);
             LastUsedRunspace.Open();
+            return RawExecuteInLastRunspace(commands, throwMethodInvocationException);
+        }
+
+        public static Collection<PSObject> RawExecuteInLastRunspace(string cmd, bool throwMethodInvocationException = true)
+        {
+            return RawExecuteInLastRunspace(new string[] { cmd }, throwMethodInvocationException);
+        }
+
+        public static Collection<PSObject> RawExecuteInLastRunspace(string[] commands, bool throwMethodInvocationException = true)
+        {
             foreach (var command in commands)
             {
                 using (var pipeline = LastUsedRunspace.CreatePipeline())
@@ -71,16 +82,17 @@ namespace ReferenceTests
                     }
                     catch (Exception)
                     {
-                        LastRawResults = pipeline.Output.ReadToEnd();
-                        if (pipeline.Error.Count > 0)
-                        {
-                            LastRawErrorResults = pipeline.Error.ReadToEnd();
-                        }
+                        // we need to store the results
+                        LastRawResults = pipeline.Output.ReadToEnd();;
                         throw;
                     }
-                    if (throwMethodInvocationException && pipeline.Error.Count > 0)
+                    finally
                     {
-                        throw new MethodInvocationException(String.Join(Environment.NewLine, pipeline.Error.ReadToEnd()));
+                        LastRawErrorResults = pipeline.Error.ReadToEnd();
+                    }
+                    if (throwMethodInvocationException && LastRawErrorResults.Count > 0)
+                    {
+                        throw new MethodInvocationException(String.Join(Environment.NewLine, LastRawErrorResults));
                     }
                 }
             }
@@ -109,6 +121,11 @@ namespace ReferenceTests
             return (from obj in LastRawErrorResults
                     let error = (PSObject)obj
                     select (ErrorRecord)error.BaseObject).ToArray();
+        }
+
+        public static object GetVariableValue(string name)
+        {
+            return LastUsedRunspace.SessionStateProxy.GetVariable(name);
         }
     }
 }
