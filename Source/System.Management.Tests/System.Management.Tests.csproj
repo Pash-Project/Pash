@@ -72,7 +72,6 @@
     <Compile Include="ParameterTests\CmdLetInfoTests.cs" />
     <Compile Include="ParameterTests\BindingTests.cs" />
     <Compile Include="ParameterTests\TestParameterCommand.cs" />
-    <Compile Include="LanguagePrimitivesTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

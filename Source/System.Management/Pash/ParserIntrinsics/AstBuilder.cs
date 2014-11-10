@@ -11,6 +11,7 @@ using Irony.Parsing;
 using Pash.ParserIntrinsics;
 using System.Text.RegularExpressions;
 using System.Reflection;
+using System.Management.Automation;
 
 namespace Pash.ParserIntrinsics
 {
@@ -1902,7 +1903,7 @@ namespace Pash.ParserIntrinsics
 
             if (commandElementsOptNode.ChildNodes.Any())
             {
-                commandElements.AddRange(commandElementsOptNode.ChildNodes.Single().ChildNodes.Select(BuildCommandElementAst));
+                commandElements.AddRange(BuildCommandOptElementAsts(commandElementsOptNode.ChildNodes.Single()));
             }
 
             return new CommandAst(
@@ -1955,25 +1956,70 @@ namespace Pash.ParserIntrinsics
             return new StringConstantExpressionAst(new ScriptExtent(parseTreeNode), parseTreeNode.Token.Text, StringConstantType.BareWord);
         }
 
-        CommandElementAst BuildCommandElementAst(ParseTreeNode parseTreeNode)
+        IEnumerable<CommandElementAst> BuildCommandOptElementAsts(ParseTreeNode parseTreeNode)
         {
-            VerifyTerm(parseTreeNode, this._grammar.command_element);
+            VerifyTerm(parseTreeNode, this._grammar.command_elements);
 
-            var childNode = parseTreeNode.ChildNodes.Single();
+            var elementAsts = new List<CommandElementAst>();
+            CommandParameterAst lastParameter = null;
 
-            if (childNode.Term == this._grammar.command_parameter)
+            var commandElements = from child in parseTreeNode.ChildNodes select child.ChildNodes.Single();
+
+            foreach (var cmdElementTree in commandElements)
             {
-                return BuildCommandParameterAst(childNode);
+                // first check if a parameter is waiting for its argument
+                if (lastParameter != null && lastParameter.RequiresArgument)
+                {
+                    // lastParameter is already in elementAsts list, only set the Argument property
+                    lastParameter.Argument = BuildCommandArgumentAstFromCommandElement(cmdElementTree,
+                                                                                       lastParameter.ParameterName);
+                    lastParameter = null; // makes sure we don't set it twice
+                    continue;
+                }
+
+                // otherwise check for parameters, arguments, and redirection
+                if (cmdElementTree.Term == this._grammar.command_parameter)
+                {
+                    lastParameter = BuildCommandParameterAst(cmdElementTree);
+                    elementAsts.Add(lastParameter);
+                }
+                else if (cmdElementTree.Term == this._grammar.command_argument)
+                {
+                    elementAsts.Add(BuildCommandArgumentAst(cmdElementTree));
+                }
+                else if (cmdElementTree.Term == this._grammar.redirection)
+                {
+                    throw new NotImplementedException(elementAsts.ToString());
+                }
+                else
+                {
+                    throw new InvalidOperationException(parseTreeNode.ToString());
+                }
             }
 
-            if (childNode.Term == this._grammar.command_argument)
+            // make sure the last parameter didn't expect an argument that was not provided
+            if (lastParameter != null && lastParameter.RequiresArgument)
             {
-                return BuildCommandArgumentAst(childNode);
+                throw new ParseException(String.Format("The parameter \"-{0}\" requires an argument",
+                                                       lastParameter.ParameterName));
             }
 
-            if (childNode.Term == this._grammar.redirection) throw new NotImplementedException(childNode.ToString());
+            return elementAsts;
+        }
 
-            throw new InvalidOperationException(parseTreeNode.ToString());
+        ExpressionAst BuildCommandArgumentAstFromCommandElement(ParseTreeNode parseTreeNode, string parameterName)
+        {
+            if (parseTreeNode.Term == this._grammar.command_parameter)
+            {
+                return new StringConstantExpressionAst(new ScriptExtent(parseTreeNode),
+                                                       parseTreeNode.Token.Text, StringConstantType.BareWord);
+            }
+            else if (parseTreeNode.Term == this._grammar.command_argument)
+            {
+                return BuildCommandArgumentAst(parseTreeNode);
+            }
+
+            throw new ParseException(String.Format("The parameter \"-{0}\" requires an argument", parameterName));
         }
 
         ExpressionAst BuildCommandArgumentAst(ParseTreeNode parseTreeNode)
@@ -1996,24 +2042,11 @@ namespace Pash.ParserIntrinsics
             var match = this._grammar.command_parameter.Expression.Match(parseTreeNode.Token.Text);
             var parameterName = match.Groups[this._grammar._parameter_name.Name].Value;
 
-            bool colon = match.Groups[this._grammar.colon.Name].Success;
+            // colon at the end means that the next term will be the argument
+            bool requiresArgument = match.Groups[this._grammar.colon.Name].Success;
 
-            // to match PowerShell's behavior, we have to bump command_parameter to be a nonterminal. Later.
-            // 
-            // Try parsing this to see:
-            //    x -y:$z
-            //
-            //    PS> $ast.EndBlock.Statements[0].PipelineElements[0].CommandElements[1]
-            //
-            //    ParameterName : y
-            //    Argument      : $z
-            //    ErrorPosition : -y:
-            //    Extent        : -y:$z
-            //    Parent        : x -y:$z
-
-            if (colon) throw new NotImplementedException("can't parse colon parameters");
-
-            return new CommandParameterAst(new ScriptExtent(parseTreeNode), parameterName, null, new ScriptExtent(parseTreeNode));
+            return new CommandParameterAst(new ScriptExtent(parseTreeNode), parameterName, null,
+                                           new ScriptExtent(parseTreeNode), requiresArgument);
         }
     }
 }

@@ -8,16 +8,24 @@ namespace System.Management.Automation.Language
     public class CommandParameterAst : CommandElementAst
     {
         public CommandParameterAst(IScriptExtent extent, string parameterName, ExpressionAst argument, IScriptExtent errorPosition)
+            : this(extent, parameterName, argument, errorPosition, false)
+        {
+        }
+
+        internal CommandParameterAst(IScriptExtent extent, string parameterName, ExpressionAst argument,
+                                     IScriptExtent errorPosition, bool requiresValue)
             : base(extent)
         {
             this.ParameterName = parameterName;
             this.Argument = argument;
             this.ErrorPosition = errorPosition;
+            RequiresArgument = requiresValue;
         }
 
-        public ExpressionAst Argument { get; private set; }
+        public ExpressionAst Argument { get; internal set; }
         public IScriptExtent ErrorPosition { get; private set; }
         public string ParameterName { get; private set; }
+        internal bool RequiresArgument { get; private set; }
 
         internal override IEnumerable<Ast> Children
         {

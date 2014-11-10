@@ -24,7 +24,7 @@ Assuming you have MonoDevelop installed:
 3. `xbuild`
 4. `mono Source/PashConsole/bin/Debug/Pash.exe`
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for more details.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for more details, especially if you see funny characters on startup.
 
 License
 -------

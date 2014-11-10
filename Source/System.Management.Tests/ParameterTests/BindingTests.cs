@@ -120,7 +120,7 @@ namespace System.Management.Tests.ParameterTests
         {
             var parameters = new CommandParameterCollection {
                 { "Name", "John" },
-                { "Recurse", null },
+                { "Recurse", true },
                 { mandatory, "foo" } // chooses the parameter set
             };
 
@@ -136,7 +136,7 @@ namespace System.Management.Tests.ParameterTests
         {
             var parameters = new CommandParameterCollection {
                 { "Variable", "a" },
-                { "Recurse", null }
+                { "Recurse", true }
             };
 
             _binder.BindCommandLineParameters(parameters);
@@ -241,7 +241,7 @@ namespace System.Management.Tests.ParameterTests
         {
             var varname = "foo";
             var parameters = new CommandParameterCollection {
-                { "ConstVar", null}, // switch parameter, should select "Variable" set
+                { "ConstVar", true}, // switch parameter, should select "Variable" set
                 { null, varname }
             };
 
