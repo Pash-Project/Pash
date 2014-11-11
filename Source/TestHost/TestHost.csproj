@@ -109,7 +109,6 @@
     <Compile Include="FileSystemTests\FileSystemNavigationTests.cs" />
     <Compile Include="System.Management\PathNavigationTests.cs" />
     <Compile Include="SessionStateScopeTests.cs" />
-    <Compile Include="ScopeTests.cs" />
     <Compile Include="SnapInTests.cs" />
     <Compile Include="FullHostTests.cs" />
     <Compile Include="TestHostRawUserInterface.cs" />
