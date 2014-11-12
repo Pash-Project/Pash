@@ -47,6 +47,7 @@
     <Compile Include="Commands\AddMemberTests.cs" />
     <Compile Include="Commands\AddTypeTests.cs" />
     <Compile Include="Commands\ImportModuleTests.cs" />
+    <Compile Include="Commands\RemoveModuleTests.cs" />
     <Compile Include="Integration\RosettaCode.cs" />
     <Compile Include="Language\ObjectMemberTests.cs" />
     <Compile Include="Language\Operators\FormatOperatorTests_7_5.cs" />
