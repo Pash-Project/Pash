@@ -25,27 +25,7 @@ namespace ReferenceTests
 
         public static string Execute(string[] commands, bool throwMethodInvocationException = true)
         {
-            LastResults = "";
-            try
-            {
-                RawExecute(commands, throwMethodInvocationException);
-            }
-            finally
-            {
-                if (LastRawResults != null)
-                {
-                    StringBuilder resultstr = new StringBuilder();
-                    foreach (var curPSObject in LastRawResults)
-                    {
-                        if (curPSObject != null)
-                        {
-                            resultstr.Append(curPSObject.ToString());
-                        }
-                        resultstr.Append(Environment.NewLine);
-                    }
-                    LastResults = resultstr.ToString();
-                }
-            }
+            RawExecute(commands, throwMethodInvocationException);
             return LastResults;
         }
 
@@ -89,6 +69,7 @@ namespace ReferenceTests
                     finally
                     {
                         LastRawErrorResults = pipeline.Error.ReadToEnd();
+                        MergeLastRawResultsToString();
                     }
                     if (throwMethodInvocationException && LastRawErrorResults.Count > 0)
                     {
@@ -97,6 +78,24 @@ namespace ReferenceTests
                 }
             }
             return LastRawResults;
+        }
+
+        private static void MergeLastRawResultsToString()
+        {
+            LastResults = "";
+            if (LastRawResults != null)
+           {
+                StringBuilder resultstr = new StringBuilder();
+                foreach (var curPSObject in LastRawResults)
+                {
+                    if (curPSObject != null)
+                    {
+                        resultstr.Append(curPSObject.ToString());
+                    }
+                    resultstr.Append(Environment.NewLine);
+                }
+                LastResults = resultstr.ToString();
+            }
         }
 
         internal static void ImportModules(string[] modules)
