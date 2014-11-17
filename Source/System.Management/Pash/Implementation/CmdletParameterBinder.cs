@@ -89,25 +89,31 @@ namespace System.Management.Automation
             // 5. Check if there is an "active" parameter set, yet, and fail if there are more than one
             CheckForActiveParameterSet();
 
-            // 6. For either the (active or default) parameter set: Gather missing mandatory parameters by UI
-            // 7. Check if (active or default) parameter set has unbound mandatory parameters and fail if so
-            //    But not pipeline related parameters, they might get passed later on
-            HandleMissingMandatoryParameters(ActiveOrDefaultParameterSet, false, true);
+            // 6. If we don't have parameter sets that have parameters that are unbound but will be set by pipeline,
+            //    then we will gather the missing mandatory parameters by UI for either the (active or default)
+            //    parameter set.
+            //    Also then check if (active or default) parameter set has unbound mandatory parameters and fail if so
+            if (!HasParameterSetsWithUnboundMandatoryPipelineParameters())
+            {
+                HandleMissingMandatoryParameters(ActiveOrDefaultParameterSet, false, true);
+            }
 
-            // 8. Check for an active parameter set. If the default set had unique mandatory parameters, we might
+            // 7. Check for an active parameter set. If the default set had unique mandatory parameters, we might
             //    know that the default set is the active set
             CheckForActiveParameterSet();
 
-            // 9. Define "candidate" parameter sets: All that have mandatory parameters set, ignoring pipeline related
+            // 8. Define "candidate" parameter sets: All that have mandatory parameters set, ignoring pipeline related
             //    If one set is already active, this should be the only candidate set
             // NOTE: makes sense if there has been no unique parameter, but multiple sets have their mandatories set
             _candidateParameterSets = GetCandidateParameterSets(false);
 
-            // 10. Back up the bound parameters
+            // 9. Back up the bound parameters
             BackupCommandLineParameterValues();
 
-            // 11. For the beginning phase: Tell the cmdlet which parameter set is likely to be used (if we know it)
-            ChooseParameterSet(ActiveOrDefaultParameterSet);
+            // 10. For the beginning phase: Tell the cmdlet which parameter set is likely to be used (if we know it)
+            // If there is only one candidate, use it at least temporarily. Otherwise the active or default
+            ChooseParameterSet(_candidateParameterSets.Count == 1 ? _candidateParameterSets[0]
+                                                                  : ActiveOrDefaultParameterSet);
         }
 
         /// <summary>
@@ -131,18 +137,9 @@ namespace System.Management.Automation
             // 2. If there is an input object:
             else
             {
-                bool success = false;
-                // 1. If the default parameter set is still a candidate: Try to bind pipeline object properly
-                if (DefaultParameterSet != null && _candidateParameterSets.Contains(DefaultParameterSet))
-                {
-                    success = BindPipelineParameters(DefaultParameterSet.Parameters, pipelineInput);
-                }
-                // 2. If binding to the default set was not possible, try the same with all parameters
-                if (!success)
-                {
-                    success = BindPipelineParameters(AllParameters(_candidateParameterSets), pipelineInput);
-                }
-                // 3. If we still had no success, throw an error
+                // 1. Try to bind pipeline object properly in all candidate sets: with and without conversion
+                bool success = BindPipelineParameters(AllParameters(_candidateParameterSets), pipelineInput);
+                // 2. If we had no success, throw an error
                 if (!success)
                 {
                     // well PS throws a MethodInvocationException instead of a ParameterBindingException, so..
@@ -213,9 +210,10 @@ namespace System.Management.Automation
 
         private void ChooseParameterSet(CommandParameterSetInfo chosenSet)
         {
-            if (chosenSet != null && _cmdlet is PSCmdlet)
+            if (_cmdlet is PSCmdlet)
             {
-                ((PSCmdlet)_cmdlet).ParameterSetName = chosenSet.Name;
+                ((PSCmdlet)_cmdlet).ParameterSetName = chosenSet != null ? chosenSet.Name
+                    : ParameterAttribute.AllParameterSets;
             }
         }
 
@@ -319,6 +317,31 @@ namespace System.Management.Automation
                 }
                 BindParameter(pair.Key, pair.Value, true);
             }
+        }
+
+        private bool HasParameterSetsWithUnboundMandatoryPipelineParameters()
+        {
+            foreach (var curParamSet in _cmdletInfo.ParameterSets)
+            {
+                // make sure we don't care about the AllParameter set. If it's the only one, it's already active
+                if (curParamSet.Name.Equals(ParameterAttribute.AllParameterSets))
+                {
+                    continue;
+                }
+                var unboundMandatoriesByPipeline = from param in curParamSet.Parameters
+                    where param.IsMandatory && !_boundParameters.Contains(param.MemberInfo) && 
+                        (param.ValueFromPipeline || param.ValueFromPipelineByPropertyName)
+                        select param;
+                var unboundMandatoriesWithoutPipeline = from param in curParamSet.Parameters
+                    where param.IsMandatory && !_boundParameters.Contains(param.MemberInfo) && 
+                        !(param.ValueFromPipeline || param.ValueFromPipelineByPropertyName)
+                        select param;
+                if (unboundMandatoriesByPipeline.Any() && !unboundMandatoriesWithoutPipeline.Any())
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private Collection<CommandParameterSetInfo> GetCandidateParameterSets(bool considerPipeline)
