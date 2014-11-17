@@ -499,7 +499,7 @@ namespace TestPSSnapIn
         }
     }
 
-    [Cmdlet(VerbsDiagnostic.Test, "MandatoryParamByPipelineSelection", DefaultParameterSetName = "Message")]
+    [Cmdlet(VerbsDiagnostic.Test, "OneMandatoryParamByPipelineSelection", DefaultParameterSetName = "Message")]
     public class TestOneMandatoryParamByPipelineSelectionCommand : PSCmdlet
     {
         [Parameter(Mandatory = true, ParameterSetName = "Message")]
@@ -542,7 +542,7 @@ namespace TestPSSnapIn
     public class TestMandatoryParamByPipelineSelectionCommand :
         TestMandatoryParamByPipelineSelectionCommandBase {}
 
-    [Cmdlet(VerbsDiagnostic.Test, "MandatoryParamByPipelineSelection")]
+    [Cmdlet(VerbsDiagnostic.Test, "MandatoryParamByPipelineSelectionWithoutDefault")]
     public class TestMandatoryParamByPipelineSelectionWithoutDefaultCommand :
                  TestMandatoryParamByPipelineSelectionCommandBase {}
 

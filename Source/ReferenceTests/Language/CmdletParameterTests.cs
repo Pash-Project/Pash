@@ -51,7 +51,7 @@ namespace ReferenceTests.Language
         {
             var cmd = "2 | " + CmdletName(typeof(TestOneMandatoryParamByPipelineSelectionCommand));
             var res = ReferenceHost.Execute(cmd);
-            Assert.AreEqual(NewlineJoin("Message", "Integer"), res);
+            Assert.AreEqual(NewlineJoin("Integer", "Integer"), res);
         }
 
         [TestCase("1", new [] { "Message", "Integer" })]
