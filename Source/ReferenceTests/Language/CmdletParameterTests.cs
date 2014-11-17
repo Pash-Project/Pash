@@ -19,15 +19,21 @@ namespace ReferenceTests.Language
         }
 
         [Test]
+        public void ParameterIsNotMandatoryByDefault()
+        {
+            var cmd = CmdletName(typeof(TestParamIsNotMandatoryByDefaultCommand)); // should work without param
+            var res = ReferenceHost.RawExecute(cmd);
+            Assert.That(res.Count, Is.EqualTo(1));
+            Assert.That(res[0], Is.Null);
+        }
+
+        [Test]
         public void CmdletWithoutProvidedMandatoryThrows()
         {
             var cmd = CmdletName(typeof(TestWithMandatoryCommand));
-            var ex = Assert.Throws(typeof(ParameterBindingException),
-                                   delegate()
-                                   {
+            var ex = Assert.Throws<ParameterBindingException>(delegate {
                 ReferenceHost.Execute(cmd);
-            }
-            ) as ParameterBindingException;
+            });
             StringAssert.Contains("Missing", ex.ErrorRecord.FullyQualifiedErrorId);
         }
 

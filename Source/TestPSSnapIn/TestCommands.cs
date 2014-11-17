@@ -487,6 +487,18 @@ namespace TestPSSnapIn
         }
     }
 
+    [Cmdlet(VerbsDiagnostic.Test, "ParamIsNotMandatoryByDefault")]
+    public class TestParamIsNotMandatoryByDefaultCommand : PSCmdlet
+    {
+        [Parameter]
+        public string Message { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(Message);
+        }
+    }
+
     [TypeConverter(typeof(CustomTypeConverter))]
     public class Custom
     {
