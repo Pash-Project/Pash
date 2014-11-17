@@ -15,7 +15,6 @@ namespace System.Management.Automation
     /// </summary>
     public class Cmdlet : InternalCommand
     {
-        internal string ParameterSetName { get; set; }
         internal CommonParametersCmdlet CommonParameters { get; set; }
 
         protected Cmdlet()

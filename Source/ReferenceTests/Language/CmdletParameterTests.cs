@@ -46,6 +46,32 @@ namespace ReferenceTests.Language
             Assert.AreEqual(NewlineJoin(expected), res);
         }
 
+        [Test]
+        public void ParameterSetSelectionWithOneMandatoryParameterByPipeline()
+        {
+            var cmd = "2 | " + CmdletName(typeof(TestOneMandatoryParamByPipelineSelectionCommand));
+            var res = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(NewlineJoin("Message", "Integer"), res);
+        }
+
+        [TestCase("1", new [] { "Message", "Integer" })]
+        [TestCase("'foo'", new [] { "Message", "Message" })]
+        public void ParameterSetSelectionWithMandatoryParameterByPipeline(string pipeInput, string[] expected)
+        {
+            var cmd = pipeInput + " | " + CmdletName(typeof(TestMandatoryParamByPipelineSelectionCommand));
+            var res = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(NewlineJoin(expected), res);
+        }
+
+        [TestCase("1", new [] { "__AllParameterSets", "Integer" })]
+        [TestCase("'foo'", new [] { "__AllParameterSets", "Message" })]
+        public void ParameterSetSelectionWithMandatoryParameterByPipelineWithoutDefault(string pipeInput, string[] expected)
+        {
+            var cmd = pipeInput +" | " + CmdletName(typeof(TestMandatoryParamByPipelineSelectionWithoutDefaultCommand));
+            var res = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(NewlineJoin(expected), res);
+        }
+
         [TestCase("-RandomString '4'", "Correct: 1 2")]
         [TestCase("-RandomInt 4", "Reversed: 2 1")]
         public void BindingByPositionWithChosenParameterSet(string parameter, string expected)

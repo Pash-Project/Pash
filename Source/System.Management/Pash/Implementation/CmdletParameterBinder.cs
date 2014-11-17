@@ -213,9 +213,9 @@ namespace System.Management.Automation
 
         private void ChooseParameterSet(CommandParameterSetInfo chosenSet)
         {
-            if (chosenSet != null)
+            if (chosenSet != null && _cmdlet is PSCmdlet)
             {
-                _cmdlet.ParameterSetName = chosenSet.Name;
+                ((PSCmdlet)_cmdlet).ParameterSetName = chosenSet.Name;
             }
         }
 
