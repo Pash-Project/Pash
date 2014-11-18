@@ -31,15 +31,15 @@ namespace ReferenceTests.Commands
         [TestCase("-Scope 'Global'")]
         [TestCase("-Global")]
         [TestCase("-Global:$false")] // strange, but PS behavior
-        public void CanImportScriptModuleToGlobalScope(string scopeParam)
+        public void CanImportScriptModuleFromFunctionToGlobalScope(string scopeParam)
         {
             var module = CreateFile("function test {'globalWorks'}", "psm1");
             var cmd = NewlineJoin(
                 "function doImport {",
                 "  Import-Module '" + module + "' " + scopeParam + ";",
-                "  test",
                 "}",
-                "doImport;"
+                "doImport;",
+                "test;"
             );
             var expected = NewlineJoin("globalWorks");
             Assert.That(ReferenceHost.Execute(cmd), Is.EqualTo(expected));
@@ -47,16 +47,45 @@ namespace ReferenceTests.Commands
             Assert.That(ReferenceHost.LastResults, Is.EqualTo(expected));
         }
 
-        public void CanImportScriptModuleToLocalScope(string scopeParam)
+        [TestCase("")]
+        [TestCase("-Scope 'Global'")]
+        [TestCase("-Global")]
+        [TestCase("-Global:$false")] // strange, but PS behavior
+        public void CanImportScriptModuleFromScriptToGlobalScope(string scopeParam)
+        {
+            var module = CreateFile("function test {'globalWorks'}", "psm1");
+            var script = CreateFile( "Import-Module '" + module + "' " + scopeParam + ";", "ps1");
+            var cmd = "& '" + script + "'; test";
+            var expected = NewlineJoin("globalWorks");
+            Assert.That(ReferenceHost.Execute(cmd), Is.EqualTo(expected));
+            ReferenceHost.RawExecuteInLastRunspace("test");
+            Assert.That(ReferenceHost.LastResults, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void CanImportScriptModuleFromFunctionOnlyToLocalScope()
         {
             var module = CreateFile("function test {'localWorks'}", "psm1");
             var cmd = NewlineJoin(
                 "function doImport {",
                 "  Import-Module '" + module + "' -Scope 'Local';",
-                "  test",
+                "  test;",
                 "}",
                 "doImport;"
             );
+            var expected = NewlineJoin("localWorks");
+            Assert.That(ReferenceHost.Execute(cmd), Is.EqualTo(expected));
+            Assert.Throws<CommandNotFoundException>(delegate {
+                ReferenceHost.RawExecuteInLastRunspace("test");
+            });
+        }
+
+        [Test]
+        public void CanImportScriptModuleFromScriptOnlyToLocalScope()
+        {
+            var module = CreateFile("function test {'localWorks'}", "psm1");
+            var script = CreateFile("Import-Module '" + module + "' -Scope 'local'; test", "ps1");
+            var cmd = "& '" + script + "';";
             var expected = NewlineJoin("localWorks");
             Assert.That(ReferenceHost.Execute(cmd), Is.EqualTo(expected));
             Assert.Throws<CommandNotFoundException>(delegate {
