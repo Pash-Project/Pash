@@ -11,6 +11,8 @@ namespace System.Management.Automation
     {
         protected PSCmdlet() { }
 
+        public string ParameterSetName { get; internal set; }
+
         public PSHost Host
         {
             get

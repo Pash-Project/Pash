@@ -14,6 +14,7 @@ namespace System.Management.Automation
         public bool IsDefault { get; private set; }
         public string Name { get; private set; }
         public ReadOnlyCollection<CommandParameterInfo> Parameters { get; private set; }
+        public bool IsAllParameterSets { get; private set; }
 
         // internals
         //internal CommandParameterSetInfo(string name, bool isDefaultParameterSet, uint parameterSetFlag, MergedCommandParameterMetadata parameterMetadata)
@@ -21,6 +22,7 @@ namespace System.Management.Automation
         {
             Name = name;
             IsDefault = isDefaultParameterSet;
+            IsAllParameterSets = Name.Equals(ParameterAttribute.AllParameterSets);
 
             // TODO: fill in the parameters info
             Parameters = new ReadOnlyCollection<CommandParameterInfo>(paramsInfo);
@@ -37,9 +39,39 @@ namespace System.Management.Automation
             return null;
         }
 
+        internal bool Contains(CommandParameterInfo param)
+        {
+            return Parameters.Contains(param);
+        }
+
         public override string ToString()
         {
             return String.Format("{0}({1} parameters)", Name, Parameters.Count);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || !(obj is CommandParameterSetInfo))
+            {
+                return false;
+            }
+            if (Object.ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            var other = (CommandParameterSetInfo) obj;
+            return Name.Equals(other.Name) && Parameters.SequenceEqual(other.Parameters);
+        }
+
+        public override int GetHashCode()
+        {
+            var hash = Name.GetHashCode();
+
+            foreach (var paramHash in (from p in Parameters select p.GetHashCode()))
+            {
+                hash = hash ^ paramHash;
+            }
+            return hash;
         }
     }
 }

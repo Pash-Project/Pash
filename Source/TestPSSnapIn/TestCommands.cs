@@ -465,6 +465,25 @@ namespace TestPSSnapIn
         }
     }
 
+    [Cmdlet(VerbsDiagnostic.Test, "ParameterInTwoSetsButNotDefault", DefaultParameterSetName = "Default")]
+    public sealed class TestParameterInTwoSetsButNotDefaultCommand : PSCmdlet
+    {
+        [Parameter(Mandatory = true, Position = 0, ParameterSetName = "Custom1")]
+        [Parameter(Mandatory = true, Position = 0, ParameterSetName = "Custom2")]
+        public string Custom { get; set; }
+
+        [Parameter(Mandatory = true, Position = 1, ParameterSetName = "Custom2")]
+        public string Custom2 { get; set; }
+
+        [Parameter(Mandatory = true, Position = 0, ParameterSetName = "Default")]
+        public string DefParam { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(ParameterSetName);
+        }
+    }
+
     [Cmdlet(VerbsDiagnostic.Test, "IntegerArraySum")]
     public sealed class TestIntegerArraySumCommand : PSCmdlet
     {
@@ -486,6 +505,65 @@ namespace TestPSSnapIn
             WriteObject(Transform(IntArray));
         }
     }
+
+    [Cmdlet(VerbsDiagnostic.Test, "ParamIsNotMandatoryByDefault")]
+    public class TestParamIsNotMandatoryByDefaultCommand : PSCmdlet
+    {
+        [Parameter]
+        public string Message { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(Message);
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "OneMandatoryParamByPipelineSelection", DefaultParameterSetName = "Message")]
+    public class TestOneMandatoryParamByPipelineSelectionCommand : PSCmdlet
+    {
+        [Parameter(Mandatory = true, ParameterSetName = "Message")]
+        public string Message { get; set; }
+
+        [Parameter(Mandatory = true, ParameterSetName = "Integer", ValueFromPipeline = true)]
+        public int Integer { get; set; }
+
+        protected override void BeginProcessing()
+        {
+            WriteObject(ParameterSetName);
+        }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(ParameterSetName);
+        }
+    }
+
+    public class TestMandatoryParamByPipelineSelectionCommandBase : PSCmdlet
+    {
+        [Parameter(Mandatory = true, ParameterSetName = "Message", ValueFromPipeline = true)]
+        public string Message { get; set; }
+
+        [Parameter(Mandatory = true, ParameterSetName = "Integer", ValueFromPipeline = true)]
+        public int Integer { get; set; }
+
+        protected override void BeginProcessing()
+        {
+            WriteObject(ParameterSetName);
+        }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(ParameterSetName);
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "MandatoryParamByPipelineSelection", DefaultParameterSetName = "Message")]
+    public class TestMandatoryParamByPipelineSelectionCommand :
+        TestMandatoryParamByPipelineSelectionCommandBase {}
+
+    [Cmdlet(VerbsDiagnostic.Test, "MandatoryParamByPipelineSelectionWithoutDefault")]
+    public class TestMandatoryParamByPipelineSelectionWithoutDefaultCommand :
+                 TestMandatoryParamByPipelineSelectionCommandBase {}
 
     [TypeConverter(typeof(CustomTypeConverter))]
     public class Custom

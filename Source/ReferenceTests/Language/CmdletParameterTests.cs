@@ -19,15 +19,21 @@ namespace ReferenceTests.Language
         }
 
         [Test]
+        public void ParameterIsNotMandatoryByDefault()
+        {
+            var cmd = CmdletName(typeof(TestParamIsNotMandatoryByDefaultCommand)); // should work without param
+            var res = ReferenceHost.RawExecute(cmd);
+            Assert.That(res.Count, Is.EqualTo(1));
+            Assert.That(res[0], Is.Null);
+        }
+
+        [Test]
         public void CmdletWithoutProvidedMandatoryThrows()
         {
             var cmd = CmdletName(typeof(TestWithMandatoryCommand));
-            var ex = Assert.Throws(typeof(ParameterBindingException),
-                                   delegate()
-                                   {
+            var ex = Assert.Throws<ParameterBindingException>(delegate {
                 ReferenceHost.Execute(cmd);
-            }
-            ) as ParameterBindingException;
+            });
             StringAssert.Contains("Missing", ex.ErrorRecord.FullyQualifiedErrorId);
         }
 
@@ -36,6 +42,32 @@ namespace ReferenceTests.Language
         public void ParameterSetSelectionByPipelineTest(string pipeInput, string expected)
         {
             var cmd = pipeInput + " | " + CmdletName(typeof(TestNoMandatoriesCommand)) + " -One '1' -Two '2'";
+            var res = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(NewlineJoin(expected), res);
+        }
+
+        [Test]
+        public void ParameterSetSelectionWithOneMandatoryParameterByPipeline()
+        {
+            var cmd = "2 | " + CmdletName(typeof(TestOneMandatoryParamByPipelineSelectionCommand));
+            var res = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(NewlineJoin("Integer", "Integer"), res);
+        }
+
+        [TestCase("1", new [] { "Message", "Integer" })]
+        [TestCase("'foo'", new [] { "Message", "Message" })]
+        public void ParameterSetSelectionWithMandatoryParameterByPipeline(string pipeInput, string[] expected)
+        {
+            var cmd = pipeInput + " | " + CmdletName(typeof(TestMandatoryParamByPipelineSelectionCommand));
+            var res = ReferenceHost.Execute(cmd);
+            Assert.AreEqual(NewlineJoin(expected), res);
+        }
+
+        [TestCase("1", new [] { "__AllParameterSets", "Integer" })]
+        [TestCase("'foo'", new [] { "__AllParameterSets", "Message" })]
+        public void ParameterSetSelectionWithMandatoryParameterByPipelineWithoutDefault(string pipeInput, string[] expected)
+        {
+            var cmd = pipeInput +" | " + CmdletName(typeof(TestMandatoryParamByPipelineSelectionWithoutDefaultCommand));
             var res = ReferenceHost.Execute(cmd);
             Assert.AreEqual(NewlineJoin(expected), res);
         }
@@ -323,6 +355,13 @@ namespace ReferenceTests.Language
             });
             // stuff before and after third object should work
             Assert.AreEqual(expected, ReferenceHost.LastResults);
+        }
+
+        [Test]
+        public void ParameterSelectionMakesDefaultUneligible()
+        {
+            var cmd = CmdletName(typeof(TestParameterInTwoSetsButNotDefaultCommand)) + " -Custom 'foo'";
+            Assert.That(ReferenceHost.Execute(cmd), Is.EqualTo(NewlineJoin("Custom1")));
         }
 
         [Test]
