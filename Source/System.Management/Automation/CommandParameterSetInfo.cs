@@ -48,5 +48,30 @@ namespace System.Management.Automation
         {
             return String.Format("{0}({1} parameters)", Name, Parameters.Count);
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || !(obj is CommandParameterSetInfo))
+            {
+                return false;
+            }
+            if (Object.ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            var other = (CommandParameterSetInfo) obj;
+            return Name.Equals(other.Name) && Parameters.SequenceEqual(other.Parameters);
+        }
+
+        public override int GetHashCode()
+        {
+            var hash = Name.GetHashCode();
+
+            foreach (var paramHash in (from p in Parameters select p.GetHashCode()))
+            {
+                hash = hash ^ paramHash;
+            }
+            return hash;
+        }
     }
 }

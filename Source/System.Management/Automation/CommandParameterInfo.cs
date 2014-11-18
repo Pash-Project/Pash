@@ -68,12 +68,16 @@ namespace System.Management.Automation
 
         public override bool Equals(object obj)
         {
-            var otherParamInfo = obj as CommandParameterInfo;
-            if (obj == null)
+            if (obj == null || !(obj is CommandParameterInfo))
             {
-                throw new ArgumentException("Equality check with null or different obejct type");
+                return false;
             }
-            return Equals(otherParamInfo);
+            if (Object.ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            var other = (CommandParameterInfo) obj;
+            return Name.Equals(other.Name) && ParameterType.Equals(other.ParameterType);
         }
 
         public override string ToString()

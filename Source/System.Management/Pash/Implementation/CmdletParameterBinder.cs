@@ -17,13 +17,12 @@ namespace System.Management.Automation
         private Collection<MemberInfo> _boundParameters;
         private Dictionary<MemberInfo, object> _commandLineValuesBackup;
         private List<MemberInfo> _commonParameters;
-        private string[] _eligibleSets;
         private CmdletInfo _cmdletInfo;
         private Cmdlet _cmdlet;
         private CommandParameterSetInfo _activeSet;
         private CommandParameterSetInfo _defaultSet;
         private bool _hasDefaultSet;
-        private Collection<CommandParameterSetInfo> _candidateParameterSets;
+        private List<CommandParameterSetInfo> _candidateParameterSets;
 
         private CommandParameterSetInfo ActiveOrDefaultParameterSet
         {
@@ -52,14 +51,13 @@ namespace System.Management.Automation
             _cmdlet = cmdlet;
             _defaultValues = new Dictionary<MemberInfo, object>();
             _boundParameters = new Collection<MemberInfo>();
-            _candidateParameterSets = new Collection<CommandParameterSetInfo>();
+            _candidateParameterSets = _cmdletInfo.ParameterSets.ToList();
             _commandLineValuesBackup = new Dictionary<MemberInfo, object>();
             _activeSet = null;
             _defaultSet = null;
             _hasDefaultSet = true;
             _commonParameters = (from parameter in CommonCmdletParameters.CommonParameterSetInfo.Parameters
                                  select parameter.MemberInfo).ToList();
-            _eligibleSets = (from paramSet in _cmdletInfo.ParameterSets select paramSet.Name).ToArray();
         }
 
         /// <summary>
@@ -71,53 +69,45 @@ namespace System.Management.Automation
         /// </remarks>
         public void BindCommandLineParameters(CommandParameterCollection parameters)
         {
-
             // How command line parameters are bound:
-            // 1. Bind all named parameters, fail if some name is bound twice
-            BindNamedParameters(parameters);
+            // In general: We will bind first named parameters, then positionals, and then maybe gather some.
+            // While parameters are being bound, a list of _candidateParameterSets is maintained that keeps track
+            // of those sets that are eligible for being taken.
+            // As we might have an early choice that can be handled, an _activeSet is maintained in addition.
+            // The _candidateSet will be restricted to the _activeSet if we found one early
 
-            // 2. Check if there is an "active" parameter set, yet.
-            //    If there is more than one "active" parameter set, fail with ambigous error
-            CheckForActiveParameterSet();
+            // 1. Check if one obvious choice for a parameter set to be chosen (e.g. if there is only one)
+            _activeSet = SelectObviousActiveParameterSet();
+
+            // 2. Bind all named parameters, fail if some name is bound twice or if the selection is already ambiguos
+            BindNamedParameters(parameters);
 
             // 3. Bind positional parameters per parameter set
             //    To do so, sort parameters of set by position, ignore bound parameters and set the first unbound position
             //    Note: if we don't know the active parameter set, yet, we will bind it by Default, this is PS behavior
+            //    Binding will also restrict the candidate set and check for ambiguity 
             BindPositionalParameters(parameters, ActiveOrDefaultParameterSet);
 
             // 4. This would be the place for common parameters, support of ShouldProcess and dynamic parameters
             // TODO: care about "common" parameters and dynamic parameters
 
-            // 5. Check if there is an "active" parameter set, yet, and fail if there are more than one
-            CheckForActiveParameterSet();
-
-            // 6. If we don't have parameter sets that have parameters that are unbound but will be set by pipeline,
-            //    then we will gather the missing mandatory parameters by UI for either the (active or default)
-            //    parameter set.
-            //    Also then check if (active or default) parameter set has unbound mandatory parameters and fail if so
+            // 6. There might be parameter sets with parameters that are still unbound but will be set by pipeline.
+            //    If not, and if we have an (active or default) parameter set that is still a candidate, then get the
+            //    missing parameters.
             if (!HasParameterSetsWithUnboundMandatoryPipelineParameters() &&
-                ActiveOrDefaultParameterSet != null &&
-                _eligibleSets.Contains(ActiveOrDefaultParameterSet.Name))
+                _candidateParameterSets.Contains(ActiveOrDefaultParameterSet))
             {
-                // TODO: only consider if we make sure that the above function onl holds true for
-                // parameter sets that are still eligible for being a candidate and if tthe
-                // default parameter set is also still eligible for getting active!
                 HandleMissingMandatoryParameters(ActiveOrDefaultParameterSet, false, true);
-               
-                // 7. Check for an active parameter set. If the default set had unique mandatory parameters, we might
-                //    know that the default set is the active set
-                CheckForActiveParameterSet();
             }
 
-            // 8. Define "candidate" parameter sets: All that have mandatory parameters set, ignoring pipeline related
-            //    If one set is already active, this should be the only candidate set
-            // NOTE: makes sense if there has been no unique parameter, but multiple sets have their mandatories set
-            _candidateParameterSets = GetCandidateParameterSets(false);
+            // 7. We finished binding parameters without pipeline. Therefore we can restrict the candidate set to those
+            //    sets that have all mandatory parameters set or are able to set them by pipeline
+            RestrictCandidatesByBoundParameter(false);
 
-            // 9. Back up the bound parameters
+            // 8. Back up the bound parameters
             BackupCommandLineParameterValues();
 
-            // 10. For the beginning phase: Tell the cmdlet which parameter set is likely to be used (if we know it)
+            // 9. For the beginning phase: Tell the cmdlet which parameter set is likely to be used (if we know it)
             // If there is only one candidate, use it at least temporarily. Otherwise the active or default
             ChooseParameterSet(_candidateParameterSets.Count == 1 ? _candidateParameterSets[0]
                                                                   : ActiveOrDefaultParameterSet);
@@ -133,18 +123,17 @@ namespace System.Management.Automation
             // First reset to command line parameter values
             RestoreCommandLineParameterValues();
 
-            // How pipeline parameters are bound
+            // How pipeline parameters are bound:
             // 1. If this command is the first in pipeline and there are no input objects:
             //    Then get all left mandatory parameters for the (active or default) parameter set from UI
             if (pipelineInput == null && isFirstInPipeline)
             {
                 if (ActiveOrDefaultParameterSet != null &&
-                    _eligibleSets.Contains(ActiveOrDefaultParameterSet.Name))
+                    _candidateParameterSets.Contains(ActiveOrDefaultParameterSet))
                 {
                     HandleMissingMandatoryParameters(ActiveOrDefaultParameterSet, true, true);
                 }
             }
-
             // 2. If there is an input object:
             else
             {
@@ -161,18 +150,15 @@ namespace System.Management.Automation
             // 3. This would be the place to process dynamic pipeline parameters
             // TODO: care about dynamic pipeline parameters
 
-            // 3. Check for active sets, fail the record (ambiguous) if there are multiples
-            CheckForActiveParameterSet();
-
             // 4. If there is an active set, make sure all mandatory parameters are set
             if (_activeSet != null)
             {
                 HandleMissingMandatoryParameters(_activeSet, true, false);
             }
 
-            // 5. Check for candidate sets, not ignoring pipeline related parameters (as we might still have no active)
+            // 5. Check for candidate sets, *not* ignoring pipeline related parameters (as we might still have no active)
             //    Note that this set automatically only contain the active set if there is one, so don't worry
-            _candidateParameterSets = GetCandidateParameterSets(true);
+            RestrictCandidatesByBoundParameter(true);
 
             // 6. If there is only one candidate: Choose that parameter set (This is also the case with an active set)
             if (_candidateParameterSets.Count == 1)
@@ -190,7 +176,7 @@ namespace System.Management.Automation
                     return;
                 }
                 // 2. If the default set is the AllParameter set then choose it.
-                else if (DefaultParameterSet != null && (DefaultParameterSet.Name == ParameterAttribute.AllParameterSets))
+                else if (DefaultParameterSet != null && (DefaultParameterSet.IsAllParameterSets))
                 {
                     ChooseParameterSet(DefaultParameterSet);
                     return;
@@ -209,7 +195,7 @@ namespace System.Management.Automation
             }
         }
 
-        IEnumerable<CommandParameterInfo> AllParameters(Collection<CommandParameterSetInfo> sources)
+        IEnumerable<CommandParameterInfo> AllParameters(IEnumerable<CommandParameterSetInfo> sources)
         {
             IEnumerable<CommandParameterInfo> allParams = Enumerable.Empty<CommandParameterInfo>();
             foreach (var curParamSet in sources)
@@ -332,9 +318,8 @@ namespace System.Management.Automation
 
         private bool HasParameterSetsWithUnboundMandatoryPipelineParameters()
         {
-            foreach (var setName in _eligibleSets)
+            foreach (var curParamSet in _candidateParameterSets)
             {
-                var curParamSet = _cmdletInfo.GetParameterSetByName(setName);
                 var unboundMandatoriesByPipeline = from param in curParamSet.Parameters
                     where param.IsMandatory && !_boundParameters.Contains(param.MemberInfo) && 
                         (param.ValueFromPipeline || param.ValueFromPipelineByPropertyName)
@@ -351,25 +336,42 @@ namespace System.Management.Automation
             return false;
         }
 
-        private Collection<CommandParameterSetInfo> GetCandidateParameterSets(bool considerPipeline)
+        // restricts the candidate parameter sets by the newly bound parameters
+        private void RestrictCandidatesByBoundParameter(CommandParameterInfo info)
         {
-            var candidates = new Collection<CommandParameterSetInfo>();
+            var setsContaining = from paramSet in _cmdletInfo.ParameterSets
+                where paramSet.Contains(info) select paramSet;
+            _candidateParameterSets = _candidateParameterSets.Intersect(setsContaining).ToList();
+            if (_candidateParameterSets.Count == 0)
+            {
+                throw new ParameterBindingException("The parameter set selection is ambiguous!",
+                                                    "AmbiguousParameterSet");
+            }
+            else if (_candidateParameterSets.Count == 1)
+            {
+                _activeSet = _candidateParameterSets[0];
+            }
+        }
+
+        // restricts candidates by s.t. it only considers those parameter sets that have enough bound parameters
+        private void RestrictCandidatesByBoundParameter(bool pipelineProcessed)
+        {
             // if we already found an active set, then this should be the only real candidate
             if (_activeSet != null)
             {
-                candidates.Add(_activeSet);
-                return candidates;
+                _candidateParameterSets = new List<CommandParameterSetInfo>() { _activeSet };
+                return;
             }
-            foreach (var setName in _eligibleSets)
+            var newCandidates = new List<CommandParameterSetInfo>();
+            foreach (var curParamSet in _candidateParameterSets)
             {
-                var curParamSet = _cmdletInfo.GetParameterSetByName(setName);
-                var unboundMandatories = GetMandatoryUnboundParameters(curParamSet, considerPipeline);
-                if (!unboundMandatories.Any())
+                var unboundMandatories = GetMandatoryUnboundParameters(curParamSet, pipelineProcessed);
+                if (!unboundMandatories.Any() && !curParamSet.IsAllParameterSets)
                 {
-                    candidates.Add(curParamSet);
+                    newCandidates.Add(curParamSet);
                 }
             }
-            return candidates;
+            _candidateParameterSets = newCandidates;
         }
 
         bool BindPipelineParameters(IEnumerable<CommandParameterInfo> parameterSet, object pipelineInput)
@@ -448,7 +450,8 @@ namespace System.Management.Automation
             }
         }
 
-        private IEnumerable<CommandParameterInfo> GetMandatoryUnboundParameters(CommandParameterSetInfo parameterSet, bool considerPipeline)
+        private IEnumerable<CommandParameterInfo> GetMandatoryUnboundParameters(CommandParameterSetInfo parameterSet,
+                                                                                bool considerPipeline)
         {
             if (parameterSet == null)
             {
@@ -463,45 +466,34 @@ namespace System.Management.Automation
                 select param;
         }
 
-        private void CheckForActiveParameterSet()
+        private CommandParameterSetInfo SelectObviousActiveParameterSet()
         {
             // if we only have one parameter set, this is always the active one (e.g. AllParametersSets)
+            CommandParameterSetInfo active = null;
             var setCount = _cmdletInfo.ParameterSets.Count;
             if (setCount == 1)
             {
-                if (_activeSet == null)
-                {
-                    _activeSet = _cmdletInfo.ParameterSets[0];
-                }
-                return;
+                active = _cmdletInfo.ParameterSets[0];
             }
             // if we have two sets and one is AllParametersSets, then the other one is naturally the default
             else if (setCount == 2)
             {
                 var firstSet = _cmdletInfo.ParameterSets[0];
                 var secondSet = _cmdletInfo.ParameterSets[1];
-                if (firstSet.Name.Equals(ParameterAttribute.AllParameterSets))
+                if (firstSet.IsAllParameterSets)
                 {
-                    _activeSet = secondSet;
-                    return;
+                    active = secondSet;
                 }
-                else if (secondSet.Name.Equals(ParameterAttribute.AllParameterSets))
+                else if (secondSet.IsAllParameterSets)
                 {
-                    _activeSet = firstSet;
-                    return;
+                    active = firstSet;
                 }
             }
-            // otherwise we have more than one parameter set with name
-            // even if an activeSet was already chosen, make sure there ist at most one active set
-            if (_eligibleSets.Length == 0)
+            if (active != null)
             {
-                throw new ParameterBindingException("The parameter set selection is ambiguous!",
-                                                    "AmbiguousParameterSet");
+                _candidateParameterSets = new List<CommandParameterSetInfo>() { active };
             }
-            else if (_eligibleSets.Length == 1)
-            {
-                _activeSet = _cmdletInfo.GetParameterSetByName(_eligibleSets[0]);
-            }
+            return active;
         }
 
         private bool TryBindParameter(CommandParameterInfo info, object value, bool doConvert)
@@ -533,16 +525,9 @@ namespace System.Management.Automation
             }
             // TODO: validate value with Attributes (ValidateNotNullOrEmpty, etc)
             SetCommandValue(memberInfo, value);
-            AdjustEligibleSet(info);
+            // make sure to update the candidate set to only consider parameter sets with the newly bound parameter
+            RestrictCandidatesByBoundParameter(info);
             _boundParameters.Add(memberInfo);
-        }
-
-        private void AdjustEligibleSet(CommandParameterInfo info)
-        {
-            var setsContaining = from paramSet in _cmdletInfo.ParameterSets
-                where (!paramSet.IsAllParameterSets && paramSet.Contains(info))
-                select paramSet.Name;
-            _eligibleSets = _eligibleSets.Intersect(setsContaining).ToArray();
         }
 
         private bool TryBindObjectAsParameters(IEnumerable<CommandParameterInfo> parameters, object valueObject, bool doConvert)
