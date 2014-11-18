@@ -14,6 +14,7 @@ namespace System.Management.Automation
         public bool IsDefault { get; private set; }
         public string Name { get; private set; }
         public ReadOnlyCollection<CommandParameterInfo> Parameters { get; private set; }
+        public bool IsAllParameterSets { get; private set; }
 
         // internals
         //internal CommandParameterSetInfo(string name, bool isDefaultParameterSet, uint parameterSetFlag, MergedCommandParameterMetadata parameterMetadata)
@@ -21,6 +22,7 @@ namespace System.Management.Automation
         {
             Name = name;
             IsDefault = isDefaultParameterSet;
+            IsAllParameterSets = Name.Equals(ParameterAttribute.AllParameterSets);
 
             // TODO: fill in the parameters info
             Parameters = new ReadOnlyCollection<CommandParameterInfo>(paramsInfo);
@@ -35,6 +37,11 @@ namespace System.Management.Automation
             }
 
             return null;
+        }
+
+        internal bool Contains(CommandParameterInfo param)
+        {
+            return Parameters.Contains(param);
         }
 
         public override string ToString()

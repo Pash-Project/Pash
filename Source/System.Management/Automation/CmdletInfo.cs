@@ -22,7 +22,6 @@ namespace System.Management.Automation
         public string Verb { get; private set; }
         public ReadOnlyCollection<CommandParameterSetInfo> ParameterSets { get; private set; }
 
-        internal Dictionary<string, string> UniqueSetParameters { get; private set; }
         internal Dictionary<string, CommandParameterInfo> ParameterInfoLookupTable { get; private set; }
 
         private Exception _validationException;
@@ -35,7 +34,6 @@ namespace System.Management.Automation
             {
                 throw new Exception("InvalidCmdletNameFormat " + name);
             }
-            UniqueSetParameters = new Dictionary<string, string>();
             ParameterInfoLookupTable = new Dictionary<string, CommandParameterInfo>(StringComparer.CurrentCultureIgnoreCase);
             Verb = name.Substring(0, i);
             Noun = name.Substring(i + 1);
@@ -125,20 +123,6 @@ namespace System.Management.Automation
             CommandParameterInfo pi = new CommandParameterInfo(memberInfo, type, paramAttr);
             var paramSetName = paramAttr.ParameterSetName;
             // Determine if this parameter is uniquely defined for one set and rember it
-            if (!String.IsNullOrEmpty(paramSetName) && !paramSetName.Equals(ParameterAttribute.AllParameterSets))
-            {
-                var parameterName = pi.Name;
-                // check if we already defined that parameter for another set
-                if (UniqueSetParameters.ContainsKey(parameterName))
-                {
-                    UniqueSetParameters[parameterName] = null;
-                }
-                else
-                {
-                    // not yet in any set, it's a candidate for a unique parameter
-                    UniqueSetParameters[parameterName] = paramSetName;
-                }
-            }
 
             paramSetName = paramSetName ?? ParameterAttribute.AllParameterSets;
 
@@ -259,12 +243,6 @@ namespace System.Management.Automation
                 {
                     RegisterParameter(last);
                 }
-            }
-
-            // Clean the UniqueSetParameters
-            foreach (var cur in UniqueSetParameters.Where(keyValue => (keyValue.Value == null)).ToList())
-            {
-                UniqueSetParameters.Remove(cur.Key);
             }
 
             // Create param-sets collection

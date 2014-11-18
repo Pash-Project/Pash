@@ -465,6 +465,25 @@ namespace TestPSSnapIn
         }
     }
 
+    [Cmdlet(VerbsDiagnostic.Test, "ParameterInTwoSetsButNotDefault", DefaultParameterSetName = "Default")]
+    public sealed class TestParameterInTwoSetsButNotDefaultCommand : PSCmdlet
+    {
+        [Parameter(Mandatory = true, Position = 0, ParameterSetName = "Custom1")]
+        [Parameter(Mandatory = true, Position = 0, ParameterSetName = "Custom2")]
+        public string Custom { get; set; }
+
+        [Parameter(Mandatory = true, Position = 1, ParameterSetName = "Custom2")]
+        public string Custom2 { get; set; }
+
+        [Parameter(Mandatory = true, Position = 0, ParameterSetName = "Default")]
+        public string DefParam { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(ParameterSetName);
+        }
+    }
+
     [Cmdlet(VerbsDiagnostic.Test, "IntegerArraySum")]
     public sealed class TestIntegerArraySumCommand : PSCmdlet
     {

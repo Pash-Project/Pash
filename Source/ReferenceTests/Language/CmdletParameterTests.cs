@@ -358,6 +358,13 @@ namespace ReferenceTests.Language
         }
 
         [Test]
+        public void ParameterSelectionMakesDefaultUneligible()
+        {
+            var cmd = CmdletName(typeof(TestParameterInTwoSetsButNotDefaultCommand)) + " -Custom 'foo'";
+            Assert.That(ReferenceHost.Execute(cmd), Is.EqualTo(NewlineJoin("Custom1")));
+        }
+
+        [Test]
         public void CmdletPipeParamPropertyPreferredOverConversion()
         {
             var cmdletName = CmdletName(typeof(TestParametersByPipelineWithPropertiesAndConversionCommand));

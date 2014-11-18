@@ -17,6 +17,7 @@ namespace System.Management.Automation
         private Collection<MemberInfo> _boundParameters;
         private Dictionary<MemberInfo, object> _commandLineValuesBackup;
         private List<MemberInfo> _commonParameters;
+        private string[] _eligibleSets;
         private CmdletInfo _cmdletInfo;
         private Cmdlet _cmdlet;
         private CommandParameterSetInfo _activeSet;
@@ -58,6 +59,7 @@ namespace System.Management.Automation
             _hasDefaultSet = true;
             _commonParameters = (from parameter in CommonCmdletParameters.CommonParameterSetInfo.Parameters
                                  select parameter.MemberInfo).ToList();
+            _eligibleSets = (from paramSet in _cmdletInfo.ParameterSets select paramSet.Name).ToArray();
         }
 
         /// <summary>
@@ -93,14 +95,19 @@ namespace System.Management.Automation
             //    then we will gather the missing mandatory parameters by UI for either the (active or default)
             //    parameter set.
             //    Also then check if (active or default) parameter set has unbound mandatory parameters and fail if so
-            if (!HasParameterSetsWithUnboundMandatoryPipelineParameters())
+            if (!HasParameterSetsWithUnboundMandatoryPipelineParameters() &&
+                ActiveOrDefaultParameterSet != null &&
+                _eligibleSets.Contains(ActiveOrDefaultParameterSet.Name))
             {
+                // TODO: only consider if we make sure that the above function onl holds true for
+                // parameter sets that are still eligible for being a candidate and if tthe
+                // default parameter set is also still eligible for getting active!
                 HandleMissingMandatoryParameters(ActiveOrDefaultParameterSet, false, true);
+               
+                // 7. Check for an active parameter set. If the default set had unique mandatory parameters, we might
+                //    know that the default set is the active set
+                CheckForActiveParameterSet();
             }
-
-            // 7. Check for an active parameter set. If the default set had unique mandatory parameters, we might
-            //    know that the default set is the active set
-            CheckForActiveParameterSet();
 
             // 8. Define "candidate" parameter sets: All that have mandatory parameters set, ignoring pipeline related
             //    If one set is already active, this should be the only candidate set
@@ -131,7 +138,11 @@ namespace System.Management.Automation
             //    Then get all left mandatory parameters for the (active or default) parameter set from UI
             if (pipelineInput == null && isFirstInPipeline)
             {
-                HandleMissingMandatoryParameters(ActiveOrDefaultParameterSet, true, true);
+                if (ActiveOrDefaultParameterSet != null &&
+                    _eligibleSets.Contains(ActiveOrDefaultParameterSet.Name))
+                {
+                    HandleMissingMandatoryParameters(ActiveOrDefaultParameterSet, true, true);
+                }
             }
 
             // 2. If there is an input object:
@@ -321,13 +332,9 @@ namespace System.Management.Automation
 
         private bool HasParameterSetsWithUnboundMandatoryPipelineParameters()
         {
-            foreach (var curParamSet in _cmdletInfo.ParameterSets)
+            foreach (var setName in _eligibleSets)
             {
-                // make sure we don't care about the AllParameter set. If it's the only one, it's already active
-                if (curParamSet.Name.Equals(ParameterAttribute.AllParameterSets))
-                {
-                    continue;
-                }
+                var curParamSet = _cmdletInfo.GetParameterSetByName(setName);
                 var unboundMandatoriesByPipeline = from param in curParamSet.Parameters
                     where param.IsMandatory && !_boundParameters.Contains(param.MemberInfo) && 
                         (param.ValueFromPipeline || param.ValueFromPipelineByPropertyName)
@@ -353,13 +360,9 @@ namespace System.Management.Automation
                 candidates.Add(_activeSet);
                 return candidates;
             }
-            foreach (var curParamSet in _cmdletInfo.ParameterSets)
+            foreach (var setName in _eligibleSets)
             {
-                // make sure we don't care about the AllParameter set. If it's the only one, it's already active
-                if (curParamSet.Name.Equals(ParameterAttribute.AllParameterSets))
-                {
-                    continue;
-                }
+                var curParamSet = _cmdletInfo.GetParameterSetByName(setName);
                 var unboundMandatories = GetMandatoryUnboundParameters(curParamSet, considerPipeline);
                 if (!unboundMandatories.Any())
                 {
@@ -487,22 +490,17 @@ namespace System.Management.Automation
                     _activeSet = firstSet;
                     return;
                 }
-
             }
             // otherwise we have more than one parameter set with name
             // even if an activeSet was already chosen, make sure there ist at most one active set
-            foreach (var param in _boundParameters)
+            if (_eligibleSets.Length == 0)
             {
-                string activeSetName;
-                if (_cmdletInfo.UniqueSetParameters.TryGetValue(param.Name, out activeSetName))
-                {
-                    if (_activeSet != null && !_activeSet.Name.Equals(activeSetName))
-                    {
-                        throw new ParameterBindingException("The parameter set selection is ambiguous!",
-                             "AmbiguousParameterSet");
-                    }
-                    _activeSet = _cmdletInfo.GetParameterSetByName(activeSetName);
-                }
+                throw new ParameterBindingException("The parameter set selection is ambiguous!",
+                                                    "AmbiguousParameterSet");
+            }
+            else if (_eligibleSets.Length == 1)
+            {
+                _activeSet = _cmdletInfo.GetParameterSetByName(_eligibleSets[0]);
             }
         }
 
@@ -527,6 +525,7 @@ namespace System.Management.Automation
                 var msg = String.Format("Parameter '{0}' has already been bound!", info.Name);
                 throw new ParameterBindingException(msg);
             }
+
             // ConvertTo throws an exception if conversion isn't possible. That's just fine.
             if (doConvert)
             {
@@ -534,7 +533,16 @@ namespace System.Management.Automation
             }
             // TODO: validate value with Attributes (ValidateNotNullOrEmpty, etc)
             SetCommandValue(memberInfo, value);
+            AdjustEligibleSet(info);
             _boundParameters.Add(memberInfo);
+        }
+
+        private void AdjustEligibleSet(CommandParameterInfo info)
+        {
+            var setsContaining = from paramSet in _cmdletInfo.ParameterSets
+                where (!paramSet.IsAllParameterSets && paramSet.Contains(info))
+                select paramSet.Name;
+            _eligibleSets = _eligibleSets.Intersect(setsContaining).ToArray();
         }
 
         private bool TryBindObjectAsParameters(IEnumerable<CommandParameterInfo> parameters, object valueObject, bool doConvert)
