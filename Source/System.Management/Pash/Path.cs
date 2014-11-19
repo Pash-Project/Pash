@@ -344,6 +344,21 @@ namespace System.Management
             return true;
         }
 
+        public bool HasExtension()
+        {
+            return System.IO.Path.HasExtension(_rawPath);
+        }
+
+        public string GetExtension()
+        {
+            return System.IO.Path.GetExtension(_rawPath);
+        }
+
+        public string GetFileNameWithoutExtension()
+        {
+            return System.IO.Path.GetFileNameWithoutExtension(_rawPath);
+        }
+
         public Path RemoveDrive()
         {
             string drive;

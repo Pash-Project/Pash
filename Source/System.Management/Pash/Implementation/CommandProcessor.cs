@@ -100,11 +100,11 @@ namespace System.Management.Automation
         /// </summary>
         public override void EndProcessing()
         {
-            ExecutionContext.SetVariable("global:?", false); // we set it true if we succeed
+            ExecutionContext.SetSuccessVariable(false); // we set it true if we succeed
             try
             {
                 Command.DoEndProcessing();
-                ExecutionContext.SetVariable("global:?", true); // only false if we got an exception
+                ExecutionContext.SetSuccessVariable(true); // only false if we got an exception
             }
             catch (CmdletInvocationException)
             {

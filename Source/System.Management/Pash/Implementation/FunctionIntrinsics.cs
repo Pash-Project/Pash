@@ -33,6 +33,11 @@ namespace Pash.Implementation
             return _scope.GetAll();
         }
 
+        internal Dictionary<string, FunctionInfo> GetAllLocal()
+        {
+            return _scope.Items;
+        }
+
         public void Set(string name, ScriptBlock function, string description = "")
         {
             Set(name, function, null, description);

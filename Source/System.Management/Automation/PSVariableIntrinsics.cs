@@ -19,6 +19,11 @@ namespace System.Management.Automation
             return _scope.Get(name, true);
         }
 
+        internal PSVariable GetAtScope(string name, string scope)
+        {
+            return _scope.GetAtScope(name, scope);
+        }
+
         public object GetValue(string name)
         {
             var variable = Get(name);

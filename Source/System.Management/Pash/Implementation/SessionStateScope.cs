@@ -208,7 +208,6 @@ namespace Pash.Implementation
             }
             return visibleItems;
         }
-
         #endregion
 
         #region specified scope related

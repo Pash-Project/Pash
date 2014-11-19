@@ -34,7 +34,9 @@ namespace Pash.Implementation
         private void CreateOwnScope()
         {
             _originalContext = ExecutionContext;
-            _scopedContext = ExecutionContext.Clone(_scriptBlockInfo.ScopeUsage);
+            var executionSessionState = CommandInfo.Module != null ? CommandInfo.Module.SessionState
+                                                                   : ExecutionContext.SessionState;
+            _scopedContext = ExecutionContext.Clone(executionSessionState, _scriptBlockInfo.ScopeUsage);
             _scopedExecutionVisitor = new ExecutionVisitor(_scopedContext, CommandRuntime, false);
         }
 
@@ -105,7 +107,7 @@ namespace Pash.Implementation
                     int exitCode = 0;
                     LanguagePrimitives.TryConvertTo<int>(((ExitException)e).Argument, out exitCode);
                     _exitCode = exitCode;
-                    ExecutionContext.SetVariable("global:LASTEXITCODE", exitCode);
+                    ExecutionContext.SetLastExitCodeVariable(exitCode);
                 }
                 // otherwise (return), we simply stop execution of the script (that's why we're here) and do nothing
             }
@@ -118,7 +120,7 @@ namespace Pash.Implementation
         public override void EndProcessing()
         {
             // TODO: process end clause. remember to switch scope
-            ExecutionContext.SetVariable("global:?", _exitCode == null || _exitCode == 0);
+            ExecutionContext.SetSuccessVariable(_exitCode == null || _exitCode == 0);
         }
 
         public override string ToString()

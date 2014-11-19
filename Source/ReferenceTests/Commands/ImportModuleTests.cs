@@ -19,6 +19,7 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
+        [Ignore("How can PS throw and MethodInvocationException from inside a cmdlet?")]
         public void WrongScriptModuleExtensionThrows()
         {
             var module = CreateFile("function foo {'fail'}", "psm3");
@@ -33,17 +34,17 @@ namespace ReferenceTests.Commands
         [TestCase("-Global:$false")] // strange, but PS behavior
         public void CanImportScriptModuleFromFunctionToGlobalScope(string scopeParam)
         {
-            var module = CreateFile("function test {'globalWorks'}", "psm1");
+            var module = CreateFile("function testfun {'globalWorks'}", "psm1");
             var cmd = NewlineJoin(
                 "function doImport {",
                 "  Import-Module '" + module + "' " + scopeParam + ";",
+                "  testfun;",
                 "}",
-                "doImport;",
-                "test;"
-            );
+                "doImport;"
+                );
             var expected = NewlineJoin("globalWorks");
             Assert.That(ReferenceHost.Execute(cmd), Is.EqualTo(expected));
-            ReferenceHost.RawExecuteInLastRunspace("test");
+            ReferenceHost.RawExecuteInLastRunspace("testfun");
             Assert.That(ReferenceHost.LastResults, Is.EqualTo(expected));
         }
 
@@ -53,43 +54,43 @@ namespace ReferenceTests.Commands
         [TestCase("-Global:$false")] // strange, but PS behavior
         public void CanImportScriptModuleFromScriptToGlobalScope(string scopeParam)
         {
-            var module = CreateFile("function test {'globalWorks'}", "psm1");
+            var module = CreateFile("function testfun {'globalWorks'}", "psm1");
             var script = CreateFile( "Import-Module '" + module + "' " + scopeParam + ";", "ps1");
-            var cmd = "& '" + script + "'; test";
+            var cmd = "& '" + script + "'; testfun";
             var expected = NewlineJoin("globalWorks");
             Assert.That(ReferenceHost.Execute(cmd), Is.EqualTo(expected));
-            ReferenceHost.RawExecuteInLastRunspace("test");
+            ReferenceHost.RawExecuteInLastRunspace("testfun");
             Assert.That(ReferenceHost.LastResults, Is.EqualTo(expected));
         }
 
         [Test]
         public void CanImportScriptModuleFromFunctionOnlyToLocalScope()
         {
-            var module = CreateFile("function test {'localWorks'}", "psm1");
+            var module = CreateFile("function testfun {'localWorks'}", "psm1");
             var cmd = NewlineJoin(
                 "function doImport {",
                 "  Import-Module '" + module + "' -Scope 'Local';",
-                "  test;",
+                "  testfun;",
                 "}",
                 "doImport;"
             );
             var expected = NewlineJoin("localWorks");
             Assert.That(ReferenceHost.Execute(cmd), Is.EqualTo(expected));
             Assert.Throws<CommandNotFoundException>(delegate {
-                ReferenceHost.RawExecuteInLastRunspace("test");
+                ReferenceHost.RawExecuteInLastRunspace("testfun");
             });
         }
 
         [Test]
         public void CanImportScriptModuleFromScriptOnlyToLocalScope()
         {
-            var module = CreateFile("function test {'localWorks'}", "psm1");
-            var script = CreateFile("Import-Module '" + module + "' -Scope 'local'; test", "ps1");
+            var module = CreateFile("function testfun {'localWorks'}", "psm1");
+            var script = CreateFile("Import-Module '" + module + "' -Scope 'local'; testfun", "ps1");
             var cmd = "& '" + script + "';";
             var expected = NewlineJoin("localWorks");
             Assert.That(ReferenceHost.Execute(cmd), Is.EqualTo(expected));
             Assert.Throws<CommandNotFoundException>(delegate {
-                ReferenceHost.RawExecuteInLastRunspace("test");
+                ReferenceHost.RawExecuteInLastRunspace("testfun");
             });
         }
 
@@ -102,10 +103,10 @@ namespace ReferenceTests.Commands
                 "function foo {",
                 "  $x = 'mf';",
                 "  \"x = $x\";",
-                "  \"script:x = $script:x\";",
-                "  \"global:x = $global:x\";",
-                "  \"gv 1 = $((Get-Variable -Scope 1 x).Value)\";",
-                "  \"gv 2 = $((Get-Variable -Scope 2 x).Value)\";",
+                "  \"script:x = \" + $script:x;",
+                "  \"global:x = \" + $global:x;",
+                "  \"gv 1 = \" + (Get-Variable -Scope 1 x).Value;",
+                "  \"gv 2 = \" + (Get-Variable -Scope 2 x).Value;",
                 "};"
              ), "psm1");
             var script = CreateFile(NewlineJoin(
@@ -129,5 +130,10 @@ namespace ReferenceTests.Commands
             );
             Assert.That(ReferenceHost.Execute(statement), Is.EqualTo(expected));
         }
+
+        // TODO: tests for modules importing modules to check scope derivance and execution
+        // TODO: test that checks what happens if the script module returns a value
+        // TODO: test that checks the behavior if both the Global and the Scope parameter are set
+        // TODO: test if module exports a variable that overwrites an existing one. which PSVariable *object* will be used?
     }
 }
