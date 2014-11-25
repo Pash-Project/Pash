@@ -99,7 +99,7 @@ namespace Pash.Implementation
                     SessionStateScope<T> affectedScope = GetScope(qualName.ScopeSpecifier, false);
                     var item = affectedScope.GetLocal(qualName.UnqualifiedName);
                     //return null if it's private
-                    if (affectedScope != this && item.ItemOptions.HasFlag(ScopedItemOptions.Private))
+                    if (item == null || affectedScope != this && item.ItemOptions.HasFlag(ScopedItemOptions.Private))
                     {
                         return default(T);
                     }

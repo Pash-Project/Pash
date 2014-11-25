@@ -34,6 +34,17 @@ namespace ReferenceTests.Language
             var res = ReferenceHost.Execute(psStr);
             Assert.AreEqual(NewlineJoin(expected), res);
         }
+
+        [TestCase("$x", "2")]
+        [TestCase("$global:x", "1")] // scope qualifier works
+        [TestCase("$foo:x", "")] // invalid drive qualifier doesn't throw
+        [TestCase("$y", "")] // unset variable doesn't throw
+        public void StringWithVariableWorks(string varAccess, string expected)
+        {
+            var stringPrefix = "foo ";
+            var res = ReferenceHost.Execute("$x = 1; & { $x = 2; \"" + stringPrefix + varAccess + "\"; }");
+            Assert.That(res, Is.EqualTo(NewlineJoin(stringPrefix + expected)));
+        }
     }
 }
 

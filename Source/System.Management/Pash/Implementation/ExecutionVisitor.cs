@@ -551,8 +551,8 @@ namespace System.Management.Pash.Implementation
 
         private SessionStateProviderBase GetSessionStateProvider(VariablePath variablePath)
         {
-            PSDriveInfo driveInfo = _context.SessionState.Drive.Get(variablePath.DriveName);
-            if (driveInfo != null)
+            PSDriveInfo driveInfo;
+            if (_context.SessionState.Drive.TryGet(variablePath.DriveName, out driveInfo))
             {
                 return _context.SessionStateGlobal.GetProviderInstance(driveInfo.Provider.Name) as SessionStateProviderBase;
             }

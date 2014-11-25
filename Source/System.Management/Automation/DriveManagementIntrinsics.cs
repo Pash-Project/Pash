@@ -29,6 +29,12 @@ namespace System.Management.Automation
             }
         }
 
+        internal bool TryGet(string driveName, out PSDriveInfo info)
+        {
+            info = _scope.Get(driveName, false);
+            return info != null;
+        }
+
         public PSDriveInfo Get(string driveName)
         {
             var drive = _scope.Get(driveName, false);
