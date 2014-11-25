@@ -14,7 +14,8 @@ namespace ReferenceTests.Language
         public void UnknownVariableIsSimplyNull(string name)
         {
             var res = ReferenceHost.RawExecute(name);
-            Assert.That(res, Is.Empty);
+            Assert.That(res.Count, Is.EqualTo(1));
+            Assert.That(res[0], Is.Null);
         }
 
     }
