@@ -13,19 +13,19 @@ namespace ReferenceTests.Language.Operators
         [Test]
         public void PlusEqualsWorks()
         {
-            ExecuteAndCompareTypedResult("$a = 3; $a += 2.5; $a", 5.5f);
+            ExecuteAndCompareTypedResult("$a = 3; $a += 2.5; $a", 5.5d);
         }
 
         [Test]
         public void PlusEqualsWorksWithUndefined()
         {
-            ExecuteAndCompareTypedResult("$a += 2.5; $a", 2.5f);
+            ExecuteAndCompareTypedResult("$a += 2.5; $a", 2.5d);
         }
 
         [Test]
         public void TimeEqualsWorks()
         {
-            ExecuteAndCompareTypedResult("$a = 3; $a *= 2.5; $a", 7.5f);
+            ExecuteAndCompareTypedResult("$a = 3; $a *= 2.5; $a", 7.5d);
         }
 
         [Test]
@@ -37,19 +37,19 @@ namespace ReferenceTests.Language.Operators
         [Test]
         public void MinusEqualsWorks()
         {
-            ExecuteAndCompareTypedResult("$a = 5; $a -= 6.5; $a", -1.5f);
+            ExecuteAndCompareTypedResult("$a = 5; $a -= 6.5; $a", -1.5d);
         }
 
         [Test]
         public void MinusEqualsWorksWithUndefined()
         {
-            ExecuteAndCompareTypedResult("$a -= 6.5; $a", -6.5f);
+            ExecuteAndCompareTypedResult("$a -= 6.5; $a", -6.5d);
         }
 
         [Test]
         public void DivideEqualsWorks()
         {
-            ExecuteAndCompareTypedResult("$a = 5; $a /= 2; $a", 2.5f);
+            ExecuteAndCompareTypedResult("$a = 5; $a /= 2; $a", 2.5d);
         }
 
         [Test]
@@ -61,13 +61,13 @@ namespace ReferenceTests.Language.Operators
         [Test]
         public void RemainderEqualsWorks()
         {
-            ExecuteAndCompareTypedResult("$a = 5.3; $a %= 0.4; $a", 0.2f);
+            ExecuteAndCompareTypedResult("$a = 5.3; $a %= 0.4; $a", 0.2d);
         }
 
         [Test]
         public void RemainderEqualsWorksWithUndefined()
         {
-            ExecuteAndCompareTypedResult("$a %= 0.4; $a", 0.0f);
+            ExecuteAndCompareTypedResult("$a %= 0.4; $a", 0.0d);
         }
         
         [Test]

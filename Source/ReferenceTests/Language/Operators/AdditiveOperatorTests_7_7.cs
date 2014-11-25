@@ -104,7 +104,7 @@ namespace ReferenceTests.Language.Operators
             ExecuteAndCompareTypedResult(cmd, expected);
         }
 
-        [TestCase("$a + $null", new object[] { 10, 20 })]
+        [TestCase("$a + $null", new object[] { 10, 20, null })]
         [TestCase("$null + $a", new object[] { 10, 20 })]
         public void ArrayConcatenationWithNull(string cmd, object[] expected)
         {

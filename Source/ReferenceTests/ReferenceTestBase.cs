@@ -183,6 +183,12 @@ namespace ReferenceTests
         public static void ExecuteAndCompareTypedResult(string cmd, params object[] expectedValues)
         {
             var results = ReferenceHost.RawExecute(cmd);
+            if (expectedValues == null)
+            {
+                Assert.That(results.Count, Is.EqualTo(1));
+                Assert.That(results[0], Is.Null);
+                return;
+            }
             Assert.AreEqual(expectedValues.Length, results.Count);
             for (int i = 0; i < expectedValues.Length; i++)
             {

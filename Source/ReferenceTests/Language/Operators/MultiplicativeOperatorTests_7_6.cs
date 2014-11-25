@@ -24,9 +24,9 @@ namespace ReferenceTests.Language.Operators
             ExecuteAndCompareTypedResult("-10.300D * 12", (decimal) -123.600m);
         }
 
-        [TestCase("12.1 * $null", 0.0f)]
+        [TestCase("12.1 * $null", 0.0d)]
         [TestCase("$null * $null", null)]
-        [TestCase("3.5 * $null", 0.0f)]
+        [TestCase("3.5 * $null", 0.0d)]
         [TestCase("3 * $null", (int) 0)]
         public void MultiplicationWithNull(string cmd, object expected)
         {
@@ -56,11 +56,11 @@ namespace ReferenceTests.Language.Operators
             ExecuteAndCompareTypedResult("\"red\" * 2.3450D", "redred");
         }
 
-        [TestCase("\"red\" * $null")]
-        [TestCase("$null * \"red\"")]
-        public void StringReplicationWithNull(string cmd)
+        [TestCase("\"red\" * $null", "")]
+        [TestCase("$null * \"red\"", null)]
+        public void StringReplicationWithNull(string cmd, object expected)
         {
-            ExecuteAndCompareTypedResult(cmd, "");
+            ExecuteAndCompareTypedResult(cmd, expected);
         }
 
         [TestCase("$a * \"3\"", new object[] {10, 20, 10, 20, 10, 20})]
@@ -82,12 +82,18 @@ namespace ReferenceTests.Language.Operators
             ExecuteAndCompareTypedResult(cmd, new object[] {10, 20, 10, 20});
         }
 
-        [TestCase("$a * $null")]
-        [TestCase("$null * $a")]
-        public void ArrayReplicationWithNull(string cmd)
+        [Test]
+        public void ArrayReplicationWithNull()
         {
-            cmd = "$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20;" + cmd;
-            ExecuteAndCompareTypedResult(cmd, new object[] {});
+            var cmd = "$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20; $a * $null";
+            var res = ReferenceHost.RawExecute(cmd);
+            Assert.That(res, Is.Empty);
+        }
+
+        public void ArrayReplicationWithNullFirstIsNull()
+        {
+             var cmd = "$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20; $null * $a";
+            ExecuteAndCompareTypedResult(cmd, null);
         }
 
         [Test]
@@ -123,11 +129,18 @@ namespace ReferenceTests.Language.Operators
         }
 
         [Test]
-        public void DivisionWithNullSecondThrows()
+        public void IntDivisionWithNullSecondThrows()
         {
             Assert.Throws<RuntimeException>(delegate {
-                ReferenceHost.Execute("3.4 / $null");
+                ReferenceHost.Execute("3 / $null");
             });
+        }
+
+        [TestCase("3.5", Double.PositiveInfinity)]
+        [TestCase("-3.5", Double.NegativeInfinity)]
+        public void DoubleDivisionWithNullSecond(string operand, object expected)
+        {
+            ExecuteAndCompareTypedResult(operand + " / $null", expected);
         }
 
         [TestCase("10 % 3", (int) 1)]
@@ -156,11 +169,18 @@ namespace ReferenceTests.Language.Operators
         }
 
         [Test]
-        public void RemainderWithNullSecondThrows()
+        public void IntRemainderWithNullSecondThrows()
         {
             Assert.Throws<RuntimeException>(delegate {
-                ReferenceHost.Execute("3.4 % $null");
+                ReferenceHost.Execute("3 % $null");
             });
+        }
+
+        [TestCase("3.5")]
+        [TestCase("-3.5")]
+        public void DoubleRemainderWithNullSecond(string operand)
+        {
+            ExecuteAndCompareTypedResult(operand + " / $null", Double.NaN);
         }
     }
 }
