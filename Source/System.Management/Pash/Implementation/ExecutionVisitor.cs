@@ -1078,12 +1078,26 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitDoUntilStatement(DoUntilStatementAst doUntilStatementAst)
         {
-            throw new NotImplementedException(); //VisitDoUntilStatement(doUntilStatementAst);
+            bool cond = false;
+            do
+            {
+                _pipelineCommandRuntime.WriteObject(EvaluateAst(doUntilStatementAst.Body, false), true);
+                cond = LanguagePrimitives.ConvertTo<bool>(EvaluateAst(doUntilStatementAst.Condition));
+            }
+            while (!cond); // while negated = until
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitDoWhileStatement(DoWhileStatementAst doWhileStatementAst)
         {
-            throw new NotImplementedException(); //VisitDoWhileStatement(doWhileStatementAst);
+            bool cond = false;
+            do
+            {
+                _pipelineCommandRuntime.WriteObject(EvaluateAst(doWhileStatementAst.Body, false), true);
+                cond = LanguagePrimitives.ConvertTo<bool>(EvaluateAst(doWhileStatementAst.Condition));
+            }
+            while (cond);
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitExitStatement(ExitStatementAst exitStatementAst)
@@ -1161,7 +1175,9 @@ namespace System.Management.Pash.Implementation
                 EvaluateAst(forStatementAst.Initializer);
             }
 
-            while (forStatementAst.Condition != null ? (bool)((PSObject)EvaluateAst(forStatementAst.Condition)).BaseObject : true)
+            while (forStatementAst.Condition != null ?
+                      LanguagePrimitives.ConvertTo<bool>(EvaluateAst(forStatementAst.Condition))
+                    : true)
             {
                 this._pipelineCommandRuntime.WriteObject(EvaluateAst(forStatementAst.Body, false), true);
                 if (forStatementAst.Iterator != null)
@@ -1505,7 +1521,7 @@ namespace System.Management.Pash.Implementation
              * controlling expression tests True. The controlling expression
              * is evaluated before each execution of the loop body.
              */
-            while ((bool)((PSObject)EvaluateAst(whileStatementAst.Condition)).BaseObject)
+            while (LanguagePrimitives.ConvertTo<bool>(EvaluateAst(whileStatementAst.Condition)))
             {
                 this._pipelineCommandRuntime.WriteObject(EvaluateAst(whileStatementAst.Body, false), true);
             }
