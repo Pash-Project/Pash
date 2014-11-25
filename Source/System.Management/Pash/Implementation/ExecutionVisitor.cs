@@ -540,13 +540,15 @@ namespace System.Management.Pash.Implementation
         private void VisitDriveQualifiedVariableExpression(VariableExpressionAst variableExpressionAst)
         {
             SessionStateProviderBase provider = GetSessionStateProvider(variableExpressionAst.VariablePath);
-            if (provider != null)
+            if (provider == null)
             {
-                var path = new Path(variableExpressionAst.VariablePath.GetUnqualifiedUserPath());
-                object item = provider.GetSessionStateItem(path);
-                object value = provider.GetValueOfItem(item);
-                _pipelineCommandRuntime.WriteObject(value);
+                _pipelineCommandRuntime.WriteObject(null);
+                return;
             }
+            var path = new Path(variableExpressionAst.VariablePath.GetUnqualifiedUserPath());
+            object item = provider.GetSessionStateItem(path);
+            object value = provider.GetValueOfItem(item);
+            _pipelineCommandRuntime.WriteObject(value);
         }
 
         private SessionStateProviderBase GetSessionStateProvider(VariablePath variablePath)
