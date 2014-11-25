@@ -9,7 +9,7 @@ namespace Microsoft.PowerShell.Commands.Utility
     internal class TableFormatGenerator : FormatGenerator
     {
         private bool _nextWithHeader;
-        private Alignment[] _currentAlignments;
+        private Dictionary<string, Alignment> _currentAlignments;
 
         private TableFormatGeneratorOptions TableOptions
         {
@@ -46,7 +46,7 @@ namespace Microsoft.PowerShell.Commands.Utility
             var row = new List<FormatObjectProperty>();
             if (_nextWithHeader)
             {
-                _currentAlignments = new Alignment[rowData.Count];
+                _currentAlignments = new Dictionary<string, Alignment>(StringComparer.InvariantCultureIgnoreCase);
             }
             for (int i = 0; i < rowData.Count; i++)
             {
@@ -59,18 +59,19 @@ namespace Microsoft.PowerShell.Commands.Utility
                 } catch (GetValueException)
                 {
                 }
-                Alignment align = Alignment.Left;
                 if (_nextWithHeader)
                 {
+                    Alignment valAlign = Alignment.Left;
                     if (value != null)
                     {
-                        align = (value.GetType().IsNumeric() || value is bool) ? Alignment.Right : Alignment.Left;
+                        valAlign = (value.GetType().IsNumeric() || value is bool) ? Alignment.Right : Alignment.Left;
                     }
-                    _currentAlignments[i] = align;
+                    _currentAlignments[curData.Name] = valAlign;
                 }
                 var strValue = value == null ? "" : PSObject.AsPSObject(value).ToString();
-                row.Add(new FormatObjectProperty(curData.Name, strValue,
-                                                 _currentAlignments[i]));
+                var curAlign = _currentAlignments.ContainsKey(curData.Name) ? _currentAlignments[curData.Name]
+                                                                             : Alignment.Left;
+                row.Add(new FormatObjectProperty(curData.Name, strValue, curAlign));
             }
 
             var entry = new TableFormatEntryData(row);
