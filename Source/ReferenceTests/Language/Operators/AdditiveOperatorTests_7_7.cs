@@ -1,6 +1,7 @@
 using System;
 using NUnit.Framework;
 using System.Collections;
+using System.Management.Automation;
 
 namespace ReferenceTests.Language.Operators
 {
@@ -16,6 +17,13 @@ namespace ReferenceTests.Language.Operators
         public void Addition_Spec_7_7_1(string cmd, object expected)
         {
             ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
+        [TestCase("6.3 + $null")]
+        [TestCase("$null + 6.3")]
+        public void AdditionWithNullWorks(string cmd)
+        {
+            ExecuteAndCompareTypedResult(cmd, (double) 6.3);
         }
 
         [Test] // -10.300D + 12 # decimal result 1.700
@@ -79,11 +87,26 @@ namespace ReferenceTests.Language.Operators
             ExecuteAndCompareTypedResult(cmd, expected);
         }
 
+        [TestCase("$null + \"red\"", "red")]
+        [TestCase("\"red\" + $null", "red")]
+        public void StringConcatenationWithNullWorks(string cmd, string expected)
+        {
+            ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
         [TestCase("$a + \"red\"", new object[] { 10, 20, "red" })]
         [TestCase("$a + 12.5,$true", new object[] { 10, 20, 12.5, true })]
         [TestCase("$a + (new-object 'System.Double[,]' 2,3)", new object[] { 10, 20, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 })]
         [TestCase("(new-object 'System.Double[,]' 2,3) + $a", new object[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 20 })]
         public void ArrayConcatenation_Spec_7_7_3(string cmd, object[] expected)
+        {
+            cmd = "$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20;" + cmd;
+            ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
+        [TestCase("$a + $null", new object[] { 10, 20 })]
+        [TestCase("$null + $a", new object[] { 10, 20 })]
+        public void ArrayConcatenationWithNull(string cmd, object[] expected)
         {
             cmd = "$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20;" + cmd;
             ExecuteAndCompareTypedResult(cmd, expected);
@@ -106,6 +129,33 @@ namespace ReferenceTests.Language.Operators
         }
 
         [Test]
+        public void HashtableConcatenationWithNullFirst()
+        {
+            var cmd = NewlineJoin(
+                "$h1 = @{ FirstName = \"James\"; LastName = \"Anderson\" }",
+                "$h2 = $null + $h1",
+                "$h2"
+                );
+            var expected = new Hashtable(StringComparer.InvariantCultureIgnoreCase);
+            expected["FirstName"] = "James";
+            expected["LastName"] = "Anderson";
+            ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
+        [Test]
+        public void HashtableConcatenationWithNullSecondThrows()
+        {
+            var cmd = NewlineJoin(
+                "$h1 = @{ FirstName = \"James\"; LastName = \"Anderson\" }",
+                "$h2 = $h1 + $null",
+                "$h2"
+                );
+            Assert.Throws<RuntimeException>(delegate {
+                ReferenceHost.Execute(cmd);
+            });
+        }
+
+        [Test]
         public void HashtableConcatenationFailsWithSameKey()
         {
             var cmd = NewlineJoin(
@@ -125,6 +175,13 @@ namespace ReferenceTests.Language.Operators
         [TestCase("12 - \"+0xabc\"", (int) -2736)]
         [TestCase("12 - \"-0xabc\"", (int) 2760)]
         public void Subtraction_Spec_7_7_5(string cmd, object expected)
+        {
+            ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
+        [TestCase("12.1 - $null", (double) 12.1)]
+        [TestCase("$null - 12.1", (double) -12.1)]
+        public void SubtractionWithNullWorks(string cmd, object expected)
         {
             ExecuteAndCompareTypedResult(cmd, expected);
         }

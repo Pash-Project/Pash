@@ -1,6 +1,7 @@
 using System;
 using NUnit.Framework;
 using System.Runtime.InteropServices;
+using System.Management.Automation;
 
 namespace ReferenceTests.Language.Operators
 {
@@ -21,6 +22,15 @@ namespace ReferenceTests.Language.Operators
         public void Multiplication_Spec_7_6_1_decimal()
         {
             ExecuteAndCompareTypedResult("-10.300D * 12", (decimal) -123.600m);
+        }
+
+        [TestCase("12.1 * $null", 0.0f)]
+        [TestCase("$null * $null", null)]
+        [TestCase("3.5 * $null", 0.0f)]
+        [TestCase("3 * $null", (int) 0)]
+        public void MultiplicationWithNull(string cmd, object expected)
+        {
+            ExecuteAndCompareTypedResult(cmd, expected);
         }
 
         [TestCase("2*2", 2.0d)]
@@ -46,6 +56,13 @@ namespace ReferenceTests.Language.Operators
             ExecuteAndCompareTypedResult("\"red\" * 2.3450D", "redred");
         }
 
+        [TestCase("\"red\" * $null")]
+        [TestCase("$null * \"red\"")]
+        public void StringReplicationWithNull(string cmd)
+        {
+            ExecuteAndCompareTypedResult(cmd, "");
+        }
+
         [TestCase("$a * \"3\"", new object[] {10, 20, 10, 20, 10, 20})]
         [TestCase("$a * 4", new object[] {10, 20, 10, 20, 10, 20, 10, 20})]
         [TestCase("$a * 0", new object[] {})]
@@ -63,6 +80,14 @@ namespace ReferenceTests.Language.Operators
         {
             var cmd = "$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20; $a * 2.3450D";
             ExecuteAndCompareTypedResult(cmd, new object[] {10, 20, 10, 20});
+        }
+
+        [TestCase("$a * $null")]
+        [TestCase("$null * $a")]
+        public void ArrayReplicationWithNull(string cmd)
+        {
+            cmd = "$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20;" + cmd;
+            ExecuteAndCompareTypedResult(cmd, new object[] {});
         }
 
         [Test]
@@ -91,6 +116,20 @@ namespace ReferenceTests.Language.Operators
             ExecuteAndCompareTypedResult("12/-10.0D", (decimal) -1.2m);
         }
 
+        [Test]
+        public void DivisionWithNullFirst()
+        {
+            ExecuteAndCompareTypedResult("$null / 3.5", (double) 0.0);
+        }
+
+        [Test]
+        public void DivisionWithNullSecondThrows()
+        {
+            Assert.Throws<RuntimeException>(delegate {
+                ReferenceHost.Execute("3.4 / $null");
+            });
+        }
+
         [TestCase("10 % 3", (int) 1)]
         [TestCase("10.0 % 0.33", (double) 0.1)]
         public void Remainder_Spec_7_6_5(string cmd, object result)
@@ -108,6 +147,20 @@ namespace ReferenceTests.Language.Operators
         public void Remainder_Spec_7_6_5_decimal2()
         {
             ExecuteAndCompareTypedResult("10.00D % 0.33D", (decimal) 0.10m);
+        }
+
+        [Test]
+        public void RemainderWithNullFirst()
+        {
+            ExecuteAndCompareTypedResult("$null % 3.5", (double) 0.0);
+        }
+
+        [Test]
+        public void RemainderWithNullSecondThrows()
+        {
+            Assert.Throws<RuntimeException>(delegate {
+                ReferenceHost.Execute("3.4 % $null");
+            });
         }
     }
 }
