@@ -321,7 +321,7 @@ namespace Pash.ParserIntrinsics
                 var msg = "The parser internally crashed and gets reinitialized." + Environment.NewLine +
                           "Although this shouldn't happen, it's likely that it happened because of invalid syntax.";
                 Parser = new Parser(Instance);
-                throw new SystemException(msg);
+                throw new InvalidOperationException(msg);
             }
 
             if (parseTree.HasErrors())
