@@ -75,7 +75,7 @@ namespace ReferenceTests
             {
                 using (var pipeline = LastUsedRunspace.CreatePipeline())
                 {
-                    pipeline.Commands.AddScript(command, true);
+                    pipeline.Commands.AddScript(command, false);
                     try
                     {
                         LastRawResults = pipeline.Invoke();

@@ -39,6 +39,7 @@ namespace ReferenceTests.Language
         [TestCase("$global:x", "1")] // scope qualifier works
         [TestCase("$foo:x", "")] // invalid drive qualifier doesn't throw
         [TestCase("$y", "")] // unset variable doesn't throw
+        [TestCase("$global:y", "")] // unset variable doesn't throw with qualified scope
         public void StringWithVariableWorks(string varAccess, string expected)
         {
             var stringPrefix = "foo ";
