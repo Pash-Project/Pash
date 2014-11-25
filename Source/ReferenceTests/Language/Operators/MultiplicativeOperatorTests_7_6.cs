@@ -1,6 +1,7 @@
 using System;
 using NUnit.Framework;
 using System.Runtime.InteropServices;
+using System.Management.Automation;
 
 namespace ReferenceTests.Language.Operators
 {
@@ -21,6 +22,14 @@ namespace ReferenceTests.Language.Operators
         public void Multiplication_Spec_7_6_1_decimal()
         {
             ExecuteAndCompareTypedResult("-10.300D * 12", (decimal) -123.600m);
+        }
+
+        [TestCase("12.1 * $null", 0.0d)]
+        [TestCase("3.5 * $null", 0.0d)]
+        [TestCase("3 * $null", (int) 0)]
+        public void MultiplicationWithNull(string cmd, object expected)
+        {
+            ExecuteAndCompareTypedResult(cmd, expected);
         }
 
         [TestCase("2*2", 2.0d)]
@@ -46,6 +55,12 @@ namespace ReferenceTests.Language.Operators
             ExecuteAndCompareTypedResult("\"red\" * 2.3450D", "redred");
         }
 
+        [TestCase("\"red\" * $null", "")]
+        public void StringReplicationWithNull(string cmd, object expected)
+        {
+            ExecuteAndCompareTypedResult(cmd, expected);
+        }
+
         [TestCase("$a * \"3\"", new object[] {10, 20, 10, 20, 10, 20})]
         [TestCase("$a * 4", new object[] {10, 20, 10, 20, 10, 20, 10, 20})]
         [TestCase("$a * 0", new object[] {})]
@@ -63,6 +78,14 @@ namespace ReferenceTests.Language.Operators
         {
             var cmd = "$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20; $a * 2.3450D";
             ExecuteAndCompareTypedResult(cmd, new object[] {10, 20, 10, 20});
+        }
+
+        [Test]
+        public void ArrayReplicationWithNull()
+        {
+            var cmd = "$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20; $a * $null";
+            var res = ReferenceHost.RawExecute(cmd);
+            Assert.That(res, Is.Empty);
         }
 
         [Test]
@@ -91,6 +114,27 @@ namespace ReferenceTests.Language.Operators
             ExecuteAndCompareTypedResult("12/-10.0D", (decimal) -1.2m);
         }
 
+        [Test]
+        public void DivisionWithNullFirst()
+        {
+            ExecuteAndCompareTypedResult("$null / 3.5", (double) 0.0);
+        }
+
+        [Test]
+        public void IntDivisionWithNullSecondThrows()
+        {
+            Assert.Throws<RuntimeException>(delegate {
+                ReferenceHost.Execute("3 / $null");
+            });
+        }
+
+        [TestCase("3.5", Double.PositiveInfinity)]
+        [TestCase("-3.5", Double.NegativeInfinity)]
+        public void DoubleDivisionWithNullSecond(string operand, object expected)
+        {
+            ExecuteAndCompareTypedResult(operand + " / $null", expected);
+        }
+
         [TestCase("10 % 3", (int) 1)]
         [TestCase("10.0 % 0.33", (double) 0.1)]
         public void Remainder_Spec_7_6_5(string cmd, object result)
@@ -108,6 +152,40 @@ namespace ReferenceTests.Language.Operators
         public void Remainder_Spec_7_6_5_decimal2()
         {
             ExecuteAndCompareTypedResult("10.00D % 0.33D", (decimal) 0.10m);
+        }
+
+        [Test]
+        public void RemainderWithNullFirst()
+        {
+            ExecuteAndCompareTypedResult("$null % 3.5", (double) 0.0);
+        }
+
+        [Test]
+        public void IntRemainderWithNullSecondThrows()
+        {
+            Assert.Throws<RuntimeException>(delegate {
+                ReferenceHost.Execute("3 % $null");
+            });
+        }
+
+        [TestCase("3.5")]
+        [TestCase("-3.5")]
+        public void DoubleRemainderWithNullSecond(string operand)
+        {
+            ExecuteAndCompareTypedResult(operand + " / $null", Double.NaN);
+        }
+
+        [TestCase("$null * $null")]
+        [TestCase("$null * $3.5")]
+        [TestCase("$null * 3")]
+        [TestCase("$null * \"red\"")]
+        [TestCase("$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20; $null * $a")]
+        [TestCase("$null * @()")]
+        [TestCase("$null * (new-object psobject -property @{foo='bar'})")]
+        [TestCase("$null * (new-object datetime)")]
+        public void MultiplyingNullWithSomethingReturnsNull(string cmd)
+        {
+            ExecuteAndCompareTypedResult(cmd, null);
         }
     }
 }
