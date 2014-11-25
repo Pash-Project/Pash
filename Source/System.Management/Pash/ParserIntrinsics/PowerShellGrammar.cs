@@ -291,7 +291,7 @@ namespace Pash.ParserIntrinsics
         // of how to refactor this to separate the grammar from the parser. Or
         // merge them. Or whatever.
         public static readonly PowerShellGrammar Instance;
-        public static readonly Parser Parser;
+        public static Parser Parser;
 
         static PowerShellGrammar()
         {
@@ -311,7 +311,18 @@ namespace Pash.ParserIntrinsics
 
         public static ScriptBlockAst ParseInteractiveInput(string input)
         {
-            var parseTree = Parser.Parse(input);
+            ParseTree parseTree = null;
+            try
+            {
+                parseTree = Parser.Parse(input);
+            }
+            catch (Exception)
+            {
+                var msg = "The parser internally crashed and gets reinitialized." + Environment.NewLine +
+                          "Although this shouldn't happen, it's likely that it happened because of invalid syntax.";
+                Parser = new Parser(Instance);
+                throw new InvalidOperationException(msg);
+            }
 
             if (parseTree.HasErrors())
             {
