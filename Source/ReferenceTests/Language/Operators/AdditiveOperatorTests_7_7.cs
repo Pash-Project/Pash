@@ -192,6 +192,17 @@ namespace ReferenceTests.Language.Operators
             // decimals aren't constante expressions, we need a seperate test
             ExecuteAndCompareTypedResult("-10.300D - 12", (decimal) -22.3m);
         }
+
+        [TestCase("$a='foo'", "$a")]
+        [TestCase("$a=@(1,2)", "$a")]
+        [TestCase("$a=@{a='b'; b='c'}", "$a")]
+        [TestCase("$a=(new-object psobject -property @{foo='bar'})", "$a")]
+        [TestCase("$a=(new-object datetime)", "$a")]
+        public void AddingNullToObjectReturnsObjectItself(string cmd, string varname)
+        {
+            cmd += "; [object]::ReferenceEquals(($null + " + varname + "), " + varname + ")";
+            ExecuteAndCompareTypedResult(cmd, true);
+        }
     }
 }
 

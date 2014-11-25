@@ -466,7 +466,6 @@ namespace System.Management.Automation
         {
             return ConvertToBool(obj);
         }
-
         #endregion
 
         internal static bool UsualArithmeticConversion(object left, object right, out object leftConverted,
@@ -474,17 +473,20 @@ namespace System.Management.Automation
         {
             left = PSObject.Unwrap(left);
             right = PSObject.Unwrap(right);
-            Type leftType = left.GetType();
-            Type rightType = right.GetType();
             leftConverted = null;
             rightConverted = null;
             // 6.15 Usual arithmetic conversions
             // If neither operand designates a value having numeric type, then
-            if (!leftType.IsNumeric() && !rightType.IsNumeric() &&
-                !UsualArithmeticConversionOneOperand(ref left, ref right))
+            if ((
+                  left == null || right == null || // one operand is null => it needs to be converted to a number
+                  (!left.GetType().IsNumeric() && !right.GetType().IsNumeric()) // if both aren't numbers, convert
+                ) &&
+                !UsualArithmeticConversionOneOperand(ref left, ref right)) // actually convert
             {
                 return false;
             }
+            Type leftType = left.GetType();
+            Type rightType = right.GetType();
 
             // Numeric conversions:
             // Otherwise, if one operand designates a value of type float, the values designated by both operands are

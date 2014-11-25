@@ -618,6 +618,7 @@ namespace ReferenceTests.Integration
         }
 
         [Test]
+        [Ignore("Pash cannot bind a parameter by paranthesis")]
         // Taken from http://rosettacode.org/wiki/IsNumeric#PowerShell
         public void IsNumeric()
         {

@@ -25,7 +25,6 @@ namespace ReferenceTests.Language.Operators
         }
 
         [TestCase("12.1 * $null", 0.0d)]
-        [TestCase("$null * $null", null)]
         [TestCase("3.5 * $null", 0.0d)]
         [TestCase("3 * $null", (int) 0)]
         public void MultiplicationWithNull(string cmd, object expected)
@@ -57,7 +56,6 @@ namespace ReferenceTests.Language.Operators
         }
 
         [TestCase("\"red\" * $null", "")]
-        [TestCase("$null * \"red\"", null)]
         public void StringReplicationWithNull(string cmd, object expected)
         {
             ExecuteAndCompareTypedResult(cmd, expected);
@@ -88,12 +86,6 @@ namespace ReferenceTests.Language.Operators
             var cmd = "$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20; $a * $null";
             var res = ReferenceHost.RawExecute(cmd);
             Assert.That(res, Is.Empty);
-        }
-
-        public void ArrayReplicationWithNullFirstIsNull()
-        {
-             var cmd = "$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20; $null * $a";
-            ExecuteAndCompareTypedResult(cmd, null);
         }
 
         [Test]
@@ -181,6 +173,19 @@ namespace ReferenceTests.Language.Operators
         public void DoubleRemainderWithNullSecond(string operand)
         {
             ExecuteAndCompareTypedResult(operand + " / $null", Double.NaN);
+        }
+
+        [TestCase("$null * $null")]
+        [TestCase("$null * $3.5")]
+        [TestCase("$null * 3")]
+        [TestCase("$null * \"red\"")]
+        [TestCase("$a = new-object System.Int32[] 2; $a[0] = 10; $a[1] = 20; $null * $a")]
+        [TestCase("$null * @()")]
+        [TestCase("$null * (new-object psobject -property @{foo='bar'})")]
+        [TestCase("$null * (new-object datetime)")]
+        public void MultiplyingNullWithSomethingReturnsNull(string cmd)
+        {
+            ExecuteAndCompareTypedResult(cmd, null);
         }
     }
 }
