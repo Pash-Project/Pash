@@ -86,7 +86,7 @@ namespace Pash
 
         private bool IsValidVariableNameCharacter(int c)
         {
-            return Char.IsLetterOrDigit((char)c);
+            return Char.IsLetterOrDigit((char)c) || (c == ':'); // colon is for scope pattern
         }
 
         private void AddVariable(int startIndex, int endIndex)
