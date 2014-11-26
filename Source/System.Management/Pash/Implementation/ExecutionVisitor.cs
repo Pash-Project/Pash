@@ -381,6 +381,40 @@ namespace System.Management.Pash.Implementation
             return result.ToArray();
         }
 
+        public bool EvaluateLoopBodyAst(Ast expressionAst, string loopLabel)
+        {
+            var loopCanContinue = true;
+            LoopFlowException rethrow = null;
+
+            var subVisitor = this.CloneSub(false);
+            try
+            {
+                expressionAst.Visit(subVisitor);
+            }
+            catch (LoopFlowException e)
+            {
+                if (!String.IsNullOrEmpty(e.Label) && !e.Label.Equals(loopLabel))
+                {
+                    rethrow = e;
+                }
+                loopCanContinue = e is ContinueException;
+            }
+            // before we rethrow the exception, we need to read and write the output that has already been written
+            var result = subVisitor._pipelineCommandRuntime.OutputStream.Read();
+            if (result != null)
+            {
+                _pipelineCommandRuntime.WriteObject(result.Count == 1 ? result.Single() : result.ToArray(), true);
+            }
+
+            // if labels didn't match, i.e. this loop isn't the one meant, we need to propagate the exception
+            if (rethrow != null)
+            {
+                throw rethrow;
+            }
+            // return if the loop can continue execution or should break
+            return loopCanContinue;
+        }
+
         public override AstVisitAction VisitConstantExpression(ConstantExpressionAst constantExpressionAst)
         {
             this._pipelineCommandRuntime.OutputStream.Write(constantExpressionAst.Value);
@@ -1102,22 +1136,19 @@ namespace System.Management.Pash.Implementation
         private AstVisitAction VisitSimpleLoopStatement(StatementBlockAst body, PipelineBaseAst condition,
                                                     bool preExecuteBody, bool invertCond)
         {
+            // TODO: pass loop label
             // preExecuteBody is for do while/until loops
-            if (preExecuteBody)
+            if (preExecuteBody && !EvaluateLoopBodyAst(body, null))
             {
-                var res = EvaluateAst(body, false);
-                if (res != null)
-                {
-                    this._pipelineCommandRuntime.WriteObject(res, true);
-                }
+                return AstVisitAction.SkipChildren;
             }
+
             // the condition is XORed with invertCond and menas: (true && !invertCond) || (false && invertCond)
             while (LanguagePrimitives.ConvertTo<bool>(EvaluateAst(condition)) ^ invertCond)
             {
-                var res = EvaluateAst(body, false);
-                if (res != null)
+                if (!EvaluateLoopBodyAst(body, null))
                 {
-                    this._pipelineCommandRuntime.WriteObject(res, true);
+                    break;
                 }
             }
             return AstVisitAction.SkipChildren;
@@ -1156,11 +1187,12 @@ namespace System.Management.Pash.Implementation
 
             while (enumerator.MoveNext())
             {
-                this._context.SessionState.PSVariable.Set(forEachStatementAst.Variable.VariablePath.UserPath, enumerator.Current);
-                var res = EvaluateAst(forEachStatementAst.Body, false);
-                if (res != null)
+                this._context.SessionState.PSVariable.Set(forEachStatementAst.Variable.VariablePath.UserPath,
+                                                          enumerator.Current);
+                // TODO: pass the loop label
+                if (!EvaluateLoopBodyAst(forEachStatementAst.Body, null))
                 {
-                    this._pipelineCommandRuntime.WriteObject(res, true);
+                    break;
                 }
             }
 
@@ -1200,10 +1232,10 @@ namespace System.Management.Pash.Implementation
                       LanguagePrimitives.ConvertTo<bool>(EvaluateAst(forStatementAst.Condition))
                     : true)
             {
-                var res = EvaluateAst(forStatementAst.Body, false);
-                if (res != null)
+                // TODO: pass loop label
+                if (!EvaluateLoopBodyAst(forStatementAst.Body, null))
                 {
-                    this._pipelineCommandRuntime.WriteObject(res, true);
+                    break;
                 }
                 if (forStatementAst.Iterator != null)
                 {
