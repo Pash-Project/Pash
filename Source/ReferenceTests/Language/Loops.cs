@@ -216,6 +216,20 @@ namespace ReferenceTests.Language
             var cmd = "for ($i = 0; $i -ilt 2; $i++) { $j = 0; while($j -ilt 3) { $j++; break; $j }; $j; $i; } ";
             ExecuteAndCompareTypedResult(cmd, 1, 0, 1, 1);
         }
+
+        [Test]
+        public void ContinueWorksInConditionalAndWritesDataBefore()
+        {
+            var cmd = "$i = 0; do { if ($true) { $i++; 1; continue; 2; }; 3; } until ($i -ige 2);";
+            ExecuteAndCompareTypedResult(cmd, 1, 1);
+        }
+
+        [Test]
+        public void BreakWorksInConditionalAndWritesDataBefore()
+        {
+            var cmd = "$i = 0; do { if ($true) { $i++; 1; break; 2; }; 3; } until ($i -ige 2);";
+            ExecuteAndCompareTypedResult(cmd, 1);
+        }
     }
 }
 
