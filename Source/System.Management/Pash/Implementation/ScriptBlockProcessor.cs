@@ -125,9 +125,9 @@ namespace Pash.Implementation
             }
             catch (FlowControlException e)
             {
-                if (!_fromFile)
+                if (!_fromFile || e is LoopFlowException)
                 {
-                    throw; // gets propagated if the script block is not an external script
+                    throw; // gets propagated if the script block is not an external script or it's a break/continue
                 }
                 if (e is ExitException)
                 {
@@ -136,8 +136,7 @@ namespace Pash.Implementation
                     _exitCode = exitCode;
                     ExecutionContext.SetVariable("global:LASTEXITCODE", exitCode);
                 }
-                // otherwise (return, break, continue), we simply stop execution of the script (that's why we're here)
-                // and do nothing
+                // otherwise (return), we simply stop execution of the script (that's why we're here) and do nothing
             }
             finally //make sure we switch back to the original execution context, no matter what happened
             {
