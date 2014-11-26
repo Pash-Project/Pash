@@ -683,23 +683,9 @@ namespace System.Management.Automation
                 var ofsV = runspace.SessionStateProxy.GetVariable("OFS");
                 var ofs = ofsV != null ? ofsV.ToString() : " ";
 
-                var sb = new StringBuilder();
-                bool first = true;
-                // foreach visits multidimensional arrays in row-major order, thereby handling the flattening for us
-                foreach (var o in arr)
-                {
-                    // Since PSObject.ToString uses this very method as well we have to be careful not to
-                    // accidentally handle nested arrays the same way.
-                    var obj = PSObject.Unwrap(o);
-                    if (!first)
-                    {
-                        sb.Append(ofs);
-                    }
-                    sb.Append(obj.ToString());
-                    first = false;
-                }
-
-                return sb.ToString();
+                // Linq handles flattening
+                return String.Join(ofs, from o in arr.Cast<object>()
+                                        select o == null ? "" : PSObject.Unwrap(o).ToString());
             }
             // A scriptblock type value is converted to a string containing the text of that block without the
             // delimiting { and } characters.
