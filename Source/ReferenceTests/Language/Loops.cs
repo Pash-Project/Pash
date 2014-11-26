@@ -177,7 +177,7 @@ namespace ReferenceTests.Language
         public void BreakInForLoopWorks()
         {
             var cmd = "for ($i = 0; $i -ilt 10; $i++) { break; $i; }; $i";
-            ExecuteAndCompareTypedResult(cmd, 1);
+            ExecuteAndCompareTypedResult(cmd, 0);
         }
 
         [Test]
