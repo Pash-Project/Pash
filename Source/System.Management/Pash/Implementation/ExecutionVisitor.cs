@@ -1078,25 +1078,46 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitDoUntilStatement(DoUntilStatementAst doUntilStatementAst)
         {
-            bool cond = false;
-            do
-            {
-                _pipelineCommandRuntime.WriteObject(EvaluateAst(doUntilStatementAst.Body, false), true);
-                cond = LanguagePrimitives.ConvertTo<bool>(EvaluateAst(doUntilStatementAst.Condition));
-            }
-            while (!cond); // while negated = until
-            return AstVisitAction.SkipChildren;
+            return VisitSimpleLoopStatement(doUntilStatementAst.Body, doUntilStatementAst.Condition, true, true);
         }
 
         public override AstVisitAction VisitDoWhileStatement(DoWhileStatementAst doWhileStatementAst)
         {
-            bool cond = false;
-            do
+            return VisitSimpleLoopStatement(doWhileStatementAst.Body, doWhileStatementAst.Condition, true, false);
+        }
+
+        public override AstVisitAction VisitWhileStatement(WhileStatementAst whileStatementAst)
+        {
+            /* The controlling expression while-condition must have type bool or
+             * be implicitly convertible to that type. The loop body, which
+             * consists of statement-block, is executed repeatedly while the
+             * controlling expression tests True. The controlling expression
+             * is evaluated before each execution of the loop body.
+             */
+            return VisitSimpleLoopStatement(whileStatementAst.Body, whileStatementAst.Condition, false, false);
+        }
+
+        private AstVisitAction VisitSimpleLoopStatement(StatementBlockAst body, PipelineBaseAst condition,
+                                                    bool preExecuteBody, bool invertCond)
+        {
+            // preExecuteBody is for do while/until loops
+            if (preExecuteBody)
             {
-                _pipelineCommandRuntime.WriteObject(EvaluateAst(doWhileStatementAst.Body, false), true);
-                cond = LanguagePrimitives.ConvertTo<bool>(EvaluateAst(doWhileStatementAst.Condition));
+                var res = EvaluateAst(body, false);
+                if (res != null)
+                {
+                    this._pipelineCommandRuntime.WriteObject(res, true);
+                }
             }
-            while (cond);
+            // the condition is XORed with invertCond and menas: (true && !invertCond) || (false && invertCond)
+            while (LanguagePrimitives.ConvertTo<bool>(EvaluateAst(condition)) ^ invertCond)
+            {
+                var res = EvaluateAst(body, false);
+                if (res != null)
+                {
+                    this._pipelineCommandRuntime.WriteObject(res, true);
+                }
+            }
             return AstVisitAction.SkipChildren;
         }
 
@@ -1140,7 +1161,11 @@ namespace System.Management.Pash.Implementation
             while (enumerator.MoveNext())
             {
                 this._context.SessionState.PSVariable.Set(forEachStatementAst.Variable.VariablePath.UserPath, enumerator.Current);
-                _pipelineCommandRuntime.WriteObject(EvaluateAst(forEachStatementAst.Body, false), true);
+                var res = EvaluateAst(forEachStatementAst.Body, false);
+                if (res != null)
+                {
+                    this._pipelineCommandRuntime.WriteObject(res, true);
+                }
             }
 
             return AstVisitAction.SkipChildren;
@@ -1179,7 +1204,11 @@ namespace System.Management.Pash.Implementation
                       LanguagePrimitives.ConvertTo<bool>(EvaluateAst(forStatementAst.Condition))
                     : true)
             {
-                this._pipelineCommandRuntime.WriteObject(EvaluateAst(forStatementAst.Body, false), true);
+                var res = EvaluateAst(forStatementAst.Body, false);
+                if (res != null)
+                {
+                    this._pipelineCommandRuntime.WriteObject(res, true);
+                }
                 if (forStatementAst.Iterator != null)
                 {
                     EvaluateAst(forStatementAst.Iterator);
@@ -1511,22 +1540,6 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitUsingExpression(UsingExpressionAst usingExpressionAst)
         {
             throw new NotImplementedException(); //VisitUsingExpression(usingExpressionAst);
-        }
-
-        public override AstVisitAction VisitWhileStatement(WhileStatementAst whileStatementAst)
-        {
-            /* The controlling expression while-condition must have type bool or
-             * be implicitly convertible to that type. The loop body, which
-             * consists of statement-block, is executed repeatedly while the
-             * controlling expression tests True. The controlling expression
-             * is evaluated before each execution of the loop body.
-             */
-            while (LanguagePrimitives.ConvertTo<bool>(EvaluateAst(whileStatementAst.Condition)))
-            {
-                this._pipelineCommandRuntime.WriteObject(EvaluateAst(whileStatementAst.Body, false), true);
-            }
-
-            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitTypeExpression(TypeExpressionAst typeExpressionAst)

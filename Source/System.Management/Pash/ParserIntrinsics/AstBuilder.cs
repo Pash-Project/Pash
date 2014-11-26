@@ -420,7 +420,17 @@ namespace Pash.ParserIntrinsics
                 return BuildWhileStatementAst(parseTreeNode);
             }
 
-            throw new NotImplementedException();
+            else if (parseTreeNode.Term == this._grammar.do_statement)
+            {
+                return BuildDoLoopStatementAst(parseTreeNode);
+            }
+            /*
+            else if (parseTreeNode.Term == this._grammar.switch_statement)
+            {
+            }
+            */
+
+            throw new NotImplementedException("Switch statements are currently not supported");
         }
 
         ForStatementAst BuildForStatementAst(ParseTreeNode parseTreeNode)
@@ -486,6 +496,28 @@ namespace Pash.ParserIntrinsics
                 );
         }
 
+        LoopStatementAst BuildDoLoopStatementAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.do_statement);
+            var loopStatement = parseTreeNode.ChildNodes[0];
+            if (loopStatement.ChildNodes.Count != 6)
+            {
+                throw new NotImplementedException("Invalid do_statement. Please report this! " + this.ToString());
+            }
+
+            var body = BuildStatementBlockAst(loopStatement.ChildNodes[1]);
+            var condition = BuildPipelineAst(loopStatement.ChildNodes[4].ChildNodes.Single());
+            if (loopStatement.Term == this._grammar._do_statement_while)
+            {
+                return new DoWhileStatementAst(new ScriptExtent(parseTreeNode), null, condition, body);
+            }
+            else if (loopStatement.Term == this._grammar._do_statement_until)
+            {
+                return new DoUntilStatementAst(new ScriptExtent(parseTreeNode), null, condition, body);
+            }
+
+            throw new NotImplementedException("Unknown do_statement. Please report this! " + this.ToString());
+        }
 
         IfStatementAst BuildIfStatementAst(ParseTreeNode parseTreeNode)
         {
