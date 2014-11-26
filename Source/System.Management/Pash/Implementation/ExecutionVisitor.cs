@@ -381,6 +381,27 @@ namespace System.Management.Pash.Implementation
             return result.ToArray();
         }
 
+        public bool EvaluateLoopBodyAst(Ast expressionAst, string loopLabel)
+        {
+            var loopCanContinue = true;
+
+            try
+            {
+                expressionAst.Visit(this);
+            }
+            catch (LoopFlowException e)
+            {
+                if (!String.IsNullOrEmpty(e.Label) && !e.Label.Equals(loopLabel))
+                {
+                    throw;
+                }
+                loopCanContinue = e is ContinueException;
+            }
+
+            // return if the loop can continue execution or should break
+            return loopCanContinue;
+        }
+
         public override AstVisitAction VisitConstantExpression(ConstantExpressionAst constantExpressionAst)
         {
             this._pipelineCommandRuntime.OutputStream.Write(constantExpressionAst.Value);
@@ -851,7 +872,7 @@ namespace System.Management.Pash.Implementation
 
                 else throw new NotImplementedException(clause.Item1.ToString());
 
-                this._pipelineCommandRuntime.WriteObject(EvaluateAst(clause.Item2));
+                clause.Item2.Visit(this);
                 return AstVisitAction.SkipChildren;
             }
 
@@ -860,7 +881,7 @@ namespace System.Management.Pash.Implementation
                 // iterating over a statement list should be its own method.
                 foreach (var statement in ifStatementAst.ElseClause.Statements)
                 {
-                    this._pipelineCommandRuntime.WriteObject(EvaluateAst(statement));
+                    statement.Visit(this);
                 }
             }
 
@@ -1038,7 +1059,8 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitBreakStatement(BreakStatementAst breakStatementAst)
         {
-            return AstVisitAction.SkipChildren;
+            var label = breakStatementAst.Label == null ? null : EvaluateAst(breakStatementAst.Label, false);
+            throw new BreakException(LanguagePrimitives.ConvertTo<string>(label));
         }
 
         public override AstVisitAction VisitCatchClause(CatchClauseAst catchClauseAst)
@@ -1058,7 +1080,8 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitContinueStatement(ContinueStatementAst continueStatementAst)
         {
-            return AstVisitAction.SkipChildren;
+            var label = continueStatementAst.Label == null ? null : EvaluateAst(continueStatementAst.Label, false);
+            throw new ContinueException(LanguagePrimitives.ConvertTo<string>(label));
         }
 
         public override AstVisitAction VisitConvertExpression(ConvertExpressionAst convertExpressionAst)
@@ -1078,24 +1101,50 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitDoUntilStatement(DoUntilStatementAst doUntilStatementAst)
         {
-            throw new NotImplementedException(); //VisitDoUntilStatement(doUntilStatementAst);
+            return VisitSimpleLoopStatement(doUntilStatementAst.Body, doUntilStatementAst.Condition, true, true);
         }
 
         public override AstVisitAction VisitDoWhileStatement(DoWhileStatementAst doWhileStatementAst)
         {
-            throw new NotImplementedException(); //VisitDoWhileStatement(doWhileStatementAst);
+            return VisitSimpleLoopStatement(doWhileStatementAst.Body, doWhileStatementAst.Condition, true, false);
+        }
+
+        public override AstVisitAction VisitWhileStatement(WhileStatementAst whileStatementAst)
+        {
+            /* The controlling expression while-condition must have type bool or
+             * be implicitly convertible to that type. The loop body, which
+             * consists of statement-block, is executed repeatedly while the
+             * controlling expression tests True. The controlling expression
+             * is evaluated before each execution of the loop body.
+             */
+            return VisitSimpleLoopStatement(whileStatementAst.Body, whileStatementAst.Condition, false, false);
+        }
+
+        private AstVisitAction VisitSimpleLoopStatement(StatementBlockAst body, PipelineBaseAst condition,
+                                                    bool preExecuteBody, bool invertCond)
+        {
+            // TODO: pass loop label
+            // preExecuteBody is for do while/until loops
+            if (preExecuteBody && !EvaluateLoopBodyAst(body, null))
+            {
+                return AstVisitAction.SkipChildren;
+            }
+
+            // the condition is XORed with invertCond and menas: (true && !invertCond) || (false && invertCond)
+            while (LanguagePrimitives.ConvertTo<bool>(EvaluateAst(condition)) ^ invertCond)
+            {
+                if (!EvaluateLoopBodyAst(body, null))
+                {
+                    break;
+                }
+            }
+            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitExitStatement(ExitStatementAst exitStatementAst)
         {
-            int exitCode = 0;
-            if (exitStatementAst.Pipeline != null)
-            {
-                var value = EvaluateAst(exitStatementAst.Pipeline, false);
-                // Default PS behavior: either convert value to int or it's 0 (see above)
-                LanguagePrimitives.TryConvertTo<int>(value, out exitCode);
-            }
-            throw new ExitException(exitCode);
+            object arg = exitStatementAst.Pipeline == null ? null : EvaluateAst(exitStatementAst.Pipeline, false);
+            throw new ExitException(arg);
         }
 
         public override AstVisitAction VisitExpandableStringExpression(ExpandableStringExpressionAst expandableStringExpressionAst)
@@ -1125,8 +1174,13 @@ namespace System.Management.Pash.Implementation
 
             while (enumerator.MoveNext())
             {
-                this._context.SessionState.PSVariable.Set(forEachStatementAst.Variable.VariablePath.UserPath, enumerator.Current);
-                _pipelineCommandRuntime.WriteObject(EvaluateAst(forEachStatementAst.Body, false), true);
+                this._context.SessionState.PSVariable.Set(forEachStatementAst.Variable.VariablePath.UserPath,
+                                                          enumerator.Current);
+                // TODO: pass the loop label
+                if (!EvaluateLoopBodyAst(forEachStatementAst.Body, null))
+                {
+                    break;
+                }
             }
 
             return AstVisitAction.SkipChildren;
@@ -1161,9 +1215,15 @@ namespace System.Management.Pash.Implementation
                 EvaluateAst(forStatementAst.Initializer);
             }
 
-            while (forStatementAst.Condition != null ? (bool)((PSObject)EvaluateAst(forStatementAst.Condition)).BaseObject : true)
+            while (forStatementAst.Condition != null ?
+                      LanguagePrimitives.ConvertTo<bool>(EvaluateAst(forStatementAst.Condition))
+                    : true)
             {
-                this._pipelineCommandRuntime.WriteObject(EvaluateAst(forStatementAst.Body, false), true);
+                // TODO: pass loop label
+                if (!EvaluateLoopBodyAst(forStatementAst.Body, null))
+                {
+                    break;
+                }
                 if (forStatementAst.Iterator != null)
                 {
                     EvaluateAst(forStatementAst.Iterator);
@@ -1202,12 +1262,9 @@ namespace System.Management.Pash.Implementation
                 {
                     statement.Visit(this);
                 }
-                catch (ReturnException)
+                catch (FlowControlException)
                 {
-                    throw;
-                }
-                catch (ExitException)
-                {
+                    // flow control as Exit, Return, Break, and Continue doesn't concern the user and is propagated
                     throw;
                 }
                 catch (Exception ex)
@@ -1269,13 +1326,15 @@ namespace System.Management.Pash.Implementation
         {
             foreach (StatementAst statement in trapStatement.Body.Statements)
             {
-                statement.Visit(this);
-
-                if (statement is ContinueStatementAst)
+                try
+                {
+                    statement.Visit(this);
+                }
+                catch (ContinueException)
                 {
                     return AstVisitAction.Continue;
                 }
-                else if (statement is BreakStatementAst)
+                catch (BreakException)
                 {
                     WriteErrorRecord();
                     return AstVisitAction.SkipChildren;
@@ -1459,8 +1518,9 @@ namespace System.Management.Pash.Implementation
             {
                 tryStatementAst.Body.Visit(this);
             }
-            catch (ReturnException)
+            catch (FlowControlException)
             {
+                // flow control (return, exit, continue, break) is nothing the user should see and is propagated
                 throw;
             }
             catch (Exception ex)
@@ -1495,22 +1555,6 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitUsingExpression(UsingExpressionAst usingExpressionAst)
         {
             throw new NotImplementedException(); //VisitUsingExpression(usingExpressionAst);
-        }
-
-        public override AstVisitAction VisitWhileStatement(WhileStatementAst whileStatementAst)
-        {
-            /* The controlling expression while-condition must have type bool or
-             * be implicitly convertible to that type. The loop body, which
-             * consists of statement-block, is executed repeatedly while the
-             * controlling expression tests True. The controlling expression
-             * is evaluated before each execution of the loop body.
-             */
-            while ((bool)((PSObject)EvaluateAst(whileStatementAst.Condition)).BaseObject)
-            {
-                this._pipelineCommandRuntime.WriteObject(EvaluateAst(whileStatementAst.Body, false), true);
-            }
-
-            return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitTypeExpression(TypeExpressionAst typeExpressionAst)

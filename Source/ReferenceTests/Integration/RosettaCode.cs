@@ -732,7 +732,6 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Lots of additional newlines in the output")]
         // Adapted from http://rosettacode.org/wiki/Loops/Continue#PowerShell
         public void LoopsContinue()
         {
@@ -752,7 +751,6 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("NotImplementedException")]
         // Taken from http://rosettacode.org/wiki/Loops/Do-while#PowerShell
         public void LoopsDoWhile()
         {
@@ -838,7 +836,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Wrong output, as break doesn't work yet")]
+        [Test]
         // Adapted from http://rosettacode.org/wiki/Loops/N_plus_one_half#PowerShell
         public void LoopsNPlusOneHalf1()
         {

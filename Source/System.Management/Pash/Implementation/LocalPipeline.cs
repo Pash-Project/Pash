@@ -143,18 +143,21 @@ namespace Pash.Implementation
                 pipelineProcessor.Execute(context);
                 SetPipelineState(PipelineState.Completed);
             }
-            catch (ExitException ex)
+            catch (FlowControlException ex)
             {
-                // Toplevel pipeline
-                if (!IsNested)
+                if (IsNested)
                 {
-                    _runspace.PSHost.SetShouldExit(ex.ExitCode);
+                    throw; // propagate to parent levels
                 }
-                else
+                if (ex is ExitException)
                 {
-                    // nested pipelines propagate the exit command
-                    throw;
+                    // exit code must be an int. otherwise it's 0
+                    int exitCode = 0;
+                    LanguagePrimitives.TryConvertTo<int>(((ExitException)ex).Argument, out exitCode);
+                    _runspace.PSHost.SetShouldExit(exitCode);
                 }
+                // at this point we are in the toplevel pipeline and we got a "return", "break", or "continue".
+                // The behavior for this is that the pipeline stops (that's why we're here), but nothing else
             }
             catch (Exception ex)
             {
