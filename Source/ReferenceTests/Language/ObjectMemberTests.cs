@@ -149,6 +149,12 @@ namespace ReferenceTests.Language
         }
 
         [Test]
+        public void CanInvokeMethodWithNullArg()
+        {
+            ExecuteAndCompareTypedResult("[string]::IsNullOrEmpty($null)", true);
+        }
+
+        [Test]
         public void PSObjectIsntCopiedAndPropertyIsUpdatable()
         {
             var result = ReferenceHost.Execute(NewlineJoin(
