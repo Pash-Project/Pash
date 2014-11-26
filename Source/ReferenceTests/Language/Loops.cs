@@ -102,6 +102,104 @@ namespace ReferenceTests.Language
             var cmd = "foreach ($char in 'abc'.ToCharArray()) { $char }";
             ExecuteAndCompareTypedResult(cmd, 'a', 'b', 'c');
         }
+
+        [Test]
+        public void BreakEndsExecutionWithoutLoop()
+        {
+            var cmd = "1; &{ 2; & { 3; break; 4; }; 5; }; 6;";
+            ExecuteAndCompareTypedResult(cmd, 1, 2, 3);
+        }
+
+        [Test]
+        public void ContinueEndsExecutionWithoutLoop()
+        {
+            var cmd = "1; &{ 2; & { 3; continue; 4; }; 5; }; 6;";
+            ExecuteAndCompareTypedResult(cmd, 1, 2, 3);
+        }
+
+        [Test]
+        public void ContinueInWhileLoopWorks()
+        {
+            var cmd = "$i = 0; while ($i -ilt 10) { $i++; continue; $i }; $i";
+            ExecuteAndCompareTypedResult(cmd, 10);
+        }
+
+        [Test]
+        public void ContinueInDoWhileLoopWorks()
+        {
+            var cmd = "$i = 0; do { $i++; continue; $i } while ($i -ilt 10); $i";
+            ExecuteAndCompareTypedResult(cmd, 10);
+        }
+
+        [Test]
+        public void ContinueInDoUntilLoopWorks()
+        {
+            var cmd = "$i = 0; do { $i++; continue; $i } until ($i -ige 10); $i";
+            ExecuteAndCompareTypedResult(cmd, 10);
+        }
+
+        [Test]
+        public void ContinueInForLoopWorks()
+        {
+            var cmd = "for ($i = 0; $i -ilt 10; $i++) { continue; $i; }; $i";
+            ExecuteAndCompareTypedResult(cmd, 10);
+        }
+
+        [Test]
+        public void ContinueInForeachLoopWorks()
+        {
+            var cmd = "$i = 0; foreach ($j in (1..10)) { $i = $j; continue; $j; }; $i";
+            ExecuteAndCompareTypedResult(cmd, 10);
+        }
+
+        [Test]
+        public void BreakInWhileLoopWorks()
+        {
+            var cmd = "$i = 0; while ($i -ilt 10) { $i++; break; $i }; $i";
+            ExecuteAndCompareTypedResult(cmd, 1);
+        }
+
+        [Test]
+        public void BreakInDoWhileLoopWorks()
+        {
+            var cmd = "$i = 0; do { $i++; break; $i } while ($i -ilt 10); $i";
+            ExecuteAndCompareTypedResult(cmd, 1);
+        }
+
+        [Test]
+        public void BreakInDoUntilLoopWorks()
+        {
+            var cmd = "$i = 0; do { $i++; break; $i } until ($i -ige 10); $i";
+            ExecuteAndCompareTypedResult(cmd, 1);
+        }
+
+        [Test]
+        public void BreakInForLoopWorks()
+        {
+            var cmd = "for ($i = 0; $i -ilt 10; $i++) { break; $i; }; $i";
+            ExecuteAndCompareTypedResult(cmd, 1);
+        }
+
+        [Test]
+        public void BreakInForeachLoopWorks()
+        {
+            var cmd = "$i = 0; foreach ($j in (1..10)) { $i = $j; break; $j; }; $i";
+            ExecuteAndCompareTypedResult(cmd, 1);
+        }
+
+        [Test]
+        public void ContinueWorksOnlyInInnerLoop()
+        {
+            var cmd = "for ($i = 0; $i -ilt 2; $i++) { $j = 0; while($j -ilt 3) { $j++; continue; $j }; $j; $i; } ";
+            ExecuteAndCompareTypedResult(cmd, 3, 0, 3, 1);
+        }
+
+        [Test]
+        public void BreakWorksOnlyInInnerLoop()
+        {
+            var cmd = "for ($i = 0; $i -ilt 2; $i++) { $j = 0; while($j -ilt 3) { $j++; break; $j }; $j; $i; } ";
+            ExecuteAndCompareTypedResult(cmd, 1, 0, 1, 1);
+        }
     }
 }
 
