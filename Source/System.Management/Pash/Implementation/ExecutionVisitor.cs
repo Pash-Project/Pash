@@ -1339,13 +1339,15 @@ namespace System.Management.Pash.Implementation
         {
             foreach (StatementAst statement in trapStatement.Body.Statements)
             {
-                statement.Visit(this);
-
-                if (statement is ContinueStatementAst)
+                try
+                {
+                    statement.Visit(this);
+                }
+                catch (ContinueException)
                 {
                     return AstVisitAction.Continue;
                 }
-                else if (statement is BreakStatementAst)
+                catch (BreakException)
                 {
                     WriteErrorRecord();
                     return AstVisitAction.SkipChildren;
