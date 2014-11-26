@@ -87,6 +87,7 @@
     <Compile Include="Parsing\CommandParsingTests.cs" />
     <Compile Include="API\LanguagePrimitivesTests.cs" />
     <Compile Include="Language\VariableTests.cs" />
+    <Compile Include="Language\Loops.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
