@@ -1165,7 +1165,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Scope modifiers don't work in strings yet")]
+        [Test]
         // Taken from http://rosettacode.org/wiki/Scope_modifiers#PowerShell
         public void ScopeModifiers1()
         {
@@ -1182,7 +1182,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("NullReferenceException in Ast.cs:44")]
+        [Test]
         // Taken from http://rosettacode.org/wiki/Scope_modifiers#PowerShell
         public void ScopeModifiers2()
         {
@@ -1618,7 +1618,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("NullReferenceException in Ast.cs:44")]
+        [Test]
         // Taken from http://rosettacode.org/wiki/Variables#PowerShell
         public void Variables()
         {

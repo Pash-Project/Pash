@@ -133,22 +133,25 @@ namespace System.Management.Automation
             var candidates = new List<Tuple<MethodInfo, object[]>>();
             var numArgs = arguments.Length;
             // try direct match first
-            var argTypes = (from arg in arguments
-                                     select arg.GetType()).ToArray();
-            var methodInfo = _classType.GetMethod(Name, argTypes);
-            if (methodInfo != null && methodInfo.IsPublic && methodInfo.IsStatic != IsInstance)
+            if (!arguments.Contains(null))
             {
-                // this doesn't mean that we got all arguments for methodInfo, e.g. we'd have a
-                // methodInfo for a method that takes an optional argument although argTypes doesn't
-                // include it. As old mono versions don't support invoking with optional arguments
-                // we need to take care of it
-                object[] fittingArgs;
-                if (MethodFitsArgs(methodInfo, arguments, out fittingArgs))
+                var argTypes = (from arg in arguments
+                                    select arg.GetType()).ToArray();
+                var methodInfo = _classType.GetMethod(Name, argTypes);
+                if (methodInfo != null && methodInfo.IsPublic && methodInfo.IsStatic != IsInstance)
                 {
-                    newArguments = fittingArgs;
-                    return methodInfo;
+                    // this doesn't mean that we got all arguments for methodInfo, e.g. we'd have a
+                    // methodInfo for a method that takes an optional argument although argTypes doesn't
+                    // include it. As old mono versions don't support invoking with optional arguments
+                    // we need to take care of it
+                    object[] fittingArgs;
+                    if (MethodFitsArgs(methodInfo, arguments, out fittingArgs))
+                    {
+                        newArguments = fittingArgs;
+                        return methodInfo;
+                    }
+                    // if we weren't successful (shouldn't be the case, but who knows), we try all overloads
                 }
-                // if we weren't successful (shouldn't be the case, but who knows), we try all overloads
             }
 
             // then check methods with conersion, optionall parameters or "params" parameter
