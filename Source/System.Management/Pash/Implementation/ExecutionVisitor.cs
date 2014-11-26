@@ -384,33 +384,20 @@ namespace System.Management.Pash.Implementation
         public bool EvaluateLoopBodyAst(Ast expressionAst, string loopLabel)
         {
             var loopCanContinue = true;
-            LoopFlowException rethrow = null;
 
-            var subVisitor = this.CloneSub(false);
             try
             {
-                expressionAst.Visit(subVisitor);
+                expressionAst.Visit(this);
             }
             catch (LoopFlowException e)
             {
                 if (!String.IsNullOrEmpty(e.Label) && !e.Label.Equals(loopLabel))
                 {
-                    rethrow = e;
+                    throw;
                 }
                 loopCanContinue = e is ContinueException;
             }
-            // before we rethrow the exception, we need to read and write the output that has already been written
-            var result = subVisitor._pipelineCommandRuntime.OutputStream.Read();
-            if (result != null)
-            {
-                _pipelineCommandRuntime.WriteObject(result.Count == 1 ? result.Single() : result.ToArray(), true);
-            }
 
-            // if labels didn't match, i.e. this loop isn't the one meant, we need to propagate the exception
-            if (rethrow != null)
-            {
-                throw rethrow;
-            }
             // return if the loop can continue execution or should break
             return loopCanContinue;
         }
@@ -885,7 +872,7 @@ namespace System.Management.Pash.Implementation
 
                 else throw new NotImplementedException(clause.Item1.ToString());
 
-                this._pipelineCommandRuntime.WriteObject(EvaluateAst(clause.Item2));
+                clause.Item2.Visit(this);
                 return AstVisitAction.SkipChildren;
             }
 
@@ -894,7 +881,7 @@ namespace System.Management.Pash.Implementation
                 // iterating over a statement list should be its own method.
                 foreach (var statement in ifStatementAst.ElseClause.Statements)
                 {
-                    this._pipelineCommandRuntime.WriteObject(EvaluateAst(statement));
+                    statement.Visit(this);
                 }
             }
 

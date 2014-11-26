@@ -835,7 +835,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Wrong output, as break doesn't work yet")]
+        [Test]
         // Adapted from http://rosettacode.org/wiki/Loops/N_plus_one_half#PowerShell
         public void LoopsNPlusOneHalf1()
         {
