@@ -303,6 +303,12 @@ namespace ReferenceTests.Language.Operators
             ExecuteAndCompareTypedResult(cmd, expected);
         }
 
+        [Test]
+        public void ConvertToStringFromArrayWithNull()
+        {
+            ExecuteAndCompareTypedResult("$OFS='|';[string]@(1,'f',$null,3)", "1|f||3");
+        }
+
         [Test, ExpectedException, Explicit]
         public void ConvertToArray_Spec_6_9_TargetTypeMayNotBeMultidimensional()
         {
