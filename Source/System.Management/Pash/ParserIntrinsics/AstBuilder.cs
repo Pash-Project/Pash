@@ -12,6 +12,7 @@ using Pash.ParserIntrinsics;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using System.Management.Automation;
+using System.Linq.Expressions;
 
 namespace Pash.ParserIntrinsics
 {
@@ -352,12 +353,16 @@ namespace Pash.ParserIntrinsics
 
         private StatementAst BuildContinueStatementAst(ParseTreeNode parseTreeNode)
         {
-            return new ContinueStatementAst(new ScriptExtent(parseTreeNode), null);
+            VerifyTerm(parseTreeNode, this._grammar._flow_control_statement_continue);
+            var label = parseTreeNode.ChildNodes.Count < 2 ? null : BuildLabelExpressionAst(parseTreeNode.ChildNodes[1]);
+            return new ContinueStatementAst(new ScriptExtent(parseTreeNode), label);
         }
 
         private StatementAst BuildBreakStatementAst(ParseTreeNode parseTreeNode)
         {
-            return new BreakStatementAst(new ScriptExtent(parseTreeNode), null);
+            VerifyTerm(parseTreeNode, this._grammar._flow_control_statement_break);
+            var label = parseTreeNode.ChildNodes.Count < 2 ? null : BuildLabelExpressionAst(parseTreeNode.ChildNodes[1]);
+            return new BreakStatementAst(new ScriptExtent(parseTreeNode), label);
         }
 
         StatementAst BuildTryStatementAst(ParseTreeNode parseTreeNode)
@@ -502,7 +507,7 @@ namespace Pash.ParserIntrinsics
             var loopStatement = parseTreeNode.ChildNodes[0];
             if (loopStatement.ChildNodes.Count != 6)
             {
-                throw new NotImplementedException("Invalid do_statement. Please report this! " + this.ToString());
+                throw new InvalidOperationException("Invalid do_statement. Please report this! " + this.ToString());
             }
 
             var body = BuildStatementBlockAst(loopStatement.ChildNodes[1]);
@@ -516,7 +521,7 @@ namespace Pash.ParserIntrinsics
                 return new DoUntilStatementAst(new ScriptExtent(parseTreeNode), null, condition, body);
             }
 
-            throw new NotImplementedException("Unknown do_statement. Please report this! " + this.ToString());
+            throw new InvalidOperationException("Unknown do_statement. Please report this! " + this.ToString());
         }
 
         IfStatementAst BuildIfStatementAst(ParseTreeNode parseTreeNode)
@@ -1601,7 +1606,17 @@ namespace Pash.ParserIntrinsics
         ExpressionAst BuildKeyExpressionAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.key_expression);
+            return BuildUnaryOrSimpleNameExpressionAstUnsafe(parseTreeNode);
+        }
 
+        ExpressionAst BuildLabelExpressionAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.label_expression);
+            return BuildUnaryOrSimpleNameExpressionAstUnsafe(parseTreeNode);
+        }
+
+        ExpressionAst BuildUnaryOrSimpleNameExpressionAstUnsafe(ParseTreeNode parseTreeNode)
+        {
             var childParseTreeNode = parseTreeNode.ChildNodes.Single();
 
             if (childParseTreeNode.Term == this._grammar.simple_name)
@@ -1613,7 +1628,6 @@ namespace Pash.ParserIntrinsics
             {
                 return BuildUnaryExpressionAst(childParseTreeNode);
             }
-
             throw new InvalidOperationException(childParseTreeNode.ToString());
         }
 

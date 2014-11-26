@@ -8,7 +8,7 @@ namespace System.Management.Automation
 
         internal LoopFlowException(string label)
         {
-            Label = label;
+            Label = label ?? "";
         }
     }
 }

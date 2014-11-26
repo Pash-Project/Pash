@@ -1038,7 +1038,8 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitBreakStatement(BreakStatementAst breakStatementAst)
         {
-            return AstVisitAction.SkipChildren;
+            var label = breakStatementAst.Label == null ? null : EvaluateAst(breakStatementAst.Label, false);
+            throw new BreakException(LanguagePrimitives.ConvertTo<string>(label));
         }
 
         public override AstVisitAction VisitCatchClause(CatchClauseAst catchClauseAst)
@@ -1058,7 +1059,8 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitContinueStatement(ContinueStatementAst continueStatementAst)
         {
-            return AstVisitAction.SkipChildren;
+            var label = continueStatementAst.Label == null ? null : EvaluateAst(continueStatementAst.Label, false);
+            throw new ContinueException(LanguagePrimitives.ConvertTo<string>(label));
         }
 
         public override AstVisitAction VisitConvertExpression(ConvertExpressionAst convertExpressionAst)
