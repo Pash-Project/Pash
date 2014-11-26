@@ -1123,14 +1123,8 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitExitStatement(ExitStatementAst exitStatementAst)
         {
-            int exitCode = 0;
-            if (exitStatementAst.Pipeline != null)
-            {
-                var value = EvaluateAst(exitStatementAst.Pipeline, false);
-                // Default PS behavior: either convert value to int or it's 0 (see above)
-                LanguagePrimitives.TryConvertTo<int>(value, out exitCode);
-            }
-            throw new ExitException(exitCode);
+            object arg = exitStatementAst.Pipeline == null ? null : EvaluateAst(exitStatementAst.Pipeline, false);
+            throw new ExitException(arg);
         }
 
         public override AstVisitAction VisitExpandableStringExpression(ExpandableStringExpressionAst expandableStringExpressionAst)
@@ -1247,12 +1241,9 @@ namespace System.Management.Pash.Implementation
                 {
                     statement.Visit(this);
                 }
-                catch (ReturnException)
+                catch (FlowControlException)
                 {
-                    throw;
-                }
-                catch (ExitException)
-                {
+                    // flow control as Exit, Return, Break, and Continue doesn't concern the user and is propagated
                     throw;
                 }
                 catch (Exception ex)
@@ -1504,8 +1495,9 @@ namespace System.Management.Pash.Implementation
             {
                 tryStatementAst.Body.Visit(this);
             }
-            catch (ReturnException)
+            catch (FlowControlException)
             {
+                // flow control (return, exit, continue, break) is nothing the user should see and is propagated
                 throw;
             }
             catch (Exception ex)

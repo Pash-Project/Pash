@@ -111,6 +111,22 @@ namespace ReferenceTests.Language
         }
 
         [Test]
+        public void BreakEndsScriptWithoutLoop()
+        {
+            var script = CreateFile("2; break; 3;", "ps1");
+            var cmd = "1; . '" + script + "'; 4;";
+            ExecuteAndCompareTypedResult(cmd, 1, 2, 4);
+        }
+
+        [Test]
+        public void ContinueEndsScriptWithoutLoop()
+        {
+            var script = CreateFile("2; continue; 3;", "ps1");
+            var cmd = "1; . '" + script + "'; 4;";
+            ExecuteAndCompareTypedResult(cmd, 1, 2, 4);
+        }
+
+        [Test]
         public void ContinueEndsExecutionWithoutLoop()
         {
             var cmd = "1; &{ 2; & { 3; continue; 4; }; 5; }; 6;";

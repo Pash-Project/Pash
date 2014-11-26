@@ -123,17 +123,21 @@ namespace Pash.Implementation
             {
                 _scriptBlockInfo.ScriptBlock.Ast.Visit(_scopedExecutionVisitor);
             }
-            catch (ExitException e)
+            catch (FlowControlException e)
             {
-                if (_fromFile)
+                if (!_fromFile)
                 {
-                    _exitCode = e.ExitCode;
-                    ExecutionContext.SetVariable("global:LASTEXITCODE", e.ExitCode);
+                    throw; // gets propagated if the script block is not an external script
                 }
-                else
+                if (e is ExitException)
                 {
-                    throw;
+                    int exitCode = 0;
+                    LanguagePrimitives.TryConvertTo<int>(((ExitException)e).Argument, out exitCode);
+                    _exitCode = exitCode;
+                    ExecutionContext.SetVariable("global:LASTEXITCODE", exitCode);
                 }
+                // otherwise (return, break, continue), we simply stop execution of the script (that's why we're here)
+                // and do nothing
             }
             finally //make sure we switch back to the original execution context, no matter what happened
             {
