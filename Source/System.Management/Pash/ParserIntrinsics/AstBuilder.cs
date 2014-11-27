@@ -981,11 +981,15 @@ namespace Pash.ParserIntrinsics
                      (operatorKeyTerm != null && operatorKeyTerm.Text.Equals("!")))
             {
                 // bang expression is alternative spelling for -not
-                return BuildUnaryNotExpressionAst(subNode);
+                return BuildUnaryExpressionAstWithToken(subNode, TokenKind.Not);
             }
             else if (operatorKeyTerm != null && operatorKeyTerm.Text.Equals("++"))
             {
-                return BuildPreIncrementExpressionAst(subNode);
+                return BuildUnaryExpressionAstWithToken(subNode, TokenKind.PlusPlus);
+            }
+            else if (operatorTerm == this._grammar.dashdash)
+            {
+                return BuildUnaryExpressionAstWithToken(subNode, TokenKind.MinusMinus);
             }
             else if (operatorKeyTerm != null && operatorKeyTerm.Text.Equals(",")) //unary array
             {
@@ -994,7 +998,6 @@ namespace Pash.ParserIntrinsics
             }
             /* left to be implemented:
              * operatorTerm == _operator_bnot
-             * operatorTerm == dashdash  // pre decrement
              * operatorKeyTerm != null && operatorKeyTerm.Text.Equals("+") //unary plus
              * operatorKeyTerm != null && operatorKeyTerm.Text.Equals("-split") //split array
              * operatorKeyTerm != null && operatorKeyTerm.Text.Equals("-join") //join array
@@ -1095,22 +1098,11 @@ namespace Pash.ParserIntrinsics
             }
         }
 
-        ExpressionAst BuildPreIncrementExpressionAst(ParseTreeNode parseTreeNode)
-        {
-            // VerifyTerm(parseTreeNode, this._grammar.pre_increment_expression);
-
-            return new UnaryExpressionAst(
-                new ScriptExtent(parseTreeNode),
-                TokenKind.PlusPlus,
-                BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1])
-                );
-        }
-
-        ExpressionAst BuildUnaryNotExpressionAst(ParseTreeNode parseTreeNode)
+        ExpressionAst BuildUnaryExpressionAstWithToken(ParseTreeNode parseTreeNode, TokenKind token)
         {
             return new UnaryExpressionAst(
                 new ScriptExtent(parseTreeNode),
-                TokenKind.Not,
+                token,
                 BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1])
                 );
         }
@@ -1126,22 +1118,22 @@ namespace Pash.ParserIntrinsics
                 return BuildValueAst(parseTreeNode);
             }
 
-            if (parseTreeNode.Term == this._grammar._member_access_or_invocation_expression)
+            else if (parseTreeNode.Term == this._grammar._member_access_or_invocation_expression)
             {
                 return BuildMemberAccessOrInvocationExpressionAst(parseTreeNode);
             }
 
-            if (parseTreeNode.Term == this._grammar.element_access)
+            else if (parseTreeNode.Term == this._grammar.element_access)
             {
                 return BuildElementAccessAst(parseTreeNode);
             }
 
-            if (parseTreeNode.Term == this._grammar.post_increment_expression)
+            else if (parseTreeNode.Term == this._grammar.post_increment_expression)
             {
                 return BuildPostIncrementExpressionAst(parseTreeNode);
             }
 
-            if (parseTreeNode.Term == this._grammar.post_decrement_expression)
+            else if (parseTreeNode.Term == this._grammar.post_decrement_expression)
             {
                 return BuildPostDecrementExpressionAst(parseTreeNode);
             }
@@ -1151,7 +1143,13 @@ namespace Pash.ParserIntrinsics
 
         ExpressionAst BuildPostDecrementExpressionAst(ParseTreeNode parseTreeNode)
         {
-            throw new NotImplementedException();
+            VerifyTerm(parseTreeNode, this._grammar.post_decrement_expression);
+
+            return new UnaryExpressionAst(
+                new ScriptExtent(parseTreeNode),
+                TokenKind.PostfixMinusMinus,
+                BuildPrimaryExpressionAst(parseTreeNode.ChildNodes[0])
+                );
         }
 
         ExpressionAst BuildPostIncrementExpressionAst(ParseTreeNode parseTreeNode)

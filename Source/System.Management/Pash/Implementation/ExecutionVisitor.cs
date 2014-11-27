@@ -941,6 +941,12 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitMemberExpression(MemberExpressionAst memberExpressionAst)
         {
+            _pipelineCommandRuntime.WriteObject(GetMemberExpressionValue(memberExpressionAst));
+            return AstVisitAction.SkipChildren;
+        }
+
+        private object GetMemberExpressionValue(MemberExpressionAst memberExpressionAst)
+        {
             string memberName;
             var psobj = EvaluateAsPSObject(memberExpressionAst.Expression);
             var unwraped = PSObject.Unwrap(psobj);
@@ -949,16 +955,11 @@ namespace System.Management.Pash.Implementation
             if (unwraped is Hashtable && memberNameObj != null &&
                 !_hashtableAccessibleMembers.Contains(memberNameObj.ToString()))
             {
-                var hashtable = (Hashtable)unwraped;
-                _pipelineCommandRuntime.WriteObject(hashtable[memberNameObj]);
+                return ((Hashtable)unwraped)[memberNameObj];
             }
-            else // otherwise a PSObject
-            {
-                var member = GetPSObjectMember(psobj, memberNameObj, memberExpressionAst.Static, out memberName);
-                var value = (member == null) ? null : PSObject.AsPSObject(member.Value);
-                _pipelineCommandRuntime.WriteObject(value);
-            }
-            return AstVisitAction.SkipChildren;
+            // otherwise a PSObject
+            var member = GetPSObjectMember(psobj, memberNameObj, memberExpressionAst.Static, out memberName);
+            return (member == null) ? null : PSObject.AsPSObject(member.Value);
         }
 
         public override AstVisitAction VisitArrayLiteral(ArrayLiteralAst arrayLiteralAst)
@@ -975,38 +976,16 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitUnaryExpression(UnaryExpressionAst unaryExpressionAst)
         {
-            var childVariableExpressionAst = unaryExpressionAst.Child as VariableExpressionAst;
-            var childVariable = childVariableExpressionAst == null ? null : GetVariable(childVariableExpressionAst);
-            var childVariableValue = childVariable == null ? null : childVariable.Value;
-
             switch (unaryExpressionAst.TokenKind)
             {
-                // TODO: the following two cases should not just deal
                 case TokenKind.PostfixPlusPlus:
-
-                    if (childVariable == null) throw new NotImplementedException(unaryExpressionAst.ToString());
-                    if (childVariableValue is PSObject)
-                    {
-                        if (this._writeSideEffectsToPipeline) this._pipelineCommandRuntime.WriteObject(childVariable.Value);
-                        childVariable.Value = PSObject.AsPSObject(((int)((PSObject)childVariableValue).BaseObject) + 1);
-                    }
-                    else throw new NotImplementedException(childVariableValue.ToString());
-
-                    break;
-
                 case TokenKind.PlusPlus:
+                case TokenKind.MinusMinus:
+                case TokenKind.PostfixMinusMinus:
+                    VisitIncrementDecrementExpression(unaryExpressionAst);
+                break;
 
-                    if (childVariable == null) throw new NotImplementedException(unaryExpressionAst.ToString());
-                    if (childVariableValue is PSObject)
-                    {
-                        childVariable.Value = PSObject.AsPSObject(((int)((PSObject)childVariableValue).BaseObject) + 1);
-                        if (this._writeSideEffectsToPipeline) this._pipelineCommandRuntime.WriteObject(childVariable.Value);
-                    }
-                    else throw new NotImplementedException(childVariableValue.ToString());
-
-                    break;
-
-            case TokenKind.Not:
+                case TokenKind.Not:
                     var value = EvaluateAst(unaryExpressionAst.Child, _writeSideEffectsToPipeline);
                     var boolValue = (bool) LanguagePrimitives.ConvertTo(value, typeof(bool));
                     _pipelineCommandRuntime.WriteObject(!boolValue);
@@ -1017,6 +996,90 @@ namespace System.Management.Pash.Implementation
             }
 
             return AstVisitAction.SkipChildren;
+        }
+
+        private void VisitIncrementDecrementExpression(UnaryExpressionAst unaryExpressionAst)
+        {
+            var token = unaryExpressionAst.TokenKind;
+            var child = unaryExpressionAst.Child;
+
+            // first validate the expression. Shouldn't fail, but let's be sure
+            var validTokens = new [] { TokenKind.PostfixPlusPlus, TokenKind.PostfixMinusMinus,
+                TokenKind.PlusPlus, TokenKind.MinusMinus};
+            if (!validTokens.Contains(token))
+            {
+                throw new PSInvalidOperationException("The unary expression is not a decrement/increment expression. " +
+                                                      "Please report this issue.");
+            }
+
+            bool postfix = token == TokenKind.PostfixPlusPlus || token == TokenKind.PostfixMinusMinus;
+            bool increment = token == TokenKind.PostfixPlusPlus || token == TokenKind.PlusPlus;
+
+            // This operation only works with variables or properties
+            if (!(child is VariableExpressionAst) && !(child is MemberExpressionAst)) // should be catched by builder
+            {
+                var msg = String.Format("The '{0}' operator can only be used with variables or properties",
+                                        increment ? "++" : "--");
+                throw new PSInvalidOperationException(msg);
+            }
+
+            bool isvar = child is VariableExpressionAst;
+            var varExpression = isvar ? (VariableExpressionAst)child : null;
+            var variable = isvar ? GetVariable(varExpression) : null;
+            var memberExpression = isvar ? null : (MemberExpressionAst) child;
+
+            object objValue = null;
+            if (isvar && variable != null)
+            {
+                objValue = PSObject.Unwrap(variable.Value);
+            }
+            else if (!isvar)
+            {
+                objValue = PSObject.Unwrap(GetMemberExpressionValue(memberExpression));
+            }
+            objValue = objValue ?? 0; // if the value is null, then we "convert" to integer 0, says the specification
+
+            // check for non-numerics
+            var valueType = objValue.GetType();
+            if (!valueType.IsNumeric())
+            {
+                var msg = String.Format("The operator '{0}' can only be used for numbers. The operand is '{1}'",
+                                        increment ? "++" : "--", valueType.FullName);
+                throw new RuntimeException(msg, "OperatorRequiresNumber", ErrorCategory.InvalidOperation, objValue);
+            }
+
+            // if it's a postfix operation, then we need to write the numeric value to pipeline
+            if (postfix && _writeSideEffectsToPipeline)
+            {
+                _pipelineCommandRuntime.WriteObject(objValue);
+            }
+
+            // now actually change the value, check for overflow
+            dynamic dynValue = (dynamic)objValue;
+            try
+            {
+                dynValue = checked(dynValue + (increment ? 1 : -1));
+            }
+            catch (OverflowException) // cast to double on overflow
+            {
+                dynValue = LanguagePrimitives.ConvertTo<double>(objValue) + (increment ? 1 : -1);
+            }
+
+            // set the new value to the variable/property
+            if (isvar)
+            {
+                SetVariableValue(varExpression, (object)dynValue);
+            }
+            else
+            {
+                SetMemberExpressionValue(memberExpression, (object)dynValue);
+            }
+
+            // if it was a prefix, then we need to write the new value to pipeline
+            if (!postfix && _writeSideEffectsToPipeline)
+            {
+                _pipelineCommandRuntime.WriteObject(dynValue);
+            }
         }
 
         public override AstVisitAction VisitArrayExpression(ArrayExpressionAst arrayExpressionAst)
