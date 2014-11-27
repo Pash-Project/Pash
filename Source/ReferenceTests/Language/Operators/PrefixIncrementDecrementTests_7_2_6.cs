@@ -1,5 +1,6 @@
 using System;
 using NUnit.Framework;
+using System.Management.Automation;
 
 namespace ReferenceTests.Language.Operators
 {
@@ -22,6 +23,14 @@ namespace ReferenceTests.Language.Operators
             ExecuteAndCompareTypedResult("$i = 0.1D; $j = ++$i; $j; $i", 1.1m, 1.1m);
         }
 
+        [Test]
+        public void PrefixIncrementWithStringThrows()
+        {
+            Assert.Throws<RuntimeException>(delegate {
+                ReferenceHost.Execute("$f = 'foo'; ++$f");
+            });
+        }
+
         [TestCase("$i = 0; $j = --$i; $j; $i", -1, -1)] // increments properly by 1, before assignment
         [TestCase("$i = 0; (--$i); $i", -1, -1)] // parenthesis cause writing sideffects to pipeline
         [TestCase("$i = $null; $j = --$i; $j; $i", -1, -1)] // with $null value
@@ -36,6 +45,14 @@ namespace ReferenceTests.Language.Operators
         public void PrefixDerementDecimal()
         {
             ExecuteAndCompareTypedResult("$i = 0.1D; $j = --$i; $j; $i", -0.9m, -0.9m);
+        }
+
+        [Test]
+        public void PrefixDecrementWithStringThrows()
+        {
+            Assert.Throws<RuntimeException>(delegate {
+                ReferenceHost.Execute("$f = 'foo'; --$f");
+            });
         }
 
         [Test]
