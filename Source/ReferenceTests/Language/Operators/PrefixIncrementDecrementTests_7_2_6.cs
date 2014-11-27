@@ -1,8 +1,9 @@
 using System;
 using NUnit.Framework;
 
-namespace ReferenceTests.Operators
+namespace ReferenceTests.Language.Operators
 {
+    [TestFixture]
     public class PrefixIncrementDecrementTests_7_2_6 : ReferenceTestBase
     {
         [TestCase("$i = 0; $j = ++$i; $j; $i", 1, 1)] // increments properly by 1, before assignment
@@ -81,7 +82,7 @@ namespace ReferenceTests.Operators
                 "$j = 1",
                 "$b[--$j] = $a[++$i]",
                 "$a; $b; $i; $j");
-            ExecuteAndCompareTypedResult(cmd, new int[] {1,2,3}, new int[] {2,8,7}, 1, 0);
+            ExecuteAndCompareTypedResult(cmd, 1, 2, 3, 2, 8, 7, 1, 0);
         }
 
         [Test]
@@ -93,7 +94,7 @@ namespace ReferenceTests.Operators
                 "$i = 0",
                 "$b[++$i] = $a[++$i]",
                 "$a; $b; $i");
-            ExecuteAndCompareTypedResult(cmd, new int[] {1,2,3}, new int[] {9,8,2}, 2);
+            ExecuteAndCompareTypedResult(cmd, 1, 2, 3, 9, 8, 2, 2);
         }
         // TODO: tests with type constraint as "[int]$x = [int]::MaxValue; $x++"
     }

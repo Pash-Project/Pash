@@ -1,15 +1,15 @@
 using System;
 using NUnit.Framework;
 
-namespace ReferenceTests.Operators
+namespace ReferenceTests.Language.Operators
 {
     [TestFixture]
     public class PostfixIncrementDecrementOperatorTests_7_1_5 : ReferenceTestBase
     {
         [TestCase("$i = 0; $j = $i++; $j; $i", 0, 1)] // increments properly by 1, after assignment
         [TestCase("$i = 0; ($i++); $i", 0, 1)] // parenthesis cause writing sideffects to pipeline
-        [TestCase("$i = $null; $j = $i++; $j; $i", null, 1)] // with $null value
-        [TestCase("$j = $i++; $j; $i", null, 1)] // not defined before
+        [TestCase("$i = $null; $j = $i++; $j; $i", 0, 1)] // with $null value
+        [TestCase("$j = $i++; $j; $i", 0, 1)] // not defined before
         [TestCase("$i = 0.1; $j = $i++; $j; $i", 0.1d, 1.1d)] // double
         public void PostfixIncrement(string cmd, object assigned, object incremented)
         {
@@ -24,8 +24,8 @@ namespace ReferenceTests.Operators
 
         [TestCase("$i = 0; $j = $i--; $j; $i", 0, -1)] // increments properly by 1, after assignment
         [TestCase("$i = 0; ($i--); $i", 0, -1)] // parenthesis cause writing sideffects to pipeline
-        [TestCase("$i = $null; $j = $i--; $j; $i", null, -1)] // with $null value
-        [TestCase("$j = $i--; $j; $i", null, -1)] // not defined before
+        [TestCase("$i = $null; $j = $i--; $j; $i", 0, -1)] // with $null value, which is converted to 0
+        [TestCase("$j = $i--; $j; $i", 0, -1)] // not defined before
         [TestCase("$i = 0.1; $j = $i--; $j; $i", 0.1d, -0.9d)] // double
         public void PostfixDecrement(string cmd, object assigned, object incremented)
         {
@@ -82,7 +82,7 @@ namespace ReferenceTests.Operators
                 "$j = 1",
                 "$b[$j--] = $a[$i++]",
                 "$a; $b; $i; $j");
-            ExecuteAndCompareTypedResult(cmd, new int[] {1,2,3}, new int[] {9,1,7}, 1, 0);
+            ExecuteAndCompareTypedResult(cmd, 1, 2, 3, 9, 1, 7, 1, 0);
         }
 
         [Test]
@@ -94,7 +94,7 @@ namespace ReferenceTests.Operators
                 "$i = 0",
                 "$b[$i++] = $a[$i++]",
                 "$a; $b; $i");
-            ExecuteAndCompareTypedResult(cmd, new int[] {1,2,3}, new int[] {9,1,7}, 2);
+            ExecuteAndCompareTypedResult(cmd, 1, 2, 3, 9, 1, 7, 2);
         }
         // TODO: tests with type constraint as "[int]$x = [int]::MaxValue; $x++"
     }
