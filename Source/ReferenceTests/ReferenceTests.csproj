@@ -88,6 +88,7 @@
     <Compile Include="API\LanguagePrimitivesTests.cs" />
     <Compile Include="Language\VariableTests.cs" />
     <Compile Include="Language\Loops.cs" />
+    <Compile Include="Language\Operators\IncrementDecrementOperatorTests_7_1_5.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
