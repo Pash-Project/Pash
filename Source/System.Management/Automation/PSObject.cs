@@ -287,6 +287,24 @@ namespace System.Management.Automation
                 return LanguagePrimitives.Compare(this.BaseObject, obj);
         }
 
+        internal static PSMemberInfo GetMemberInfoSafe(PSObject psobj, object memberNameObj, bool isStatic)
+        {
+            if (memberNameObj == null)
+            {
+                throw new PSArgumentNullException("Member name is null");
+            }
+            var memberName = memberNameObj.ToString();
+            if (psobj == null)
+            {
+                return null;
+            }
+            if (isStatic)
+            {
+                return psobj.StaticMembers[memberName];
+            }
+            return psobj.Members[memberName];
+        }
+
 
     }
 }

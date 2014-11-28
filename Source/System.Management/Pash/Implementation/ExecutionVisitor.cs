@@ -29,9 +29,6 @@ namespace System.Management.Pash.Implementation
         readonly ExecutionContext _context;
         readonly PipelineCommandRuntime _pipelineCommandRuntime;
         readonly bool _writeSideEffectsToPipeline;
-        readonly HashSet<string> _hashtableAccessibleMembers = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) {
-            "Count", "Keys", "Values", "Remove"
-        };
 
         public ExecutionVisitor(ExecutionContext context, PipelineCommandRuntime pipelineCommandRuntime, bool writeSideEffectsToPipeline = false)
         {
@@ -648,7 +645,7 @@ namespace System.Management.Pash.Implementation
             }
             else if (expressionAst is MemberExpressionAst)
             {
-                SetMemberExpressionValue((MemberExpressionAst)expressionAst, newValue);
+                new SettableMemberExpression((MemberExpressionAst)expressionAst, this).SetValue(newValue);
             }
             else if (expressionAst is IndexExpressionAst)
             {
@@ -684,28 +681,6 @@ namespace System.Management.Pash.Implementation
                 var path = new Path(variableExpressionAst.VariablePath.GetUnqualifiedUserPath());
                 provider.SetSessionStateItem(path, value, false);
             }
-        }
-
-        private void SetMemberExpressionValue(MemberExpressionAst memberExpressionAst, object value)
-        {
-            string memberName;
-            var psobj = EvaluateAsPSObject(memberExpressionAst.Expression);
-            var unwraped = PSObject.Unwrap(psobj);
-            var memberNameObj = EvaluateAst(memberExpressionAst.Member, false);
-            // check for Hashtable first
-            if (unwraped is Hashtable && memberNameObj != null &&
-                !_hashtableAccessibleMembers.Contains(memberNameObj.ToString()))
-            { 
-                ((Hashtable) unwraped)[memberNameObj] = value;
-                return;
-            }
-            // else it's a PSObject
-            var member = GetPSObjectMember(psobj, memberNameObj, memberExpressionAst.Static, out memberName);
-            if (member == null)
-            {
-                throw new PSArgumentNullException(String.Format("Member '{0}' to be assigned is null", memberName));
-            }
-            member.Value = value;
         }
 
         private void SetIndexExpressionValue(IndexExpressionAst indexExpressionAst, object value)
@@ -890,17 +865,17 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitInvokeMemberExpression(InvokeMemberExpressionAst methodCallAst)
         {
-            string memberName;
-            var psobj = EvaluateAsPSObject(methodCallAst.Expression);
+            var psobj = PSObject.WrapOrNull(EvaluateAst(methodCallAst.Expression, false));
             if (psobj == null)
             {
                 throw new PSInvalidOperationException("Cannot invoke a method of a NULL expression");
             }
             var memberNameObj = EvaluateAst(methodCallAst.Member, false);
-            var method = GetPSObjectMember(psobj, memberNameObj, methodCallAst.Static, out memberName) as PSMethodInfo;
+            var method = PSObject.GetMemberInfoSafe(psobj, memberNameObj, methodCallAst.Static) as PSMethodInfo;
             if (method == null)
             {
-                throw new PSArgumentException(String.Format("The object has no method called '{0}'", memberName));
+                var msg = String.Format("The object has no method called '{0}'", memberNameObj.ToString());
+                throw new PSArgumentException(msg);
             }
             var arguments = methodCallAst.Arguments.Select(EvaluateAst).Select(o => o is PSObject ? ((PSObject)o).BaseObject : o);
             var result = method.Invoke(arguments.ToArray());
@@ -911,55 +886,10 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
-        private PSObject EvaluateAsPSObject(ExpressionAst expression)
-        {
-            // if the expression is a variable including an enumerable object (e.g. collection)
-            // then we want the collection itself. The enumerable object should only be expanded when being processed
-            // e.g. in a pipeline
-            return PSObject.WrapOrNull(EvaluateAst(expression, false));
-        }
-
-        private PSMemberInfo GetPSObjectMember(PSObject psobj, object memberNameObj, bool isStatic, out string memberName)
-        {
-
-            if (memberNameObj == null)
-            {
-                throw new PSArgumentNullException("Member name evaluates to null");
-            }
-            memberName = memberNameObj.ToString();
-            if (psobj == null)
-            {
-                return null;
-            }
-            // Powershell allows access to hastable values by member acccess
-            if (isStatic)
-            {
-                return psobj.StaticMembers[memberName];
-            }
-            return psobj.Members[memberName];
-        }
-
         public override AstVisitAction VisitMemberExpression(MemberExpressionAst memberExpressionAst)
         {
-            _pipelineCommandRuntime.WriteObject(GetMemberExpressionValue(memberExpressionAst));
+            _pipelineCommandRuntime.WriteObject(new SettableMemberExpression(memberExpressionAst, this).GetValue());
             return AstVisitAction.SkipChildren;
-        }
-
-        private object GetMemberExpressionValue(MemberExpressionAst memberExpressionAst)
-        {
-            string memberName;
-            var psobj = EvaluateAsPSObject(memberExpressionAst.Expression);
-            var unwraped = PSObject.Unwrap(psobj);
-            var memberNameObj = EvaluateAst(memberExpressionAst.Member, false);
-            // check for Hastable first
-            if (unwraped is Hashtable && memberNameObj != null &&
-                !_hashtableAccessibleMembers.Contains(memberNameObj.ToString()))
-            {
-                return ((Hashtable)unwraped)[memberNameObj];
-            }
-            // otherwise a PSObject
-            var member = GetPSObjectMember(psobj, memberNameObj, memberExpressionAst.Static, out memberName);
-            return (member == null) ? null : PSObject.AsPSObject(member.Value);
         }
 
         public override AstVisitAction VisitArrayLiteral(ArrayLiteralAst arrayLiteralAst)
@@ -1035,7 +965,7 @@ namespace System.Management.Pash.Implementation
             }
             else if (!isvar)
             {
-                objValue = PSObject.Unwrap(GetMemberExpressionValue(memberExpression));
+                objValue = PSObject.Unwrap(new SettableMemberExpression(memberExpression, this).GetValue());
             }
             objValue = objValue ?? 0; // if the value is null, then we "convert" to integer 0, says the specification
 
@@ -1072,7 +1002,7 @@ namespace System.Management.Pash.Implementation
             }
             else
             {
-                SetMemberExpressionValue(memberExpression, (object)dynValue);
+                new SettableMemberExpression(memberExpression, this).SetValue((object)dynValue);
             }
 
             // if it was a prefix, then we need to write the new value to pipeline

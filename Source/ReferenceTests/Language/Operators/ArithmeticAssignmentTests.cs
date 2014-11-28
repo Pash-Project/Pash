@@ -17,6 +17,13 @@ namespace ReferenceTests.Language.Operators
         }
 
         [Test]
+        public void PlusEqualsLeftSideIsOnlyEvaluatedOnce()
+        {
+            ExecuteAndCompareTypedResult("$a = 0,0,0; $i = 0; $a[$i++] += 1; $i; $a",
+                                         1, 1, 0, 0);
+        }
+
+        [Test]
         public void PlusEqualsWorksWithUndefined()
         {
             ExecuteAndCompareTypedResult("$a += 2.5; $a", 2.5d);
@@ -26,6 +33,13 @@ namespace ReferenceTests.Language.Operators
         public void TimeEqualsWorks()
         {
             ExecuteAndCompareTypedResult("$a = 3; $a *= 2.5; $a", 7.5d);
+        }
+
+        [Test]
+        public void TimesEqualsLeftSideIsOnlyEvaluatedOnce()
+        {
+            ExecuteAndCompareTypedResult("$a = 1,1,1; $i = 0; $a[$i++] *= 2; $i; $a",
+                                         1, 2, 1, 1);
         }
 
         [Test]
@@ -41,6 +55,13 @@ namespace ReferenceTests.Language.Operators
         }
 
         [Test]
+        public void MinusEqualsLeftSideIsOnlyEvaluatedOnce()
+        {
+            ExecuteAndCompareTypedResult("$a = 1,1,1; $i = 0; $a[$i++] -= 1; $i; $a",
+                                         1, 0, 1, 1);
+        }
+
+        [Test]
         public void MinusEqualsWorksWithUndefined()
         {
             ExecuteAndCompareTypedResult("$a -= 6.5; $a", -6.5d);
@@ -53,6 +74,13 @@ namespace ReferenceTests.Language.Operators
         }
 
         [Test]
+        public void DivideEqualsLeftSideIsOnlyEvaluatedOnce()
+        {
+            ExecuteAndCompareTypedResult("$a = 1,1,1; $i = 0; $a[$i++] /= 2; $i; $a",
+                                         1, 0.5, 1, 1);
+        }
+
+        [Test]
         public void DivideEqualsWorksWithUndefined()
         {
             ExecuteAndCompareTypedResult("$a /= 2; $a", 0);
@@ -62,6 +90,12 @@ namespace ReferenceTests.Language.Operators
         public void RemainderEqualsWorks()
         {
             ExecuteAndCompareTypedResult("$a = 5.3; $a %= 0.4; $a", 0.2d);
+        }
+
+        public void RemainderEqualsLeftSideIsOnlyEvaluatedOnce()
+        {
+            ExecuteAndCompareTypedResult("$a = 3,3,3; $i = 0; $a[$i++] %= 2; $i; $a",
+                                         1, 1, 3, 3);
         }
 
         [Test]
