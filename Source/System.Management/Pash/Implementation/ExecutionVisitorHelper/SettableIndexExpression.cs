@@ -47,7 +47,8 @@ namespace System.Management.Pash.Implementation
             {
                 var dictTarget = (IDictionary) targetValue;
                 var idxobjects = index is object[] ? (object[])index : new object[] { index };
-                return (from idxobj in idxobjects select dictTarget[PSObject.Unwrap(idxobj)]).ToArray();
+                var vals = (from idxobj in idxobjects select dictTarget[PSObject.Unwrap(idxobj)]);
+                return ArrayOrSimpleValue(vals);
             }
 
             // otherwise we need int indexing
@@ -95,7 +96,7 @@ namespace System.Management.Pash.Implementation
                     values.Add(iListTarget[idx]);
                 }
             }
-            return values.ToArray();
+            return ArrayOrSimpleValue(values);
         }
 
         public override void SetValue(object value)
@@ -122,7 +123,7 @@ namespace System.Management.Pash.Implementation
             {
                 var intIdx = (int)LanguagePrimitives.ConvertTo(index, typeof(int));
                 intIdx = intIdx < 0 ? intIdx + iListTarget.Count : intIdx;
-                iListTarget[intIdx] = value;
+                iListTarget[intIdx] = PSObject.Unwrap(value);
             }
             else if (target is IDictionary)
             {
@@ -149,6 +150,20 @@ namespace System.Management.Pash.Implementation
                 convIndices[i] = rawIndices[i] < 0 ? rawIndices[i] + array.GetLength(i) : rawIndices[i];
             }
             return convIndices;
+        }
+
+        private object ArrayOrSimpleValue(IEnumerable<object> values)
+        {
+            var array = values.ToArray();
+            if (array.Length == 0)
+            {
+                return null;
+            }
+            else if (array.Length == 1)
+            {
+                return array[0];
+            }
+            return array;
         }
     }
 }

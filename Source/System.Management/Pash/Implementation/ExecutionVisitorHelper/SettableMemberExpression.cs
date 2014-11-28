@@ -61,12 +61,13 @@ namespace System.Management.Pash.Implementation
                 var msg = String.Format("Member '{0}' to be assigned is null", memberNameObj.ToString());
                 throw new PSArgumentNullException(msg);
             }
-            member.Value = value;
+
+            member.Value = PSObject.Unwrap(value);
         }
 
        public override object GetValue()
-        {
-            var psobj = PSObject.AsPSObject(EvaluatedBase);
+       {
+            var psobj = PSObject.WrapOrNull(EvaluatedBase);
             var unwraped = PSObject.Unwrap(psobj);
             var memberNameObj = EvaluatedMember;
             // check for Hastable first

@@ -985,7 +985,7 @@ namespace Pash.ParserIntrinsics
                 return new UnaryExpressionAst(
                     new ScriptExtent(parseTreeNode),
                     TokenKind.Not,
-                    BuildUnaryExpressionAst(parseTreeNode.ChildNodes[1])
+                    BuildUnaryExpressionAst(subNode.ChildNodes[1])
                     );
             }
             else if (operatorKeyTerm != null && operatorKeyTerm.Text.Equals("++"))
