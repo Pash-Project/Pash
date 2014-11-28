@@ -26,20 +26,21 @@ namespace System.Management.Pash.Implementation
 {
     class ExecutionVisitor : AstVisitor
     {
-        readonly ExecutionContext _context;
         readonly PipelineCommandRuntime _pipelineCommandRuntime;
         readonly bool _writeSideEffectsToPipeline;
 
+        internal readonly ExecutionContext ExecutionContext;
+
         public ExecutionVisitor(ExecutionContext context, PipelineCommandRuntime pipelineCommandRuntime, bool writeSideEffectsToPipeline = false)
         {
-            this._context = context;
+            this.ExecutionContext = context;
             this._pipelineCommandRuntime = pipelineCommandRuntime;
             this._writeSideEffectsToPipeline = writeSideEffectsToPipeline;
         }
 
         ExecutionVisitor CloneSub(bool writeSideEffectsToPipeline)
         {
-            var subContext = this._context.CreateNestedContext();
+            var subContext = this.ExecutionContext.CreateNestedContext();
             var subRuntime = new PipelineCommandRuntime(this._pipelineCommandRuntime.PipelineProcessor);
             subRuntime.ExecutionContext = subContext;
             return new ExecutionVisitor(
@@ -256,7 +257,7 @@ namespace System.Management.Pash.Implementation
                 }
             }
 
-            _context.SetVariable("Matches", PSObject.AsPSObject(matches));
+            ExecutionContext.SetVariable("Matches", PSObject.AsPSObject(matches));
         }
 
         private IEnumerable<int> Range(int start, int end)
@@ -414,12 +415,12 @@ namespace System.Management.Pash.Implementation
             }
             // Pipeline uses global execution context, so we should set its WriteSideEffects flag, and restore it after.
             // TODO: I'm not very sure about that changing context and WriteSideEffectsToPipeline stuff
-            var pipeLineContext = _context.CurrentRunspace.ExecutionContext;
+            var pipeLineContext = ExecutionContext.CurrentRunspace.ExecutionContext;
             bool writeSideEffects = pipeLineContext.WriteSideEffectsToPipeline;
             try
             {
                 pipeLineContext.WriteSideEffectsToPipeline = _writeSideEffectsToPipeline;
-                var pipeline = _context.CurrentRunspace.CreateNestedPipeline();
+                var pipeline = ExecutionContext.CurrentRunspace.CreateNestedPipeline();
                 int startAt = 0; // set to 1 if first element is an expression
                 int pipelineCommandCount = pipelineAst.PipelineElements.Count;
 
@@ -451,7 +452,7 @@ namespace System.Management.Pash.Implementation
                 }
                 else // if there was no expression we take the input of the context's input stream
                 {
-                    foreach (var input in _context.InputStream.Read())
+                    foreach (var input in ExecutionContext.InputStream.Read())
                     {
                         pipeline.Input.Write(input);
                     }
@@ -478,7 +479,7 @@ namespace System.Management.Pash.Implementation
                 }
 
                 // now execute the pipeline
-                _context.PushPipeline(pipeline);
+                ExecutionContext.PushPipeline(pipeline);
                 // rerouting the output and error stream would be easier, but Pipeline doesn't
                 // have an interface for this. So let's catch the exception for now, read the streams
                 // and rethrow it afterwards
@@ -503,7 +504,7 @@ namespace System.Management.Pash.Implementation
                 {
                     _pipelineCommandRuntime.ErrorStream.Write(curError);
                 }
-                _context.PopPipeline();
+                ExecutionContext.PopPipeline();
                 if (exception != null)
                 {
                     throw exception;
@@ -541,49 +542,8 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitVariableExpression(VariableExpressionAst variableExpressionAst)
         {
-            if (variableExpressionAst.VariablePath.IsDriveQualified)
-            {
-                VisitDriveQualifiedVariableExpression(variableExpressionAst);
-            }
-            else
-            {
-                var variable = GetVariable(variableExpressionAst);
-                var value = (variable != null) ? variable.Value : null;
-                this._pipelineCommandRuntime.WriteObject(value);
-            }
-
+            _pipelineCommandRuntime.WriteObject(new SettableVariableExpression(variableExpressionAst, this).GetValue());
             return AstVisitAction.SkipChildren;
-        }
-
-        private void VisitDriveQualifiedVariableExpression(VariableExpressionAst variableExpressionAst)
-        {
-            SessionStateProviderBase provider = GetSessionStateProvider(variableExpressionAst.VariablePath);
-            if (provider == null)
-            {
-                _pipelineCommandRuntime.WriteObject(null);
-                return;
-            }
-            var path = new Path(variableExpressionAst.VariablePath.GetUnqualifiedUserPath());
-            object item = provider.GetSessionStateItem(path);
-            object value = provider.GetValueOfItem(item);
-            _pipelineCommandRuntime.WriteObject(value);
-        }
-
-        private SessionStateProviderBase GetSessionStateProvider(VariablePath variablePath)
-        {
-            PSDriveInfo driveInfo;
-            if (_context.SessionState.Drive.TryGet(variablePath.DriveName, out driveInfo))
-            {
-                return _context.SessionStateGlobal.GetProviderInstance(driveInfo.Provider.Name) as SessionStateProviderBase;
-            }
-            return null;
-        }
-
-        private PSVariable GetVariable(VariableExpressionAst variableExpressionAst)
-        {
-            var variable = this._context.SessionState.PSVariable.Get(variableExpressionAst.VariablePath.UserPath);
-
-            return variable;
         }
 
         public override AstVisitAction VisitAssignmentStatement(AssignmentStatementAst assignmentStatementAst)
@@ -641,7 +601,7 @@ namespace System.Management.Pash.Implementation
 
             if (isVariableAssignment)
             {
-                SetVariableValue((VariableExpressionAst)expressionAst, newValue);
+                new SettableVariableExpression((VariableExpressionAst)expressionAst, this).SetValue(newValue);
             }
             else if (expressionAst is MemberExpressionAst)
             {
@@ -659,28 +619,6 @@ namespace System.Management.Pash.Implementation
             }
 
             return AstVisitAction.SkipChildren;
-        }
-
-        private void SetVariableValue(VariableExpressionAst variableExpressionAst, object value)
-        {
-            if (variableExpressionAst.VariablePath.IsDriveQualified)
-            {
-                SetDriveVariableValue(variableExpressionAst, value);
-            }
-            else
-            {
-                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, value);
-            }
-        }
-
-        private void SetDriveVariableValue(VariableExpressionAst variableExpressionAst, object value)
-        {
-            SessionStateProviderBase provider = GetSessionStateProvider(variableExpressionAst.VariablePath);
-            if (provider != null)
-            {
-                var path = new Path(variableExpressionAst.VariablePath.GetUnqualifiedUserPath());
-                provider.SetSessionStateItem(path, value, false);
-            }
         }
 
         private void SetIndexExpressionValue(IndexExpressionAst indexExpressionAst, object value)
@@ -722,7 +660,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitFunctionDefinition(FunctionDefinitionAst functionDefinitionAst)
         {
-            _context.SessionState.Function.Set(functionDefinitionAst.Name, functionDefinitionAst.Body.GetScriptBlock());
+            ExecutionContext.SessionState.Function.Set(functionDefinitionAst.Name, functionDefinitionAst.Body.GetScriptBlock());
             return AstVisitAction.SkipChildren;
         }
 
@@ -955,13 +893,12 @@ namespace System.Management.Pash.Implementation
 
             bool isvar = child is VariableExpressionAst;
             var varExpression = isvar ? (VariableExpressionAst)child : null;
-            var variable = isvar ? GetVariable(varExpression) : null;
             var memberExpression = isvar ? null : (MemberExpressionAst) child;
 
             object objValue = null;
-            if (isvar && variable != null)
+            if (isvar)
             {
-                objValue = PSObject.Unwrap(variable.Value);
+                objValue = PSObject.Unwrap(new SettableVariableExpression(varExpression, this).GetValue());
             }
             else if (!isvar)
             {
@@ -998,7 +935,7 @@ namespace System.Management.Pash.Implementation
             // set the new value to the variable/property
             if (isvar)
             {
-                SetVariableValue(varExpression, (object)dynValue);
+                new SettableVariableExpression(varExpression, this).SetValue((object)dynValue);
             }
             else
             {
@@ -1167,7 +1104,7 @@ namespace System.Management.Pash.Implementation
 
             while (enumerator.MoveNext())
             {
-                this._context.SessionState.PSVariable.Set(forEachStatementAst.Variable.VariablePath.UserPath,
+                this.ExecutionContext.SessionState.PSVariable.Set(forEachStatementAst.Variable.VariablePath.UserPath,
                                                           enumerator.Current);
                 // TODO: pass the loop label
                 if (!EvaluateLoopBodyAst(forEachStatementAst.Body, null))
@@ -1340,7 +1277,7 @@ namespace System.Management.Pash.Implementation
 
         private void WriteErrorRecord()
         {
-            object error = _context.GetVariableValue("_");
+            object error = ExecutionContext.GetVariableValue("_");
             _pipelineCommandRuntime.WriteObject(error);
         }
 
@@ -1537,7 +1474,7 @@ namespace System.Management.Pash.Implementation
             {
                 rec = new ErrorRecord(ex, "", ErrorCategory.InvalidOperation, null);
             }
-            _context.SetVariable("_", rec);
+            ExecutionContext.SetVariable("_", rec);
         }
 
         public override AstVisitAction VisitTypeConstraint(TypeConstraintAst typeConstraintAst)
