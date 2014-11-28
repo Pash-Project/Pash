@@ -24,7 +24,8 @@ namespace ReferenceTests.Language
         [TestCase("$a = 1,2,3; $a")]
         public void ArrayIsEvaluatedWhenWrittenToPipeline(string cmd)
         {
-            ExecuteAndCompareTypedResult(cmd, 1, 2, 3);
+            // last "; 0" makes sure it's in the middle of a script block
+            ExecuteAndCompareTypedResult(cmd + "; 0", 1, 2, 3, 0);
         }
 
         [Test]
