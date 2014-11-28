@@ -18,19 +18,20 @@ namespace ReferenceTests.Language
             Assert.AreEqual(NewlineJoin(typeof(object[]).FullName), result);
         }
 
+        [TestCase("1,2,3")]
+        [TestCase("@(1,2,3)")]
+        [TestCase("$a = @(1,2,3); $a")]
+        [TestCase("$a = 1,2,3; $a")]
+        public void ArrayIsEvaluatedWhenWrittenToPipeline(string cmd)
+        {
+            ExecuteAndCompareTypedResult(cmd, 1, 2, 3);
+        }
+
         [Test]
         public void EmptyArrayWorks()
         {
             var cmd = "$a = @(); $a.Length";
             Assert.AreEqual(NewlineJoin("0"), ReferenceHost.Execute(cmd));
-        }
-
-        [Test]
-        public void ArrayInVariableGetsEvaluatedWhenPassedToPipeline()
-        {
-            var cmd = String.Format("$a = @(1,2,3); $a");
-            var results = ReferenceHost.RawExecute(cmd);
-            Assert.AreEqual(3, results.Count);
         }
 
         [Test]
