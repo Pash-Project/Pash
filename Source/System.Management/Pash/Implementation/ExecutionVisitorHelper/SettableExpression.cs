@@ -39,7 +39,7 @@ namespace System.Management.Pash.Implementation
             throw new InvalidOperationException(msg);
         }
 
-        protected object GetEventuallyEvaluatedValue(ExpressionAst expression, ref bool isEvaluated, ref object value)
+        protected object GetEventuallyEvaluatedValue(Ast expression, ref bool isEvaluated, ref object value)
         {
             if (!isEvaluated)
             {

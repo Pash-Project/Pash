@@ -15,6 +15,27 @@ namespace System.Management.Pash.Implementation
 
         private MemberExpressionAst _expressionAst;
 
+        private bool _baseIsEvaluated;
+        private object _baseValue;
+        public object EvaluatedBase
+        {
+            get
+            {
+                return GetEventuallyEvaluatedValue(_expressionAst.Expression, ref _baseIsEvaluated, ref _baseValue);
+            }
+        }
+
+        private bool _memberIsEvaluated;
+        private object _memberValue;
+        public object EvaluatedMember
+        {
+            get
+            {
+                return GetEventuallyEvaluatedValue(_expressionAst.Member, ref _memberIsEvaluated, ref _memberValue);
+            }
+        }
+
+
         internal SettableMemberExpression(MemberExpressionAst expressionAst, ExecutionVisitor currentExecution)
             : base(currentExecution)
         {
@@ -23,9 +44,9 @@ namespace System.Management.Pash.Implementation
 
         public override void SetValue(object value)
         {
-            var psobj = PSObject.AsPSObject(CurrentExecution.EvaluateAst(_expressionAst.Expression, false));
+            var psobj = PSObject.AsPSObject(EvaluatedBase);
             var unwraped = PSObject.Unwrap(psobj);
-            var memberNameObj = CurrentExecution.EvaluateAst(_expressionAst.Member, false);
+            var memberNameObj = EvaluatedMember;
             // check for Hashtable first
             if (unwraped is Hashtable && memberNameObj != null &&
                 !_hashtableAccessibleMembers.Contains(memberNameObj.ToString()))
@@ -45,9 +66,9 @@ namespace System.Management.Pash.Implementation
 
        public override object GetValue()
         {
-            var psobj = PSObject.AsPSObject(CurrentExecution.EvaluateAst(_expressionAst.Expression));
+            var psobj = PSObject.AsPSObject(EvaluatedBase);
             var unwraped = PSObject.Unwrap(psobj);
-            var memberNameObj = CurrentExecution.EvaluateAst(_expressionAst.Member, false);
+            var memberNameObj = EvaluatedMember;
             // check for Hastable first
             if (unwraped is Hashtable && memberNameObj != null &&
                 !_hashtableAccessibleMembers.Contains(memberNameObj.ToString()))
