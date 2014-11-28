@@ -548,24 +548,26 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitAssignmentStatement(AssignmentStatementAst assignmentStatementAst)
         {
+            // first check if it's a assignable expression, fail otherwise. later on we also need support for 
+            // arrays of variables
             ExpressionAst expressionAst = assignmentStatementAst.Left;
-            var isEquals = assignmentStatementAst.Operator == TokenKind.Equals;
-            var isVariableAssignment = expressionAst is VariableExpressionAst;
-            var rightValueRes = EvaluateAst(assignmentStatementAst.Right);
-            // a little ugly, but we need to stay dynamic. It's crucial that a psobject isn't unpacked if it's simply
-            // assigned to a variable, otherwise we could lose some important properties
-            // TODO: this is more like a workaround. PSObject should implement implicit casting,
-            // then no checks and .BaseObject calls should be necessary anymore
-            bool unpackPSObject = !isEquals || !isVariableAssignment;
-            dynamic rightValue = (rightValueRes is PSObject && unpackPSObject) ?
-                ((PSObject)rightValueRes).BaseObject : rightValueRes;
+            if (!SettableExpression.SupportedExpressions.Contains(expressionAst.GetType()))
+            {
+                var msg = String.Format("The expression type '{0}' is currently not supported for assignments",
+                                        expressionAst.GetType().ToString());
+                throw new NotImplementedException(msg);
+            }
+            var assignableExpression = SettableExpression.Create(expressionAst, this);
+            var rightValue = EvaluateAst(assignmentStatementAst.Right);
             object newValue = rightValue;
 
-            dynamic currentValueRes = isEquals ? null : EvaluateAst(assignmentStatementAst.Left);
-            dynamic currentValue = (currentValueRes != null && currentValueRes is PSObject && unpackPSObject) ?
-                                   ((PSObject)currentValueRes).BaseObject : currentValueRes;
+            bool isSimpleAssignment = assignmentStatementAst.Operator == TokenKind.Equals;
+            // safe the effort to get the value of the left side if it's replaced anyway
+            dynamic currentValue = isSimpleAssignment ? null : assignableExpression.GetValue();
 
-            if (assignmentStatementAst.Operator == TokenKind.Equals)
+
+            // compute the new value
+            if (isSimpleAssignment)
             {
                 newValue = rightValue;
             }
@@ -599,24 +601,8 @@ namespace System.Management.Pash.Implementation
                 this._pipelineCommandRuntime.WriteObject(newValue);
             }
 
-            if (isVariableAssignment)
-            {
-                new SettableVariableExpression((VariableExpressionAst)expressionAst, this).SetValue(newValue);
-            }
-            else if (expressionAst is MemberExpressionAst)
-            {
-                new SettableMemberExpression((MemberExpressionAst)expressionAst, this).SetValue(newValue);
-            }
-            else if (expressionAst is IndexExpressionAst)
-            {
-                new SettableIndexExpression((IndexExpressionAst)expressionAst, this).SetValue(newValue);
-            }
-            else
-            {
-                var msg = String.Format("The expression type '{0}' is currently not supported for assignments",
-                                        expressionAst.GetType().ToString());
-                throw new NotImplementedException(msg);
-            }
+            // set the new value
+            assignableExpression.SetValue(newValue);
 
             return AstVisitAction.SkipChildren;
         }
@@ -746,7 +732,6 @@ namespace System.Management.Pash.Implementation
         private void VisitIncrementDecrementExpression(UnaryExpressionAst unaryExpressionAst)
         {
             var token = unaryExpressionAst.TokenKind;
-            var child = unaryExpressionAst.Child;
 
             // first validate the expression. Shouldn't fail, but let's be sure
             var validTokens = new [] { TokenKind.PostfixPlusPlus, TokenKind.PostfixMinusMinus,
@@ -760,27 +745,9 @@ namespace System.Management.Pash.Implementation
             bool postfix = token == TokenKind.PostfixPlusPlus || token == TokenKind.PostfixMinusMinus;
             bool increment = token == TokenKind.PostfixPlusPlus || token == TokenKind.PlusPlus;
 
-            // This operation only works with variables or properties
-            if (!(child is VariableExpressionAst) && !(child is MemberExpressionAst)) // should be catched by builder
-            {
-                var msg = String.Format("The '{0}' operator can only be used with variables or properties",
-                                        increment ? "++" : "--");
-                throw new PSInvalidOperationException(msg);
-            }
-
-            bool isvar = child is VariableExpressionAst;
-            var varExpression = isvar ? (VariableExpressionAst)child : null;
-            var memberExpression = isvar ? null : (MemberExpressionAst) child;
-
-            object objValue = null;
-            if (isvar)
-            {
-                objValue = PSObject.Unwrap(new SettableVariableExpression(varExpression, this).GetValue());
-            }
-            else if (!isvar)
-            {
-                objValue = PSObject.Unwrap(new SettableMemberExpression(memberExpression, this).GetValue());
-            }
+            // It's the duty of the AstBuilderto check wether the child expression is a settable expression
+            SettableExpression affectedExpression = SettableExpression.Create(unaryExpressionAst.Child, this);
+            object objValue = PSObject.Unwrap(affectedExpression.GetValue());
             objValue = objValue ?? 0; // if the value is null, then we "convert" to integer 0, says the specification
 
             // check for non-numerics
@@ -809,15 +776,8 @@ namespace System.Management.Pash.Implementation
                 dynValue = LanguagePrimitives.ConvertTo<double>(objValue) + (increment ? 1 : -1);
             }
 
-            // set the new value to the variable/property
-            if (isvar)
-            {
-                new SettableVariableExpression(varExpression, this).SetValue((object)dynValue);
-            }
-            else
-            {
-                new SettableMemberExpression(memberExpression, this).SetValue((object)dynValue);
-            }
+            // set the new value
+            affectedExpression.SetValue((object)dynValue);
 
             // if it was a prefix, then we need to write the new value to pipeline
             if (!postfix && _writeSideEffectsToPipeline)
