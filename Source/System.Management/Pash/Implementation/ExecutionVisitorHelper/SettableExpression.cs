@@ -1,11 +1,13 @@
 using System;
 using System.Management.Automation.Language;
+using Pash.Implementation;
 
 namespace System.Management.Pash.Implementation
 {
     public abstract class SettableExpression
     {
         internal ExecutionVisitor CurrentExecution { get; private set; }
+        internal ExecutionContext ExecutionContext { get { return CurrentExecution.ExecutionContext; } }
 
         public static readonly Type[] SupportedExpressions = new [] {
             typeof(VariableExpressionAst), typeof(MemberExpressionAst), typeof(IndexExpressionAst)
