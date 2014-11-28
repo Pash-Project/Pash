@@ -609,7 +609,7 @@ namespace System.Management.Pash.Implementation
             }
             else if (expressionAst is IndexExpressionAst)
             {
-                SetIndexExpressionValue((IndexExpressionAst)expressionAst, newValue);
+                new SettableIndexExpression((IndexExpressionAst)expressionAst, this).SetValue(newValue);
             }
             else
             {
@@ -621,43 +621,6 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
-        private void SetIndexExpressionValue(IndexExpressionAst indexExpressionAst, object value)
-        {
-            var target = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Target));
-            var index = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Index, false));
-            var arrayTarget = target as Array;
-            if (arrayTarget != null && arrayTarget.Rank > 1)
-            {
-                var rawIndices = (int[])LanguagePrimitives.ConvertTo(index, typeof(int[]));
-                var indices = ConvertNegativeIndicesForMultidimensionalArray(arrayTarget, rawIndices);
-                var convertedValue = LanguagePrimitives.ConvertTo(value, arrayTarget.GetType().GetElementType());
-                arrayTarget.SetValue(convertedValue, indices);
-                return;
-            }
-            // we don't support assignment to slices (, yet?), so throw an error
-            if (index is Array && ((Array)index).Length > 1)
-            {
-                throw new PSInvalidOperationException("Assignment to slices is not supported");
-            }
-            // otherwise do assignments
-            var iListTarget = target as IList;
-            if (iListTarget != null) // covers also arrays
-            {
-                var intIdx = (int)LanguagePrimitives.ConvertTo(index, typeof(int));
-                intIdx = intIdx < 0 ? intIdx + iListTarget.Count : intIdx;
-                iListTarget[intIdx] = value;
-            }
-            else if (target is IDictionary)
-            {
-                ((IDictionary)target)[index] = value;
-            }
-            else
-            {
-                var msg = String.Format("Cannot set index for type '{0}'", target.GetType().FullName);
-                throw new PSInvalidOperationException(msg);
-            }
-        }
-
         public override AstVisitAction VisitFunctionDefinition(FunctionDefinitionAst functionDefinitionAst)
         {
             ExecutionContext.SessionState.Function.Set(functionDefinitionAst.Name, functionDefinitionAst.Body.GetScriptBlock());
@@ -666,94 +629,8 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitIndexExpression(IndexExpressionAst indexExpressionAst)
         {
-            var targetValue = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Target, true));
-
-            object index = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Index));
-
-            if (targetValue is PSObject) targetValue = ((PSObject)targetValue).BaseObject;
-
-            // Check dicts/hashtables first
-            var dictTarget = targetValue as IDictionary;
-            if (dictTarget != null)
-            {
-                var idxobjects = index is object[] ? (object[])index : new object[] { index };
-                foreach (var idxobj in idxobjects)
-                {
-                    var res = dictTarget[PSObject.Unwrap(idxobj)];
-                    _pipelineCommandRuntime.WriteObject(res);
-                }
-                return AstVisitAction.SkipChildren;
-            }
-
-            // otherwise we need int indexing
-            var indices = (int[]) LanguagePrimitives.ConvertTo(index, typeof(int[]));
-
-            // check for real multidimensional array access first
-            var arrayTarget = targetValue as Array;
-            if (arrayTarget != null && arrayTarget.Rank > 1)
-            {
-                int[] convIndices = ConvertNegativeIndicesForMultidimensionalArray(arrayTarget, indices);
-                object arrayValue = null;
-                try
-                {
-                    arrayValue = arrayTarget.GetValue(convIndices);
-                }
-                catch (IndexOutOfRangeException) // just write nothing to pipeline
-                {
-                }
-                this._pipelineCommandRuntime.WriteObject(arrayValue);
-                return AstVisitAction.SkipChildren;
-            }
-
-            // if we have a string, we need to access it as an char[]
-            if (targetValue is string)
-            {
-                targetValue = ((string)targetValue).ToCharArray();
-            }
-
-            // now we can access arrays, list, and string (charArrays) all the same by using the IList interface
-            var iListTarget = targetValue as IList;
-            if (iListTarget == null)
-            {
-                var msg = String.Format("Cannot index an object of type '{0}'.", targetValue.GetType().FullName);
-                throw new PSInvalidOperationException(msg);
-            }
-
-            var numItems = iListTarget.Count;
-            // now get all elements from the index list
-            bool writtenFromList = false;
-            foreach (int curIdx in indices)
-            {
-                // support negative indices
-                var idx = curIdx < 0 ? curIdx + numItems : curIdx;
-                // check if it's a valid index, otherwise ignore
-                if (idx >= 0 && idx < numItems)
-                {
-                    _pipelineCommandRuntime.WriteObject(iListTarget[idx]);
-                    writtenFromList = true;
-                }
-            }
-            if (!writtenFromList)
-            {
-                _pipelineCommandRuntime.WriteObject(null);
-            }
+            _pipelineCommandRuntime.WriteObject(new SettableIndexExpression(indexExpressionAst, this).GetValue(), true);
             return AstVisitAction.SkipChildren;
-        }
-
-        private int[] ConvertNegativeIndicesForMultidimensionalArray(Array array, int[] rawIndices)
-        {
-            if (array.Rank != rawIndices.Length)
-            {
-                var msg = String.Format("The index [{0}] is invalid to access an {1}-dimensional array",
-                                        String.Join(",", rawIndices), array.Rank);
-                throw new PSInvalidOperationException(msg);
-            }
-            var convIndices = new int[array.Rank];
-            for (int i = 0; i < rawIndices.Length; i++)
-            {
-                convIndices[i] = rawIndices[i] < 0 ? rawIndices[i] + array.GetLength(i) : rawIndices[i];
-            }
-            return convIndices;
         }
 
         public override AstVisitAction VisitIfStatement(IfStatementAst ifStatementAst)

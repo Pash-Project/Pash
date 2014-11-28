@@ -7,18 +7,18 @@ namespace System.Management.Pash.Implementation
 {
     public class SettableVariableExpression : SettableExpression
     {
-        private VariableExpressionAst _expression;
+        private VariableExpressionAst _expressionAst;
         private ExecutionVisitor _currentExecution;
         
         internal SettableVariableExpression(VariableExpressionAst expressionAst, ExecutionVisitor currentExecution)
         {
-            _expression = expressionAst;
+            _expressionAst = expressionAst;
             _currentExecution = currentExecution;
         }
 
         public override object GetValue()
         {
-            if (_expression.VariablePath.IsDriveQualified)
+            if (_expressionAst.VariablePath.IsDriveQualified)
             {
                 return GetDriveQualifiedVariableValue();
             }
@@ -30,40 +30,40 @@ namespace System.Management.Pash.Implementation
 
         public override void SetValue(object value)
         {
-            if (_expression.VariablePath.IsDriveQualified)
+            if (_expressionAst.VariablePath.IsDriveQualified)
             {
                 SetDriveQualifiedVariableValue(value);
             }
             else
             {
-                _currentExecution.ExecutionContext.SetVariable(_expression.VariablePath.UserPath, value);
+                _currentExecution.ExecutionContext.SetVariable(_expressionAst.VariablePath.UserPath, value);
             }
         }
 
         private PSVariable GetUnqualifiedVariable()
         {
             var variableIntrinsics = _currentExecution.ExecutionContext.SessionState.PSVariable;
-            return variableIntrinsics.Get(_expression.VariablePath.UserPath);
+            return variableIntrinsics.Get(_expressionAst.VariablePath.UserPath);
         }
 
         private object GetDriveQualifiedVariableValue()
         {
-            SessionStateProviderBase provider = GetSessionStateProvider(_expression.VariablePath);
+            SessionStateProviderBase provider = GetSessionStateProvider(_expressionAst.VariablePath);
             if (provider == null)
             {
                 return null;
             }
-            var path = new Path(_expression.VariablePath.GetUnqualifiedUserPath());
+            var path = new Path(_expressionAst.VariablePath.GetUnqualifiedUserPath());
             object item = provider.GetSessionStateItem(path);
             return item == null ? null : provider.GetValueOfItem(item);
         }
 
         private void SetDriveQualifiedVariableValue(object value)
         {
-            SessionStateProviderBase provider = GetSessionStateProvider(_expression.VariablePath);
+            SessionStateProviderBase provider = GetSessionStateProvider(_expressionAst.VariablePath);
             if (provider != null)
             {
-                var path = new Path(_expression.VariablePath.GetUnqualifiedUserPath());
+                var path = new Path(_expressionAst.VariablePath.GetUnqualifiedUserPath());
                 provider.SetSessionStateItem(path, value, false);
             }
         }
