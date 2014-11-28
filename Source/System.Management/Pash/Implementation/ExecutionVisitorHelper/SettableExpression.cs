@@ -5,9 +5,16 @@ namespace System.Management.Pash.Implementation
 {
     public abstract class SettableExpression
     {
+        internal ExecutionVisitor CurrentExecution { get; private set; }
+
         public static readonly Type[] SupportedExpressions = new [] {
             typeof(VariableExpressionAst), typeof(MemberExpressionAst), typeof(IndexExpressionAst)
         };
+
+        internal SettableExpression(ExecutionVisitor currentExecution)
+        {
+            CurrentExecution = currentExecution;
+        }
 
         public abstract object GetValue();
 
@@ -30,6 +37,16 @@ namespace System.Management.Pash.Implementation
             var msg = String.Format("The expression is not a modifiable value, but of type '{0}'. Please report this!",
                                     valueExpression.GetType().FullName);
             throw new InvalidOperationException(msg);
+        }
+
+        protected object GetEventuallyEvaluatedValue(ExpressionAst expression, ref bool isEvaluated, ref object value)
+        {
+            if (!isEvaluated)
+            {
+                value = CurrentExecution.EvaluateAst(expression);
+                isEvaluated = true;
+            }
+            return value;
         }
     }
 }

@@ -8,12 +8,11 @@ namespace System.Management.Pash.Implementation
     public class SettableVariableExpression : SettableExpression
     {
         private VariableExpressionAst _expressionAst;
-        private ExecutionVisitor _currentExecution;
-        
+
         internal SettableVariableExpression(VariableExpressionAst expressionAst, ExecutionVisitor currentExecution)
+            : base(currentExecution)
         {
             _expressionAst = expressionAst;
-            _currentExecution = currentExecution;
         }
 
         public override object GetValue()
@@ -36,13 +35,13 @@ namespace System.Management.Pash.Implementation
             }
             else
             {
-                _currentExecution.ExecutionContext.SetVariable(_expressionAst.VariablePath.UserPath, value);
+                CurrentExecution.ExecutionContext.SetVariable(_expressionAst.VariablePath.UserPath, value);
             }
         }
 
         private PSVariable GetUnqualifiedVariable()
         {
-            var variableIntrinsics = _currentExecution.ExecutionContext.SessionState.PSVariable;
+            var variableIntrinsics = CurrentExecution.ExecutionContext.SessionState.PSVariable;
             return variableIntrinsics.Get(_expressionAst.VariablePath.UserPath);
         }
 
@@ -71,11 +70,11 @@ namespace System.Management.Pash.Implementation
         private SessionStateProviderBase GetSessionStateProvider(VariablePath variablePath)
         {
             PSDriveInfo driveInfo;
-            if (!_currentExecution.ExecutionContext.SessionState.Drive.TryGet(variablePath.DriveName, out driveInfo))
+            if (!CurrentExecution.ExecutionContext.SessionState.Drive.TryGet(variablePath.DriveName, out driveInfo))
             {
                 return null;
             }
-            return _currentExecution.ExecutionContext.SessionStateGlobal.GetProviderInstance(driveInfo.Provider.Name)
+            return CurrentExecution.ExecutionContext.SessionStateGlobal.GetProviderInstance(driveInfo.Provider.Name)
                 as SessionStateProviderBase;
         }
     }

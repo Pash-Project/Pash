@@ -10,18 +10,37 @@ namespace System.Management.Pash.Implementation
     public class SettableIndexExpression : SettableExpression
     {
         private IndexExpressionAst _expressionAst;
-        private ExecutionVisitor _currentExecution;
+
+        private bool _targetIsEvaluated;
+        private object _targetValue;
+        public object EvaluatedTargetValue
+        {
+            get
+            {
+                return GetEventuallyEvaluatedValue(_expressionAst.Target, ref _targetIsEvaluated, ref _targetValue);
+            }
+        }
+
+        private bool _indexIsEvaluated;
+        private object _indexValue;
+        public object EvaluatedIndexValue
+        {
+            get
+            {
+                return GetEventuallyEvaluatedValue(_expressionAst.Index, ref _indexIsEvaluated, ref _indexValue);
+            }
+        }
 
         internal SettableIndexExpression(IndexExpressionAst expressionAst, ExecutionVisitor currentExecution)
+            : base (currentExecution)
         {
             _expressionAst = expressionAst;
-            _currentExecution = currentExecution;
         }
 
         public override object GetValue()
         {
-            object targetValue = PSObject.Unwrap(_currentExecution.EvaluateAst(_expressionAst.Target, true));
-            object index = PSObject.Unwrap(_currentExecution.EvaluateAst(_expressionAst.Index));
+            object targetValue = PSObject.Unwrap(EvaluatedTargetValue);
+            object index = PSObject.Unwrap(EvaluatedIndexValue);
 
             // Check dicts/hashtables first
             if (targetValue is IDictionary)
@@ -81,8 +100,8 @@ namespace System.Management.Pash.Implementation
 
         public override void SetValue(object value)
         {
-            var target = PSObject.Unwrap(_currentExecution.EvaluateAst(_expressionAst.Target));
-            var index = PSObject.Unwrap(_currentExecution.EvaluateAst(_expressionAst.Index, false));
+            var target = PSObject.Unwrap(EvaluatedTargetValue);
+            var index = PSObject.Unwrap(EvaluatedIndexValue);
             var arrayTarget = target as Array;
             if (arrayTarget != null && arrayTarget.Rank > 1)
             {

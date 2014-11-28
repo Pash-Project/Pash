@@ -14,19 +14,18 @@ namespace System.Management.Pash.Implementation
         };
 
         private MemberExpressionAst _expressionAst;
-        private ExecutionVisitor _currentExecution;
 
         internal SettableMemberExpression(MemberExpressionAst expressionAst, ExecutionVisitor currentExecution)
+            : base(currentExecution)
         {
             _expressionAst = expressionAst;
-            _currentExecution = currentExecution;
         }
 
         public override void SetValue(object value)
         {
-            var psobj = PSObject.AsPSObject(_currentExecution.EvaluateAst(_expressionAst.Expression, false));
+            var psobj = PSObject.AsPSObject(CurrentExecution.EvaluateAst(_expressionAst.Expression, false));
             var unwraped = PSObject.Unwrap(psobj);
-            var memberNameObj = _currentExecution.EvaluateAst(_expressionAst.Member, false);
+            var memberNameObj = CurrentExecution.EvaluateAst(_expressionAst.Member, false);
             // check for Hashtable first
             if (unwraped is Hashtable && memberNameObj != null &&
                 !_hashtableAccessibleMembers.Contains(memberNameObj.ToString()))
@@ -46,9 +45,9 @@ namespace System.Management.Pash.Implementation
 
        public override object GetValue()
         {
-            var psobj = PSObject.AsPSObject(_currentExecution.EvaluateAst(_expressionAst.Expression));
+            var psobj = PSObject.AsPSObject(CurrentExecution.EvaluateAst(_expressionAst.Expression));
             var unwraped = PSObject.Unwrap(psobj);
-            var memberNameObj = _currentExecution.EvaluateAst(_expressionAst.Member, false);
+            var memberNameObj = CurrentExecution.EvaluateAst(_expressionAst.Member, false);
             // check for Hastable first
             if (unwraped is Hashtable && memberNameObj != null &&
                 !_hashtableAccessibleMembers.Contains(memberNameObj.ToString()))
