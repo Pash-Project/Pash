@@ -62,5 +62,21 @@ Write-Host $param1");
 
             Assert.AreEqual(result, string.Format("defaultValue{0}", Environment.NewLine));
         }
+
+        [Test]
+        public void NoParametersPassedToScriptThatTakesOneParameterNoDefaultValueCausesDefaultNullToBePassedAsParameter()
+        {
+            string fileName = CreateScript(@"param ($param1)
+
+if ($param1 -eq $null) {
+    Write-Host '$param1 is null'
+}
+");
+            string statement = string.Format("& '{0}'", fileName);
+
+            string result = TestHost.Execute(statement);
+
+            Assert.AreEqual(result, string.Format("$param1 is null{0}", Environment.NewLine));
+        }
     }
 }
