@@ -615,7 +615,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitIndexExpression(IndexExpressionAst indexExpressionAst)
         {
-            _pipelineCommandRuntime.WriteObject(new SettableIndexExpression(indexExpressionAst, this).GetValue(), true);
+            _pipelineCommandRuntime.WriteObject(new SettableIndexExpression(indexExpressionAst, this).GetValue(), false);
             return AstVisitAction.SkipChildren;
         }
 
@@ -1016,9 +1016,11 @@ namespace System.Management.Pash.Implementation
             {
                 return VisitNamedBlockWithTraps(namedBlockAst);
             }
-
-            // just iterate over children
-            return base.VisitNamedBlock(namedBlockAst);
+            foreach (var stmt in namedBlockAst.Statements)
+            {
+                VisitStatement(stmt);
+            }
+            return AstVisitAction.SkipChildren;
         }
 
         private AstVisitAction VisitNamedBlockWithTraps(NamedBlockAst namedBlockAst)
@@ -1027,7 +1029,7 @@ namespace System.Management.Pash.Implementation
             {
                 try
                 {
-                    statement.Visit(this);
+                    VisitStatement(statement);
                 }
                 catch (FlowControlException)
                 {
@@ -1148,52 +1150,49 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitScriptBlock(ScriptBlockAst scriptBlockAst)
         {
+            try
+            {
+                scriptBlockAst.EndBlock.Visit(this);
+            }
+            catch (ReturnException e)
+            {
+                // if the exception was a return excpetion, also write the returnResult, if existing
+                if (PSObject.Unwrap(e.Value) != null)
+                {
+                    _pipelineCommandRuntime.WriteObject(e.Value, true);
+                }
+            }
+
+            return AstVisitAction.SkipChildren;
+        }
+
+        private AstVisitAction VisitStatement(StatementAst statementAst)
+        {
             // We execute this in a subcontext, because single enumerable results are 
             // evaluated and its values are written to pipeline (i.e. ". {1,2,3}" writes
             // all three values to pipeline
             // therefore we have to catch exceptions for now to read and write
             // the subVisitors' output stream, so that already written results appear
             // also in this OutputStream
-            // TODO: is there a better way? Maybe evaluation of enumerable results should be
-            // somewhere else? Can't be when writing the input pipe of a pipeline, because
-            // it would enumerates many objects that should be enumerated
             var subVisitor = this.CloneSub(false);
             object returnResult = null;
-            Exception exception = null;
             subVisitor._pipelineCommandRuntime.ErrorStream.Redirect(_pipelineCommandRuntime.ErrorStream);
             try
             {
-                scriptBlockAst.EndBlock.Visit(subVisitor);
+                statementAst.Visit(subVisitor);
             }
-            catch (ReturnException e)
+            finally
             {
-                // return exception is okay
-                returnResult = e.Value; // we first need to read the other results
-            }
-            catch (Exception e)
-            {
-                // others need to be rethrown
-                exception = e;
-            }
-            var result = subVisitor._pipelineCommandRuntime.OutputStream.Read();
-            if (result.Count == 1)
-            {
-                // this is the actual thing of this whole work: enumerate a single value!
-                _pipelineCommandRuntime.WriteObject(result.Single(), true);
-            }
-            else if (result.Count > 1)
-            {
-                _pipelineCommandRuntime.WriteObject(result, true);
-            }
-            // rethrow exception if we had one
-            if (exception != null)
-            {
-                throw exception;
-            }
-            // if the exception was a return excpetion, also write the returnResult, if existing
-            if (PSObject.Unwrap(returnResult) != null)
-            {
-                _pipelineCommandRuntime.WriteObject(returnResult, true);
+                var result = subVisitor._pipelineCommandRuntime.OutputStream.Read();
+                if (result.Count == 1)
+                {
+                    // this is the actual thing of this whole work: enumerate a single value!
+                    _pipelineCommandRuntime.WriteObject(result.Single(), true);
+                }
+                else if (result.Count > 1)
+                {
+                    _pipelineCommandRuntime.WriteObject(result, true);
+                }
             }
             return AstVisitAction.SkipChildren;
         }
