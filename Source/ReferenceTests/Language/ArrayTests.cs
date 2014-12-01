@@ -18,19 +18,23 @@ namespace ReferenceTests.Language
             Assert.AreEqual(NewlineJoin(typeof(object[]).FullName), result);
         }
 
+        [TestCase("1,2,3")]
+        [TestCase("@(1,2,3)")]
+        [TestCase("$a = @(1,2,3); $a")]
+        [TestCase("$a = 1,2,3; $a")]
+        [TestCase("$a = 1,2,3; [int[]]$a")]
+        [TestCase("$a = new-object 'int[]' 3; $a[0]=1; $a[1]=2; $a[2]=3; [int[]]$a")]
+        public void ArrayIsEvaluatedWhenWrittenToPipeline(string cmd)
+        {
+            // last "; 0" makes sure it's in the middle of a script block
+            ExecuteAndCompareTypedResult(cmd + "; 0", 1, 2, 3, 0);
+        }
+
         [Test]
         public void EmptyArrayWorks()
         {
             var cmd = "$a = @(); $a.Length";
             Assert.AreEqual(NewlineJoin("0"), ReferenceHost.Execute(cmd));
-        }
-
-        [Test]
-        public void ArrayInVariableGetsEvaluatedWhenPassedToPipeline()
-        {
-            var cmd = String.Format("$a = @(1,2,3); $a");
-            var results = ReferenceHost.RawExecute(cmd);
-            Assert.AreEqual(3, results.Count);
         }
 
         [Test]
@@ -64,6 +68,20 @@ namespace ReferenceTests.Language
         {
             var result = ReferenceHost.Execute("(@(1,2)).GetType().FullName");
             Assert.AreEqual(NewlineJoin(typeof(object[]).FullName), result);
+        }
+
+        [Test]
+        public void ArrayInParenthesisDoesntLoseType()
+        {
+            var result = ReferenceHost.Execute("$a = [int[]]@(1,2); $a.GetType().FullName; ($a).GetType().FullName");
+            Assert.AreEqual(NewlineJoin(typeof(int[]).FullName, typeof(int[]).FullName), result);
+        }
+
+        [Test]
+        public void ArrayInArrayOpLosesType()
+        {
+            var result = ReferenceHost.Execute("$a = [int[]]@(1,2); $a.GetType().FullName; @($a).GetType().FullName");
+            Assert.AreEqual(NewlineJoin(typeof(int[]).FullName, typeof(object[]).FullName), result);
         }
 
         [Test] // issue #116

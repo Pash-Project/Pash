@@ -26,23 +26,21 @@ namespace System.Management.Pash.Implementation
 {
     class ExecutionVisitor : AstVisitor
     {
-        readonly ExecutionContext _context;
         readonly PipelineCommandRuntime _pipelineCommandRuntime;
         readonly bool _writeSideEffectsToPipeline;
-        readonly HashSet<string> _hashtableAccessibleMembers = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) {
-            "Count", "Keys", "Values", "Remove"
-        };
+
+        internal readonly ExecutionContext ExecutionContext;
 
         public ExecutionVisitor(ExecutionContext context, PipelineCommandRuntime pipelineCommandRuntime, bool writeSideEffectsToPipeline = false)
         {
-            this._context = context;
+            this.ExecutionContext = context;
             this._pipelineCommandRuntime = pipelineCommandRuntime;
             this._writeSideEffectsToPipeline = writeSideEffectsToPipeline;
         }
 
         ExecutionVisitor CloneSub(bool writeSideEffectsToPipeline)
         {
-            var subContext = this._context.CreateNestedContext();
+            var subContext = this.ExecutionContext.CreateNestedContext();
             var subRuntime = new PipelineCommandRuntime(this._pipelineCommandRuntime.PipelineProcessor);
             subRuntime.ExecutionContext = subContext;
             return new ExecutionVisitor(
@@ -259,7 +257,7 @@ namespace System.Management.Pash.Implementation
                 }
             }
 
-            _context.SetVariable("Matches", PSObject.AsPSObject(matches));
+            ExecutionContext.SetVariable("Matches", PSObject.AsPSObject(matches));
         }
 
         private IEnumerable<int> Range(int start, int end)
@@ -417,12 +415,12 @@ namespace System.Management.Pash.Implementation
             }
             // Pipeline uses global execution context, so we should set its WriteSideEffects flag, and restore it after.
             // TODO: I'm not very sure about that changing context and WriteSideEffectsToPipeline stuff
-            var pipeLineContext = _context.CurrentRunspace.ExecutionContext;
+            var pipeLineContext = ExecutionContext.CurrentRunspace.ExecutionContext;
             bool writeSideEffects = pipeLineContext.WriteSideEffectsToPipeline;
             try
             {
                 pipeLineContext.WriteSideEffectsToPipeline = _writeSideEffectsToPipeline;
-                var pipeline = _context.CurrentRunspace.CreateNestedPipeline();
+                var pipeline = ExecutionContext.CurrentRunspace.CreateNestedPipeline();
                 int startAt = 0; // set to 1 if first element is an expression
                 int pipelineCommandCount = pipelineAst.PipelineElements.Count;
 
@@ -454,7 +452,7 @@ namespace System.Management.Pash.Implementation
                 }
                 else // if there was no expression we take the input of the context's input stream
                 {
-                    foreach (var input in _context.InputStream.Read())
+                    foreach (var input in ExecutionContext.InputStream.Read())
                     {
                         pipeline.Input.Write(input);
                     }
@@ -481,7 +479,7 @@ namespace System.Management.Pash.Implementation
                 }
 
                 // now execute the pipeline
-                _context.PushPipeline(pipeline);
+                ExecutionContext.PushPipeline(pipeline);
                 // rerouting the output and error stream would be easier, but Pipeline doesn't
                 // have an interface for this. So let's catch the exception for now, read the streams
                 // and rethrow it afterwards
@@ -506,7 +504,7 @@ namespace System.Management.Pash.Implementation
                 {
                     _pipelineCommandRuntime.ErrorStream.Write(curError);
                 }
-                _context.PopPipeline();
+                ExecutionContext.PopPipeline();
                 if (exception != null)
                 {
                     throw exception;
@@ -544,71 +542,32 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitVariableExpression(VariableExpressionAst variableExpressionAst)
         {
-            if (variableExpressionAst.VariablePath.IsDriveQualified)
-            {
-                VisitDriveQualifiedVariableExpression(variableExpressionAst);
-            }
-            else
-            {
-                var variable = GetVariable(variableExpressionAst);
-                var value = (variable != null) ? variable.Value : null;
-                this._pipelineCommandRuntime.WriteObject(value);
-            }
-
+            _pipelineCommandRuntime.WriteObject(new SettableVariableExpression(variableExpressionAst, this).GetValue());
             return AstVisitAction.SkipChildren;
-        }
-
-        private void VisitDriveQualifiedVariableExpression(VariableExpressionAst variableExpressionAst)
-        {
-            SessionStateProviderBase provider = GetSessionStateProvider(variableExpressionAst.VariablePath);
-            if (provider == null)
-            {
-                _pipelineCommandRuntime.WriteObject(null);
-                return;
-            }
-            var path = new Path(variableExpressionAst.VariablePath.GetUnqualifiedUserPath());
-            object item = provider.GetSessionStateItem(path);
-            object value = provider.GetValueOfItem(item);
-            _pipelineCommandRuntime.WriteObject(value);
-        }
-
-        private SessionStateProviderBase GetSessionStateProvider(VariablePath variablePath)
-        {
-            PSDriveInfo driveInfo;
-            if (_context.SessionState.Drive.TryGet(variablePath.DriveName, out driveInfo))
-            {
-                return _context.SessionStateGlobal.GetProviderInstance(driveInfo.Provider.Name) as SessionStateProviderBase;
-            }
-            return null;
-        }
-
-        private PSVariable GetVariable(VariableExpressionAst variableExpressionAst)
-        {
-            var variable = this._context.SessionState.PSVariable.Get(variableExpressionAst.VariablePath.UserPath);
-
-            return variable;
         }
 
         public override AstVisitAction VisitAssignmentStatement(AssignmentStatementAst assignmentStatementAst)
         {
+            // first check if it's a assignable expression, fail otherwise. later on we also need support for 
+            // arrays of variables
             ExpressionAst expressionAst = assignmentStatementAst.Left;
-            var isEquals = assignmentStatementAst.Operator == TokenKind.Equals;
-            var isVariableAssignment = expressionAst is VariableExpressionAst;
-            var rightValueRes = EvaluateAst(assignmentStatementAst.Right);
-            // a little ugly, but we need to stay dynamic. It's crucial that a psobject isn't unpacked if it's simply
-            // assigned to a variable, otherwise we could lose some important properties
-            // TODO: this is more like a workaround. PSObject should implement implicit casting,
-            // then no checks and .BaseObject calls should be necessary anymore
-            bool unpackPSObject = !isEquals || !isVariableAssignment;
-            dynamic rightValue = (rightValueRes is PSObject && unpackPSObject) ?
-                ((PSObject)rightValueRes).BaseObject : rightValueRes;
+            if (!SettableExpression.SupportedExpressions.Contains(expressionAst.GetType()))
+            {
+                var msg = String.Format("The expression type '{0}' is currently not supported for assignments",
+                                        expressionAst.GetType().ToString());
+                throw new NotImplementedException(msg);
+            }
+            var assignableExpression = SettableExpression.Create(expressionAst, this);
+            var rightValue = EvaluateAst(assignmentStatementAst.Right);
             object newValue = rightValue;
 
-            dynamic currentValueRes = isEquals ? null : EvaluateAst(assignmentStatementAst.Left);
-            dynamic currentValue = (currentValueRes != null && currentValueRes is PSObject && unpackPSObject) ?
-                                   ((PSObject)currentValueRes).BaseObject : currentValueRes;
+            bool isSimpleAssignment = assignmentStatementAst.Operator == TokenKind.Equals;
+            // safe the effort to get the value of the left side if it's replaced anyway
+            dynamic currentValue = isSimpleAssignment ? null : assignableExpression.GetValue();
 
-            if (assignmentStatementAst.Operator == TokenKind.Equals)
+
+            // compute the new value
+            if (isSimpleAssignment)
             {
                 newValue = rightValue;
             }
@@ -642,205 +601,22 @@ namespace System.Management.Pash.Implementation
                 this._pipelineCommandRuntime.WriteObject(newValue);
             }
 
-            if (isVariableAssignment)
-            {
-                SetVariableValue((VariableExpressionAst)expressionAst, newValue);
-            }
-            else if (expressionAst is MemberExpressionAst)
-            {
-                SetMemberExpressionValue((MemberExpressionAst)expressionAst, newValue);
-            }
-            else if (expressionAst is IndexExpressionAst)
-            {
-                SetIndexExpressionValue((IndexExpressionAst)expressionAst, newValue);
-            }
-            else
-            {
-                var msg = String.Format("The expression type '{0}' is currently not supported for assignments",
-                                        expressionAst.GetType().ToString());
-                throw new NotImplementedException(msg);
-            }
+            // set the new value
+            assignableExpression.SetValue(newValue);
 
             return AstVisitAction.SkipChildren;
         }
 
-        private void SetVariableValue(VariableExpressionAst variableExpressionAst, object value)
-        {
-            if (variableExpressionAst.VariablePath.IsDriveQualified)
-            {
-                SetDriveVariableValue(variableExpressionAst, value);
-            }
-            else
-            {
-                _context.SetVariable(variableExpressionAst.VariablePath.UserPath, value);
-            }
-        }
-
-        private void SetDriveVariableValue(VariableExpressionAst variableExpressionAst, object value)
-        {
-            SessionStateProviderBase provider = GetSessionStateProvider(variableExpressionAst.VariablePath);
-            if (provider != null)
-            {
-                var path = new Path(variableExpressionAst.VariablePath.GetUnqualifiedUserPath());
-                provider.SetSessionStateItem(path, value, false);
-            }
-        }
-
-        private void SetMemberExpressionValue(MemberExpressionAst memberExpressionAst, object value)
-        {
-            string memberName;
-            var psobj = EvaluateAsPSObject(memberExpressionAst.Expression);
-            var unwraped = PSObject.Unwrap(psobj);
-            var memberNameObj = EvaluateAst(memberExpressionAst.Member, false);
-            // check for Hashtable first
-            if (unwraped is Hashtable && memberNameObj != null &&
-                !_hashtableAccessibleMembers.Contains(memberNameObj.ToString()))
-            { 
-                ((Hashtable) unwraped)[memberNameObj] = value;
-                return;
-            }
-            // else it's a PSObject
-            var member = GetPSObjectMember(psobj, memberNameObj, memberExpressionAst.Static, out memberName);
-            if (member == null)
-            {
-                throw new PSArgumentNullException(String.Format("Member '{0}' to be assigned is null", memberName));
-            }
-            member.Value = value;
-        }
-
-        private void SetIndexExpressionValue(IndexExpressionAst indexExpressionAst, object value)
-        {
-            var target = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Target));
-            var index = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Index, false));
-            var arrayTarget = target as Array;
-            if (arrayTarget != null && arrayTarget.Rank > 1)
-            {
-                var rawIndices = (int[])LanguagePrimitives.ConvertTo(index, typeof(int[]));
-                var indices = ConvertNegativeIndicesForMultidimensionalArray(arrayTarget, rawIndices);
-                var convertedValue = LanguagePrimitives.ConvertTo(value, arrayTarget.GetType().GetElementType());
-                arrayTarget.SetValue(convertedValue, indices);
-                return;
-            }
-            // we don't support assignment to slices (, yet?), so throw an error
-            if (index is Array && ((Array)index).Length > 1)
-            {
-                throw new PSInvalidOperationException("Assignment to slices is not supported");
-            }
-            // otherwise do assignments
-            var iListTarget = target as IList;
-            if (iListTarget != null) // covers also arrays
-            {
-                var intIdx = (int)LanguagePrimitives.ConvertTo(index, typeof(int));
-                intIdx = intIdx < 0 ? intIdx + iListTarget.Count : intIdx;
-                iListTarget[intIdx] = value;
-            }
-            else if (target is IDictionary)
-            {
-                ((IDictionary)target)[index] = value;
-            }
-            else
-            {
-                var msg = String.Format("Cannot set index for type '{0}'", target.GetType().FullName);
-                throw new PSInvalidOperationException(msg);
-            }
-        }
-
         public override AstVisitAction VisitFunctionDefinition(FunctionDefinitionAst functionDefinitionAst)
         {
-            _context.SessionState.Function.Set(functionDefinitionAst.Name, functionDefinitionAst.Body.GetScriptBlock());
+            ExecutionContext.SessionState.Function.Set(functionDefinitionAst.Name, functionDefinitionAst.Body.GetScriptBlock());
             return AstVisitAction.SkipChildren;
         }
 
         public override AstVisitAction VisitIndexExpression(IndexExpressionAst indexExpressionAst)
         {
-            var targetValue = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Target, true));
-
-            object index = PSObject.Unwrap(EvaluateAst(indexExpressionAst.Index));
-
-            if (targetValue is PSObject) targetValue = ((PSObject)targetValue).BaseObject;
-
-            // Check dicts/hashtables first
-            var dictTarget = targetValue as IDictionary;
-            if (dictTarget != null)
-            {
-                var idxobjects = index is object[] ? (object[])index : new object[] { index };
-                foreach (var idxobj in idxobjects)
-                {
-                    var res = dictTarget[PSObject.Unwrap(idxobj)];
-                    _pipelineCommandRuntime.WriteObject(res);
-                }
-                return AstVisitAction.SkipChildren;
-            }
-
-            // otherwise we need int indexing
-            var indices = (int[]) LanguagePrimitives.ConvertTo(index, typeof(int[]));
-
-            // check for real multidimensional array access first
-            var arrayTarget = targetValue as Array;
-            if (arrayTarget != null && arrayTarget.Rank > 1)
-            {
-                int[] convIndices = ConvertNegativeIndicesForMultidimensionalArray(arrayTarget, indices);
-                object arrayValue = null;
-                try
-                {
-                    arrayValue = arrayTarget.GetValue(convIndices);
-                }
-                catch (IndexOutOfRangeException) // just write nothing to pipeline
-                {
-                }
-                this._pipelineCommandRuntime.WriteObject(arrayValue);
-                return AstVisitAction.SkipChildren;
-            }
-
-            // if we have a string, we need to access it as an char[]
-            if (targetValue is string)
-            {
-                targetValue = ((string)targetValue).ToCharArray();
-            }
-
-            // now we can access arrays, list, and string (charArrays) all the same by using the IList interface
-            var iListTarget = targetValue as IList;
-            if (iListTarget == null)
-            {
-                var msg = String.Format("Cannot index an object of type '{0}'.", targetValue.GetType().FullName);
-                throw new PSInvalidOperationException(msg);
-            }
-
-            var numItems = iListTarget.Count;
-            // now get all elements from the index list
-            bool writtenFromList = false;
-            foreach (int curIdx in indices)
-            {
-                // support negative indices
-                var idx = curIdx < 0 ? curIdx + numItems : curIdx;
-                // check if it's a valid index, otherwise ignore
-                if (idx >= 0 && idx < numItems)
-                {
-                    _pipelineCommandRuntime.WriteObject(iListTarget[idx]);
-                    writtenFromList = true;
-                }
-            }
-            if (!writtenFromList)
-            {
-                _pipelineCommandRuntime.WriteObject(null);
-            }
+            _pipelineCommandRuntime.WriteObject(new SettableIndexExpression(indexExpressionAst, this).GetValue(), false);
             return AstVisitAction.SkipChildren;
-        }
-
-        private int[] ConvertNegativeIndicesForMultidimensionalArray(Array array, int[] rawIndices)
-        {
-            if (array.Rank != rawIndices.Length)
-            {
-                var msg = String.Format("The index [{0}] is invalid to access an {1}-dimensional array",
-                                        String.Join(",", rawIndices), array.Rank);
-                throw new PSInvalidOperationException(msg);
-            }
-            var convIndices = new int[array.Rank];
-            for (int i = 0; i < rawIndices.Length; i++)
-            {
-                convIndices[i] = rawIndices[i] < 0 ? rawIndices[i] + array.GetLength(i) : rawIndices[i];
-            }
-            return convIndices;
         }
 
         public override AstVisitAction VisitIfStatement(IfStatementAst ifStatementAst)
@@ -890,17 +666,17 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitInvokeMemberExpression(InvokeMemberExpressionAst methodCallAst)
         {
-            string memberName;
-            var psobj = EvaluateAsPSObject(methodCallAst.Expression);
+            var psobj = PSObject.WrapOrNull(EvaluateAst(methodCallAst.Expression, false));
             if (psobj == null)
             {
                 throw new PSInvalidOperationException("Cannot invoke a method of a NULL expression");
             }
             var memberNameObj = EvaluateAst(methodCallAst.Member, false);
-            var method = GetPSObjectMember(psobj, memberNameObj, methodCallAst.Static, out memberName) as PSMethodInfo;
+            var method = PSObject.GetMemberInfoSafe(psobj, memberNameObj, methodCallAst.Static) as PSMethodInfo;
             if (method == null)
             {
-                throw new PSArgumentException(String.Format("The object has no method called '{0}'", memberName));
+                var msg = String.Format("The object has no method called '{0}'", memberNameObj.ToString());
+                throw new PSArgumentException(msg);
             }
             var arguments = methodCallAst.Arguments.Select(EvaluateAst).Select(o => o is PSObject ? ((PSObject)o).BaseObject : o);
             var result = method.Invoke(arguments.ToArray());
@@ -911,53 +687,9 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
-        private PSObject EvaluateAsPSObject(ExpressionAst expression)
-        {
-            // if the expression is a variable including an enumerable object (e.g. collection)
-            // then we want the collection itself. The enumerable object should only be expanded when being processed
-            // e.g. in a pipeline
-            return PSObject.WrapOrNull(EvaluateAst(expression, false));
-        }
-
-        private PSMemberInfo GetPSObjectMember(PSObject psobj, object memberNameObj, bool isStatic, out string memberName)
-        {
-
-            if (memberNameObj == null)
-            {
-                throw new PSArgumentNullException("Member name evaluates to null");
-            }
-            memberName = memberNameObj.ToString();
-            if (psobj == null)
-            {
-                return null;
-            }
-            // Powershell allows access to hastable values by member acccess
-            if (isStatic)
-            {
-                return psobj.StaticMembers[memberName];
-            }
-            return psobj.Members[memberName];
-        }
-
         public override AstVisitAction VisitMemberExpression(MemberExpressionAst memberExpressionAst)
         {
-            string memberName;
-            var psobj = EvaluateAsPSObject(memberExpressionAst.Expression);
-            var unwraped = PSObject.Unwrap(psobj);
-            var memberNameObj = EvaluateAst(memberExpressionAst.Member, false);
-            // check for Hastable first
-            if (unwraped is Hashtable && memberNameObj != null &&
-                !_hashtableAccessibleMembers.Contains(memberNameObj.ToString()))
-            {
-                var hashtable = (Hashtable)unwraped;
-                _pipelineCommandRuntime.WriteObject(hashtable[memberNameObj]);
-            }
-            else // otherwise a PSObject
-            {
-                var member = GetPSObjectMember(psobj, memberNameObj, memberExpressionAst.Static, out memberName);
-                var value = (member == null) ? null : PSObject.AsPSObject(member.Value);
-                _pipelineCommandRuntime.WriteObject(value);
-            }
+            _pipelineCommandRuntime.WriteObject(new SettableMemberExpression(memberExpressionAst, this).GetValue());
             return AstVisitAction.SkipChildren;
         }
 
@@ -975,38 +707,16 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitUnaryExpression(UnaryExpressionAst unaryExpressionAst)
         {
-            var childVariableExpressionAst = unaryExpressionAst.Child as VariableExpressionAst;
-            var childVariable = childVariableExpressionAst == null ? null : GetVariable(childVariableExpressionAst);
-            var childVariableValue = childVariable == null ? null : childVariable.Value;
-
             switch (unaryExpressionAst.TokenKind)
             {
-                // TODO: the following two cases should not just deal
                 case TokenKind.PostfixPlusPlus:
-
-                    if (childVariable == null) throw new NotImplementedException(unaryExpressionAst.ToString());
-                    if (childVariableValue is PSObject)
-                    {
-                        if (this._writeSideEffectsToPipeline) this._pipelineCommandRuntime.WriteObject(childVariable.Value);
-                        childVariable.Value = PSObject.AsPSObject(((int)((PSObject)childVariableValue).BaseObject) + 1);
-                    }
-                    else throw new NotImplementedException(childVariableValue.ToString());
-
-                    break;
-
                 case TokenKind.PlusPlus:
+                case TokenKind.MinusMinus:
+                case TokenKind.PostfixMinusMinus:
+                    VisitIncrementDecrementExpression(unaryExpressionAst);
+                break;
 
-                    if (childVariable == null) throw new NotImplementedException(unaryExpressionAst.ToString());
-                    if (childVariableValue is PSObject)
-                    {
-                        childVariable.Value = PSObject.AsPSObject(((int)((PSObject)childVariableValue).BaseObject) + 1);
-                        if (this._writeSideEffectsToPipeline) this._pipelineCommandRuntime.WriteObject(childVariable.Value);
-                    }
-                    else throw new NotImplementedException(childVariableValue.ToString());
-
-                    break;
-
-            case TokenKind.Not:
+                case TokenKind.Not:
                     var value = EvaluateAst(unaryExpressionAst.Child, _writeSideEffectsToPipeline);
                     var boolValue = (bool) LanguagePrimitives.ConvertTo(value, typeof(bool));
                     _pipelineCommandRuntime.WriteObject(!boolValue);
@@ -1017,6 +727,63 @@ namespace System.Management.Pash.Implementation
             }
 
             return AstVisitAction.SkipChildren;
+        }
+
+        private void VisitIncrementDecrementExpression(UnaryExpressionAst unaryExpressionAst)
+        {
+            var token = unaryExpressionAst.TokenKind;
+
+            // first validate the expression. Shouldn't fail, but let's be sure
+            var validTokens = new [] { TokenKind.PostfixPlusPlus, TokenKind.PostfixMinusMinus,
+                TokenKind.PlusPlus, TokenKind.MinusMinus};
+            if (!validTokens.Contains(token))
+            {
+                throw new PSInvalidOperationException("The unary expression is not a decrement/increment expression. " +
+                                                      "Please report this issue.");
+            }
+
+            bool postfix = token == TokenKind.PostfixPlusPlus || token == TokenKind.PostfixMinusMinus;
+            bool increment = token == TokenKind.PostfixPlusPlus || token == TokenKind.PlusPlus;
+
+            // It's the duty of the AstBuilderto check wether the child expression is a settable expression
+            SettableExpression affectedExpression = SettableExpression.Create(unaryExpressionAst.Child, this);
+            object objValue = PSObject.Unwrap(affectedExpression.GetValue());
+            objValue = objValue ?? 0; // if the value is null, then we "convert" to integer 0, says the specification
+
+            // check for non-numerics
+            var valueType = objValue.GetType();
+            if (!valueType.IsNumeric())
+            {
+                var msg = String.Format("The operator '{0}' can only be used for numbers. The operand is '{1}'",
+                                        increment ? "++" : "--", valueType.FullName);
+                throw new RuntimeException(msg, "OperatorRequiresNumber", ErrorCategory.InvalidOperation, objValue);
+            }
+
+            // if it's a postfix operation, then we need to write the numeric value to pipeline
+            if (postfix && _writeSideEffectsToPipeline)
+            {
+                _pipelineCommandRuntime.WriteObject(objValue);
+            }
+
+            // now actually change the value, check for overflow
+            dynamic dynValue = (dynamic)objValue;
+            try
+            {
+                dynValue = checked(dynValue + (increment ? 1 : -1));
+            }
+            catch (OverflowException) // cast to double on overflow
+            {
+                dynValue = LanguagePrimitives.ConvertTo<double>(objValue) + (increment ? 1 : -1);
+            }
+
+            // set the new value
+            affectedExpression.SetValue((object)dynValue);
+
+            // if it was a prefix, then we need to write the new value to pipeline
+            if (!postfix && _writeSideEffectsToPipeline)
+            {
+                _pipelineCommandRuntime.WriteObject(dynValue);
+            }
         }
 
         public override AstVisitAction VisitArrayExpression(ArrayExpressionAst arrayExpressionAst)
@@ -1174,7 +941,7 @@ namespace System.Management.Pash.Implementation
 
             while (enumerator.MoveNext())
             {
-                this._context.SessionState.PSVariable.Set(forEachStatementAst.Variable.VariablePath.UserPath,
+                this.ExecutionContext.SessionState.PSVariable.Set(forEachStatementAst.Variable.VariablePath.UserPath,
                                                           enumerator.Current);
                 // TODO: pass the loop label
                 if (!EvaluateLoopBodyAst(forEachStatementAst.Body, null))
@@ -1249,9 +1016,11 @@ namespace System.Management.Pash.Implementation
             {
                 return VisitNamedBlockWithTraps(namedBlockAst);
             }
-
-            // just iterate over children
-            return base.VisitNamedBlock(namedBlockAst);
+            foreach (var stmt in namedBlockAst.Statements)
+            {
+                VisitStatement(stmt);
+            }
+            return AstVisitAction.SkipChildren;
         }
 
         private AstVisitAction VisitNamedBlockWithTraps(NamedBlockAst namedBlockAst)
@@ -1260,7 +1029,7 @@ namespace System.Management.Pash.Implementation
             {
                 try
                 {
-                    statement.Visit(this);
+                    VisitStatement(statement);
                 }
                 catch (FlowControlException)
                 {
@@ -1347,7 +1116,7 @@ namespace System.Management.Pash.Implementation
 
         private void WriteErrorRecord()
         {
-            object error = _context.GetVariableValue("_");
+            object error = ExecutionContext.GetVariableValue("_");
             _pipelineCommandRuntime.WriteObject(error);
         }
 
@@ -1381,52 +1150,49 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitScriptBlock(ScriptBlockAst scriptBlockAst)
         {
+            try
+            {
+                scriptBlockAst.EndBlock.Visit(this);
+            }
+            catch (ReturnException e)
+            {
+                // if the exception was a return excpetion, also write the returnResult, if existing
+                if (PSObject.Unwrap(e.Value) != null)
+                {
+                    _pipelineCommandRuntime.WriteObject(e.Value, true);
+                }
+            }
+
+            return AstVisitAction.SkipChildren;
+        }
+
+        private AstVisitAction VisitStatement(StatementAst statementAst)
+        {
             // We execute this in a subcontext, because single enumerable results are 
             // evaluated and its values are written to pipeline (i.e. ". {1,2,3}" writes
             // all three values to pipeline
             // therefore we have to catch exceptions for now to read and write
             // the subVisitors' output stream, so that already written results appear
             // also in this OutputStream
-            // TODO: is there a better way? Maybe evaluation of enumerable results should be
-            // somewhere else? Can't be when writing the input pipe of a pipeline, because
-            // it would enumerates many objects that should be enumerated
             var subVisitor = this.CloneSub(false);
             object returnResult = null;
-            Exception exception = null;
             subVisitor._pipelineCommandRuntime.ErrorStream.Redirect(_pipelineCommandRuntime.ErrorStream);
             try
             {
-                scriptBlockAst.EndBlock.Visit(subVisitor);
+                statementAst.Visit(subVisitor);
             }
-            catch (ReturnException e)
+            finally
             {
-                // return exception is okay
-                returnResult = e.Value; // we first need to read the other results
-            }
-            catch (Exception e)
-            {
-                // others need to be rethrown
-                exception = e;
-            }
-            var result = subVisitor._pipelineCommandRuntime.OutputStream.Read();
-            if (result.Count == 1)
-            {
-                // this is the actual thing of this whole work: enumerate a single value!
-                _pipelineCommandRuntime.WriteObject(result.Single(), true);
-            }
-            else if (result.Count > 1)
-            {
-                _pipelineCommandRuntime.WriteObject(result, true);
-            }
-            // rethrow exception if we had one
-            if (exception != null)
-            {
-                throw exception;
-            }
-            // if the exception was a return excpetion, also write the returnResult, if existing
-            if (PSObject.Unwrap(returnResult) != null)
-            {
-                _pipelineCommandRuntime.WriteObject(returnResult, true);
+                var result = subVisitor._pipelineCommandRuntime.OutputStream.Read();
+                if (result.Count == 1)
+                {
+                    // this is the actual thing of this whole work: enumerate a single value!
+                    _pipelineCommandRuntime.WriteObject(result.Single(), true);
+                }
+                else if (result.Count > 1)
+                {
+                    _pipelineCommandRuntime.WriteObject(result, true);
+                }
             }
             return AstVisitAction.SkipChildren;
         }
@@ -1544,7 +1310,7 @@ namespace System.Management.Pash.Implementation
             {
                 rec = new ErrorRecord(ex, "", ErrorCategory.InvalidOperation, null);
             }
-            _context.SetVariable("_", rec);
+            ExecutionContext.SetVariable("_", rec);
         }
 
         public override AstVisitAction VisitTypeConstraint(TypeConstraintAst typeConstraintAst)

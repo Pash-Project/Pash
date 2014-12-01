@@ -490,6 +490,10 @@
     <Compile Include="Automation\LoopFlowException.cs" />
     <Compile Include="Automation\ContinueException.cs" />
     <Compile Include="Automation\BreakException.cs" />
+    <Compile Include="Pash\Implementation\ExecutionVisitorHelper\SettableExpression.cs" />
+    <Compile Include="Pash\Implementation\ExecutionVisitorHelper\SettableIndexExpression.cs" />
+    <Compile Include="Pash\Implementation\ExecutionVisitorHelper\SettableMemberExpression.cs" />
+    <Compile Include="Pash\Implementation\ExecutionVisitorHelper\SettableVariableExpression.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -507,5 +511,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Pash\ParserIntrinsics\README.TXT" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Pash\Implementation\ExecutionVisitorHelper\" />
   </ItemGroup>
 </Project>

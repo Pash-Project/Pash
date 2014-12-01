@@ -97,8 +97,10 @@ namespace System.Management.Pash.Implementation
             return ArithmeticOperation(leftValue, rightValue, "+", addOp);
         }
 
-        public static object Multiply(object leftValue, object rightValue)
+        public static object Multiply(object leftValuePacked, object rightValuePacked)
         {
+            var leftValue = PSObject.Unwrap(leftValuePacked);
+            var rightValue = PSObject.Unwrap(rightValuePacked);
             // well, this is not part of the specification, but can be shown with tests:
             // if left is null, then null is returned. This even works with other objects like FileInfo on the right
             if (leftValue == null)
@@ -145,8 +147,10 @@ namespace System.Management.Pash.Implementation
             return ArithmeticOperation(leftValue, rightValue, "*", mulOp);
         }
 
-        public static object Divide(object leftValue, object rightValue)
+        public static object Divide(object leftValuePacked, object rightValuePacked)
         {
+            var leftValue = PSObject.Unwrap(leftValuePacked);
+            var rightValue = PSObject.Unwrap(rightValuePacked);
             // arithmetic division (7.6.4)
             object convLeft, convRight;
             if (!LanguagePrimitives.UsualArithmeticConversion(leftValue, rightValue, 
@@ -171,15 +175,19 @@ namespace System.Management.Pash.Implementation
             return left % right == 0 ? left / right : ((double)left) / right;
         }
 
-        public static object Remainder(object leftValue, object rightValue)
+        public static object Remainder(object leftValuePacked, object rightValuePacked)
         {
+            var leftValue = PSObject.Unwrap(leftValuePacked);
+            var rightValue = PSObject.Unwrap(rightValuePacked);
             // arithmetic remainder (7.6.5)
             Func<dynamic, dynamic, dynamic> remOp = (dynamic x, dynamic y) => checked(x % y);
             return ArithmeticOperation(leftValue, rightValue, "%", remOp);
         }
 
-        public static object Subtract(object leftValue, object rightValue)
+        public static object Subtract(object leftValuePacked, object rightValuePacked)
         {
+            var leftValue = PSObject.Unwrap(leftValuePacked);
+            var rightValue = PSObject.Unwrap(rightValuePacked);
             // arithmetic expression (7.7.5)
             Func<dynamic, dynamic, dynamic> subOp = (dynamic x, dynamic y) => checked(x - y);
             return ArithmeticOperation(leftValue, rightValue, "-", subOp);
