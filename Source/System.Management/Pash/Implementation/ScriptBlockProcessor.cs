@@ -51,7 +51,12 @@ namespace Pash.Implementation
             {
                 return parameter.Value;
             }
-            return _scopedExecutionVisitor.EvaluateAst(scriptParameter.DefaultValue);;
+
+            if (scriptParameter.DefaultValue != null)
+            {
+                return _scopedExecutionVisitor.EvaluateAst(scriptParameter.DefaultValue);
+            }
+            return null;
         }
 
         private CommandParameter GetParameterByPosition(int position)
