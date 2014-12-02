@@ -43,6 +43,27 @@ namespace ReferenceTests.Language
             ExecuteAndCompareTypedResult(funStart + "$a; $b; }; f", null, null);
         }
 
+        [TestCase("function f($a, $b) { ")]
+        [TestCase("function f { param($a, $b); ")]
+        public void FunctionWithNamedParameters(string funStart)
+        {
+            ExecuteAndCompareTypedResult(funStart + "$a; $b; }; f -b 1 -a 2", 2, 1);
+        }
+
+        [TestCase("function f($a, $b) { ")]
+        [TestCase("function f { param($a, $b); ")]
+        public void FunctionWithExplicitlyNamedParameters(string funStart)
+        {
+            ExecuteAndCompareTypedResult(funStart + "$a; $b; }; f -b: 1 -a: 2", 2, 1);
+        }
+
+        [TestCase("function f($a, $b) { ")]
+        [TestCase("function f { param($a, $b); ")]
+        public void FunctionWithMoreArgsInArgsVar(string funStart)
+        {
+            ExecuteAndCompareTypedResult(funStart + "$a; $b; $args; }; f -b 1 '-a' -d -e", null, 1, "-a", "-d", "-e");
+        }
+
         [Test]
         public void FunctionWithBothParenthesisAndParamBlockThrows()
         {
