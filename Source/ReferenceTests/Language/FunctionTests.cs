@@ -80,7 +80,7 @@ namespace ReferenceTests.Language
 
         [TestCase("function f($a='f') { ")]
         [TestCase("function f { param($a='f'); ")]
-        public void FunctionsNamedUsetParameterThrows(string funStart)
+        public void FunctionsNamedUnsetParameterThrows(string funStart)
         {
             Assert.Throws<ParameterBindingException>(delegate {
                ReferenceHost.Execute(funStart + "}; f -a");
@@ -89,9 +89,37 @@ namespace ReferenceTests.Language
 
         [TestCase("function f($a='f') { ")]
         [TestCase("function f { param($a='f'); ")]
+        public void FunctionsNamedParameterExplicitNull(string funStart)
+        {
+            Assert.Throws<ParameterBindingException>(delegate
+            {
+                ReferenceHost.Execute(funStart + "}; f -a");
+            });
+        }
+
+        [TestCase("function f($a='f') { ")]
+        [TestCase("function f { param($a='f'); ")]
         public void FunctionsNamedParameterCanTakeUnusedParamName(string funStart)
         {
             ExecuteAndCompareTypedResult(funStart + " $a; }; f -a -b", "-b");
+        }
+
+        [TestCase("function f($a='f') { ", "-a: $null")]
+        [TestCase("function f($a='f') { ", "-a $null")]
+        [TestCase("function f { param($a='f'); ", "-a: $null")]
+        [TestCase("function f { param($a='f'); ", "-a $null")]
+        public void FunctionsNamedParameterCanTakeExplicitNull(string funStart, string arg)
+        {
+            ExecuteAndCompareTypedResult(funStart + " $a; }; f " + arg, null);
+        }
+
+        [TestCase("function f($a='f') { ")]
+        [TestCase("function f { param($a='f'); ")]
+        public void FunctionsNamedParameterCantTakeUnusedButSetParam(string funStart)
+        {
+            Assert.Throws<ParameterBindingException>(delegate {
+                ReferenceHost.Execute(funStart + " $a; }; f -a -b: foo");
+            });
         }
 
         [Test]
