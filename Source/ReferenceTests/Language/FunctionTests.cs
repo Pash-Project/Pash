@@ -61,7 +61,14 @@ namespace ReferenceTests.Language
         [TestCase("function f { param($a, $b); ")]
         public void FunctionWithMoreArgsInArgsVar(string funStart)
         {
-            ExecuteAndCompareTypedResult(funStart + "$a; $b; $args; }; f -b 1 '-a' -d -e", null, 1, "-a", "-d", "-e");
+            ExecuteAndCompareTypedResult(funStart + "$a; $b; $args; }; f -b 1 '-a' -d -e", "-a", 1, "-d", "-e");
+        }
+
+        [TestCase("function f($a, $b) { ")]
+        [TestCase("function f { param($a, $b); ")]
+        public void FunctionsUndefinedNamedArgsAreInArgsVar(string funStart)
+        {
+            ExecuteAndCompareTypedResult(funStart + "$a; $b; $args; }; f -c 1 -d 'val' -e", null, null, "-c", 1, "-d", "val", "-e");
         }
 
         [Test]
