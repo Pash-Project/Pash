@@ -28,22 +28,14 @@ namespace Pash.Implementation
         {
             // TODO: as soon as we support cmdlet functions, we should think about using the CmdletParameterBinder
             // or at least extract common functionality
-            var stringComparer = StringComparer.InvariantCultureIgnoreCase;
-
             var unboundArguments = new List<CommandParameter>(parameters);
             var unboundScriptParameters = new List<ParameterAst>(_scriptParameters);
 
             // bind arguments by name
-            var boundArgumentNames = BindArgumentsByName(unboundArguments);
-            unboundArguments.RemoveAll(arg => boundArgumentNames.Contains(arg.Name, stringComparer));
-            unboundScriptParameters.RemoveAll(
-                param => boundArgumentNames.Contains(param.Name.VariablePath.UserPath, stringComparer));
+            BindArgumentsByName(unboundScriptParameters, unboundArguments);
 
             // then we set all parameters by position
-            boundArgumentNames = BindArgumentsByPosition(unboundScriptParameters, unboundArguments);
-            unboundArguments.RemoveAll(arg => boundArgumentNames.Contains(arg.Name, stringComparer));
-            unboundScriptParameters.RemoveAll(
-                param => boundArgumentNames.Contains(param.Name.VariablePath.UserPath, stringComparer));
+            BindArgumentsByPosition(unboundScriptParameters, unboundArguments);
 
             // parameters that are still unbound should get their default value
             SetUnboundParametersToDefaultValue(unboundScriptParameters);
@@ -52,43 +44,51 @@ namespace Pash.Implementation
             SetArgsVariableFromUnboundArgs(unboundArguments);
         }
 
-        private List<string> BindArgumentsByName(List<CommandParameter> unboundArguments)
+        private void BindArgumentsByName(List<ParameterAst> unboundParameters, List<CommandParameter> unboundArguments)
         {
-            var boundArgumentNames = new List<string>();
             // first find all named arguments for those parameters that exist
             var scriptParamDict = _scriptParameters.ToDictionary<ParameterAst, string>(
                 param => param.Name.VariablePath.UserPath, StringComparer.InvariantCultureIgnoreCase);
-            var namedArgs = from arg in unboundArguments
+            var namedArgs = (from arg in unboundArguments
                     where !String.IsNullOrEmpty(arg.Name) && scriptParamDict.Keys.Contains(arg.Name)
-                    select arg;
-            foreach (var namedArg in namedArgs)
+                    select arg).ToArray();
+
+            var boundArgumentNames = new List<string>();
+            foreach (var curArg in namedArgs)
             {
                 // if the parameter is bound multiple times, throw an error
-                if (boundArgumentNames.Contains(namedArg.Name))
+                if (boundArgumentNames.Contains(curArg.Name))
                 {
-                    var msg = String.Format("The parameter '{0}' has already been bound", namedArg.Name);
+                    var msg = String.Format("The parameter '{0}' has already been bound", curArg.Name);
                     throw new ParameterBindingException(msg, "ParameterAlreadyBound");
                 }
-                BindVariable(scriptParamDict[namedArg.Name], namedArg);
-                boundArgumentNames.Add(namedArg.Name);
+                var param = scriptParamDict[curArg.Name];
+                BindVariable(param, curArg);
+
+                boundArgumentNames.Add(curArg.Name);
+                unboundArguments.Remove(curArg);
+                unboundParameters.Remove(param);
             }
-            return boundArgumentNames;
         }
 
-        private List<string> BindArgumentsByPosition(List<ParameterAst> unboundParameters, List<CommandParameter> unboundArguments)
+        private void BindArgumentsByPosition(List<ParameterAst> unboundParameters,
+                                             List<CommandParameter> unboundArguments)
         {
-            var boundArgumentNames = new List<string>();
+            var boundArguments = new List<CommandParameter>();
             var unnamedArguments = (from arg in unboundArguments
                                     where String.IsNullOrEmpty(arg.Name) select arg).ToList();
-            var unnamedArgCount = unnamedArguments.Count;
-            var paramCount = unboundParameters.Count;
-            for (int i = 0; i < Math.Min(paramCount, unnamedArgCount); i++)
+
+            int i;
+            for (i = 0; i < Math.Min(unboundParameters.Count, unnamedArguments.Count); i++)
             {
                 var curArg = unnamedArguments[i];
                 BindVariable(unboundParameters[i], curArg);
-                boundArgumentNames.Add(curArg.Name);
+                boundArguments.Add(curArg);
             }
-            return boundArgumentNames;
+
+            // update unbound- lists
+            boundArguments.ForEach(x => unboundArguments.Remove(x));
+            unboundParameters.RemoveRange(0, i);
         }
 
         private void SetUnboundParametersToDefaultValue(List<ParameterAst> unboundScriptParameters)
@@ -97,6 +97,7 @@ namespace Pash.Implementation
             {
                 BindVariable(unboundParam, null);
             }
+            unboundScriptParameters.Clear();
         }
 
         private void SetArgsVariableFromUnboundArgs(List<CommandParameter> unboundArguments)
@@ -110,12 +111,13 @@ namespace Pash.Implementation
                     otherArgs.Add(unboundArg.GetDecoratedName());
                     nameSet = true;
                 }
-                if (!nameSet || unboundArg.HasExplicitArgument)
+                if (unboundArg.Value != null || !nameSet || unboundArg.HasExplicitArgument)
                 {
                     otherArgs.Add(unboundArg.Value);
                 }
             }
             _executionContext.SetVariable("Args", otherArgs.ToArray());
+            unboundArguments.Clear();
         }
 
         private void BindVariable(ParameterAst scriptParameter, CommandParameter argument)

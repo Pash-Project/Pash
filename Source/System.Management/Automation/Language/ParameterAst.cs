@@ -34,7 +34,7 @@ namespace System.Management.Automation.Language
 
         public override string ToString()
         {
-            return string.Format("{0} = {1}", this.Name, this.DefaultValue.ToString() ?? "");
+            return string.Format("{0} = {1}", this.Name, DefaultValue == null ? "" : DefaultValue.ToString());
         }
     }
 }

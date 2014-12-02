@@ -189,7 +189,9 @@ namespace ReferenceTests
                 Assert.That(results[0], Is.Null);
                 return;
             }
-            Assert.AreEqual(expectedValues.Length, results.Count);
+            Assert.AreEqual(expectedValues.Length, results.Count,
+                "Expected: " + String.Join(", ", expectedValues) + Environment.NewLine +
+                "Was: " + String.Join(", ", results));
             for (int i = 0; i < expectedValues.Length; i++)
             {
                 var expected = expectedValues[i];
@@ -198,6 +200,7 @@ namespace ReferenceTests
                     Assert.IsNull(results[i]);
                     continue;
                 }
+                Assert.NotNull(results[i], i + "th result is null, but should be" + expectedValues[i].ToString());
                 var res = results[i].BaseObject;
                 var restype = res.GetType();
                 Assert.AreSame(expected.GetType(), restype);
