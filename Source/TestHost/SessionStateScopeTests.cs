@@ -461,7 +461,7 @@ namespace TestHost
         private FunctionInfo createFunction(string name, string description = "",
                                             ScopedItemOptions options = ScopedItemOptions.None)
         {
-            var info = new FunctionInfo(name, null, options);
+            var info = new FunctionInfo(name, null, null, options);
             info.Description = description;
             return info;
         }

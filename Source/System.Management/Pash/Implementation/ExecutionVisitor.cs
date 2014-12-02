@@ -609,7 +609,9 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitFunctionDefinition(FunctionDefinitionAst functionDefinitionAst)
         {
-            ExecutionContext.SessionState.Function.Set(functionDefinitionAst.Name, functionDefinitionAst.Body.GetScriptBlock());
+            // TODO sburnicki: test if parameters need to be evaluated here or later
+            ExecutionContext.SessionState.Function.Set(functionDefinitionAst.Name, functionDefinitionAst.Body.GetScriptBlock(),
+                                               functionDefinitionAst.Parameters, "");
             return AstVisitAction.SkipChildren;
         }
 

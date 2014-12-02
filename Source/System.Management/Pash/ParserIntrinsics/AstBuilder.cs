@@ -238,6 +238,12 @@ namespace Pash.ParserIntrinsics
                 scriptBlock = BuildScriptBlockAst(parseTreeNode.ChildNodes[3]);
             }
 
+            if (parameters != null && scriptBlock.ParamBlock != null)
+            {
+                throw new ParseException("Cannot define both param block and parameters");
+                // TODO sburnicki: check if both parameters and scriptBlock.ParamBlock are defined and throw a parse error
+            }
+
             return new FunctionDefinitionAst(
                 new ScriptExtent(parseTreeNode),
                 isFilter,

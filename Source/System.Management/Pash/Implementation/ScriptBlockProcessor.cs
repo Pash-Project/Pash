@@ -35,6 +35,7 @@ namespace Pash.Implementation
         {
             ReadOnlyCollection<ParameterAst> scriptParameters = _scriptBlockInfo.GetParameters();
 
+            // iterate over all provided parameters and bind the args to them
             for (int i = 0; i < scriptParameters.Count; ++i)
             {
                 ParameterAst scriptParameter = scriptParameters[i];
