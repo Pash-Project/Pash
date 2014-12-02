@@ -16,11 +16,12 @@ namespace ReferenceTests.Language
             );
         }
 
-        [Test]
-        public void FunctionParamsParamBlockDefaultValueCanBeExpression()
+        [TestCase("function f { param($test=(get-location).path)")]
+        [TestCase("function f ($test=(get-location).path) {")]
+        public void FunctionParamsDefaultValueCanBeExpression(string funStart)
         {
             var cmd = NewlineJoin(
-                "function f { param($test=(get-location).path)",
+                funStart,
                 "$test",
                 "}",
                 "f");
@@ -28,34 +29,18 @@ namespace ReferenceTests.Language
             Assert.AreEqual(NewlineJoin(Environment.CurrentDirectory), result);
         }
 
-        [Test]
-        public void FunctionParamsParenthesisDefaultValueCanBeExpression()
+        [TestCase("function f($a, $b) { ")]
+        [TestCase("function f { param($a, $b); ")]
+        public void FunctionWithParameters(string funStart)
         {
-            var cmd = NewlineJoin(
-                "function f ($test=(get-location).path) {",
-                "$test",
-                "}",
-                "f");
-            var result = ReferenceHost.Execute(cmd);
-            Assert.AreEqual(NewlineJoin(Environment.CurrentDirectory), result);
+            ExecuteAndCompareTypedResult(funStart + "$a; $b; }; f 1 2", 1, 2);
         }
 
-        [Test]
-        public void FunctionWithParametersInParanthesis()
+        [TestCase("function f($a, $b) { ")]
+        [TestCase("function f { param($a, $b); ")]
+        public void FunctionWithoutPassedParameters(string funStart)
         {
-            ExecuteAndCompareTypedResult("function f($a, $b) { $a; $b; }; f 1 2", 1, 2);
-        }
-
-        [Test]
-        public void FunctionWithParametersInParamBlock()
-        {
-            ExecuteAndCompareTypedResult("function f { param($a, $b); $a; $b; }; f 1 2", 1, 2);
-        }
-
-        [Test]
-        public void FunctionWithoutPassedParameters()
-        {
-            ExecuteAndCompareTypedResult("function f($a, $b) { $a; $b; }; f", null, null);
+            ExecuteAndCompareTypedResult(funStart + "$a; $b; }; f", null, null);
         }
 
         [Test]
