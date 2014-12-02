@@ -33,6 +33,7 @@ namespace Pash.Implementation
 
         private void BindArguments()
         {
+            MergeParameters();
             ReadOnlyCollection<ParameterAst> scriptParameters = _scriptBlockInfo.GetParameters();
 
             // iterate over all provided parameters and bind the args to them
@@ -58,6 +59,7 @@ namespace Pash.Implementation
                 return _scopedExecutionVisitor.EvaluateAst(scriptParameter.DefaultValue);
             }
             return null;
+
         }
 
         private CommandParameter GetParameterByPosition(int position)
@@ -159,6 +161,14 @@ namespace Pash.Implementation
         public override string ToString()
         {
             return this._scriptBlockInfo.ToString();
+        }
+
+        void MergeParameters()
+        {
+            /*
+            var oldParameters = new Collection<CommandParameter>(new List<CommandParameter>(Parameters));
+            Parameters.Clear();
+            */
         }
     }
 }

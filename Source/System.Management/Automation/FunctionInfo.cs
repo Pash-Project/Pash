@@ -35,7 +35,8 @@ namespace System.Management.Automation
             ScriptBlock = function;
             Options = options;
             ScopeUsage = ScopeUsages.NewScope;
-            _explicitParameters = explicitParams == null ? null : explicitParams.ToReadOnlyCollection();
+            _explicitParameters = explicitParams == null ? new ReadOnlyCollection<ParameterAst>(new ParameterAst[0])
+                                                         : explicitParams.ToReadOnlyCollection();
         }
 
         #region IScriptBlockInfo Members
@@ -45,7 +46,7 @@ namespace System.Management.Automation
 
         public ReadOnlyCollection<ParameterAst> GetParameters()
         {
-            if (_explicitParameters != null)
+            if (_explicitParameters.Count > 0)
             {
                 return _explicitParameters;
             }
