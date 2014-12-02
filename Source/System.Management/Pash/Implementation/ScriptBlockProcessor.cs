@@ -22,53 +22,13 @@ namespace Pash.Implementation
         private bool _fromFile;
         private int? _exitCode;
         private ExecutionVisitor _scopedExecutionVisitor;
-
+        ScriptBlockParameterBinder _argumentBinder;
 
         public ScriptBlockProcessor(IScriptBlockInfo scriptBlockInfo, CommandInfo commandInfo)
             : base(commandInfo)
         {
             _scriptBlockInfo = scriptBlockInfo;
             _fromFile = commandInfo.CommandType.Equals(CommandTypes.ExternalScript);
-        }
-
-        private void BindArguments()
-        {
-            MergeParameters();
-            ReadOnlyCollection<ParameterAst> scriptParameters = _scriptBlockInfo.GetParameters();
-
-            // iterate over all provided parameters and bind the args to them
-            for (int i = 0; i < scriptParameters.Count; ++i)
-            {
-                ParameterAst scriptParameter = scriptParameters[i];
-                CommandParameter parameter = GetParameterByPosition(i);
-                object parameterValue = GetParameterValue(scriptParameter, parameter);
-
-                ExecutionContext.SetVariable(scriptParameter.Name.VariablePath.UserPath, parameterValue);
-            }
-        }
-
-        private object GetParameterValue(ParameterAst scriptParameter, CommandParameter parameter)
-        {
-            if (parameter != null)
-            {
-                return parameter.Value;
-            }
-
-            if (scriptParameter.DefaultValue != null)
-            {
-                return _scopedExecutionVisitor.EvaluateAst(scriptParameter.DefaultValue);
-            }
-            return null;
-
-        }
-
-        private CommandParameter GetParameterByPosition(int position)
-        {
-            if (Parameters.Count > position)
-            {
-                return Parameters[position];
-            }
-            return null;
         }
 
         private void CreateOwnScope()
@@ -103,7 +63,10 @@ namespace Pash.Implementation
             SwitchToOwnScope();
             try
             {
-                BindArguments();
+                MergeParameters();
+                _argumentBinder = new ScriptBlockParameterBinder(_scriptBlockInfo.GetParameters(), ExecutionContext,
+                                                                 _scopedExecutionVisitor);
+                _argumentBinder.BindCommandLineParameters(Parameters);
             }
             finally
             {
@@ -163,12 +126,59 @@ namespace Pash.Implementation
             return this._scriptBlockInfo.ToString();
         }
 
+        /// <summary>
+        /// The parse currently adds each parameter without value and each value without parameter name, because
+        /// it doesn't know at parse time whether the value belongs to the paramater or if the parameter is a switch
+        /// parameter and the value is just a positional parameter. As we now know more abot the parameters, we can
+        /// merge all parameters with the upcoming value if it's not a switch parameter
+        /// </summary>
         void MergeParameters()
         {
-            /*
+            // This implementation has quite some differences to the definition for cmdlets.
+            // For example "fun -a -b" can bind "-b" as value to parameter "-a" if "-b" doesn't exist.
+            // This is different to cmdlet behavior.
+            // Also, we will throw an error if we cannot merge a parameter, i.e. if only the name is defined: "fun -a"
+            var definedParameterNames = (from param in _scriptBlockInfo.GetParameters()
+                                         select param.Name.VariablePath.UserPath).ToList();
             var oldParameters = new Collection<CommandParameter>(new List<CommandParameter>(Parameters));
             Parameters.Clear();
-            */
+
+            int numParams = oldParameters.Count;
+            for (int i = 0; i < numParams; i++)
+            {
+                var current = oldParameters[i];
+                var peek = (i < numParams - 1) ? oldParameters[i + 1] : null;
+
+                // if the current parameter has no argument (and not explicilty set to null), try to merge the next
+                if (peek != null &&
+                    !String.IsNullOrEmpty(current.Name) &&
+                    current.Value == null &&
+                    !current.HasExplicitArgument)
+                {
+                    if (String.IsNullOrEmpty(peek.Name))
+                    {
+                        Parameters.Add(current.Name, peek.Value);
+                    }
+                    // the next parameter might also be '-b' without "b" being a defined parameter, then we take it
+                    // as value
+                    else if (peek.Value == null && !definedParameterNames.Contains(peek.Name))
+                    {
+                        Parameters.Add(current.Name, peek.GetDecoratedName());
+                    }
+                    else
+                    {
+                        // otherwise we don't have a value for this named parameter, throw an error
+                        throw new ParameterBindingException("Missing argument for parameter '" + current.Name + "'");
+                    }
+                    i++; // skip next element as it was merged
+                }
+                // otherwise we have a usual parameter/argument set
+                else
+                {
+                    Parameters.Add(current);
+                }
+            }
         }
+
     }
 }

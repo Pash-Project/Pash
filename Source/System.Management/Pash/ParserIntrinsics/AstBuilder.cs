@@ -85,6 +85,8 @@ namespace Pash.ParserIntrinsics
             // to anticipate a closing parenthesis here too.
             VerifyTerm(parseTreeNode, this._grammar.parameter_list, this._grammar.ToTerm(")"));
 
+            // TODO sburnicki: make sure every parameter name is only used once. Add proper test
+
             return from ParseTreeNode parameter in parseTreeNode.ChildNodes
                    where parameter.Term == this._grammar.script_parameter
                    select BuildParameterAst(parameter);

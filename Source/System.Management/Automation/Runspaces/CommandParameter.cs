@@ -24,6 +24,12 @@ namespace System.Management.Automation.Runspaces
         public object Value { get; private set; }
         internal bool HasExplicitArgument { get; private set; }
 
+        public object GetDecoratedName()
+        {
+            // like it was defined on the cmdline. with "-" before and probably a colon after
+            return Name == null ? "" : "-" + Name + (HasExplicitArgument ? ":" : "");
+        }
+
         public override string ToString()
         {
             return Name + "=" + Value;

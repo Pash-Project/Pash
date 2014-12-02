@@ -494,6 +494,7 @@
     <Compile Include="Pash\Implementation\ExecutionVisitorHelper\SettableIndexExpression.cs" />
     <Compile Include="Pash\Implementation\ExecutionVisitorHelper\SettableMemberExpression.cs" />
     <Compile Include="Pash\Implementation\ExecutionVisitorHelper\SettableVariableExpression.cs" />
+    <Compile Include="Pash\Implementation\ScriptBlockParameterBinder.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
