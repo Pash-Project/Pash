@@ -190,8 +190,8 @@ namespace ReferenceTests
                 return;
             }
             Assert.AreEqual(expectedValues.Length, results.Count,
-                "Expected: " + String.Join(", ", expectedValues) + Environment.NewLine +
-                "Was: " + String.Join(", ", results));
+                            "Expected: " + SafeStringJoin(", ", expectedValues) + Environment.NewLine +
+                            "Was:      " + SafeStringJoin(", ", results));
             for (int i = 0; i < expectedValues.Length; i++)
             {
                 var expected = expectedValues[i];
@@ -261,6 +261,12 @@ namespace ReferenceTests
             sb.Remove(sb.Length - 1, 1);
             sb.Append(")");
             return sb.ToString();
+        }
+
+        static string SafeStringJoin(string sep, IEnumerable<object> objs)
+        {
+            var strs = from o in objs select o == null ? "" : o.ToString();
+            return String.Join(sep, strs);
         }
     }
 }

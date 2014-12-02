@@ -89,16 +89,6 @@ namespace ReferenceTests.Language
 
         [TestCase("function f($a='f') { ")]
         [TestCase("function f { param($a='f'); ")]
-        public void FunctionsNamedParameterExplicitNull(string funStart)
-        {
-            Assert.Throws<ParameterBindingException>(delegate
-            {
-                ReferenceHost.Execute(funStart + "}; f -a");
-            });
-        }
-
-        [TestCase("function f($a='f') { ")]
-        [TestCase("function f { param($a='f'); ")]
         public void FunctionsNamedParameterCanTakeUnusedParamName(string funStart)
         {
             ExecuteAndCompareTypedResult(funStart + " $a; }; f -a -b", "-b");

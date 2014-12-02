@@ -149,32 +149,37 @@ namespace Pash.Implementation
                 var current = oldParameters[i];
                 var peek = (i < numParams - 1) ? oldParameters[i + 1] : null;
 
-                // if the current parameter has no argument (and not explicilty set to null), try to merge the next
-                if (peek != null &&
-                    !String.IsNullOrEmpty(current.Name) &&
-                    current.Value == null &&
-                    !current.HasExplicitArgument)
+                // if we have a no name, or a value different to null (or explicitly null), just take it
+                // otherwise it would have been merged before
+                if (String.IsNullOrEmpty(current.Name) ||
+                    current.Value != null ||
+                    current.HasExplicitArgument)
                 {
-                    if (String.IsNullOrEmpty(peek.Name))
-                    {
-                        Parameters.Add(current.Name, peek.Value);
-                    }
-                    // the next parameter might also be '-b' without "b" being a defined parameter, then we take it
-                    // as value
-                    else if (peek.Value == null && !definedParameterNames.Contains(peek.Name))
-                    {
-                        Parameters.Add(current.Name, peek.GetDecoratedName());
-                    }
-                    else
-                    {
-                        // otherwise we don't have a value for this named parameter, throw an error
-                        throw new ParameterBindingException("Missing argument for parameter '" + current.Name + "'");
-                    }
-                    i++; // skip next element as it was merged
+                    Parameters.Add(current);
+                    continue;
                 }
-                // otherwise we have a usual parameter/argument set
+
+                // the current parameter has no argument (and not explicilty set to null), try to merge the next
+                if (peek != null && String.IsNullOrEmpty(peek.Name))
+                {
+                    Parameters.Add(current.Name, peek.Value);
+                    i++; //because of merge
+                }
+                // the next parameter might also be '-b' without "b" being a defined parameter, then we take it
+                // as value
+                else if (peek != null && peek.Value == null && !definedParameterNames.Contains(peek.Name))
+                {
+                    Parameters.Add(current.Name, peek.GetDecoratedName());
+                    i++; //because of merge
+                }
+                else if (definedParameterNames.Contains(current.Name))
+                {
+                    // otherwise we don't have a value for this named parameter, throw an error
+                    throw new ParameterBindingException("Missing argument for parameter '" + current.Name + "'");
+                }
                 else
                 {
+                    // this happens on an named parameter that is not part of the parameter definition
                     Parameters.Add(current);
                 }
             }
