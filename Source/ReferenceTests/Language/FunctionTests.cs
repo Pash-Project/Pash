@@ -71,6 +71,29 @@ namespace ReferenceTests.Language
             ExecuteAndCompareTypedResult(funStart + "$a; $b; $args; }; f -c 1 -d 'val' -e", null, null, "-c", 1, "-d", "val", "-e");
         }
 
+        [TestCase("function f($a) { ")]
+        [TestCase("function f { param($a); ")]
+        public void FunctionsUndefinedNamedArgsKeepCorrectOrder(string funStart)
+        {
+            ExecuteAndCompareTypedResult(funStart + "$a; $args; }; f 1 2 -d 'val' -e 3 4", 1, 2, "-d", "val", "-e", 3, 4);
+        }
+
+        [TestCase("function f($a='f') { ")]
+        [TestCase("function f { param($a='f'); ")]
+        public void FunctionsNamedUsetParameterThrows(string funStart)
+        {
+            Assert.Throws<ParameterBindingException>(delegate {
+               ReferenceHost.Execute(funStart + "}; f -a");
+            });
+        }
+
+        [TestCase("function f($a='f') { ")]
+        [TestCase("function f { param($a='f'); ")]
+        public void FunctionsNamedParameterCanTakeUnusedParamName(string funStart)
+        {
+            ExecuteAndCompareTypedResult(funStart + " $a; }; f -a -b", "-b");
+        }
+
         [Test]
         public void FunctionWithBothParenthesisAndParamBlockThrows()
         {
