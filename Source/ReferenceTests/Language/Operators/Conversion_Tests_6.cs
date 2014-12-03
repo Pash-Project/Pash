@@ -304,6 +304,13 @@ namespace ReferenceTests.Language.Operators
         }
 
         [Test]
+        public void ConvertToStringFromHashtableDoesntEnumerate()
+        {
+            var cmd = "$OFS='|'; $h = @{foo='bar'; bar='baz'}; [string]$h";
+            ExecuteAndCompareTypedResult(cmd, "System.Collections.Hashtable");
+        }
+
+        [Test]
         public void ConvertToStringFromArrayWithNull()
         {
             ExecuteAndCompareTypedResult("$OFS='|';[string]@(1,'f',$null,3)", "1|f||3");
