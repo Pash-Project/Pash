@@ -112,6 +112,15 @@ namespace ReferenceTests.Language
             });
         }
 
+        [TestCase("function f($a, $A) { ")]
+        [TestCase("function f { param($a, $A'); ")]
+        public void DuplicateParameterNamesInvariantCaseThrowParseError(string funStart)
+        {
+            Assert.Throws<ParseException>(delegate {
+                ReferenceHost.Execute(funStart + " $a; }");
+            });
+        }
+
         [Test]
         public void FunctionWithBothParenthesisAndParamBlockThrows()
         {
