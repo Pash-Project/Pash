@@ -676,15 +676,15 @@ namespace System.Management.Automation
             // 1-dimensional array.
             // Windows PowerShell: For other enumerable types, the source value is treated like a 1-dimensional
             // array.
-            if (rawValue is IEnumerable)
+            IEnumerable enumerable = GetEnumerable(rawValue);
+            if (enumerable != null)
             {
-                var arr = (IEnumerable)rawValue;
                 var runspace = Runspaces.Runspace.DefaultRunspace;
                 var ofsV = runspace.SessionStateProxy.GetVariable("OFS");
                 var ofs = ofsV != null ? ofsV.ToString() : " ";
 
                 // Linq handles flattening
-                return String.Join(ofs, from o in arr.Cast<object>()
+                return String.Join(ofs, from o in enumerable.Cast<object>()
                                         select o == null ? "" : PSObject.Unwrap(o).ToString());
             }
             // A scriptblock type value is converted to a string containing the text of that block without the

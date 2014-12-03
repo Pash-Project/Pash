@@ -90,6 +90,8 @@
     <Compile Include="Language\Loops.cs" />
     <Compile Include="Language\Operators\PrefixIncrementDecrementTests_7_2_6.cs" />
     <Compile Include="Language\Operators\PostfixIncrementDecrementTests_7_1_5.cs" />
+    <Compile Include="GithubIssues\Issue200.cs" />
+    <Compile Include="GithubIssues\Issue20.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
@@ -127,5 +129,6 @@
   -->
   <ItemGroup>
     <Folder Include="Parsing\" />
+    <Folder Include="GithubIssues\" />
   </ItemGroup>
 </Project>
