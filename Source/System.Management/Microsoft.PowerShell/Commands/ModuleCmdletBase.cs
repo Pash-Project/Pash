@@ -60,8 +60,9 @@ namespace System.Management.Automation
             }
             catch (ExitException e)
             {
-                ExecutionContext.SetLastExitCodeVariable(e.ExitCode);
-                ExecutionContext.SetSuccessVariable(e.ExitCode == 0);
+                var exitCode = LanguagePrimitives.ConvertTo<int>(e.Argument);
+                ExecutionContext.SetLastExitCodeVariable(exitCode);
+                ExecutionContext.SetSuccessVariable(exitCode == 0);
             }
             finally
             {
