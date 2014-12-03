@@ -256,8 +256,7 @@ namespace Pash.ParserIntrinsics
 
             if (parameters != null && scriptBlock.ParamBlock != null)
             {
-                throw new ParseException("Cannot define both param block and parameters");
-                // TODO sburnicki: check if both parameters and scriptBlock.ParamBlock are defined and throw a parse error
+                throw new ParseException("Cannot define both param block and parameters, use one of them");
             }
 
             return new FunctionDefinitionAst(
