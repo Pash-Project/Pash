@@ -85,9 +85,25 @@ namespace Pash.ParserIntrinsics
             // to anticipate a closing parenthesis here too.
             VerifyTerm(parseTreeNode, this._grammar.parameter_list, this._grammar.ToTerm(")"));
 
-            return from ParseTreeNode parameter in parseTreeNode.ChildNodes
-                   where parameter.Term == this._grammar.script_parameter
-                   select BuildParameterAst(parameter);
+            var parameters = new List<ParameterAst>();
+            var paramNames = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+            foreach (ParseTreeNode curParam in parseTreeNode.ChildNodes)
+            { 
+                if (curParam.Term != this._grammar.script_parameter)
+                {
+                    continue;
+                }
+                var param = BuildParameterAst(curParam);
+                var name = param.Name.VariablePath.UserPath;
+                if (paramNames.Contains(name))
+                {
+                    var msg = String.Format("Duplicate parameter '{0}' in parameter list.", name);
+                    throw new ParseException(msg);
+                }
+                parameters.Add(param);
+                paramNames.Add(name);
+            }
+            return parameters;
         }
 
         private ParameterAst BuildParameterAst(ParseTreeNode parseTreeNode)
@@ -236,6 +252,11 @@ namespace Pash.ParserIntrinsics
             else
             {
                 scriptBlock = BuildScriptBlockAst(parseTreeNode.ChildNodes[3]);
+            }
+
+            if (parameters != null && scriptBlock.ParamBlock != null)
+            {
+                throw new ParseException("Cannot define both param block and parameters, use one of them");
             }
 
             return new FunctionDefinitionAst(

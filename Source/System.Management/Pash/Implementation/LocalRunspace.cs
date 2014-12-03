@@ -217,7 +217,7 @@ namespace Pash.Implementation
                 {
                     var funEntry = (SessionStateFunctionEntry)cmdEntry;
                     var scriptBlock = new ScriptBlock(CommandManager.ParseInput(funEntry.Definition));
-                    var funInfo = new FunctionInfo(funEntry.Name, scriptBlock, funEntry.Options);
+                    var funInfo = new FunctionInfo(funEntry.Name, scriptBlock, null, funEntry.Options);
                     ExecutionContext.SessionState.Function.Set(funInfo);
                 }
             }

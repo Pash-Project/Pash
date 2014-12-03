@@ -10,31 +10,33 @@ namespace System.Management.Automation
 {
     public class FunctionInfo : CommandInfo, IScopedItem, IScriptBlockInfo
     {
+        private ReadOnlyCollection<ParameterAst> _explicitParameters;
+
         public override string Definition { get { return ScriptBlock.ToString(); } }
         public ScopedItemOptions Options { get; set; }
         public string Noun { get; private set; }
         public string Verb { get; private set; }
         public string Description { get; set; }
 
-        internal FunctionInfo(string name, ScriptBlock function)
-            : this(name, function, ScopedItemOptions.None) { }
+        internal FunctionInfo(string name, ScriptBlock function, IEnumerable<ParameterAst> explicitParams)
+        : this(name, function, explicitParams, ScopedItemOptions.None) { }
 
-        internal FunctionInfo(string verb, string noun, ScriptBlock function, ScopedItemOptions options)
-            : base(verb + "-" + noun, CommandTypes.Function)
+        internal FunctionInfo(string verb, string noun, ScriptBlock function, IEnumerable<ParameterAst> explicitParams,
+                              ScopedItemOptions options)
+            : this(verb + "-" + noun, function, explicitParams, options)
         {
-            ScriptBlock = function;
-            Options = options;
             Verb = verb;
             Noun = noun;
-            ScopeUsage = ScopeUsages.NewScope;
         }
-
-        internal FunctionInfo(string name, ScriptBlock function, ScopedItemOptions options)
+        internal FunctionInfo(string name, ScriptBlock function, IEnumerable<ParameterAst> explicitParams,
+                              ScopedItemOptions options)
             : base(name, CommandTypes.Function)
         {
             ScriptBlock = function;
             Options = options;
             ScopeUsage = ScopeUsages.NewScope;
+            _explicitParameters = explicitParams == null ? new ReadOnlyCollection<ParameterAst>(new ParameterAst[0])
+                                                         : explicitParams.ToReadOnlyCollection();
         }
 
         #region IScriptBlockInfo Members
@@ -44,9 +46,16 @@ namespace System.Management.Automation
 
         public ReadOnlyCollection<ParameterAst> GetParameters()
         {
-            var scriptBlockAst = (ScriptBlockAst)ScriptBlock.Ast;
+            if (_explicitParameters.Count > 0)
+            {
+                return _explicitParameters;
+            }
+
+            var scriptBlockAst = ScriptBlock.Ast as ScriptBlockAst;
             if (scriptBlockAst.ParamBlock != null)
+            {
                 return scriptBlockAst.ParamBlock.Parameters;
+            }
 
             return new ReadOnlyCollection<ParameterAst>(new List<ParameterAst>());
         }

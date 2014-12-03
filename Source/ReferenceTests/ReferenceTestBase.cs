@@ -189,7 +189,9 @@ namespace ReferenceTests
                 Assert.That(results[0], Is.Null);
                 return;
             }
-            Assert.AreEqual(expectedValues.Length, results.Count);
+            Assert.AreEqual(expectedValues.Length, results.Count,
+                            "Expected: " + SafeStringJoin(", ", expectedValues) + Environment.NewLine +
+                            "Was:      " + SafeStringJoin(", ", results));
             for (int i = 0; i < expectedValues.Length; i++)
             {
                 var expected = expectedValues[i];
@@ -198,6 +200,7 @@ namespace ReferenceTests
                     Assert.IsNull(results[i]);
                     continue;
                 }
+                Assert.NotNull(results[i], i + "th result is null, but should be" + expectedValues[i].ToString());
                 var res = results[i].BaseObject;
                 var restype = res.GetType();
                 Assert.AreSame(expected.GetType(), restype);
@@ -258,6 +261,12 @@ namespace ReferenceTests
             sb.Remove(sb.Length - 1, 1);
             sb.Append(")");
             return sb.ToString();
+        }
+
+        static string SafeStringJoin(string sep, IEnumerable<object> objs)
+        {
+            var strs = from o in objs select o == null ? "" : o.ToString();
+            return String.Join(sep, strs);
         }
     }
 }
