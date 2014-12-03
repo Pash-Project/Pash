@@ -1175,7 +1175,6 @@ namespace System.Management.Pash.Implementation
             // the subVisitors' output stream, so that already written results appear
             // also in this OutputStream
             var subVisitor = this.CloneSub(false);
-            object returnResult = null;
             subVisitor._pipelineCommandRuntime.ErrorStream.Redirect(_pipelineCommandRuntime.ErrorStream);
             try
             {
