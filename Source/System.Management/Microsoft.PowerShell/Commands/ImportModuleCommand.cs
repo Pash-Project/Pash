@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Pash.Implementation;
 
 namespace System.Management.Automation
 {
@@ -57,9 +58,10 @@ namespace System.Management.Automation
             {
                 throw new NotImplementedException("Currently you can only import modules by name!");
             }
+            var moduleLoader = new ModuleLoader(ExecutionContext);
             foreach (var modName in Name)
             {
-                PSModuleInfo moduleInfo = LoadModuleByName(modName, _loadToGlobalScope);
+                PSModuleInfo moduleInfo = moduleLoader.LoadModuleByName(modName, _loadToGlobalScope);
                 if (PassThru.IsPresent)
                 {
                     WriteObject(moduleInfo);
