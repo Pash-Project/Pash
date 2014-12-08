@@ -11,7 +11,7 @@ namespace System.Management.Automation
         private readonly string[] _scriptExtensions = new string[] { ".psm1", ".ps1" };
         private readonly string[] _assemblyExtensions = new string[] { ".dll" };
 
-        internal PSModuleInfo LoadModuleByName(string name)
+        internal PSModuleInfo LoadModuleByName(string name, bool loadToGlobalScope)
         {
             var path = new Path(name);
             if (name.Contains(path.CorrectSlash) || path.HasExtension())
@@ -19,11 +19,19 @@ namespace System.Management.Automation
                 // ALWAYS derive from global scope: the Scope parameter only defines where stuff is imported to
                 var sessionState = new SessionState(SessionState.SessionStateGlobal.RootSessionState);
                 sessionState.IsScriptScope = true;
-                var moduleInfo = new PSModuleInfo(path, path.GetFileNameWithoutExtension(), sessionState);
-                // TODO: make sure it's not already loaded first!
-                sessionState.SetModule(moduleInfo);
 
+                // check if it's already loaded
+                var loadedModule = ExecutionContext.SessionState.LoadedModules.Get(path);
+                if (loadedModule != null)
+                {
+                    return loadedModule;
+                }
+
+                // load it otherwise
+                var moduleInfo = new PSModuleInfo(path, path.GetFileNameWithoutExtension(), sessionState);
+                sessionState.SetModule(moduleInfo);
                 LoadModuleByPath(moduleInfo, path);
+                ExecutionContext.SessionState.LoadedModules.Add(moduleInfo, loadToGlobalScope ? "global" : "local");
                 return moduleInfo;
             }
             // otherwise we'd need to look in our module paths for a module

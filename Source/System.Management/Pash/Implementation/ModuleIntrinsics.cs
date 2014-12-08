@@ -35,6 +35,11 @@ namespace Pash.Implementation
             }
         }
 
+        public PSModuleInfo Get(string path)
+        {
+            return _scope.Get(path, false);
+        }
+
         public Dictionary<string, PSModuleInfo> GetAll()
         {
             return _scope.GetAll();
@@ -91,7 +96,7 @@ namespace Pash.Implementation
                 var foundAlias = _scope.SessionState.Alias.Get(alias.ItemName);
                 if (foundAlias.Module != null && foundAlias.Module.Path.Equals(module.Path))
                 {
-                    _scope.SessionState.Alias.Remove(module.ItemName);
+                    _scope.SessionState.Alias.Remove(foundAlias.ItemName);
                 }
             }
             // TODO: removal of scoped cmdlets

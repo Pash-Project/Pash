@@ -20,6 +20,19 @@ namespace ReferenceTests.Commands
         );
 
         [Test]
+        public void ExportModuleMemberWithStar()
+        {
+            var module = CreateFile(_testModule + "Export-ModuleMember -Function * -Variable * -Alias *", "psm1");
+            var cmd = NewlineJoin(
+                "Import-Module '" + module + "';",
+                "foo; foobar; bar;",
+                "$x; $y; $xy",
+                "lorem; loremipsum; ipsum"
+                );
+            ExecuteAndCompareTypedResult(cmd, "foo", "foobar", "bar", 1, 2, 12, "foo", "foobar", "bar");
+        }
+
+        [Test]
         public void ExportModuleMemberByPattern()
         {
             var module = CreateFile(_testModule + "Export-ModuleMember -Function Foo* -Variable X* -Alias loRem*", "psm1");
@@ -38,7 +51,6 @@ namespace ReferenceTests.Commands
                 ReferenceHost.RawExecuteInLastRunspace("ipsum");
             });
         }
-
 
         [Test]
         public void ExportModuleMemberByArray()

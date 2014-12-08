@@ -35,6 +35,9 @@ namespace System.Management.Automation
         [ValidateSetAttribute("Global", "Local", IgnoreCase = true)] 
         public string Scope { get; set; }
 
+        [Parameter]
+        public SwitchParameter PassThru { get; set; }
+
         private bool _loadToGlobalScope;
 
         protected override void BeginProcessing()
@@ -56,8 +59,11 @@ namespace System.Management.Automation
             }
             foreach (var modName in Name)
             {
-                var moduleInfo = LoadModuleByName(modName);
-                ExecutionContext.SessionState.LoadedModules.Add(moduleInfo, _loadToGlobalScope ? "global" : "local");
+                PSModuleInfo moduleInfo = LoadModuleByName(modName, _loadToGlobalScope);
+                if (PassThru.IsPresent)
+                {
+                    WriteObject(moduleInfo);
+                }
             }
         }
     }
