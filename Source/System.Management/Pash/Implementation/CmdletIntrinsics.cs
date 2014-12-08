@@ -27,20 +27,26 @@ namespace Pash.Implementation
 
         public void LoadCmdletsFromAssembly(Assembly assembly, PSSnapInInfo snapinInfo)
         {
+            LoadCmdletsFromAssembly(assembly, snapinInfo, null);
+        }
+
+        public void LoadCmdletsFromAssembly(Assembly assembly, PSModuleInfo moduleInfo)
+        {
+            LoadCmdletsFromAssembly(assembly, null, moduleInfo);
+        }
+
+        // private because one should only load cmdlets from a module OR snapin, not both. but it's handy
+        private void LoadCmdletsFromAssembly(Assembly assembly, PSSnapInInfo snapinInfo, PSModuleInfo moduleInfo)
+        {
             var cmdlets = from Type type in assembly.GetTypes()
                 where type.IsSubclassOf(typeof(Cmdlet))
                     from CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof(CmdletAttribute), true)
-                    select new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo);
+                    select new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, moduleInfo);
             foreach (CmdletInfo curCmdlet in cmdlets)
             {
                 curCmdlet.AddCommonParameters();
                 _scope.SetLocal(curCmdlet, false);
             }
-        }
-
-        public void LoadCmdletsFromAssembly(Assembly assembly, PSModuleInfo moduleInfo)
-        {
-            throw new NotImplementedException("loading for modules not yet implemented");
         }
 
         public void RemoveAll(PSSnapInInfo snapin)

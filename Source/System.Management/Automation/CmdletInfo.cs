@@ -26,21 +26,23 @@ namespace System.Management.Automation
 
         private Exception _validationException;
 
-        internal CmdletInfo(string name, Type implementingType, string helpFile, PSSnapInInfo snapin)
-            : this(name, implementingType, helpFile)
+        internal CmdletInfo(string name, Type implementingType, string helpFile)
+            : this(name, implementingType, helpFile, null, null)
         {
+        }
 
-            PSSnapIn = snapin;
+        internal CmdletInfo(string name, Type implementingType, string helpFile, PSSnapInInfo snapin)
+            : this(name, implementingType, helpFile, snapin, null)
+        {
         }
 
         internal CmdletInfo(string name, Type implementingType, string helpFile, PSModuleInfo module)
-            : this(name, implementingType, helpFile)
+            : this(name, implementingType, helpFile, null, module)
         {
 
-            Module = module;
         }
 
-        internal CmdletInfo(string name, Type implementingType, string helpFile)
+        internal CmdletInfo(string name, Type implementingType, string helpFile, PSSnapInInfo snapin, PSModuleInfo module)
             : base(name, CommandTypes.Cmdlet)
         {
             int i = name.IndexOf('-');
@@ -54,6 +56,8 @@ namespace System.Management.Automation
             ImplementingType = implementingType;
             HelpFile = helpFile;
             _validationException = null;
+            PSSnapIn = snapin;
+            Module = module;
             GetParameterSetInfo(implementingType);
         }
 

@@ -341,6 +341,7 @@ namespace Pash.Implementation
             }
         }
 
+        // TODO: make this available in ProviderIntrinsics, then we can also use it for modules from the ModuleLoader :)
         private void LoadProvidersFromAssembly(Assembly assembly, PSSnapInInfo snapinInfo)
         {
             // first get name and type of all providers in this assembly
