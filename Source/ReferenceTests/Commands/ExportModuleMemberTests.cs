@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using System.Management.Automation;
 
-namespace ReferenceTests
+namespace ReferenceTests.Commands
 {
     [TestFixture]
     public class ExportModuleMemberTests : ReferenceTestBase
@@ -14,8 +14,8 @@ namespace ReferenceTests
             "$x = 1",
             "$y = 2",
             "$xy = 12",
-            "New-Alias lorem bar",
-            "New-Alias loremipsum bar",
+            "New-Alias lorem foo",
+            "New-Alias loremipsum foobar",
             "New-Alias ipsum bar"
         );
 
@@ -30,7 +30,7 @@ namespace ReferenceTests
                 "lorem; loremipsum;",
                 "$y" // shouldn't be exported
                 );
-            ExecuteAndCompareTypedResult(cmd, "foo", "foobar", 1, 12, "bar", "bar", null);
+            ExecuteAndCompareTypedResult(cmd, "foo", "foobar", 1, 12, "foo", "foobar", null);
             Assert.Throws<CommandNotFoundException>(delegate {
                 ReferenceHost.RawExecuteInLastRunspace("bar");
             });
@@ -51,13 +51,33 @@ namespace ReferenceTests
                 "lorem; ipsum;",
                 "$xy" // shouldn't be exported
                 );
-            ExecuteAndCompareTypedResult(cmd, "foo", "bar", 1, 2, "bar", "bar", null);
-            Assert.Throws<CommandNotFoundException>(delegate {
+            ExecuteAndCompareTypedResult(cmd, "foo", "bar", 1, 2, "foo", "bar", null);
+            Assert.Throws<CommandNotFoundException>(delegate
+            {
                 ReferenceHost.RawExecuteInLastRunspace("foobar");
             });
-            Assert.Throws<CommandNotFoundException>(delegate {
+            Assert.Throws<CommandNotFoundException>(delegate
+            {
                 ReferenceHost.RawExecuteInLastRunspace("loremipsum");
             });
+        }
+
+
+        [Test]
+        public void ExportModuleAliasWithoutFunctionDoesntResolve()
+        {
+            var module = CreateFile(_testModule + "Export-ModuleMember -Alias lorem", "psm1");
+            Assert.Throws<CommandNotFoundException>(delegate
+            {
+                ReferenceHost.Execute("Import-Module '" + module + "'; lorem");
+            });
+        }
+
+        [Test]
+        public void ExportModuleMembersThatDontExistDoesntThrow()
+        {
+            var module = CreateFile(_testModule + "Export-ModuleMember -Function foo,bla,blub", "psm1");
+            ExecuteAndCompareTypedResult("Import-Module '" + module + "'; foo", "foo");
         }
 
         [Test]
@@ -92,7 +112,7 @@ namespace ReferenceTests
         [Test]
         public void ExportModuleMemberNothingPreventsExportingFunctions()
         {
-            var module = CreateFile(_testModule, "psm1");
+            var module = CreateFile(_testModule + "Export-ModuleMember", "psm1");
             var cmd = NewlineJoin(
                 "Import-Module '" + module + "';",
                 "$x; $y; $xy"
@@ -121,7 +141,7 @@ namespace ReferenceTests
         [Test]
         public void ExportModuleMemberOutsideModuleThrows()
         {
-            Assert.Throws<InvalidOperationException>(delegate {
+            Assert.Throws<CmdletInvocationException>(delegate {
                 ReferenceHost.Execute("Export-ModuleMember");
             });
         }
