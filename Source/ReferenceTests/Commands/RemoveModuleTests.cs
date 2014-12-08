@@ -56,6 +56,8 @@ namespace ReferenceTests.Commands
             Assert.That(ReferenceHost.LastResults, Is.EqualTo(NewlineJoin("bar")));
         }
 
+        // TODO: remove multiple modules by pattern
+        // TODO: remove module with ambiguos name (two modules with name 'test' loaded) by PSModuleInfo object
         // TODO: test with a script importing the same module as the global, and removing it -> removed from global also
         // TODO: test that shows that exported members of all types are removed
     }

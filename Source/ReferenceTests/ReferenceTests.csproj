@@ -93,6 +93,7 @@
     <Compile Include="Language\Loops.cs" />
     <Compile Include="Language\Operators\PrefixIncrementDecrementTests_7_2_6.cs" />
     <Compile Include="Language\Operators\PostfixIncrementDecrementTests_7_1_5.cs" />
+    <Compile Include="Commands\ExportModuleMemberTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
