@@ -132,10 +132,10 @@ namespace ReferenceTests.Commands
         }
 
         // TODO: tests for modules importing modules to check scope derivance and execution
-        // TODO: test that checks what happens if the script module returns a value
-        // TODO: test that checks the behavior if both the Global and the Scope parameter are set
+        // TODO: test that checks what happens if the script module returns a value -> shouldn't
+        // TODO: test that checks the behavior if both the Global and the Scope parameter are set -> exception
         // TODO: test if module exports a variable that overwrites an existing one. which PSVariable *object* will be used?
-        // TODO: what if module is loaded twice?
-        // TODO: what if another module with the same name is loaded?
+        // TODO: what if module is loaded twice -> only loaded once
+        // TODO: what if another module with the same name is loaded -> two modules, different path
     }
 }
