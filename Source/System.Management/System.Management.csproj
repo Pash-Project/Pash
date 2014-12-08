@@ -497,7 +497,8 @@
     <Compile Include="Pash\Implementation\ScriptBlockParameterBinder.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\ImportModuleCommand.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\ModuleCmdletBase.cs" />
-    <Compile Include="Pash\ModuleIntrinsics.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\RemoveModuleCommand.cs" />
+    <Compile Include="Pash\Implementation\ModuleIntrinsics.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

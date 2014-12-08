@@ -53,6 +53,11 @@ namespace Pash.Implementation
         {
             _scope.RemoveAtScope(aliasName, scope);
         }
+
+        internal void Remove(string aliasName)
+        {
+            _scope.Remove(aliasName, false);
+        }
     }
 }
 

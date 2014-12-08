@@ -11,21 +11,10 @@ namespace System.Management.Automation
         private SessionStateScope<FunctionInfo> _functionScope;
         private SessionStateScope<PSVariable> _variableScope;
         private SessionStateScope<PSDriveInfo> _driveScope;
-        private bool _isScriptScope;
+        private SessionStateScope<PSModuleInfo> _moduleScope;
 
         internal SessionStateGlobal SessionStateGlobal { get; private set; }
-        internal bool IsScriptScope
-        {
-            get { return _isScriptScope; }
-            set
-            {
-                _isScriptScope = value;
-                _aliasScope.IsScriptScope = value;
-                _functionScope.IsScriptScope = value;
-                _variableScope.IsScriptScope = value;
-                _driveScope.IsScriptScope = value;
-            }
-        }
+        internal bool IsScriptScope { get; set; }
 
         internal AliasIntrinsics Alias { get; private set; }
         internal FunctionIntrinsics Function { get; private set; }
@@ -59,21 +48,23 @@ namespace System.Management.Automation
             var parentFunctionScope = parent == null ? null : parent._functionScope;
             var parentVariableScope = parent == null ? null : parent._variableScope;
             var parentDriveScope = parent == null ? null : parent._driveScope;
+            var parentModuleScope = parent == null ? null : parent._moduleScope;
 
-            _aliasScope = new SessionStateScope<AliasInfo>(parentAliasScope, SessionStateCategory.Alias);
-            _functionScope = new SessionStateScope<FunctionInfo>(parentFunctionScope, SessionStateCategory.Function);
-            _variableScope = new SessionStateScope<PSVariable>(parentVariableScope, SessionStateCategory.Variable);
-            _driveScope = new SessionStateScope<PSDriveInfo>(parentDriveScope, SessionStateCategory.Drive);
+            _aliasScope = new SessionStateScope<AliasInfo>(this, parentAliasScope, SessionStateCategory.Alias);
+            _functionScope = new SessionStateScope<FunctionInfo>(this, parentFunctionScope, SessionStateCategory.Function);
+            _variableScope = new SessionStateScope<PSVariable>(this, parentVariableScope, SessionStateCategory.Variable);
+            _driveScope = new SessionStateScope<PSDriveInfo>(this, parentDriveScope, SessionStateCategory.Drive);
+            _moduleScope = new SessionStateScope<PSModuleInfo>(this, parentModuleScope, SessionStateCategory.Module);
 
             IsScriptScope = false;
             Function = new FunctionIntrinsics(_functionScope);
             Alias = new AliasIntrinsics(_aliasScope);
 
-            Drive = new DriveManagementIntrinsics(this, _driveScope);
+            Drive = new DriveManagementIntrinsics(_driveScope);
             Path = new PathIntrinsics(SessionStateGlobal);
             Provider = new CmdletProviderManagementIntrinsics(SessionStateGlobal);
             PSVariable = new PSVariableIntrinsics(_variableScope);
-            LoadedModules = new ModuleIntrinsics(this);
+            LoadedModules = new ModuleIntrinsics(_moduleScope);
         }
 
         internal void SetModule(PSModuleInfo module)

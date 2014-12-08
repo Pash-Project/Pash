@@ -14,6 +14,16 @@ namespace System.Management.Automation
         public virtual ScopedItemOptions Options { get; set; }
         public Collection<Attribute> Attributes { get; private set; }
 
+        public PSModuleInfo Module { get; set; }
+
+        public string  ModuleName
+        {
+            get
+            {
+                return Module == null ? "" : this.Module.Name;
+            }
+        }
+
         public PSVariable(string name)
             : this(name, null, ScopedItemOptions.None, null)
         {

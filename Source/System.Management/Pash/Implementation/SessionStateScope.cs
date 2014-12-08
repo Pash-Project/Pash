@@ -65,21 +65,23 @@ namespace Pash.Implementation
 
         internal SessionStateCategory SessionStateCategory { get; private set; }
 
+        public SessionState SessionState { get; private set; }
         public SessionStateScope<T> ParentScope{ get; private set; }
         public Dictionary<string, T> Items { get; private set; }
-        public bool IsScriptScope { get; set; }
+        public bool IsScriptScope { get { return SessionState.IsScriptScope; } }
         public IEnumerable<SessionStateScope<T>> HierarchyIterator
         {
             get { return new ScopeHierarchyIterator(this); }
         }
 
 
-        public SessionStateScope(SessionStateScope<T> parentItems, SessionStateCategory sessionStateCategory)
+        public SessionStateScope(SessionState sessionState,SessionStateScope<T> parentItems,
+                                 SessionStateCategory sessionStateCategory)
         {
             ParentScope = parentItems;
             Items = new Dictionary<string, T>(StringComparer.CurrentCultureIgnoreCase);
             //TODO: care about AllScope items!
-
+            SessionState = sessionState;
             SessionStateCategory = sessionStateCategory;
         }
 
@@ -319,9 +321,9 @@ namespace Pash.Implementation
 
         #endregion
 
-        #region helper functions
+        #region public helper functions
 
-        private SessionStateScope<T> FindHostingScope(string unqualifiedName)
+        public SessionStateScope<T> FindHostingScope(string unqualifiedName)
         {
             //iterate through scopes and parents until we find the variable
             foreach (var candidate in HierarchyIterator)
@@ -340,8 +342,8 @@ namespace Pash.Implementation
             return null; //nothing found
         }
 
-        private SessionStateScope<T> GetScope(string specifier, bool numberAllowed,
-                                               SessionStateScope<T> fallback = null)
+        public SessionStateScope<T> GetScope(string specifier, bool numberAllowed,
+                                             SessionStateScope<T> fallback = null)
         {
             int scopeLevel = -1;
             if (String.IsNullOrEmpty(specifier))
@@ -377,6 +379,10 @@ namespace Pash.Implementation
             }
             return GetScope(scopeSpecifier);
         }
+
+        #endregion
+
+        #region private helper functions
 
         private SessionStateScope<T> GetScope(ScopeSpecifiers specifier)
         {

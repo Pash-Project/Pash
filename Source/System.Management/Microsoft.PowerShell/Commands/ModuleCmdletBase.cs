@@ -11,7 +11,7 @@ namespace System.Management.Automation
         private readonly string[] _scriptExtensions = new string[] { ".psm1", ".ps1" };
         private readonly string[] _assemblyExtensions = new string[] { ".dll" };
 
-        public PSModuleInfo LoadModuleByName(string name)
+        internal PSModuleInfo LoadModuleByName(string name)
         {
             var path = new Path(name);
             if (name.Contains(path.CorrectSlash) || path.HasExtension())
@@ -19,16 +19,18 @@ namespace System.Management.Automation
                 // ALWAYS derive from global scope: the Scope parameter only defines where stuff is imported to
                 var sessionState = new SessionState(SessionState.SessionStateGlobal.RootSessionState);
                 sessionState.IsScriptScope = true;
-                var moduleInfo = new PSModuleInfo(path.GetFileNameWithoutExtension(), sessionState);
+                var moduleInfo = new PSModuleInfo(path, path.GetFileNameWithoutExtension(), sessionState);
+                // TODO: make sure it's not already loaded first!
                 sessionState.SetModule(moduleInfo);
 
                 LoadModuleByPath(moduleInfo, path);
                 return moduleInfo;
             }
+            // otherwise we'd need to look in our module paths for a module
             throw new NotImplementedException("Currently you can only a specific module file, not installed modules");
         }
 
-        public void LoadModuleByPath(PSModuleInfo moduleInfo, Path path)
+        internal void LoadModuleByPath(PSModuleInfo moduleInfo, Path path)
         {
             var ext = path.GetExtension();
             if (_scriptExtensions.Contains(ext))
@@ -43,7 +45,7 @@ namespace System.Management.Automation
             ThrowTerminatingError(error);
         }
 
-        public void LoadScriptModule(PSModuleInfo moduleInfo, Path path)
+        internal void LoadScriptModule(PSModuleInfo moduleInfo, Path path)
         {
             // execute the script in it's own scope
             var scriptBlock = new ExternalScriptInfo(path.ToString(), ScopeUsages.CurrentScope).ScriptBlock;

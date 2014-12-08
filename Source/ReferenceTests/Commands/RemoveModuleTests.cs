@@ -34,5 +34,8 @@ namespace ReferenceTests.Commands
                 ReferenceHost.RawExecuteInLastRunspace("foo;");
             });
         }
+
+        // TODO: test that shows "hiding" a function before removal by defining a local one
+        // TODO: test with a script importing the same module as the global, and removing it -> removed from global also
     }
 }

@@ -54,13 +54,10 @@ namespace System.Management.Automation
             {
                 throw new NotImplementedException("Currently you can only import modules by name!");
             }
-            var targetSessionState = _loadToGlobalScope ? ExecutionContext.SessionStateGlobal.RootSessionState
-                                                        : SessionState;
             foreach (var modName in Name)
             {
                 var moduleInfo = LoadModuleByName(modName);
-                targetSessionState.LoadedModules.ImportMembers(moduleInfo);
-                targetSessionState.LoadedModules.Add(moduleInfo);
+                ExecutionContext.SessionState.LoadedModules.Add(moduleInfo, _loadToGlobalScope ? "global" : "local");
             }
         }
     }

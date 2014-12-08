@@ -2,11 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Pash.Implementation;
 
 namespace System.Management.Automation
 {
-    public sealed class PSModuleInfo
+    public sealed class PSModuleInfo : IScopedItem
     {
+
+        public string Path { get; private set; }
         public string Name { get; private set; }
         public SessionState SessionState { get; private set; }
         
@@ -15,8 +18,9 @@ namespace System.Management.Automation
         public Dictionary<string, AliasInfo> ExportedAliases { get; private set; }
         public Dictionary<string, CmdletInfo> ExportedCmdlets { get; private set; }
 
-        public PSModuleInfo(string name, SessionState sessionState)
+        internal PSModuleInfo(string path, string name, SessionState sessionState)
         {
+            Path = path;
             Name = name;
             SessionState = sessionState;
             ExportedVariables = new Dictionary<string, PSVariable>();
@@ -46,6 +50,20 @@ namespace System.Management.Automation
             {
                 throw new NotImplementedException("No support for exporting cmdlets, yet");
             }
-        } 
+        }
+
+        #region IScopedItem Members
+
+        public string ItemName
+        {
+            get { return Path; } // spec says: either path to module file or global identifier. so it's unique
+        }
+
+        public ScopedItemOptions ItemOptions
+        {
+            get { return ScopedItemOptions.None; }
+            set { throw new NotImplementedException("Setting scope options for PSModuleInfo is not supported"); }
+        }
+        #endregion
     }
 }

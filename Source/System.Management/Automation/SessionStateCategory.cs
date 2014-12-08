@@ -9,6 +9,6 @@ namespace System.Management.Automation
         Filter,
         Drive,
         CmdletProvider,
-        Scope
+        Module
     }
 }
