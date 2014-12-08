@@ -128,7 +128,6 @@ namespace ReferenceTests.Commands
             });
         }
 
-
         [Test]
         public void ModuleScopeDerivesFromGlobalScopeOnly()
         {

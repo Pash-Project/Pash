@@ -73,7 +73,22 @@ namespace System.Management.Automation
         public void Set(string name, object value)
         {
             var qualName = new SessionStateScope<PSVariable>.QualifiedName(name);
-            _scope.Set(name, new PSVariable(qualName.UnqualifiedName, value), true, true);
+            // check for existing one. if it's not a scope qualified name, make sure to check only local scope
+            // because we won't override a parent scope variable with the same name
+            var variable = qualName.ScopeSpecifier.Length == 0 ? _scope.GetLocal(name) : _scope.Get(name, true);
+            if (variable == null) // doesn't exist, yet. create
+            {
+                _scope.Set(name, new PSVariable(qualName.UnqualifiedName, value), true, true);
+                return;
+            }
+            // make sure it's not read only
+            if (variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly))
+            {
+                throw new SessionStateUnauthorizedAccessException(variable.Name, SessionStateCategory.Variable,
+                                                                  String.Empty, null);
+            }
+            // only modify the value of the old one
+            variable.Value = value;
         }
 
         internal IEnumerable<string> Find(string pattern)
