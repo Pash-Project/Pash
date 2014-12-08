@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace System.Management.Automation
 {
+    // TODO: remove DefaultParameterSetName attribute (see issue #320)
     [Cmdlet(VerbsCommon.Remove, "Module", SupportsShouldProcess=true, DefaultParameterSetName = "name"
             /*, HelpUri="http://go.microsoft.com/fwlink/?LinkID=141556"*/)]
     public class RemoveModuleCommand : ModuleCmdletBase
