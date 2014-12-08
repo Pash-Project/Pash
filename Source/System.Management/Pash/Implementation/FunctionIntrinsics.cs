@@ -6,6 +6,7 @@ using System.Management.Automation.Language;
 
 namespace Pash.Implementation
 {
+    // TODO sburnicki: Extract common functionality to base class
     internal sealed class FunctionIntrinsics
     {
         private SessionStateScope<FunctionInfo> _scope;
@@ -35,7 +36,7 @@ namespace Pash.Implementation
 
         internal Dictionary<string, FunctionInfo> GetAllLocal()
         {
-            return _scope.Items;
+            return new Dictionary<string, FunctionInfo>(_scope.Items);
         }
 
         public void Set(string name, ScriptBlock function, string description = "")

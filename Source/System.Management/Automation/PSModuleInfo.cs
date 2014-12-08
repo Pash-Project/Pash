@@ -18,8 +18,11 @@ namespace System.Management.Automation
         public Dictionary<string, AliasInfo> ExportedAliases { get; private set; }
         public Dictionary<string, CmdletInfo> ExportedCmdlets { get; private set; }
 
+        internal bool HasExplicitExports { get; set; }
+
         internal PSModuleInfo(string path, string name, SessionState sessionState)
         {
+            HasExplicitExports = false;
             Path = path;
             Name = name;
             SessionState = sessionState;
@@ -29,24 +32,25 @@ namespace System.Management.Automation
             ExportedCmdlets = new Dictionary<string, CmdletInfo>();
         }
 
-        internal void ExportMembers(bool exportCmdlets, bool exportFunctions)
+        internal void ValidateExportedMembers(bool defaultExportCmdlets, bool defaultExportFunctions)
         {
             // Check if stuff is already exported. If yes, we're fine
-            if (ExportedAliases.Count > 0 ||
+            if (HasExplicitExports ||
+                ExportedAliases.Count > 0 ||
                 ExportedFunctions.Count > 0 ||
                 ExportedVariables.Count > 0 ||
                 ExportedCmdlets.Count > 0)
             {
                 return;
             }
-            if (exportFunctions)
+            if (defaultExportFunctions)
             {
                 foreach (var fun in SessionState.Function.GetAllLocal())
                 {
                     ExportedFunctions.Add(fun.Key, fun.Value);
                 }
             }
-            if (exportCmdlets)
+            if (defaultExportCmdlets)
             {
                 throw new NotImplementedException("No support for exporting cmdlets, yet");
             }

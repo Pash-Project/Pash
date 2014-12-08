@@ -36,7 +36,7 @@ namespace System.Management.Automation
             if (_scriptExtensions.Contains(ext))
             {
                 LoadScriptModule(moduleInfo, path); // actually load the script
-                moduleInfo.ExportMembers(false, true); // make sure members are exported
+                moduleInfo.ValidateExportedMembers(false, true); // make sure members are exported
                 return;
             }
             // TODO: nicer error message if the extension is *really* unknown

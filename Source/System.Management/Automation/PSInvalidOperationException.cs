@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+using Irony.Parsing;
 
 namespace System.Management.Automation
 {
@@ -12,49 +13,48 @@ namespace System.Management.Automation
     [Serializable]
     public class PSInvalidOperationException : InvalidOperationException, IContainsErrorRecord
     {
-        private string id;
-        private ErrorRecord error;
+        public ErrorRecord ErrorRecord { get; private set; }
 
         public PSInvalidOperationException()
+            : this("Invalid Operation")
         {
-            id = "InvalidOperation";
         }
 
         public PSInvalidOperationException(string message)
-            : base(message)
+            : this(message, null)
         {
-            id = "InvalidOperation";
         }
 
         public PSInvalidOperationException(string message, Exception innerException)
+            : this(message, "InvalidOperation", ErrorCategory.InvalidOperation, innerException)
+        {
+        }
+
+
+        internal PSInvalidOperationException(string message, string id, ErrorCategory errorCategory)
+            : this(message, id, errorCategory, null)
+        {
+        }
+
+        internal PSInvalidOperationException(string message, string id, ErrorCategory errorCategory,
+                                             Exception innerException)
             : base(message, innerException)
         {
-            id = "InvalidOperation";
+            ErrorRecord = new ErrorRecord(new ParentContainsErrorRecordException(this), id, errorCategory, null);
         }
+
 
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            id = "InvalidOperation";
+
         }
 
         protected PSInvalidOperationException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            id = "InvalidOperation";
-        }
-
-        public ErrorRecord ErrorRecord
-        {
-            get
-            {
-                if (error != null)
-                {
-                    return error;
-                }
-                error = new ErrorRecord(new ParentContainsErrorRecordException(this), id, ErrorCategory.InvalidOperation, null);
-                return error;
-            }
+            ErrorRecord = new ErrorRecord(new ParentContainsErrorRecordException(this), "InvalidOperation",
+                                          ErrorCategory.InvalidOperation, null);
         }
     }
 }

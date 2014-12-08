@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace Pash.Implementation
 {
+    // TODO sburnicki: Extract common functionality to base class
     internal sealed class AliasIntrinsics
     {
         private SessionStateScope<AliasInfo> _scope;
@@ -37,6 +38,11 @@ namespace Pash.Implementation
         public Dictionary<string, AliasInfo> GetAll()
         {
             return _scope.GetAll();
+        }
+
+        public Dictionary<string, AliasInfo> GetAllLocal()
+        {
+            return new Dictionary<string, AliasInfo>(_scope.Items);
         }
 
         public void Set(AliasInfo info, string scope)

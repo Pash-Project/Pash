@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace System.Management.Automation
 {
+    // TODO sburnicki: Extract common functionality to base class
     public sealed class PSVariableIntrinsics
     {
         private SessionStateScope<PSVariable> _scope;
@@ -85,5 +86,9 @@ namespace System.Management.Automation
             return _scope.GetAll();
         }
 
+        internal Dictionary<string, PSVariable> GetAllLocal()
+        {
+            return new Dictionary<string, PSVariable>(_scope.Items);
+        }
     }
 }
