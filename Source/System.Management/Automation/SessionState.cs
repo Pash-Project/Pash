@@ -12,6 +12,7 @@ namespace System.Management.Automation
         private SessionStateScope<PSVariable> _variableScope;
         private SessionStateScope<PSDriveInfo> _driveScope;
         private SessionStateScope<PSModuleInfo> _moduleScope;
+        private SessionStateScope<CmdletInfo> _cmdletScope;
 
         internal SessionStateGlobal SessionStateGlobal { get; private set; }
         internal bool IsScriptScope { get; set; }
@@ -19,7 +20,7 @@ namespace System.Management.Automation
         internal AliasIntrinsics Alias { get; private set; }
         internal FunctionIntrinsics Function { get; private set; }
         internal ModuleIntrinsics LoadedModules { get; private set; }
-        // CmdletIntrinsics Cmdlet
+        internal CmdletIntrinsics Cmdlet { get; private set; }
 
         public PSModuleInfo Module { get; private set; }
 
@@ -49,12 +50,14 @@ namespace System.Management.Automation
             var parentVariableScope = parent == null ? null : parent._variableScope;
             var parentDriveScope = parent == null ? null : parent._driveScope;
             var parentModuleScope = parent == null ? null : parent._moduleScope;
+            var parentCmdletScope = parent == null ? null : parent._cmdletScope;
 
             _aliasScope = new SessionStateScope<AliasInfo>(this, parentAliasScope, SessionStateCategory.Alias);
             _functionScope = new SessionStateScope<FunctionInfo>(this, parentFunctionScope, SessionStateCategory.Function);
             _variableScope = new SessionStateScope<PSVariable>(this, parentVariableScope, SessionStateCategory.Variable);
             _driveScope = new SessionStateScope<PSDriveInfo>(this, parentDriveScope, SessionStateCategory.Drive);
             _moduleScope = new SessionStateScope<PSModuleInfo>(this, parentModuleScope, SessionStateCategory.Module);
+            _cmdletScope = new SessionStateScope<CmdletInfo>(this, parentCmdletScope, SessionStateCategory.Cmdlet);
 
             IsScriptScope = false;
             Function = new FunctionIntrinsics(_functionScope);
@@ -65,6 +68,7 @@ namespace System.Management.Automation
             Provider = new CmdletProviderManagementIntrinsics(SessionStateGlobal);
             PSVariable = new PSVariableIntrinsics(_variableScope);
             LoadedModules = new ModuleIntrinsics(_moduleScope);
+            Cmdlet = new CmdletIntrinsics(_cmdletScope);
         }
 
         internal void SetModule(PSModuleInfo module)

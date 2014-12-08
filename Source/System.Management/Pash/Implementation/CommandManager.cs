@@ -18,16 +18,12 @@ namespace Pash.Implementation
 {
     internal class CommandManager
     {
-        //TODO: why do we support multiple commandlets with the same name? That really bugs me.
-        private Dictionary<string, List<CmdletInfo>> _cmdLets;
         private Dictionary<string, ScriptInfo> _scripts;
-        private LocalRunspace _runspace;
+        private readonly LocalRunspace _runspace;
 
         public CommandManager(LocalRunspace runspace)
         {
             _runspace = runspace;
-
-            _cmdLets = new Dictionary<string, List<CmdletInfo>>(StringComparer.CurrentCultureIgnoreCase);
             _scripts = new Dictionary<string, ScriptInfo>(StringComparer.CurrentCultureIgnoreCase);
         }
 
@@ -48,46 +44,6 @@ namespace Pash.Implementation
                     reason = reason.Substring(0, 97) + "...";
                 }
                 throw new ParseException(String.Format(msgfmt, location, reason) , exception);
-            }
-        }
-
-        internal void RegisterCmdlet(CmdletInfo cmdLetInfo)
-        {
-            List<CmdletInfo> cmdletList = null;
-            if (_cmdLets.ContainsKey(cmdLetInfo.Name))
-            {
-                cmdletList = _cmdLets[cmdLetInfo.Name];
-            }
-            else
-            {
-                cmdletList = new List<CmdletInfo>();
-                _cmdLets.Add(cmdLetInfo.Name, cmdletList);
-            }
-            cmdletList.Add(cmdLetInfo);
-        }
-
-        /// <summary>
-        /// Removes all cmdlets of a specific PSSnapIn
-        /// </summary>
-        /// <param name="snapinInfo">Information about the PSSnapIn whose cmdlets should be removed</param>
-        internal void RemoveCmdlets(PSSnapInInfo snapinInfo)
-        {
-            foreach (var pair in _cmdLets)
-            {
-                Collection <CmdletInfo> removables = new Collection<CmdletInfo>();
-                foreach (var cmdlet in pair.Value)
-                {
-                    if (cmdlet.PSSnapIn == null) // not loaded with a snapin. e.g. with a module
-                        continue;
-                    if (cmdlet.PSSnapIn.Equals(snapinInfo))
-                    {
-                        removables.Add(cmdlet);
-                    }
-                }
-                foreach (var rmCmdlet in removables)
-                {
-                    pair.Value.Remove(rmCmdlet);
-                }
             }
         }
 
@@ -169,9 +125,10 @@ namespace Pash.Implementation
                 return function;
             }
 
-            if (_cmdLets.ContainsKey(command) && _cmdLets[command].Any())
+            CmdletInfo cmdlet = _runspace.ExecutionContext.SessionState.Cmdlet.Get(command);
+            if (cmdlet != null)
             {
-                return _cmdLets[command].First();
+                return cmdlet;
             }
 
             if (_scripts.ContainsKey(command))
@@ -193,44 +150,16 @@ namespace Pash.Implementation
             return new ApplicationInfo(Path.GetFileName(path), path, Path.GetExtension(path));
         }
 
-        internal IEnumerable<CommandInfo> FindCommands(string pattern)
-        {
-            var wildcard = new WildcardPattern(pattern, WildcardOptions.IgnoreCase);
-            return from List<CmdletInfo> cmdletInfoList in _cmdLets.Values
-                   from CmdletInfo info in cmdletInfoList
-                   where wildcard.IsMatch(info.Name)
-                   select info;
-        }
-
-        internal IEnumerable<CmdletInfo> LoadCmdletsFromAssembly(Assembly assembly, PSSnapInInfo snapinInfo = null)
-        {
-            var cmdlets = from Type type in assembly.GetTypes()
-                   where type.IsSubclassOf(typeof(Cmdlet))
-                   from CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof(CmdletAttribute), true)
-                   select new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, _runspace.ExecutionContext);
-            foreach (CmdletInfo curCmdlet in cmdlets)
-            {
-                curCmdlet.AddCommonParameters();
-                RegisterCmdlet(curCmdlet);
-            }
-            return cmdlets;
-        }
-
-        internal void LoadCmdletsFromAssemblies(IEnumerable<Assembly> assemblies)
-        {
-            foreach (var curAssembly in assemblies)
-            {
-                LoadCmdletsFromAssembly(curAssembly);
-            }
-        }
-
         internal void ImportModules(IEnumerable<ModuleSpecification> modules)
         {
             //TODO: this module support is not good. we need a proper implementation that allows removing modules,
             //that remembers loaded modules and cares about public and private items in the modules
             var assemblies = from ModuleSpecification module in modules
                              select Assembly.LoadFile(module.Name);
-            LoadCmdletsFromAssemblies(assemblies);
+            foreach (var ass in assemblies)
+            {
+                _runspace.ExecutionContext.SessionState.Cmdlet.LoadCmdletsFromAssembly(ass, (PSSnapInInfo) null);
+            }
         }
 
         /// <summary>

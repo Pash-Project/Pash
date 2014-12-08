@@ -9,6 +9,7 @@ namespace System.Management.Automation
         Filter,
         Drive,
         CmdletProvider,
-        Module
+        Cmdlet,
+        Module // specification says that this shouldn't be here. but we need it here, so nevermind
     }
 }

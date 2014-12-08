@@ -7,6 +7,11 @@ namespace Pash.Implementation
 {
     internal class ModuleIntrinsics
     {
+        /*
+         * Not that module intrinsics will use the ModuleInfo.Path as the name (see definition of PSModuleInfo.ItemName)
+         * because we can have multiple modules with the same name, but not with the same path (which is also a guid).
+         * Make sure to keep that in mind when working with this class.
+         */
         private SessionStateScope<PSModuleInfo> _scope;
 
         public ModuleIntrinsics(SessionStateScope<PSModuleInfo> scope)

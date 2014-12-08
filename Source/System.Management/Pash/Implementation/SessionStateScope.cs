@@ -117,7 +117,7 @@ namespace Pash.Implementation
             return default(T);
         }
 
-        public IEnumerable<string> Find(string pattern, bool isQualified)
+        public Dictionary<string, T> Find(string pattern, bool isQualified)
         {
             if (pattern == null)
             {
@@ -131,23 +131,26 @@ namespace Pash.Implementation
                 {
                     SessionStateScope<T> affectedScope = GetScope(qualName.ScopeSpecifier, false);
                     var wildcard = new WildcardPattern(qualName.UnqualifiedName, WildcardOptions.IgnoreCase);
-                    return from pair in affectedScope.Items 
+                    return (from pair in affectedScope.Items 
                            where wildcard.IsMatch(pair.Key) && 
                             (affectedScope == this || !pair.Value.ItemOptions.HasFlag(ScopedItemOptions.Private))
-                           select qualName.ScopeSpecifier + ":" + pair.Key;
+                                select pair.Value).ToDictionary(x => qualName.ScopeSpecifier + ":" + x.ItemName);
                 }
             }
             var wildcardPattern = new WildcardPattern(pattern, WildcardOptions.IgnoreCase);
-            var visibleItems = new List<string>();
+            var visibleItems = new Dictionary<string, T>();
             //now check recursively the parent scopes for non-private, not overriden variables
             foreach (var curScope in new ScopeHierarchyIterator(this))
             {
-                visibleItems.AddRange(from pair in curScope.Items
-                                      where wildcardPattern.IsMatch(pair.Key) &&
-                                            !visibleItems.Contains(pair.Key) && 
-                                           (!pair.Value.ItemOptions.HasFlag(ScopedItemOptions.Private) ||
-                                            curScope == this)
-                                      select pair.Key);
+                var matches = from pair in curScope.Items
+                              where wildcardPattern.IsMatch(pair.Key) &&
+                                    !visibleItems.ContainsKey(pair.Key) && 
+                                    (!pair.Value.ItemOptions.HasFlag(ScopedItemOptions.Private) || curScope == this)
+                              select pair.Value;
+                foreach (var match in matches)
+                {
+                    visibleItems.Add(match.ItemName, match);
+                }
             }
             return visibleItems;
         }

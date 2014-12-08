@@ -13,7 +13,7 @@ namespace System.Management.Tests.ParameterTests
         
         internal static CmdletInfo CreateCmdletInfo()
         {
-            return new CmdletInfo("Test-DefaultParameterSetIsAllParameterSets", typeof(TestDefaultParameterSetIsAllParameterSetsCommand), "", null, null);
+            return new CmdletInfo("Test-DefaultParameterSetIsAllParameterSets", typeof(TestDefaultParameterSetIsAllParameterSetsCommand), "");
         }
     }
 }

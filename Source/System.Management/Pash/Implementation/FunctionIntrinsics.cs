@@ -63,7 +63,7 @@ namespace Pash.Implementation
             _scope.Remove(name, true);
         }
 
-        internal IEnumerable<string> Find(string pattern)
+        internal Dictionary<string, FunctionInfo> Find(string pattern)
         {
             return _scope.Find(pattern, true);
         }

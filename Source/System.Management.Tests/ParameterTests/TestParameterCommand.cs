@@ -53,7 +53,7 @@ namespace System.Management.Tests.ParameterTests
 
         internal static CmdletInfo CreateCmdletInfo()
         {
-            return new CmdletInfo("Test-Parameter", typeof(TestParameterCommand), "", null, null);
+            return new CmdletInfo("Test-Parameter", typeof(TestParameterCommand), "");
         }
     }
 }

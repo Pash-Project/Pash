@@ -501,6 +501,7 @@
     <Compile Include="Pash\Implementation\ModuleIntrinsics.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\ExportModuleMemberCommand.cs" />
     <Compile Include="Pash\Implementation\ModuleLoader.cs" />
+    <Compile Include="Pash\Implementation\CmdletIntrinsics.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

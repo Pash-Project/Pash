@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Management.Automation;
+using Pash.Implementation;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -46,7 +47,8 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            AliasInfo info = new AliasInfo(Name, Value, SessionState.SessionStateGlobal.CommandManager, Option);
+            var localRunspace = ExecutionContext.CurrentRunspace as LocalRunspace;
+            AliasInfo info = new AliasInfo(Name, Value, localRunspace == null ? null : localRunspace.CommandManager, Option);
             SessionState.Alias.Set(info, Scope);
         }
     }

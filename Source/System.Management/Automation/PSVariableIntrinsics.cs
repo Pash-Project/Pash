@@ -91,7 +91,7 @@ namespace System.Management.Automation
             variable.Value = value;
         }
 
-        internal IEnumerable<string> Find(string pattern)
+        internal Dictionary<string, PSVariable> Find(string pattern)
         {
             return _scope.Find(pattern, true);
         }

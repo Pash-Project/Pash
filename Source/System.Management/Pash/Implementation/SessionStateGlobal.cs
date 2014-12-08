@@ -160,7 +160,7 @@ namespace Pash.Implementation
             }
             
             //unload cmdlets
-            CommandManager.RemoveCmdlets(snapinInfo);
+            RootSessionState.Cmdlet.RemoveAll(snapinInfo);
 
             _snapins.Remove(name);
             return snapinInfo;
@@ -213,7 +213,7 @@ namespace Pash.Implementation
                 throw new PSSnapInException(String.Format("The snapin '{0}' is already loaded!", snapinName));
             }
             LoadProvidersFromAssembly(assembly, snapinInfo);
-            CommandManager.LoadCmdletsFromAssembly(assembly, snapinInfo);
+            RootSessionState.Cmdlet.LoadCmdletsFromAssembly(assembly, snapinInfo);
         }
 
         Assembly LoadAssemblyFromFile(string name)
@@ -251,16 +251,6 @@ namespace Pash.Implementation
 
         #region Provider's Initialization
         //TODO: Move this provider stuff to ProviderIntrinsics and access it through SessionState.Provider
-        internal CommandManager CommandManager
-        {
-            get
-            {
-                //TODO: somehow this doesn't look like a good idea, we should change that and get this class
-                //independent from the CommandManager, so the CM should check out the SessionStateGlobal, not the other
-                //way around
-                return ((LocalRunspace)_globalExecutionContext.CurrentRunspace).CommandManager;
-            }
-        }
 
         private void RemoveProvider(string name)
         {
