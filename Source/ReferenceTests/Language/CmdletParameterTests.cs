@@ -8,7 +8,7 @@ using TestPSSnapIn;
 namespace ReferenceTests.Language
 {
     [TestFixture]
-    public class CmdletParameterTests : ReferenceTestBase
+    public class CmdletParameterTests : ReferenceTestBaseWithTestModule
     {
         [Test]
         public void NoMandatoriesWithoutArgsTest()

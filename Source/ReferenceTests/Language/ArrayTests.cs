@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace ReferenceTests.Language
 {
-    public class ArrayTests : ReferenceTestBase
+    public class ArrayTests : ReferenceTestBaseWithTestModule
     {
         [TestCase("1,2,3")]
         [TestCase(",2")]
