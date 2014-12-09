@@ -3,15 +3,20 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Pash.Implementation;
+using System.Reflection;
+using System.Collections.ObjectModel;
+using System.Collections;
 
 namespace System.Management.Automation
 {
     public sealed class PSModuleInfo : IScopedItem
     {
+        internal int NestingDepth { get; set;  }
 
         public string Path { get; private set; }
         public string Name { get; private set; }
         public SessionState SessionState { get; private set; }
+        public ModuleType ModuleType { get; internal set; }
         
         public Dictionary<string, PSVariable> ExportedVariables { get; private set; }
         public Dictionary<string, FunctionInfo> ExportedFunctions { get; private set; }
@@ -32,7 +37,7 @@ namespace System.Management.Automation
             ExportedCmdlets = new Dictionary<string, CmdletInfo>();
         }
 
-        internal void ValidateExportedMembers(bool defaultExportCmdlets, bool defaultExportFunctions)
+        internal void ValidateExportedMembers()
         {
             // Check if stuff is already exported. If yes, we're fine
             if (HasExplicitExports ||
@@ -43,14 +48,14 @@ namespace System.Management.Automation
             {
                 return;
             }
-            if (defaultExportFunctions)
+            if (ModuleType.Equals(ModuleType.Script))
             {
                 foreach (var fun in SessionState.Function.GetAllLocal())
                 {
                     ExportedFunctions.Add(fun.Key, fun.Value);
                 }
             }
-            if (defaultExportCmdlets)
+            else if (ModuleType.Equals(ModuleType.Binary))
             {
                 foreach (var cmdlet in SessionState.Cmdlet.GetAllLocal())
                 {
@@ -58,6 +63,89 @@ namespace System.Management.Automation
                 }
             }
         }
+
+        #region Metadata Properties
+        private static readonly List<string> _metadataPropertyNames = new List<string> {
+            "AccessMode", "Author", "ClrVersion", "CompanyName", "Copyright", "Description", "DotNetFrameworkVersion",
+            "FileList", "Guid", "HelpInfoUri", "ModuleList", "PowerShellHostName", "PowerShellHostVersion",
+            "PowerShellVersion", "PrivateData", "ProcessorArchitecture", "ProjectUri", "ReleaseNotes",
+            "RepositorySourceLocation", "RequiredAssemblies"
+        };
+        private static Dictionary<string, PropertyInfo> _metadataProperties;
+        private static Dictionary<string, PropertyInfo> MetdataProperties
+        {
+            get
+            {
+                if (_metadataProperties == null)
+                {
+                    _metadataProperties = new Dictionary<string, PropertyInfo>();
+                    var type = typeof(PSModuleInfo);
+                    foreach (var propName in _metadataPropertyNames)
+                    {
+                        _metadataProperties[propName] = type.GetProperty(propName);
+                    }
+                }
+                return _metadataProperties;
+            }
+        }
+
+        internal void SetMetadata(Hashtable metadata)
+        {
+            // setting all metadata properties by hand is tedious, we use reflection
+            foreach (var propPair in MetdataProperties)
+            {
+                if (!metadata.ContainsKey(propPair.Key))
+                {
+                    continue;
+                }
+                var value = LanguagePrimitives.ConvertTo(metadata[propPair.Key], propPair.Value.PropertyType);
+                propPair.Value.SetValue(this, value, null);
+            }
+        }
+
+        public ModuleAccessMode AccessMode { get; internal set; }
+
+        public string Author { get; internal set; }
+
+        public Version ClrVersion { get; internal set; }
+
+        public string CompanyName { get; internal set; }
+
+        public string Copyright { get; internal set; }
+
+        public string Description { get; internal set; }
+
+        public Version DotNetFrameworkVersion { get; internal set; }
+
+        public IEnumerable<string> FileList { get; internal set; }
+
+        public Guid Guid { get; internal set; }
+
+        public object HelpInfoUri { get; internal set; }
+
+        public IEnumerable<Object> ModuleList { get; internal set; }
+
+        public string PowerShellHostName { get; internal set; }
+
+        public Version PowerShellHostVersion { get; internal set; }
+
+        public Version PowerShellVersion { get; internal set; }
+
+        public object PrivateData { get; internal set; }
+
+        public ProcessorArchitecture ProcessorArchitecture { get; internal set; }
+
+        public string ProjectUri { get; internal set; }
+
+        public string ReleaseNotes { get; internal set; }
+
+        public string RepositorySourceLocation { get; internal set; }
+
+        public IEnumerable<String> RequiredAssemblies { get; internal set; }
+
+        public Version Version { get; internal set; }
+
+        #endregion
 
         #region IScopedItem Members
 
@@ -72,5 +160,6 @@ namespace System.Management.Automation
             set { throw new NotImplementedException("Setting scope options for PSModuleInfo is not supported"); }
         }
         #endregion
+
     }
 }

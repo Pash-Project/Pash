@@ -11,7 +11,7 @@ namespace Pash.Implementation
         private readonly string[] _manifestExtensions = new string[] { ".psd1" };
         private readonly string[] _scriptExtensions = new string[] { ".psm1", ".ps1" };
         // TODO sburnicki: Make sure .exe is a valid module extension
-        private readonly string[] _assemblyExtensions = new string[] { ".dll", ".exe" };
+        private readonly string[] _binaryExtensions = new string[] { ".dll", ".exe" };
 
         private ExecutionContext _executionContext;
 
@@ -50,27 +50,62 @@ namespace Pash.Implementation
             var moduleInfo = new PSModuleInfo(path, path.GetFileNameWithoutExtension(), sessionState);
             sessionState.SetModule(moduleInfo);
 
+            LoadFileIntoModule(moduleInfo, path);
+            return moduleInfo;
+        }
+
+        private void LoadFileIntoModule(PSModuleInfo moduleInfo, Path path)
+        {
+            // prevents accidental loops while loading a module
+            moduleInfo.NestingDepth++;
+            if (moduleInfo.NestingDepth > 10)
+            {
+                var msg = "The module is too deeply nested. A module can be only nested 10 times. Make sure to check" +
+                    " the loading order of your module";
+                throw new PSInvalidOperationException(msg, "Modules_ModuleTooDeeplyNested",
+                    ErrorCategory.InvalidOperation);
+            }
+
             var ext = path.GetExtension();
             if (_scriptExtensions.Contains(ext))
             {
+                moduleInfo.ModuleType = ModuleType.Script;
                 LoadScriptModule(moduleInfo, path); // actually load the script
-                return moduleInfo;
             }
-            else if (_assemblyExtensions.Contains(ext))
+            else if (_binaryExtensions.Contains(ext))
             {
-                LoadAssemblyModule(moduleInfo, path);
-                return moduleInfo;
+                moduleInfo.ModuleType = ModuleType.Binary;
+                LoadBinaryModule(moduleInfo, path);
             }
-            // TODO: nicer error message if the extension is *really* unknown
-            throw new MethodInvocationException("The extension '" + ext + "' is currently not supported");
+            else if (_manifestExtensions.Contains(ext))
+            {
+                moduleInfo.ModuleType = ModuleType.Manifest;
+                LoadManifestModule(moduleInfo, path);
+            }
+            else
+            {
+                // TODO: nicer error message if the extension is *really* unknown
+                throw new MethodInvocationException("The extension '" + ext + "' is currently not supported");
+            }
+            moduleInfo.ValidateExportedMembers();
         }
 
-        private void LoadAssemblyModule(PSModuleInfo moduleInfo, Path path)
+        void LoadManifestModule(PSModuleInfo moduleInfo, Path path)
+        {
+            throw new NotImplementedException();
+            // load the hashtable
+            // load metatata (simply overwrite if existing)
+            // TODO: check and load required assemblies and modules
+            // load RootModule / ModuleToProcess
+            // restrict the module exports
+        }
+
+        private void LoadBinaryModule(PSModuleInfo moduleInfo, Path path)
         {
             Assembly assembly = Assembly.LoadFrom(path);
             // load into the local session state of the module
             moduleInfo.SessionState.Cmdlet.LoadCmdletsFromAssembly(assembly, moduleInfo);
-            moduleInfo.ValidateExportedMembers(true, false); // make sure cmdlets get exported
+            moduleInfo.ValidateExportedMembers(); // make sure cmdlets get exported
         }
 
         private void LoadScriptModule(PSModuleInfo moduleInfo, Path path)
@@ -87,7 +122,7 @@ namespace Pash.Implementation
                 _executionContext = scopedContext;
                 _executionContext.CurrentRunspace.ExecutionContext = scopedContext;
                 scriptBlock.Invoke(); // TODO: pass parameters if set
-                moduleInfo.ValidateExportedMembers(false, true); // make sure members are exported
+                moduleInfo.ValidateExportedMembers(); // make sure members are exported
             }
             catch (ExitException e)
             {

@@ -5,16 +5,16 @@ namespace ReferenceTests
 {
     public class ModuleCommandTestBase : ReferenceTestBase
     {
-        private string _assemblyTestModule;
-        public string AssemblyTestModule
+        private string _binaryTestModule;
+        public string BinaryTestModule
         {
             get
             {
-                if (_assemblyTestModule == null)
+                if (_binaryTestModule == null)
                 {
-                    _assemblyTestModule = new UriBuilder(typeof(TestCommand).Assembly.CodeBase).Path;
+                    _binaryTestModule = new UriBuilder(typeof(TestCommand).Assembly.CodeBase).Path;
                 }
-                return _assemblyTestModule;
+                return _binaryTestModule;
             }
         }
     }

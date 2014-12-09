@@ -24,7 +24,7 @@ namespace ReferenceTests.Commands
         [Test]
         public void CanImportAssemblyModule()
         {
-            var cmd = "Import-Module '" + AssemblyTestModule + "'; " + CmdletName(typeof(TestCommand));
+            var cmd = "Import-Module '" + BinaryTestModule + "'; " + CmdletName(typeof(TestCommand));
             ExecuteAndCompareTypedResult(cmd, TestCommand.OutputString);
         }
 
@@ -184,6 +184,11 @@ namespace ReferenceTests.Commands
             Assert.That(ReferenceHost.Execute(statement), Is.EqualTo(expected));
         }
 
+        // TODO: importing an invalid manifest fails
+        // TODO: importing a manifest with both RootModule and ModuleToProcess fails
+        // TODO: tests for importing a manifest, that imports a manifest, that imports a script: check that the type
+        //       is script and exported values intersected and metadata was overwritten
+        // TODO: test for a manifest importing itself -> check recursion depth check (with timeout)
         // TODO: tests for modules importing modules to check scope derivance and execution
         // TODO: test that checks what happens if the script module returns a value -> shouldn't
         // TODO: test that checks the behavior if both the Global and the Scope parameter are set -> exception

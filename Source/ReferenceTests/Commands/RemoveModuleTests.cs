@@ -161,10 +161,10 @@ namespace ReferenceTests.Commands
         [Test]
         public void RemoveAssemblyModuleRemovesCmdlets()
         {
-            var moduleName = Path.GetFileNameWithoutExtension(AssemblyTestModule);
+            var moduleName = Path.GetFileNameWithoutExtension(BinaryTestModule);
             var script = CreateFile("Remove-Module '" + moduleName + "';", "ps1");
             var cmd = NewlineJoin(
-                "Import-Module '" + AssemblyTestModule + "'",
+                "Import-Module '" + BinaryTestModule + "'",
                 CmdletName(typeof(TestCommand)),
                 "& '" + script + "'"
             );
