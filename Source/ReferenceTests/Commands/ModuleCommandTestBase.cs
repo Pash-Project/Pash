@@ -26,7 +26,7 @@ namespace ReferenceTests
             return CreateManifest(null, null, null, null, null, null, null, null, args);
         }
 
-        public string CreateManifest(string rootModule, string author, string company, string copyright,
+        public string CreateManifest(string rootModule, string author, string company, string version,
             string funsExport = null, string varExport = null, string cmdletsExport = null, string aliasExport = null,
             Dictionary<string, string> args = null)
         {
@@ -34,10 +34,10 @@ namespace ReferenceTests
             {
                 args = new Dictionary<string, string>();
             }
+            AddToDictIfNotExisting(args, "ModuleVersion", version);
             AddToDictIfNotExisting(args, "RootModule", rootModule);
             AddToDictIfNotExisting(args, "Author", author);
             AddToDictIfNotExisting(args, "CompanyName", company);
-            AddToDictIfNotExisting(args, "Copyright", copyright);
             AddToDictIfNotExisting(args, "FunctionsToExport", funsExport);
             AddToDictIfNotExisting(args, "CmdletsToExport", cmdletsExport);
             AddToDictIfNotExisting(args, "AliasesToExport", aliasExport);

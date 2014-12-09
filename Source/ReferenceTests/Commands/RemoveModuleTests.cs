@@ -142,20 +142,19 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
-        public void RemoveModuleIsAlsoRemovedFromGlobalScope()
+        public void RemoveModuleRemovesModuleFromGlobalScopeButOnlyLocalImportedMembers()
         {
             var module = CreateTestModule();
-            var script = CreateFile("foo; Import-Module '" + module + "' -scope 'local'; foo; Remove-Module 'test'", "ps1");
+            var script = CreateFile("foo; Import-Module '" + module + "' -scope 'local'; foo; Remove-Module 'test'; foo", "ps1");
             var cmd = NewlineJoin(
                 "Import-Module '" + module + "'",
                 "foo",
-                "& '" + script + "'"
+                "& '" + script + "'",
+                "foo"
             );
-            Assert.That(ReferenceHost.Execute(cmd), Is.EqualTo(NewlineJoin("bar", "bar", "bar")));
-            // check that remove-module also removed the module from global space
-            Assert.Throws<CommandNotFoundException>(delegate {
-                ReferenceHost.RawExecuteInLastRunspace("foo");
-            });
+            Assert.That(ReferenceHost.Execute(cmd), Is.EqualTo(NewlineJoin("bar", "bar", "bar", "bar", "bar")));
+
+            // TODO: use get-module to check that module is actually removed from global scope!
         }
 
         [Test]
@@ -176,6 +175,7 @@ namespace ReferenceTests.Commands
         }
 
         // TODO: test nested module removal
+        // TODO: test that global module can be removed by a module, although it also locally loads it
 
         private string CreateTestModule()
         {

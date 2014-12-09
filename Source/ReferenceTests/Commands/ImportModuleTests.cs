@@ -31,10 +31,10 @@ namespace ReferenceTests.Commands
         [Test]
         public void CanImportManifestModule()
         {
-            var module = CreateFile(CreateManifest(null, "Me", "FooComp", "2014"), "psd1");
+            var module = CreateFile(CreateManifest(null, "Me", "FooComp", "1.0"), "psd1");
             var cmd = "$m = Import-Module '" + module + "' -PassThru;"
-                + "$m.Author; $m.CompanyName; $m.ModuleType; $m.Copyright";
-            ExecuteAndCompareTypedResult(cmd, "Me", "FooComp", ModuleType.Manifest, "2014");
+                + "$m.Author; $m.CompanyName; $m.ModuleType; $m.Version";
+            ExecuteAndCompareTypedResult(cmd, "Me", "FooComp", ModuleType.Manifest, new Version("1.0"));
         }
 
         [Test]
@@ -203,8 +203,8 @@ namespace ReferenceTests.Commands
         [Test]
         public void ImportingAnInvalidManifestFails()
         {
-            var module = CreateFile(NewlineJoin(CreateManifest(null, "Me", "FooComp", "2014") + "'ab'"), "psd1");
-            Assert.Throws<CmdletInvocationException>(delegate {
+            var module = CreateFile(NewlineJoin(CreateManifest(null, "Me", "FooComp", "1.0") + "'ab'"), "psd1");
+            Assert.Throws<MethodInvocationException>(delegate {
                 ReferenceHost.Execute("Import-Module '" + module + "'");
             });
         }
@@ -212,9 +212,10 @@ namespace ReferenceTests.Commands
         [Test]
         public void ImportingAManifestWithRootModuleAndModuleToProcessFails()
         {
-            var manifest = new Dictionary<string, string>() { { "RootModule", "foo" }, { "ModuleToProcess", "bar" } };
+            var manifest = new Dictionary<string, string>() {
+               { "RootModule", "foo" }, { "ModuleToProcess", "bar" }, { "ModuleVersion", "1.0"} };
             var module = CreateFile(NewlineJoin(CreateManifest(manifest)), "psd1");
-            Assert.Throws<CmdletInvocationException>(delegate {
+            Assert.Throws<MethodInvocationException>(delegate {
                 ReferenceHost.Execute("Import-Module '" + module + "'");
             });
         }
@@ -224,7 +225,7 @@ namespace ReferenceTests.Commands
         public void ImportingAManifestWithItselfAsRootModule()
         {
             var path = Path.Combine(Path.GetTempPath(), "manifTest.psd1");
-            File.WriteAllText(path, CreateManifest(path, "Test", "Foo", "bar"));
+            File.WriteAllText(path, CreateManifest(path, "Test", "Foo", "1.0"));
             AddCleanupFile(path);
             var e = Assert.Throws<CmdletInvocationException>(delegate {
                 ReferenceHost.Execute("Import-Module '" + path + "'");
@@ -233,7 +234,7 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
-        public void NestedManifestAddInformationAndRestrictExportsFromTargetModule()
+        public void NestedManifestAddInformationAndFirstManifestRestrictExportsFromTargetModuleIfNotEmpty()
         {
             var scriptModule = CreateFile(NewlineJoin(
                 "function foo {'foo'}",
@@ -243,8 +244,8 @@ namespace ReferenceTests.Commands
                 "New-Alias baz bar",
                 "Export-ModuleMember -Function foo -Var *"
             ), "psm1");
-            var nestedManifest = CreateFile(CreateManifest(scriptModule, "The Guy", null, "2014", "*", "y"), "psd1");
-            var manifest = CreateFile(CreateManifest(nestedManifest, "Me", "MyComp", null, null, "@('x','y')"), "psd1");
+            var nestedManifest = CreateFile(CreateManifest(scriptModule, "The Guy", null, "1.0", "@()", "y"), "psd1");
+            var manifest = CreateFile(CreateManifest(nestedManifest, "Me", "MyComp", "1.0", "bar", "x"), "psd1");
             var res = ReferenceHost.RawExecute("Import-Module '" + manifest + "' -PassThru; $x; $y");
             Assert.That(res.Count, Is.EqualTo(3));
             Assert.That(res[1], Is.Null); // nestedManifest only allows y to be exported
@@ -252,13 +253,19 @@ namespace ReferenceTests.Commands
             var module = res[0].BaseObject as PSModuleInfo;
             Assert.That(module.Author, Is.EqualTo("The Guy")); // was overwritten by nestedManifest
             Assert.That(module.CompanyName, Is.EqualTo("MyComp")); // still original from manifest
-            Assert.That(module.Copyright, Is.EqualTo("2014")); // added by nestedManifest
             Assert.That(module.ModuleType, Is.EqualTo(ModuleType.Script)); // as the last module was a script
             Assert.Throws<CommandNotFoundException>(delegate {
                 ReferenceHost.RawExecuteInLastRunspace("foo"); // not imported due to no function exports in manifest
             });
         }
 
+        // TODO: make sure that only the most nested manifest defines the exports, but only if the manifest export list is defined
+        // TODO: test that a manifest hashtable must not include an unknown member
+        // TODO: test that manifest needs a version
+        // TODO: test that manifest module.Path is path of nested RootModule
+        // TODO: test with get-module that modules are actually always in the sessionstate of the current module (or global)
+        // TODO: test that reimporting doesn't reload the module, but re-imports the exported module members (to local or global sessionstate)
+        // TODO: test that modules are only loaded by path if a slash is in the name
         // TODO: tests for modules importing modules to check scope derivance and execution
         // TODO: test that checks what happens if the script module returns a value -> shouldn't
         // TODO: test that checks the behavior if both the Global and the Scope parameter are set -> exception
