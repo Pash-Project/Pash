@@ -10,7 +10,8 @@ namespace Pash.Implementation
     {
         private readonly string[] _manifestExtensions = new string[] { ".psd1" };
         private readonly string[] _scriptExtensions = new string[] { ".psm1", ".ps1" };
-        private readonly string[] _assemblyExtensions = new string[] { ".dll" };
+        // TODO sburnicki: Make sure .exe is a valid module extension
+        private readonly string[] _assemblyExtensions = new string[] { ".dll", ".exe" };
 
         private ExecutionContext _executionContext;
 

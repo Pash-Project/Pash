@@ -150,18 +150,6 @@ namespace Pash.Implementation
             return new ApplicationInfo(Path.GetFileName(path), path, Path.GetExtension(path));
         }
 
-        internal void ImportModules(IEnumerable<ModuleSpecification> modules)
-        {
-            //TODO: this module support is not good. we need a proper implementation that allows removing modules,
-            //that remembers loaded modules and cares about public and private items in the modules
-            var assemblies = from ModuleSpecification module in modules
-                             select Assembly.LoadFile(module.Name);
-            foreach (var ass in assemblies)
-            {
-                _runspace.ExecutionContext.SessionState.Cmdlet.LoadCmdletsFromAssembly(ass, (PSSnapInInfo) null);
-            }
-        }
-
         /// <summary>
         /// Resolves the path to the executable file.
         /// </summary>
