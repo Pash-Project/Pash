@@ -3,6 +3,11 @@ using System.Management.Automation;
 using System.Management;
 using System.Linq;
 using System.Reflection;
+using System.Management.Pash.Implementation;
+using System.Collections.ObjectModel;
+using System.Collections;
+using System.Security.Cryptography;
+using Extensions.Dictionary;
 
 namespace Pash.Implementation
 {
@@ -90,16 +95,6 @@ namespace Pash.Implementation
             moduleInfo.ValidateExportedMembers();
         }
 
-        void LoadManifestModule(PSModuleInfo moduleInfo, Path path)
-        {
-            throw new NotImplementedException();
-            // load the hashtable
-            // load metatata (simply overwrite if existing)
-            // TODO: check and load required assemblies and modules
-            // load RootModule / ModuleToProcess
-            // restrict the module exports
-        }
-
         private void LoadBinaryModule(PSModuleInfo moduleInfo, Path path)
         {
             Assembly assembly = Assembly.LoadFrom(path);
@@ -110,11 +105,116 @@ namespace Pash.Implementation
 
         private void LoadScriptModule(PSModuleInfo moduleInfo, Path path)
         {
-            // execute the script in it's own scope
-            var scriptBlock = new ExternalScriptInfo(path.ToString(), ScopeUsages.CurrentScope).ScriptBlock;
+            // execute the script in the module scope
+            // TODO: simply discard the module output?
+            ExecuteScriptInSessionState(path.ToString(), moduleInfo.SessionState);
+        }
+
+        private void LoadManifestModule(PSModuleInfo moduleInfo, Path path)
+        {
+            // Load the manifest (hashtable). We use a isolated SessionState to not affect the existing one
+            var isolatedSessionState = new SessionState(_executionContext.SessionStateGlobal);
+            var res = ExecuteScriptInSessionState(path.ToString(), isolatedSessionState);
+            if (res.Count != 1 || !(res[0] is Hashtable))
+            {
+                var msg = "The module manifest is invalid as it doesn't simply define a hashtable. ";
+                throw new PSInvalidOperationException(msg, "Modules_InvalidManifest", ErrorCategory.InvalidOperation);
+            }
+            var manifest = (Hashtable)res[0];
+
+            // Load the metadata into the PSModuleInfo (simply overwrite if existing due to nesting)
+            try
+            {
+                moduleInfo.SetMetadata(manifest);
+            } 
+            catch (PSInvalidCastException e)
+            {                
+                var msg = "The module manifest contains invalid data." + Environment.NewLine + e.Message;
+                throw new PSInvalidOperationException(msg, "Modules_InvalidManifestData", ErrorCategory.InvalidData, e);
+            }
+
+            // TODO: check and load required assemblies and modules
+
+            // Load RootModule / ModuleToProcess
+            LoadManifestRootModule(moduleInfo, manifest);
+
+            // restrict the module exports
+            RestrictModuleExportsByManifest(moduleInfo, manifest);
+        }
+
+        private void LoadManifestRootModule(PSModuleInfo moduleInfo, Hashtable manifest)
+        {
+
+            var rootModule = manifest["RootModule"];
+            var moduleToProcess = manifest["ModuleToProcess"];
+            if (rootModule != null && moduleToProcess != null)
+            {
+                var msg = "The module manifest cannot contain both a definition of ModuleToProcess and RootModule.";
+                // lol, this is the actual error id from PS:
+                var id = "Modules_ModuleManifestCannotContainBothModuleToProcessAndRootModule";
+                throw new PSInvalidOperationException(msg, id, ErrorCategory.InvalidOperation);
+            }
+            if (rootModule == null || moduleToProcess == null)
+            {
+                return;
+            }
+            rootModule = rootModule == null ? moduleToProcess : rootModule; // decide which one to use
+
+            string rootModuleName;
+            if (!LanguagePrimitives.TryConvertTo<string>(rootModule, out rootModuleName))
+            {
+                var msg = "The RootModule / ModuleToProcess value must be a string.";
+                throw new PSInvalidOperationException(msg, "Modules_InvalidManifestRootModule",
+                    ErrorCategory.InvalidData);
+            }
+            try
+            {
+                LoadFileIntoModule(moduleInfo, rootModuleName);
+            }
+            catch (PSInvalidOperationException e)
+            {
+                var msg = "Failed to load the nesting module '" + rootModuleName + "'." +
+                    Environment.NewLine + e.Message;
+                throw new PSInvalidOperationException(msg, "Modules_FailedToLoadNestingModule",
+                    ErrorCategory.InvalidOperation, e);
+            }
+        }
+
+        void RestrictModuleExportsByManifest(PSModuleInfo moduleInfo, Hashtable manifest)
+        {
+            string[] funs, vars, aliases, cmdlets;
+            try
+            {
+                funs = LanguagePrimitives.ConvertTo<string[]>(manifest["FunctionsToExport"]);
+                vars = LanguagePrimitives.ConvertTo<string[]>(manifest["VariablesToExport"]);
+                cmdlets = LanguagePrimitives.ConvertTo<string[]>(manifest["CmdletsToExport"]);
+                aliases = LanguagePrimitives.ConvertTo<string[]>(manifest["AliasesToExport"]);
+            }
+            catch (PSInvalidCastException e)
+            {
+                var msg = "The module manifest contains invalid definitions for FunctionsToExport, VariablesToExport, "
+                          + "CmdletsToExport, or AliasesToExport. Make sure they are either strings or string arrays";
+                throw new PSInvalidOperationException(msg, "Modules_ManifestMembersToExportAreInvalid", 
+                    ErrorCategory.InvalidData, e);
+            }
+            moduleInfo.ExportedFunctions.ReplaceContents(
+                WildcardPattern.FilterDictionary(funs, moduleInfo.ExportedFunctions));
+            moduleInfo.ExportedVariables.ReplaceContents(
+                WildcardPattern.FilterDictionary(vars, moduleInfo.ExportedVariables));
+            moduleInfo.ExportedAliases.ReplaceContents(
+                WildcardPattern.FilterDictionary(aliases, moduleInfo.ExportedAliases));
+            moduleInfo.ExportedCmdlets.ReplaceContents(
+                WildcardPattern.FilterDictionary(cmdlets, moduleInfo.ExportedCmdlets));
+        }
+
+        private Collection<object> ExecuteScriptInSessionState(string path, SessionState sessionState)
+        {
+            var scriptBlock = new ExternalScriptInfo(path, ScopeUsages.CurrentScope).ScriptBlock;
             var originalContext = _executionContext;
-            var scopedContext = _executionContext.Clone(moduleInfo.SessionState, ScopeUsages.CurrentScope);
-            scopedContext.ErrorStream.Redirect(originalContext.ErrorStream); // make sure errors are passed
+            var scopedContext = _executionContext.Clone(sessionState, ScopeUsages.CurrentScope);
+            // create new streams for input and output, only ErrorStream will simply pass it to the original one
+            scopedContext.InputStream = new ObjectStream(this);
+            scopedContext.OutputStream = new ObjectStream(this);
             try
             {
                 // actually change the scope by changing the execution context
@@ -122,7 +222,6 @@ namespace Pash.Implementation
                 _executionContext = scopedContext;
                 _executionContext.CurrentRunspace.ExecutionContext = scopedContext;
                 scriptBlock.Invoke(); // TODO: pass parameters if set
-                moduleInfo.ValidateExportedMembers(); // make sure members are exported
             }
             catch (ExitException e)
             {
@@ -136,6 +235,7 @@ namespace Pash.Implementation
                 _executionContext.CurrentRunspace.ExecutionContext = originalContext;
                 _executionContext = originalContext;
             }
+            return scopedContext.OutputStream.Read();
         }
     }
 }

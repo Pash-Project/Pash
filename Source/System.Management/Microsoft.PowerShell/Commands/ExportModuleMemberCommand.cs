@@ -4,6 +4,7 @@ using System.Management.Automation;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Pash.Implementation;
+using Extensions.Dictionary;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -43,49 +44,17 @@ namespace Microsoft.PowerShell.Commands
         protected override void ProcessRecord()
         {
             _affectedModule.HasExplicitExports = true;
-            var ss = ExecutionContext.SessionState;
+            var funs = ExecutionContext.SessionState.Function.GetAllLocal();
+            var vars = ExecutionContext.SessionState.PSVariable.GetAllLocal();
+            var aliases = ExecutionContext.SessionState.Alias.GetAllLocal();
+            var cmdlets = ExecutionContext.SessionState.Cmdlet.GetAllLocal();
             // resolve all function, variable, cmdlet, and alias patterns and add the matched members to the exports
-            SelectMembersToExport(ss.Function.GetAllLocal(), Function, _affectedModule.ExportedFunctions);
-            SelectMembersToExport(ss.PSVariable.GetAllLocal(), Variable, _affectedModule.ExportedVariables);
-            SelectMembersToExport(ss.Alias.GetAllLocal(), Alias, _affectedModule.ExportedAliases);
-            /* TODO: support for scoped cmdlets
-            SelectMembersToExport(ss.Cmdlet.GetAllLocal(), Cmdlet, _affectedModule.ExportedCmdlets);
-            */
+            _affectedModule.ExportedFunctions.ReplaceContents(WildcardPattern.FilterDictionary(Function, funs));
+            _affectedModule.ExportedVariables.ReplaceContents(WildcardPattern.FilterDictionary(Variable, vars));
+            _affectedModule.ExportedAliases.ReplaceContents(WildcardPattern.FilterDictionary(Alias, aliases));
+            _affectedModule.ExportedCmdlets.ReplaceContents(WildcardPattern.FilterDictionary(Cmdlet, cmdlets));
         }
 
-        private void SelectMembersToExport<T>(Dictionary<string, T> localItems, string[] patterns,
-                                             Dictionary<string, T> exports)
-        {
-            var wildcards = StringArrayToWildcardArray(patterns);
-            foreach (var pair in localItems)
-            {
-                if (MatchesAnyWildcard(pair.Key, wildcards))
-                {
-                    exports.Add(pair.Key, pair.Value);
-                }
-            }
-        }
-
-        private static WildcardPattern[] StringArrayToWildcardArray(string[] strs)
-        {
-            if (strs == null)
-            {
-                return new WildcardPattern[0];
-            }
-            return (from s in strs select new WildcardPattern(s, WildcardOptions.IgnoreCase)).ToArray();
-        }
-
-        private static bool MatchesAnyWildcard(string item, WildcardPattern[] wildcards)
-        {
-            foreach (var wc in wildcards)
-            {
-                if (wc.IsMatch(item))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 }
 

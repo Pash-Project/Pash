@@ -1,6 +1,8 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 namespace System.Management.Automation
 {
@@ -76,6 +78,45 @@ namespace System.Management.Automation
             // This block of code is actually about the same speed as a linear search because Mono (and probably .NET) seem to use the
             // Tuned Boyer-Moore text searching algorithm for Sting.Replace()
             return UnescapeWildcardsIn(pattern, new[] { "*", "?", "]", "[" });
+        }
+
+        internal static WildcardPattern[] CreateWildcards(string[] strs)
+        {
+            if (strs == null)
+            {
+                return new WildcardPattern[0];
+            }
+            return (from s in strs select new WildcardPattern(s, WildcardOptions.IgnoreCase)).ToArray();
+        }
+
+        internal static bool IsAnyMatch(WildcardPattern[] wildcards, string input)
+        {
+            foreach (var wc in wildcards)
+            {
+                if (wc.IsMatch(input))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static Dictionary<string, T> FilterDictionary<T>(string[] patterns, Dictionary<string, T> dictionary)
+        {
+            return FilterDictionary<T>(CreateWildcards(patterns), dictionary);
+        }
+
+        public static Dictionary<string, T> FilterDictionary<T>(WildcardPattern[] patterns, Dictionary<string, T> dictionary)
+        {
+            var results = new Dictionary<string, T>();
+            foreach (var pair in dictionary)
+            {
+                if (IsAnyMatch(patterns, pair.Key))
+                {
+                    results.Add(pair.Key, pair.Value);
+                }
+            }
+            return results;
         }
 
         private static string UnescapeWildcardsIn(string pattern, string[] wildcards)

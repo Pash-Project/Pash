@@ -504,6 +504,7 @@
     <Compile Include="Pash\Implementation\CmdletIntrinsics.cs" />
     <Compile Include="Automation\ModuleType.cs" />
     <Compile Include="Automation\ModuleAccessMode.cs" />
+    <Compile Include="Extensions\DictionaryExtensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
