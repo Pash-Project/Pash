@@ -115,12 +115,12 @@ namespace Pash.Implementation
             // Load the manifest (hashtable). We use a isolated SessionState to not affect the existing one
             var isolatedSessionState = new SessionState(_executionContext.SessionStateGlobal);
             var res = ExecuteScriptInSessionState(path.ToString(), isolatedSessionState);
-            if (res.Count != 1 || !(res[0] is Hashtable))
+            if (res.Count != 1 || !(res[0].BaseObject is Hashtable))
             {
                 var msg = "The module manifest is invalid as it doesn't simply define a hashtable. ";
                 throw new PSInvalidOperationException(msg, "Modules_InvalidManifest", ErrorCategory.InvalidOperation);
             }
-            var manifest = (Hashtable)res[0];
+            var manifest = (Hashtable)res[0].BaseObject;
 
             // Load the metadata into the PSModuleInfo (simply overwrite if existing due to nesting)
             try
@@ -154,7 +154,7 @@ namespace Pash.Implementation
                 var id = "Modules_ModuleManifestCannotContainBothModuleToProcessAndRootModule";
                 throw new PSInvalidOperationException(msg, id, ErrorCategory.InvalidOperation);
             }
-            if (rootModule == null || moduleToProcess == null)
+            if (rootModule == null && moduleToProcess == null)
             {
                 return;
             }
@@ -173,10 +173,14 @@ namespace Pash.Implementation
             }
             catch (PSInvalidOperationException e)
             {
+                var errId = "Modules_FailedToLoadNestingModule";
+                if (e.ErrorRecord.ErrorId.Equals(errId))
+                {
+                    throw; // this avoids that nested modules result in nested exceptions
+                }
                 var msg = "Failed to load the nesting module '" + rootModuleName + "'." +
                     Environment.NewLine + e.Message;
-                throw new PSInvalidOperationException(msg, "Modules_FailedToLoadNestingModule",
-                    ErrorCategory.InvalidOperation, e);
+                throw new PSInvalidOperationException(msg, errId, ErrorCategory.InvalidOperation, e);
             }
         }
 
@@ -207,27 +211,25 @@ namespace Pash.Implementation
                 WildcardPattern.FilterDictionary(cmdlets, moduleInfo.ExportedCmdlets));
         }
 
-        private Collection<object> ExecuteScriptInSessionState(string path, SessionState sessionState)
+        private Collection<PSObject> ExecuteScriptInSessionState(string path, SessionState sessionState)
         {
             var scriptBlock = new ExternalScriptInfo(path, ScopeUsages.CurrentScope).ScriptBlock;
             var originalContext = _executionContext;
             var scopedContext = _executionContext.Clone(sessionState, ScopeUsages.CurrentScope);
-            // create new streams for input and output, only ErrorStream will simply pass it to the original one
-            scopedContext.InputStream = new ObjectStream(this);
-            scopedContext.OutputStream = new ObjectStream(this);
             try
             {
                 // actually change the scope by changing the execution context
                 // there should definitely be a nicer way for this #ExecutionContextChange
                 _executionContext = scopedContext;
                 _executionContext.CurrentRunspace.ExecutionContext = scopedContext;
-                scriptBlock.Invoke(); // TODO: pass parameters if set
+                return scriptBlock.Invoke(); // TODO: pass parameters if set
             }
             catch (ExitException e)
             {
                 var exitCode = LanguagePrimitives.ConvertTo<int>(e.Argument);
                 _executionContext.SetLastExitCodeVariable(exitCode);
                 _executionContext.SetSuccessVariable(exitCode == 0);
+                return new Collection<PSObject>() { PSObject.AsPSObject(e.Argument) };
             }
             finally
             {
@@ -235,7 +237,6 @@ namespace Pash.Implementation
                 _executionContext.CurrentRunspace.ExecutionContext = originalContext;
                 _executionContext = originalContext;
             }
-            return scopedContext.OutputStream.Read();
         }
     }
 }
