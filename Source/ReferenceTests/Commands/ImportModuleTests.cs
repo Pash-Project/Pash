@@ -40,6 +40,17 @@ namespace ReferenceTests.Commands
             Assert.That(mod.ExportedFunctions.Keys, Contains.Item("foo"));
             Assert.That(mod.Name, Is.EqualTo(Path.GetFileNameWithoutExtension(module)));
             Assert.That(mod.Path, Is.EqualTo(module));
+            var scriptRootVar = mod.SessionState.PSVariable.Get("PSScriptRoot");
+            Assert.That(scriptRootVar, Is.Not.Null);
+            Assert.That(scriptRootVar.Value, Is.EqualTo(Path.GetDirectoryName(module)));
+        }
+
+        [Test]
+        public void ImportedScriptModuleKnowsScriptRoot()
+        {
+            var module = CreateFile("function foo { $PSScriptRoot }", "psm1");
+            var cmd = "Import-Module '" + module + "'; foo";
+            ExecuteAndCompareTypedResult(cmd, Path.GetDirectoryName(module));
         }
 
         [Test]

@@ -46,6 +46,7 @@ namespace Pash.Implementation
             // ALWAYS derive from global scope: the Scope parameter only defines where stuff is imported to
             var sessionState = new SessionState(_executionContext.SessionStateGlobal.RootSessionState);
             sessionState.IsScriptScope = true;
+            sessionState.PSVariable.Set("PSScriptRoot", path.GetDirectory());
             var moduleInfo = new PSModuleInfo(path, path.GetFileNameWithoutExtension(), sessionState);
             sessionState.SetModule(moduleInfo);
 
