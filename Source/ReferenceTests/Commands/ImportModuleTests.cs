@@ -91,6 +91,13 @@ namespace ReferenceTests.Commands
             });
         }
 
+        [Test]
+        public void ModuleExtensionCheckIsCaseInvariant()
+        {
+            var module = CreateFile("function foo {'works'}", "PSm1");
+            ExecuteAndCompareTypedResult("Import-Module '" + module + "'; foo", "works");
+        }
+
         [TestCase("")]
         [TestCase("-Scope 'Global'")]
         [TestCase("-Global")]

@@ -71,18 +71,19 @@ namespace Pash.Implementation
                     ErrorCategory.InvalidOperation);
             }
 
+            var stringComparer = StringComparer.InvariantCultureIgnoreCase;
             var ext = path.GetExtension();
-            if (_scriptExtensions.Contains(ext))
+            if (_scriptExtensions.Contains(ext, stringComparer))
             {
                 moduleInfo.ModuleType = ModuleType.Script;
                 LoadScriptModule(moduleInfo, path); // actually load the script
             }
-            else if (_binaryExtensions.Contains(ext))
+            else if (_binaryExtensions.Contains(ext, stringComparer))
             {
                 moduleInfo.ModuleType = ModuleType.Binary;
                 LoadBinaryModule(moduleInfo, path);
             }
-            else if (_manifestExtensions.Contains(ext))
+            else if (_manifestExtensions.Contains(ext, stringComparer))
             {
                 moduleInfo.ModuleType = ModuleType.Manifest;
                 LoadManifestModule(moduleInfo, path);
