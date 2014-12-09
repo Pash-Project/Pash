@@ -5,11 +5,13 @@ using System.Linq;
 using System.Management.Automation;
 using System.Text;
 using System.IO;
+using TestPSSnapIn;
 
 namespace ReferenceTests.Commands
 {
-    class ImportModuleTests : ReferenceTestBase
+    public class ImportModuleTests : ModuleCommandTestBase
     {
+
         [Test]
         public void CanImportScriptModule()
         {
@@ -17,6 +19,13 @@ namespace ReferenceTests.Commands
             var cmd = "Import-Module '" + module + "'; foo";
             var expected = NewlineJoin("works");
             Assert.That(ReferenceHost.Execute(cmd), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void CanImportAssemblyModule()
+        {
+            var cmd = "Import-Module '" + AssemblyTestModule + "'; " + CmdletName(typeof(TestCommand));
+            ExecuteAndCompareTypedResult(cmd, TestCommand.OutputString);
         }
 
         [Test]

@@ -21,7 +21,6 @@ namespace Pash.Implementation
 
         public void Add(PSModuleInfo module, string scope)
         {
-            // TODO: check if already loaded (by path), and skip if we did
             var targetScope = _scope.GetScope(scope, false, _scope);
             targetScope.SessionState.LoadedModules.ImportMembers(module);
             _scope.SetAtScope(module, scope, true);
@@ -67,14 +66,11 @@ namespace Pash.Implementation
                 alias.Module = module;
                 _scope.SessionState.Alias.Set(alias, "local");
             }
-            // TODO: enable scoped cmdlets
-            /*
             foreach (var cmdlet in module.ExportedCmdlets.Values)
             {
                 cmdlet.Module = module;
-                _sessionState.Cmdlet.Set(cmdlet, "local");
+                _scope.SessionState.Cmdlet.Set(cmdlet);
             }
-            */
         }
 
         private void RemoveMembers(PSModuleInfo module)
@@ -104,7 +100,14 @@ namespace Pash.Implementation
                     _scope.SessionState.Alias.Remove(foundAlias.ItemName);
                 }
             }
-            // TODO: removal of scoped cmdlets
+            foreach (var cmdlet in module.ExportedCmdlets.Values)
+            {
+                var foundCmdlet = _scope.SessionState.Cmdlet.Get(cmdlet.ItemName);
+                if (foundCmdlet.Module != null && foundCmdlet.Module.Path.Equals(module.Path))
+                {
+                    _scope.SessionState.Cmdlet.Remove(foundCmdlet.ItemName);
+                }
+            }
         }
     }
 }

@@ -5,10 +5,11 @@ using System.Text;
 using NUnit.Framework;
 using System.Management.Automation;
 using System.IO;
+using TestPSSnapIn;
 
 namespace ReferenceTests.Commands
 {
-    class RemoveModuleTests : ReferenceTestBase
+    class RemoveModuleTests : ModuleCommandTestBase
     {
         private string _tempDir = Path.GetTempPath();
 
@@ -157,7 +158,24 @@ namespace ReferenceTests.Commands
             });
         }
 
-        // TODO: test that shows that exported cmdlets are removed
+        [Test]
+        public void RemoveAssemblyModuleRemovesCmdlets()
+        {
+            var moduleName = Path.GetFileNameWithoutExtension(AssemblyTestModule);
+            var script = CreateFile("Remove-Module '" + moduleName + "';", "ps1");
+            var cmd = NewlineJoin(
+                "Import-Module '" + AssemblyTestModule + "'",
+                CmdletName(typeof(TestCommand)),
+                "& '" + script + "'"
+            );
+            ExecuteAndCompareTypedResult(cmd, TestCommand.OutputString);
+            // check that remove-module also removed the cmdlets from global scope
+            Assert.Throws<CommandNotFoundException>(delegate {
+                ReferenceHost.RawExecuteInLastRunspace("Test-Command");
+            });
+        }
+
+        // TODO: test nested module removal
 
         private string CreateTestModule()
         {

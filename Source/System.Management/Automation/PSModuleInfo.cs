@@ -52,7 +52,10 @@ namespace System.Management.Automation
             }
             if (defaultExportCmdlets)
             {
-                throw new NotImplementedException("No support for exporting cmdlets, yet");
+                foreach (var cmdlet in SessionState.Cmdlet.GetAllLocal())
+                {
+                    ExportedCmdlets.Add(cmdlet.Key, cmdlet.Value);
+                }
             }
         }
 

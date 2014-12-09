@@ -20,6 +20,21 @@ namespace Pash.Implementation
             return _scope.Get(name, false);
         }
 
+        public void Set(CmdletInfo cmdlet)
+        {
+            _scope.SetLocal(cmdlet, false);
+        }
+
+        public void Remove(string name)
+        {
+            _scope.Remove(name, false);
+        }
+
+        public Dictionary<string, CmdletInfo> GetAllLocal()
+        {
+            return new Dictionary<string, CmdletInfo>(_scope.Items);
+        }
+
         public Dictionary<string, CmdletInfo> Find(string name)
         {
             return _scope.Find(name, false);

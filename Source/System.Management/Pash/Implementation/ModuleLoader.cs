@@ -2,6 +2,7 @@ using System;
 using System.Management.Automation;
 using System.Management;
 using System.Linq;
+using System.Reflection;
 
 namespace Pash.Implementation
 {
@@ -20,24 +21,18 @@ namespace Pash.Implementation
 
         internal PSModuleInfo LoadModuleByName(string name, bool loadToGlobalScope)
         {
+            // TODO: where do we handle FileNotFoundExceptions etc?
             var path = new Path(name);
             if (name.Contains(path.CorrectSlash) || path.HasExtension())
             {
-                // ALWAYS derive from global scope: the Scope parameter only defines where stuff is imported to
-                var sessionState = new SessionState(_executionContext.SessionStateGlobal.RootSessionState);
-                sessionState.IsScriptScope = true;
-
                 // check if it's already loaded
                 var loadedModule = _executionContext.SessionState.LoadedModules.Get(path);
                 if (loadedModule != null)
                 {
                     return loadedModule;
                 }
-
                 // load it otherwise
-                var moduleInfo = new PSModuleInfo(path, path.GetFileNameWithoutExtension(), sessionState);
-                sessionState.SetModule(moduleInfo);
-                LoadModuleByPath(moduleInfo, path);
+                var moduleInfo = LoadModuleByPath(path);
                 _executionContext.SessionState.LoadedModules.Add(moduleInfo, loadToGlobalScope ? "global" : "local");
                 return moduleInfo;
             }
@@ -45,17 +40,35 @@ namespace Pash.Implementation
             throw new NotImplementedException("Currently you can only a specific module file, not installed modules");
         }
 
-        private void LoadModuleByPath(PSModuleInfo moduleInfo, Path path)
+        private PSModuleInfo LoadModuleByPath(Path path)
         {
+            // ALWAYS derive from global scope: the Scope parameter only defines where stuff is imported to
+            var sessionState = new SessionState(_executionContext.SessionStateGlobal.RootSessionState);
+            sessionState.IsScriptScope = true;
+            var moduleInfo = new PSModuleInfo(path, path.GetFileNameWithoutExtension(), sessionState);
+            sessionState.SetModule(moduleInfo);
+
             var ext = path.GetExtension();
             if (_scriptExtensions.Contains(ext))
             {
                 LoadScriptModule(moduleInfo, path); // actually load the script
-                moduleInfo.ValidateExportedMembers(false, true); // make sure members are exported
-                return;
+                return moduleInfo;
+            }
+            else if (_assemblyExtensions.Contains(ext))
+            {
+                LoadAssemblyModule(moduleInfo, path);
+                return moduleInfo;
             }
             // TODO: nicer error message if the extension is *really* unknown
             throw new MethodInvocationException("The extension '" + ext + "' is currently not supported");
+        }
+
+        private void LoadAssemblyModule(PSModuleInfo moduleInfo, Path path)
+        {
+            Assembly assembly = Assembly.LoadFrom(path);
+            // load into the local session state of the module
+            moduleInfo.SessionState.Cmdlet.LoadCmdletsFromAssembly(assembly, moduleInfo);
+            moduleInfo.ValidateExportedMembers(true, false); // make sure cmdlets get exported
         }
 
         private void LoadScriptModule(PSModuleInfo moduleInfo, Path path)
@@ -72,6 +85,7 @@ namespace Pash.Implementation
                 _executionContext = scopedContext;
                 _executionContext.CurrentRunspace.ExecutionContext = scopedContext;
                 scriptBlock.Invoke(); // TODO: pass parameters if set
+                moduleInfo.ValidateExportedMembers(false, true); // make sure members are exported
             }
             catch (ExitException e)
             {
