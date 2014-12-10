@@ -259,6 +259,7 @@ namespace ReferenceTests.Commands
             });
         }
 
+        // TODO: -global: export to global session state, not current module
         // TODO: make sure that only the most nested manifest defines the exports, but only if the manifest export list is defined
         // TODO: test that a manifest hashtable must not include an unknown member
         // TODO: test that manifest needs a version
