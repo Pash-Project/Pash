@@ -36,6 +36,21 @@ namespace ReferenceTests.Language
             ExecuteAndCompareTypedResult(funStart + "$a; $b; }; f 1 2", 1, 2);
         }
 
+        [Test]
+        public void FunctionParamsBlockAfterNewline()
+        {
+            var cmd = NewlineJoin(
+                "function addNums {",
+                "param (",
+                "$a,",
+                "$b",
+                ")",
+                "$a + $b",
+                "}",
+                "addNums 2 5");
+            ExecuteAndCompareTypedResult(cmd, 7);
+        }
+
         [TestCase("function f($a, $b) { ")]
         [TestCase("function f { param($a, $b); ")]
         public void FunctionWithoutPassedParameters(string funStart)
