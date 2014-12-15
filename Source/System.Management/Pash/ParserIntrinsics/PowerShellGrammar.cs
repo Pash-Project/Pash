@@ -251,6 +251,8 @@ namespace Pash.ParserIntrinsics
 
         #endregion
 
+        private Regex new_line_param_regex;
+
         public PowerShellGrammar()
         {
             InitializeTerminalFields();
@@ -265,6 +267,7 @@ namespace Pash.ParserIntrinsics
             //     {
             //         "hi"
             //     }
+            this.new_line_param_regex = new Regex(new_line_character.Pattern + "*" + param.Text);
             this.skipped_new_line = new SkippedTerminal(this.new_line_character);
             new_line_character.ValidateToken += delegate(object sender, ValidateTokenEventArgs validateTokenEventArgs)
             {
@@ -289,7 +292,8 @@ namespace Pash.ParserIntrinsics
             // parameters. It's important to recognize it as such and *not* recognize the newline
             // as a statement terminator, or it will be parsed as a statement, which is wrong.
             if (validateTokenEventArgs.Context.CurrentParserState.ExpectedTerminals.Contains(this.param) &&
-                validateTokenEventArgs.Context.Source.MatchSymbol(this.param.Text))
+                new_line_param_regex.IsMatch(validateTokenEventArgs.Context.Source.Text,
+                                             validateTokenEventArgs.Context.Source.Position))
             {
                 return false;
             }

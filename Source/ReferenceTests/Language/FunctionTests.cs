@@ -41,6 +41,7 @@ namespace ReferenceTests.Language
         {
             var cmd = NewlineJoin(
                 "function addNums {",
+                "",
                 "param (",
                 "$a,",
                 "$b",
