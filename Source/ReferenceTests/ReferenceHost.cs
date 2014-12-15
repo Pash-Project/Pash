@@ -9,11 +9,11 @@ using System.Text;
 
 namespace ReferenceTests
 {
-    public class ResultContainsErrorsException : Exception
+    public class ExecutionWithErrorsException : Exception
     {
         public ErrorRecord[] Errors { get; set; }
 
-        public ResultContainsErrorsException (ErrorRecord[] records)
+        public ExecutionWithErrorsException (ErrorRecord[] records)
         {
             Errors = records;
         }
@@ -83,7 +83,7 @@ namespace ReferenceTests
                     }
                     if (throwOnError && LastRawErrorResults.Count > 0)
                     {
-                        throw new ResultContainsErrorsException((from err in LastRawErrorResults
+                        throw new ExecutionWithErrorsException((from err in LastRawErrorResults
                                                                  select err as ErrorRecord).ToArray());
                     }
                 }

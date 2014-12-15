@@ -158,6 +158,7 @@ namespace ReferenceTests.Commands
             });
         }
 
+        // TODO: test multiple member exports add stuff to exported item list
         // TODO: test a module with cmdlets to export
     }
 }

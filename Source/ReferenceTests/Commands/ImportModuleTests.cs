@@ -74,19 +74,19 @@ namespace ReferenceTests.Commands
                 "$m1 = Import-Module '" + module + "' -PassThru;",
                 "$x; foo;", // make sure we get the correct values
                 "$x = 2; $x; foo", // modify the value, check that the module internal value is modified
+                "function foo { return 3; }; foo", // overwrite foo
                 "$m2 = Import-Module '" + module + "' -PassThru;",
-                "$x; foo", // make sure it's still the modified value
+                "$x; foo", // make sure it's still the modified value and that foo got re-imported
                 "[object]::ReferenceEquals($m1, $m2)" // check that we returned indeed the same module object
             );
-            ExecuteAndCompareTypedResult(cmd, 1, 1, 2, 2, 2, 2, true);
+            ExecuteAndCompareTypedResult(cmd, 1, 1, 2, 2, 3, 2, 2, true);
         }
 
         [Test]
-        [Ignore("How can PS throw and MethodInvocationException from inside a cmdlet?")]
         public void WrongScriptModuleExtensionThrows()
         {
             var module = CreateFile("function foo {'fail'}", "psm3");
-            Assert.Throws<MethodInvocationException>(delegate {
+            Assert.Throws<ExecutionWithErrorsException>(delegate {
                 ReferenceHost.Execute("Import-Module '" + module + "';");
             });
         }
@@ -204,7 +204,7 @@ namespace ReferenceTests.Commands
         public void ImportingAnInvalidManifestFails()
         {
             var module = CreateFile(NewlineJoin(CreateManifest(null, "Me", "FooComp", "1.0") + "'ab'"), "psd1");
-            Assert.Throws<MethodInvocationException>(delegate {
+            Assert.Throws<ExecutionWithErrorsException>(delegate {
                 ReferenceHost.Execute("Import-Module '" + module + "'");
             });
         }
@@ -215,7 +215,7 @@ namespace ReferenceTests.Commands
             var manifest = new Dictionary<string, string>() {
                { "RootModule", "foo" }, { "ModuleToProcess", "bar" }, { "ModuleVersion", "1.0"} };
             var module = CreateFile(NewlineJoin(CreateManifest(manifest)), "psd1");
-            Assert.Throws<MethodInvocationException>(delegate {
+            Assert.Throws<ExecutionWithErrorsException>(delegate {
                 ReferenceHost.Execute("Import-Module '" + module + "'");
             });
         }
@@ -259,6 +259,13 @@ namespace ReferenceTests.Commands
             });
         }
 
+        /*
+         * -Global or -Scope global: Import module and items to global session state
+         * no options: import module to current modules session state table, import items to module scope
+         * -scope local: import module to current modules session state table, import items to *local scope*
+         */
+
+        // TODO: module import overwrites existing module or variable
         // TODO: -global: export to global session state, not current module
         // TODO: make sure that only the most nested manifest defines the exports, but only if the manifest export list is defined
         // TODO: test that a manifest hashtable must not include an unknown member
