@@ -70,6 +70,8 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal statement_list = null; // Initialized by reflection.
         public readonly NonTerminal statement_list_opt = null; // Initialized by reflection.
         public readonly NonTerminal statement = null; // Initialized by reflection.
+        public readonly NonTerminal _terminated_statement = null; // Initialized by reflection.
+        public readonly NonTerminal _unterminated_statement = null; // Initialized by reflection.
         public readonly NonTerminal _statement_labeled_statement = null; // Initialized by reflection.
         public readonly NonTerminal statement_terminator = null; // Initialized by reflection.
         public readonly NonTerminal statement_terminators = null; // Initialized by reflection.
@@ -539,16 +541,24 @@ namespace Pash.ParserIntrinsics
             statement_block.Rule =
                 "{" + statement_list_opt + "}";
 
-#if false
             ////        statement_list:
             ////            statement
             ////            statement_list   statement
-            statement_list.Rule = MakePlusRule(statement_list, statement);
-#else
-            // There's a bug in the language spec here. See https://github.com/Pash-Project/Pash/issues/7
+
+            // We split this rule in _unterminated_statements that require a statement_terminator behind them and
+            // _terminated_statements which are terminated by itself. Note that the last _unterminated_statement
+            // doesn't require a statement_terminator so we add one optional.
+            // NOTE: I tried to use only `_statement_list_body + _unterminated_statement_opt`, but this won't parse
+            //       a single unterminated statement for some reason
             statement_list.Rule =
-                MakeListRule(statement_list, statement_terminators, statement, TermListOptions.AllowTrailingDelimiter | TermListOptions.PlusList);
-#endif
+                _unterminated_statement
+                |
+                _unterminated_statement + statement_terminator + statement_terminators_opt + statement_list
+                |
+                _terminated_statement
+                |
+                _terminated_statement + statement_terminators_opt + statement_list
+                ;
 
             ////        statement:
             ////            if_statement
@@ -559,25 +569,37 @@ namespace Pash.ParserIntrinsics
             ////            try_statement
             ////            data_statement
             ////            pipeline   statement_terminator
-            // The spec doesn't define `label`. I'm using `simple_name` for that purpose.
+
+            // The spec has a bug concerning the definition of the statement_terminator:
+            // Easy example: `if ($true) { }` shouldn't require a semicolon or newline, a pipeline needs one
+            // Also: pipeline includes a recursive rule on statement, which would require multiple terminators
+            // Therefore we split the stamentens in terminated statements and unterminated once that require
+            // terminators as separators in the statement_list. See https://github.com/Pash-Project/Pash/issues/7
             statement.Rule =
+                _unterminated_statement
+                |
+                _terminated_statement
+                ;
+
+            // The spec doesn't define `label`. I'm using `simple_name` for that purpose.
+            _terminated_statement.Rule =
                 if_statement
                 |
                 _statement_labeled_statement
                 |
                 function_statement
                 |
-                // See https://github.com/Pash-Project/Pash/issues/7
-                flow_control_statement /*+ statement_terminator_opt*/
-                |
                 trap_statement
                 |
                 try_statement
                 |
                 data_statement
+                ;
+
+            _unterminated_statement.Rule =
+                flow_control_statement
                 |
-                // See https://github.com/Pash-Project/Pash/issues/7
-                pipeline /*+ statement_terminator_opt*/
+                pipeline
                 ;
 
             _statement_labeled_statement.Rule =

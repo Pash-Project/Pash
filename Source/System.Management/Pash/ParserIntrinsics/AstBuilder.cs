@@ -166,17 +166,28 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.statement_list);
 
-            List<StatementAst> statements = parseTreeNode
-                .ChildNodes
-                .Where(node => node.Term != this._grammar.statement_terminators)
-                .Select(BuildStatementAst)
-                .ToList()
-                ;
+            var statements = BuildStatementListRecursion(parseTreeNode);
 
             return new StatementBlockAst(
                 new ScriptExtent(parseTreeNode),
                 statements.Where(statement => !(statement is TrapStatementAst)),
                 statements.OfType<TrapStatementAst>());
+        }
+
+        IEnumerable<StatementAst> BuildStatementListRecursion(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.statement_list);
+            var numChildNodes = parseTreeNode.ChildNodes.Count;
+            var statements = new List<StatementAst>();
+            // the first element will be an _unterminated_statement or a _terminated_statement
+            statements.Add(BuildStatementAst(parseTreeNode.ChildNodes.First()));
+            // if we have more than one element, our list recurses using the last child node
+            // the child nodes in between are only separators
+            if (numChildNodes > 1)
+            {
+                statements.AddRange(BuildStatementListRecursion(parseTreeNode.ChildNodes.Last()));
+            }
+            return statements;
         }
 
         StatementBlockAst BuildNamedBlockListAst(ParseTreeNode parseTreeNode)
@@ -186,7 +197,11 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildStatementAst(ParseTreeNode parseTreeNode)
         {
-            VerifyTerm(parseTreeNode, this._grammar.statement);
+            if (parseTreeNode.Term == this._grammar.statement)
+            {
+                parseTreeNode = parseTreeNode.ChildNodes.Single();
+            }
+            VerifyTerm(parseTreeNode, this._grammar._terminated_statement, this._grammar._unterminated_statement);
 
             parseTreeNode = parseTreeNode.ChildNodes.Single();
 
