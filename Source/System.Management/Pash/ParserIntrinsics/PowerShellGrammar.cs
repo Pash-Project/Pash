@@ -251,6 +251,8 @@ namespace Pash.ParserIntrinsics
 
         #endregion
 
+        private Regex new_line_param_regex;
+
         public PowerShellGrammar()
         {
             InitializeTerminalFields();
@@ -265,6 +267,7 @@ namespace Pash.ParserIntrinsics
             //     {
             //         "hi"
             //     }
+            this.new_line_param_regex = new Regex(new_line_character.Pattern + "*" + param.Text);
             this.skipped_new_line = new SkippedTerminal(this.new_line_character);
             new_line_character.ValidateToken += delegate(object sender, ValidateTokenEventArgs validateTokenEventArgs)
             {
@@ -281,6 +284,22 @@ namespace Pash.ParserIntrinsics
 
         bool IsNewlineExpected(ValidateTokenEventArgs validateTokenEventArgs)
         {
+            // Here we check manually if a newline is used as a statement terminator
+            // or if it can be skipped (e.g. after `if(exp)`
+            // First we have some special cases:
+
+            // Functions and filters can have a `param()`block defining the functions
+            // parameters. It's important to recognize it as such and *not* recognize the newline
+            // as a statement terminator, or it will be parsed as a statement, which is wrong.
+            if (validateTokenEventArgs.Context.CurrentParserState.ExpectedTerminals.Contains(this.param) &&
+                new_line_param_regex.IsMatch(validateTokenEventArgs.Context.Source.Text,
+                                             validateTokenEventArgs.Context.Source.Position))
+            {
+                return false;
+            }
+
+            // Now the general case: When the parser has any matching rule witht the newline, it's expected.
+            // Otherwise it's optional and we skip it.
             // Remember that `validateTokenEventArgs.Context.CurrentParserState` points in to the finite state machine
             // that Irony generates. `Actions` represents the valid transitions to new states. If this statement is
             // `true`, it means the grammar has a plan for what to do with that `new_line_character`.
