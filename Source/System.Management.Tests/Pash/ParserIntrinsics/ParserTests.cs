@@ -16,7 +16,7 @@ namespace Pash.ParserIntrinsics.Tests
             // Obviously, we'd rather drive this to 0, but for now, let's lock it down
             //
             // Report this number in https://github.com/Pash-Project/Pash/issues/38
-            Assert.AreEqual(3, PowerShellGrammar.Parser.Language.Errors.Count, PowerShellGrammar.Parser.Language.Errors.JoinString("\r\n"));
+            Assert.AreEqual(2, PowerShellGrammar.Parser.Language.Errors.Count, PowerShellGrammar.Parser.Language.Errors.JoinString("\r\n"));
         }
 
         [Test]

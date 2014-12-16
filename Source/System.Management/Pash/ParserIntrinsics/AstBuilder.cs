@@ -176,14 +176,29 @@ namespace Pash.ParserIntrinsics
 
         IEnumerable<StatementAst> BuildStatementListRecursion(ParseTreeNode parseTreeNode)
         {
-            VerifyTerm(parseTreeNode, this._grammar.statement_list);
+            VerifyTerm(parseTreeNode, this._grammar.statement_list, this._grammar._statement_list_rest);
             var numChildNodes = parseTreeNode.ChildNodes.Count;
+            if (numChildNodes == 0)
+            {
+                return new StatementAst[0];
+            }
+
             var statements = new List<StatementAst>();
-            // the first element will be an _unterminated_statement or a _terminated_statement
-            statements.Add(BuildStatementAst(parseTreeNode.ChildNodes.First()));
-            // if we have more than one element, our list recurses using the last child node
-            // the child nodes in between are only separators
-            if (numChildNodes > 1)
+            var childNode = parseTreeNode.ChildNodes.First();
+            if (childNode.Term == this._grammar._unterminated_statement ||
+                childNode.Term == this._grammar._terminated_statement)
+            {
+                statements.Add(BuildStatementAst(childNode));
+            }
+            else if (childNode.Term == this._grammar._statement_list_rest ||
+                     childNode.Term == this._grammar.statement_list)
+            {
+                statements.AddRange(BuildStatementListRecursion(childNode));
+            }
+
+            // we can have more than one child to care about, then we have grammar rule recursion
+            if (numChildNodes > 1 &&
+                parseTreeNode.ChildNodes.Last().Term == this._grammar.statement_list)
             {
                 statements.AddRange(BuildStatementListRecursion(parseTreeNode.ChildNodes.Last()));
             }

@@ -774,6 +774,26 @@ ls
         }
 
         [Test]
+        public void LastStatementGetsTerminatedInAddition()
+        {
+            var statements = ParseInput(" Get-Location;; ")
+                .EndBlock
+                .Statements;
+
+            Assert.AreEqual(1, statements.Count);
+        }
+
+        [Test]
+        public void StatementListCanStartWithTerminators()
+        {
+            var statements = ParseInput(" ;  ; Get-Location")
+                .EndBlock
+                .Statements;
+
+            Assert.AreEqual(1, statements.Count);
+        }
+
+        [Test]
         public void StatementSequenceWithSemicolon()
         {
             var statements = ParseInput("Set-Location ; Get-Location")
