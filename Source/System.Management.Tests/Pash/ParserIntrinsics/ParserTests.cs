@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Pash.Implementation;
 
 namespace Pash.ParserIntrinsics.Tests
 {
@@ -16,7 +17,7 @@ namespace Pash.ParserIntrinsics.Tests
             // Obviously, we'd rather drive this to 0, but for now, let's lock it down
             //
             // Report this number in https://github.com/Pash-Project/Pash/issues/38
-            Assert.AreEqual(3, PowerShellGrammar.Parser.Language.Errors.Count, PowerShellGrammar.Parser.Language.Errors.JoinString("\r\n"));
+            Assert.AreEqual(3, Parser.IronyParser.Language.Errors.Count, Parser.IronyParser.Language.Errors.JoinString("\r\n"));
         }
 
         [Test]
@@ -263,7 +264,7 @@ if ($true)
 
         static void AssertIsValidInput(string input)
         {
-            var parseTree = PowerShellGrammar.Parser.Parse(input);
+            var parseTree = Parser.IronyParser.Parse(input);
 
             if (parseTree.HasErrors())
             {
@@ -273,7 +274,7 @@ if ($true)
 
         static void AssertIsNotValidInput(string input)
         {
-            var parseTree = PowerShellGrammar.Parser.Parse(input);
+            var parseTree = Parser.IronyParser.Parse(input);
 
             if (!parseTree.HasErrors())
             {

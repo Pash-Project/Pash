@@ -216,7 +216,7 @@ namespace Pash.Implementation
                 else if (cmdEntry is SessionStateFunctionEntry)
                 {
                     var funEntry = (SessionStateFunctionEntry)cmdEntry;
-                    var scriptBlock = new ScriptBlock(CommandManager.ParseInput(funEntry.Definition));
+                    var scriptBlock = new ScriptBlock(Parser.ParseInput(funEntry.Definition));
                     var funInfo = new FunctionInfo(funEntry.Name, scriptBlock, null, funEntry.Options);
                     ExecutionContext.SessionState.Function.Set(funInfo);
                 }

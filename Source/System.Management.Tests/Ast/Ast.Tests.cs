@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using Irony.Parsing;
 using Pash.ParserIntrinsics;
 using System.Collections;
 using System.Management.Automation;
 using System.Management.Automation.Language;
 using System.IO;
+using Pash.Implementation;
 
 namespace ParserTests
 {
@@ -593,7 +593,7 @@ ls
             Assert.AreEqual(2, indexExpressionAst.Index.Value);
         }
 
-        [Test, ExpectedException(typeof(PowerShellGrammar.ParseException))
+        [Test, ExpectedException(typeof(ParseException))
         ]
         public void IndexWithSpaceShouldFail()
         {
@@ -603,7 +603,7 @@ ls
         [Test]
         public void ParseError()
         {
-            Assert.Throws<PowerShellGrammar.ParseException>(() =>
+            Assert.Throws<ParseException>(() =>
             {
 
                 ParseInput("$");
@@ -766,7 +766,7 @@ ls
         [Test(Description = "Issue: https://github.com/Pash-Project/Pash/issues/7")]
         public void StatementSequenceWithoutSemicolonTest()
         {
-            Assert.Throws<PowerShellGrammar.ParseException>(() =>
+            Assert.Throws<ParseException>(() =>
             {
 
                 var statements = ParseInput("if ($true) { } Get-Location")
@@ -1181,7 +1181,7 @@ ls
 
         static dynamic ParseInput(string s)
         {
-            return PowerShellGrammar.ParseInteractiveInput(s);
+            return Parser.ParseInput(s);
         }
 
         static dynamic ParseStatement(string input)
@@ -1227,7 +1227,7 @@ ls
             [Test]
             public void BadMemberAccess()
             {
-                Assert.Throws<PowerShellGrammar.ParseException>(() =>
+                Assert.Throws<ParseException>(() =>
                 {
 
                     // The language spec says this space is prohibited.
