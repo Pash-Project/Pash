@@ -239,6 +239,14 @@ namespace ReferenceTests.API
             Assert.AreEqual(typeof(Custom), result.GetType());
             Assert.AreEqual("MyId", ((Custom)result).Id);
         }
+
+        [Test]
+        public void ConvertUsingConstructor()
+        {
+            string input = "1.0";
+            var result = LanguagePrimitives.ConvertTo(input, typeof(Version));
+            Assert.That(result, Is.EqualTo(new Version(input)));
+        }
     }
 }
 

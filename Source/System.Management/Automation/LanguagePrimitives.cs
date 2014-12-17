@@ -300,6 +300,11 @@ namespace System.Management.Automation
             {
                 return result;
             }
+
+            if (valueToConvert != null && TryConvertWithConstructor(valueToConvert, resultType, out result))
+            {
+                return result;
+            }
             /* TODO: further conversion methods:
              * Parse Method: If the source type is string and the destination type has a method called Parse, that
              * method is called to perform the conversion.
@@ -950,6 +955,18 @@ namespace System.Management.Automation
 
             result = null;
             return false;
+        }
+
+        private static bool TryConvertWithConstructor(object value, Type type, out object result)
+        {
+            result = null;
+            var constructor = type.GetConstructor(new Type[] { value.GetType() });
+            if (constructor == null)
+            {
+                return false;
+            }
+            result = constructor.Invoke(new object[] { value });
+            return true;
         }
 
         private static object DefaultConvertOrCast(object value, Type type)
