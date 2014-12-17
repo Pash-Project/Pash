@@ -9,6 +9,7 @@ using System.Reflection;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using System.Management.Automation.Language;
 
 namespace Pash
 {
@@ -86,6 +87,12 @@ namespace Pash
 
         void Execute(string cmd)
         {
+            // execute command as a script in current scope, not local scope
+            Execute(new Command(cmd, true, false));
+        }
+
+        void Execute(Command cmd)
+        {
             var errors = new Collection<object>();
             bool hadSuccess = false;
             try
@@ -149,17 +156,15 @@ namespace Pash
             // the user calling "exit".
             while (!LocalHost.ShouldExit && _interactive)
             {
-                Prompt();
+                var scriptBlock = ReadCommand();
 
-                string cmd = ui.ReadLine();
-
-                if (cmd == null)
+                if (scriptBlock == null)
                 {
                     // EOF
                     break;
                 }
 
-                Execute(cmd);
+                Execute(new Command(scriptBlock, false));
             }
 
             // Exit with the desired exit code that was set by exit command.
@@ -167,9 +172,77 @@ namespace Pash
             return LocalHost.ExitCode;
         }
 
-        internal void Prompt()
+        private ScriptBlockAst ReadCommand()
+        {
+            bool firstRun = true;
+            bool lastParseComplete = true;
+            StringBuilder cmdInput = new StringBuilder();
+
+            while (true)
+            {
+                // show the prompt first
+                if (firstRun)
+                {
+                    Prompt();
+                }
+                else
+                {
+                    ContinuationPrompt();
+                }
+
+                // get input
+                var input = LocalHost.UI.ReadLine();
+                if (input == null)
+                {
+                    return null;
+                }
+                cmdInput.Append(input);
+
+                // empty strings can be ignored
+                if (cmdInput.Length == 0)
+                {
+                    continue;
+                }
+
+                // try to parse the input
+                bool complete = false;
+                ScriptBlockAst command;
+                try
+                {
+                    complete = Parser.TryParsePartialInput(cmdInput.ToString(), out command);
+                }
+                catch (ParseException e)
+                {
+                    var errors = new Collection<object>();
+                    executeHelper("out-default", new object[] { ObjectAsErrorStreamObject(e) }, ref errors);
+                    // TODO: append exception to error variable, set last success to false
+                    // fall back
+                    firstRun = true;
+                    lastParseComplete = true;
+                    cmdInput.Clear();
+                    continue;
+                }
+
+                // return if we parsed the command in one run,
+                //     or if the parse was already completed last time and the current input is empty
+                if (complete && (firstRun || (lastParseComplete && input.Trim().Length == 0)))
+                {
+                    return command;
+                }
+
+                lastParseComplete = complete;
+                firstRun = false;
+            }
+        }
+
+        private void Prompt()
         {
             Execute("prompt | write-host -nonewline");
+        }
+
+        private void ContinuationPrompt()
+        {
+            Execute("'>>' | write-host -nonewline");
         }
 
         private bool? GetBoolVariable (string name)
@@ -194,16 +267,15 @@ namespace Pash
 
         private bool executeHelper(string cmd, object[] input, ref Collection<object> errors)
         {
-            // Ignore empty command lines.
-            if (String.IsNullOrEmpty(cmd))
-                return true;
+            return executeHelper(new Command(cmd, true, false), input, ref errors);
+        }
 
+        private bool executeHelper(Command cmd, object[] input, ref Collection<object> errors)
+        {
             bool success = true;
             using (var currentPipeline = _currentRunspace.CreatePipeline())
             {
-                // A command is not a simple word here, it's the whole user input and might contain
-                // multiple commands. Therefore we parse it first, but make sure it's not executed in a local scope
-                currentPipeline.Commands.AddScript(cmd, false);
+                currentPipeline.Commands.Add(cmd);
 
                 // Now add the default outputter to the end of the pipe.
                 // This will result in the output being written using the PSHost
@@ -245,13 +317,18 @@ namespace Pash
                 if (pipelineError != null)
                 {
                     success = false;
-                    var psobj = PSObject.AsPSObject(pipelineError);
-                    // the explicit (PS) way of setting internal psobj.WriteToErrorStream = true
-                    psobj.Properties.Add(new PSNoteProperty("writeToErrorStream", true));
-                    errors.Add(psobj);
+
+                    errors.Add(ObjectAsErrorStreamObject(pipelineError));
                 }
             }
             return success;
+        }
+
+        private PSObject ObjectAsErrorStreamObject(object obj)
+        {
+            var psobj = PSObject.AsPSObject(obj);
+            psobj.WriteToErrorStream = true;
+            return psobj;
         }
     }
 }
