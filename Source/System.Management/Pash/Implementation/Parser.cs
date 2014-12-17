@@ -7,14 +7,13 @@ using Pash.ParserIntrinsics;
 // use aliases to not confuse ironys parser class with this one
 using IronyParser = Irony.Parsing.Parser;
 using ParseTree = Irony.Parsing.ParseTree;
+using ParseTreeStatus = Irony.Parsing.ParseTreeStatus;
+using ParseMode = Irony.Parsing.ParseMode;
 
 namespace Pash.Implementation
 {
-    public class Parser
+    public static class Parser
     {
-        // This is a little weird. Hopefully someone will have a bright idea
-        // of how to refactor this to separate the grammar from the parser. Or
-        // merge them. Or whatever.
         public static readonly PowerShellGrammar Grammar;
         public static IronyParser IronyParser;
 
@@ -26,13 +25,27 @@ namespace Pash.Implementation
 
         public static ScriptBlockAst ParseInput(string input)
         {
-            var parseTree = Parse(input);
-            return new AstBuilder(Grammar).BuildScriptBlockAst(parseTree.Root);
+            var parseTree = Parse(input, false);
+            return new AstBuilder(Grammar).BuildScriptBlockAst(parseTree.Root);;
         }
 
-        private static ParseTree Parse(string input)
+        public static bool TryParsePartialInput(string input, out ScriptBlockAst scriptBlock)
+        {
+            scriptBlock = null;
+            var parseTree = Parse(input, true);
+            if (parseTree.Status.Equals(ParseTreeStatus.Parsed))
+            {
+                scriptBlock = new AstBuilder(Grammar).BuildScriptBlockAst(parseTree.Root);
+                return true;
+            }
+            // if we're here we only partially parsed, because Parse would have thrown on error
+            return false;
+        }
+
+        private static ParseTree Parse(string input, bool allowPartial)
         {
             ParseTree parseTree = null;
+            IronyParser.Context.Mode = allowPartial ? ParseMode.CommandLine : ParseMode.File;
             try
             {
                 parseTree = IronyParser.Parse(input);
@@ -44,7 +57,8 @@ namespace Pash.Implementation
                 IronyParser = new IronyParser(Grammar);
                 throw new InvalidOperationException(msg);
             }
-            if (parseTree.HasErrors())
+
+            if (parseTree.HasErrors()) // ParseTreeStatus is Error
             {
                 var logMessage = parseTree.ParserMessages.First();
                 throw new ParseException(logMessage.Message, logMessage.Location.Line, logMessage.Location.Column);
