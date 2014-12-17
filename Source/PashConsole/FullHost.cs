@@ -207,19 +207,21 @@ namespace Pash
                 {
                     continue;
                 }
+                // otherwise add a newline (user pressed enter, this can be important)
+                cmdInput.Append(Environment.NewLine);
 
                 // try to parse the input
                 bool complete = false;
-                ScriptBlockAst command;
+                ScriptBlockAst scriptBlock;
                 try
                 {
-                    complete = Parser.TryParsePartialInput(cmdInput.ToString(), out command, out lastCtrlStmtKeyword);
+                    complete = Parser.TryParsePartialInput(cmdInput.ToString(), out scriptBlock, out lastCtrlStmtKeyword);
                 }
                 catch (ParseException e)
                 {
                     var errors = new Collection<object>();
                     executeHelper("out-default", new object[] { ObjectAsErrorStreamObject(e) }, ref errors);
-                    // TODO: append exception to error variable, set last success to false
+                    _currentRunspace.ExecutionContext.AddToErrorVariable(e);
                     // fall back
                     firstRun = true;
                     lastParseComplete = true;
@@ -231,7 +233,7 @@ namespace Pash
                 //     or if the parse was already completed last time and the current input is empty
                 if (complete && (firstRun || (lastParseComplete && input.Trim().Length == 0)))
                 {
-                    return command;
+                    return scriptBlock;
                 }
 
                 lastParseComplete = complete;
