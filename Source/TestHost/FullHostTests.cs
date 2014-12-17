@@ -132,6 +132,18 @@ namespace TestHost
             Assert.AreEqual(8, outlines.Length); // Banner + 5 x Prompts (per input line) + result + new prompt
             Assert.That(outlines[6], Is.EqualTo("foo"));
         }
+
+        [Test]
+        public void ParseErrorOnInputIsPrinted()
+        {
+            CreateFreshHostAndUI(true);
+            HostUI.OnWriteErrorLineString = s => HostUI.WriteLine(s); // we want to see errors in output
+            HostUI.SetInput("$" + Environment.NewLine); // simple parse error
+            FullHost.Run();
+            var outlines = HostUI.GetOutput().Split(new string[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
+            Assert.AreEqual(6, outlines.Length); // Banner + prompt + 3 error lines + prompt
+            Assert.That(outlines[2], Is.StringStarting("Parse error"));
+        }
     }
 }
 
