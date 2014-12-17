@@ -91,6 +91,7 @@ namespace System.Management.Automation
 
         internal void SetMetadata(Hashtable metadata)
         {
+            // TODO: more validation
             // setting all metadata properties by hand is tedious, we use reflection
             foreach (var propPair in MetdataProperties)
             {
@@ -100,6 +101,11 @@ namespace System.Management.Automation
                 }
                 var value = LanguagePrimitives.ConvertTo(metadata[propPair.Key], propPair.Value.PropertyType);
                 propPair.Value.SetValue(this, value, null);
+            }
+            // module version needs to be set extra, because it has a different name in the Hashtable
+            if (metadata.ContainsKey("ModuleVersion"))
+            {
+                Version = LanguagePrimitives.ConvertTo<Version>(metadata["ModuleVersion"]);
             }
         }
 
