@@ -68,8 +68,11 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal _statement_block_empty = null; // Initialized by reflection.
         public readonly NonTerminal _statement_block_full = null; // Initialized by reflection.
         public readonly NonTerminal statement_list = null; // Initialized by reflection.
+        public readonly NonTerminal _statement_list_rest = null; // Initialized by reflection.
         public readonly NonTerminal statement_list_opt = null; // Initialized by reflection.
         public readonly NonTerminal statement = null; // Initialized by reflection.
+        public readonly NonTerminal _terminated_statement = null; // Initialized by reflection.
+        public readonly NonTerminal _unterminated_statement = null; // Initialized by reflection.
         public readonly NonTerminal _statement_labeled_statement = null; // Initialized by reflection.
         public readonly NonTerminal statement_terminator = null; // Initialized by reflection.
         public readonly NonTerminal statement_terminators = null; // Initialized by reflection.
@@ -438,8 +441,10 @@ namespace Pash.ParserIntrinsics
             #region B.2.2 Statements
             ////        script_block:
             ////            param_block_opt   statement_terminators_opt    script_block_body_opt
+            // NOTE: the script_block_body_opt includes a statement_list that can only consist of statement_terminators
+            //       Therefore we need to leave out the statement_terminators_opt here or we get shift/reduce errors!
             script_block.Rule =
-                param_block_opt + statement_terminators_opt + script_block_body_opt;
+                param_block_opt + script_block_body_opt;
 
             ////        param_block:
             ////            new_lines_opt   attribute_list_opt   new_lines_opt   param   new_lines_opt
@@ -494,16 +499,35 @@ namespace Pash.ParserIntrinsics
             statement_block.Rule =
                 "{" + statement_list_opt + "}";
 
-#if false
             ////        statement_list:
             ////            statement
             ////            statement_list   statement
-            statement_list.Rule = MakePlusRule(statement_list, statement);
-#else
-            // There's a bug in the language spec here. See https://github.com/Pash-Project/Pash/issues/7
+
+            // We split this rule in _unterminated_statements that require a statement_terminator behind them and
+            // _terminated_statements which are terminated by itself. Note that the last _unterminated_statement
+            // doesn't require a statement_terminator so we add one optional.
+            // Also, there can be a number of statement_terminators before and after the list.
+
             statement_list.Rule =
-                MakeListRule(statement_list, statement_terminators, statement, TermListOptions.AllowTrailingDelimiter | TermListOptions.PlusList);
-#endif
+                _statement_list_rest // the last statement
+                |
+                _terminated_statement + statement_list
+                |
+                _unterminated_statement + statement_terminator + statement_list
+                |
+                statement_terminator + statement_list ;
+
+            _statement_list_rest.Rule =
+                _unterminated_statement
+                |
+                statement_terminator
+                |
+                _terminated_statement
+                |
+                // is necessary to allow an unterminated_statement with one terminator. other stuff works with the list
+                _unterminated_statement + statement_terminator
+                ;
+
 
             ////        statement:
             ////            if_statement
@@ -514,25 +538,37 @@ namespace Pash.ParserIntrinsics
             ////            try_statement
             ////            data_statement
             ////            pipeline   statement_terminator
-            // The spec doesn't define `label`. I'm using `simple_name` for that purpose.
+
+            // The spec has a bug concerning the definition of the statement_terminator:
+            // Easy example: `if ($true) { }` shouldn't require a semicolon or newline, a pipeline needs one
+            // Also: pipeline includes a recursive rule on statement, which would require multiple terminators
+            // Therefore we split the stamentens in terminated statements and unterminated once that require
+            // terminators as separators in the statement_list. See https://github.com/Pash-Project/Pash/issues/7
             statement.Rule =
+                _unterminated_statement
+                |
+                _terminated_statement
+                ;
+
+            // The spec doesn't define `label`. I'm using `simple_name` for that purpose.
+            _terminated_statement.Rule =
                 if_statement
                 |
                 _statement_labeled_statement
                 |
                 function_statement
                 |
-                // See https://github.com/Pash-Project/Pash/issues/7
-                flow_control_statement /*+ statement_terminator_opt*/
-                |
                 trap_statement
                 |
                 try_statement
                 |
                 data_statement
+                ;
+
+            _unterminated_statement.Rule =
+                flow_control_statement
                 |
-                // See https://github.com/Pash-Project/Pash/issues/7
-                pipeline /*+ statement_terminator_opt*/
+                pipeline
                 ;
 
             _statement_labeled_statement.Rule =

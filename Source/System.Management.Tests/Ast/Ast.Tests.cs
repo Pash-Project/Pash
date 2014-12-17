@@ -754,6 +754,46 @@ ls
         }
 
         [Test]
+        public void EmptyStatementList()
+        {
+            var statements = ParseInput("")
+                .EndBlock
+                .Statements;
+
+            Assert.AreEqual(0, statements.Count);
+        }
+
+        [Test]
+        public void SimpleStatement()
+        {
+            var statements = ParseInput(" Get-Location ")
+                .EndBlock
+                .Statements;
+
+            Assert.AreEqual(1, statements.Count);
+        }
+
+        [Test]
+        public void LastStatementGetsTerminatedInAddition()
+        {
+            var statements = ParseInput(" Get-Location;; ")
+                .EndBlock
+                .Statements;
+
+            Assert.AreEqual(1, statements.Count);
+        }
+
+        [Test]
+        public void StatementListCanStartWithTerminators()
+        {
+            var statements = ParseInput(" ;  ; Get-Location")
+                .EndBlock
+                .Statements;
+
+            Assert.AreEqual(1, statements.Count);
+        }
+
+        [Test]
         public void StatementSequenceWithSemicolon()
         {
             var statements = ParseInput("Set-Location ; Get-Location")
@@ -763,19 +803,11 @@ ls
             Assert.AreEqual(2, statements.Count);
         }
 
-        [Test(Description = "Issue: https://github.com/Pash-Project/Pash/issues/7")]
+        [Test]
         public void StatementSequenceWithoutSemicolonTest()
         {
-            Assert.Throws<ParseException>(() =>
-            {
-
-                var statements = ParseInput("if ($true) { } Get-Location")
-                    .EndBlock
-                        .Statements;
-
-                Assert.AreEqual(2, statements.Count);
-
-            });
+            var statements = ParseInput("if ($true) { } Get-Location").EndBlock.Statements;
+            Assert.AreEqual(2, statements.Count);
         }
 
         [Test]
@@ -1181,6 +1213,7 @@ ls
 
         static dynamic ParseInput(string s)
         {
+            Parser.IronyParser.Context.TracingEnabled = true;
             return Parser.ParseInput(s);
         }
 
