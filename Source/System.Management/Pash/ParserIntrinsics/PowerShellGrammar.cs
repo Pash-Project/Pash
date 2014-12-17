@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using Irony;
 using System.Diagnostics;
 using Extensions.Irony;
+using System.Collections.Generic;
 
 namespace Pash.ParserIntrinsics
 {
@@ -254,7 +255,7 @@ namespace Pash.ParserIntrinsics
 
         #endregion
 
-        private Regex new_line_param_regex;
+        private Tuple<KeyTerm, Regex>[] _terms_after_newline;
 
         public PowerShellGrammar()
         {
@@ -265,12 +266,19 @@ namespace Pash.ParserIntrinsics
             // delegate to a new method, so we don't accidentally overwrite a readonly field.
             BuildProductionRules();
 
+            // there are special terms that can follow after skippable newlines. These terms are the
+            // param block, elseif and else blocks. To make sure they aren't interpreted as statements,
+            // we need to extra check when a newline occurs if the newline should be skipped
+            _terms_after_newline = (
+                from t in new KeyTerm[] { @param, @else, @elseif }
+                select new Tuple<KeyTerm, Regex>(t, new Regex(new_line_character.Pattern + "*" + t.Text))
+            ).ToArray();
+
             // Skip newlines within statements, e.g.:
             //     if ($true)       # not the end of the statement - keep parsing!
             //     {
             //         "hi"
             //     }
-            this.new_line_param_regex = new Regex(new_line_character.Pattern + "*" + param.Text);
             this.skipped_new_line = new SkippedTerminal(this.new_line_character);
             new_line_character.ValidateToken += delegate(object sender, ValidateTokenEventArgs validateTokenEventArgs)
             {
@@ -291,14 +299,15 @@ namespace Pash.ParserIntrinsics
             // or if it can be skipped (e.g. after `if(exp)`
             // First we have some special cases:
 
-            // Functions and filters can have a `param()`block defining the functions
-            // parameters. It's important to recognize it as such and *not* recognize the newline
-            // as a statement terminator, or it will be parsed as a statement, which is wrong.
-            if (validateTokenEventArgs.Context.CurrentParserState.ExpectedTerminals.Contains(this.param) &&
-                new_line_param_regex.IsMatch(validateTokenEventArgs.Context.Source.Text,
-                                             validateTokenEventArgs.Context.Source.Position))
+            // detect param, elseif, and else keywords to make sure they aren't misinterpreted as a command
+            foreach (var matchTuple in _terms_after_newline)
             {
-                return false;
+                if (validateTokenEventArgs.Context.CurrentParserState.ExpectedTerminals.Contains(matchTuple.Item1) &&
+                    matchTuple.Item2.IsMatch(validateTokenEventArgs.Context.Source.Text,
+                                             validateTokenEventArgs.Context.Source.Position))
+                {
+                    return false;
+                }
             }
 
             // Now the general case: When the parser has any matching rule witht the newline, it's expected.

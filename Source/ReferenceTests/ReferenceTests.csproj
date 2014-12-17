@@ -11,7 +11,7 @@
     <AssemblyName>ReferenceTests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -92,6 +92,7 @@
     <Compile Include="Language\Operators\PostfixIncrementDecrementTests_7_1_5.cs" />
     <Compile Include="GithubIssues\Issue200.cs" />
     <Compile Include="GithubIssues\Issue20.cs" />
+    <Compile Include="Language\IfElseTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
