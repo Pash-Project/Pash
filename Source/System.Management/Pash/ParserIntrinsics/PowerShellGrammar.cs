@@ -309,51 +309,6 @@ namespace Pash.ParserIntrinsics
             return validateTokenEventArgs.Context.CurrentParserState.Actions.ContainsKey(this.new_line_character);
         }
 
-        // This is a little weird. Hopefully someone will have a bright idea
-        // of how to refactor this to separate the grammar from the parser. Or
-        // merge them. Or whatever.
-        public static readonly PowerShellGrammar Instance;
-        public static Parser Parser;
-
-        static PowerShellGrammar()
-        {
-            Instance = new PowerShellGrammar();
-            Parser = new Parser(Instance);
-        }
-
-        public class ParseException : Exception
-        {
-            public readonly LogMessage LogMessage;
-
-            public ParseException(LogMessage logMessage)
-            {
-                this.LogMessage = logMessage;
-            }
-        }
-
-        public static ScriptBlockAst ParseInteractiveInput(string input)
-        {
-            ParseTree parseTree = null;
-            try
-            {
-                parseTree = Parser.Parse(input);
-            }
-            catch (Exception)
-            {
-                var msg = "The parser internally crashed and gets reinitialized." + Environment.NewLine +
-                          "Although this shouldn't happen, it's likely that it happened because of invalid syntax.";
-                Parser = new Parser(Instance);
-                throw new InvalidOperationException(msg);
-            }
-
-            if (parseTree.HasErrors())
-            {
-                throw new ParseException(parseTree.ParserMessages.First());
-            }
-
-            return new AstBuilder(Instance).BuildScriptBlockAst(parseTree.Root);
-        }
-
         public override void OnLanguageDataConstructed(LanguageData language)
         {
             if (language.ErrorLevel != GrammarErrorLevel.NoError) throw new Exception(language.ErrorLevel.ToString());

@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace System.Management.Automation
 {
@@ -11,17 +12,31 @@ namespace System.Management.Automation
     [Serializable]
     public class ParseException : RuntimeException
     {
-        public ParseException()
+        public string RawMessage { get; private set; }
+        public string FormattedMessage { get; private set; }
+
+        public override string Message
         {
-            base.Id = "Parse";
-            base.Category = ErrorCategory.ParserError;
+            get
+            {
+                return FormattedMessage;
+            }
         }
 
-        public ParseException(string message)
-            : base(message)
+        public ParseException() : this("Unknown Error")
         {
-            base.Id = "Parse";
-            base.Category = ErrorCategory.ParserError;
+        }
+
+        public ParseException(string rawMessage) : this(rawMessage, -1, -1)
+        {
+        }
+
+        public ParseException(string rawMessage, int line, int col)
+        {
+            Id = "Parse";
+            Category = ErrorCategory.ParserError;
+            RawMessage = rawMessage;
+            FormattedMessage = FormatMessage(rawMessage, line, col);
         }
 
         public ParseException(string message, Exception innerException)
@@ -36,6 +51,25 @@ namespace System.Management.Automation
         {
         }
 
+        private string FormatMessage(string rawMessage, int line, int col)
+        {
+            var msg = new StringBuilder("Parse error");
+            if (line >= 0 || col >= 0)
+            {
+                msg.AppendFormat(" at ({0}:{1})", line, col);
+            }
+            msg.Append(": ");
+            if (rawMessage.Length > 100)
+            {
+                msg.Append(rawMessage.Substring(0, 97));
+                msg.Append("...");
+            }
+            else
+            {
+                msg.Append(rawMessage);
+            }
+            return msg.ToString();
+        }
     }
 }
 
