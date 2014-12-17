@@ -1,5 +1,6 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Linq;
 using System.Text;
 using System.Management.Automation.Runspaces;
 using System.Management.Automation;
@@ -17,6 +18,7 @@ namespace Pash
     {
         private bool _interactive;
         private Runspace _currentRunspace;
+        private int _ctrlStmtKeywordLength;
 
         public const string BannerText = "Pash - Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/";
 
@@ -28,6 +30,7 @@ namespace Pash
             LocalHost = new LocalHost(true);
             _currentRunspace = RunspaceFactory.CreateRunspace(LocalHost);
             _currentRunspace.Open();
+            _ctrlStmtKeywordLength = Parser.ControlStatementKeywords.Max(s => s.Length);
 
             LoadProfiles();
         }
@@ -176,6 +179,7 @@ namespace Pash
         {
             bool firstRun = true;
             bool lastParseComplete = true;
+            string lastCtrlStmtKeyword = "";
             StringBuilder cmdInput = new StringBuilder();
 
             while (true)
@@ -187,7 +191,7 @@ namespace Pash
                 }
                 else
                 {
-                    ContinuationPrompt();
+                    ContinuationPrompt(lastCtrlStmtKeyword);
                 }
 
                 // get input
@@ -209,7 +213,7 @@ namespace Pash
                 ScriptBlockAst command;
                 try
                 {
-                    complete = Parser.TryParsePartialInput(cmdInput.ToString(), out command);
+                    complete = Parser.TryParsePartialInput(cmdInput.ToString(), out command, out lastCtrlStmtKeyword);
                 }
                 catch (ParseException e)
                 {
@@ -240,9 +244,9 @@ namespace Pash
             Execute("prompt | write-host -nonewline");
         }
 
-        private void ContinuationPrompt()
+        private void ContinuationPrompt(string start)
         {
-            Execute("'>> ' | write-host -nonewline");
+            Execute(String.Format("'{0}>> ' | write-host -nonewline", start.PadRight(_ctrlStmtKeywordLength, '-')));
         }
 
         private bool? GetBoolVariable (string name)

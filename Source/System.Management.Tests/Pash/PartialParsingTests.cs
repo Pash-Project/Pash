@@ -7,7 +7,7 @@ using System.Management.Automation.Language;
 namespace ParserTests
 {
     [TestFixture]
-    public class PartialParsingTets
+    public class PartialParsingTests
     {
         [TestCase("'")]
         [TestCase("$")]
@@ -19,20 +19,24 @@ namespace ParserTests
             });
         }
 
-        [TestCase("if ('foo') { ")]
-        [TestCase("if ($true) { 'foo' } else {")]
-        [TestCase("@(")]
-        [TestCase("@{")]
-        [TestCase("foreach ($a in $b)")]
-        [TestCase("foo | foreach {")]
-        [TestCase("'foo' | ")]
-        [TestCase("$object.method(")]
-        [TestCase("function f {")]
-        public void PartialParsingIsPossible(string input)
+        [TestCase("if ('foo') { ", "if")]
+        [TestCase("if ($true) { 'foo' } else {", "else")]
+        [TestCase("@(", "")]
+        [TestCase("@{", "")]
+        [TestCase("foreach ($a in $b)", "foreach")]
+        [TestCase("foo | foreach {", "")]
+        [TestCase("'foo' | ", "")]
+        [TestCase("$object.method(", "")]
+        [TestCase("function f {", "function")]
+        [TestCase("if ('foo') { while($false) { ", "while")]
+        public void PartialParsingIsPossible(string input, string expectedLastKeyword)
         {
             ScriptBlockAst sb;
-            var complete = Parser.TryParsePartialInput(input + Environment.NewLine, out sb);
+            string lastKeyword = "";
+
+            var complete = Parser.TryParsePartialInput(input + Environment.NewLine, out sb, out lastKeyword);
             Assert.That(complete, Is.False, "Parser reported complete parsing of incomplete sentence");
+            Assert.That(lastKeyword, Is.EqualTo(expectedLastKeyword));
         }
 
         [TestCase("1")]

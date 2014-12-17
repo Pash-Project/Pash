@@ -75,7 +75,7 @@
     <Compile Include="ParameterTests\CmdLetInfoTests.cs" />
     <Compile Include="ParameterTests\BindingTests.cs" />
     <Compile Include="ParameterTests\TestParameterCommand.cs" />
-    <Compile Include="Pash\PartialParsingTets.cs" />
+    <Compile Include="Pash\PartialParsingTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
