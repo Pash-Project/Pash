@@ -41,4 +41,4 @@ using System.Runtime.InteropServices;
 [assembly: InternalsVisibleTo("System.Management.Tests")]
 [assembly: InternalsVisibleTo("ParserTests")]
 [assembly: InternalsVisibleTo("TestHost")]
-[assembly: InternalsVisibleTo("PashConsole")]
+[assembly: InternalsVisibleTo("Pash")] // note that it's not PashConsole, because the project compiles to Pash.exe

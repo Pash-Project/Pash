@@ -242,7 +242,7 @@ namespace Pash
 
         private void ContinuationPrompt()
         {
-            Execute("'>>' | write-host -nonewline");
+            Execute("'>> ' | write-host -nonewline");
         }
 
         private bool? GetBoolVariable (string name)
