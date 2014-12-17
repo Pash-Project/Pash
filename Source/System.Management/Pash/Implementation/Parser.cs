@@ -79,7 +79,7 @@ namespace Pash.Implementation
                 var msg = "The parser internally crashed and gets reinitialized." + Environment.NewLine +
                     "Although this shouldn't happen, it's likely that it happened because of invalid syntax.";
                 IronyParser = new IronyParser(Grammar);
-                throw new InvalidOperationException(msg);
+                throw new ParseException(msg);
             }
 
             if (parseTree.HasErrors()) // ParseTreeStatus is Error
