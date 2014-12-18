@@ -1,6 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Linq;
+using System.Management.Automation.Host;
 using System.Text;
 using System.Management.Automation.Runspaces;
 using System.Management.Automation;
@@ -16,9 +17,9 @@ namespace Pash
 {
     internal class FullHost
     {
-        private bool _interactive;
-        private Runspace _currentRunspace;
-        private int _ctrlStmtKeywordLength;
+        private readonly bool _interactive;
+        private readonly Runspace _currentRunspace;
+        private readonly int _ctrlStmtKeywordLength;
 
         public const string BannerText = "Pash - Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/";
 
@@ -39,11 +40,11 @@ namespace Pash
         {
             // currently we only support the current user, current host (semantics of other things in Pash need to
             // be discussed first)
-            var curUserCurHost = GetCurrentUserCurrentHostProfilePath();
-            LoadProfile(curUserCurHost);
+            var currentUserCurrentHost = GetCurrentUserCurrentHostProfilePath();
+            LoadProfile(currentUserCurrentHost);
 
             // finally set the variable with all used profiles
-            SetProfileVariable(curUserCurHost, "", "", "");
+            SetProfileVariable(currentUserCurrentHost, "", "", "");
         }
 
         internal void LoadProfile(string path)
@@ -70,20 +71,20 @@ namespace Pash
             }
         }
 
-        internal void SetProfileVariable(string curUserCurHost, string curUserAllHosts, string allUsersCurHost, string allUsersAllHosts)
+        internal void SetProfileVariable(string currentUserCurrentHost, string currentUserAllHosts, string allUsersCurrentHost, string allUsersAllHosts)
         {
-            var profileObj = new PSObject(curUserCurHost);
+            var profileObj = new PSObject(currentUserCurrentHost);
             var profiles = new Dictionary<string, string> {
-                { "CurrentUserCurrentHost", curUserCurHost },
-                { "CurrentUserAllHosts", curUserAllHosts },
-                { "AllUsersCurrentHost", allUsersCurHost },
+                { "CurrentUserCurrentHost", currentUserCurrentHost },
+                { "CurrentUserAllHosts", currentUserAllHosts },
+                { "AllUsersCurrentHost", allUsersCurrentHost },
                 { "AllUsersAllHosts", allUsersAllHosts }
             };
             foreach (var pair in profiles)
             {
-                var prop = new PSNoteProperty(pair.Key, pair.Value);
-                profileObj.Properties.Add(prop);
-                profileObj.Members.Add(prop);
+                var psNoteProperty = new PSNoteProperty(pair.Key, pair.Value);
+                profileObj.Properties.Add(psNoteProperty);
+                profileObj.Members.Add(psNoteProperty);
             }
             _currentRunspace.SessionStateProxy.SetVariable("Profile", profileObj);
         }
@@ -146,9 +147,8 @@ namespace Pash
             }
 
             if (String.IsNullOrEmpty(commands))
-            { 
-                ui.WriteLine(ConsoleColor.White, ConsoleColor.Black, BannerText);
-                ui.WriteLine();
+            {
+                WriteBanner(ui);
             }
             else
             {
@@ -175,27 +175,26 @@ namespace Pash
             return LocalHost.ExitCode;
         }
 
+        private static void WriteBanner(PSHostUserInterface ui)
+        {
+            ui.WriteLine(ConsoleColor.White, ConsoleColor.Black, BannerText);
+            ui.WriteLine();
+        }
+
         private ScriptBlockAst ReadCommand()
         {
             bool firstRun = true;
             bool lastParseComplete = true;
-            string lastCtrlStmtKeyword = "";
+            string lastControlStatementKeyword = "";
             StringBuilder cmdInput = new StringBuilder();
 
             while (true)
             {
                 // show the prompt first
-                if (firstRun)
-                {
-                    Prompt();
-                }
-                else
-                {
-                    ContinuationPrompt(lastCtrlStmtKeyword);
-                }
+                ShowPrompt(firstRun, lastControlStatementKeyword);
 
                 // get input
-                var input = LocalHost.UI.ReadLine();
+                var input = ReadInput();
                 if (input == null)
                 {
                     return null;
@@ -215,7 +214,7 @@ namespace Pash
                 ScriptBlockAst scriptBlock;
                 try
                 {
-                    complete = Parser.TryParsePartialInput(cmdInput.ToString(), out scriptBlock, out lastCtrlStmtKeyword);
+                    complete = Parser.TryParsePartialInput(cmdInput.ToString(), out scriptBlock, out lastControlStatementKeyword);
                 }
                 catch (ParseException e)
                 {
@@ -241,12 +240,29 @@ namespace Pash
             }
         }
 
-        private void Prompt()
+        private string ReadInput()
+        {
+            return LocalHost.UI.ReadLine();
+        }
+
+        private void ShowPrompt(bool firstRun, string lastCtrlStmtKeyword)
+        {
+            if (firstRun)
+            {
+                ShowNormalPrompt();
+            }
+            else
+            {
+                ShowContinuationPrompt(lastCtrlStmtKeyword);
+            }
+        }
+
+        private void ShowNormalPrompt()
         {
             Execute("prompt | write-host -nonewline");
         }
 
-        private void ContinuationPrompt(string start)
+        private void ShowContinuationPrompt(string start)
         {
             Execute(String.Format("'{0}>> ' | write-host -nonewline", start.PadRight(_ctrlStmtKeywordLength, '-')));
         }
@@ -261,14 +277,11 @@ namespace Pash
 
             var value = variable.Value;
             var psObject = value as PSObject;
-            if (psObject == null)
-            {
-                return value as bool?;
-            }
-            else
+            if (psObject != null)
             {
                 return psObject.BaseObject as bool?;
             }
+            return value as bool?;
         }
 
         private bool executeHelper(string cmd, object[] input, ref Collection<object> errors)
