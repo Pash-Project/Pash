@@ -40,11 +40,11 @@ namespace Pash
         {
             // currently we only support the current user, current host (semantics of other things in Pash need to
             // be discussed first)
-            var curUserCurHost = GetCurrentUserCurrentHostProfilePath();
-            LoadProfile(curUserCurHost);
+            var currentUserCurrentHost = GetCurrentUserCurrentHostProfilePath();
+            LoadProfile(currentUserCurrentHost);
 
             // finally set the variable with all used profiles
-            SetProfileVariable(curUserCurHost, "", "", "");
+            SetProfileVariable(currentUserCurrentHost, "", "", "");
         }
 
         internal void LoadProfile(string path)
@@ -71,20 +71,20 @@ namespace Pash
             }
         }
 
-        internal void SetProfileVariable(string curUserCurHost, string curUserAllHosts, string allUsersCurHost, string allUsersAllHosts)
+        internal void SetProfileVariable(string currentUserCurrentHost, string currentUserAllHosts, string allUsersCurrentHost, string allUsersAllHosts)
         {
-            var profileObj = new PSObject(curUserCurHost);
+            var profileObj = new PSObject(currentUserCurrentHost);
             var profiles = new Dictionary<string, string> {
-                { "CurrentUserCurrentHost", curUserCurHost },
-                { "CurrentUserAllHosts", curUserAllHosts },
-                { "AllUsersCurrentHost", allUsersCurHost },
+                { "CurrentUserCurrentHost", currentUserCurrentHost },
+                { "CurrentUserAllHosts", currentUserAllHosts },
+                { "AllUsersCurrentHost", allUsersCurrentHost },
                 { "AllUsersAllHosts", allUsersAllHosts }
             };
             foreach (var pair in profiles)
             {
-                var prop = new PSNoteProperty(pair.Key, pair.Value);
-                profileObj.Properties.Add(prop);
-                profileObj.Members.Add(prop);
+                var psNoteProperty = new PSNoteProperty(pair.Key, pair.Value);
+                profileObj.Properties.Add(psNoteProperty);
+                profileObj.Members.Add(psNoteProperty);
             }
             _currentRunspace.SessionStateProxy.SetVariable("Profile", profileObj);
         }
