@@ -1,6 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Linq;
+using System.Management.Automation.Host;
 using System.Text;
 using System.Management.Automation.Runspaces;
 using System.Management.Automation;
@@ -146,9 +147,8 @@ namespace Pash
             }
 
             if (String.IsNullOrEmpty(commands))
-            { 
-                ui.WriteLine(ConsoleColor.White, ConsoleColor.Black, BannerText);
-                ui.WriteLine();
+            {
+                WriteBanner(ui);
             }
             else
             {
@@ -173,6 +173,12 @@ namespace Pash
             // Exit with the desired exit code that was set by exit command.
             // This is set in the host by the MyHost.SetShouldExit() implementation.
             return LocalHost.ExitCode;
+        }
+
+        private static void WriteBanner(PSHostUserInterface ui)
+        {
+            ui.WriteLine(ConsoleColor.White, ConsoleColor.Black, BannerText);
+            ui.WriteLine();
         }
 
         private ScriptBlockAst ReadCommand()
