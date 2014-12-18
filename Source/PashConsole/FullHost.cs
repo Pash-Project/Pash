@@ -185,14 +185,7 @@ namespace Pash
             while (true)
             {
                 // show the prompt first
-                if (firstRun)
-                {
-                    ShowNormalPrompt();
-                }
-                else
-                {
-                    ShowContinuationPrompt(lastCtrlStmtKeyword);
-                }
+                ShowPrompt(firstRun, lastCtrlStmtKeyword);
 
                 // get input
                 var input = LocalHost.UI.ReadLine();
@@ -238,6 +231,18 @@ namespace Pash
 
                 lastParseComplete = complete;
                 firstRun = false;
+            }
+        }
+
+        private void ShowPrompt(bool firstRun, string lastCtrlStmtKeyword)
+        {
+            if (firstRun)
+            {
+                ShowNormalPrompt();
+            }
+            else
+            {
+                ShowContinuationPrompt(lastCtrlStmtKeyword);
             }
         }
 
