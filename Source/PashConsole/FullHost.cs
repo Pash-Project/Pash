@@ -187,11 +187,11 @@ namespace Pash
                 // show the prompt first
                 if (firstRun)
                 {
-                    Prompt();
+                    ShowNormalPrompt();
                 }
                 else
                 {
-                    ContinuationPrompt(lastCtrlStmtKeyword);
+                    ShowContinuationPrompt(lastCtrlStmtKeyword);
                 }
 
                 // get input
@@ -241,12 +241,12 @@ namespace Pash
             }
         }
 
-        private void Prompt()
+        private void ShowNormalPrompt()
         {
             Execute("prompt | write-host -nonewline");
         }
 
-        private void ContinuationPrompt(string start)
+        private void ShowContinuationPrompt(string start)
         {
             Execute(String.Format("'{0}>> ' | write-host -nonewline", start.PadRight(_ctrlStmtKeywordLength, '-')));
         }
