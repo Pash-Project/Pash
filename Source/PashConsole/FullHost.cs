@@ -185,13 +185,13 @@ namespace Pash
         {
             bool firstRun = true;
             bool lastParseComplete = true;
-            string lastCtrlStmtKeyword = "";
+            string lastControlStatementKeyword = "";
             StringBuilder cmdInput = new StringBuilder();
 
             while (true)
             {
                 // show the prompt first
-                ShowPrompt(firstRun, lastCtrlStmtKeyword);
+                ShowPrompt(firstRun, lastControlStatementKeyword);
 
                 // get input
                 var input = ReadInput();
@@ -214,7 +214,7 @@ namespace Pash
                 ScriptBlockAst scriptBlock;
                 try
                 {
-                    complete = Parser.TryParsePartialInput(cmdInput.ToString(), out scriptBlock, out lastCtrlStmtKeyword);
+                    complete = Parser.TryParsePartialInput(cmdInput.ToString(), out scriptBlock, out lastControlStatementKeyword);
                 }
                 catch (ParseException e)
                 {
