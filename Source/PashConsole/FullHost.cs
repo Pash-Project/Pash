@@ -242,8 +242,7 @@ namespace Pash
 
         private string ReadInput()
         {
-            var input = LocalHost.UI.ReadLine();
-            return input;
+            return LocalHost.UI.ReadLine();
         }
 
         private void ShowPrompt(bool firstRun, string lastCtrlStmtKeyword)
