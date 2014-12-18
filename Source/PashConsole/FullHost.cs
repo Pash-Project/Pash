@@ -188,7 +188,7 @@ namespace Pash
                 ShowPrompt(firstRun, lastCtrlStmtKeyword);
 
                 // get input
-                var input = LocalHost.UI.ReadLine();
+                var input = ReadInput();
                 if (input == null)
                 {
                     return null;
@@ -232,6 +232,12 @@ namespace Pash
                 lastParseComplete = complete;
                 firstRun = false;
             }
+        }
+
+        private string ReadInput()
+        {
+            var input = LocalHost.UI.ReadLine();
+            return input;
         }
 
         private void ShowPrompt(bool firstRun, string lastCtrlStmtKeyword)
