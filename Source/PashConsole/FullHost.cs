@@ -17,9 +17,9 @@ namespace Pash
 {
     internal class FullHost
     {
-        private bool _interactive;
-        private Runspace _currentRunspace;
-        private int _ctrlStmtKeywordLength;
+        private readonly bool _interactive;
+        private readonly Runspace _currentRunspace;
+        private readonly int _ctrlStmtKeywordLength;
 
         public const string BannerText = "Pash - Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/";
 
