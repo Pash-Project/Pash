@@ -278,14 +278,11 @@ namespace Pash
 
             var value = variable.Value;
             var psObject = value as PSObject;
-            if (psObject == null)
-            {
-                return value as bool?;
-            }
-            else
+            if (psObject != null)
             {
                 return psObject.BaseObject as bool?;
             }
+            return value as bool?;
         }
 
         private bool executeHelper(string cmd, object[] input, ref Collection<object> errors)
