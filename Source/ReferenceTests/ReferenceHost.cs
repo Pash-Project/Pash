@@ -84,7 +84,7 @@ namespace ReferenceTests
                     if (throwOnError && LastRawErrorResults.Count > 0)
                     {
                         throw new ExecutionWithErrorsException((from err in LastRawErrorResults
-                                                                 select err as ErrorRecord).ToArray());
+                                                                 select ((PSObject) err).BaseObject as ErrorRecord).ToArray());
                     }
                 }
             }

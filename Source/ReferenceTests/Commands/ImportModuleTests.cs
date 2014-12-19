@@ -86,9 +86,10 @@ namespace ReferenceTests.Commands
         public void WrongScriptModuleExtensionThrows()
         {
             var module = CreateFile("function foo {'fail'}", "psm3");
-            Assert.Throws<ExecutionWithErrorsException>(delegate {
+            var e = Assert.Throws<ExecutionWithErrorsException>(delegate {
                 ReferenceHost.Execute("Import-Module '" + module + "';");
             });
+            Assert.That(e.Errors[0].Exception is InvalidOperationException);
         }
 
         [Test]
@@ -204,9 +205,10 @@ namespace ReferenceTests.Commands
         public void ImportingAnInvalidManifestFails()
         {
             var module = CreateFile(NewlineJoin(CreateManifest(null, "Me", "FooComp", "1.0") + "'ab'"), "psd1");
-            Assert.Throws<ExecutionWithErrorsException>(delegate {
+            var e = Assert.Throws<ExecutionWithErrorsException>(delegate {
                 ReferenceHost.Execute("Import-Module '" + module + "'");
             });
+            Assert.That(e.Errors[0].Exception is ArgumentException);
         }
 
         [Test]
@@ -215,9 +217,10 @@ namespace ReferenceTests.Commands
             var manifest = new Dictionary<string, string>() {
                { "RootModule", "foo" }, { "ModuleToProcess", "bar" }, { "ModuleVersion", "1.0"} };
             var module = CreateFile(NewlineJoin(CreateManifest(manifest)), "psd1");
-            Assert.Throws<ExecutionWithErrorsException>(delegate {
+            var e = Assert.Throws<ExecutionWithErrorsException>(delegate {
                 ReferenceHost.Execute("Import-Module '" + module + "'");
             });
+            Assert.That(e.Errors[0].Exception is InvalidOperationException);
         }
 
         [Test]
@@ -230,7 +233,7 @@ namespace ReferenceTests.Commands
             var e = Assert.Throws<CmdletInvocationException>(delegate {
                 ReferenceHost.Execute("Import-Module '" + path + "'");
             });
-            //Assert.That(e.ErrorRecord.FullyQualifiedErrorId.Equals("foo"));
+            Assert.That(e.ErrorRecord.Exception is InvalidOperationException);
         }
 
         [Test]
