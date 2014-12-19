@@ -63,7 +63,7 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
-        public void ImportingAModuleTwiceReturnsTheSameReferenceAndIsNotLoadedTwice()
+        public void ImportingAModuleTwiceReturnsTheSameReferenceButIsLoadedTwice()
         {
             var module = CreateFile(NewlineJoin(
                 "$x = 1",
@@ -73,8 +73,10 @@ namespace ReferenceTests.Commands
             var cmd = NewlineJoin(
                 "$m1 = Import-Module '" + module + "' -PassThru;",
                 "$x; foo;", // make sure we get the correct values
+
                 "$x = 2; $x; foo", // modify the value, check that the module internal value is modified
                 "function foo { return 3; }; foo", // overwrite foo
+
                 "$m2 = Import-Module '" + module + "' -PassThru;",
                 "$x; foo", // make sure it's still the modified value and that foo got re-imported
                 "[object]::ReferenceEquals($m1, $m2)" // check that we returned indeed the same module object
@@ -237,50 +239,70 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
-        public void NestedManifestAddInformationAndFirstManifestRestrictExportsFromTargetModuleIfNotEmpty()
+        public void NestedManifestsAddInfos()
+        {
+            var scriptModule = CreateFile("function foo {'foo'}", "psm1");
+            var nestedManifest = CreateFile(CreateManifest(scriptModule, "The Guy", null, "1.1"), "psd1");
+            var manifest = CreateFile(CreateManifest(nestedManifest, "Me", "MyComp", "1.0"), "psd1");
+            var res = ReferenceHost.RawExecute("Import-Module '" + manifest + "' -PassThru;");
+            Assert.That(res.Count, Is.EqualTo(1));
+            var module = res[0].BaseObject as PSModuleInfo;
+            Assert.That(module.Author, Is.EqualTo("The Guy")); // was overwritten by nestedManifest
+            Assert.That(module.CompanyName, Is.EqualTo("MyComp")); // still original from manifest
+            Assert.That(module.ModuleType, Is.EqualTo(ModuleType.Script)); // as the last module was a script
+            Assert.That(module.Version, Is.EqualTo(new Version("1.1"))); // overwritten by nesetd manifest
+        }
+
+        [Test]
+        public void OneNestedManifestRestrictsExportsFromTargetModule()
         {
             var scriptModule = CreateFile(NewlineJoin(
                 "function foo {'foo'}",
                 "function bar {'bar'}",
                 "$x = 1",
                 "$y = 2",
-                "New-Alias baz bar",
                 "Export-ModuleMember -Function foo -Var *"
-            ), "psm1");
-            var nestedManifest = CreateFile(CreateManifest(scriptModule, "The Guy", null, "1.0", "@()", "y"), "psd1");
-            var manifest = CreateFile(CreateManifest(nestedManifest, "Me", "MyComp", "1.0", "bar", "x"), "psd1");
-            var res = ReferenceHost.RawExecute("Import-Module '" + manifest + "' -PassThru; $x; $y");
-            Assert.That(res.Count, Is.EqualTo(3));
-            Assert.That(res[1], Is.Null); // nestedManifest only allows y to be exported
-            Assert.That(res[2].BaseObject, Is.EqualTo(2)); // all 3 modules export it
-            var module = res[0].BaseObject as PSModuleInfo;
-            Assert.That(module.Author, Is.EqualTo("The Guy")); // was overwritten by nestedManifest
-            Assert.That(module.CompanyName, Is.EqualTo("MyComp")); // still original from manifest
-            Assert.That(module.ModuleType, Is.EqualTo(ModuleType.Script)); // as the last module was a script
+                ), "psm1");
+            var uselessManifest = CreateFile(CreateManifest(scriptModule, "", "", "1.0"), "psd1");
+            var nestedManifest = CreateFile(CreateManifest(uselessManifest, null, null, "1.0", "@()", "y"), "psd1");
+            var manifest = CreateFile(CreateManifest(nestedManifest, null, null, "1.0", null, "@()"), "psd1");
+            // useless manifest doesn't restrict any export, so the next one will do it
+            var res = ReferenceHost.RawExecute("Import-Module '" + manifest + "'; $x; $y");
+            Assert.That(res.Count, Is.EqualTo(2));
+            Assert.That(res[0], Is.Null); // nestedManifest only allows y to be exported.
+            Assert.That(res[1].BaseObject, Is.EqualTo(2)); // restriction of toplevel mainfest has no influence anymore
             Assert.Throws<CommandNotFoundException>(delegate {
                 ReferenceHost.RawExecuteInLastRunspace("foo"); // not imported due to no function exports in manifest
             });
         }
 
-        /*
-         * -Global or -Scope global: Import module and items to global session state
-         * no options: import module to current modules session state table, import items to module scope
-         * -scope local: import module to current modules session state table, import items to *local scope*
-         */
+        [Test]
+        public void ManifestOnlyRestrictsExportsIfNotEmpty()
+        {
+            var scriptModule = CreateFile(NewlineJoin(
+                "function foo {'foo'}",
+                "function bar {'bar'}",
+                "$x = 1",
+                "$y = 2",
+                "Export-ModuleMember -Function foo -Var *"
+                ), "psm1");
+            var nestedManifest = CreateFile(CreateManifest(scriptModule, null, null, "1.0", null, "@()"), "psd1");
+            var manifest = CreateFile(CreateManifest(nestedManifest, null, null, "1.0", "@()", null), "psd1");
+            var res = ReferenceHost.RawExecute("Import-Module '" + manifest + "'; foo; $x; $y");
+            Assert.That(res.Count, Is.EqualTo(3));
+            Assert.That(res[0].BaseObject, Is.EqualTo("foo"));// nestedManifest function restriction is null, so not modified
+            Assert.That(res[1], Is.Null); // manifest doesn't allow any variable to be exported.
+            Assert.That(res[2], Is.Null);
+        }
 
-        // TODO: module import overwrites existing module or variable
-        // TODO: -global: export to global session state, not current module
-        // TODO: make sure that only the most nested manifest defines the exports, but only if the manifest export list is defined
         // TODO: test that a manifest hashtable must not include an unknown member
         // TODO: test that manifest needs a version
         // TODO: test that manifest module.Path is path of nested RootModule
         // TODO: test with get-module that modules are actually always in the sessionstate of the current module (or global)
-        // TODO: test that reimporting doesn't reload the module, but re-imports the exported module members (to local or global sessionstate)
         // TODO: test that modules are only loaded by path if a slash is in the name
         // TODO: tests for modules importing modules to check scope derivance and execution
         // TODO: test that checks what happens if the script module returns a value -> shouldn't
         // TODO: test that checks the behavior if both the Global and the Scope parameter are set -> exception
-        // TODO: test if module exports a variable that overwrites an existing one. which PSVariable *object* will be used?
         // TODO: what if another module with the same name is loaded -> two modules, different path
     }
 }

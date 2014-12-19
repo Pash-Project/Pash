@@ -14,6 +14,7 @@ namespace System.Management.Automation
     public class PSInvalidOperationException : InvalidOperationException, IContainsErrorRecord
     {
         public ErrorRecord ErrorRecord { get; private set; }
+        internal bool Terminating { get; private set; }
 
         public PSInvalidOperationException()
             : this("Invalid Operation")
@@ -37,10 +38,11 @@ namespace System.Management.Automation
         }
 
         internal PSInvalidOperationException(string message, string id, ErrorCategory errorCategory,
-                                             Exception innerException)
+                                             Exception innerException, bool terminating = true)
             : base(message, innerException)
         {
-            ErrorRecord = new ErrorRecord(new ParentContainsErrorRecordException(this), id, errorCategory, null);
+            Terminating = terminating;
+            ErrorRecord = new ErrorRecord(this, id, errorCategory, null);
         }
 
 
@@ -53,7 +55,7 @@ namespace System.Management.Automation
         protected PSInvalidOperationException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            ErrorRecord = new ErrorRecord(new ParentContainsErrorRecordException(this), "InvalidOperation",
+            ErrorRecord = new ErrorRecord(this, "InvalidOperation",
                                           ErrorCategory.InvalidOperation, null);
         }
     }

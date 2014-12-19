@@ -15,7 +15,6 @@ namespace Pash.Implementation
     {
         private readonly string[] _manifestExtensions = new string[] { ".psd1" };
         private readonly string[] _scriptExtensions = new string[] { ".psm1", ".ps1" };
-        // TODO sburnicki: Make sure .exe is a valid module extension
         private readonly string[] _binaryExtensions = new string[] { ".dll", ".exe" };
 
         private ExecutionContext _executionContext;
@@ -25,21 +24,28 @@ namespace Pash.Implementation
             _executionContext = context;
         }
 
-        internal PSModuleInfo LoadModuleByName(string name, bool loadToGlobalScope)
+        internal PSModuleInfo LoadModuleByName(string name, bool loadToGlobalScope, bool importMembers = true)
         {
             // TODO: where do we handle FileNotFoundExceptions etc?
             var path = new Path(name);
             if (name.Contains(path.CorrectSlash) || path.HasExtension())
             {
                 // check if it's already loaded
-                var loadedModule = _executionContext.SessionState.LoadedModules.Get(path);
-                if (loadedModule != null)
+                var moduleInfo = _executionContext.SessionState.LoadedModules.Get(path);
+                if (moduleInfo != null)
                 {
-                    return loadedModule;
+                    return moduleInfo;
                 }
                 // load it otherwise
-                var moduleInfo = LoadModuleByPath(path);
-                _executionContext.SessionState.LoadedModules.Add(moduleInfo, loadToGlobalScope ? "global" : "local");
+                moduleInfo = LoadModuleByPath(path);
+                // modules are loaded either to global or module scope, never to local scope
+                var targetScope = loadToGlobalScope ? ModuleIntrinsics.ModuleImportScopes.Global
+                                                    : ModuleIntrinsics.ModuleImportScopes.Module;
+                _executionContext.SessionState.LoadedModules.Add(moduleInfo, targetScope);
+                if (importMembers)
+                {
+                    _executionContext.SessionState.LoadedModules.ImportMembers(moduleInfo, targetScope);
+                }
                 return moduleInfo;
             }
             // otherwise we'd need to look in our module paths for a module
@@ -90,8 +96,9 @@ namespace Pash.Implementation
             }
             else
             {
-                // TODO: nicer error message if the extension is *really* unknown
-                throw new MethodInvocationException("The extension '" + ext + "' is currently not supported");
+                var msg = "The extension '" + ext + "' is currently not supported";
+                throw new PSInvalidOperationException(msg, "Modules_InvalidFileExtension",
+                                                      ErrorCategory.InvalidOperation, null, false);
             }
             moduleInfo.ValidateExportedMembers();
         }
@@ -119,7 +126,7 @@ namespace Pash.Implementation
             if (res.Count != 1 || !(res[0].BaseObject is Hashtable))
             {
                 var msg = "The module manifest is invalid as it doesn't simply define a hashtable. ";
-                throw new PSInvalidOperationException(msg, "Modules_InvalidManifest", ErrorCategory.InvalidOperation);
+                throw new PSArgumentException(msg, "Modules_InvalidManifest", ErrorCategory.InvalidOperation);
             }
             var manifest = (Hashtable)res[0].BaseObject;
 
@@ -131,7 +138,8 @@ namespace Pash.Implementation
             catch (PSInvalidCastException e)
             {                
                 var msg = "The module manifest contains invalid data." + Environment.NewLine + e.Message;
-                throw new PSInvalidOperationException(msg, "Modules_InvalidManifestData", ErrorCategory.InvalidData, e);
+                throw new PSInvalidOperationException(msg, "Modules_InvalidManifestData", ErrorCategory.InvalidData, e,
+                                                      false);
             }
 
             // TODO: check and load required assemblies and modules
@@ -153,7 +161,7 @@ namespace Pash.Implementation
                 var msg = "The module manifest cannot contain both a definition of ModuleToProcess and RootModule.";
                 // lol, this is the actual error id from PS:
                 var id = "Modules_ModuleManifestCannotContainBothModuleToProcessAndRootModule";
-                throw new PSInvalidOperationException(msg, id, ErrorCategory.InvalidOperation);
+                throw new PSInvalidOperationException(msg, id, ErrorCategory.InvalidOperation, null, false);
             }
             if (rootModule == null && moduleToProcess == null)
             {
@@ -166,7 +174,7 @@ namespace Pash.Implementation
             {
                 var msg = "The RootModule / ModuleToProcess value must be a string.";
                 throw new PSInvalidOperationException(msg, "Modules_InvalidManifestRootModule",
-                    ErrorCategory.InvalidData);
+                    ErrorCategory.InvalidData, null, false);
             }
             try
             {
@@ -181,13 +189,16 @@ namespace Pash.Implementation
                 }
                 var msg = "Failed to load the nesting module '" + rootModuleName + "'." +
                     Environment.NewLine + e.Message;
-                throw new PSInvalidOperationException(msg, errId, ErrorCategory.InvalidOperation, e);
+                var terminating = e is PSInvalidOperationException ?
+                    ((PSInvalidOperationException)e).Terminating : false;
+                throw new PSInvalidOperationException(msg, errId, ErrorCategory.InvalidOperation, e, terminating);
             }
         }
 
         void RestrictModuleExportsByManifest(PSModuleInfo moduleInfo, Hashtable manifest)
         {
             string[] funs, vars, aliases, cmdlets;
+            // validate first
             try
             {
                 funs = LanguagePrimitives.ConvertTo<string[]>(manifest["FunctionsToExport"]);
@@ -202,14 +213,33 @@ namespace Pash.Implementation
                 throw new PSInvalidOperationException(msg, "Modules_ManifestMembersToExportAreInvalid", 
                     ErrorCategory.InvalidData, e);
             }
-            moduleInfo.ExportedFunctions.ReplaceContents(
-                WildcardPattern.FilterDictionary(funs, moduleInfo.ExportedFunctions));
-            moduleInfo.ExportedVariables.ReplaceContents(
-                WildcardPattern.FilterDictionary(vars, moduleInfo.ExportedVariables));
-            moduleInfo.ExportedAliases.ReplaceContents(
-                WildcardPattern.FilterDictionary(aliases, moduleInfo.ExportedAliases));
-            moduleInfo.ExportedCmdlets.ReplaceContents(
-                WildcardPattern.FilterDictionary(cmdlets, moduleInfo.ExportedCmdlets));
+            // only one manifest can restrict the exported members, so check if we did it already
+            if (moduleInfo.ExportsAreRestrictedByManifest ||
+                (funs == null && vars == null && aliases == null && cmdlets == null))
+            {
+                return;
+            }
+            if (funs != null)
+            {
+                moduleInfo.ExportedFunctions.ReplaceContents(
+                    WildcardPattern.FilterDictionary(funs, moduleInfo.ExportedFunctions));
+            }
+            if (vars != null)
+            {
+                moduleInfo.ExportedVariables.ReplaceContents(
+                    WildcardPattern.FilterDictionary(vars, moduleInfo.ExportedVariables));
+            }
+            if (aliases != null)
+            {
+                moduleInfo.ExportedAliases.ReplaceContents(
+                    WildcardPattern.FilterDictionary(aliases, moduleInfo.ExportedAliases));
+            }
+            if (cmdlets != null)
+            {
+                moduleInfo.ExportedCmdlets.ReplaceContents(
+                    WildcardPattern.FilterDictionary(cmdlets, moduleInfo.ExportedCmdlets));
+            }
+            moduleInfo.ExportsAreRestrictedByManifest = true;
         }
 
         private Collection<PSObject> ExecuteScriptInSessionState(string path, SessionState sessionState)

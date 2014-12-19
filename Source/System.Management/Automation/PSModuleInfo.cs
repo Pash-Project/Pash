@@ -24,6 +24,7 @@ namespace System.Management.Automation
         public Dictionary<string, CmdletInfo> ExportedCmdlets { get; private set; }
 
         internal bool HasExplicitExports { get; set; }
+        internal bool ExportsAreRestrictedByManifest { get; set; }
 
         internal PSModuleInfo(string path, string name, SessionState sessionState)
         {

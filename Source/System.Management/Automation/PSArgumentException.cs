@@ -12,34 +12,37 @@ namespace System.Management.Automation
     [Serializable]
     public class PSArgumentException : ArgumentException, IContainsErrorRecord
     {
-        public ErrorRecord ErrorRecord
-        {
-            get
-            {
-                return new ErrorRecord(this, "", ErrorCategory.InvalidArgument, null);
-            }
-        }
-
-        //todo: implement
-        //public override string Message { get; }
+        public ErrorRecord ErrorRecord { get; private set; }
 
         public PSArgumentException()
-        {
-        }
-
-        public PSArgumentException(string message)
-            : base(message)
-        {
-        }
-
-        public PSArgumentException(string message, Exception innerException)
-            : base(message, innerException)
+            : this("Invalid Argument!")
         {
         }
 
         public PSArgumentException(string message, string paramName)
-            : base(message, paramName)
+            : this(message + "Invalid parameter: " + paramName)
         {
+        }
+
+        public PSArgumentException(string message)
+            : this(message, (Exception) null)
+        {
+        }
+
+        internal PSArgumentException(string message, Exception innerException)
+            : this(message, "Invalid Argument", ErrorCategory.InvalidArgument)
+        {
+        }
+
+        internal PSArgumentException(string message, string errorId, ErrorCategory errorCat)
+            : this(message, "Invalid Argument", ErrorCategory.InvalidArgument, null)
+        {
+        }
+
+        internal PSArgumentException(string message, string errorId, ErrorCategory errorCat, Exception innerException)
+            : base(message, innerException)
+        {
+            ErrorRecord = new ErrorRecord(this, errorId, errorCat, null);
         }
 
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]

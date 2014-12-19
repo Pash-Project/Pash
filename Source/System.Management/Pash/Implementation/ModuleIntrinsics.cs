@@ -14,16 +14,26 @@ namespace Pash.Implementation
          */
         private SessionStateScope<PSModuleInfo> _scope;
 
+        // modules are a little different: you can import them either to local, global, or *module* scope.
+        // the module scope level is unfortunately only supported with modules, not for other scoped items,
+        // so we have to operate a little different here
+        internal enum ModuleImportScopes
+        {
+            Local,
+            Module,
+            Global
+        };
+
         public ModuleIntrinsics(SessionStateScope<PSModuleInfo> scope)
         {
             _scope = scope;
         }
 
-        public void Add(PSModuleInfo module, string scope)
+        public void Add(PSModuleInfo module, ModuleImportScopes scope)
         {
-            var targetScope = _scope.GetScope(scope, false, _scope);
-            targetScope.SessionState.LoadedModules.ImportMembers(module);
-            _scope.SetAtScope(module, scope, true);
+            // it's either set at global or module level
+            var targetScope = GetModuleImportScope(scope);
+            targetScope.SetLocal(module, false);
         }
 
         public void Remove(PSModuleInfo module)
@@ -49,27 +59,29 @@ namespace Pash.Implementation
             return _scope.GetAll();
         }
 
-        private void ImportMembers(PSModuleInfo module)
+        internal void ImportMembers(PSModuleInfo module, ModuleImportScopes scope)
         {
+            // we either export to
+            var targetScope = GetModuleImportScope(scope);
             foreach (var fun in module.ExportedFunctions.Values)
             {
                 fun.Module = module;
-                _scope.SessionState.Function.Set(fun);
+                targetScope.SessionState.Function.Set(fun);
             }
             foreach (var variable in module.ExportedVariables.Values)
             {
                 variable.Module = module;
-                _scope.SessionState.PSVariable.Set(variable);
+                targetScope.SessionState.PSVariable.Set(variable);
             }
             foreach (var alias in module.ExportedAliases.Values)
             {
                 alias.Module = module;
-                _scope.SessionState.Alias.Set(alias, "local");
+                targetScope.SessionState.Alias.Set(alias, "local");
             }
             foreach (var cmdlet in module.ExportedCmdlets.Values)
             {
                 cmdlet.Module = module;
-                _scope.SessionState.Cmdlet.Set(cmdlet);
+                targetScope.SessionState.Cmdlet.Set(cmdlet);
             }
         }
 
@@ -108,6 +120,31 @@ namespace Pash.Implementation
                     _scope.SessionState.Cmdlet.Remove(foundCmdlet.ItemName);
                 }
             }
+        }
+
+        private SessionStateScope<PSModuleInfo> GetModuleImportScope(ModuleImportScopes scope)
+        {
+            if (scope.Equals(ModuleImportScopes.Local))
+            {
+                return _scope;
+            }
+            var moduleScope = scope.Equals(ModuleImportScopes.Module);
+            foreach (var curScope in _scope.HierarchyIterator)
+            {
+                // check for global scope. Even if we want to get the module scope, this means it doesn't exist
+                // or we would have returned it
+                if (curScope.ParentScope == null)
+                {
+                    return curScope;
+                }
+                // check for module scope
+                if (moduleScope && curScope.SessionState.Module != null)
+                {
+                    return curScope;
+                }
+            }
+            // should never happen as we *must* reach the global scope
+            return null;
         }
     }
 }

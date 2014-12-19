@@ -40,16 +40,27 @@ namespace System.Management.Automation
         public SwitchParameter PassThru { get; set; }
 
         private bool _loadToGlobalScope;
+        private ModuleIntrinsics.ModuleImportScopes _importScope;
+        private ModuleLoader _moduleLoader;
 
         protected override void BeginProcessing()
         {
+            _moduleLoader = new ModuleLoader(ExecutionContext);
+            // evaluate meaning of scope parameters:
+            // -Global or -Scope global: Import module and items to global session state
+            // no options: import module to current modules session state table, import items to module scope
+            // -scope local: import module to current modules session state table, import items to *local scope*
             if (Global.IsPresent && !String.IsNullOrEmpty(Scope))
             {
                 throw new MethodInvocationException("You cannot specify both the Global and the Scope parameter!");
             }
-            // tests show somehow that we load the module to global scope by default rather than to local scope
-            // as documentation says?
-            _loadToGlobalScope = !String.Equals(Scope, "Local", StringComparison.InvariantCultureIgnoreCase);
+
+            _loadToGlobalScope = Global.IsPresent || String.Equals(Scope, "Global", StringComparison.InvariantCultureIgnoreCase);
+            _importScope = _loadToGlobalScope ? ModuleIntrinsics.ModuleImportScopes.Global
+                                              : ModuleIntrinsics.ModuleImportScopes.Module;
+            _importScope = String.Equals(Scope, "Local", StringComparison.InvariantCultureIgnoreCase) ? 
+                                ModuleIntrinsics.ModuleImportScopes.Local : _importScope;
+
         }
 
         protected override void ProcessRecord()
@@ -58,15 +69,46 @@ namespace System.Management.Automation
             {
                 throw new NotImplementedException("Currently you can only import modules by name!");
             }
-            var moduleLoader = new ModuleLoader(ExecutionContext);
             foreach (var modName in Name)
             {
-                PSModuleInfo moduleInfo = moduleLoader.LoadModuleByName(modName, _loadToGlobalScope);
+                var module = LoadModule(modName);
+                if (module == null)
+                {
+                    continue;
+                }
+                // (re-) import the members to specified scope
+                SessionState.LoadedModules.ImportMembers(module, _importScope);
+
                 if (PassThru.IsPresent)
                 {
-                    WriteObject(moduleInfo);
+                    WriteObject(module);
                 }
             }
+        }
+
+        private PSModuleInfo LoadModule(string name)
+        {
+            PSModuleInfo moduleInfo = null;
+            try
+            {
+                // last arg: importMembers is false, because we need to (re-)import the members explicitly
+                // to a maybe different scope
+                moduleInfo = _moduleLoader.LoadModuleByName(name, _loadToGlobalScope, false);
+            }
+            catch (PSArgumentException e)
+            {
+                WriteError(e.ErrorRecord);
+            }
+            catch (PSInvalidOperationException e)
+            {
+                if (e.Terminating)
+                {
+                    ThrowTerminatingError(e.ErrorRecord);
+                }
+                WriteError(e.ErrorRecord);
+            }
+
+            return moduleInfo;
         }
     }
 }
