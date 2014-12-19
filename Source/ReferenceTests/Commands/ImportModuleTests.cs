@@ -250,7 +250,7 @@ namespace ReferenceTests.Commands
             Assert.That(module.Author, Is.EqualTo("The Guy")); // was overwritten by nestedManifest
             Assert.That(module.CompanyName, Is.EqualTo("MyComp")); // still original from manifest
             Assert.That(module.ModuleType, Is.EqualTo(ModuleType.Script)); // as the last module was a script
-            Assert.That(module.Version, Is.EqualTo(new Version("1.1"))); // overwritten by nesetd manifest
+            Assert.That(module.Version, Is.EqualTo(new Version("1.0"))); // not overwritten by nested manifest
         }
 
         [Test]
@@ -263,17 +263,31 @@ namespace ReferenceTests.Commands
                 "$y = 2",
                 "Export-ModuleMember -Function foo -Var *"
                 ), "psm1");
-            var uselessManifest = CreateFile(CreateManifest(scriptModule, "", "", "1.0"), "psd1");
-            var nestedManifest = CreateFile(CreateManifest(uselessManifest, null, null, "1.0", "@()", "y"), "psd1");
+            var nestedManifest = CreateFile(CreateManifest(scriptModule, null, null, "1.0", "@()", "y"), "psd1");
             var manifest = CreateFile(CreateManifest(nestedManifest, null, null, "1.0", null, "@()"), "psd1");
-            // useless manifest doesn't restrict any export, so the next one will do it
-            var res = ReferenceHost.RawExecute("Import-Module '" + manifest + "'; $x; $y");
-            Assert.That(res.Count, Is.EqualTo(2));
-            Assert.That(res[0], Is.Null); // nestedManifest only allows y to be exported.
-            Assert.That(res[1].BaseObject, Is.EqualTo(2)); // restriction of toplevel mainfest has no influence anymore
-            Assert.Throws<CommandNotFoundException>(delegate {
+            // nestedManifest only allows y to be exported. restriction of toplevel mainfest has no influence anymore
+            ExecuteAndCompareTypedResult("Import-Module '" + manifest + "'; $x; $y", null, 2);
+            Assert.Throws<CommandNotFoundException>(delegate
+            {
                 ReferenceHost.RawExecuteInLastRunspace("foo"); // not imported due to no function exports in manifest
             });
+        }
+
+
+        [Test]
+        public void ManifestWithoutRestrictionsCounts()
+        {
+            var scriptModule = CreateFile(NewlineJoin(
+                "function foo {'foo'}",
+                "function bar {'bar'}",
+                "$x = 1",
+                "$y = 2",
+                "Export-ModuleMember -Function foo -Var *"
+                ), "psm1");
+            var uselessManifest = CreateFile(CreateManifest(scriptModule, "", "", "1.0"), "psd1");
+            var manifest = CreateFile(CreateManifest(uselessManifest, null, null, "1.0", "@()", "@()"), "psd1");
+            // useless manifest doesn't restrict any export, so the next one will do it
+            ExecuteAndCompareTypedResult("Import-Module '" + manifest + "'; $x; $y; foo", 1, 2, "foo");
         }
 
         [Test]
@@ -288,11 +302,8 @@ namespace ReferenceTests.Commands
                 ), "psm1");
             var nestedManifest = CreateFile(CreateManifest(scriptModule, null, null, "1.0", null, "@()"), "psd1");
             var manifest = CreateFile(CreateManifest(nestedManifest, null, null, "1.0", "@()", null), "psd1");
-            var res = ReferenceHost.RawExecute("Import-Module '" + manifest + "'; foo; $x; $y");
-            Assert.That(res.Count, Is.EqualTo(3));
-            Assert.That(res[0].BaseObject, Is.EqualTo("foo"));// nestedManifest function restriction is null, so not modified
-            Assert.That(res[1], Is.Null); // manifest doesn't allow any variable to be exported.
-            Assert.That(res[2], Is.Null);
+            // nestedManifest function restriction is null, so not modified. nestedManifest doesn't allow any variable to be exported.
+            ExecuteAndCompareTypedResult("Import-Module '" + manifest + "'; foo; $x; $y", "foo", null, null);
         }
 
         // TODO: test that a manifest hashtable must not include an unknown member
