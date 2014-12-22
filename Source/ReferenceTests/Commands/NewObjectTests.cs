@@ -52,6 +52,17 @@ namespace ReferenceTests.Commands
                 Assert.AreEqual(expected[key], res.Properties[key].Value);
             }
         }
+
+        [Test]
+        public void CreateSystemUriUsingUriKindParameter()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(new string[] {
+                "$projectUri = new-object Uri('http://pash-project.github.io/', [System.UriKind]::Absolute)",
+                "$projectUri.AbsoluteUri"
+            }));
+
+            Assert.AreEqual("http://pash-project.github.io/" + Environment.NewLine, result);
+        }
     }
 }
 
