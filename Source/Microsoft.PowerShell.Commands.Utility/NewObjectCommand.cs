@@ -32,7 +32,7 @@ namespace Microsoft.PowerShell.Commands.Utility
         {
             Type type = new TypeName(this.TypeName).GetReflectionType();
 
-            var result = PSObject.AsPSObject(Activator.CreateInstance(type, this.ArgumentList));
+            var result = PSObject.AsPSObject(Activator.CreateInstance(type, GetArguments()));
 
             if (Property != null)
             {
@@ -40,6 +40,17 @@ namespace Microsoft.PowerShell.Commands.Utility
             }
 
             WriteObject(result);
+        }
+
+        private object[] GetArguments()
+        {
+            if (ArgumentList == null)
+            {
+                return new object[0];
+            }
+
+            return (from arg in ArgumentList
+                    select PSObject.Unwrap(arg)).ToArray();
         }
 
         private void AddProperties(PSObject psobj)
