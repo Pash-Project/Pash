@@ -40,5 +40,73 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual("", result);
         }
+
+        [Test]
+        public void PropertyNameValueEquals()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$c = Get-Command | where -Property Name -eq -Value 'Where-Object'",
+                "$c.Name"
+            });
+
+            Assert.AreEqual("Where-Object" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void PropertyNameWithDifferentCaseEqualsValue()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$c = Get-Command | where -Property name -eq -Value 'Where-Object'",
+                "$c.Name"
+            });
+
+            Assert.AreEqual("Where-Object" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void PropertyValueWithDifferentCaseEqualsValue()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$c = Get-Command | where -Property Name -eq -Value 'where-object'",
+                "$c.Name"
+            });
+
+            Assert.AreEqual("Where-Object" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void PropertyValueEqualsWithoutUsingNamedParameters()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$c = Get-Command | where name -eq 'where-object'",
+                "$c.Name"
+            });
+
+            Assert.AreEqual("Where-Object" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void UnknownPropertyEqualsNonNullValueFiltersOutAllValues()
+        {
+            string result = ReferenceHost.Execute("1,2,3 | where -Property UnknownProperty -eq -Value 1");
+
+            Assert.AreEqual("", result);
+        }
+
+        [Test]
+        public void UnknownPropertyEqualsNullValueReturnsAllValues()
+        {
+            string result = ReferenceHost.Execute("1,2,3 | where -Property UnknownProperty -eq -Value $null");
+
+            Assert.AreEqual(NewlineJoin("1", "2", "3"), result);
+        }
+
+        [Test]
+        public void NullPipelineObjectMatchesNullValue()
+        {
+            string result = ReferenceHost.Execute("$null | where -Property UnknownProperty -eq -Value $null");
+
+            Assert.AreEqual(Environment.NewLine, result);
+        }
     }
 }

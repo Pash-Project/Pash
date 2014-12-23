@@ -1,5 +1,6 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Linq;
 using System.Management.Automation;
 using System.Management.Pash.Implementation;
 
@@ -118,6 +119,18 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
+            if (FilterScript != null)
+            {
+                FilterByScript();
+            }
+            else
+            {
+                FilterByProperty();
+            }
+        }
+
+        private void FilterByScript()
+        {
             ExecutionContext.SetVariable("_", InputObject);
 
             var executionVisitor = new ExecutionVisitor(ExecutionContext, (PipelineCommandRuntime)CommandRuntime);
@@ -142,6 +155,41 @@ namespace Microsoft.PowerShell.Commands
                 return (bool)result.ImmediateBaseObject;
             }
             return false;
+        }
+
+        private void FilterByProperty()
+        {
+            object propertyValue = GetPropertyValue();
+
+            if (ValuePassesFilter(propertyValue))
+            {
+                WriteObject(InputObject);
+            }
+        }
+
+        private object GetPropertyValue()
+        {
+            if (InputObject == null)
+            {
+                return null;
+            }
+
+            PSPropertyInfo inputObjectProperty = InputObject.Properties[Property];
+            if (inputObjectProperty != null)
+            {
+                return inputObjectProperty.Value;
+            }
+
+            return null;
+        }
+
+        private bool ValuePassesFilter(object propertyValue)
+        {
+            if (EQ.IsPresent)
+            {
+                return LanguagePrimitives.Equals(propertyValue, Value, true);
+            }
+            throw new NotImplementedException("Where-Object filter not implemented");
         }
     }
 }
