@@ -70,9 +70,6 @@ namespace System.Management.Pash.Implementation
             int? leftOperandInt = leftOperand is int ? ((int?)leftOperand) : null;
             int? rightOperandInt = rightOperand is int ? ((int?)rightOperand) : null;
 
-            bool? leftOperandBool = leftOperand is bool ? ((bool?)leftOperand) : null;
-            bool? rightOperandBool = rightOperand is bool ? ((bool?)rightOperand) : null;
-
             switch (binaryExpressionAst.Operator)
             {
                 case TokenKind.DotDot:
@@ -118,16 +115,13 @@ namespace System.Management.Pash.Implementation
                     throw new NotImplementedException(binaryExpressionAst.ToString());
 
                 case TokenKind.Or:
-                    if (leftOperandBool.HasValue) return leftOperandBool.Value || rightOperandBool.Value;
-                    throw new NotImplementedException(binaryExpressionAst.ToString());
+                    return LanguagePrimitives.ConvertTo<bool>(leftOperand) || LanguagePrimitives.ConvertTo<bool>(rightOperand);
 
                 case TokenKind.Xor:
-                    if (leftOperandBool.HasValue) return leftOperandBool != rightOperandBool;
-                    throw new NotImplementedException(binaryExpressionAst.ToString());
+                    return LanguagePrimitives.ConvertTo<bool>(leftOperand) != LanguagePrimitives.ConvertTo<bool>(rightOperand);
 
                 case TokenKind.And:
-                    if (leftOperandBool.HasValue) return leftOperandBool.Value && rightOperandBool.Value;
-                    throw new NotImplementedException(binaryExpressionAst.ToString());
+                    return LanguagePrimitives.ConvertTo<bool>(leftOperand) && LanguagePrimitives.ConvertTo<bool>(rightOperand);
 
                 case TokenKind.Ilt:
                     if (leftOperandInt.HasValue) return leftOperandInt < rightOperandInt;
