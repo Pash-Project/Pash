@@ -2,12 +2,12 @@
 using System;
 using Pash.Implementation;
 using System.Management.Automation.Language;
+using System.Management.Pash.Implementation;
 
 namespace System.Management.Automation.Runspaces
 {
     public sealed class Command
     {
-
         internal ScriptBlockAst ScriptBlockAst { get; set; }
 
         public string CommandText { get; private set; }
@@ -81,6 +81,7 @@ namespace System.Management.Automation.Runspaces
             cmdProcBase.ExecutionContext = executionContext;
             cmdProcBase.AddParameters(Parameters);
             SetMergeResultOptions(cmdProcBase);
+            cmdProcBase.RedirectionVisitor = RedirectionVisitor;
             return cmdProcBase;
         }
 
@@ -94,5 +95,7 @@ namespace System.Management.Automation.Runspaces
 
         internal PipelineResultTypes MergeMyResult { get; private set; }
         internal PipelineResultTypes MergeToResult { get; private set; }
+
+        internal RedirectionVisitor RedirectionVisitor { get; set; }
     }
 }

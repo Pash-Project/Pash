@@ -2,6 +2,7 @@
 using System.Management.Automation.Runspaces;
 using System.Management.Automation;
 using System.Collections.ObjectModel;
+using System.Management.Pash.Implementation;
 
 namespace Pash.Implementation
 {
@@ -91,5 +92,15 @@ namespace Pash.Implementation
         /// Last but not least this is for cleanup of the CommandProcessor itself.
         /// </summary>
         public abstract void EndProcessing();
+
+        internal RedirectionVisitor RedirectionVisitor { get; set; }
+
+        internal void ProcessRedirects()
+        {
+            if (RedirectionVisitor != null)
+            {
+                RedirectionVisitor.Visit(CommandRuntime);
+            }
+        }
     }
 }

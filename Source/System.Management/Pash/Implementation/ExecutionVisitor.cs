@@ -430,6 +430,7 @@ namespace System.Management.Pash.Implementation
                     if (pipelineCommandCount == 1)
                     {
                         _pipelineCommandRuntime.WriteObject(results, true);
+                        VisitRedirections(expression);
                         return AstVisitAction.SkipChildren;
                     }
                     // otherwise write value to input of pipeline to be processed
@@ -468,6 +469,8 @@ namespace System.Management.Pash.Implementation
                     .Skip(1)
                         .Select(ConvertCommandElementToCommandParameter)
                         .ForEach(command.Parameters.Add);
+
+                    command.RedirectionVisitor = new RedirectionVisitor(this, commandAst.Redirections);
 
                     pipeline.Commands.Add(command);
                 }
@@ -510,6 +513,27 @@ namespace System.Management.Pash.Implementation
             }
 
             return AstVisitAction.SkipChildren;
+        }
+
+        private void VisitRedirections(CommandBaseAst commandAst)
+        {
+            if (commandAst.Redirections.Count == 0)
+            {
+                return;
+            }
+
+            foreach (RedirectionAst redirectAst in commandAst.Redirections)
+            {
+                var fileRedirectAst = redirectAst as FileRedirectionAst;
+                if (fileRedirectAst != null)
+                {
+                    VisitFileRedirection(fileRedirectAst);
+                }
+                else
+                {
+                    throw new NotImplementedException(redirectAst.ToString());
+                }
+            }
         }
 
         public override AstVisitAction VisitHashtable(HashtableAst hashtableAst)
@@ -921,7 +945,7 @@ namespace System.Management.Pash.Implementation
 
         public override AstVisitAction VisitFileRedirection(FileRedirectionAst redirectionAst)
         {
-            throw new NotImplementedException(); //VisitFileRedirection(redirectionAst);
+            return new FileRedirectionVisitor(this, _pipelineCommandRuntime).Visit(redirectionAst);
         }
 
         public override AstVisitAction VisitForEachStatement(ForEachStatementAst forEachStatementAst)

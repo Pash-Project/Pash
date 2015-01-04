@@ -717,10 +717,7 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar._pipeline_expression);
 
-            var commandExpressionAst = new CommandExpressionAst(
-                new ScriptExtent(parseTreeNode.ChildNodes[0]),
-                BuildExpressionAst(parseTreeNode.ChildNodes[0]), null
-                );
+            CommandExpressionAst commandExpressionAst = BuildCommandExpressionAst(parseTreeNode.ChildNodes[0]);
 
             if (parseTreeNode.ChildNodes.Count == 1)
             {
@@ -730,15 +727,38 @@ namespace Pash.ParserIntrinsics
                     );
             }
 
+            ParseTreeNode pipeLineTailNode = null;
             if (parseTreeNode.ChildNodes.Count == 2 && parseTreeNode.ChildNodes[1].Term == this._grammar.pipeline_tails)
             {
-                var pipelineTail = GetPipelineTailsCommandList(parseTreeNode.ChildNodes[1]).ToList();
-                pipelineTail.Insert(0, commandExpressionAst);
-                return new PipelineAst(new ScriptExtent(parseTreeNode), pipelineTail);
+                pipeLineTailNode = parseTreeNode.ChildNodes[1];
+            }
+            else if (parseTreeNode.ChildNodes.Count == 3 &&
+                parseTreeNode.ChildNodes[1].Term == this._grammar.redirections &&
+                parseTreeNode.ChildNodes[2].Term == this._grammar.pipeline_tails)
+            {
+                commandExpressionAst = BuildCommandExpressionAst(
+                    parseTreeNode.ChildNodes[0],
+                    BuildRedirectionsAst(parseTreeNode.ChildNodes[1])
+                );
+                pipeLineTailNode = parseTreeNode.ChildNodes[2];
+            }
+            else
+            {
+                throw new NotImplementedException(parseTreeNode.ToString());
             }
 
-            throw new NotImplementedException(parseTreeNode.ToString());
+            var pipelineTail = GetPipelineTailsCommandList(pipeLineTailNode).ToList();
+            pipelineTail.Insert(0, commandExpressionAst);
+            return new PipelineAst(new ScriptExtent(parseTreeNode), pipelineTail);
+        }
 
+        private CommandExpressionAst BuildCommandExpressionAst(ParseTreeNode parseTreeNode, IEnumerable<RedirectionAst> redirections = null)
+        {
+            return new CommandExpressionAst(
+                new ScriptExtent(parseTreeNode),
+                BuildExpressionAst(parseTreeNode),
+                redirections
+            );
         }
 
         PipelineBaseAst BuildPipelineCommandAst(ParseTreeNode parseTreeNode)
@@ -1967,6 +1987,7 @@ namespace Pash.ParserIntrinsics
             parseTreeNode = parseTreeNode.ChildNodes.Single();
 
             var commandElements = new List<CommandElementAst>();
+            List<RedirectionAst> redirections = null;
 
             TokenKind invocationOperator = TokenKind.Unknown;
 
@@ -2005,13 +2026,14 @@ namespace Pash.ParserIntrinsics
             if (commandElementsOptNode.ChildNodes.Any())
             {
                 commandElements.AddRange(BuildCommandOptElementAsts(commandElementsOptNode.ChildNodes.Single()));
+                redirections = BuildCommandElementRedirectionAsts(commandElementsOptNode.ChildNodes.Single()).ToList();
             }
 
             return new CommandAst(
                 new ScriptExtent(parseTreeNode),
                 commandElements,
                 invocationOperator,
-                null);
+                redirections);
 
         }
 
@@ -2090,7 +2112,7 @@ namespace Pash.ParserIntrinsics
                 }
                 else if (cmdElementTree.Term == this._grammar.redirection)
                 {
-                    throw new NotImplementedException(elementAsts.ToString());
+                    // Redirections are built separately.
                 }
                 else
                 {
@@ -2148,6 +2170,68 @@ namespace Pash.ParserIntrinsics
 
             return new CommandParameterAst(new ScriptExtent(parseTreeNode), parameterName, null,
                                            new ScriptExtent(parseTreeNode), requiresArgument);
+        }
+
+        IEnumerable<RedirectionAst> BuildCommandElementRedirectionAsts(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.command_elements);
+
+            var redirectionAsts = new List<RedirectionAst>();
+
+            var commandElements = from child in parseTreeNode.ChildNodes select child.ChildNodes.Single();
+
+            foreach (var cmdElementTree in commandElements)
+            {
+                if (cmdElementTree.Term == this._grammar.redirection)
+                {
+                    redirectionAsts.Add(BuildRedirectionAst(cmdElementTree));
+                }
+            }
+
+            return redirectionAsts;
+        }
+
+        private IEnumerable<RedirectionAst> BuildRedirectionsAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.redirections);
+
+            foreach (ParseTreeNode child in parseTreeNode.ChildNodes)
+            {
+                yield return BuildRedirectionAst(child);
+            }
+        }
+
+        private RedirectionAst BuildRedirectionAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.redirection);
+
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar.file_redirection_operator)
+            {
+                return new FileRedirectionAst(
+                    new ScriptExtent(parseTreeNode),
+                    RedirectionStream.Output,
+                    BuildCommandArgumentAst(parseTreeNode.ChildNodes[1].ChildNodes[0]),
+                    IsFileRedirectionAppendOperator(parseTreeNode.ChildNodes[0]));
+            }
+            else
+            {
+                throw new NotImplementedException(parseTreeNode.ToString());
+            }
+        }
+
+        private bool IsFileRedirectionAppendOperator(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.file_redirection_operator);
+
+            switch (parseTreeNode.Token.ValueString)
+            {
+                case ">>":
+                    return true;
+                case ">":
+                    return false;
+                default:
+                    throw new NotImplementedException(parseTreeNode.ToString());
+            }
         }
     }
 }
