@@ -17,9 +17,9 @@ namespace ReferenceTests.Commands
                 "Import-Module '" + mod +"'",
                 "Get-Module"
             ));
-            Assert.That(res, Is.Not.Empty);
-            var names = from r in res select (r.BaseObject as PSModuleInfo).Name;
-            Assert.That(names, Contains.Item(Path.GetFileNameWithoutExtension(mod)));
+            var modName = Path.GetFileNameWithoutExtension(mod);
+            Assert.That(res.Count, Is.EqualTo(1));
+            Assert.That((res[0].BaseObject as PSModuleInfo).Name, Is.EqualTo(modName));
         }
 
         [Test]
@@ -35,7 +35,7 @@ namespace ReferenceTests.Commands
 
             var res = ReferenceHost.RawExecute(NewlineJoin(
                 "Import-Module '" + m1Path +"','" + m2Path + "'",
-                "Get-Module fooba"
+                "Get-Module fooba*"
             ));
             Assert.That(res.Count, Is.EqualTo(2));
             var names = from r in res select (r.BaseObject as PSModuleInfo).Name;
@@ -79,17 +79,20 @@ namespace ReferenceTests.Commands
                 ReferenceHost.RawExecuteInLastRunspace("testfun");
             });
 
-            // make sure innerMod is registered in outerMod, altough loaded in local scope
             var innerModName = Path.GetFileNameWithoutExtension(innerMod);
+            var outerModName = Path.GetFileNameWithoutExtension(outerMod);
+
+            // make sure innerMod is registered in outerMod, altough loaded in local scope
             var res = ReferenceHost.RawExecuteInLastRunspace("getMT | % { $_.Name }");
-            Assert.That(res.Count, Is.EqualTo(1));
-            Assert.That(res[0].BaseObject, Is.EqualTo(innerModName));
+            Assert.That(res.Count, Is.EqualTo(2));
+            var modNames = from r in res select r.BaseObject;
+            Assert.That(modNames, Contains.Item(innerModName));
+            Assert.That(modNames, Contains.Item(innerModName));
 
             // make sure innerMod is *not* registered in global scope, as it's only loaded as a submodule
             res = ReferenceHost.RawExecuteInLastRunspace("Get-Module | % { $_.Name }");
-            var modNames = from r in res select r.BaseObject;
-            Assert.That(modNames, Contains.Item(Path.GetFileNameWithoutExtension(outerMod)));
-            Assert.That(modNames, Is.Not.Contains(innerModName));
+            Assert.That(res.Count, Is.EqualTo(1));
+            Assert.That(res[0].BaseObject, Is.EqualTo(outerModName));
         }
 
         [Test]
@@ -99,7 +102,7 @@ namespace ReferenceTests.Commands
             var script = CreateFile("Import-Module '" + innerMod + "' -Global", "ps1");
             var outerMod = CreateFile(NewlineJoin(
                 "function getMT { Get-Module }",
-                "function execTest { test }",
+                "function execTest { testfun }",
                 " & '" + script + "'"
             ), "psm1");
 
@@ -115,15 +118,20 @@ namespace ReferenceTests.Commands
             Assert.That(res.Count, Is.EqualTo(1));
             Assert.That(res[0].BaseObject, Is.EqualTo("foo"));
 
-            // make sure innerMod is registered in outerMod
             var innerModName = Path.GetFileNameWithoutExtension(innerMod);
+            var outerModName = Path.GetFileNameWithoutExtension(outerMod);
+
+            // make sure innerMod is registered in outerMod
             res = ReferenceHost.RawExecuteInLastRunspace("getMT | % { $_.Name }");
-            Assert.That(res.Count, Is.EqualTo(1));
-            Assert.That(res[0].BaseObject, Is.EqualTo(innerModName));
+            Assert.That(res.Count, Is.EqualTo(2));
+            var modNames = from r in res select r.BaseObject;
+            Assert.That(modNames, Contains.Item(innerModName));
+            Assert.That(modNames, Contains.Item(innerModName));
 
             // make sure innerMod is also registered in global scope
             res = ReferenceHost.RawExecuteInLastRunspace("Get-Module | % { $_.Name }");
-            var modNames = from r in res select r.BaseObject;
+            Assert.That(res.Count, Is.EqualTo(2));
+            modNames = from r in res select r.BaseObject;
             Assert.That(modNames, Contains.Item(Path.GetFileNameWithoutExtension(outerMod)));
             Assert.That(modNames, Contains.Item(innerModName));
         }
