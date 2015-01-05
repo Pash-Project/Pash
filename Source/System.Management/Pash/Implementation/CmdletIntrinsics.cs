@@ -6,38 +6,20 @@ using System.Collections.Generic;
 
 namespace Pash.Implementation
 {
-    public class CmdletIntrinsics
+    internal class CmdletIntrinsics : SessionStateIntrinsics<CmdletInfo>
     {
-        private SessionStateScope<CmdletInfo> _scope;
-
-        internal CmdletIntrinsics(SessionStateScope<CmdletInfo> scope)
+        internal CmdletIntrinsics(SessionStateScope<CmdletInfo> scope) : base(scope, false)
         {
-            _scope = scope;
-        }
-
-        public CmdletInfo Get(string name)
-        {
-            return _scope.Get(name, false);
         }
 
         public void Set(CmdletInfo cmdlet)
         {
-            _scope.SetLocal(cmdlet, false);
+            Scope.SetLocal(cmdlet, false);
         }
 
         public void Remove(string name)
         {
-            _scope.Remove(name, false);
-        }
-
-        public Dictionary<string, CmdletInfo> GetAllLocal()
-        {
-            return new Dictionary<string, CmdletInfo>(_scope.Items);
-        }
-
-        public Dictionary<string, CmdletInfo> Find(string name)
-        {
-            return _scope.Find(name, false);
+            Scope.Remove(name, false);
         }
 
         public void LoadCmdletsFromAssembly(Assembly assembly, PSSnapInInfo snapinInfo)
@@ -60,19 +42,19 @@ namespace Pash.Implementation
             foreach (CmdletInfo curCmdlet in cmdlets)
             {
                 curCmdlet.AddCommonParameters();
-                _scope.SetLocal(curCmdlet, false);
+                Scope.SetLocal(curCmdlet, false);
             }
         }
 
         public void RemoveAll(PSSnapInInfo snapin)
         {
-            foreach (var pair in _scope.GetAll())
+            foreach (var pair in Scope.GetAll())
             {
                 var cmdletSnapin = pair.Value.PSSnapIn;
                 // check if loaded by this snapin and remove if it is
                 if (cmdletSnapin != null && cmdletSnapin.Equals(snapin))
                 {
-                    _scope.Remove(pair.Key, false);
+                    Scope.Remove(pair.Key, false);
                 }
             }
         }

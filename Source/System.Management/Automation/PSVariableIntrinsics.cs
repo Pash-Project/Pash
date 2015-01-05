@@ -5,24 +5,29 @@ using System.Collections.Generic;
 
 namespace System.Management.Automation
 {
-    // TODO sburnicki: Extract common functionality to base class
-    public sealed class PSVariableIntrinsics
+    public sealed class PSVariableIntrinsics : ISessionStateIntrinsics<PSVariable>
     {
-        private SessionStateScope<PSVariable> _scope;
+        /* This class is part of the public Powershell API. Therefore we cannot
+         * derive from SessionStateIntrinsics<PSVariable>, but use it internally
+         * and map some functions to it to conform to the public API
+         */
+        private SessionStateIntrinsics<PSVariable> _intrinsics;
 
-        internal PSVariableIntrinsics(SessionStateScope<PSVariable> variableScope)
+        internal PSVariableIntrinsics(SessionStateScope<PSVariable> scope)
         {
-            _scope = variableScope;
+            _intrinsics = new SessionStateIntrinsics<PSVariable>(scope, true);
         }
+
+        public bool SupportsScopedName { get { return true; } }
 
         public PSVariable Get(string name)
         {
-            return _scope.Get(name, true);
+            return _intrinsics.Get(name);
         }
 
-        internal PSVariable GetAtScope(string name, string scope)
+        public PSVariable GetAtScope(string name, string scope)
         {
-            return _scope.GetAtScope(name, scope);
+            return _intrinsics.GetAtScope(name, scope);
         }
 
         public object GetValue(string name)
@@ -49,7 +54,7 @@ namespace System.Management.Automation
 
         public void Remove(string name)
         {
-            _scope.Remove(name, true);
+            _intrinsics.Scope.Remove(name, true);
         }
 
         public void Set(PSVariable variable)
@@ -58,16 +63,16 @@ namespace System.Management.Automation
             {
                 throw new ArgumentNullException("The variable is null.");
             }
-            var original = _scope.GetLocal(variable.Name);
+            var original = _intrinsics.Scope.GetLocal(variable.Name);
             if (original == null)
             {
-                _scope.SetLocal(variable, true);
+                _intrinsics.Scope.SetLocal(variable, true);
                 return;
             }
             original.Value = variable.Value;
             original.Description = variable.Description;
             original.Options = variable.Options;
-            _scope.SetLocal(original, true);
+            _intrinsics.Scope.SetLocal(original, true);
         }
 
         public void Set(string name, object value)
@@ -75,10 +80,11 @@ namespace System.Management.Automation
             var qualName = new SessionStateScope<PSVariable>.QualifiedName(name);
             // check for existing one. if it's not a scope qualified name, make sure to check only local scope
             // because we won't override a parent scope variable with the same name
-            var variable = qualName.ScopeSpecifier.Length == 0 ? _scope.GetLocal(name) : _scope.Get(name, true);
+            var variable = qualName.ScopeSpecifier.Length == 0 ? _intrinsics.Scope.GetLocal(name)
+                                                               : _intrinsics.Scope.Get(name, true);
             if (variable == null) // doesn't exist, yet. create
             {
-                _scope.Set(name, new PSVariable(qualName.UnqualifiedName, value), true, true);
+                _intrinsics.Scope.Set(name, new PSVariable(qualName.UnqualifiedName, value), true, true);
                 return;
             }
             // make sure it's not read only
@@ -91,19 +97,19 @@ namespace System.Management.Automation
             variable.Value = value;
         }
 
-        internal Dictionary<string, PSVariable> Find(string pattern)
+        public Dictionary<string, PSVariable> Find(string pattern)
         {
-            return _scope.Find(pattern, true);
+            return _intrinsics.Find(pattern);
         }
 
-        internal Dictionary<string, PSVariable> GetAll()
+        public Dictionary<string, PSVariable> GetAll()
         {
-            return _scope.GetAll();
+            return _intrinsics.GetAll();
         }
 
-        internal Dictionary<string, PSVariable> GetAllLocal()
+        public Dictionary<string, PSVariable> GetAllLocal()
         {
-            return new Dictionary<string, PSVariable>(_scope.Items);
+            return _intrinsics.GetAllLocal();
         }
     }
 }

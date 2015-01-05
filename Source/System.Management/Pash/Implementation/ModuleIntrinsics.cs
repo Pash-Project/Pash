@@ -5,14 +5,13 @@ using System.Reflection;
 
 namespace Pash.Implementation
 {
-    internal class ModuleIntrinsics
+    internal class ModuleIntrinsics : SessionStateIntrinsics<PSModuleInfo>
     {
         /*
          * Not that module intrinsics will use the ModuleInfo.Path as the name (see definition of PSModuleInfo.ItemName)
          * because we can have multiple modules with the same name, but not with the same path (which is also a guid).
          * Make sure to keep that in mind when working with this class.
          */
-        private SessionStateScope<PSModuleInfo> _scope;
 
         // modules are a little different: you can import them either to local, global, or *module* scope.
         // the module scope level is unfortunately only supported with modules, not for other scoped items,
@@ -24,9 +23,8 @@ namespace Pash.Implementation
             Global
         };
 
-        public ModuleIntrinsics(SessionStateScope<PSModuleInfo> scope)
+        public ModuleIntrinsics(SessionStateScope<PSModuleInfo> scope) : base(scope, false)
         {
-            _scope = scope;
         }
 
         public void Add(PSModuleInfo module, ModuleImportScopes scope)
@@ -40,23 +38,13 @@ namespace Pash.Implementation
         {
             RemoveMembers(module);
             // remove the module from all scopes upwards the hierarchy
-            foreach (var curScope in _scope.HierarchyIterator)
+            foreach (var curScope in Scope.HierarchyIterator)
             {
                 if (curScope.HasLocal(module.ItemName))
                 {
                     curScope.RemoveLocal(module.ItemName);
                 }
             }
-        }
-
-        public PSModuleInfo Get(string path)
-        {
-            return _scope.Get(path, false);
-        }
-
-        public Dictionary<string, PSModuleInfo> GetAll()
-        {
-            return _scope.GetAll();
         }
 
         internal void ImportMembers(PSModuleInfo module, ModuleImportScopes scope)
@@ -90,34 +78,34 @@ namespace Pash.Implementation
             // check for exported items, check if they are the originals (compare module & module path) and remove them
             foreach (var fun in module.ExportedFunctions.Values)
             {
-                var foundFun = _scope.SessionState.Function.Get(fun.ItemName);
+                var foundFun = Scope.SessionState.Function.Get(fun.ItemName);
                 if (foundFun.Module != null && foundFun.Module.Path.Equals(module.Path))
                 {
-                    _scope.SessionState.Function.Remove(fun.ItemName);
+                    Scope.SessionState.Function.Remove(fun.ItemName);
                 }
             }
             foreach (var variable in module.ExportedVariables.Values)
             {
-                var foundVar = _scope.SessionState.PSVariable.Get(variable.ItemName);
+                var foundVar = Scope.SessionState.PSVariable.Get(variable.ItemName);
                 if (foundVar.Module != null && foundVar.Module.Path.Equals(module.Path))
                 {
-                    _scope.SessionState.PSVariable.Remove(foundVar.ItemName);
+                    Scope.SessionState.PSVariable.Remove(foundVar.ItemName);
                 }
             }
             foreach (var alias in module.ExportedAliases.Values)
             {
-                var foundAlias = _scope.SessionState.Alias.Get(alias.ItemName);
+                var foundAlias = Scope.SessionState.Alias.Get(alias.ItemName);
                 if (foundAlias.Module != null && foundAlias.Module.Path.Equals(module.Path))
                 {
-                    _scope.SessionState.Alias.Remove(foundAlias.ItemName);
+                    Scope.SessionState.Alias.Remove(foundAlias.ItemName);
                 }
             }
             foreach (var cmdlet in module.ExportedCmdlets.Values)
             {
-                var foundCmdlet = _scope.SessionState.Cmdlet.Get(cmdlet.ItemName);
+                var foundCmdlet = Scope.SessionState.Cmdlet.Get(cmdlet.ItemName);
                 if (foundCmdlet.Module != null && foundCmdlet.Module.Path.Equals(module.Path))
                 {
-                    _scope.SessionState.Cmdlet.Remove(foundCmdlet.ItemName);
+                    Scope.SessionState.Cmdlet.Remove(foundCmdlet.ItemName);
                 }
             }
         }
@@ -126,10 +114,10 @@ namespace Pash.Implementation
         {
             if (scope.Equals(ModuleImportScopes.Local))
             {
-                return _scope;
+                return Scope;
             }
             var moduleScope = scope.Equals(ModuleImportScopes.Module);
-            foreach (var curScope in _scope.HierarchyIterator)
+            foreach (var curScope in Scope.HierarchyIterator)
             {
                 // check for global scope. Even if we want to get the module scope, this means it doesn't exist
                 // or we would have returned it
