@@ -1,9 +1,7 @@
 using System;
-using System.Linq;
-using Pash.Implementation;
-using System.Management.Pash.Implementation;
+using System.Management.Automation;
 
-namespace System.Management.Automation
+namespace Microsoft.PowerShell.Commands
 {
     public class ModuleCmdletBase : PSCmdlet
     {

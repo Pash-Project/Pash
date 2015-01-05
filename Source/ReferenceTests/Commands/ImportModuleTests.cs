@@ -9,6 +9,7 @@ using TestPSSnapIn;
 
 namespace ReferenceTests.Commands
 {
+    [TestFixture]
     public class ImportModuleTests : ModuleCommandTestBase
     {
 
