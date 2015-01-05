@@ -93,6 +93,21 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
+        public void ExportModuleMemberAddsToListWhenUsedMultipleTimes()
+        {
+            var module = CreateFile(_testModule + NewlineJoin(
+                "Export-ModuleMember -Variable x",
+                "Export-ModuleMember -Function foo",
+                "Export-ModuleMember -Alias lorem"
+            ), "psm1");
+            var cmd = NewlineJoin(
+                "Import-Module '" + module + "';",
+                "$x; foo; lorem"
+            );
+            ExecuteAndCompareTypedResult(cmd, 1, "foo", "foo");
+        }
+
+        [Test]
         public void ExportModuleMemberVariablePreventsExportingFunctions()
         {
             var module = CreateFile(_testModule + "Export-ModuleMember -Variable x", "psm1");
@@ -158,7 +173,6 @@ namespace ReferenceTests.Commands
             });
         }
 
-        // TODO: test multiple member exports add stuff to exported item list
         // TODO: test a module with cmdlets to export
     }
 }

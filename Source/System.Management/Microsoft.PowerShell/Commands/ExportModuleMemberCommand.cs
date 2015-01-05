@@ -49,10 +49,10 @@ namespace Microsoft.PowerShell.Commands
             var aliases = ExecutionContext.SessionState.Alias.GetAllLocal();
             var cmdlets = ExecutionContext.SessionState.Cmdlet.GetAllLocal();
             // resolve all function, variable, cmdlet, and alias patterns and add the matched members to the exports
-            _affectedModule.ExportedFunctions.ReplaceContents(WildcardPattern.FilterDictionary(Function, funs));
-            _affectedModule.ExportedVariables.ReplaceContents(WildcardPattern.FilterDictionary(Variable, vars));
-            _affectedModule.ExportedAliases.ReplaceContents(WildcardPattern.FilterDictionary(Alias, aliases));
-            _affectedModule.ExportedCmdlets.ReplaceContents(WildcardPattern.FilterDictionary(Cmdlet, cmdlets));
+            _affectedModule.ExportedFunctions.AddRange(WildcardPattern.FilterDictionary(Function, funs));
+            _affectedModule.ExportedVariables.AddRange(WildcardPattern.FilterDictionary(Variable, vars));
+            _affectedModule.ExportedAliases.AddRange(WildcardPattern.FilterDictionary(Alias, aliases));
+            _affectedModule.ExportedCmdlets.AddRange(WildcardPattern.FilterDictionary(Cmdlet, cmdlets));
         }
 
     }
