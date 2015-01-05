@@ -13,7 +13,7 @@ namespace System.Management.Automation
     {
         internal int NestingDepth { get; set;  }
 
-        public string Path { get; private set; }
+        public string Path { get; internal set; }
         public string Name { get; private set; }
         public SessionState SessionState { get; private set; }
         public ModuleType ModuleType { get; internal set; }

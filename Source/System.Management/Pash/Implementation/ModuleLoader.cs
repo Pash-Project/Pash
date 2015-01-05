@@ -77,6 +77,7 @@ namespace Pash.Implementation
                     ErrorCategory.InvalidOperation);
             }
 
+            moduleInfo.Path = path; // update path for nested modules
             var stringComparer = StringComparer.InvariantCultureIgnoreCase;
             var ext = path.GetExtension();
             if (_scriptExtensions.Contains(ext, stringComparer))
