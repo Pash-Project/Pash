@@ -307,13 +307,101 @@ namespace ReferenceTests.Commands
             ExecuteAndCompareTypedResult("Import-Module '" + manifest + "'; foo; $x; $y", "foo", null, null);
         }
 
-        // TODO: test that a manifest hashtable must not include an unknown member
-        // TODO: test that manifest needs a version
-        // TODO: test that manifest module.Path is path of nested RootModule
-        // TODO: test that modules are only loaded by path if a slash is in the name
-        // TODO: tests for modules importing modules to check scope derivance and execution
-        // TODO: test that checks what happens if the script module returns a value -> shouldn't
-        // TODO: test that checks the behavior if both the Global and the Scope parameter are set -> exception
-        // TODO: what if another module with the same name is loaded -> two modules, different path. but what is really loaded with nested stuff?
+        [Test]
+        public void ManifestMustNotIncludeUnknownMembers()
+        {
+            var manifest = CreateFile(CreateManifest("", null, null, "1.0", "@()", null, null, null,
+                new Dictionary<string, string>() { { "someKey", "anyValue" } }), "psd1");
+            Assert.Throws<ExecutionWithErrorsException>(delegate {
+                ReferenceHost.Execute("Import-Module '" + manifest + "'");
+            });
+        }
+
+        [Test]
+        public void ManifestMustIncludeVersion()
+        {
+            var manifest = CreateFile(CreateManifest("", null, null, null), "psd1");
+            Assert.Throws<ExecutionWithErrorsException>(delegate {
+                ReferenceHost.Execute("Import-Module '" + manifest + "'");
+            });
+        }
+
+        [Test]
+        public void ImportModuleCannotUseBothGlobalAndScopeParam()
+        {
+            var manifest = CreateFile("", "psm1");
+            Assert.Throws<CmdletInvocationException>(delegate {
+                ReferenceHost.Execute("Import-Module '" + manifest + "' -Global -Scope global");
+            });
+        }
+
+        [Test]
+        public void ManifestWithRootModuleInheritsPath()
+        {
+            var scriptModule = CreateFile("", "psm1");
+            var manifest = CreateFile(CreateManifest(scriptModule, null, null, "1.0"), "psd1");
+            var cmd = "(Import-Module '" + manifest + "' -PassThru).Path";
+            ExecuteAndCompareTypedResult(cmd, scriptModule);
+        }
+
+        [Test]
+        public void ScriptModuleReturningAValueHasNoEffect()
+        {
+            var scriptModule = CreateFile("function bar { 'bar' }; 'foo'", "psm1");
+            var cmd = "Import-Module '" + scriptModule + "'; bar";
+            ExecuteAndCompareTypedResult(cmd, "bar"); // no 'foo' in output
+        }
+
+        [Test]
+        public void TwoModulesWithSameNameCanBeLoaded()
+        {
+            var tempPath = Path.GetTempPath();
+            var newTempPath = Path.Combine(tempPath, "_pashModuleTestDir");
+            var testMod1 = Path.Combine(tempPath, "pashTestMod.psm1");
+            var testMod2 = Path.Combine(newTempPath, "pashTestMod.psm1");
+            AddCleanupDir(newTempPath);
+            AddCleanupFile(testMod1);
+            AddCleanupFile(testMod2);
+            Directory.CreateDirectory(newTempPath);
+            File.WriteAllText(testMod1, "function foo { 'foo' }; function bar { 'bar1' }");
+            File.WriteAllText(testMod2, "function baz { 'baz' }; function bar { 'bar2' }");
+
+            var cmd = NewlineJoin(
+                "Import-Module '" + testMod1 + "','" + testMod2 + "'",
+                "foo; baz; bar;"
+            );
+            ExecuteAndCompareTypedResult(cmd, "foo", "baz", "bar2"); // second module overwrites bar
+            var res = ReferenceHost.RawExecuteInLastRunspace("Get-Module | % { $_.Name }");
+            Assert.That(res.Count, Is.EqualTo(2));
+            Assert.That(res[0].BaseObject, Is.EqualTo("pashTestMod"));
+            Assert.That(res[1].BaseObject, Is.EqualTo("pashTestMod"));
+        }
+
+        [Test]
+        public void ModulesCanImportModules()
+        {
+            var innerMod = CreateFile(NewlineJoin(
+                "$y = 3",
+                "function getX { $x; }", // from global scope as not defined in module
+                "function getY { $y; }" // local one
+            ), "psm1");
+            var outerMod = CreateFile(NewlineJoin(
+                "$y = 4",
+                "$x = 4",
+                "Import-Module '" + innerMod + "'",
+                "function getXY { getX; getY }", // from inner module
+                "function getMyX { $x }" // from this module
+            ), "psm1");
+            var cmd = NewlineJoin(
+                "$x = 1",
+                "$y = 1",
+                "Import-Module '" + outerMod + "'",
+                "getXY",
+                "getMyX",
+                "$x = 6",
+                "getX" // will also exist outside as innerModule imported it and exports it as all functions are exported
+            );
+            ExecuteAndCompareTypedResult(cmd, 1, 3, 4, 6);
+        }
     }
 }
