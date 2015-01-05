@@ -334,7 +334,7 @@ namespace ReferenceTests.Language
             });
         }
 
-        [Test, Explicit("To be honest: I don't understand why PS writes the last output AND still throws and excpetion")]
+        [Test]
         public void CmdletPipeParamByPropertyCanProcessMultipleButThrowsOnError()
         {
             var cmd = NewlineJoin(new string[] {
@@ -349,7 +349,7 @@ namespace ReferenceTests.Language
                 "ghi ",
                 "mno jkl"
             });
-            Assert.Throws<MethodInvocationException>(() =>
+            Assert.Throws<ExecutionWithErrorsException>(() =>
             {
                 ReferenceHost.Execute(cmd);
             });
