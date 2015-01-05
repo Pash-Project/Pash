@@ -2,8 +2,9 @@ using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using System.Management.Automation;
 
-namespace System.Management.Automation
+namespace Microsoft.PowerShell.Commands
 {
     // TODO: remove DefaultParameterSetName attribute (see issue #320)
     [Cmdlet(VerbsCommon.Remove, "Module", SupportsShouldProcess=true, DefaultParameterSetName = "name"

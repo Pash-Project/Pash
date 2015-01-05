@@ -2,8 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Pash.Implementation;
+using System.Management.Automation;
 
-namespace System.Management.Automation
+namespace Microsoft.PowerShell.Commands
 {
     [CmdletAttribute(VerbsData.Import, "Module", DefaultParameterSetName="Name")] 
     public sealed class ImportModuleCommand : ModuleCmdletBase

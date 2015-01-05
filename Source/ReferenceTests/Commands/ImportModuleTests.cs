@@ -310,7 +310,6 @@ namespace ReferenceTests.Commands
         // TODO: test that a manifest hashtable must not include an unknown member
         // TODO: test that manifest needs a version
         // TODO: test that manifest module.Path is path of nested RootModule
-        // TODO: test with get-module that modules are actually always in the sessionstate of the current module (or global)
         // TODO: test that modules are only loaded by path if a slash is in the name
         // TODO: tests for modules importing modules to check scope derivance and execution
         // TODO: test that checks what happens if the script module returns a value -> shouldn't
