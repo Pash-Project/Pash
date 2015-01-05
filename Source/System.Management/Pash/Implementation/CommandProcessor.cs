@@ -78,7 +78,17 @@ namespace System.Management.Automation
             foreach (var curInput in inputObjects)
             {
                 // TODO: determine the correct second arg: true if this commandProcessor is the first command in pipeline
-                _argumentBinder.BindPipelineParameters(curInput, true);
+                try
+                {
+                    _argumentBinder.BindPipelineParameters(curInput, true);
+                }
+                catch (ParameterBindingException e)
+                {
+                    // if we failed to bind this parameter, we only skip this one record and continue
+                    CommandRuntime.WriteError(e.ErrorRecord);
+                    continue;
+                }
+
                 try
                 {
                     Command.DoProcessRecord();

@@ -100,17 +100,26 @@ namespace System.Management.Automation
                 HandleMissingMandatoryParameters(ActiveOrDefaultParameterSet, false, true);
             }
 
+
+
             // 7. We finished binding parameters without pipeline. Therefore we can restrict the candidate set to those
             //    sets that have all mandatory parameters set or are able to set them by pipeline
             RestrictCandidatesByBoundParameter(false);
+
+            // 8. Check if we have unbound parameters that can be set by pipeline. If not and we can already do
+            // our final choice (and throw an error on problems)
+            if (!HasUnboundPipelineParameters())
+            {
+                DoFinalChoiceOfParameterSet();
+            }
 
             // 8. Back up the bound parameters
             BackupCommandLineParameterValues();
 
             // 9. For the beginning phase: Tell the cmdlet which parameter set is likely to be used (if we know it)
             // If there is only one candidate, use it at least temporarily. Otherwise the active or default
-            ChooseParameterSet(_candidateParameterSets.Count == 1 ? _candidateParameterSets[0]
-                                                                  : ActiveOrDefaultParameterSet);
+            SetCmdletParameterSetName(_candidateParameterSets.Count == 1 ? _candidateParameterSets[0]
+                                                                         : ActiveOrDefaultParameterSet);
         }
 
         /// <summary>
@@ -142,8 +151,7 @@ namespace System.Management.Automation
                 // 2. If we had no success, throw an error
                 if (!success)
                 {
-                    // well PS throws a MethodInvocationException instead of a ParameterBindingException, so..
-                    throw new MethodInvocationException("The pipeline input cannot be bound to any parameter");
+                    throw new ParameterBindingException("The pipeline input cannot be bound to any parameter");
                 }
             }
 
@@ -160,35 +168,40 @@ namespace System.Management.Automation
             //    Note that this set automatically only contain the active set if there is one, so don't worry
             RestrictCandidatesByBoundParameter(true);
 
-            // 6. If there is only one candidate: Choose that parameter set (This is also the case with an active set)
+            // 6. Do the final choice of our parameter set
+            DoFinalChoiceOfParameterSet();
+        }
+
+        private void DoFinalChoiceOfParameterSet()
+        {
+            // If there is only one candidate: Choose that parameter set (This is also the case with an active set)
             if (_candidateParameterSets.Count == 1)
             {
                 ChooseParameterSet(_candidateParameterSets[0]);
                 return;
             }
-            // 7. If there is more than one candidate:
+            // If there is more than one candidate:
             else if (_candidateParameterSets.Count > 1)
             {
-                // 1. If the default set is among the candidates, choose it
+                // If the default set is among the candidates, choose it
                 if (DefaultParameterSet != null && _candidateParameterSets.Contains(DefaultParameterSet))
                 {
                     ChooseParameterSet(DefaultParameterSet);
                     return;
                 }
-                // 2. If the default set is the AllParameter set then choose it.
+                // If the default set is the AllParameter set then choose it.
                 else if (DefaultParameterSet != null && (DefaultParameterSet.IsAllParameterSets))
                 {
                     ChooseParameterSet(DefaultParameterSet);
                     return;
                 }
-                // 3. Otherwise we could choose multiple sets, so throw an ambigiuous error
+                // Otherwise we could choose multiple sets, so throw an ambigiuous error
                 else
                 {
-                    throw new ParameterBindingException("The parameter set to be used cannot be resolved.",
-                         "AmbiguousParameterSet");
+                    ThrowAmbiguousParameterSetException();
                 }
             }
-            // 8. If the candidate set is empty: Throw an error and tell the user what's missing
+            // If the candidate set is empty: Throw an error and tell the user what's missing
             else
             {
                 ThrowMissingParametersExcpetion(ActiveOrDefaultParameterSet);
@@ -205,13 +218,21 @@ namespace System.Management.Automation
             return allParams;
         }
 
-        private void ChooseParameterSet(CommandParameterSetInfo chosenSet)
+        private void SetCmdletParameterSetName(CommandParameterSetInfo chosenSet)
         {
             if (_cmdlet is PSCmdlet)
             {
                 ((PSCmdlet)_cmdlet).ParameterSetName = chosenSet != null ? chosenSet.Name
                     : ParameterAttribute.AllParameterSets;
             }
+        }
+
+        private void ChooseParameterSet(CommandParameterSetInfo chosenSet)
+        {
+            _activeSet = chosenSet;
+            _candidateParameterSets.Clear();
+            _candidateParameterSets.Add(chosenSet);
+            SetCmdletParameterSetName(chosenSet);
         }
 
         private void ThrowMissingParametersExcpetion(CommandParameterSetInfo paramSet)
@@ -237,6 +258,12 @@ namespace System.Management.Automation
             }
         }
 
+        private void ThrowAmbiguousParameterSetException()
+        {
+            throw new ParameterBindingException("The parameter set to be used cannot be resolved.",
+                "AmbiguousParameterSet");
+        }
+
         private void BindPositionalParameters(CommandParameterCollection parameters, CommandParameterSetInfo parameterSet)
         {
             var parametersWithoutName = from param in parameters
@@ -246,8 +273,7 @@ namespace System.Management.Automation
             {
                 if (parametersWithoutName.Any())
                 {
-                    throw new ParameterBindingException("The parameter set to be used cannot be resolved.",
-                         "AmbiguousParameterSet");
+                    ThrowAmbiguousParameterSetException();
                 }
                 return;
             }
@@ -316,6 +342,22 @@ namespace System.Management.Automation
             }
         }
 
+        private bool HasUnboundPipelineParameters()
+        {
+            foreach (var curParamSet in _candidateParameterSets)
+            {
+                var unboundByPipeline = from param in curParamSet.Parameters
+                    where !_boundParameters.Contains(param.MemberInfo) &&
+                    (param.ValueFromPipeline || param.ValueFromPipelineByPropertyName)
+                    select param;
+                if (unboundByPipeline.Any())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private bool HasParameterSetsWithUnboundMandatoryPipelineParameters()
         {
             foreach (var curParamSet in _candidateParameterSets)
@@ -344,8 +386,7 @@ namespace System.Management.Automation
             _candidateParameterSets = _candidateParameterSets.Intersect(setsContaining).ToList();
             if (_candidateParameterSets.Count == 0)
             {
-                throw new ParameterBindingException("The parameter set selection is ambiguous!",
-                                                    "AmbiguousParameterSet");
+                ThrowAmbiguousParameterSetException();
             }
             else if (_candidateParameterSets.Count == 1)
             {
