@@ -1,11 +1,12 @@
 using System;
 using NUnit.Framework;
 using System.Management.Automation;
+using TestPSSnapIn;
 
 namespace ReferenceTests.Commands
 {
     [TestFixture]
-    public class ExportModuleMemberTests : ReferenceTestBase
+    public class ExportModuleMemberTests : ModuleCommandTestBase
     {
         private string _testModule = NewlineJoin(
             "function foo { 'foo' };",
@@ -173,7 +174,22 @@ namespace ReferenceTests.Commands
             });
         }
 
-        // TODO: test a module with cmdlets to export
+        [Test]
+        public void ExportModuleMemberWorksWithCmdlets()
+        {
+            // BinaryTestModule includes some test cmdlets, as Test-Command, Test-Dummy, Test-NoParameters
+            var moduleManifest = CreateFile(CreateManifest(BinaryTestModule, "me", "FooComp", "1.0", null, null,
+                "@('Test-Command', 'Test-*Parameters')"), "psd1");
+            var cmd = NewlineJoin(
+                "Import-Module '" + moduleManifest + "';",
+                "Test-Command",
+                "Test-NoParameters"
+            );
+            ExecuteAndCompareTypedResult(cmd, "works", "works");
+            Assert.Throws<CommandNotFoundException>(delegate {
+                ReferenceHost.RawExecuteInLastRunspace("Test-Dummy");
+            });
+        }
     }
 }
 
