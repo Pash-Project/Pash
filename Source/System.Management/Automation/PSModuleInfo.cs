@@ -104,7 +104,9 @@ namespace System.Management.Automation
                 propPair.Value.SetValue(this, value, null);
             }
             // module version needs to be set extra, because it has a different name in the Hashtable
-            if (metadata.ContainsKey("ModuleVersion"))
+            // the Version seems to be important when loading a module (e.g. for checking if it needs to
+            // be reloaded) and is therefore never overwritten by nested modules (as a nested manifest)
+            if (metadata.ContainsKey("ModuleVersion") && Version == null)
             {
                 Version = LanguagePrimitives.ConvertTo<Version>(metadata["ModuleVersion"]);
             }

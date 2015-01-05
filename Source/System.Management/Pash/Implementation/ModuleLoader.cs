@@ -214,8 +214,7 @@ namespace Pash.Implementation
                     ErrorCategory.InvalidData, e);
             }
             // only one manifest can restrict the exported members, so check if we did it already
-            if (moduleInfo.ExportsAreRestrictedByManifest ||
-                (funs == null && vars == null && aliases == null && cmdlets == null))
+            if (moduleInfo.ExportsAreRestrictedByManifest)
             {
                 return;
             }

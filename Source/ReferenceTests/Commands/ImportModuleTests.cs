@@ -314,6 +314,6 @@ namespace ReferenceTests.Commands
         // TODO: tests for modules importing modules to check scope derivance and execution
         // TODO: test that checks what happens if the script module returns a value -> shouldn't
         // TODO: test that checks the behavior if both the Global and the Scope parameter are set -> exception
-        // TODO: what if another module with the same name is loaded -> two modules, different path
+        // TODO: what if another module with the same name is loaded -> two modules, different path. but what is really loaded with nested stuff?
     }
 }
