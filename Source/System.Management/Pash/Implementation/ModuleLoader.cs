@@ -27,7 +27,7 @@ namespace Pash.Implementation
         internal PSModuleInfo LoadModuleByName(string name, bool loadToGlobalScope, bool importMembers = true)
         {
             // TODO: where do we handle FileNotFoundExceptions etc?
-            var path = new Path(name);
+            var path = new Path(name).NormalizeSlashes();
             if (name.Contains(path.CorrectSlash) || path.HasExtension())
             {
                 // check if it's already loaded
