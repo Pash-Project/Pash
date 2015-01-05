@@ -4,13 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1BF599D3-ECA3-4525-ABF9-5C65F7B7F3F8}</ProjectGuid>
+    <ProjectGuid>{FF7C1297-59A1-4C80-B65D-4B4890F10100}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ReferenceTests</RootNamespace>
-    <AssemblyName>WindowsPowershellReferenceTests</AssemblyName>
+    <RootNamespace>TestModule</RootNamespace>
+    <AssemblyName>TestModule</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,28 +31,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework">
-      <HintPath>..\Tools\NUnit-2.6.1\bin\nunit.framework.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Management.Automation" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Management.Automation" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Source\ReferenceTests\**\*.cs" Exclude="..\Source\ReferenceTests\obj\**\*.cs;..\Source\ReferenceTests\Properties\**\*.cs;..\Source\ReferenceTests\ReferenceTestInfo.cs;..\Source\ReferenceTests\Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReferenceTestInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="TestModule\TestModule.csproj">
-      <Project>{ff7c1297-59a1-4c80-b65d-4b4890f10100}</Project>
-      <Name>TestModule</Name>
-    </ProjectReference>
+    <Compile Include="..\..\Source\TestPSSnapIn\*.cs" Exclude="..\..\Source\TestPSSnapIn\PashTestSnapIn.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

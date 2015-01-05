@@ -286,7 +286,7 @@ namespace ReferenceTests.Language
         {
             var cmd = "new-object psobject -property @{f='abc'; b='def'} | "
                 + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand));
-            Assert.Throws<MethodInvocationException>(() => {
+            Assert.Throws<ExecutionWithErrorsException>(() => {
                 ReferenceHost.Execute(cmd);
             });
         }
@@ -329,7 +329,7 @@ namespace ReferenceTests.Language
             var cmd = "new-object psobject -property @{foo='abc'; bar='def'} | "
                 + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand))
                 + " -Foo 'a' -Bar 'a'";
-            Assert.Throws<MethodInvocationException>(() => {
+            Assert.Throws<ExecutionWithErrorsException>(() => {
                 ReferenceHost.Execute(cmd);
             });
         }
