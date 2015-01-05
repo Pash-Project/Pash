@@ -1,5 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Linq;
+using System.Management.Automation.Host;
 using System.Text;
 using System.Management.Automation.Runspaces;
 using System.Management.Automation;
@@ -9,13 +11,15 @@ using System.Reflection;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using System.Management.Automation.Language;
 
 namespace Pash
 {
     internal class FullHost
     {
-        private bool _interactive;
-        private Runspace _currentRunspace;
+        private readonly bool _interactive;
+        private readonly Runspace _currentRunspace;
+        private readonly int _ctrlStmtKeywordLength;
 
         public const string BannerText = "Pash - Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/";
 
@@ -27,6 +31,7 @@ namespace Pash
             LocalHost = new LocalHost(true);
             _currentRunspace = RunspaceFactory.CreateRunspace(LocalHost);
             _currentRunspace.Open();
+            _ctrlStmtKeywordLength = Parser.ControlStatementKeywords.Max(s => s.Length);
 
             LoadProfiles();
         }
@@ -35,11 +40,11 @@ namespace Pash
         {
             // currently we only support the current user, current host (semantics of other things in Pash need to
             // be discussed first)
-            var curUserCurHost = GetCurrentUserCurrentHostProfilePath();
-            LoadProfile(curUserCurHost);
+            var currentUserCurrentHost = GetCurrentUserCurrentHostProfilePath();
+            LoadProfile(currentUserCurrentHost);
 
             // finally set the variable with all used profiles
-            SetProfileVariable(curUserCurHost, "", "", "");
+            SetProfileVariable(currentUserCurrentHost, "", "", "");
         }
 
         internal void LoadProfile(string path)
@@ -66,25 +71,31 @@ namespace Pash
             }
         }
 
-        internal void SetProfileVariable(string curUserCurHost, string curUserAllHosts, string allUsersCurHost, string allUsersAllHosts)
+        internal void SetProfileVariable(string currentUserCurrentHost, string currentUserAllHosts, string allUsersCurrentHost, string allUsersAllHosts)
         {
-            var profileObj = new PSObject(curUserCurHost);
+            var profileObj = new PSObject(currentUserCurrentHost);
             var profiles = new Dictionary<string, string> {
-                { "CurrentUserCurrentHost", curUserCurHost },
-                { "CurrentUserAllHosts", curUserAllHosts },
-                { "AllUsersCurrentHost", allUsersCurHost },
+                { "CurrentUserCurrentHost", currentUserCurrentHost },
+                { "CurrentUserAllHosts", currentUserAllHosts },
+                { "AllUsersCurrentHost", allUsersCurrentHost },
                 { "AllUsersAllHosts", allUsersAllHosts }
             };
             foreach (var pair in profiles)
             {
-                var prop = new PSNoteProperty(pair.Key, pair.Value);
-                profileObj.Properties.Add(prop);
-                profileObj.Members.Add(prop);
+                var psNoteProperty = new PSNoteProperty(pair.Key, pair.Value);
+                profileObj.Properties.Add(psNoteProperty);
+                profileObj.Members.Add(psNoteProperty);
             }
             _currentRunspace.SessionStateProxy.SetVariable("Profile", profileObj);
         }
 
         void Execute(string cmd)
+        {
+            // execute command as a script in current scope, not local scope
+            Execute(new Command(cmd, true, false));
+        }
+
+        void Execute(Command cmd)
         {
             var errors = new Collection<object>();
             bool hadSuccess = false;
@@ -136,9 +147,8 @@ namespace Pash
             }
 
             if (String.IsNullOrEmpty(commands))
-            { 
-                ui.WriteLine(ConsoleColor.White, ConsoleColor.Black, BannerText);
-                ui.WriteLine();
+            {
+                WriteBanner(ui);
             }
             else
             {
@@ -149,17 +159,15 @@ namespace Pash
             // the user calling "exit".
             while (!LocalHost.ShouldExit && _interactive)
             {
-                Prompt();
+                var scriptBlock = ReadCommand();
 
-                string cmd = ui.ReadLine();
-
-                if (cmd == null)
+                if (scriptBlock == null)
                 {
                     // EOF
                     break;
                 }
 
-                Execute(cmd);
+                Execute(new Command(scriptBlock, false));
             }
 
             // Exit with the desired exit code that was set by exit command.
@@ -167,9 +175,96 @@ namespace Pash
             return LocalHost.ExitCode;
         }
 
-        internal void Prompt()
+        private static void WriteBanner(PSHostUserInterface ui)
+        {
+            ui.WriteLine(ConsoleColor.White, ConsoleColor.Black, BannerText);
+            ui.WriteLine();
+        }
+
+        private ScriptBlockAst ReadCommand()
+        {
+            bool firstRun = true;
+            bool lastParseComplete = true;
+            string lastControlStatementKeyword = "";
+            StringBuilder cmdInput = new StringBuilder();
+
+            while (true)
+            {
+                // show the prompt first
+                ShowPrompt(firstRun, lastControlStatementKeyword);
+
+                // get input
+                var input = ReadInput();
+                if (input == null)
+                {
+                    return null;
+                }
+                cmdInput.Append(input);
+
+                // empty strings can be ignored
+                if (cmdInput.Length == 0)
+                {
+                    continue;
+                }
+                // otherwise add a newline (user pressed enter, this can be important)
+                cmdInput.Append(Environment.NewLine);
+
+                // try to parse the input
+                bool complete = false;
+                ScriptBlockAst scriptBlock;
+                try
+                {
+                    complete = Parser.TryParsePartialInput(cmdInput.ToString(), out scriptBlock, out lastControlStatementKeyword);
+                }
+                catch (ParseException e)
+                {
+                    var errors = new Collection<object>();
+                    executeHelper("out-default", new object[] { ObjectAsErrorStreamObject(e) }, ref errors);
+                    _currentRunspace.ExecutionContext.AddToErrorVariable(e);
+                    // fall back
+                    firstRun = true;
+                    lastParseComplete = true;
+                    cmdInput.Clear();
+                    continue;
+                }
+
+                // return if we parsed the command in one run,
+                //     or if the parse was already completed last time and the current input is empty
+                if (complete && (firstRun || (lastParseComplete && input.Trim().Length == 0)))
+                {
+                    return scriptBlock;
+                }
+
+                lastParseComplete = complete;
+                firstRun = false;
+            }
+        }
+
+        private string ReadInput()
+        {
+            return LocalHost.UI.ReadLine();
+        }
+
+        private void ShowPrompt(bool firstRun, string lastCtrlStmtKeyword)
+        {
+            if (firstRun)
+            {
+                ShowNormalPrompt();
+            }
+            else
+            {
+                ShowContinuationPrompt(lastCtrlStmtKeyword);
+            }
+        }
+
+        private void ShowNormalPrompt()
         {
             Execute("prompt | write-host -nonewline");
+        }
+
+        private void ShowContinuationPrompt(string start)
+        {
+            Execute(String.Format("'{0}>> ' | write-host -nonewline", start.PadRight(_ctrlStmtKeywordLength, '-')));
         }
 
         private bool? GetBoolVariable (string name)
@@ -182,28 +277,24 @@ namespace Pash
 
             var value = variable.Value;
             var psObject = value as PSObject;
-            if (psObject == null)
-            {
-                return value as bool?;
-            }
-            else
+            if (psObject != null)
             {
                 return psObject.BaseObject as bool?;
             }
+            return value as bool?;
         }
 
         private bool executeHelper(string cmd, object[] input, ref Collection<object> errors)
         {
-            // Ignore empty command lines.
-            if (String.IsNullOrEmpty(cmd))
-                return true;
+            return executeHelper(new Command(cmd, true, false), input, ref errors);
+        }
 
+        private bool executeHelper(Command cmd, object[] input, ref Collection<object> errors)
+        {
             bool success = true;
             using (var currentPipeline = _currentRunspace.CreatePipeline())
             {
-                // A command is not a simple word here, it's the whole user input and might contain
-                // multiple commands. Therefore we parse it first, but make sure it's not executed in a local scope
-                currentPipeline.Commands.AddScript(cmd, false);
+                currentPipeline.Commands.Add(cmd);
 
                 // Now add the default outputter to the end of the pipe.
                 // This will result in the output being written using the PSHost
@@ -245,13 +336,18 @@ namespace Pash
                 if (pipelineError != null)
                 {
                     success = false;
-                    var psobj = PSObject.AsPSObject(pipelineError);
-                    // the explicit (PS) way of setting internal psobj.WriteToErrorStream = true
-                    psobj.Properties.Add(new PSNoteProperty("writeToErrorStream", true));
-                    errors.Add(psobj);
+
+                    errors.Add(ObjectAsErrorStreamObject(pipelineError));
                 }
             }
             return success;
+        }
+
+        private PSObject ObjectAsErrorStreamObject(object obj)
+        {
+            var psobj = PSObject.AsPSObject(obj);
+            psobj.WriteToErrorStream = true;
+            return psobj;
         }
     }
 }

@@ -72,7 +72,7 @@ namespace Microsoft.PowerShell.Commands.Utility
             }
             else if (errorData.BaseObject is IContainsErrorRecord)
             {
-                errorRecord = ((IContainsErrorRecord)errorData).ErrorRecord;
+                errorRecord = ((IContainsErrorRecord)errorData.BaseObject).ErrorRecord;
             }
             else if (errorData.BaseObject is Exception)
             {

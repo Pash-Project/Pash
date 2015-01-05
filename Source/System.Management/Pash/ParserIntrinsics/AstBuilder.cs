@@ -166,17 +166,43 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.statement_list);
 
-            List<StatementAst> statements = parseTreeNode
-                .ChildNodes
-                .Where(node => node.Term != this._grammar.statement_terminators)
-                .Select(BuildStatementAst)
-                .ToList()
-                ;
+            var statements = BuildStatementListRecursion(parseTreeNode);
 
             return new StatementBlockAst(
                 new ScriptExtent(parseTreeNode),
                 statements.Where(statement => !(statement is TrapStatementAst)),
                 statements.OfType<TrapStatementAst>());
+        }
+
+        IEnumerable<StatementAst> BuildStatementListRecursion(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.statement_list, this._grammar._statement_list_rest);
+            var numChildNodes = parseTreeNode.ChildNodes.Count;
+            if (numChildNodes == 0)
+            {
+                return new StatementAst[0];
+            }
+
+            var statements = new List<StatementAst>();
+            var childNode = parseTreeNode.ChildNodes.First();
+            if (childNode.Term == this._grammar._unterminated_statement ||
+                childNode.Term == this._grammar._terminated_statement)
+            {
+                statements.Add(BuildStatementAst(childNode));
+            }
+            else if (childNode.Term == this._grammar._statement_list_rest ||
+                     childNode.Term == this._grammar.statement_list)
+            {
+                statements.AddRange(BuildStatementListRecursion(childNode));
+            }
+
+            // we can have more than one child to care about, then we have grammar rule recursion
+            if (numChildNodes > 1 &&
+                parseTreeNode.ChildNodes.Last().Term == this._grammar.statement_list)
+            {
+                statements.AddRange(BuildStatementListRecursion(parseTreeNode.ChildNodes.Last()));
+            }
+            return statements;
         }
 
         StatementBlockAst BuildNamedBlockListAst(ParseTreeNode parseTreeNode)
@@ -186,7 +212,11 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildStatementAst(ParseTreeNode parseTreeNode)
         {
-            VerifyTerm(parseTreeNode, this._grammar.statement);
+            if (parseTreeNode.Term == this._grammar.statement)
+            {
+                parseTreeNode = parseTreeNode.ChildNodes.Single();
+            }
+            VerifyTerm(parseTreeNode, this._grammar._terminated_statement, this._grammar._unterminated_statement);
 
             parseTreeNode = parseTreeNode.ChildNodes.Single();
 

@@ -508,6 +508,7 @@
     <Compile Include="Microsoft.PowerShell\Commands\GetModuleCommand.cs" />
     <Compile Include="Pash\Implementation\SessionStateIntrinsics.cs" />
     <Compile Include="Pash\Implementation\ISessionStateIntrinsics.cs" />
+    <Compile Include="Pash\Implementation\Parser.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -115,6 +115,35 @@ namespace TestHost
             Assert.AreEqual("auch", outlines[3]);
             Assert.AreEqual("auah", outlines[4]);
         }
+
+        [Test]
+        [Timeout(3000)] // just in case the test runs into a loop
+        public void CanParseTakePartialInput()
+        {
+            CreateFreshHostAndUI(true);
+            HostUI.SetInput(String.Join(Environment.NewLine, new [] {
+                "if ($true)",
+                "{",
+                "'foo'",
+                "}"
+            }) + Environment.NewLine + Environment.NewLine); // last newline "confirms" that partial parsing can end
+            FullHost.Run();
+            var outlines = HostUI.GetOutput().Split(new string[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
+            Assert.AreEqual(8, outlines.Length); // Banner + 5 x Prompts (per input line) + result + new prompt
+            Assert.That(outlines[6], Is.EqualTo("foo"));
+        }
+
+        [Test]
+        public void ParseErrorOnInputIsPrinted()
+        {
+            CreateFreshHostAndUI(true);
+            HostUI.OnWriteErrorLineString = s => HostUI.WriteLine(s); // we want to see errors in output
+            HostUI.SetInput("$" + Environment.NewLine); // simple parse error
+            FullHost.Run();
+            var outlines = HostUI.GetOutput().Split(new string[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
+            Assert.AreEqual(6, outlines.Length); // Banner + prompt + 3 error lines + prompt
+            Assert.That(outlines[2], Is.StringStarting("Parse error"));
+        }
     }
 }
 

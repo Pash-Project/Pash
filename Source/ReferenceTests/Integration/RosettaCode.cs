@@ -154,7 +154,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Where-Object not implemented")]
+        [Test, Explicit("Value '2008' can't be converted or casted to 'System.DateTime'")]
         // Taken from http://rosettacode.org/wiki/Day_of_the_week#PowerShell
         public void DayOfWeek()
         {
@@ -266,7 +266,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Where-Object not implemented")]
+        [Test]
         // Adapted from http://rosettacode.org/wiki/Factors_of_an_integer#PowerShell
         public void FactorsOfAnInteger1()
         {
@@ -280,7 +280,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Where-Object not implemented")]
+        [Test]
         // Adapted from http://rosettacode.org/wiki/Factors_of_an_integer#PowerShell
         public void FactorsOfAnInteger2()
         {
@@ -1001,7 +1001,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Where-Object not yet implemented")]
+        [Test]
         // Taken from http://rosettacode.org/wiki/Primality_by_trial_division#PowerShell
         public void PrimalityByTrialDivision()
         {
@@ -1198,7 +1198,7 @@ namespace ReferenceTests.Integration
             Assert.AreEqual(expected, actual);
         }
 
-        [Test, Explicit("Where-Object not yet implemented")]
+        [Test]
         // Taken from http://rosettacode.org/wiki/Select_from_Array#PowerShell
         public void SelectFromArray()
         {

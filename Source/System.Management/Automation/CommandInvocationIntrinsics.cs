@@ -53,7 +53,7 @@ namespace System.Management.Automation
         
         public ScriptBlock NewScriptBlock(string scriptText)
         {
-            return new ScriptBlock(CommandManager.ParseInput(scriptText));
+            return new ScriptBlock(Parser.ParseInput(scriptText));
         }
     }
 }

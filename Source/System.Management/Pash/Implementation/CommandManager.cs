@@ -27,33 +27,13 @@ namespace Pash.Implementation
             _scripts = new Dictionary<string, ScriptInfo>(StringComparer.CurrentCultureIgnoreCase);
         }
 
-        public static ScriptBlockAst ParseInput(string input)
-        {
-            try
-            {
-                return PowerShellGrammar.ParseInteractiveInput(input);
-            }
-            catch (PowerShellGrammar.ParseException exception)
-            {
-                // nicer error message
-                var msgfmt = "Parse error at {0}: {1}";
-                var location = exception.LogMessage.Location.ToUiString();
-                var reason = exception.LogMessage.Message;
-                if (reason.Length > 100)
-                {
-                    reason = reason.Substring(0, 97) + "...";
-                }
-                throw new ParseException(String.Format(msgfmt, location, reason) , exception);
-            }
-        }
-
         private void LoadScripts()
         {
             foreach (ScriptConfigurationEntry entry in _runspace.ExecutionContext.RunspaceConfiguration.Scripts)
             {
                 try
                 {
-                    var scriptBlock = new ScriptBlock(ParseInput(entry.Definition));
+                    var scriptBlock = new ScriptBlock(Parser.ParseInput(entry.Definition));
                     _scripts.Add(entry.Name, new ScriptInfo(entry.Name, scriptBlock,
                                                             ScopeUsages.NewScriptScope));
                     continue;
@@ -74,7 +54,7 @@ namespace Pash.Implementation
 
             if (command.IsScript) //CommandText contains a script block. Parse it
             {
-                command.ScriptBlockAst = CommandManager.ParseInput(cmdText);
+                command.ScriptBlockAst = Parser.ParseInput(cmdText);
             }
 
             //either we parsed something like "& { foo; bar }", or the CommandText was a script and was just parsed

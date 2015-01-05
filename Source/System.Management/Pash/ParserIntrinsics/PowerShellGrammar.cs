@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using Irony;
 using System.Diagnostics;
 using Extensions.Irony;
+using System.Collections.Generic;
 
 namespace Pash.ParserIntrinsics
 {
@@ -68,8 +69,11 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal _statement_block_empty = null; // Initialized by reflection.
         public readonly NonTerminal _statement_block_full = null; // Initialized by reflection.
         public readonly NonTerminal statement_list = null; // Initialized by reflection.
+        public readonly NonTerminal _statement_list_rest = null; // Initialized by reflection.
         public readonly NonTerminal statement_list_opt = null; // Initialized by reflection.
         public readonly NonTerminal statement = null; // Initialized by reflection.
+        public readonly NonTerminal _terminated_statement = null; // Initialized by reflection.
+        public readonly NonTerminal _unterminated_statement = null; // Initialized by reflection.
         public readonly NonTerminal _statement_labeled_statement = null; // Initialized by reflection.
         public readonly NonTerminal statement_terminator = null; // Initialized by reflection.
         public readonly NonTerminal statement_terminators = null; // Initialized by reflection.
@@ -251,6 +255,8 @@ namespace Pash.ParserIntrinsics
 
         #endregion
 
+        private Tuple<KeyTerm, Regex>[] _terms_after_newline;
+
         public PowerShellGrammar()
         {
             InitializeTerminalFields();
@@ -259,6 +265,14 @@ namespace Pash.ParserIntrinsics
 
             // delegate to a new method, so we don't accidentally overwrite a readonly field.
             BuildProductionRules();
+
+            // there are special terms that can follow after skippable newlines. These terms are the
+            // param block, elseif and else blocks. To make sure they aren't interpreted as statements,
+            // we need to extra check when a newline occurs if the newline should be skipped
+            _terms_after_newline = (
+                from t in new KeyTerm[] { @param, @else, @elseif }
+                select new Tuple<KeyTerm, Regex>(t, new Regex(new_line_character.Pattern + "*" + t.Text))
+            ).ToArray();
 
             // Skip newlines within statements, e.g.:
             //     if ($true)       # not the end of the statement - keep parsing!
@@ -281,55 +295,27 @@ namespace Pash.ParserIntrinsics
 
         bool IsNewlineExpected(ValidateTokenEventArgs validateTokenEventArgs)
         {
+            // Here we check manually if a newline is used as a statement terminator
+            // or if it can be skipped (e.g. after `if(exp)`
+            // First we have some special cases:
+
+            // detect param, elseif, and else keywords to make sure they aren't misinterpreted as a command
+            foreach (var matchTuple in _terms_after_newline)
+            {
+                if (validateTokenEventArgs.Context.CurrentParserState.ExpectedTerminals.Contains(matchTuple.Item1) &&
+                    matchTuple.Item2.IsMatch(validateTokenEventArgs.Context.Source.Text,
+                                             validateTokenEventArgs.Context.Source.Position))
+                {
+                    return false;
+                }
+            }
+
+            // Now the general case: When the parser has any matching rule witht the newline, it's expected.
+            // Otherwise it's optional and we skip it.
             // Remember that `validateTokenEventArgs.Context.CurrentParserState` points in to the finite state machine
             // that Irony generates. `Actions` represents the valid transitions to new states. If this statement is
             // `true`, it means the grammar has a plan for what to do with that `new_line_character`.
             return validateTokenEventArgs.Context.CurrentParserState.Actions.ContainsKey(this.new_line_character);
-        }
-
-        // This is a little weird. Hopefully someone will have a bright idea
-        // of how to refactor this to separate the grammar from the parser. Or
-        // merge them. Or whatever.
-        public static readonly PowerShellGrammar Instance;
-        public static Parser Parser;
-
-        static PowerShellGrammar()
-        {
-            Instance = new PowerShellGrammar();
-            Parser = new Parser(Instance);
-        }
-
-        public class ParseException : Exception
-        {
-            public readonly LogMessage LogMessage;
-
-            public ParseException(LogMessage logMessage)
-            {
-                this.LogMessage = logMessage;
-            }
-        }
-
-        public static ScriptBlockAst ParseInteractiveInput(string input)
-        {
-            ParseTree parseTree = null;
-            try
-            {
-                parseTree = Parser.Parse(input);
-            }
-            catch (Exception)
-            {
-                var msg = "The parser internally crashed and gets reinitialized." + Environment.NewLine +
-                          "Although this shouldn't happen, it's likely that it happened because of invalid syntax.";
-                Parser = new Parser(Instance);
-                throw new InvalidOperationException(msg);
-            }
-
-            if (parseTree.HasErrors())
-            {
-                throw new ParseException(parseTree.ParserMessages.First());
-            }
-
-            return new AstBuilder(Instance).BuildScriptBlockAst(parseTree.Root);
         }
 
         public override void OnLanguageDataConstructed(LanguageData language)
@@ -464,8 +450,10 @@ namespace Pash.ParserIntrinsics
             #region B.2.2 Statements
             ////        script_block:
             ////            param_block_opt   statement_terminators_opt    script_block_body_opt
+            // NOTE: the script_block_body_opt includes a statement_list that can only consist of statement_terminators
+            //       Therefore we need to leave out the statement_terminators_opt here or we get shift/reduce errors!
             script_block.Rule =
-                param_block_opt + statement_terminators_opt + script_block_body_opt;
+                param_block_opt + script_block_body_opt;
 
             ////        param_block:
             ////            new_lines_opt   attribute_list_opt   new_lines_opt   param   new_lines_opt
@@ -520,16 +508,35 @@ namespace Pash.ParserIntrinsics
             statement_block.Rule =
                 "{" + statement_list_opt + "}";
 
-#if false
             ////        statement_list:
             ////            statement
             ////            statement_list   statement
-            statement_list.Rule = MakePlusRule(statement_list, statement);
-#else
-            // There's a bug in the language spec here. See https://github.com/Pash-Project/Pash/issues/7
+
+            // We split this rule in _unterminated_statements that require a statement_terminator behind them and
+            // _terminated_statements which are terminated by itself. Note that the last _unterminated_statement
+            // doesn't require a statement_terminator so we add one optional.
+            // Also, there can be a number of statement_terminators before and after the list.
+
             statement_list.Rule =
-                MakeListRule(statement_list, statement_terminators, statement, TermListOptions.AllowTrailingDelimiter | TermListOptions.PlusList);
-#endif
+                _statement_list_rest // the last statement
+                |
+                _terminated_statement + statement_list
+                |
+                _unterminated_statement + statement_terminator + statement_list
+                |
+                statement_terminator + statement_list ;
+
+            _statement_list_rest.Rule =
+                _unterminated_statement
+                |
+                statement_terminator
+                |
+                _terminated_statement
+                |
+                // is necessary to allow an unterminated_statement with one terminator. other stuff works with the list
+                _unterminated_statement + statement_terminator
+                ;
+
 
             ////        statement:
             ////            if_statement
@@ -540,25 +547,37 @@ namespace Pash.ParserIntrinsics
             ////            try_statement
             ////            data_statement
             ////            pipeline   statement_terminator
-            // The spec doesn't define `label`. I'm using `simple_name` for that purpose.
+
+            // The spec has a bug concerning the definition of the statement_terminator:
+            // Easy example: `if ($true) { }` shouldn't require a semicolon or newline, a pipeline needs one
+            // Also: pipeline includes a recursive rule on statement, which would require multiple terminators
+            // Therefore we split the stamentens in terminated statements and unterminated once that require
+            // terminators as separators in the statement_list. See https://github.com/Pash-Project/Pash/issues/7
             statement.Rule =
+                _unterminated_statement
+                |
+                _terminated_statement
+                ;
+
+            // The spec doesn't define `label`. I'm using `simple_name` for that purpose.
+            _terminated_statement.Rule =
                 if_statement
                 |
                 _statement_labeled_statement
                 |
                 function_statement
                 |
-                // See https://github.com/Pash-Project/Pash/issues/7
-                flow_control_statement /*+ statement_terminator_opt*/
-                |
                 trap_statement
                 |
                 try_statement
                 |
                 data_statement
+                ;
+
+            _unterminated_statement.Rule =
+                flow_control_statement
                 |
-                // See https://github.com/Pash-Project/Pash/issues/7
-                pipeline /*+ statement_terminator_opt*/
+                pipeline
                 ;
 
             _statement_labeled_statement.Rule =

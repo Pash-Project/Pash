@@ -48,6 +48,7 @@
     <Compile Include="Commands\AddTypeTests.cs" />
     <Compile Include="Commands\ImportModuleTests.cs" />
     <Compile Include="Commands\RemoveModuleTests.cs" />
+    <Compile Include="Commands\WhereObjectTests.cs" />
     <Compile Include="Integration\RosettaCode.cs" />
     <Compile Include="Language\ObjectMemberTests.cs" />
     <Compile Include="Language\Operators\FormatOperatorTests_7_5.cs" />
@@ -56,6 +57,7 @@
     <Compile Include="API\DefaultScriptScopeTests.cs" />
     <Compile Include="Language\FunctionTests.cs" />
     <Compile Include="Language\InvocationTests.cs" />
+    <Compile Include="Language\Operators\LogicalOperators_7_10.cs" />
     <Compile Include="Language\Operators\RangeOperatorTests_7_4.cs" />
     <Compile Include="Language\ScopeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -97,6 +99,9 @@
     <Compile Include="ReferenceTestBaseWithTestModule.cs" />
     <Compile Include="Commands\ModuleCommandTestBase.cs" />
     <Compile Include="Commands\GetModuleTests.cs" />
+    <Compile Include="GithubIssues\Issue200.cs" />
+    <Compile Include="GithubIssues\Issue20.cs" />
+    <Compile Include="Language\IfElseTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
@@ -133,4 +138,5 @@
   </Target>
   -->
   <ItemGroup />
+</Project>
 </Project>
