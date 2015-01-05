@@ -96,7 +96,7 @@
     <Compile Include="Commands\ExportModuleMemberTests.cs" />
     <Compile Include="ReferenceTestBaseWithTestModule.cs" />
     <Compile Include="Commands\ModuleCommandTestBase.cs" />
-    <Compile Include="Commands\GetModuleCommandTests.cs" />
+    <Compile Include="Commands\GetModuleTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
