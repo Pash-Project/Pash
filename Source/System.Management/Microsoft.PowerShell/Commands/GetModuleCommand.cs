@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands
@@ -7,9 +8,11 @@ namespace Microsoft.PowerShell.Commands
                      /*, HelpUri="http://go.microsoft.com/fwlink/?LinkID=141552" */ )] 
     public sealed class GetModuleCommand : ModuleCmdletBase
     {
-        // [ParameterAttribute(ParameterSetName="Available")]
+        /*
+        [ParameterAttribute(ParameterSetName="Available")]
         [ParameterAttribute(ParameterSetName="Loaded")]
         public SwitchParameter All { get; set; }
+        */
 
         /*
         [ParameterAttribute(ParameterSetName="Loaded", ValueFromPipelineByPropertyName=true)]
@@ -49,7 +52,16 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-
+            var modules = SessionState.LoadedModules.GetAll();
+            var rawPatterns = (Name == null || Name.Length == 0) ? new []{ "*" } : Name;
+            var patterns = (from p in rawPatterns select new WildcardPattern(p, WildcardOptions.IgnoreCase)).ToArray();
+            foreach (var mod in modules.Values)
+            {
+                if (WildcardPattern.IsAnyMatch(patterns, mod.Name))
+                {
+                    WriteObject(mod);
+                }
+            }
         }
 
     }
