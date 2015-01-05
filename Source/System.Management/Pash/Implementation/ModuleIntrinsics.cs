@@ -53,22 +53,22 @@ namespace Pash.Implementation
             var targetScope = GetModuleImportScope(scope);
             foreach (var fun in module.ExportedFunctions.Values)
             {
-                fun.Module = module;
+                fun.Module = fun.Module ?? module;
                 targetScope.SessionState.Function.Set(fun);
             }
             foreach (var variable in module.ExportedVariables.Values)
             {
-                variable.Module = module;
+                variable.Module = variable.Module ?? module;
                 targetScope.SessionState.PSVariable.Set(variable);
             }
             foreach (var alias in module.ExportedAliases.Values)
             {
-                alias.Module = module;
+                alias.Module = alias.Module ?? module;
                 targetScope.SessionState.Alias.Set(alias, "local");
             }
             foreach (var cmdlet in module.ExportedCmdlets.Values)
             {
-                cmdlet.Module = module;
+                cmdlet.Module = cmdlet.Module ?? module;
                 targetScope.SessionState.Cmdlet.Set(cmdlet);
             }
         }
