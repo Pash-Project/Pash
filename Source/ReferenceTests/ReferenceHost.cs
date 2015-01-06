@@ -9,6 +9,16 @@ using System.Text;
 
 namespace ReferenceTests
 {
+    public class ExecutionWithErrorsException : Exception
+    {
+        public ErrorRecord[] Errors { get; set; }
+
+        public ExecutionWithErrorsException (ErrorRecord[] records)
+        {
+            Errors = records;
+        }
+    }
+
     internal static class ReferenceHost
     {
         public static InitialSessionState InitialSessionState { get; set; }
@@ -18,58 +28,38 @@ namespace ReferenceTests
         public static string LastResults { get; private set; }
 
 
-        public static string Execute(string cmd, bool throwMethodInvocationException = true)
+        public static string Execute(string cmd, bool throwOnError = true)
         {
-            return Execute(new string[] { cmd }, throwMethodInvocationException);
+            return Execute(new string[] { cmd }, throwOnError);
         }
 
-        public static string Execute(string[] commands, bool throwMethodInvocationException = true)
+        public static string Execute(string[] commands, bool throwOnError = true)
         {
-            LastResults = "";
-            try
-            {
-                RawExecute(commands, throwMethodInvocationException);
-            }
-            finally
-            {
-                if (LastRawResults != null)
-                {
-                    StringBuilder resultstr = new StringBuilder();
-                    foreach (var curPSObject in LastRawResults)
-                    {
-                        if (curPSObject != null)
-                        {
-                            resultstr.Append(curPSObject.ToString());
-                        }
-                        resultstr.Append(Environment.NewLine);
-                    }
-                    LastResults = resultstr.ToString();
-                }
-            }
+            RawExecute(commands, throwOnError);
             return LastResults;
         }
 
-        public static Collection<PSObject> RawExecute(string cmd, bool throwMethodInvocationException = true)
+        public static Collection<PSObject> RawExecute(string cmd, bool throwOnError = true)
         {
-            return RawExecute(new string[] { cmd }, throwMethodInvocationException);
+            return RawExecute(new string[] { cmd }, throwOnError);
         }
 
-        public static Collection<PSObject> RawExecute(string[] commands, bool throwMethodInvocationException = true)
+        public static Collection<PSObject> RawExecute(string[] commands, bool throwOnError = true)
         {
             LastRawResults = null;
             LastRawErrorResults = null;
             LastUsedRunspace = InitialSessionState == null ?
                 RunspaceFactory.CreateRunspace() : RunspaceFactory.CreateRunspace(InitialSessionState);
             LastUsedRunspace.Open();
-            return RawExecuteInLastRunspace(commands, throwMethodInvocationException);
+            return RawExecuteInLastRunspace(commands, throwOnError);
         }
 
-        public static Collection<PSObject> RawExecuteInLastRunspace(string cmd, bool throwMethodInvocationException = true)
+        public static Collection<PSObject> RawExecuteInLastRunspace(string cmd, bool throwOnError = true)
         {
-            return RawExecuteInLastRunspace(new string[] { cmd }, throwMethodInvocationException);
+            return RawExecuteInLastRunspace(new string[] { cmd }, throwOnError);
         }
 
-        public static Collection<PSObject> RawExecuteInLastRunspace(string[] commands, bool throwMethodInvocationException = true)
+        public static Collection<PSObject> RawExecuteInLastRunspace(string[] commands, bool throwOnError = true)
         {
             foreach (var command in commands)
             {
@@ -89,14 +79,34 @@ namespace ReferenceTests
                     finally
                     {
                         LastRawErrorResults = pipeline.Error.ReadToEnd();
+                        MergeLastRawResultsToString();
                     }
-                    if (throwMethodInvocationException && LastRawErrorResults.Count > 0)
+                    if (throwOnError && LastRawErrorResults.Count > 0)
                     {
-                        throw new MethodInvocationException(String.Join(Environment.NewLine, LastRawErrorResults));
+                        throw new ExecutionWithErrorsException((from err in LastRawErrorResults
+                                                                 select ((PSObject) err).BaseObject as ErrorRecord).ToArray());
                     }
                 }
             }
             return LastRawResults;
+        }
+
+        private static void MergeLastRawResultsToString()
+        {
+            LastResults = "";
+            if (LastRawResults != null)
+           {
+                StringBuilder resultstr = new StringBuilder();
+                foreach (var curPSObject in LastRawResults)
+                {
+                    if (curPSObject != null)
+                    {
+                        resultstr.Append(curPSObject.ToString());
+                    }
+                    resultstr.Append(Environment.NewLine);
+                }
+                LastResults = resultstr.ToString();
+            }
         }
 
         internal static void ImportModules(string[] modules)

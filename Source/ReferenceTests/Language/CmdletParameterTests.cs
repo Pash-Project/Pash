@@ -8,7 +8,7 @@ using TestPSSnapIn;
 namespace ReferenceTests.Language
 {
     [TestFixture]
-    public class CmdletParameterTests : ReferenceTestBase
+    public class CmdletParameterTests : ReferenceTestBaseWithTestModule
     {
         [Test]
         public void NoMandatoriesWithoutArgsTest()
@@ -286,7 +286,7 @@ namespace ReferenceTests.Language
         {
             var cmd = "new-object psobject -property @{f='abc'; b='def'} | "
                 + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand));
-            Assert.Throws<MethodInvocationException>(() => {
+            Assert.Throws<ExecutionWithErrorsException>(() => {
                 ReferenceHost.Execute(cmd);
             });
         }
@@ -329,12 +329,12 @@ namespace ReferenceTests.Language
             var cmd = "new-object psobject -property @{foo='abc'; bar='def'} | "
                 + CmdletName(typeof(TestParametersByPipelinePropertyNamesCommand))
                 + " -Foo 'a' -Bar 'a'";
-            Assert.Throws<MethodInvocationException>(() => {
+            Assert.Throws<ExecutionWithErrorsException>(() => {
                 ReferenceHost.Execute(cmd);
             });
         }
 
-        [Test, Explicit("To be honest: I don't understand why PS writes the last output AND still throws and excpetion")]
+        [Test]
         public void CmdletPipeParamByPropertyCanProcessMultipleButThrowsOnError()
         {
             var cmd = NewlineJoin(new string[] {
@@ -349,7 +349,7 @@ namespace ReferenceTests.Language
                 "ghi ",
                 "mno jkl"
             });
-            Assert.Throws<MethodInvocationException>(() =>
+            Assert.Throws<ExecutionWithErrorsException>(() =>
             {
                 ReferenceHost.Execute(cmd);
             });

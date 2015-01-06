@@ -31,12 +31,13 @@ namespace Pash.Implementation
         private Dictionary<ProviderInfo, PSDriveInfo> _providersCurrentDrive;
         private Dictionary<string, PSSnapInInfo> _snapins;
 
-        private ExecutionContext _executionContext;
+        private readonly ExecutionContext _globalExecutionContext;
+        internal SessionState RootSessionState  { get { return _globalExecutionContext.SessionState; } }
         internal PSDriveInfo _currentDrive;
 
         internal SessionStateGlobal(ExecutionContext executionContext)
         {
-            _executionContext = executionContext;
+            _globalExecutionContext = executionContext;
             _providers = new Dictionary<string, List<ProviderInfo>>(StringComparer.CurrentCultureIgnoreCase);
             _providerInstances = new Dictionary<string, List<CmdletProvider>>(StringComparer.CurrentCultureIgnoreCase);
             _providersCurrentDrive = new Dictionary<ProviderInfo, PSDriveInfo>();
@@ -159,7 +160,7 @@ namespace Pash.Implementation
             }
             
             //unload cmdlets
-            CommandManager.RemoveCmdlets(snapinInfo);
+            RootSessionState.Cmdlet.RemoveAll(snapinInfo);
 
             _snapins.Remove(name);
             return snapinInfo;
@@ -212,7 +213,7 @@ namespace Pash.Implementation
                 throw new PSSnapInException(String.Format("The snapin '{0}' is already loaded!", snapinName));
             }
             LoadProvidersFromAssembly(assembly, snapinInfo);
-            CommandManager.LoadCmdletsFromAssembly(assembly, snapinInfo);
+            RootSessionState.Cmdlet.LoadCmdletsFromAssembly(assembly, snapinInfo);
         }
 
         Assembly LoadAssemblyFromFile(string name)
@@ -250,16 +251,6 @@ namespace Pash.Implementation
 
         #region Provider's Initialization
         //TODO: Move this provider stuff to ProviderIntrinsics and access it through SessionState.Provider
-        internal CommandManager CommandManager
-        {
-            get
-            {
-                //TODO: somehow this doesn't look like a good idea, we should change that and get this class
-                //independent from the CommandManager, so the CM should check out the SessionStateGlobal, not the other
-                //way around
-                return ((LocalRunspace)_executionContext.CurrentRunspace).CommandManager;
-            }
-        }
 
         private void RemoveProvider(string name)
         {
@@ -269,10 +260,10 @@ namespace Pash.Implementation
                                                     null);
             }
             //remove all drives. TODO: I think _providers[name].Drive
-            foreach (var drive in _executionContext.SessionState.Drive.GetAllForProvider(name))
+            foreach (var drive in _globalExecutionContext.SessionState.Drive.GetAllForProvider(name))
             {
                 //remove from all scopes, sub-scopes might created a new drive using this provider
-                _executionContext.SessionState.Drive.RemoveAtAllScopes(drive);
+                _globalExecutionContext.SessionState.Drive.RemoveAtAllScopes(drive);
             }
 
             //now also stop and remove all instances
@@ -295,7 +286,7 @@ namespace Pash.Implementation
         {
             CmdletProvider provider = providerInfo.CreateInstance();
 
-            provider.Start(providerInfo, new ProviderRuntime(_executionContext));
+            provider.Start(providerInfo, new ProviderRuntime(_globalExecutionContext));
             provider.SetProviderInfo(providerInfo);
 
             // Cache the Provider's Info
@@ -337,7 +328,7 @@ namespace Pash.Implementation
                         try
                         {
                             //always to global scope
-                            _executionContext.SessionState.Drive.New(driveInfo,
+                            RootSessionState.Drive.New(driveInfo,
                                 SessionStateScope<PSDriveInfo>.ScopeSpecifiers.Global.ToString());
                         }
                         catch
@@ -350,6 +341,7 @@ namespace Pash.Implementation
             }
         }
 
+        // TODO: make this available in ProviderIntrinsics, then we can also use it for modules from the ModuleLoader :)
         private void LoadProvidersFromAssembly(Assembly assembly, PSSnapInInfo snapinInfo)
         {
             // first get name and type of all providers in this assembly
@@ -362,7 +354,7 @@ namespace Pash.Implementation
             // then initialize all providers
             foreach (var curPair in providers)
             {
-                ProviderInfo providerInfo = new ProviderInfo(_executionContext.SessionState, curPair.Value,
+                ProviderInfo providerInfo = new ProviderInfo(_globalExecutionContext.SessionState, curPair.Value,
                                                              curPair.Key, string.Empty, snapinInfo);
                 CmdletProvider provider = AddProvider(providerInfo);
                 InitializeProvider(provider, providerInfo);
@@ -388,7 +380,7 @@ namespace Pash.Implementation
                     throw new NullReferenceException("CurrentDrive is null.");
                 }
                 PSDriveInfo driveInfo = CurrentDrive;
-                return new PathInfo(driveInfo, driveInfo.Provider, driveInfo.CurrentLocation, _executionContext.SessionState);
+                return new PathInfo(driveInfo, driveInfo.Provider, driveInfo.CurrentLocation, _globalExecutionContext.SessionState);
             }
         }
 
@@ -483,7 +475,7 @@ namespace Pash.Implementation
 
         internal PathInfo SetLocation(string path)
         {
-            return SetLocation(path, new ProviderRuntime(_executionContext));
+            return SetLocation(path, new ProviderRuntime(_globalExecutionContext));
         }
         #endregion
 
@@ -506,7 +498,7 @@ namespace Pash.Implementation
         // TODO: it would be nice if these functions would be in the intrinsics itself, not called from there
         internal Collection<PSObject> GetChildItems(string path, bool recurse)
         {
-            ProviderRuntime providerRuntime = new ProviderRuntime(_executionContext);
+            ProviderRuntime providerRuntime = new ProviderRuntime(_globalExecutionContext);
 
             return GetChildItems(path, recurse, providerRuntime);
         }
@@ -565,7 +557,7 @@ namespace Pash.Implementation
             string driveName = path.GetDrive();
             if (!string.IsNullOrEmpty(driveName))
             {
-                return _executionContext.SessionState.Drive.Get(driveName);
+                return RootSessionState.Drive.Get(driveName);
             }
             return null;
         }
@@ -621,7 +613,7 @@ namespace Pash.Implementation
             {
                 try
                 {
-                    nextDrive = _executionContext.SessionState.Drive.Get(driveName);
+                    nextDrive = _globalExecutionContext.SessionState.Drive.Get(driveName);
                 }
                 catch (MethodInvocationException) //didn't find a drive (maybe it's "\" on Windows)
                 {

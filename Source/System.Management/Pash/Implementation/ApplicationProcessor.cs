@@ -99,8 +99,8 @@ namespace Pash.Implementation
 
         private void ProcessExited(object sender, System.EventArgs e)
         {
-            ExecutionContext.SetVariable("global:LASTEXITCODE", _process.ExitCode);
-            ExecutionContext.SetVariable("global:?", _process.ExitCode == 0); // PS also just compares against null
+            ExecutionContext.SetLastExitCodeVariable(_process.ExitCode);
+            ExecutionContext.SetSuccessVariable(_process.ExitCode == 0); // PS also just compares against null
 
             _process.Dispose();
             _process = null;

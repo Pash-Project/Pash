@@ -8,7 +8,7 @@ namespace Pash.Implementation
 {
     static class CommonCmdletParameters
     {
-        static readonly CmdletInfo commonCmdletInfo = new CmdletInfo("Common-Commands", typeof(CommonParametersCmdlet), null, null, null);
+        static readonly CmdletInfo commonCmdletInfo = new CmdletInfo("Common-Commands", typeof(CommonParametersCmdlet), null);
 
         static CommonCmdletParameters()
         {

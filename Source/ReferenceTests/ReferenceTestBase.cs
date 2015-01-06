@@ -38,14 +38,12 @@ namespace ReferenceTests
         [SetUp]
         public virtual void SetUp()
         {
-            ImportTestCmdlets();
             _startDir = Environment.CurrentDirectory;
         }
 
         [TearDown]
         public virtual void TearDown()
         {
-            CleanImports();
             RemoveCreatedFiles();
             if (!String.IsNullOrEmpty(_startDir) && !_startDir.Equals(Environment.CurrentDirectory))
             {

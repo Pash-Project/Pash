@@ -31,6 +31,16 @@ namespace System.Management.Automation
 
         public string Name { get; private set; }
 
+        public PSModuleInfo Module { get; set; }
+
+        public string  ModuleName
+        {
+            get
+            {
+                return Module == null ? "" : this.Module.Name;
+            }
+        }
+
         public override string ToString()
         {
             // TODO: implement CommandInfo.ToString

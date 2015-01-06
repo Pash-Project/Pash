@@ -78,7 +78,7 @@ namespace System.Management.Pash.Implementation
             }
             // otherwise a PSObject
             var member = PSObject.GetMemberInfoSafe(psobj, memberNameObj, _expressionAst.Static);
-            return (member == null) ? null : PSObject.AsPSObject(member.Value);
+            return (member == null) ? null : PSObject.WrapOrNull(member.Value);
         }
     }
 }

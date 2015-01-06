@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace ReferenceTests.Language
 {
     [TestFixture]
-    public class ObjectMemberTests : ReferenceTestBase
+    public class ObjectMemberTests : ReferenceTestBaseWithTestModule
     {
         [Test]
         public void CustomPSObjectPropertiesCanBeAccessedCaseInsensitive()

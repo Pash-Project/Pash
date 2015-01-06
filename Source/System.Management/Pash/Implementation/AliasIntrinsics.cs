@@ -4,13 +4,10 @@ using System.Collections.Generic;
 
 namespace Pash.Implementation
 {
-    internal sealed class AliasIntrinsics
+    internal sealed class AliasIntrinsics : SessionStateIntrinsics<AliasInfo>
     {
-        private SessionStateScope<AliasInfo> _scope;
-
-        internal AliasIntrinsics(SessionStateScope<AliasInfo> aliasScope)
+        internal AliasIntrinsics(SessionStateScope<AliasInfo> scope) : base(scope, false)
         {
-            _scope = aliasScope;
         }
 
         public bool Exists(string aliasName)
@@ -18,40 +15,24 @@ namespace Pash.Implementation
             return (Get(aliasName) != null);
         }
 
-        public AliasInfo Get(string aliasName)
-        {
-            //Alias names do *not* support scope prefixes
-            return _scope.Get(aliasName, false);
-        }
-           
-        public AliasInfo GetAtScope(string aliasName, string scope)
-        {
-            return _scope.GetAtScope(aliasName, scope);
-        }
-
-        public Dictionary<string, AliasInfo> GetAllAtScope(string scope)
-        {
-            return _scope.GetAllAtScope(scope);
-        }
-
-        public Dictionary<string, AliasInfo> GetAll()
-        {
-            return _scope.GetAll();
-        }
-
         public void Set(AliasInfo info, string scope)
         {
-            _scope.SetAtScope(info, scope, true);
+            Scope.SetAtScope(info, scope, true);
         }
 
         public void New(AliasInfo info, string scope)
         {
-            _scope.SetAtScope(info, scope, false);
+            Scope.SetAtScope(info, scope, false);
         }
 
         public void Remove(string aliasName, string scope)
         {
-            _scope.RemoveAtScope(aliasName, scope);
+            Scope.RemoveAtScope(aliasName, scope);
+        }
+
+        internal void Remove(string aliasName)
+        {
+            Scope.Remove(aliasName, false);
         }
     }
 }

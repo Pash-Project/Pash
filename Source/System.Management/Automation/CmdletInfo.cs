@@ -13,7 +13,7 @@ namespace System.Management.Automation
     /// <summary>
     /// Represents and contains information about a cmdlet.
     /// </summary>
-    public class CmdletInfo : CommandInfo
+    public class CmdletInfo : CommandInfo, IScopedItem
     {
         public string HelpFile { get; private set; }
         public Type ImplementingType { get; private set; }
@@ -26,7 +26,23 @@ namespace System.Management.Automation
 
         private Exception _validationException;
 
-        internal CmdletInfo(string name, Type implementingType, string helpFile, PSSnapInInfo PSSnapin, ExecutionContext context)
+        internal CmdletInfo(string name, Type implementingType, string helpFile)
+            : this(name, implementingType, helpFile, null, null)
+        {
+        }
+
+        internal CmdletInfo(string name, Type implementingType, string helpFile, PSSnapInInfo snapin)
+            : this(name, implementingType, helpFile, snapin, null)
+        {
+        }
+
+        internal CmdletInfo(string name, Type implementingType, string helpFile, PSModuleInfo module)
+            : this(name, implementingType, helpFile, null, module)
+        {
+
+        }
+
+        internal CmdletInfo(string name, Type implementingType, string helpFile, PSSnapInInfo snapin, PSModuleInfo module)
             : base(name, CommandTypes.Cmdlet)
         {
             int i = name.IndexOf('-');
@@ -39,8 +55,9 @@ namespace System.Management.Automation
             Noun = name.Substring(i + 1);
             ImplementingType = implementingType;
             HelpFile = helpFile;
-            PSSnapIn = PSSnapin;
             _validationException = null;
+            PSSnapIn = snapin;
+            Module = module;
             GetParameterSetInfo(implementingType);
         }
 
@@ -304,5 +321,20 @@ namespace System.Management.Automation
                 RegisterParameter(parameterInfo);
             }
         }
+
+        #region IScopedItem Members
+
+        public string ItemName
+        {
+            get { return Name; }
+        }
+
+        public ScopedItemOptions ItemOptions
+        {
+            get { return ScopedItemOptions.None; }
+            set { throw new NotImplementedException("Setting scope options for cmdlets is not supported"); }
+        }
+        #endregion
+
     }
 }

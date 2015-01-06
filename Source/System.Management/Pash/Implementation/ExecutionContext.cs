@@ -38,7 +38,12 @@ namespace Pash.Implementation
 
         public ExecutionContext Clone(ScopeUsages scopeUsage = ScopeUsages.CurrentScope)
         {
-            var sstate = (scopeUsage == ScopeUsages.CurrentScope) ? SessionState : new SessionState(SessionState);
+            return Clone(SessionState, scopeUsage);
+        }
+
+        public ExecutionContext Clone(SessionState sessionState, ScopeUsages scopeUsage)
+        {
+            var sstate = (scopeUsage == ScopeUsages.CurrentScope) ? sessionState : new SessionState(sessionState);
             if (scopeUsage == ScopeUsages.NewScriptScope)
             {
                 sstate.IsScriptScope = true;
@@ -120,7 +125,7 @@ namespace Pash.Implementation
 
         internal bool WriteSideEffectsToPipeline { get; set; }
 
-        public void AddToErrorVariable(object error)
+        internal void AddToErrorVariable(object error)
         {
             var errorRecordsVar = GetVariable("Error");
             var records = errorRecordsVar.Value as ArrayList;
@@ -134,6 +139,16 @@ namespace Pash.Implementation
             {
                 records.Insert(0, error);
             }
+        }
+
+        internal void SetLastExitCodeVariable(int exitCode)
+        {
+            SetVariable("global:LASTEXITCODE", exitCode);
+        }
+
+        internal void SetSuccessVariable(bool success)
+        {
+            SetVariable("global:?", success);
         }
     }
 }

@@ -43,9 +43,9 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void EndProcessing()
         {
-            foreach (CommandInfo cmdInfo in ((LocalRunspace)LocalRunspace.DefaultRunspace).CommandManager.FindCommands("*"))
+            foreach (var cmdletInfoPair in ExecutionContext.SessionState.Cmdlet.Find("*"))
             {
-                WriteObject(cmdInfo);
+                WriteObject(cmdletInfoPair.Value);
             }
         }
 

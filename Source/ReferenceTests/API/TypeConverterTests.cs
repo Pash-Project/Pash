@@ -7,7 +7,7 @@ using TestPSSnapIn;
 namespace ReferenceTests.API
 {
     [TestFixture]
-    public class TypeConverterTests : ReferenceTestBase
+    public class TypeConverterTests : ReferenceTestBaseWithTestModule
     {
         [Test]
         public void ConvertFromStringToTypeWithTypeConverterUsesTypeConverter()

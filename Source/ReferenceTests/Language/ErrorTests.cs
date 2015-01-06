@@ -10,7 +10,7 @@ using System.Collections;
 namespace ReferenceTests.Language
 {
     [TestFixture]
-    public class ErrorTests : ReferenceTestBase
+    public class ErrorTests : ReferenceTestBaseWithTestModule
     {
         [Test]
         public void ParseErrorAppearsInStreamAndErrorVar()

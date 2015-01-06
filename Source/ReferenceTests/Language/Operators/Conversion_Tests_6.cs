@@ -513,6 +513,12 @@ namespace ReferenceTests.Language.Operators
             if (prefix == "-") { expected *= -1; }
             ExecuteAndCompareTypedResult(cmd, expected);
         }
+
+        [Test]
+        public void ConvertUsingConstructor_Spec_6_18()
+        {
+            ExecuteAndCompareTypedResult("[version]'1.0'", new Version("1.0"));
+        }
     }
 }
 

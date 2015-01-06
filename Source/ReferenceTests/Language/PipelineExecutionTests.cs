@@ -8,7 +8,7 @@ using TestPSSnapIn;
 namespace ReferenceTests.Language
 {
     [TestFixture]
-    public class PipelineExecutionTests : ReferenceTestBase
+    public class PipelineExecutionTests : ReferenceTestBaseWithTestModule
     {
         [Test]
         public void AllPhasesAreRunAsSingleCommand()

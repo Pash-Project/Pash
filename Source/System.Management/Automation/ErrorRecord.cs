@@ -18,7 +18,7 @@ namespace System.Management.Automation
         public ErrorRecord(Exception exception, string errorId, ErrorCategory errorCategory, object targetObject)
         {
             Exception = exception;
-            FullyQualifiedErrorId = errorId;
+            ErrorId = errorId;
             TargetObject = targetObject;
             CategoryInfo = new ErrorCategoryInfo(exception, errorCategory);
         }
@@ -26,16 +26,17 @@ namespace System.Management.Automation
         internal ErrorRecord(ErrorRecord errorRecord, Exception exception)
         {
             Exception = exception;
-            FullyQualifiedErrorId = errorRecord.FullyQualifiedErrorId;
+            ErrorId = errorRecord.ErrorId;
             TargetObject = errorRecord.TargetObject;
         }
 
+        internal string ErrorId { get; set; }
 
         public ErrorCategoryInfo CategoryInfo { get; set; }
 
         public ErrorDetails ErrorDetails { get; set; }
         public Exception Exception { get; internal set; }
-        public string FullyQualifiedErrorId { get; internal set; }
+        public string FullyQualifiedErrorId { get { return ErrorId; } } // for now it's simply the errorId
         // public InvocationInfo InvocationInfo { get; }
         public object TargetObject { get; internal set; }
 

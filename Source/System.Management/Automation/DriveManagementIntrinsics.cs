@@ -12,12 +12,10 @@ namespace System.Management.Automation
         private const string driveDoesntExistFormat = @"No such drive. A drive with the name ""{0}"" doesn't exist.";
         private const string driveAlreadyExistsFormat = @"A drive with the name ""{0}"" already exists.";
 
-        private SessionState _sessionState;
         private SessionStateScope<PSDriveInfo> _scope;
 
-        internal DriveManagementIntrinsics(SessionState sessionState, SessionStateScope<PSDriveInfo> driveScope)
+        internal DriveManagementIntrinsics(SessionStateScope<PSDriveInfo> driveScope)
         {
-            _sessionState = sessionState;
             _scope = driveScope;
         }
 
@@ -25,7 +23,7 @@ namespace System.Management.Automation
         {
             get
             {
-                return _sessionState.SessionStateGlobal.CurrentDrive;
+                return _scope.SessionState.SessionStateGlobal.CurrentDrive;
             }
         }
 

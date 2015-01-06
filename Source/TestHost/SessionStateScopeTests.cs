@@ -519,7 +519,7 @@ namespace TestHost
             {
                 if (curState.Key == affectedState)
                 {
-                    Assert.AreEqual(0, curState.Value.Alias.GetAllAtScope("local").Count);
+                    Assert.AreEqual(0, curState.Value.Alias.GetAllLocal().Count);
                 }
                 else
                 {
@@ -550,29 +550,6 @@ namespace TestHost
                 }
             }
             Assert.True (found);
-        }
-
-        [TestCase("local", new string [] {})]
-        [TestCase("0", new string [] {})]
-        [TestCase("1", new string [] {"function"})]
-        [TestCase("script", new string [] {"script1", "script2"})]
-        [TestCase("2", new string [] {"script1", "script2"})]
-        [TestCase("global", new string [] {"global1", "global2"})]
-        [TestCase("3", new string [] {"global1", "global2"})]
-        [TestCase("4", new string [] {}, ExpectedException=typeof(ArgumentOutOfRangeException))]
-        public void AliasGetAllAtScopeTest(string scope, string[] expectedDescriptions)
-        {
-            globalState.Alias.New(createAlias("x", "global1"), "local");
-            globalState.Alias.New(createAlias("y", "global2"), "local");
-            scriptState.Alias.New(createAlias("x", "script1"), "local");
-            scriptState.Alias.New(createAlias("y", "script2"), "local");
-            functionState.Alias.New(createAlias("x", "function"), "local");
-            var drives = localState.Alias.GetAllAtScope(scope);
-            Assert.AreEqual(expectedDescriptions.Length, drives.Count);
-            foreach (var curAlias in drives)
-            {
-                Assert.Contains(curAlias.Value.Definition, expectedDescriptions);
-            }
         }
 
         [Test]

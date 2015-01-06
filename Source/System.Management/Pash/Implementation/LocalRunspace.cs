@@ -198,7 +198,17 @@ namespace Pash.Implementation
 
             AddInitialSessionVariables();
             AddInitialSessionCommands();
-            CommandManager.ImportModules(_initialSessionState.Modules);
+            AddInitialSessionModules();
+        }
+
+        void AddInitialSessionModules()
+        {
+            var moduleLoader = new ModuleLoader(ExecutionContext);
+            foreach (var mod in _initialSessionState.Modules)
+            {
+                // Is it correct that ModuleSpecification.Name can be a path? Well, we use it like this for now.
+                moduleLoader.LoadModuleByName(mod.Name, true);
+            }
         }
 
         private void AddInitialSessionCommands()

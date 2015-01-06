@@ -18,6 +18,20 @@ namespace ReferenceTests.Language
             Assert.That(res[0], Is.Null);
         }
 
+        [Test]
+        public void SettingAVariableOnlyModifiesTheObject()
+        {
+            var cmd = "$x = 1; $var = Get-Variable x; $var.Value; $x = 2; $var.Value";
+            ExecuteAndCompareTypedResult(cmd, 1, 2);
+        }
+
+        [Test]
+        public void SetVariableValueViaObject()
+        {
+            var cmd = "$x = 1; $var = Get-Variable x; $var.Value = 2; $x";
+            ExecuteAndCompareTypedResult(cmd, 2);
+        }
+
     }
 }
 

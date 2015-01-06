@@ -78,7 +78,17 @@ namespace System.Management.Automation
             foreach (var curInput in inputObjects)
             {
                 // TODO: determine the correct second arg: true if this commandProcessor is the first command in pipeline
-                _argumentBinder.BindPipelineParameters(curInput, true);
+                try
+                {
+                    _argumentBinder.BindPipelineParameters(curInput, true);
+                }
+                catch (ParameterBindingException e)
+                {
+                    // if we failed to bind this parameter, we only skip this one record and continue
+                    CommandRuntime.WriteError(e.ErrorRecord);
+                    continue;
+                }
+
                 try
                 {
                     Command.DoProcessRecord();
@@ -100,11 +110,11 @@ namespace System.Management.Automation
         /// </summary>
         public override void EndProcessing()
         {
-            ExecutionContext.SetVariable("global:?", false); // we set it true if we succeed
+            ExecutionContext.SetSuccessVariable(false); // we set it true if we succeed
             try
             {
                 Command.DoEndProcessing();
-                ExecutionContext.SetVariable("global:?", true); // only false if we got an exception
+                ExecutionContext.SetSuccessVariable(true); // only false if we got an exception
             }
             catch (CmdletInvocationException)
             {

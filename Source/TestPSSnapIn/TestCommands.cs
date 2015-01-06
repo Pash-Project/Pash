@@ -62,7 +62,7 @@ namespace TestPSSnapIn
         }
     }
 
-    [Cmdlet(VerbsDiagnostic.Test, "PSSnapin")]
+    [Cmdlet(VerbsDiagnostic.Test, "Command")]
     public class TestCommand : PSCmdlet
     {
         public static string OutputString = "works";

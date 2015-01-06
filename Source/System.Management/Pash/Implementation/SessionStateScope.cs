@@ -65,21 +65,23 @@ namespace Pash.Implementation
 
         internal SessionStateCategory SessionStateCategory { get; private set; }
 
+        public SessionState SessionState { get; private set; }
         public SessionStateScope<T> ParentScope{ get; private set; }
         public Dictionary<string, T> Items { get; private set; }
-        public bool IsScriptScope { get; set; }
+        public bool IsScriptScope { get { return SessionState.IsScriptScope; } }
         public IEnumerable<SessionStateScope<T>> HierarchyIterator
         {
             get { return new ScopeHierarchyIterator(this); }
         }
 
 
-        public SessionStateScope(SessionStateScope<T> parentItems, SessionStateCategory sessionStateCategory)
+        public SessionStateScope(SessionState sessionState,SessionStateScope<T> parentItems,
+                                 SessionStateCategory sessionStateCategory)
         {
             ParentScope = parentItems;
             Items = new Dictionary<string, T>(StringComparer.CurrentCultureIgnoreCase);
             //TODO: care about AllScope items!
-
+            SessionState = sessionState;
             SessionStateCategory = sessionStateCategory;
         }
 
@@ -115,7 +117,7 @@ namespace Pash.Implementation
             return default(T);
         }
 
-        public IEnumerable<string> Find(string pattern, bool isQualified)
+        public Dictionary<string, T> Find(string pattern, bool isQualified)
         {
             if (pattern == null)
             {
@@ -129,23 +131,26 @@ namespace Pash.Implementation
                 {
                     SessionStateScope<T> affectedScope = GetScope(qualName.ScopeSpecifier, false);
                     var wildcard = new WildcardPattern(qualName.UnqualifiedName, WildcardOptions.IgnoreCase);
-                    return from pair in affectedScope.Items 
+                    return (from pair in affectedScope.Items 
                            where wildcard.IsMatch(pair.Key) && 
                             (affectedScope == this || !pair.Value.ItemOptions.HasFlag(ScopedItemOptions.Private))
-                           select qualName.ScopeSpecifier + ":" + pair.Key;
+                                select pair.Value).ToDictionary(x => qualName.ScopeSpecifier + ":" + x.ItemName);
                 }
             }
             var wildcardPattern = new WildcardPattern(pattern, WildcardOptions.IgnoreCase);
-            var visibleItems = new List<string>();
+            var visibleItems = new Dictionary<string, T>();
             //now check recursively the parent scopes for non-private, not overriden variables
             foreach (var curScope in new ScopeHierarchyIterator(this))
             {
-                visibleItems.AddRange(from pair in curScope.Items
-                                      where wildcardPattern.IsMatch(pair.Key) &&
-                                            !visibleItems.Contains(pair.Key) && 
-                                           (!pair.Value.ItemOptions.HasFlag(ScopedItemOptions.Private) ||
-                                            curScope == this)
-                                      select pair.Key);
+                var matches = from pair in curScope.Items
+                              where wildcardPattern.IsMatch(pair.Key) &&
+                                    !visibleItems.ContainsKey(pair.Key) && 
+                                    (!pair.Value.ItemOptions.HasFlag(ScopedItemOptions.Private) || curScope == this)
+                              select pair.Value;
+                foreach (var match in matches)
+                {
+                    visibleItems.Add(match.ItemName, match);
+                }
             }
             return visibleItems;
         }
@@ -208,7 +213,6 @@ namespace Pash.Implementation
             }
             return visibleItems;
         }
-
         #endregion
 
         #region specified scope related
@@ -320,9 +324,9 @@ namespace Pash.Implementation
 
         #endregion
 
-        #region helper functions
+        #region public helper functions
 
-        private SessionStateScope<T> FindHostingScope(string unqualifiedName)
+        public SessionStateScope<T> FindHostingScope(string unqualifiedName)
         {
             //iterate through scopes and parents until we find the variable
             foreach (var candidate in HierarchyIterator)
@@ -341,8 +345,8 @@ namespace Pash.Implementation
             return null; //nothing found
         }
 
-        private SessionStateScope<T> GetScope(string specifier, bool numberAllowed,
-                                               SessionStateScope<T> fallback = null)
+        public SessionStateScope<T> GetScope(string specifier, bool numberAllowed,
+                                             SessionStateScope<T> fallback = null)
         {
             int scopeLevel = -1;
             if (String.IsNullOrEmpty(specifier))
@@ -378,6 +382,10 @@ namespace Pash.Implementation
             }
             return GetScope(scopeSpecifier);
         }
+
+        #endregion
+
+        #region private helper functions
 
         private SessionStateScope<T> GetScope(ScopeSpecifiers specifier)
         {

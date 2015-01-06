@@ -344,6 +344,27 @@ namespace System.Management
             return true;
         }
 
+        public string GetDirectory()
+        {
+            var lastSlash = LastIndexOf(CorrectSlash);
+            return new Path(_rawPath.Substring(0, lastSlash)); // path without last slash and stuff behind
+        }
+
+        public bool HasExtension()
+        {
+            return System.IO.Path.HasExtension(_rawPath);
+        }
+
+        public string GetExtension()
+        {
+            return System.IO.Path.GetExtension(_rawPath);
+        }
+
+        public string GetFileNameWithoutExtension()
+        {
+            return System.IO.Path.GetFileNameWithoutExtension(_rawPath);
+        }
+
         public Path RemoveDrive()
         {
             string drive;

@@ -164,7 +164,7 @@ namespace Pash.Implementation
                 // in case of throw statement, parse error, or "ThrowTerminatingError"
                 // just add to error variable, the error stream and rethrow that thing
                 context.AddToErrorVariable(ex);
-                context.SetVariable("global:?", false); // last command was definitely not successfull
+                context.SetSuccessVariable(false); // last command was definitely not successfull
                 throw;
             }
             _runspace.RemoveRunningPipeline(this);

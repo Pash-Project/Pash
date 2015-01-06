@@ -108,8 +108,8 @@ namespace Pash.Implementation
             {
                 return Enumerable.Empty<string>();
             }
-            return from cmd in _runspace.CommandManager.FindCommands(replacableEnd + "*")
-                orderby cmd.Name ascending select cmd.Name + " ";
+            return from cmdletPair in _runspace.ExecutionContext.SessionState.Cmdlet.Find(replacableEnd + "*")
+                orderby cmdletPair.Key ascending select cmdletPair.Key + " ";
         }
 
         public IEnumerable<string> GetVariableExpansions(string cmdStart, string replacableEnd)
@@ -129,8 +129,8 @@ namespace Pash.Implementation
                 return Enumerable.Empty<string>();
             }
 
-            var varnames = _runspace.ExecutionContext.SessionState.PSVariable.Find(replacableEnd + "*");
-            return from vname in varnames orderby vname ascending select "$" + vname;
+            var vars = _runspace.ExecutionContext.SessionState.PSVariable.Find(replacableEnd + "*");
+            return from varPair in vars orderby varPair.Key ascending select "$" + varPair.Key;
         }
 
         public IEnumerable<string> GetFunctionExpansions(string cmdStart, string replacableEnd)
@@ -139,8 +139,8 @@ namespace Pash.Implementation
             {
                 return Enumerable.Empty<string>();
             }
-            var funnames = _runspace.ExecutionContext.SessionState.Function.Find(replacableEnd + "*");
-            return from fun in funnames orderby fun ascending select fun;
+            var funs = _runspace.ExecutionContext.SessionState.Function.Find(replacableEnd + "*");
+            return from funPair in funs orderby funPair.Key ascending select funPair.Key;
         }
 
         public IEnumerable<string> GetFilesystemExpansions(string cmdStart, string replacableEnd)
