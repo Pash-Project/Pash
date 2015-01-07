@@ -23,6 +23,27 @@ namespace ReferenceTests
 
         public string AssemblyDirectory { get; set; }
 
+        private string _binaryTestModule;
+        public string BinaryTestModule
+        {
+            get
+            {
+                if (_binaryTestModule == null)
+                {
+                    _binaryTestModule = new Uri(typeof(TestCommand).Assembly.CodeBase).LocalPath;
+                }
+                return _binaryTestModule;
+            }
+        }
+
+        public string BinaryTestModuleName
+        {
+            get
+            {
+                return Path.GetFileNameWithoutExtension(BinaryTestModule);
+            }
+        }
+
         public ReferenceTestBase()
         {
             _createdFiles = new List<string>();

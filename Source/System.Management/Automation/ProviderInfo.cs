@@ -14,6 +14,14 @@ namespace System.Management.Automation
         public ProviderCapabilities Capabilities { get; private set; }
         public string HelpFile { get; private set; }
         private SessionState _sessionState;
+        public PSModuleInfo Module { get; private set; }
+        public string ModuleName
+        {
+            get
+            {
+                return Module == null ? null : Module.Name;
+            }
+        }
 
         public Collection<PSDriveInfo> Drives
         {
@@ -51,6 +59,7 @@ namespace System.Management.Automation
             ImplementingType = providerInfo.ImplementingType;
             Capabilities = providerInfo.Capabilities;
             HelpFile = providerInfo.HelpFile;
+            Module = providerInfo.Module;
         }
 
         public override string ToString()

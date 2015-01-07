@@ -102,6 +102,8 @@
     <Compile Include="GithubIssues\Issue200.cs" />
     <Compile Include="GithubIssues\Issue20.cs" />
     <Compile Include="Language\IfElseTests.cs" />
+    <Compile Include="Providers\ProviderLoadingTests.cs" />
+    <Compile Include="Providers\DriveCmdletProviderTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
