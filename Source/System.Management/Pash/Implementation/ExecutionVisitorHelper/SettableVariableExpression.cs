@@ -81,7 +81,7 @@ namespace System.Management.Pash.Implementation
             {
                 return null;
             }
-            return ExecutionContext.SessionStateGlobal.GetProviderInstance(driveInfo.Provider.Name)
+            return ExecutionContext.SessionState.Provider.GetProviderInstance(driveInfo.Provider.Name)
                 as SessionStateProviderBase;
         }
     }

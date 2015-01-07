@@ -25,77 +25,18 @@ namespace Pash.Implementation
             "Microsoft.PowerShell.PSUtilityPSSnapIn, Microsoft.PowerShell.Commands.Utility",
             "Microsoft.Commands.Management.PSManagementPSSnapIn, Microsoft.PowerShell.Commands.Management",
         };
-        //TODO: I really don't know why we should support lists of providers with the same name. This isn't reasonable!
-        private Dictionary<string, List<ProviderInfo>> _providers;
-        private Dictionary<string, List<CmdletProvider>> _providerInstances;
-        private Dictionary<ProviderInfo, PSDriveInfo> _providersCurrentDrive;
         private Dictionary<string, PSSnapInInfo> _snapins;
 
-        private readonly ExecutionContext _globalExecutionContext;
+        internal readonly ExecutionContext _globalExecutionContext;
         internal SessionState RootSessionState  { get { return _globalExecutionContext.SessionState; } }
         internal PSDriveInfo _currentDrive;
 
         internal SessionStateGlobal(ExecutionContext executionContext)
         {
             _globalExecutionContext = executionContext;
-            _providers = new Dictionary<string, List<ProviderInfo>>(StringComparer.CurrentCultureIgnoreCase);
-            _providerInstances = new Dictionary<string, List<CmdletProvider>>(StringComparer.CurrentCultureIgnoreCase);
-            _providersCurrentDrive = new Dictionary<ProviderInfo, PSDriveInfo>();
             _snapins = new Dictionary<string, PSSnapInInfo>(StringComparer.CurrentCultureIgnoreCase);
         }
 
-        #region CmdletProviderManagementIntrinsics
-        //TODO: this should go into CmdletProviderManagementIntrinsics
-        internal IEnumerable<ProviderInfo> Providers
-        {
-            get
-            {
-                Collection<ProviderInfo> collection = new Collection<ProviderInfo>();
-                foreach (List<ProviderInfo> list in _providers.Values)
-                {
-                    foreach (ProviderInfo info in list)
-                    {
-                        collection.Add(info);
-                    }
-                }
-                return collection;
-            }
-        }
-
-        internal ProviderInfo GetProviderByName(string name)
-        {
-            Collection<ProviderInfo> providers = GetProvidersByName(name);
-
-            if (providers.Count > 0)
-                return providers[0];
-
-            return null;
-        }
-
-        internal Collection<ProviderInfo> GetProvidersByName(string name)
-        {
-            if (_providers.ContainsKey(name))
-                return new Collection<ProviderInfo>(_providers[name]);
-
-            return new Collection<ProviderInfo>();
-        }
-
-        private Collection<ProviderInfo> GetProvidersByPSSnapIn(PSSnapInInfo snapinInfo)
-        {
-            Collection<ProviderInfo> snapinProviders = new Collection<ProviderInfo>();
-            foreach (var pair in _providers)
-            {
-                foreach (var provider in pair.Value)
-                {
-                    if (provider.PSSnapIn.Equals(snapinInfo))
-                    {
-                        snapinProviders.Add(provider);
-                    }
-                }
-            }
-            return snapinProviders;
-        }
-        #endregion
 
         #region PSSnapIn specific stuff
         internal void LoadDefaultPSSnapIns()
@@ -146,18 +87,7 @@ namespace Pash.Implementation
                                                           name));
             }
             //unload providers and associated drives
-            foreach (var provider in GetProvidersByPSSnapIn(snapinInfo))
-            {
-                try
-                {
-                    RemoveProvider(provider.Name);
-                }
-                catch (ProviderNotFoundException)
-                {
-                    //TODO: it would be great to have the possibilities to write warnings here. It'd be nice notifying
-                    //the user about this strange effect, but isn't worth aborting the whole action
-                }
-            }
+            RootSessionState.Provider.RemoveProviders(snapinInfo);
             
             //unload cmdlets
             RootSessionState.Cmdlet.RemoveAll(snapinInfo);
@@ -212,7 +142,7 @@ namespace Pash.Implementation
             {
                 throw new PSSnapInException(String.Format("The snapin '{0}' is already loaded!", snapinName));
             }
-            LoadProvidersFromAssembly(assembly, snapinInfo);
+            RootSessionState.Provider.LoadProvidersFromAssembly(assembly, snapinInfo);
             RootSessionState.Cmdlet.LoadCmdletsFromAssembly(assembly, snapinInfo);
         }
 
@@ -249,127 +179,6 @@ namespace Pash.Implementation
         }
         #endregion
 
-        #region Provider's Initialization
-        //TODO: Move this provider stuff to ProviderIntrinsics and access it through SessionState.Provider
-
-        private void RemoveProvider(string name)
-        {
-            if (!_providers.ContainsKey(name))
-            {
-                throw new ProviderNotFoundException(name, SessionStateCategory.CmdletProvider, "RemoveProviderNotFound",
-                                                    null);
-            }
-            //remove all drives. TODO: I think _providers[name].Drive
-            foreach (var drive in _globalExecutionContext.SessionState.Drive.GetAllForProvider(name))
-            {
-                //remove from all scopes, sub-scopes might created a new drive using this provider
-                _globalExecutionContext.SessionState.Drive.RemoveAtAllScopes(drive);
-            }
-
-            //now also stop and remove all instances
-            if (_providerInstances.ContainsKey(name))
-            {
-                var instances = _providerInstances[name];
-                foreach (var inst in instances)
-                {
-                    //TODO: it should be possible to notify the provider that it's removed. That's also the intention
-                    //of the provider's Stop() method. However, the specification says that Stop() is protected. So
-                    //we need another, internal method, that can be called. I called it DoStop(), but this should
-                    //certainly be changed. Like ghaving an internal Stop() method with a useful argument
-                    inst.DoStop();
-                }
-            }
-             _providers.Remove(name);
-        }
-
-        private CmdletProvider AddProvider(ProviderInfo providerInfo)
-        {
-            CmdletProvider provider = providerInfo.CreateInstance();
-
-            provider.Start(providerInfo, new ProviderRuntime(_globalExecutionContext));
-            provider.SetProviderInfo(providerInfo);
-
-            // Cache the Provider's Info
-            if (!_providers.ContainsKey(providerInfo.Name))
-            {
-                _providers.Add(providerInfo.Name, new List<ProviderInfo>());
-            }
-            _providers[providerInfo.Name].Add(providerInfo);
-
-            return provider;
-        }
-
-
-        private void InitializeProvider(CmdletProvider providerInstance, ProviderInfo provider)
-        {
-            List<PSDriveInfo> drives = new List<PSDriveInfo>();
-            DriveCmdletProvider driveProvider = providerInstance as DriveCmdletProvider;
-
-            if (driveProvider != null)
-            {
-                Collection<PSDriveInfo> collection = driveProvider.DoInitializeDefaultDrives();
-                if ((collection != null) && (collection.Count > 0))
-                {
-                    drives.AddRange(collection);
-                    _providersCurrentDrive[provider] = collection[0];
-                }
-            }
-
-            if (drives.Count > 0)
-            {
-                foreach (PSDriveInfo driveInfo in drives)
-                {
-                    if (driveInfo != null)
-                    {
-                        // TODO: need to set driveInfo.Root
-                        // TODO:this should be automatically called when using DriveIntrinsics.New! #providerSupport
-                        driveProvider.DoNewDrive(driveInfo);
-
-                        try
-                        {
-                            //always to global scope
-                            RootSessionState.Drive.New(driveInfo,
-                                SessionStateScope<PSDriveInfo>.ScopeSpecifiers.Global.ToString());
-                        }
-                        catch
-                        {
-                            // TODO: What should we do if the drive name is not unique?
-                            // => I guess overwrite the old one and write a warning (however this works from here)
-                        }
-                    }
-                }
-            }
-        }
-
-        // TODO: make this available in ProviderIntrinsics, then we can also use it for modules from the ModuleLoader :)
-        private void LoadProvidersFromAssembly(Assembly assembly, PSSnapInInfo snapinInfo)
-        {
-            // first get name and type of all providers in this assembly
-            var providers = from Type type in assembly.GetTypes()
-                where !type.IsSubclassOf(typeof(Cmdlet))
-                    where type.IsSubclassOf(typeof(CmdletProvider))
-                    from CmdletProviderAttribute providerAttr in
-                    type.GetCustomAttributes(typeof(CmdletProviderAttribute), true)
-                    select new KeyValuePair<string, Type>(providerAttr.ProviderName, type);
-            // then initialize all providers
-            foreach (var curPair in providers)
-            {
-                ProviderInfo providerInfo = new ProviderInfo(_globalExecutionContext.SessionState, curPair.Value,
-                                                             curPair.Key, string.Empty, snapinInfo);
-                CmdletProvider provider = AddProvider(providerInfo);
-                InitializeProvider(provider, providerInfo);
-
-                // Cache the provider's instance
-                if (!_providerInstances.ContainsKey(providerInfo.Name))
-                {
-                    _providerInstances.Add(providerInfo.Name, new List<CmdletProvider>());
-                }
-                List<CmdletProvider> instanceList = _providerInstances[providerInfo.Name];
-                instanceList.Add(provider);
-            }
-        }
-        #endregion
-
         #region Current Location Management
         internal PathInfo CurrentLocation
         {
@@ -398,7 +207,7 @@ namespace Pash.Implementation
 
         internal void SetCurrentDrive()
         {
-            ProviderInfo fileSystemProvider = GetProviderByName(FileSystemProvider.ProviderName);
+            ProviderInfo fileSystemProvider = RootSessionState.Provider.GetOne(FileSystemProvider.ProviderName);
             if (fileSystemProvider == null)
                 throw new Exception("FileSystemProvider not found.");
 
@@ -418,8 +227,6 @@ namespace Pash.Implementation
             throw new NotImplementedException("why are we here?");
         }
         #endregion
-
-
 
         #region PathIntrinsics
         //TODO: move this (and implement it) in the appropriate class, not here
@@ -479,22 +286,6 @@ namespace Pash.Implementation
         }
         #endregion
 
-        internal CmdletProvider GetProviderInstance(string name)
-        {
-            if (_providerInstances.ContainsKey(name))
-            {
-                List<CmdletProvider> instanceList = _providerInstances[name];
-
-                if (instanceList.Count > 0)
-                {
-                    // Take the first one
-                    return instanceList[0] as CmdletProvider;
-                }
-            }
-
-            return null;
-        }
-
         // TODO: it would be nice if these functions would be in the intrinsics itself, not called from there
         internal Collection<PSObject> GetChildItems(string path, bool recurse)
         {
@@ -549,7 +340,7 @@ namespace Pash.Implementation
             if (drive == null)
                 return null;
 
-            return GetProviderInstance(drive.Provider.Name);
+            return RootSessionState.Provider.GetProviderInstance(drive.Provider.Name);
         }
 
         private PSDriveInfo GetDrive(Path path)
@@ -605,7 +396,7 @@ namespace Pash.Implementation
 
             PSDriveInfo nextDrive = CurrentDrive;
 
-
+            // use the same provider-specific logic as resolve-path would use here
             path = path.NormalizeSlashes().ResolveTilde();
 
             string driveName = null;
@@ -623,47 +414,26 @@ namespace Pash.Implementation
 
             Path newLocation = PathNavigation.CalculateFullPath(nextDrive.CurrentLocation, path);
 
-            // I'm not a fan of this block of code.
-            // The goal here is to throw an exception if trying to "CD" into an invalid location
-            //
-            // Not sure why the providerInstances are returned as a collection. Feels like given a 
-            // path we should have one provider we're talking to.
-            if (_providerInstances.ContainsKey(nextDrive.Provider.Name))
+            var provider = RootSessionState.Provider.GetInstance(nextDrive.Provider);
+            if (!(provider is ItemCmdletProvider))
             {
-                bool pathExists = false;
-                IEnumerable<ItemCmdletProvider> cmdletProviders = _providerInstances[nextDrive.Provider.Name].Where(x => x is ItemCmdletProvider).Cast<ItemCmdletProvider>();
-                ItemCmdletProvider currentProvider = null;
-                foreach (var provider in cmdletProviders)
-                {
-                    if (provider.ItemExists(newLocation, providerRuntime))
-                    {
-                        pathExists = true;
-                        currentProvider = provider;
-                        break;
-                    }
-                }
-
-                if (!pathExists)
-                {
-                    throw new Exception(string.Format("Cannot find path '{0}' because it does not exist.", newLocation));
-                }
-                else
-                {
-                    if (currentProvider is FileSystemProvider)
-                    {
-                        System.Environment.CurrentDirectory = newLocation;
-                    }
-                }
+                throw new PSInvalidOperationException("Cannot set location for this type of provider.");
             }
-            else
+            var itemProvider = (ItemCmdletProvider)provider;
+
+            if (!itemProvider.ItemExists(newLocation, providerRuntime))
             {
-                throw new NotImplementedException("Unsure how to set location with provider:" + nextDrive.Provider.Name);
+                throw new PSInvalidOperationException(string.Format("Cannot find path '{0}' because it does not exist.", newLocation));
+            }
+
+            if (provider is FileSystemProvider)
+            {
+                System.Environment.CurrentDirectory = newLocation;
             }
 
             nextDrive.CurrentLocation = newLocation;
 
             CurrentDrive = nextDrive;
-            _providersCurrentDrive[CurrentDrive.Provider] = CurrentDrive;
             return CurrentLocation;
         }
     }

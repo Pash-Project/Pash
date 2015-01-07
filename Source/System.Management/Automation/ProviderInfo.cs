@@ -140,7 +140,11 @@ namespace System.Management.Automation
         // internals
         internal bool IsNameMatch(string providerName)
         {
-            return string.Equals(FullName, providerName, StringComparison.CurrentCultureIgnoreCase);
+            if (string.Equals(FullName, providerName, StringComparison.CurrentCultureIgnoreCase))
+            {
+                return true;
+            }
+            return string.Equals(Name, providerName, StringComparison.CurrentCultureIgnoreCase);
         }
 
         public override bool Equals(object obj)
