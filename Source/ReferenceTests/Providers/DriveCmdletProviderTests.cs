@@ -24,7 +24,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = NewlineJoin(
                 "$d = New-PSDrive -Name 'testDrive' -Root '/test' -PSProvider " + TestDriveProvider.ProviderName,
-                "[object].ReferenceEquals((Get-PSDrive -Name 'testDrive'), $d)", // make sure it's listed by Get-PSDrive
+                "[object]::ReferenceEquals((Get-PSDrive -Name 'testDrive'), $d)", // make sure it's listed by Get-PSDrive
                 "$d.GetType().FullName", // is a custom type
                 "$d.Root", // check if correctly passed
                 "$d.IsRemoved" // property of the custom type
@@ -43,16 +43,14 @@ namespace ReferenceTests.Providers
             var cmd = NewlineJoin(
                 "$d = New-PSDrive -Name 'testDrive' -Root '/test' -PSProvider " + TestDriveProvider.ProviderName,
                 "$d.IsRemoved", // property of the custom type is false by default
-                "$r = Remove-PSDrive -Name 'testDri*' -PSProvider " + TestDriveProvider.ProviderName,
-                "[object]::ReferenceEquals($d, $r)", // make sure it's the same object
+                "Remove-PSDrive -Name 'testDri*' -PSProvider " + TestDriveProvider.ProviderName,
                 "$d.IsRemoved", // should be true now, because of uninitialization
-                "Get-PSDrive -Name 'testDrive'" // should be null, as it's removed
+                "(Get-PSDrive | where Name -eq 'testDrive') -eq $null" // should be true, because testDrive was removed
             );
             ExecuteAndCompareTypedResult(cmd,
                 false, // custom property is false
-                true, // same object reference,
                 true, // custom property is now true
-                null // not listed anymore
+                true // not listed anymore
             );
         }
     }
