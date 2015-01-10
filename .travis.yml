@@ -1,5 +1,8 @@
 language: c
 
+# use Travis Containers - http://docs.travis-ci.com/user/workers/container-based-infrastructure/
+sudo: false
+
 notifications:
   email:
     on_success: always
