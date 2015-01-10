@@ -20,7 +20,11 @@ namespace System.Management.Pash.Implementation
 
         public AstVisitAction Visit(FileRedirectionAst redirectionAst)
         {
-            string outputPath = _visitor.EvaluateAst(redirectionAst.Location, false).ToString();
+            string outputPath = GetOutputFileName(redirectionAst);
+            if (outputPath == null)
+            {
+                return AstVisitAction.SkipChildren;
+            }
 
             FileMode fileMode = GetFileMode(redirectionAst);
             FileStream file = File.Open(outputPath, fileMode, FileAccess.Write);
@@ -33,6 +37,16 @@ namespace System.Management.Pash.Implementation
                 }
             }
             return AstVisitAction.SkipChildren;
+        }
+
+        private string GetOutputFileName(FileRedirectionAst redirectionAst)
+        {
+            object outputPath = _visitor.EvaluateAst(redirectionAst.Location, false);
+            if (outputPath != null)
+            {
+                return outputPath.ToString();
+            }
+            return null;
         }
 
         private FileMode GetFileMode(FileRedirectionAst redirectionAst)

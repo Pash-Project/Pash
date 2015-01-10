@@ -86,5 +86,17 @@ namespace ReferenceTests.Language
 
             AssertTempFileContains("abc", "def");
         }
+
+        [Test]
+        public void OutputStreamToNullFileName()
+        {
+            Assert.DoesNotThrow(() => ReferenceHost.Execute("'abc' > $null", throwOnError: true));
+        }
+
+        [Test]
+        public void OutputStreamToFileNameVariableWhichIsNull()
+        {
+            Assert.DoesNotThrow(() => ReferenceHost.Execute("'abc' > $filename", throwOnError: true));
+        }
     }
 }
