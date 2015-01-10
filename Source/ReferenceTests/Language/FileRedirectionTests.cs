@@ -98,5 +98,23 @@ namespace ReferenceTests.Language
         {
             Assert.DoesNotThrow(() => ReferenceHost.Execute("'abc' > $filename", throwOnError: true));
         }
+
+        [Test]
+        public void OutputIntegerArrayToFile()
+        {
+            string fileName = GenerateTempFileName();
+            ReferenceHost.Execute("1..4 > " + fileName);
+
+            AssertTempFileContains("1", "2", "3", "4");
+        }
+
+        [Test]
+        public void OutputStringArrayToFile()
+        {
+            string fileName = GenerateTempFileName();
+            ReferenceHost.Execute("'abc', 'def', 'ghi' > " + fileName);
+
+            AssertTempFileContains("abc", "def", "ghi");
+        }
     }
 }

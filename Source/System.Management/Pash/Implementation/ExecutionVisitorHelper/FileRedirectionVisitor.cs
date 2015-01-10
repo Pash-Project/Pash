@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -30,10 +31,9 @@ namespace System.Management.Pash.Implementation
             FileStream file = File.Open(outputPath, fileMode, FileAccess.Write);
             using (var streamWriter = new StreamWriter(file, Encoding.Unicode))
             {
-                foreach (object o in _runtime.OutputStream.Read())
+                foreach (object obj in _runtime.OutputStream.Read())
                 {
-                    var psObject = PSObject.AsPSObject(o);
-                    streamWriter.WriteLine(psObject.ToString());
+                    WriteObject(streamWriter, obj);
                 }
             }
             return AstVisitAction.SkipChildren;
@@ -56,6 +56,33 @@ namespace System.Management.Pash.Implementation
                 return FileMode.Append;
             }
             return FileMode.Create;
+        }
+
+        private void WriteObject(StreamWriter writer, object obj)
+        {
+            IEnumerator enumerable = LanguagePrimitives.GetEnumerator(obj);
+            if (enumerable != null)
+            {
+                WriteEnumerable(writer, enumerable);
+            }
+            else
+            {
+                WritePSObject(writer, obj);
+            }
+        }
+
+        private void WritePSObject(StreamWriter writer, object obj)
+        {
+            var psObject = PSObject.AsPSObject(obj);
+            writer.WriteLine(psObject.ToString());
+        }
+
+        private void WriteEnumerable(StreamWriter writer, IEnumerator enumerable)
+        {
+            while (enumerable.MoveNext())
+            {
+                WritePSObject(writer, enumerable.Current);
+            }
         }
     }
 }
