@@ -116,5 +116,32 @@ namespace ReferenceTests.Language
 
             AssertTempFileContains("abc", "def", "ghi");
         }
+
+        [Test]
+        public void NullOutputToFile()
+        {
+            string fileName = GenerateTempFileName();
+            ReferenceHost.Execute("$null > " + fileName);
+
+            AssertTempFileContains("");
+        }
+
+        [Test]
+        public void OutputStringArrayWithNullsToFile()
+        {
+            string fileName = GenerateTempFileName();
+            ReferenceHost.Execute("'abc', $null, 'ghi' > " + fileName);
+
+            AssertTempFileContains("abc", "ghi");
+        }
+
+        [Test]
+        public void OutputArrayWithOnlyNullsToFile()
+        {
+            string fileName = GenerateTempFileName();
+            ReferenceHost.Execute("$null, $null, $null > " + fileName);
+
+            AssertTempFileContains("");
+        }
     }
 }

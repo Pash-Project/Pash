@@ -73,8 +73,11 @@ namespace System.Management.Pash.Implementation
 
         private void WritePSObject(StreamWriter writer, object obj)
         {
-            var psObject = PSObject.AsPSObject(obj);
-            writer.WriteLine(psObject.ToString());
+            if (obj != null)
+            {
+                var psObject = PSObject.AsPSObject(obj);
+                writer.WriteLine(psObject.ToString());
+            }
         }
 
         private void WriteEnumerable(StreamWriter writer, IEnumerator enumerable)
