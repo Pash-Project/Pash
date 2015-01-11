@@ -2207,30 +2207,17 @@ namespace Pash.ParserIntrinsics
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.file_redirection_operator)
             {
+                FileRedirectionOperator redirectionOperator = FileRedirectionOperator.Get(parseTreeNode.ChildNodes[0]);
+
                 return new FileRedirectionAst(
                     new ScriptExtent(parseTreeNode),
-                    RedirectionStream.Output,
+                    redirectionOperator.FromStream,
                     BuildCommandArgumentAst(parseTreeNode.ChildNodes[1].ChildNodes[0]),
-                    IsFileRedirectionAppendOperator(parseTreeNode.ChildNodes[0]));
+                    redirectionOperator.IsAppend);
             }
             else
             {
                 throw new NotImplementedException(parseTreeNode.ToString());
-            }
-        }
-
-        private bool IsFileRedirectionAppendOperator(ParseTreeNode parseTreeNode)
-        {
-            VerifyTerm(parseTreeNode, this._grammar.file_redirection_operator);
-
-            switch (parseTreeNode.Token.ValueString)
-            {
-                case ">>":
-                    return true;
-                case ">":
-                    return false;
-                default:
-                    throw new NotImplementedException(parseTreeNode.ToString());
             }
         }
     }

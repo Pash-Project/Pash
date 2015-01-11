@@ -27,6 +27,18 @@ namespace ReferenceTests.Language
             Assert.AreEqual(NewlineJoin(lines), NewlineJoin(ReadLinesFromFile(fileName)));
         }
 
+        private void AssertTempFileContainsSubstring(string expectedText)
+        {
+            string output = NewlineJoin(ReadLinesFromFile(_tempFileName));
+            StringAssert.Contains(expectedText, output);
+        }
+
+        private void AssertTempFileDoesNotContainSubstring(string expectedText)
+        {
+            string output = NewlineJoin(ReadLinesFromFile(_tempFileName));
+            StringAssert.DoesNotContain(expectedText, output);
+        }
+
         [Test]
         public void OutputStreamToFile()
         {
@@ -142,6 +154,42 @@ namespace ReferenceTests.Language
             ReferenceHost.Execute("$null, $null, $null > " + fileName);
 
             AssertTempFileContains("");
+        }
+
+        /// <summary>
+        /// TODO: Errors should be formatted.
+        /// </summary>
+        [Test]
+        public void ErrorStreamToFile()
+        {
+            string fileName = GenerateTempFileName();
+            ReferenceHost.Execute("write-error 'ErrorText' 2> " + fileName);
+
+            AssertTempFileContainsSubstring("ErrorText");
+        }
+
+        [Test]
+        public void ErrorStreamOverwritesExistingFile()
+        {
+            string fileName = GenerateTempFileName();
+            ReferenceHost.Execute(new string[] {
+                "write-error 'ErrorText1' 2> " + fileName,
+                "write-error 'ErrorText2' 2> " + fileName});
+
+            AssertTempFileDoesNotContainSubstring("ErrorText1");
+            AssertTempFileContainsSubstring("ErrorText2");
+        }
+
+        [Test]
+        public void ErrorStreamAppendedToFile()
+        {
+            string fileName = GenerateTempFileName();
+            ReferenceHost.Execute(new string[] {
+                "write-error 'ErrorText1' 2> " + fileName,
+                "write-error 'ErrorText2' 2>> " + fileName});
+
+            AssertTempFileContainsSubstring("ErrorText1");
+            AssertTempFileContainsSubstring("ErrorText2");
         }
     }
 }

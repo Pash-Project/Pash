@@ -2194,6 +2194,37 @@ ls
                 Assert.AreEqual(RedirectionStream.Output, redirectAst.FromStream);
                 Assert.AreEqual("out.txt", redirectFileNameAst.Value);
             }
+
+            [Test]
+            public void OutputErrorStreamToFile()
+            {
+                CommandAst commandAst = Parse("Get-Process 2> out.txt");
+                var firstCommandElementAst = commandAst.CommandElements.FirstOrDefault() as StringConstantExpressionAst;
+                var redirectAst = commandAst.Redirections.FirstOrDefault() as FileRedirectionAst;
+                var redirectFileNameAst = redirectAst.Location as StringConstantExpressionAst;
+
+                Assert.AreEqual(1, commandAst.CommandElements.Count);
+                Assert.IsNotNull(firstCommandElementAst);
+                Assert.AreEqual("Get-Process", firstCommandElementAst.Value);
+                Assert.AreEqual(1, commandAst.Redirections.Count);
+                Assert.IsFalse(redirectAst.Append);
+                Assert.AreEqual(RedirectionStream.Error, redirectAst.FromStream);
+                Assert.IsNotNull(redirectFileNameAst);
+                Assert.AreEqual("out.txt", redirectFileNameAst.Value);
+            }
+
+            [Test]
+            public void ErrorStreamAppendedToFile()
+            {
+                CommandAst commandAst = Parse("Get-Process 2>> out.txt");
+                var firstCommandElementAst = commandAst.CommandElements.FirstOrDefault() as StringConstantExpressionAst;
+                var redirectAst = commandAst.Redirections.FirstOrDefault() as FileRedirectionAst;
+                var redirectFileNameAst = redirectAst.Location as StringConstantExpressionAst;
+
+                Assert.IsTrue(redirectAst.Append);
+                Assert.AreEqual(RedirectionStream.Error, redirectAst.FromStream);
+                Assert.AreEqual("out.txt", redirectFileNameAst.Value);
+            }
         }
     }
 }

@@ -1,10 +1,12 @@
-﻿using System;
+﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using System;
 using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Management.Automation;
 using System.Management.Automation.Language;
+using Pash.Implementation;
 
 namespace System.Management.Pash.Implementation
 {
@@ -19,6 +21,9 @@ namespace System.Management.Pash.Implementation
             _runtime = runtime;
         }
 
+        /// <summary>
+        /// TODO: Output should be formatted.
+        /// </summary>
         public AstVisitAction Visit(FileRedirectionAst redirectionAst)
         {
             string outputPath = GetOutputFileName(redirectionAst);
@@ -28,15 +33,30 @@ namespace System.Management.Pash.Implementation
             }
 
             FileMode fileMode = GetFileMode(redirectionAst);
+            ObjectStream stream = GetStream(redirectionAst);
             FileStream file = File.Open(outputPath, fileMode, FileAccess.Write);
+
             using (var streamWriter = new StreamWriter(file, Encoding.Unicode))
             {
-                foreach (object obj in _runtime.OutputStream.Read())
+                foreach (object obj in stream.Read())
                 {
                     WriteObject(streamWriter, obj);
                 }
             }
             return AstVisitAction.SkipChildren;
+        }
+
+        private ObjectStream GetStream(FileRedirectionAst redirectionAst)
+        {
+            switch (redirectionAst.FromStream)
+            {
+                case RedirectionStream.Output:
+                    return _runtime.OutputStream;
+                case RedirectionStream.Error:
+                    return _runtime.ErrorStream;
+                default:
+                    throw new NotImplementedException(redirectionAst.FromStream.ToString());
+            }
         }
 
         private string GetOutputFileName(FileRedirectionAst redirectionAst)
