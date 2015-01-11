@@ -115,6 +115,7 @@ namespace System.Management.Automation
             {
                 Command.DoEndProcessing();
                 ExecutionContext.SetSuccessVariable(true); // only false if we got an exception
+                ProcessRedirects();
             }
             catch (CmdletInvocationException)
             {
