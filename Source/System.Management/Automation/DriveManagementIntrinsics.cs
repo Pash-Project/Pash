@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using Pash.Implementation;
 using System.Collections.Generic;
 using System.Linq;
+using System.Management.Automation.Provider;
 
 namespace System.Management.Automation
 {
@@ -104,13 +105,19 @@ namespace System.Management.Automation
 
         public PSDriveInfo New(PSDriveInfo drive, string scope)
         {
+            // make sure the provider can intitalize this drive properly
+            drive = GetProvider(drive).DoNewDrive(drive);
+            return NewSkipInit(drive, scope);
+        }
+
+        internal PSDriveInfo NewSkipInit(PSDriveInfo drive, string scope)
+        {
             /*
              * "Fun" Fact: Although "private" is a valid scope specifier, it does not really make the drive
              * private, i.e. it does not restricts child scopes froma accessing or removing it.
              * "Private" seems to be only effective for variables, functions and aliases, but not for drives.
              * Who knows why.
              */
-            //TODO: the provider's "NewDrive" method must be called here l #providerSupport
             _scope.SetAtScope(drive, scope, false);
             return drive;
         }
@@ -123,7 +130,9 @@ namespace System.Management.Automation
              */
             try
             {
-                //TODO: the provider's "RemoveDrive" method must be called here l #providerSupport
+                var drive = Get(driveName);
+                // make sure the provider can clean up this drive properly
+                GetProvider(drive).DoRemoveDrive(drive);
                 _scope.RemoveAtScope(driveName, scope);
             }
             catch (ItemNotFoundException)
@@ -134,14 +143,25 @@ namespace System.Management.Automation
 
         internal void RemoveAtAllScopes(PSDriveInfo drive)
         {
+            // don't forget to give the provider the chance to clean up first
+            GetProvider(drive).DoRemoveDrive(drive);
             foreach (var curScope in _scope.HierarchyIterator)
             {
                 if (curScope.HasLocal(drive))
                 {
-                    //TODO: the provider's "RemoveDrive" method must be called here l #providerSupport
                     curScope.RemoveLocal(drive.Name);
                 }
             }
+        }
+
+        DriveCmdletProvider GetProvider(PSDriveInfo drive)
+        {
+            var provider = _scope.SessionState.Provider.GetInstance(drive.Provider) as DriveCmdletProvider;
+            if (provider == null)
+            {
+                throw new ArgumentException("No proper DriveCmdletProvider is associated with drive '" + drive.Name + "'.");
+            }
+            return provider;
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Microsoft.PowerShell.Commands
     public class GetPSProviderCommand : PSCmdlet
     {
         [Parameter(Position = 0, ValueFromPipelineByPropertyName = true)]
-        public string[] PSProvider { get; private set; }
+        public string[] PSProvider { get; set; }
 
         protected override void ProcessRecord()
         {

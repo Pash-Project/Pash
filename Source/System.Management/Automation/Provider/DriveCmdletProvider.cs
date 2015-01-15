@@ -32,11 +32,10 @@ namespace System.Management.Automation.Provider
             return drive; //nothing special to do per default
         }
 
-        // internals
-        //internal System.Collections.ObjectModel.Collection<PSDriveInfo> InitializeDefaultDrives(CmdletProviderContext context);
-        //internal PSDriveInfo NewDrive(PSDriveInfo drive, CmdletProviderContext context);
-        //internal object NewDriveDynamicParameters(CmdletProviderContext context);
-        //internal PSDriveInfo RemoveDrive(PSDriveInfo drive, CmdletProviderContext context);
+        internal PSDriveInfo DoRemoveDrive(PSDriveInfo drive)
+        {
+            return RemoveDrive(drive);
+        }
 
         internal Collection<PSDriveInfo> DoInitializeDefaultDrives()
         {

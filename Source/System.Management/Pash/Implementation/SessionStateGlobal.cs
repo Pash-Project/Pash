@@ -87,7 +87,7 @@ namespace Pash.Implementation
                                                           name));
             }
             //unload providers and associated drives
-            RootSessionState.Provider.RemoveProviders(snapinInfo);
+            RootSessionState.Provider.Remove(snapinInfo);
             
             //unload cmdlets
             RootSessionState.Cmdlet.RemoveAll(snapinInfo);
@@ -142,7 +142,7 @@ namespace Pash.Implementation
             {
                 throw new PSSnapInException(String.Format("The snapin '{0}' is already loaded!", snapinName));
             }
-            RootSessionState.Provider.LoadProvidersFromAssembly(assembly, snapinInfo);
+            RootSessionState.Provider.Load(assembly, snapinInfo);
             RootSessionState.Cmdlet.LoadCmdletsFromAssembly(assembly, snapinInfo);
         }
 
@@ -340,7 +340,7 @@ namespace Pash.Implementation
             if (drive == null)
                 return null;
 
-            return RootSessionState.Provider.GetProviderInstance(drive.Provider.Name);
+            return RootSessionState.Provider.GetInstance(drive.Provider.Name);
         }
 
         private PSDriveInfo GetDrive(Path path)

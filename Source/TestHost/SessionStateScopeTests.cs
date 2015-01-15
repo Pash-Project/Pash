@@ -5,6 +5,7 @@ using System.Management.Automation.Runspaces;
 using System.Management.Automation;
 using System.Collections.Generic;
 using System.Management.Automation.Language;
+using TestPSSnapIn;
 
 namespace TestHost
 {
@@ -25,14 +26,21 @@ namespace TestHost
         private SessionState localState;
         private Dictionary<AvailableStates, SessionState> states;
         private CommandManager hostCommandManager;
+        private ProviderInfo testProvider;
 
         [SetUp]
         public void createScopes()
         {
             TestHost testHost = new TestHost(new TestHostUserInterface());
+
             Runspace hostRunspace = TestHost.CreateRunspace(testHost);
 
+            var testModule = new Uri(typeof(TestDriveProvider).Assembly.CodeBase).LocalPath;
+
             globalState = hostRunspace.ExecutionContext.SessionState;
+            globalState.SessionStateGlobal.AddPSSnapIn(testModule);
+            testProvider = globalState.Provider.GetOne(TestDriveProvider.ProviderName);
+
             scriptState = new SessionState(globalState);
             scriptState.IsScriptScope = true;
             functionState = new SessionState(scriptState);
@@ -327,11 +335,10 @@ namespace TestHost
 
         public void DriveGetAllForProviderTest()
         {
-            var provider = new ProviderInfo (null, null, "testProvider", "", null);
-            globalState.Drive.New(createDrive ("global", "", provider), "local");
-            scriptState.Drive.New(createDrive ("script", "", provider), "local");
-            functionState.Drive.New(createDrive ("function", "", provider), "local");
-            localState.Drive.New (createDrive("local", "", provider), "local");
+            globalState.Drive.New(createDrive ("global", ""), "local");
+            scriptState.Drive.New(createDrive ("script", ""), "local");
+            functionState.Drive.New(createDrive ("function", ""), "local");
+            localState.Drive.New (createDrive("local", ""), "local");
             var drives = localState.Drive.GetAllForProvider("testProvider");
             Assert.AreEqual(4, drives.Count);
             foreach (var curDrive in drives) {
@@ -348,9 +355,9 @@ namespace TestHost
             } catch (MethodInvocationException) { }
         }
 
-        private PSDriveInfo createDrive(string name, string descr="", ProviderInfo provider=null)
+        private PSDriveInfo createDrive(string name, string descr="")
         {
-            return new PSDriveInfo(name, provider, String.Empty, descr, null);
+            return new PSDriveInfo(name, testProvider, String.Empty, descr, null);
         }
 
         #endregion
