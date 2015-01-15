@@ -96,7 +96,18 @@ namespace System.Management.Automation
             }
         }
 
+        internal void Load(Assembly assembly, PSModuleInfo moduleInfo)
+        {
+            Load(assembly, null, moduleInfo);
+        }
+
         internal void Load(Assembly assembly, PSSnapInInfo snapinInfo)
+        {
+            Load(assembly, snapinInfo, null);
+        }
+
+        // private method avoids that accidentally both snapin and module get specified
+        private void Load(Assembly assembly, PSSnapInInfo snapinInfo, PSModuleInfo moduleInfo)
         {
             // first get name and type of all providers in this assembly
             var providers = from Type type in assembly.GetTypes()
@@ -109,7 +120,7 @@ namespace System.Management.Automation
             foreach (var curPair in providers)
             {
                 ProviderInfo providerInfo = new ProviderInfo(_sessionState.RootSessionState, curPair.Value,
-                    curPair.Key, string.Empty, snapinInfo);
+                                    curPair.Key, string.Empty, string.Empty, string.Empty, snapinInfo, moduleInfo);
                 Add(providerInfo);
             }
         }
@@ -184,7 +195,7 @@ namespace System.Management.Automation
                 try
                 {
                     // always to global scope
-                    // use DoSkipInit because the dafault drives are inited
+                    // use NewSkipInit because the dafault drives are inited
                     _sessionState.RootSessionState.Drive.NewSkipInit(driveInfo,
                         SessionStateScope<PSDriveInfo>.ScopeSpecifiers.Global.ToString());
                 }

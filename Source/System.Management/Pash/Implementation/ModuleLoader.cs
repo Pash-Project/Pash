@@ -109,6 +109,8 @@ namespace Pash.Implementation
             Assembly assembly = Assembly.LoadFrom(path);
             // load into the local session state of the module
             moduleInfo.SessionState.Cmdlet.LoadCmdletsFromAssembly(assembly, moduleInfo);
+            // load providers. they aren't scoped, so the SessionState object used doesn't matter
+            _executionContext.SessionState.Provider.Load(assembly, moduleInfo);
             moduleInfo.ValidateExportedMembers(); // make sure cmdlets get exported
         }
 

@@ -37,9 +37,19 @@ namespace System.Management.Automation
         {
         }
 
-        internal ProviderInfo(SessionState sessionState, Type implementingType, string name, string description, string home, string helpFile, PSSnapInInfo psSnapIn)
+        internal ProviderInfo(SessionState sessionState, Type implementingType, string name, string description,
+                              string home, string helpFile, PSSnapInInfo psSnapIn)
+            : this(sessionState, implementingType, name, description, home, helpFile, psSnapIn, null)
+        {
+        }
+
+        // for all fields
+        internal ProviderInfo(SessionState sessionState, Type implementingType, string name, string description, string home,
+                              string helpFile, PSSnapInInfo psSnapIn, PSModuleInfo module)
+
         {
             _sessionState = sessionState;
+            Module = Module;
             PSSnapIn = psSnapIn;
             Name = name;
             Description = description;
