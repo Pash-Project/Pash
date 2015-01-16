@@ -13,6 +13,7 @@ namespace Pash.Implementation
         internal SwitchParameter Force { get; set; }
         internal ExecutionContext ExecutionContext { get; private set; }
         internal PSCredential Credential { get; set; }
+        internal SwitchParameter AvoidWildcardExpansion { get; set; }
 
         private Cmdlet _cmdlet;
         private Collection<PSObject> _outputData;
@@ -24,17 +25,23 @@ namespace Pash.Implementation
             _errorData = new Collection<ErrorRecord>();
         }
 
+        internal ProviderRuntime(Cmdlet cmdlet)
+            : this(cmdlet.ExecutionContext)
+        {
+            _cmdlet = cmdlet;
+        }
+
         internal ProviderRuntime(ExecutionContext executionContext)
+            : this(executionContext, false, false)
+        {
+        }
+
+        internal ProviderRuntime(ExecutionContext executionContext, bool force, bool avoidWildcardExpansion)
             : this()
         {
             ExecutionContext = executionContext;
-        }
-
-        internal ProviderRuntime(Cmdlet cmdlet)
-            : this()
-        {
-            _cmdlet = cmdlet;
-            ExecutionContext = cmdlet.ExecutionContext;
+            AvoidWildcardExpansion = avoidWildcardExpansion;
+            Force = force;
         }
 
         internal Collection<PSObject> RetreiveAllProviderData()
