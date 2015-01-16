@@ -40,6 +40,7 @@ namespace TestHost
             globalState = hostRunspace.ExecutionContext.SessionState;
             globalState.SessionStateGlobal.AddPSSnapIn(testModule);
             testProvider = globalState.Provider.GetOne(TestDriveProvider.ProviderName);
+            globalState.Drive.Remove("testDefault", true, "local"); // so tests can rely on that there are no drives
 
             scriptState = new SessionState(globalState);
             scriptState.IsScriptScope = true;
@@ -244,10 +245,9 @@ namespace TestHost
         public void DriveRemoveNotExistingTest ()
         {
             PSDriveInfo info = createDrive ("test");
-            try {
-                globalState.Drive.Remove (info.Name, true, "local");
-                Assert.True (false);
-            } catch (DriveNotFoundException) { }
+            Assert.Throws<DriveNotFoundException>(delegate {
+                globalState.Drive.Remove(info.Name, true, "local");
+            });
         }
 
         [Test]

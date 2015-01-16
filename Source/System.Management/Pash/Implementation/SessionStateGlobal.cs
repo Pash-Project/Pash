@@ -31,10 +31,13 @@ namespace Pash.Implementation
         internal SessionState RootSessionState  { get { return _globalExecutionContext.SessionState; } }
         internal PSDriveInfo _currentDrive;
 
+        internal CmdletProviderManagementIntrinsics Provider { get; private set; }
+
         internal SessionStateGlobal(ExecutionContext executionContext)
         {
             _globalExecutionContext = executionContext;
             _snapins = new Dictionary<string, PSSnapInInfo>(StringComparer.CurrentCultureIgnoreCase);
+            Provider = new CmdletProviderManagementIntrinsics(this);
         }
 
 

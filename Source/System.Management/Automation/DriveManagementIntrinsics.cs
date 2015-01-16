@@ -128,17 +128,15 @@ namespace System.Management.Automation
              * So, we need to find out when a drive is in use and should throw an exception on removal without
              * the "force" parameter being true
              */
-            try
-            {
-                var drive = Get(driveName);
-                // make sure the provider can clean up this drive properly
-                GetProvider(drive).DoRemoveDrive(drive);
-                _scope.RemoveAtScope(driveName, scope);
-            }
-            catch (ItemNotFoundException)
+            var drive = _scope.GetAtScope(driveName, scope);
+            if (drive == null)
             {
                 throw new DriveNotFoundException(driveName, String.Empty, null);
             }
+
+            // make sure the provider can clean up this drive properly
+            GetProvider(drive).DoRemoveDrive(drive);
+            _scope.RemoveAtScope(driveName, scope);
         }
 
         internal void RemoveAtAllScopes(PSDriveInfo drive)
