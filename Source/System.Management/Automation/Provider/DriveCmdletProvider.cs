@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Collections.ObjectModel;
+using Pash.Implementation;
 
 namespace System.Management.Automation.Provider
 {
@@ -32,18 +33,21 @@ namespace System.Management.Automation.Provider
             return drive; //nothing special to do per default
         }
 
-        internal PSDriveInfo DoRemoveDrive(PSDriveInfo drive)
+        internal PSDriveInfo RemoveDrive(PSDriveInfo drive, ProviderRuntime runtime)
         {
+            ProviderRuntime = runtime;
             return RemoveDrive(drive);
         }
 
-        internal Collection<PSDriveInfo> DoInitializeDefaultDrives()
+        internal Collection<PSDriveInfo> InitializeDefaultDrives(ProviderRuntime runtime)
         {
+            ProviderRuntime = runtime;
             return InitializeDefaultDrives();
         }
 
-        internal PSDriveInfo DoNewDrive(PSDriveInfo drive)
+        internal PSDriveInfo NewDrive(PSDriveInfo drive, ProviderRuntime runtime)
         {
+            ProviderRuntime = runtime;
             return NewDrive(drive);
         }
     }

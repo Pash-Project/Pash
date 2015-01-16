@@ -86,6 +86,8 @@
     <Compile Include="StopProcessCommand.cs" />
     <Compile Include="StopServiceCommand.cs" />
     <Compile Include="SuspendServiceCommand.cs" />
+    <Compile Include="NewPSDriveCommand.cs" />
+    <Compile Include="CoreCommandWithCredentialsBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

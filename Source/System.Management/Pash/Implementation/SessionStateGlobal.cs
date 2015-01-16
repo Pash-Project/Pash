@@ -49,7 +49,7 @@ namespace Pash.Implementation
                 Type snapinType = Type.GetType(defaultSnapin, true);
                 PSSnapIn snapin = Activator.CreateInstance(snapinType) as PSSnapIn;
                 Assembly snapinAssembly = snapinType.Assembly;
-                LoadPSSnapIn(new PSSnapInInfo(snapin, snapinAssembly, true), snapinAssembly);
+                LoadPSSnapIn(new PSSnapInInfo(snapin, snapinAssembly, true), snapinAssembly, _globalExecutionContext);
             }
         }
 
@@ -76,7 +76,7 @@ namespace Pash.Implementation
             return _snapins[name];
         }
 
-        internal PSSnapInInfo RemovePSSnapIn(string name)
+        internal PSSnapInInfo RemovePSSnapIn(string name, ExecutionContext context)
         {
             ValidatePSSnapInName(name);
             if (!_snapins.ContainsKey(name))
@@ -90,7 +90,7 @@ namespace Pash.Implementation
                                                           name));
             }
             //unload providers and associated drives
-            RootSessionState.Provider.Remove(snapinInfo);
+            RootSessionState.Provider.Remove(snapinInfo, context);
             
             //unload cmdlets
             RootSessionState.Cmdlet.RemoveAll(snapinInfo);
@@ -105,7 +105,7 @@ namespace Pash.Implementation
         /// <exception cref="PSArgumentException">If loading the snapin fails (e.g. invalid name/path)</exception>
         /// <param name="name">Either the name of the registered snapin or a path to an assembly</param>
         /// <returns>The newly added PSSnapIn</returns>
-        internal PSSnapInInfo AddPSSnapIn(string name)
+        internal PSSnapInInfo AddPSSnapIn(string name, ExecutionContext context)
         {
             // a slash is not part of a valid snapin name. If the name contains a slash (e.g. "./foobar") its likely
             // that the user wants to load an assembly directly
@@ -130,11 +130,11 @@ namespace Pash.Implementation
             PSSnapIn snapin = (PSSnapIn) Activator.CreateInstance(snapins.First());
             //okay, we got the new snapin. now load it
             PSSnapInInfo snapinInfo = new PSSnapInInfo(snapin, assembly, false);
-            LoadPSSnapIn(snapinInfo, assembly);
+            LoadPSSnapIn(snapinInfo, assembly, context);
             return snapinInfo;
         }
 
-        private void LoadPSSnapIn(PSSnapInInfo snapinInfo, Assembly assembly)
+        private void LoadPSSnapIn(PSSnapInInfo snapinInfo, Assembly assembly, ExecutionContext context)
         {
             var snapinName = snapinInfo.Name;
             try
@@ -145,7 +145,7 @@ namespace Pash.Implementation
             {
                 throw new PSSnapInException(String.Format("The snapin '{0}' is already loaded!", snapinName));
             }
-            RootSessionState.Provider.Load(assembly, _globalExecutionContext, snapinInfo);
+            RootSessionState.Provider.Load(assembly, context, snapinInfo);
             RootSessionState.Cmdlet.LoadCmdletsFromAssembly(assembly, snapinInfo);
         }
 

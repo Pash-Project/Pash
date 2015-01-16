@@ -38,7 +38,7 @@ namespace TestHost
             var testModule = new Uri(typeof(TestDriveProvider).Assembly.CodeBase).LocalPath;
 
             globalState = hostRunspace.ExecutionContext.SessionState;
-            globalState.SessionStateGlobal.AddPSSnapIn(testModule);
+            globalState.SessionStateGlobal.AddPSSnapIn(testModule, hostRunspace.ExecutionContext);
             testProvider = globalState.Provider.GetOne(TestDriveProvider.ProviderName);
             globalState.Drive.Remove("testDefault", true, "local"); // so tests can rely on that there are no drives
 

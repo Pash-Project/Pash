@@ -83,7 +83,7 @@ namespace System.Management.Automation.Provider
             return providerInfo;
         }
 
-        internal ProviderInfo DoStart(ProviderInfo providerInfo, ProviderRuntime providerRuntime)
+        internal ProviderInfo Start(ProviderInfo providerInfo, ProviderRuntime providerRuntime)
         {
             ProviderRuntime = providerRuntime;
             return Start(providerInfo);
@@ -92,14 +92,18 @@ namespace System.Management.Automation.Provider
         protected virtual object StartDynamicParameters() { throw new NotImplementedException(); }
 
 
-        internal void DoStop()
-        {
-            Stop();
-        }
         protected virtual void Stop()
         {
             //TODO: useful default implementation?
         }
+
+        internal void Stop(ProviderRuntime providerRuntime)
+        {
+            ProviderRuntime = providerRuntime;
+            Stop();
+        }
+
+
         protected internal virtual void StopProcessing() { throw new NotImplementedException(); }
         public void ThrowTerminatingError(ErrorRecord errorRecord) { throw new NotImplementedException(); }
         public void WriteDebug(string text) { throw new NotImplementedException(); }

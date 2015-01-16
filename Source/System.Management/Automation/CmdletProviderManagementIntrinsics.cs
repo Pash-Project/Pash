@@ -80,13 +80,13 @@ namespace System.Management.Automation
             return _providerInstances[info];
         }
 
-        internal void Remove(PSSnapInInfo snapinInfo)
+        internal void Remove(PSSnapInInfo snapinInfo, ExecutionContext executionContext)
         {
             foreach (var provider in Get(snapinInfo))
             {
                 try
                 {
-                    Remove(provider);
+                    Remove(provider, executionContext);
                 }
                 catch (ProviderNotFoundException)
                 {
@@ -129,18 +129,19 @@ namespace System.Management.Automation
 
         #region private helper functions
 
-        private void Remove(ProviderInfo info)
+        private void Remove(ProviderInfo info, ExecutionContext executionContext)
         {
+            var runtime = new ProviderRuntime(executionContext);
             //remove all drives. TODO: I think _providers[name].Drive
             foreach (var drive in _sessionState.RootSessionState.Drive.GetAllForProvider(info.FullName))
             {
                 //remove from all scopes, sub-scopes might created a new drive using this provider
-                _sessionState.RootSessionState.Drive.RemoveAtAllScopes(drive);
+                _sessionState.RootSessionState.Drive.RemoveAtAllScopes(drive, runtime);
             }
 
             //now also stop and remove
             var inst = _providerInstances[info];
-            inst.DoStop();
+            inst.Stop(runtime);
             _providerInstances.Remove(info);
 
             var list = _providers[info.Name];
@@ -155,7 +156,8 @@ namespace System.Management.Automation
         {
             CmdletProvider provider = providerInfo.CreateInstance();
 
-            providerInfo = provider.DoStart(providerInfo, new ProviderRuntime(executionContext));
+            var runtime = new ProviderRuntime(executionContext);
+            providerInfo = provider.Start(providerInfo, runtime);
             provider.SetProviderInfo(providerInfo);
 
             // Cache the Provider's Info and instance
@@ -167,12 +169,12 @@ namespace System.Management.Automation
             _providerInstances[providerInfo] = provider;
 
             // provider is added, default drives can be added
-            InitializeProvider(provider, providerInfo);
+            AddDefaultDrives(provider, runtime);
 
             return provider;
         }
 
-        private void InitializeProvider(CmdletProvider providerInstance, ProviderInfo provider)
+        private void AddDefaultDrives(CmdletProvider providerInstance, ProviderRuntime runtime)
         {
             DriveCmdletProvider driveProvider = providerInstance as DriveCmdletProvider;
             if (driveProvider == null)
@@ -180,7 +182,7 @@ namespace System.Management.Automation
                 return;
             }
 
-            var drives = driveProvider.DoInitializeDefaultDrives();
+            var drives = driveProvider.InitializeDefaultDrives(runtime);
             if (drives == null)
             {
                 throw new PSInvalidOperationException("The default drive collection for this null!");

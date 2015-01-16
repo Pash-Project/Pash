@@ -5,6 +5,7 @@ using Pash.Implementation;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation.Provider;
+using System.Management.Automation.Runspaces;
 
 namespace System.Management.Automation
 {
@@ -105,8 +106,16 @@ namespace System.Management.Automation
 
         public PSDriveInfo New(PSDriveInfo drive, string scope)
         {
+            // we take the Runspace.DefaultRunspace.ExecutionContext because on every #ExecutionContextChange
+            // this variable is set to the current
+            var runtime = new ProviderRuntime(Runspace.DefaultRunspace.ExecutionContext);
+            return New(drive, scope, runtime);
+        }
+
+        internal PSDriveInfo New(PSDriveInfo drive, string scope, ProviderRuntime providerRuntime)
+        {
             // make sure the provider can intitalize this drive properly
-            drive = GetProvider(drive).DoNewDrive(drive);
+            drive = GetProvider(drive).NewDrive(drive, providerRuntime);
             return NewSkipInit(drive, scope);
         }
 
@@ -124,6 +133,15 @@ namespace System.Management.Automation
 
         public void Remove(string driveName, bool force, string scope)
         {
+            // we take the Runspace.DefaultRunspace.ExecutionContext because on every #ExecutionContextChange
+            // this variable is set to the current
+            var runtime = new ProviderRuntime(Runspace.DefaultRunspace.ExecutionContext);
+            runtime.Force = new SwitchParameter(force);
+            Remove(driveName, scope, runtime);
+        }
+
+        internal void Remove(string driveName, string scope, ProviderRuntime runtime)
+        {
             /* TODO: force is used to remove the drive "although it's in use by the provider"
              * So, we need to find out when a drive is in use and should throw an exception on removal without
              * the "force" parameter being true
@@ -135,14 +153,14 @@ namespace System.Management.Automation
             }
 
             // make sure the provider can clean up this drive properly
-            GetProvider(drive).DoRemoveDrive(drive);
+            GetProvider(drive).RemoveDrive(drive, runtime);
             _scope.RemoveAtScope(driveName, scope);
         }
 
-        internal void RemoveAtAllScopes(PSDriveInfo drive)
+        internal void RemoveAtAllScopes(PSDriveInfo drive, ProviderRuntime runtime)
         {
             // don't forget to give the provider the chance to clean up first
-            GetProvider(drive).DoRemoveDrive(drive);
+            GetProvider(drive).RemoveDrive(drive, runtime);
             foreach (var curScope in _scope.HierarchyIterator)
             {
                 if (curScope.HasLocal(drive))
