@@ -112,7 +112,7 @@ namespace System.Management.Automation.Provider
             ProviderRuntime.WriteError(errorRecord);
         }
 
-        public void WriteItemObject(object item, Path path, bool isContainer)
+        public void WriteItemObject(object item, string path, bool isContainer)
         {
             PSObject psObject = GetItemAsPSObject(item, path);
             PSNoteProperty member = new PSNoteProperty("PSIsContainer", isContainer);
