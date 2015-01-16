@@ -54,8 +54,18 @@ namespace System.Management.Automation
 
         internal Collection<ProviderInfo> Get(PSSnapInInfo snapinInfo)
         {
-            var providers = (from p in GetAll() where p.PSSnapIn.Equals(snapinInfo) select p).ToList();
-            return new Collection<ProviderInfo>(providers);
+            var providers = from p in GetAll()
+                            where p.PSSnapIn != null && p.PSSnapIn.Equals(snapinInfo)
+                            select p;
+            return new Collection<ProviderInfo>(providers.ToList());
+        }
+
+        internal Collection<ProviderInfo> Get(PSModuleInfo moduleInfo)
+        {
+            var providers = from p in GetAll()
+                            where p.Module != null && p.Module.Equals(moduleInfo)
+                            select p;
+            return new Collection<ProviderInfo>(providers.ToList());
         }
 
         internal CmdletProvider GetInstance(string name)
@@ -78,6 +88,22 @@ namespace System.Management.Automation
         internal CmdletProvider GetInstance(ProviderInfo info)
         {
             return _providerInstances[info];
+        }
+
+        internal void Remove(PSModuleInfo moduleInfo, ExecutionContext executionContext)
+        {
+            foreach (var provider in Get(moduleInfo))
+            {
+                try
+                {
+                    Remove(provider, executionContext);
+                }
+                catch (ProviderNotFoundException)
+                {
+                    //TODO: it would be great to have the possibilities to write warnings here. It'd be nice notifying
+                    //the user about this strange effect, but isn't worth aborting the whole action
+                }
+            }
         }
 
         internal void Remove(PSSnapInInfo snapinInfo, ExecutionContext executionContext)

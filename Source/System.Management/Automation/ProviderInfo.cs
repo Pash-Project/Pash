@@ -49,7 +49,7 @@ namespace System.Management.Automation
 
         {
             _sessionState = sessionState;
-            Module = Module;
+            Module = module;
             PSSnapIn = psSnapIn;
             Name = name;
             Description = description;

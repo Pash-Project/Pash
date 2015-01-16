@@ -22,7 +22,7 @@ namespace ReferenceTests.Providers
             );
         }
 
-        [Test, Ignore("When executed with PS 3.0 this doesn't work. The same commands work as a script."+
+        [Test, Explicit("When executed with PS 3.0 this doesn't work. The same commands work as a script."+
                       "I think PS doesn't get the connection between the provider and the module anymore when NUnit is used")]
         public void ProviderFromModuleCanBeRemovedAndUninitialized()
         {

@@ -170,5 +170,19 @@ namespace System.Management.Automation
         }
         #endregion
 
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            var other = obj as PSModuleInfo;
+            if (other == null)
+            {
+                return false;
+            }
+            return Path.Equals(other.Path);
+        }
+
     }
 }
