@@ -151,10 +151,21 @@ namespace System.Management.Automation
             {
                 throw new DriveNotFoundException(driveName, String.Empty, null);
             }
+            Remove(drive, scope, runtime);
+        }
 
+        internal void Remove(PSDriveInfo drive, string scope, ProviderRuntime runtime)
+        {
             // make sure the provider can clean up this drive properly
             GetProvider(drive).RemoveDrive(drive, runtime);
-            _scope.RemoveAtScope(driveName, scope);
+            if (String.IsNullOrEmpty(scope))
+            {
+                _scope.Remove(drive.ItemName, false);
+            }
+            else
+            {
+                _scope.RemoveAtScope(drive.ItemName, scope);
+            }
         }
 
         internal void RemoveAtAllScopes(PSDriveInfo drive, ProviderRuntime runtime)

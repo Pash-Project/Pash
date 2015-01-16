@@ -27,7 +27,11 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-
+            var drives = GetDrives(LiteralName, Name, PSProvider, Scope);
+            foreach (var drive in drives)
+            {
+                SessionState.Drive.Remove(drive, Scope, ProviderRuntime);
+            }
         }
 
     }

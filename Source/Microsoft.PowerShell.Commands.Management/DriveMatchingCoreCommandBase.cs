@@ -15,7 +15,8 @@ namespace Microsoft.PowerShell.Commands
 
         internal List<PSDriveInfo> GetDrives(string[] literalName, string[] name, string[] providerNames, string scope)
         {
-            var drives = SessionState.Drive.GetAllAtScope(scope);
+            var drives = String.IsNullOrEmpty(scope) ? SessionState.Drive.GetAll() 
+                                                     : SessionState.Drive.GetAllAtScope(scope);
             var filtered = FilterDriveByProvider(drives, providerNames);
             filtered = FilterDriveByName(filtered, literalName, name);
             return filtered.ToList();
