@@ -13,23 +13,23 @@ namespace System.Management.Automation.Provider
         {
         }
 
-        protected virtual Path GetChildName(Path path)
+        protected virtual string GetChildName(string path)
         {
             if (string.IsNullOrEmpty(path))
             {
                 throw new NullReferenceException("Path can't be null");
             }
 
-            return path.GetChildNameOrSelfIfNoChild();
+            return new Path(path).GetChildNameOrSelfIfNoChild();
         }
 
-        internal string GetChildName(Path path, ProviderRuntime providerRuntime)
+        internal string GetChildName(string path, ProviderRuntime providerRuntime)
         {
             _providerRuntime = providerRuntime;
             return GetChildName(path);
         }
 
-        protected virtual Path GetParentPath(Path path, Path root)
+        protected virtual string GetParentPath(string path, string root)
         {
             if ((root == null) && (PSDriveInfo != null))
             {
@@ -37,34 +37,34 @@ namespace System.Management.Automation.Provider
             }
 
 
-            return path.GetParentPath(root);
+            return new Path(path).GetParentPath(root);
         }
 
-        internal string GetParentPath(Path path, string root, ProviderRuntime providerRuntime)
+        internal string GetParentPath(string path, string root, ProviderRuntime providerRuntime)
         {
             _providerRuntime = providerRuntime;
             return GetParentPath(path, root);
         }
 
-        protected virtual bool IsItemContainer(Path path)
+        protected virtual bool IsItemContainer(string path)
         {
             throw new NotImplementedException();
         }
 
-        internal bool IsItemContainer(Path path, ProviderRuntime providerRuntime)
+        internal bool IsItemContainer(string path, ProviderRuntime providerRuntime)
         {
             _providerRuntime = providerRuntime;
             return IsItemContainer(path);
         }
 
-        protected virtual string MakePath(Path parent, Path child)
+        protected virtual string MakePath(string parent, string child)
         {
-            return parent.Combine(child);
+            return new Path(parent).Combine(child);
         }
 
-        protected virtual void MoveItem(Path path, Path destination) { throw new NotImplementedException(); }
-        protected virtual object MoveItemDynamicParameters(Path path, string destination) { throw new NotImplementedException(); }
-        protected virtual string NormalizeRelativePath(Path path, string basePath) { throw new NotImplementedException(); }
+        protected virtual void MoveItem(string path, string destination) { throw new NotImplementedException(); }
+        protected virtual object MoveItemDynamicParameters(string path, string destination) { throw new NotImplementedException(); }
+        protected virtual string NormalizeRelativePath(string path, string basePath) { throw new NotImplementedException(); }
 
         // internals
         //internal string GetChildName(Path path, System.Management.Automation.CmdletProviderContext context);
@@ -75,7 +75,7 @@ namespace System.Management.Automation.Provider
         //internal object MoveItemDynamicParameters(Path path, string destination, System.Management.Automation.CmdletProviderContext context);
         //internal string NormalizeRelativePath(Path path, string basePath, System.Management.Automation.CmdletProviderContext context);
 
-        internal static Path NormalizePath(Path path)
+        internal static string NormalizePath(string path)
         {
             return PathIntrinsics.NormalizePath(path);
         }

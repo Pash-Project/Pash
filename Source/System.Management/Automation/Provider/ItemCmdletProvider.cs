@@ -12,24 +12,24 @@ namespace System.Management.Automation.Provider
         {
         }
 
-        protected virtual void ClearItem(Path path) { throw new NotImplementedException(); }
-        protected virtual object ClearItemDynamicParameters(Path path) { throw new NotImplementedException(); }
+        protected virtual void ClearItem(string path) { throw new NotImplementedException(); }
+        protected virtual object ClearItemDynamicParameters(string path) { throw new NotImplementedException(); }
 
         protected virtual string[] ExpandPath (string path) { throw new NotImplementedException(); }
 
-        protected virtual void GetItem(Path path) { throw new NotImplementedException(); }
-        protected virtual object GetItemDynamicParameters(Path path) { throw new NotImplementedException(); }
+        protected virtual void GetItem(string path) { throw new NotImplementedException(); }
+        protected virtual object GetItemDynamicParameters(string path) { throw new NotImplementedException(); }
 
-        protected virtual void InvokeDefaultAction(Path path) { throw new NotImplementedException(); }
+        protected virtual void InvokeDefaultAction(string path) { throw new NotImplementedException(); }
         protected virtual object InvokeDefaultActionDynamicParameters(Path path) { throw new NotImplementedException(); }
 
-        protected abstract bool IsValidPath(Path path);
+        protected abstract bool IsValidPath(string path);
 
-        protected virtual bool ItemExists(Path path) { throw new NotImplementedException(); }
-        protected virtual object ItemExistsDynamicParameters(Path path) { throw new NotImplementedException(); }
+        protected virtual bool ItemExists(string path) { throw new NotImplementedException(); }
+        protected virtual object ItemExistsDynamicParameters(string path) { throw new NotImplementedException(); }
 
-        protected virtual void SetItem(Path path, object value) { throw new NotImplementedException(); }
-        protected virtual object SetItemDynamicParameters(Path path, object value) { throw new NotImplementedException(); }
+        protected virtual void SetItem(string path, object value) { throw new NotImplementedException(); }
+        protected virtual object SetItemDynamicParameters(string path, object value) { throw new NotImplementedException(); }
 
         /*
          * While the functions above are stubs to be implemented by the concrete provider, we basically

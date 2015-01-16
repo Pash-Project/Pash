@@ -37,6 +37,7 @@
     <Compile Include="TestCommands.cs" />
     <Compile Include="TestCreateErrorCommand.cs" />
     <Compile Include="TestDriveProvider.cs" />
+    <Compile Include="TestItemProvider.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

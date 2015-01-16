@@ -14,9 +14,10 @@ namespace ReferenceTests.Providers
             var cmd = NewlineJoin(
                 "$d = Get-PSDrive -PSProvider " + TestDriveProvider.ProviderName,
                 "$d.Name", // should be only one
+                "$d.Provider.GetType().FullName", // the custom provider info
                 "$d.Root" // is '/'
             );
-            ExecuteAndCompareTypedResult(cmd, TestDriveProvider.DefaultDriveName, "/");
+            ExecuteAndCompareTypedResult(cmd, TestDriveProvider.DefaultDriveName, typeof(TestProviderInfo).FullName, "/");
         }
 
         [Test]

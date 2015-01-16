@@ -55,7 +55,7 @@ namespace System.Management.Automation.Provider
 
         public CommandInvocationIntrinsics InvokeCommand { get; private set; }
         public ProviderIntrinsics InvokeProvider { get; private set; }
-        protected internal ProviderInfo ProviderInfo { get; private set; }
+        protected ProviderInfo ProviderInfo { get; private set; }
         protected PSDriveInfo PSDriveInfo { get; private set; }
         public bool Stopping { get; private set; }
 

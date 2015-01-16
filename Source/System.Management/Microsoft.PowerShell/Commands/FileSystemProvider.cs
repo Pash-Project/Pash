@@ -29,12 +29,12 @@ namespace Microsoft.PowerShell.Commands
         {
         }
 
-        protected override void CopyItem(Path path, Path destinationPath, bool recurse)
+        protected override void CopyItem(string path, string destinationPath, bool recurse)
         {
             throw new NotImplementedException();
         }
 
-        protected override void GetChildItems(Path path, bool recurse)
+        protected override void GetChildItems(string path, bool recurse)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -107,14 +107,14 @@ namespace Microsoft.PowerShell.Commands
             }
         }
 
-        protected override Path GetChildName(Path path)
+        protected override string GetChildName(string path)
         {
             if (string.IsNullOrEmpty(path))
             {
                 throw new NullReferenceException("Path can't be null");
             }
 
-            return path.GetChildNameOrSelfIfNoChild();
+            return new Path(path).GetChildNameOrSelfIfNoChild();
             //
             //            path = PathIntrinsics.NormalizePath(path);
             //            path = path.TrimEnd('\\');
@@ -128,19 +128,19 @@ namespace Microsoft.PowerShell.Commands
             //            return path.Substring(num + 1);
         }
 
-        protected override void GetChildNames(Path path, ReturnContainers returnContainers)
+        protected override void GetChildNames(string path, ReturnContainers returnContainers)
         {
             throw new NotImplementedException();
         }
 
-        protected override void GetItem(Path path)
+        protected override void GetItem(string path)
         {
             bool isContainer = false;
             var fileSystemInfo = GetFileSystemInfo(path, ref isContainer, false);
             WriteItemObject(fileSystemInfo, fileSystemInfo.FullName, isContainer);
         }
 
-        protected override Path GetParentPath(Path path, Path root)
+        protected override string GetParentPath(string path, string root)
         {
             Path parentPath = base.GetParentPath(path, root);
 
@@ -152,7 +152,7 @@ namespace Microsoft.PowerShell.Commands
             return parentPath;
         }
 
-        private Path MakeSlashedPath(Path path)
+        private string MakeSlashedPath(string path)
         {
             // Make sure that the path is ended bith '\'
             int index = path.IndexOf(':');
@@ -163,7 +163,7 @@ namespace Microsoft.PowerShell.Commands
             return path;
         }
 
-        protected override bool HasChildItems(Path path) { throw new NotImplementedException(); }
+        protected override bool HasChildItems(string path) { throw new NotImplementedException(); }
 
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
@@ -226,9 +226,9 @@ namespace Microsoft.PowerShell.Commands
             return drives.Length == 1 && drives[0].Name.Length == 0;
         }
 
-        protected override void InvokeDefaultAction(Path path) { throw new NotImplementedException(); }
+        protected override void InvokeDefaultAction(string path) { throw new NotImplementedException(); }
 
-        protected override void NewItem(System.Management.Path path, string itemTypeName, object newItemValue)
+        protected override void NewItem(string path, string itemTypeName, object newItemValue)
         {
             path = NormalizePath(path);
             var type = GetItemType(itemTypeName);
@@ -274,16 +274,16 @@ namespace Microsoft.PowerShell.Commands
             }
         }
 
-        protected override bool IsItemContainer(Path path)
+        protected override bool IsItemContainer(string path)
         {
             path = NormalizePath(path);
 
             return (new System.IO.DirectoryInfo(path)).Exists;
         }
 
-        protected override bool IsValidPath(Path path) { throw new NotImplementedException(); }
+        protected override bool IsValidPath(string path) { throw new NotImplementedException(); }
 
-        protected override bool ItemExists(Path path)
+        protected override bool ItemExists(string path)
         {
             path = NormalizePath(path);
             try
@@ -305,7 +305,7 @@ namespace Microsoft.PowerShell.Commands
             return false;
         }
 
-        protected override void MoveItem(Path path, Path destination) { throw new NotImplementedException(); }
+        protected override void MoveItem(string path, string destination) { throw new NotImplementedException(); }
 
         protected override PSDriveInfo NewDrive(PSDriveInfo drive)
         {
@@ -362,32 +362,32 @@ namespace Microsoft.PowerShell.Commands
 
         #region IContentCmdletProvider Members
 
-        public void ClearContent(Path path)
+        public void ClearContent(string path)
         {
             throw new NotImplementedException();
         }
 
-        public object ClearContentDynamicParameters(Path path)
+        public object ClearContentDynamicParameters(string path)
         {
             return null;
         }
 
-        public IContentReader GetContentReader(Path path)
+        public IContentReader GetContentReader(string path)
         {
             throw new NotImplementedException();
         }
 
-        public object GetContentReaderDynamicParameters(Path path)
+        public object GetContentReaderDynamicParameters(string path)
         {
             return new FileSystemContentReaderDynamicParameters();
         }
 
-        public IContentWriter GetContentWriter(Path path)
+        public IContentWriter GetContentWriter(string path)
         {
             throw new NotImplementedException();
         }
 
-        public object GetContentWriterDynamicParameters(Path path)
+        public object GetContentWriterDynamicParameters(string path)
         {
             return new FileSystemContentWriterDynamicParameters();
         }
@@ -396,32 +396,32 @@ namespace Microsoft.PowerShell.Commands
 
         #region IPropertyCmdletProvider Members
 
-        public void ClearProperty(Path path, Collection<string> propertyToClear)
+        public void ClearProperty(string path, Collection<string> propertyToClear)
         {
             throw new NotImplementedException();
         }
 
-        public object ClearPropertyDynamicParameters(Path path, Collection<string> propertyToClear)
+        public object ClearPropertyDynamicParameters(string path, Collection<string> propertyToClear)
         {
             throw new NotImplementedException();
         }
 
-        public void GetProperty(Path path, Collection<string> providerSpecificPickList)
+        public void GetProperty(string path, Collection<string> providerSpecificPickList)
         {
             throw new NotImplementedException();
         }
 
-        public object GetPropertyDynamicParameters(Path path, Collection<string> providerSpecificPickList)
+        public object GetPropertyDynamicParameters(string path, Collection<string> providerSpecificPickList)
         {
             throw new NotImplementedException();
         }
 
-        public void SetProperty(Path path, PSObject propertyValue)
+        public void SetProperty(string path, PSObject propertyValue)
         {
             throw new NotImplementedException();
         }
 
-        public object SetPropertyDynamicParameters(Path path, PSObject propertyValue)
+        public object SetPropertyDynamicParameters(string path, PSObject propertyValue)
         {
             throw new NotImplementedException();
         }
@@ -430,12 +430,12 @@ namespace Microsoft.PowerShell.Commands
 
         #region ISecurityDescriptorCmdletProvider Members
 
-        public void GetSecurityDescriptor(Path path, AccessControlSections includeSections)
+        public void GetSecurityDescriptor(string path, AccessControlSections includeSections)
         {
             throw new NotImplementedException();
         }
 
-        public ObjectSecurity NewSecurityDescriptorFromPath(Path path, AccessControlSections includeSections)
+        public ObjectSecurity NewSecurityDescriptorFromPath(string path, AccessControlSections includeSections)
         {
             throw new NotImplementedException();
         }
@@ -445,7 +445,7 @@ namespace Microsoft.PowerShell.Commands
             throw new NotImplementedException();
         }
 
-        public void SetSecurityDescriptor(Path path, ObjectSecurity securityDescriptor)
+        public void SetSecurityDescriptor(string path, ObjectSecurity securityDescriptor)
         {
             throw new NotImplementedException();
         }
@@ -466,7 +466,7 @@ namespace Microsoft.PowerShell.Commands
             return ItemType.Unknown;
         }
 
-        private System.IO.FileSystemInfo GetFileSystemInfo(Path path, ref bool isContainer, bool showHidden)
+        private System.IO.FileSystemInfo GetFileSystemInfo(string path, ref bool isContainer, bool showHidden)
         {
             path = NormalizePath(path);
             var fi = new System.IO.FileInfo(path);

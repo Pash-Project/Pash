@@ -26,19 +26,12 @@ namespace TestPSSnapIn
     [CmdletProvider(TestDriveProvider.ProviderName, ProviderCapabilities.Filter | ProviderCapabilities.ShouldProcess)]
     public class TestDriveProvider : DriveCmdletProvider
     {
-        private TestProviderInfo _info;
-
         public const string ProviderName = "TestDriveProvider";
         public const string DefaultDriveName = "testDefault";
 
         protected override PSDriveInfo NewDrive(PSDriveInfo drive)
         {
             return new TestDrive(drive);
-        }
-
-        protected override object NewDriveDynamicParameters()
-        {
-            return base.NewDriveDynamicParameters();
         }
 
         protected override PSDriveInfo RemoveDrive(PSDriveInfo drive)
@@ -54,24 +47,18 @@ namespace TestPSSnapIn
 
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
-            var defdrive = new TestDrive(new PSDriveInfo(DefaultDriveName, _info, "/", "Test Default Drive", null));
+            var defdrive = new TestDrive(new PSDriveInfo(DefaultDriveName, ProviderInfo, "/", "Test Default Drive", null));
             return new Collection<PSDriveInfo>(new [] { defdrive });
         }
 
         protected override ProviderInfo Start(ProviderInfo providerInfo)
         {
-            _info = new TestProviderInfo(providerInfo);
-            return _info;
-        }
-
-        protected override object StartDynamicParameters()
-        {
-            return base.StartDynamicParameters();
+            return new TestProviderInfo(providerInfo);
         }
 
         protected override void Stop()
         {
-            _info.IsStopped = true;
+            (ProviderInfo as TestProviderInfo).IsStopped = true;
         }
 
     }
