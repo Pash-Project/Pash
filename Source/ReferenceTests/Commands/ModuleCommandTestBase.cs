@@ -8,19 +8,6 @@ namespace ReferenceTests
 {
     public class ModuleCommandTestBase : ReferenceTestBase
     {
-        private string _binaryTestModule;
-        public string BinaryTestModule
-        {
-            get
-            {
-                if (_binaryTestModule == null)
-                {
-                    _binaryTestModule = new UriBuilder(typeof(TestCommand).Assembly.CodeBase).Path;
-                }
-                return _binaryTestModule;
-            }
-        }
-
         public string CreateManifest(Dictionary<string, string> args )
         {
             return CreateManifest(null, null, null, null, null, null, null, null, args);

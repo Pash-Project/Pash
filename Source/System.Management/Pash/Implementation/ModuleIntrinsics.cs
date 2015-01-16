@@ -34,9 +34,10 @@ namespace Pash.Implementation
             targetScope.SetLocal(module, false);
         }
 
-        public void Remove(PSModuleInfo module)
+        public void Remove(PSModuleInfo module, ExecutionContext context)
         {
             RemoveMembers(module);
+            Scope.SessionState.Provider.Remove(module, context);
             // remove the module from all scopes upwards the hierarchy
             foreach (var curScope in Scope.HierarchyIterator)
             {

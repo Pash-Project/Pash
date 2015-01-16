@@ -12,6 +12,7 @@ namespace Pash.Implementation
         internal string Filter { get; set; }
         internal SwitchParameter Force { get; set; }
         internal ExecutionContext ExecutionContext { get; private set; }
+        internal PSCredential Credential { get; set; }
 
         private Cmdlet _cmdlet;
         private Collection<PSObject> _outputData;

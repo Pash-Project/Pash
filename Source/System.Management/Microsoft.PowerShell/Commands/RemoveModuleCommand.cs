@@ -49,7 +49,7 @@ namespace Microsoft.PowerShell.Commands
             {
                 // TODO: some security checks. E.g. if it's ReadOnly access mode. Then we need to use ShouldContinue
                 // and the Force parameter
-                ExecutionContext.SessionState.LoadedModules.Remove(mod);
+                ExecutionContext.SessionState.LoadedModules.Remove(mod, ExecutionContext);
             }
         }
     }

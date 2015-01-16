@@ -45,7 +45,7 @@ namespace Microsoft.PowerShell.Commands
                         //For now we use simply the SessionStateGlobal
                         try
                         {
-                            var snapin = ExecutionContext.SessionStateGlobal.RemovePSSnapIn(curSnapin.Name);
+                            var snapin = ExecutionContext.SessionStateGlobal.RemovePSSnapIn(curSnapin.Name, ExecutionContext);
                             if (PassThru.IsPresent)
                             {
                                 WriteObject(snapin);

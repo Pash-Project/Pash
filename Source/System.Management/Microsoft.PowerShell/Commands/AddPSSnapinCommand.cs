@@ -24,7 +24,7 @@ namespace Microsoft.PowerShell.Commands
             {
                 try
                 {
-                    var snapin = SessionState.SessionStateGlobal.AddPSSnapIn(curName);
+                    var snapin = SessionState.SessionStateGlobal.AddPSSnapIn(curName, ExecutionContext);
                     if (PassThru.IsPresent)
                     {
                         WriteObject(snapin);

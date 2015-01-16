@@ -1,8 +1,10 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Internal;
 using Pash.Implementation;
+using System.Collections.ObjectModel;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -12,12 +14,9 @@ namespace Microsoft.PowerShell.Commands
         public virtual string[] Exclude { get; set; }
         public virtual string Filter { get; set; }
         public virtual SwitchParameter Force { get; set; }
-        public bool SupportsShouldProcess { get; protected set; }
+        protected virtual bool ProviderSupportsShouldProcess { get { return true; } }
 
-        protected CoreCommandBase()
-        {
-            SupportsShouldProcess = true;
-        }
+        public bool SupportsShouldProcess { get { return ProviderSupportsShouldProcess; } }
 
         protected bool DoesProviderSupportShouldProcess(string[] paths)
         {
@@ -29,13 +28,16 @@ namespace Microsoft.PowerShell.Commands
             throw new NotImplementedException();
         }
 
-        internal ProviderRuntime ProviderRuntime
+        internal virtual ProviderRuntime ProviderRuntime
         {
             get
             {
-                ProviderRuntime providerRuntime = new ProviderRuntime(this);
-                // TODO: set the Force, Filter, Include, Exlude on the runtime
-                return providerRuntime;
+                var runtime = new ProviderRuntime(this);
+                runtime.Include = Include == null ? new Collection<string>() : new Collection<string>(Include.ToList());
+                runtime.Exclude = Exclude == null ? new Collection<string>() : new Collection<string>(Exclude.ToList());
+                runtime.Filter = Filter;
+                runtime.Force = Force;
+                return runtime;
             }
         }
     }

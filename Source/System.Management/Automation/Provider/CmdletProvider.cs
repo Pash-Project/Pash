@@ -92,15 +92,18 @@ namespace System.Management.Automation.Provider
         protected virtual object StartDynamicParameters() { throw new NotImplementedException(); }
 
 
-        //TODO: simple wrapper to call Stop() from outisde. Should be replaced at any time for something more meaningful
-        internal void DoStop()
-        {
-            Stop();
-        }
         protected virtual void Stop()
         {
             //TODO: useful default implementation?
         }
+
+        internal void Stop(ProviderRuntime providerRuntime)
+        {
+            ProviderRuntime = providerRuntime;
+            Stop();
+        }
+
+
         protected internal virtual void StopProcessing() { throw new NotImplementedException(); }
         public void ThrowTerminatingError(ErrorRecord errorRecord) { throw new NotImplementedException(); }
         public void WriteDebug(string text) { throw new NotImplementedException(); }

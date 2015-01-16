@@ -26,8 +26,15 @@ namespace System.Management.Automation
 
         public DriveManagementIntrinsics Drive { get; private set; }
         public PathIntrinsics Path { get; private set; }
-        public CmdletProviderManagementIntrinsics Provider { get; private set; }
         public PSVariableIntrinsics PSVariable { get; private set; }
+        public CmdletProviderManagementIntrinsics Provider
+        {
+            get
+            {
+                return SessionStateGlobal.Provider;
+            }
+        }
+
 
         // creates a session state with a new (global) scope
         internal SessionState(SessionStateGlobal sessionStateGlobal)
@@ -65,7 +72,6 @@ namespace System.Management.Automation
 
             Drive = new DriveManagementIntrinsics(_driveScope);
             Path = new PathIntrinsics(SessionStateGlobal);
-            Provider = new CmdletProviderManagementIntrinsics(SessionStateGlobal);
             PSVariable = new PSVariableIntrinsics(_variableScope);
             LoadedModules = new ModuleIntrinsics(_moduleScope);
             Cmdlet = new CmdletIntrinsics(_cmdletScope);
