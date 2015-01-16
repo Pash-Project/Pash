@@ -184,5 +184,10 @@ namespace System.Management.Automation
             return Path.Equals(other.Path);
         }
 
+        public override int GetHashCode()
+        {
+            return Path.GetHashCode();
+        }
+
     }
 }
