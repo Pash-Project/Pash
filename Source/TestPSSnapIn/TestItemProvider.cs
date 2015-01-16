@@ -23,35 +23,39 @@ namespace TestPSSnapIn
             }
         }
 
+        private ItemTestDrive _defaultDrive
+        {
+            get
+            {
+                return SessionState.Drive.GetAllForProvider(ProviderName).First() as ItemTestDrive;
+            }
+        }
+
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
-            var defdrive = new TestDrive(new PSDriveInfo(DefaultDriveName, ProviderInfo, "", "Test Item Drive", null));
-            return new Collection<PSDriveInfo>(new [] { defdrive });
+            var defDrive = new ItemTestDrive(new PSDriveInfo(DefaultDriveName, ProviderInfo, @"testItems:", "Test Item Drive", null));
+            return new Collection<PSDriveInfo>(new[] { defDrive });
         }
 
         protected override void ClearItem(string path)
         {
-
-            var drive = PSDriveInfo as ItemTestDrive;
             var driveless = GetPathWithoutDrive(path);
-            drive.Items.Remove(driveless);
+            _defaultDrive.Items.Remove(driveless);
         }
 
         protected override string[] ExpandPath(string path)
         {
-            var drive = PSDriveInfo as ItemTestDrive;
             var driveless = GetPathWithoutDrive(path);
             var wildcard = new WildcardPattern(driveless, WildcardOptions.IgnoreCase);
-            return (from i in drive.Items.Keys
+            return (from i in _defaultDrive.Items.Keys
                              where wildcard.IsMatch(i)
                              select i).ToArray();
         }
 
         protected override void GetItem(string path)
         {
-            var drive = PSDriveInfo as ItemTestDrive;
             var driveless = GetPathWithoutDrive(path);
-            WriteItemObject(drive.Items[driveless], path, false);
+            WriteItemObject(_defaultDrive.Items[driveless], path, false);
         }
 
         protected override void InvokeDefaultAction(string path)
@@ -61,29 +65,34 @@ namespace TestPSSnapIn
 
         protected override bool IsValidPath(string path)
         {
-            return Regex.IsMatch(path, @"[a-zA-Z:]+");
+            return Regex.IsMatch(path, @"[a-zA-Z:\\]+");
         }
 
         protected override bool ItemExists(string path)
         {
-            var drive = PSDriveInfo as ItemTestDrive;
             var driveless = GetPathWithoutDrive(path);
-            return drive.Items.ContainsKey(driveless);
+            return _defaultDrive.Items.ContainsKey(driveless);
         }
 
         protected override void SetItem(string path, object value)
         {
-            var drive = PSDriveInfo as ItemTestDrive;
             var driveless = GetPathWithoutDrive(path);
-            drive.Items[driveless] = value.ToString();
+            var strValue = value.ToString();
+            _defaultDrive.Items[driveless] = strValue;
+            WriteItemObject(strValue, path, false);
         }
 
         private string GetPathWithoutDrive(string path)
         {
-            var driveWithSep = PSDriveInfo.Name + ":";
-            if (path.StartsWith(driveWithSep))
+            var providerPrefix = ProviderName + "::";
+            var drivePrefix = _defaultDrive.Root;
+            if (path.StartsWith(providerPrefix))
             {
-                path = path.Substring(driveWithSep.Length);
+                path = path.Substring(providerPrefix.Length);
+            }
+            if (!path.StartsWith(drivePrefix))
+            {
+                throw new PSInvalidOperationException("Path doesn't begin with the default test drive!");
             }
             return path;
         }
