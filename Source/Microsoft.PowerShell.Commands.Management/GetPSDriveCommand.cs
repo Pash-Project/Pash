@@ -24,35 +24,8 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            var drives = SessionState.Drive.GetAllAtScope(Scope);
-            WriteObject(FilterDriveByName(FilterDriveByProvider(drives)), true);
-        }
-
-        private IEnumerable<PSDriveInfo> FilterDriveByProvider(IEnumerable<PSDriveInfo> drives)
-        {
-            if (PSProvider == null)
-            {
-                return drives;
-            }
-            return from d in drives where d.Provider.IsAnyNameMatch(PSProvider) select d;
-        }
-
-        private IEnumerable<PSDriveInfo> FilterDriveByName(IEnumerable<PSDriveInfo> drives)
-        {
-            if (LiteralName != null)
-            {
-                return from d in drives
-                       where LiteralName.Contains(d.Name, StringComparer.InvariantCultureIgnoreCase)
-                       select d;
-            }
-            if (Name == null)
-            {
-                return drives;
-            }
-            var wildcards = (from n in Name select new WildcardPattern(n, WildcardOptions.IgnoreCase)).ToArray();
-            return from d in drives
-                   where WildcardPattern.IsAnyMatch(wildcards, d.Name)
-                   select d;
+            var drives = GetDrives(LiteralName, Name, PSProvider, Scope);
+            WriteObject(drives, true);
         }
     }
 }
