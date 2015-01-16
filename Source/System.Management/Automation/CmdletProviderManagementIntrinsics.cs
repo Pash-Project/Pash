@@ -96,18 +96,18 @@ namespace System.Management.Automation
             }
         }
 
-        internal void Load(Assembly assembly, PSModuleInfo moduleInfo)
+        internal void Load(Assembly assembly, ExecutionContext executionContext, PSModuleInfo moduleInfo)
         {
-            Load(assembly, null, moduleInfo);
+            Load(assembly, executionContext, null, moduleInfo);
         }
 
-        internal void Load(Assembly assembly, PSSnapInInfo snapinInfo)
+        internal void Load(Assembly assembly, ExecutionContext executionContext, PSSnapInInfo snapinInfo)
         {
-            Load(assembly, snapinInfo, null);
+            Load(assembly, executionContext, snapinInfo, null);
         }
 
         // private method avoids that accidentally both snapin and module get specified
-        private void Load(Assembly assembly, PSSnapInInfo snapinInfo, PSModuleInfo moduleInfo)
+        private void Load(Assembly assembly, ExecutionContext executionContext, PSSnapInInfo snapinInfo, PSModuleInfo moduleInfo)
         {
             // first get name and type of all providers in this assembly
             var providers = from Type type in assembly.GetTypes()
@@ -121,7 +121,7 @@ namespace System.Management.Automation
             {
                 ProviderInfo providerInfo = new ProviderInfo(_sessionState.RootSessionState, curPair.Value,
                                     curPair.Key, string.Empty, string.Empty, string.Empty, snapinInfo, moduleInfo);
-                Add(providerInfo);
+                Add(providerInfo, executionContext);
             }
         }
 
@@ -151,11 +151,11 @@ namespace System.Management.Automation
             list.Remove(info);
         }
 
-        private CmdletProvider Add(ProviderInfo providerInfo)
+        private CmdletProvider Add(ProviderInfo providerInfo, ExecutionContext executionContext)
         {
             CmdletProvider provider = providerInfo.CreateInstance();
 
-            providerInfo = provider.DoStart(providerInfo, new ProviderRuntime(_sessionState._globalExecutionContext));
+            providerInfo = provider.DoStart(providerInfo, new ProviderRuntime(executionContext));
             provider.SetProviderInfo(providerInfo);
 
             // Cache the Provider's Info and instance

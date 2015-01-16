@@ -26,12 +26,12 @@ namespace Pash.Implementation
             "Microsoft.Commands.Management.PSManagementPSSnapIn, Microsoft.PowerShell.Commands.Management",
         };
         private Dictionary<string, PSSnapInInfo> _snapins;
+        private readonly ExecutionContext _globalExecutionContext;
 
-        internal readonly ExecutionContext _globalExecutionContext;
         internal SessionState RootSessionState  { get { return _globalExecutionContext.SessionState; } }
-        internal PSDriveInfo _currentDrive;
-
         internal CmdletProviderManagementIntrinsics Provider { get; private set; }
+
+        public PSDriveInfo CurrentDrive { get; private set; }
 
         internal SessionStateGlobal(ExecutionContext executionContext)
         {
@@ -145,7 +145,7 @@ namespace Pash.Implementation
             {
                 throw new PSSnapInException(String.Format("The snapin '{0}' is already loaded!", snapinName));
             }
-            RootSessionState.Provider.Load(assembly, snapinInfo);
+            RootSessionState.Provider.Load(assembly, _globalExecutionContext, snapinInfo);
             RootSessionState.Cmdlet.LoadCmdletsFromAssembly(assembly, snapinInfo);
         }
 
@@ -196,18 +196,6 @@ namespace Pash.Implementation
             }
         }
 
-        public PSDriveInfo CurrentDrive
-        {
-            get
-            {
-                return _currentDrive;
-            }
-            private set
-            {
-                _currentDrive = value;
-            }
-        }
-
         internal void SetCurrentDrive()
         {
             ProviderInfo fileSystemProvider = RootSessionState.Provider.GetOne(FileSystemProvider.ProviderName);
@@ -222,7 +210,7 @@ namespace Pash.Implementation
                 if (string.Equals(drive.Name, currentDir.GetDrive(), StringComparison.OrdinalIgnoreCase))
                 {
                     drive.CurrentLocation = currentDir;
-                    _currentDrive = drive;
+                    CurrentDrive = drive;
                     return;
                 }
             }
