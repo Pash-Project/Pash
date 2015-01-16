@@ -58,6 +58,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Irony, Version=1.0.0.0, Culture=neutral, PublicKeyToken=ca48ace7223ead47, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Irony.0.9.0-net40\lib\net40\Irony.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -522,13 +526,10 @@
   </Target>
   -->
   <ItemGroup>
-    <ProjectReference Include="..\..\Libraries\Irony\Irony\010.Irony.2010.csproj">
-      <Project>{D81F5C91-D7DB-46E5-BC99-49488FB6814C}</Project>
-      <Name>010.Irony.2010</Name>
-    </ProjectReference>
+    <Content Include="Pash\ParserIntrinsics\README.TXT" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Pash\ParserIntrinsics\README.TXT" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
 </Project>
