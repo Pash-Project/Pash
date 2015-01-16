@@ -190,7 +190,7 @@ namespace System.Management.Automation
             {
                 return provider.FullName.CompareTo(provider.FullName); //cannot be 0, otherwise it was a name match
             }
-            return PSSnapIn.CompareTo(provider.PSSnapIn);
+            return 0;
         }
 
         public int CompareTo(object obj)

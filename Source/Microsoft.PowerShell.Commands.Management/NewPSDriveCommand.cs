@@ -33,8 +33,9 @@ namespace Microsoft.PowerShell.Commands
         protected override void ProcessRecord()
         {
             var provider = SessionState.Provider.GetOne(PSProvider);
-            var drive = new PSDriveInfo(Name, provider, Root, Description, Credential);
-            SessionState.Drive.New(drive, Scope ?? "local", ProviderRuntime);
+            var driveInfo = new PSDriveInfo(Name, provider, Root, Description, Credential);
+            var realDrive = SessionState.Drive.New(driveInfo, Scope ?? "local", ProviderRuntime);
+            WriteObject(realDrive);
         }
     }
 }
