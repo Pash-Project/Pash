@@ -93,9 +93,10 @@ namespace System.Management.Automation
         {
             get
             {
-                if (!string.IsNullOrEmpty(PSSnapInName))
+                var moudleOrSnapinName = string.IsNullOrEmpty(PSSnapInName) ? ModuleName : PSSnapInName;
+                if (!string.IsNullOrEmpty(moudleOrSnapinName))
                 {
-                    return string.Format(@"{0}\{1}", PSSnapInName, Name);
+                    return string.Format(@"{0}\{1}", moudleOrSnapinName, Name);
                 }
                 return Name;
             }
@@ -155,6 +156,18 @@ namespace System.Management.Automation
                 return true;
             }
             return string.Equals(Name, providerName, StringComparison.CurrentCultureIgnoreCase);
+        }
+
+        public bool IsAnyNameMatch(string[] providerNames)
+        {
+            foreach (var name in providerNames)
+            {
+                if (IsNameMatch(name))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public override bool Equals(object obj)

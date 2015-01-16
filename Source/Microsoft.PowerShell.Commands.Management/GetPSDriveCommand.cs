@@ -1,6 +1,9 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using System.Linq;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
+using System;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -19,39 +22,37 @@ namespace Microsoft.PowerShell.Commands
         [Parameter(ValueFromPipelineByPropertyName = true)]
         public string Scope { get; set; }
 
-        public GetPSDriveCommand()
-        {
-            PSProvider = new string[0];
-        }
-
         protected override void ProcessRecord()
         {
-            if ((PSProvider == null) || ((PSProvider != null) && (PSProvider.Length == 0)))
-            {
-                // TODO: as soon as we'll have formatters use the next line
-                // WriteObject(SessionState.Provider.GetAll(), true);
+            var drives = SessionState.Drive.GetAllAtScope(Scope);
+            WriteObject(FilterDriveByName(FilterDriveByProvider(drives)), true);
+        }
 
-                foreach (ProviderInfo providerInfo in SessionState.Provider.GetAll())
-                {
-                    WriteObject(providerInfo.Drives, true);
-                }
-            }
-            else
+        private IEnumerable<PSDriveInfo> FilterDriveByProvider(IEnumerable<PSDriveInfo> drives)
+        {
+            if (PSProvider == null)
             {
-                foreach (string str in PSProvider)
-                {
-                    // TODO: deal with Wildcards
-                    try
-                    {
-                        Collection<ProviderInfo> sendToPipeline = SessionState.Provider.Get(str);
-                        WriteObject(sendToPipeline, true);
-                    }
-                    catch (ProviderNotFoundException exception)
-                    {
-                        WriteError(new ErrorRecord(exception.ErrorRecord, exception));
-                    }
-                }
+                return drives;
             }
+            return from d in drives where d.Provider.IsAnyNameMatch(PSProvider) select d;
+        }
+
+        private IEnumerable<PSDriveInfo> FilterDriveByName(IEnumerable<PSDriveInfo> drives)
+        {
+            if (LiteralName != null)
+            {
+                return from d in drives
+                       where LiteralName.Contains(d.Name, StringComparer.InvariantCultureIgnoreCase)
+                       select d;
+            }
+            if (Name == null)
+            {
+                return drives;
+            }
+            var wildcards = (from n in Name select new WildcardPattern(n, WildcardOptions.IgnoreCase)).ToArray();
+            return from d in drives
+                   where WildcardPattern.IsAnyMatch(wildcards, d.Name)
+                   select d;
         }
     }
 }
