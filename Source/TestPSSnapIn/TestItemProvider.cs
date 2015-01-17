@@ -13,13 +13,15 @@ namespace TestPSSnapIn
     {
         public const string ProviderName = "TestItemProvider";
         public const string DefaultDriveName = "testItems";
+        public const string DefaultItemName = "defItem";
+        public const string DefaultItemValue = "defItemValue";
 
         public class ItemTestDrive : PSDriveInfo
         {
             internal Dictionary<string, string> Items { get; set; }
             public ItemTestDrive(PSDriveInfo driveInfo) : base(driveInfo)
             {
-                Items = new Dictionary<string, string>();
+                Items = new Dictionary<string, string>() { { DefaultItemName, DefaultItemValue } };
             }
         }
 
@@ -49,23 +51,26 @@ namespace TestPSSnapIn
             var wildcard = new WildcardPattern(driveless, WildcardOptions.IgnoreCase);
             return (from i in _defaultDrive.Items.Keys
                              where wildcard.IsMatch(i)
-                             select i).ToArray();
+                             select _defaultDrive.Name + ":" + i).ToArray();
         }
 
         protected override void GetItem(string path)
         {
             var driveless = GetPathWithoutDrive(path);
-            WriteItemObject(_defaultDrive.Items[driveless], path, false);
+            if (_defaultDrive.Items.ContainsKey(driveless))
+            {
+                WriteItemObject(_defaultDrive.Items[driveless], path, false);
+            }
         }
 
         protected override void InvokeDefaultAction(string path)
         {
-            SetItem(path + ":DEFAULT", "true");
+            WriteItemObject("invoked!", path + ":DEFAULT", false);
         }
 
         protected override bool IsValidPath(string path)
         {
-            return Regex.IsMatch(path, @"[a-zA-Z:\\]+");
+            return Regex.IsMatch(path, @"^[a-zA-Z:\\]+$");
         }
 
         protected override bool ItemExists(string path)
@@ -85,16 +90,17 @@ namespace TestPSSnapIn
         private string GetPathWithoutDrive(string path)
         {
             var providerPrefix = ProviderName + "::";
-            var drivePrefix = _defaultDrive.Root;
+            var drivePrefix = _defaultDrive.Name + ":";
             if (path.StartsWith(providerPrefix))
             {
                 path = path.Substring(providerPrefix.Length);
             }
             if (!path.StartsWith(drivePrefix))
             {
+                // we throw an exception here so tests fail if an akward path appears in this function in any test
                 throw new PSInvalidOperationException("Path doesn't begin with the default test drive!");
             }
-            return path;
+            return path.Substring(drivePrefix.Length);
         }
     }
 }
