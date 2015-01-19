@@ -12,7 +12,6 @@ namespace TestPSSnapIn
     public class TestItemProvider : ItemCmdletProvider
     {
         public const string ProviderName = "TestItemProvider";
-        public const string DefaultDriveName = "testItems";
         public const string DefaultItemName = "defItem";
         public const string DefaultItemValue = "defItemValue";
 
@@ -35,31 +34,28 @@ namespace TestPSSnapIn
 
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
-            var defDrive = new ItemTestDrive(new PSDriveInfo(DefaultDriveName, ProviderInfo, @"testItems:", "Test Item Drive", null));
+            var defDrive = new ItemTestDrive(new PSDriveInfo("testItemDrive", ProviderInfo, "/", "Test Item Drive", null));
             return new Collection<PSDriveInfo>(new[] { defDrive });
         }
 
         protected override void ClearItem(string path)
         {
-            var driveless = GetPathWithoutDrive(path);
-            _defaultDrive.Items.Remove(driveless);
+            _defaultDrive.Items.Remove(path);
         }
 
         protected override string[] ExpandPath(string path)
         {
-            var driveless = GetPathWithoutDrive(path);
-            var wildcard = new WildcardPattern(driveless, WildcardOptions.IgnoreCase);
+            var wildcard = new WildcardPattern(path, WildcardOptions.IgnoreCase);
             return (from i in _defaultDrive.Items.Keys
                              where wildcard.IsMatch(i)
-                             select _defaultDrive.Name + ":" + i).ToArray();
+                             select i).ToArray();
         }
 
         protected override void GetItem(string path)
         {
-            var driveless = GetPathWithoutDrive(path);
-            if (_defaultDrive.Items.ContainsKey(driveless))
+            if (_defaultDrive.Items.ContainsKey(path))
             {
-                WriteItemObject(_defaultDrive.Items[driveless], path, false);
+                WriteItemObject(_defaultDrive.Items[path], path, false);
             }
         }
 
@@ -75,32 +71,14 @@ namespace TestPSSnapIn
 
         protected override bool ItemExists(string path)
         {
-            var driveless = GetPathWithoutDrive(path);
-            return _defaultDrive.Items.ContainsKey(driveless);
+            return _defaultDrive.Items.ContainsKey(path);
         }
 
         protected override void SetItem(string path, object value)
         {
-            var driveless = GetPathWithoutDrive(path);
             var strValue = value.ToString();
-            _defaultDrive.Items[driveless] = strValue;
+            _defaultDrive.Items[path] = strValue;
             WriteItemObject(strValue, path, false);
-        }
-
-        private string GetPathWithoutDrive(string path)
-        {
-            var providerPrefix = ProviderName + "::";
-            var drivePrefix = _defaultDrive.Name + ":";
-            if (path.StartsWith(providerPrefix))
-            {
-                path = path.Substring(providerPrefix.Length);
-            }
-            if (!path.StartsWith(drivePrefix))
-            {
-                // we throw an exception here so tests fail if an akward path appears in this function in any test
-                throw new PSInvalidOperationException("Path doesn't begin with the default test drive!");
-            }
-            return path.Substring(drivePrefix.Length);
         }
     }
 }
