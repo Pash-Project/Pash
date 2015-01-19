@@ -14,6 +14,7 @@ namespace Pash.Implementation
         internal ExecutionContext ExecutionContext { get; private set; }
         internal PSCredential Credential { get; set; }
         internal SwitchParameter AvoidWildcardExpansion { get; set; }
+        internal PSDriveInfo PSDriveInfo { get; set; }
 
         private Cmdlet _cmdlet;
         private Collection<PSObject> _outputData;

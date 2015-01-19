@@ -15,7 +15,7 @@ namespace System.Management.Automation
         public string Root { get; internal set; }
         public string Description { get; set; }
         public PSCredential Credential { get; private set; }
-        public Path CurrentLocation { get; set; }
+        public string CurrentLocation { get; set; }
         internal bool RemovableDrive { get; set; }
 
         protected PSDriveInfo(PSDriveInfo driveInfo)

@@ -162,7 +162,7 @@ namespace System.Management.Automation
 
         #region internal API
         // these function calls use directly a ProviderRuntime and don't return objects, but write it to the
-        // ProviderRuntime's result buffer
+        // ProviderRuntime's result buffer (which might be the cmdlet's result buffer)
 
         internal void Clear(string[] path, ProviderRuntime runtime)
         {
@@ -191,7 +191,17 @@ namespace System.Management.Automation
 
         internal void Get(string[] path, ProviderRuntime runtime)
         {
-            throw new NotImplementedException();
+            foreach (var curPath in path)
+            {
+                CmdletProvider provider;
+                var globber = new PathGlobber(_executionContext.SessionState);
+                var globbedPaths = globber.GetGlobbedProviderPaths(curPath, runtime, out provider);
+                var itemProvider = CmdletProvider.As<ItemCmdletProvider>(provider);
+                foreach (var p in globbedPaths)
+                {
+                    itemProvider.GetItem(p, runtime);
+                }
+            }
         }
 
         internal object GetItemDynamicParameters(string path, ProviderRuntime runtime)

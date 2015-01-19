@@ -509,6 +509,7 @@
     <Compile Include="Pash\Implementation\SessionStateIntrinsics.cs" />
     <Compile Include="Pash\Implementation\ISessionStateIntrinsics.cs" />
     <Compile Include="Pash\Implementation\Parser.cs" />
+    <Compile Include="Pash\Implementation\PathGlobber.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

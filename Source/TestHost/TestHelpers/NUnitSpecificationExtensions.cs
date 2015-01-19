@@ -220,14 +220,14 @@ public static class NUnitSpecificationExtensions
     }
 
 
-    public static System.Management.Path ShouldEqual(this System.Management.Path inputPath, System.Management.Path expectedPath, string message = null)
+    internal static System.Management.Path ShouldEqual(this System.Management.Path inputPath, System.Management.Path expectedPath, string message = null)
     {
         Assert.AreEqual((string)expectedPath, (string)inputPath, message);
         return inputPath;
     }
 
     [Obsolete("We need to find a way to run distinct tests per OS (or at least windows/unix). This function is a hack to get tests to run in both places")]
-    public static string PathShouldEqual(this System.Management.Path actual, System.Management.Path expected, string message = null)
+    internal static string PathShouldEqual(this System.Management.Path actual, System.Management.Path expected, string message = null)
     {
         return PathShouldEqual((string)actual, (string)expected, message);
     }

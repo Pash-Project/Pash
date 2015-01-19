@@ -15,6 +15,7 @@ namespace Microsoft.PowerShell.Commands
         public virtual string Filter { get; set; }
         public virtual SwitchParameter Force { get; set; }
         protected virtual bool ProviderSupportsShouldProcess { get { return true; } }
+        protected virtual SwitchParameter AvoidWildcardExpansion { get; set; }
 
         public bool SupportsShouldProcess { get { return ProviderSupportsShouldProcess; } }
 
@@ -37,6 +38,7 @@ namespace Microsoft.PowerShell.Commands
                 runtime.Exclude = Exclude == null ? new Collection<string>() : new Collection<string>(Exclude.ToList());
                 runtime.Filter = Filter;
                 runtime.Force = Force;
+                runtime.AvoidWildcardExpansion = AvoidWildcardExpansion;
                 return runtime;
             }
         }

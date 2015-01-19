@@ -6,10 +6,10 @@ namespace System.Management
 {
     public class PathNavigation
     {
-        public static Path CalculateFullPath(Path currentLocation, Path changeCommand)
+        public static string CalculateFullPath(string curLocation, string changeCommandStr)
         {
-            changeCommand = (changeCommand ?? string.Empty).NormalizeSlashes();
-            currentLocation = currentLocation.NormalizeSlashes();
+            var changeCommand = new Path(changeCommandStr ?? string.Empty).NormalizeSlashes();
+            var currentLocation = new Path(curLocation).NormalizeSlashes();
 
             bool applyParts = false;
             Path resultPath;

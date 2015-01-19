@@ -44,6 +44,15 @@ namespace System.Management.Automation.Provider
                 return ProviderRuntime.Force;
             }
         }
+
+        protected PSDriveInfo PSDriveInfo
+        {
+            get
+            {
+                return ProviderRuntime.PSDriveInfo;
+            }
+        }
+
         public PSHost Host { get; private set; }
         public Collection<string> Include
         {
@@ -56,7 +65,6 @@ namespace System.Management.Automation.Provider
         public CommandInvocationIntrinsics InvokeCommand { get; private set; }
         public ProviderIntrinsics InvokeProvider { get; private set; }
         protected ProviderInfo ProviderInfo { get; private set; }
-        protected PSDriveInfo PSDriveInfo { get; private set; }
         public bool Stopping { get; private set; }
 
         public SessionState SessionState
@@ -138,6 +146,16 @@ namespace System.Management.Automation.Provider
         internal void SetProviderInfo(ProviderInfo providerInfo)
         {
             ProviderInfo = providerInfo;
+        }
+
+        internal static T As<T>(CmdletProvider provider) where T : CmdletProvider
+        {
+            var casted = provider as T;
+            if (casted == null)
+            {
+                throw new NotSupportedException("The provider is not a valid provider of type '" + typeof(T).Name + "'");
+            }
+            return casted;
         }
 
         private PSObject GetItemAsPSObject(object item, Path path)

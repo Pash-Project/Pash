@@ -21,7 +21,7 @@ namespace System.Management.Automation.Provider
         protected virtual object GetItemDynamicParameters(string path) { throw new NotImplementedException(); }
 
         protected virtual void InvokeDefaultAction(string path) { throw new NotImplementedException(); }
-        protected virtual object InvokeDefaultActionDynamicParameters(Path path) { throw new NotImplementedException(); }
+        protected virtual object InvokeDefaultActionDynamicParameters(string path) { throw new NotImplementedException(); }
 
         protected abstract bool IsValidPath(string path);
 
