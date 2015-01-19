@@ -6,9 +6,15 @@ using System.Management.Automation;
 using System.Collections.Generic;
 using System.Management.Automation.Language;
 using TestPSSnapIn;
+using System.Management.Automation.Provider;
 
 namespace TestHost
 {
+
+    class DummyProvider : DriveCmdletProvider
+    {
+    }
+
     [TestFixture]
     public class SessionStateScopeTests
     {
@@ -26,7 +32,7 @@ namespace TestHost
         private SessionState localState;
         private Dictionary<AvailableStates, SessionState> states;
         private CommandManager hostCommandManager;
-        private ProviderInfo testProvider;
+        private ProviderInfo dummyProvider;
 
         [SetUp]
         public void createScopes()
@@ -35,12 +41,11 @@ namespace TestHost
 
             Runspace hostRunspace = TestHost.CreateRunspace(testHost);
 
-            var testModule = new Uri(typeof(TestDriveProvider).Assembly.CodeBase).LocalPath;
-
             globalState = hostRunspace.ExecutionContext.SessionState;
-            globalState.SessionStateGlobal.AddPSSnapIn(testModule, hostRunspace.ExecutionContext);
-            testProvider = globalState.Provider.GetOne(TestDriveProvider.ProviderName);
-            globalState.Drive.Remove("testDefault", true, "local"); // so tests can rely on that there are no drives
+
+            var dummyProviderInfo = new ProviderInfo(globalState, typeof(DummyProvider), "DummyProvider", "", null);
+            globalState.Provider.Add(dummyProviderInfo, hostRunspace.ExecutionContext);
+            dummyProvider = globalState.Provider.GetOne("DummyProvider");
 
             scriptState = new SessionState(globalState);
             scriptState.IsScriptScope = true;
@@ -357,7 +362,7 @@ namespace TestHost
 
         private PSDriveInfo createDrive(string name, string descr="")
         {
-            return new PSDriveInfo(name, testProvider, String.Empty, descr, null);
+            return new PSDriveInfo(name, dummyProvider, String.Empty, descr, null);
         }
 
         #endregion
