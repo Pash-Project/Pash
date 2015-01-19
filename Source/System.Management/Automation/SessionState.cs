@@ -71,7 +71,7 @@ namespace System.Management.Automation
             Alias = new AliasIntrinsics(_aliasScope);
 
             Drive = new DriveManagementIntrinsics(_driveScope);
-            Path = new PathIntrinsics(SessionStateGlobal);
+            Path = new PathIntrinsics(this);
             PSVariable = new PSVariableIntrinsics(_variableScope);
             LoadedModules = new ModuleIntrinsics(_moduleScope);
             Cmdlet = new CmdletIntrinsics(_cmdletScope);

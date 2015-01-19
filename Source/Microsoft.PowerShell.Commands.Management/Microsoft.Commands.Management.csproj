@@ -96,6 +96,8 @@
     <Compile Include="SetItemCommand.cs" />
     <Compile Include="ClearItemCommand.cs" />
     <Compile Include="InvokeItemCommand.cs" />
+    <Compile Include="TestPathCommand.cs" />
+    <Compile Include="TestPathType.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

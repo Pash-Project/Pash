@@ -38,73 +38,73 @@ namespace System.Management.Automation.Provider
          * Also we might want to add more behavior ord error checking to be executed before or after the stubs, so
          * let's do it this way.
          */
-        internal void ClearItem(Path path, ProviderRuntime runtime)
+        internal void ClearItem(string path, ProviderRuntime runtime)
         {
             ProviderRuntime = runtime;
             ClearItem(path);
         }
 
-        internal string[] ExpandPath(Path path, ProviderRuntime runtime)
+        internal string[] ExpandPath(string path, ProviderRuntime runtime)
         {
             ProviderRuntime = runtime;
             return ExpandPath(path);
         }
 
-        internal object ClearItemDynamicParameters(Path path, ProviderRuntime runtime)
+        internal object ClearItemDynamicParameters(string path, ProviderRuntime runtime)
         {
             ProviderRuntime = runtime;
             return ClearItemDynamicParameters(path);
         }
 
-        internal void GetItem(Path path, ProviderRuntime runtime)
+        internal void GetItem(string path, ProviderRuntime runtime)
         {
             ProviderRuntime = runtime;
             GetItem(path);
         }
 
-        internal object GetItemDynamicParameters(Path path, ProviderRuntime runtime)
+        internal object GetItemDynamicParameters(string path, ProviderRuntime runtime)
         {
             ProviderRuntime = runtime;
             return GetItemDynamicParameters(path);
         }
 
-        internal void InvokeDefaultAction(Path path, ProviderRuntime runtime)
+        internal void InvokeDefaultAction(string path, ProviderRuntime runtime)
         {
             ProviderRuntime = runtime;
             InvokeDefaultAction(path);
         }
 
-        internal object InvokeDefaultActionDynamicParameters(Path path, ProviderRuntime runtime)
+        internal object InvokeDefaultActionDynamicParameters(string path, ProviderRuntime runtime)
         {
             ProviderRuntime = runtime;
             return InvokeDefaultActionDynamicParameters(path);
         }
 
-        internal bool IsValidPath(Path path, ProviderRuntime runtime)
+        internal bool IsValidPath(string path, ProviderRuntime runtime)
         {
             ProviderRuntime = runtime;
             return IsValidPath(path);
         }
 
-        internal bool ItemExists(Path path, ProviderRuntime runtime)
+        internal bool ItemExists(string path, ProviderRuntime runtime)
         {
             ProviderRuntime = runtime;
             return ItemExists(path);
         }
 
-        internal object ItemExistsDynamicParameters(Path path, ProviderRuntime runtime)
+        internal object ItemExistsDynamicParameters(string path, ProviderRuntime runtime)
         {
             ProviderRuntime = runtime;
             return ItemExistsDynamicParameters(path);
         }
 
-        internal void SetItem(Path path, object value, ProviderRuntime runtime)
+        internal void SetItem(string path, object value, ProviderRuntime runtime)
         {
             ProviderRuntime = runtime;
             SetItem(path, value);
         }
 
-        internal object SetItemDynamicParameters(Path path, object value, ProviderRuntime runtime)
+        internal object SetItemDynamicParameters(string path, object value, ProviderRuntime runtime)
         {
             ProviderRuntime = runtime;
             return SetItemDynamicParameters(path, value);

@@ -28,7 +28,7 @@ namespace Pash.Implementation
             PSDriveInfo drive;
 
             // get internal path, resolve home path and set provider info and drive info (if resolved)
-            path = GetProviderInternalPath(path, out providerInfo, out drive);
+            path = GetProviderSpecificPath(path, out providerInfo, out drive);
             runtime.PSDriveInfo = drive;
 
             provider = _sessionState.Provider.GetInstance(providerInfo);
@@ -57,7 +57,7 @@ namespace Pash.Implementation
             return results;
         }
 
-        private string GetProviderInternalPath(string path, out ProviderInfo providerInfo, out PSDriveInfo drive)
+        internal string GetProviderSpecificPath(string path, out ProviderInfo providerInfo, out PSDriveInfo drive)
         {
             // differentiate between drive-qualified, provider-qualified, provider-internal, and provider-direct paths
             // then strip provider prefix, set provider, set drive is possible or get from Drive.Current
