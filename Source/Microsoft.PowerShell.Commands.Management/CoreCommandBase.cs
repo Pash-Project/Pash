@@ -15,7 +15,10 @@ namespace Microsoft.PowerShell.Commands
         public virtual string Filter { get; set; }
         public virtual SwitchParameter Force { get; set; }
         protected virtual bool ProviderSupportsShouldProcess { get { return true; } }
-        protected virtual SwitchParameter AvoidWildcardExpansion { get; set; }
+
+        // The internal parameters cannot be used in that override-if-you-need fashion, because it's not part of the
+        // public API
+        internal bool AvoidWildcardExpansion { get; set; }
 
         public bool SupportsShouldProcess { get { return ProviderSupportsShouldProcess; } }
 

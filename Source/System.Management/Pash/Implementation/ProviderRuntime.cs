@@ -16,6 +16,8 @@ namespace Pash.Implementation
         internal SwitchParameter AvoidWildcardExpansion { get; set; }
         internal PSDriveInfo PSDriveInfo { get; set; }
 
+        internal bool PassThru { get; set; }
+
         private Cmdlet _cmdlet;
         private Collection<PSObject> _outputData;
         private Collection<ErrorRecord> _errorData;
@@ -24,6 +26,7 @@ namespace Pash.Implementation
         {
             _outputData = new Collection<PSObject>();
             _errorData = new Collection<ErrorRecord>();
+            PassThru = true;
         }
 
         internal ProviderRuntime(Cmdlet cmdlet)
@@ -54,7 +57,7 @@ namespace Pash.Implementation
 
         internal void WriteObject(object obj)
         {
-            if (_cmdlet != null)
+            if (_cmdlet != null && PassThru)
             {
                 _cmdlet.WriteObject(obj);
             }
@@ -66,7 +69,7 @@ namespace Pash.Implementation
 
         internal void WriteError(ErrorRecord errorRecord)
         {
-            if (_cmdlet != null)
+            if (_cmdlet != null && PassThru)
             {
                 _cmdlet.WriteError(errorRecord);
             }

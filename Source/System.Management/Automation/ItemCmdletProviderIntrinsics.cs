@@ -277,7 +277,17 @@ namespace System.Management.Automation
 
         internal void Set(string[] path, object value, ProviderRuntime runtime)
         {
-            throw new NotImplementedException();
+            foreach (var curPath in path)
+            {
+                CmdletProvider provider;
+                var globber = new PathGlobber(_executionContext.SessionState);
+                var globbedPaths = globber.GetGlobbedProviderPaths(curPath, runtime, out provider);
+                var itemProvider = CmdletProvider.As<ItemCmdletProvider>(provider);
+                foreach (var p in globbedPaths)
+                {
+                    itemProvider.SetItem(p, value, runtime);
+                }
+            }
         }
 
         internal object SetItemDynamicParameters(string path, object value, ProviderRuntime runtime)

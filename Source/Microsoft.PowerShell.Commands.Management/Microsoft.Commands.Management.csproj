@@ -93,6 +93,7 @@
     <Compile Include="CoreCommandWithCredentialsBase.cs" />
     <Compile Include="RemovePSDriveCommand.cs" />
     <Compile Include="GetItemCommand.cs" />
+    <Compile Include="SetItemCommand.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
