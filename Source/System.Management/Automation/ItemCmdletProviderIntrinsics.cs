@@ -85,7 +85,8 @@ namespace System.Management.Automation
         public void Invoke(string[] path, bool literalPath)
         {
             var runtime = new ProviderRuntime(_executionContext);
-            Invoke(path, literalPath, runtime);
+            runtime.AvoidWildcardExpansion = literalPath;
+            Invoke(path, runtime);
             runtime.ThrowFirstErrorOrContinue();
         }
 
@@ -199,9 +200,9 @@ namespace System.Management.Automation
             throw new NotImplementedException();
         }
 
-        internal void Invoke(string[] path, bool literalPath, ProviderRuntime runtime)
+        internal void Invoke(string[] path, ProviderRuntime runtime)
         {
-            throw new NotImplementedException();
+            GlobAndInvoke(path, runtime, (curPath, provider) => provider.InvokeDefaultAction(curPath, runtime));
         }
 
         internal object InvokeItemDynamicParameters(string path, ProviderRuntime runtime)
