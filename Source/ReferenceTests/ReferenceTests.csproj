@@ -63,6 +63,7 @@
     <Compile Include="Language\ScopeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\ItemCmdletProviderTests.cs" />
+    <Compile Include="Providers\ContainerCmdletProviderTests.cs" />
     <Compile Include="ReferenceHost.cs" />
     <Compile Include="Language\PipelineExecutionTests.cs" />
     <Compile Include="ReferenceTestBase.cs" />
