@@ -56,6 +56,8 @@ namespace Microsoft.PowerShell.Commands
         [Parameter]
         public SwitchParameter PassThru { get; set; }
 
+        // TODO: support for DynamicParameters (calling the providers appropriate method)
+
         protected override void ProcessRecord()
         {
             var runtime = ProviderRuntime; // assign to var because ProviderRuntime generates instances

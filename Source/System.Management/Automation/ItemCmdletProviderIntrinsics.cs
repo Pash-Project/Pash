@@ -166,7 +166,7 @@ namespace System.Management.Automation
 
         internal void Clear(string[] path, ProviderRuntime runtime)
         {
-            throw new NotImplementedException();
+            GlobAndInvoke(path, runtime, (curPath, provider) => provider.ClearItem(curPath, runtime));
         }
 
         internal object ClearItemDynamicParameters(string path, ProviderRuntime runtime)
@@ -191,17 +191,7 @@ namespace System.Management.Automation
 
         internal void Get(string[] path, ProviderRuntime runtime)
         {
-            foreach (var curPath in path)
-            {
-                CmdletProvider provider;
-                var globber = new PathGlobber(_executionContext.SessionState);
-                var globbedPaths = globber.GetGlobbedProviderPaths(curPath, runtime, out provider);
-                var itemProvider = CmdletProvider.As<ItemCmdletProvider>(provider);
-                foreach (var p in globbedPaths)
-                {
-                    itemProvider.GetItem(p, runtime);
-                }
-            }
+            GlobAndInvoke(path, runtime, (curPath, provider) => provider.GetItem(curPath, runtime));
         }
 
         internal object GetItemDynamicParameters(string path, ProviderRuntime runtime)
@@ -277,17 +267,7 @@ namespace System.Management.Automation
 
         internal void Set(string[] path, object value, ProviderRuntime runtime)
         {
-            foreach (var curPath in path)
-            {
-                CmdletProvider provider;
-                var globber = new PathGlobber(_executionContext.SessionState);
-                var globbedPaths = globber.GetGlobbedProviderPaths(curPath, runtime, out provider);
-                var itemProvider = CmdletProvider.As<ItemCmdletProvider>(provider);
-                foreach (var p in globbedPaths)
-                {
-                    itemProvider.SetItem(p, value, runtime);
-                }
-            }
+            GlobAndInvoke(path, runtime, (curPath, provider) => provider.SetItem(curPath, value, runtime));
         }
 
         internal object SetItemDynamicParameters(string path, object value, ProviderRuntime runtime)
@@ -321,6 +301,21 @@ namespace System.Management.Automation
         {
             runtime.ThrowFirstErrorOrContinue();
             return runtime.RetreiveAllProviderData();
+        }
+
+        private void GlobAndInvoke(string[] paths, ProviderRuntime runtime, Action<string, ItemCmdletProvider> method)
+        {
+            foreach (var curPath in paths)
+            {
+                CmdletProvider provider;
+                var globber = new PathGlobber(_executionContext.SessionState);
+                var globbedPaths = globber.GetGlobbedProviderPaths(curPath, runtime, out provider);
+                var itemProvider = CmdletProvider.As<ItemCmdletProvider>(provider);
+                foreach (var p in globbedPaths)
+                {
+                    method(p, itemProvider);
+                }
+            }
         }
 
         #endregion

@@ -3,14 +3,22 @@ using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands
 {
-    [Cmdlet("Get", "Item", DefaultParameterSetName="Path"
-            /*, SupportsTransactions=true, HelpUri="http://go.microsoft.com/fwlink/?LinkID=113319" */)]
-    public class GetItemCommand : CoreCommandWithCredentialsBase
+    [Cmdlet("Clear", "Item", DefaultParameterSetName="Path", SupportsShouldProcess=true
+            /*, SupportsTransactions=true, HelpUri="http://go.microsoft.com/fwlink/?LinkID=113283" */)] 
+    public class ClearItemCommand : CoreCommandWithCredentialsBase
     {
         private string[] _paths;
 
+        protected override bool ProviderSupportsShouldProcess {
+            get
+            {
+                // TODO: useful implementation based on _paths and the affected providers
+                return false;
+            }
+        }
+
         [Parameter(Position=0, ParameterSetName="Path", Mandatory=true, ValueFromPipeline=true,
-                   ValueFromPipelineByPropertyName=true)]
+            ValueFromPipelineByPropertyName=true)]
         public string[] Path
         {
             get { return _paths; }
@@ -18,7 +26,7 @@ namespace Microsoft.PowerShell.Commands
         }
 
         [Parameter(ParameterSetName="LiteralPath", Mandatory=true, ValueFromPipeline=false,
-                   ValueFromPipelineByPropertyName=true)]
+            ValueFromPipelineByPropertyName=true)]
         [Alias("PSPath")]
         public string[] LiteralPath
         {
@@ -46,7 +54,7 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            InvokeProvider.Item.Get(_paths, ProviderRuntime);
+            InvokeProvider.Item.Clear(_paths, ProviderRuntime);
         }
     }
 }

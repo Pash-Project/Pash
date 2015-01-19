@@ -94,6 +94,7 @@
     <Compile Include="RemovePSDriveCommand.cs" />
     <Compile Include="GetItemCommand.cs" />
     <Compile Include="SetItemCommand.cs" />
+    <Compile Include="ClearItemCommand.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
