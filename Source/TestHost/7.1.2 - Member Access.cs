@@ -198,21 +198,11 @@ $a.ID									# get ID from each element in the array
         }
 
         [Test]
-        [Platform("Win")]
-        public void CallGetTypeOnTypeOnWindows()
+        public void CallGetTypeOnType()
         {
             string result = TestHost.Execute("'abc'.GetType().GetType().FullName");
 
-            Assert.AreEqual("System.RuntimeType" + Environment.NewLine, result);
-        }
-
-        [Test]
-        [Platform("Unix")]
-        public void CallGetTypeOnTypeOnUnix()
-        {
-            string result = TestHost.Execute("'abc'.GetType().GetType().FullName");
-
-            Assert.AreEqual("System.MonoType" + Environment.NewLine, result);
+            Assert.AreEqual(typeof(System.Environment).GetType().FullName + Environment.NewLine, result);
         }
 
         [Test]
@@ -224,21 +214,11 @@ $a.ID									# get ID from each element in the array
         }
 
         [Test]
-        [Platform("Win")]
-        public void CallGetTypeMethodOnSystemEnvironmentOnWindows()
+        public void CallGetTypeMethodOnSystemEnvironment()
         {
             string result = TestHost.Execute("[Environment].GetType().FullName");
 
-            Assert.AreEqual("System.RuntimeType" + Environment.NewLine, result);
-        }
-
-        [Test]
-        [Platform("Unix")]
-        public void CallGetTypeMethodOnSystemEnvironmentOnUnix()
-        {
-            string result = TestHost.Execute("[Environment].GetType().FullName");
-
-            Assert.AreEqual("System.MonoType" + Environment.NewLine, result);
+            Assert.AreEqual(typeof(System.Environment).GetType().FullName + Environment.NewLine, result);
         }
 
         [Test]
@@ -253,27 +233,13 @@ $path.FullName
         }
 
         [Test]
-        [Platform("Win")]
-        public void CallGetTypeOnTypeReferencedByVariableOnWindows()
+        public void CallGetTypeOnTypeReferencedByVariable()
         {
             var result = TestHost.Execute(true, @"
 $path = [System.IO.Path]
 $path.GetType().FullName
 ");
-
-            Assert.AreEqual("System.RuntimeType" + Environment.NewLine, result);
-        }
-
-        [Test]
-        [Platform("Unix")]
-        public void CallGetTypeOnTypeReferencedByVariableOnUnix()
-        {
-            var result = TestHost.Execute(true, @"
-$path = [System.IO.Path]
-$path.GetType().FullName
-");
-
-            Assert.AreEqual("System.MonoType" + Environment.NewLine, result);
+            Assert.AreEqual(typeof(System.Environment).GetType().FullName + Environment.NewLine, result);
         }
     }
 }
