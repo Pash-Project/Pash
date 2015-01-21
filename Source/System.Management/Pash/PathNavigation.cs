@@ -4,12 +4,12 @@ using System.Linq;
 
 namespace System.Management
 {
-    public class PathNavigation
+    internal class PathNavigation
     {
-        public static Path CalculateFullPath(Path currentLocation, Path changeCommand)
+        public static string CalculateFullPath(Path curLocation, Path changeCommandStr)
         {
-            changeCommand = (changeCommand ?? string.Empty).NormalizeSlashes();
-            currentLocation = currentLocation.NormalizeSlashes();
+            var changeCommand = (changeCommandStr ?? string.Empty).NormalizeSlashes();
+            var currentLocation = curLocation.NormalizeSlashes();
 
             bool applyParts = false;
             Path resultPath;

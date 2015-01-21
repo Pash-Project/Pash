@@ -92,6 +92,13 @@
     <Compile Include="NewPSDriveCommand.cs" />
     <Compile Include="CoreCommandWithCredentialsBase.cs" />
     <Compile Include="RemovePSDriveCommand.cs" />
+    <Compile Include="GetItemCommand.cs" />
+    <Compile Include="SetItemCommand.cs" />
+    <Compile Include="ClearItemCommand.cs" />
+    <Compile Include="InvokeItemCommand.cs" />
+    <Compile Include="TestPathCommand.cs" />
+    <Compile Include="TestPathType.cs" />
+    <Compile Include="CoreCommandWithPathsBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

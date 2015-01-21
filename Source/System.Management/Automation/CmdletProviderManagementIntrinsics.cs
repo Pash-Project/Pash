@@ -151,6 +151,28 @@ namespace System.Management.Automation
             }
         }
 
+        internal CmdletProvider Add(ProviderInfo providerInfo, ExecutionContext executionContext)
+        {
+            CmdletProvider provider = providerInfo.CreateInstance();
+
+            var runtime = new ProviderRuntime(executionContext);
+            providerInfo = provider.Start(providerInfo, runtime);
+            provider.SetProviderInfo(providerInfo);
+
+            // Cache the Provider's Info and instance
+            if (!_providers.ContainsKey(providerInfo.Name))
+            {
+                _providers.Add(providerInfo.Name, new List<ProviderInfo>());
+            }
+            _providers[providerInfo.Name].Add(providerInfo);
+            _providerInstances[providerInfo] = provider;
+
+            // provider is added, default drives can be added
+            AddDefaultDrives(provider, runtime);
+
+            return provider;
+        }
+
         #endregion
 
         #region private helper functions
@@ -176,28 +198,6 @@ namespace System.Management.Automation
                 return;
             }
             list.Remove(info);
-        }
-
-        private CmdletProvider Add(ProviderInfo providerInfo, ExecutionContext executionContext)
-        {
-            CmdletProvider provider = providerInfo.CreateInstance();
-
-            var runtime = new ProviderRuntime(executionContext);
-            providerInfo = provider.Start(providerInfo, runtime);
-            provider.SetProviderInfo(providerInfo);
-
-            // Cache the Provider's Info and instance
-            if (!_providers.ContainsKey(providerInfo.Name))
-            {
-                _providers.Add(providerInfo.Name, new List<ProviderInfo>());
-            }
-            _providers[providerInfo.Name].Add(providerInfo);
-            _providerInstances[providerInfo] = provider;
-
-            // provider is added, default drives can be added
-            AddDefaultDrives(provider, runtime);
-
-            return provider;
         }
 
         private void AddDefaultDrives(CmdletProvider providerInstance, ProviderRuntime runtime)

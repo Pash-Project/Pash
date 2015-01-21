@@ -16,6 +16,10 @@ namespace Microsoft.PowerShell.Commands
         public virtual SwitchParameter Force { get; set; }
         protected virtual bool ProviderSupportsShouldProcess { get { return true; } }
 
+        // The internal parameters cannot be used in that override-if-you-need fashion, because it's not part of the
+        // public API
+        internal bool AvoidWildcardExpansion { get; set; }
+
         public bool SupportsShouldProcess { get { return ProviderSupportsShouldProcess; } }
 
         protected bool DoesProviderSupportShouldProcess(string[] paths)
@@ -37,6 +41,7 @@ namespace Microsoft.PowerShell.Commands
                 runtime.Exclude = Exclude == null ? new Collection<string>() : new Collection<string>(Exclude.ToList());
                 runtime.Filter = Filter;
                 runtime.Force = Force;
+                runtime.AvoidWildcardExpansion = AvoidWildcardExpansion;
                 return runtime;
             }
         }

@@ -9,28 +9,28 @@ namespace System.Management
     /// <summary>
     /// Imutable class that acts like a string, but provides many options around manipulating a powershell 'path'.
     /// </summary>
-    public class Path
+    internal class Path
     {
         private readonly string _rawPath;
-        static readonly string _predeterminedCorrectSlash;
-        static readonly string _predeterminedWrongSlash;
+        public static readonly string PredeterminedCorrectSlash;
+        public static readonly string PredeterminedWrongSlash;
 
         static Path()
         {
             if (System.IO.Path.DirectorySeparatorChar.Equals('/'))
             {
-                _predeterminedCorrectSlash = "/";
-                _predeterminedWrongSlash = "\\";
+                PredeterminedCorrectSlash = "/";
+                PredeterminedWrongSlash = "\\";
             }
             else
             {
-                _predeterminedCorrectSlash = "\\";
-                _predeterminedWrongSlash = "/";
+                PredeterminedCorrectSlash = "\\";
+                PredeterminedWrongSlash = "/";
             }
         }
 
         public Path(string rawPath)
-            : this(_predeterminedCorrectSlash, _predeterminedWrongSlash, rawPath)
+            : this(PredeterminedCorrectSlash, PredeterminedWrongSlash, rawPath)
         {
         }
 
@@ -439,7 +439,7 @@ namespace System.Management
         public int Length { get { return _rawPath.Length; } }
     }
 
-    public static partial class _
+    internal static partial class _
     {
         public static Path AsPath(this string value)
         {

@@ -13,6 +13,10 @@ namespace Pash.Implementation
         internal SwitchParameter Force { get; set; }
         internal ExecutionContext ExecutionContext { get; private set; }
         internal PSCredential Credential { get; set; }
+        internal SwitchParameter AvoidWildcardExpansion { get; set; }
+        internal PSDriveInfo PSDriveInfo { get; set; }
+
+        internal bool PassThru { get; set; }
 
         private Cmdlet _cmdlet;
         private Collection<PSObject> _outputData;
@@ -22,19 +26,26 @@ namespace Pash.Implementation
         {
             _outputData = new Collection<PSObject>();
             _errorData = new Collection<ErrorRecord>();
-        }
-
-        internal ProviderRuntime(ExecutionContext executionContext)
-            : this()
-        {
-            ExecutionContext = executionContext;
+            PassThru = true;
         }
 
         internal ProviderRuntime(Cmdlet cmdlet)
-            : this()
+            : this(cmdlet.ExecutionContext)
         {
             _cmdlet = cmdlet;
-            ExecutionContext = cmdlet.ExecutionContext;
+        }
+
+        internal ProviderRuntime(ExecutionContext executionContext)
+            : this(executionContext, false, false)
+        {
+        }
+
+        internal ProviderRuntime(ExecutionContext executionContext, bool force, bool avoidWildcardExpansion)
+            : this()
+        {
+            ExecutionContext = executionContext;
+            AvoidWildcardExpansion = avoidWildcardExpansion;
+            Force = force;
         }
 
         internal Collection<PSObject> RetreiveAllProviderData()
@@ -46,7 +57,7 @@ namespace Pash.Implementation
 
         internal void WriteObject(object obj)
         {
-            if (_cmdlet != null)
+            if (_cmdlet != null && PassThru)
             {
                 _cmdlet.WriteObject(obj);
             }
@@ -58,7 +69,7 @@ namespace Pash.Implementation
 
         internal void WriteError(ErrorRecord errorRecord)
         {
-            if (_cmdlet != null)
+            if (_cmdlet != null && PassThru)
             {
                 _cmdlet.WriteError(errorRecord);
             }

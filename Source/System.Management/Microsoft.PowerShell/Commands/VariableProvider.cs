@@ -23,10 +23,10 @@ namespace Microsoft.PowerShell.Commands
             return collection;
         }
 
-        internal override object GetSessionStateItem(Path name)
+        internal override object GetSessionStateItem(string name)
         {
             // TODO: deal with empty path
-            if (string.Equals("variable:" + name.CorrectSlash, name, StringComparison.CurrentCultureIgnoreCase))
+            if (string.Equals("variable:" + new Path(name).CorrectSlash, name, StringComparison.CurrentCultureIgnoreCase))
                 return true;
 
             return SessionState.PSVariable.Get(name);
@@ -52,7 +52,7 @@ namespace Microsoft.PowerShell.Commands
             return (IDictionary)SessionState.PSVariable.GetAll();
         }
 
-        internal override void SetSessionStateItem(Path name, object value, bool writeItem)
+        internal override void SetSessionStateItem(string name, object value, bool writeItem)
         {
             PSVariable variable = null;
             if (value != null)
@@ -82,13 +82,13 @@ namespace Microsoft.PowerShell.Commands
             }
         }
 
-        internal override void RemoveSessionStateItem(Path name)
+        internal override void RemoveSessionStateItem(string name)
         {
             // TODO: can be Force'ed
             SessionState.PSVariable.Remove(name);
         }
 
-        protected override void GetItem(Path name)
+        protected override void GetItem(string name)
         {
             // HACK: should it be this way?
 

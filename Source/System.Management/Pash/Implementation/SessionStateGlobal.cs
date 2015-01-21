@@ -231,11 +231,6 @@ namespace Pash.Implementation
             throw new NotImplementedException();
         }
 
-        internal bool IsValidPath(string path)
-        {
-            throw new NotImplementedException();
-        }
-
         internal PathInfoStack LocationStack(string stackName)
         {
             throw new NotImplementedException();

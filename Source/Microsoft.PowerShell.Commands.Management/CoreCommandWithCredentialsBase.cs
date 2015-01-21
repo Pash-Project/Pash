@@ -14,7 +14,7 @@ namespace Microsoft.PowerShell.Commands
         {
         }
 
-        internal virtual ProviderRuntime ProviderRuntime
+        internal override ProviderRuntime ProviderRuntime
         {
             get
             {

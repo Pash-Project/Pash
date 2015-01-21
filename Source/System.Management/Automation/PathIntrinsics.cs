@@ -2,29 +2,33 @@
 using System;
 using System.Collections.ObjectModel;
 using Pash.Implementation;
+using System.Management.Automation.Runspaces;
+using System.Management.Automation.Provider;
 
 namespace System.Management.Automation
 {
     public sealed class PathIntrinsics
     {
-        private SessionStateGlobal _sessionState;
+        private SessionStateGlobal _sessionStateGlobal;
+        private SessionState _sessionState;
 
-        internal PathIntrinsics(SessionStateGlobal sessionState)
+        internal PathIntrinsics(SessionState sessionState)
         {
             _sessionState = sessionState;
+            _sessionStateGlobal = sessionState.SessionStateGlobal;
         }
 
         public PathInfo CurrentFileSystemLocation { get; private set; }
-        public PathInfo CurrentLocation { get { return _sessionState.CurrentLocation; } }
+        public PathInfo CurrentLocation { get { return _sessionStateGlobal.CurrentLocation; } }
 
         public string Combine(string parent, string child)
         {
-            return _sessionState.MakePath(parent, child);
+            return _sessionStateGlobal.MakePath(parent, child);
         }
 
         public PathInfo CurrentProviderLocation(string providerName)
         {
-            return _sessionState.CurrentProviderLocation(providerName);
+            return _sessionStateGlobal.CurrentProviderLocation(providerName);
         }
 
         public Collection<string> GetResolvedProviderPathFromProviderPath(string path, string providerId)
@@ -64,57 +68,68 @@ namespace System.Management.Automation
 
         public bool IsValid(string path)
         {
-            return _sessionState.IsValidPath(path);
+            // Runspace.DefaultRunspace.ExecutionContext should be the used one as it's set during the #ExecutionContextChange
+            var runtime = new ProviderRuntime(Runspace.DefaultRunspace.ExecutionContext);
+            return IsValid(path, runtime);
         }
 
         public PathInfoStack LocationStack(string stackName)
         {
-            return _sessionState.LocationStack(stackName);
+            return _sessionStateGlobal.LocationStack(stackName);
         }
 
         public string NormalizeRelativePath(string path, string basePath)
         {
-            return _sessionState.NormalizeRelativePath(path, basePath);
+            return _sessionStateGlobal.NormalizeRelativePath(path, basePath);
         }
 
         public string ParseChildName(string path)
         {
-            return _sessionState.GetPathChildName(path);
+            return _sessionStateGlobal.GetPathChildName(path);
         }
 
         public string ParseParent(string path, string root)
         {
-            return _sessionState.GetParentPath(path, root);
+            return _sessionStateGlobal.GetParentPath(path, root);
         }
 
         public PathInfo PopLocation(string stackName)
         {
-            return _sessionState.PopLocation(stackName);
+            return _sessionStateGlobal.PopLocation(stackName);
         }
 
         public void PushCurrentLocation(string stackName)
         {
-            _sessionState.PushCurrentLocation(stackName);
+            _sessionStateGlobal.PushCurrentLocation(stackName);
         }
 
         public PathInfoStack SetDefaultLocationStack(string stackName)
         {
-            return _sessionState.SetDefaultLocationStack(stackName);
+            return _sessionStateGlobal.SetDefaultLocationStack(stackName);
         }
 
         public PathInfo SetLocation(string path)
         {
-            return _sessionState.SetLocation(path);
+            return _sessionStateGlobal.SetLocation(path);
         }
 
         // internals
+        internal bool IsValid(string path, ProviderRuntime runtime)
+        {
+            ProviderInfo providerInfo;
+            PSDriveInfo driveInfo;
+            path = new PathGlobber(_sessionState).GetProviderSpecificPath(path, out providerInfo, out driveInfo);
+            var provider = _sessionStateGlobal.Provider.GetInstance(providerInfo);
+            var itemProvider = CmdletProvider.As<ItemCmdletProvider>(provider);
+            return itemProvider.IsValidPath(path, runtime);
+        }
+
         //internal string Combine(string parent, string child, CmdletProviderContext context);
         //internal Collection<string> GetResolvedProviderPathFromProviderPath(string path, string providerId, CmdletProviderContext context);
         //internal Collection<string> GetResolvedProviderPathFromPSPath(string path, CmdletProviderContext context, out ProviderInfo provider);
         //internal Collection<PathInfo> GetResolvedPSPathFromPSPath(string path, CmdletProviderContext context);
         //internal string GetUnresolvedProviderPathFromPSPath(string path, CmdletProviderContext context, out ProviderInfo provider, out PSDriveInfo drive);
         //internal bool IsCurrentLocationOrAncestor(string path, CmdletProviderContext context);
-        //internal bool IsValid(string path, CmdletProviderContext context);
         //internal string NormalizeRelativePath(string path, string basePath, CmdletProviderContext context);
         //internal string ParseChildName(string path, CmdletProviderContext context);
         //internal string ParseParent(string path, string root, CmdletProviderContext context);
@@ -122,7 +137,7 @@ namespace System.Management.Automation
 
         internal PathInfo SetLocation(string path, ProviderRuntime providerRuntime)
         {
-            return _sessionState.SetLocation(path, providerRuntime);
+            return _sessionStateGlobal.SetLocation(path, providerRuntime);
         }
 
         #region Path Operations

@@ -1,6 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System.Collections.Generic;
 using System.Management.Automation;
+using System.Management;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -39,7 +40,7 @@ namespace Microsoft.PowerShell.Commands
                     List<PSDriveInfo> list = GetDrives(PSDrive, null, PSProvider, "local");
                     foreach (PSDriveInfo pdi in list)
                     {
-                        WriteObject(new PathInfo(pdi, pdi.Provider, pdi.CurrentLocation.MakePath(pdi.Name), SessionState));
+                        WriteObject(new PathInfo(pdi, pdi.Provider, new Path(pdi.CurrentLocation).MakePath(pdi.Name), SessionState));
                     }
                 }
                 else if ((PSProvider != null) && (PSProvider.Length > 0))

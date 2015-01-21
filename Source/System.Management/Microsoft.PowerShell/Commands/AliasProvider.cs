@@ -23,12 +23,12 @@ namespace Microsoft.PowerShell.Commands
             return collection;
         }
 
-        protected override object NewItemDynamicParameters(Path path, string type, object newItemValue)
+        protected override object NewItemDynamicParameters(string path, string type, object newItemValue)
         {
             return new AliasProviderDynamicParameters();
         }
 
-        protected override object SetItemDynamicParameters(Path path, object value)
+        protected override object SetItemDynamicParameters(string path, object value)
         {
             return new AliasProviderDynamicParameters();
         }
@@ -38,7 +38,7 @@ namespace Microsoft.PowerShell.Commands
             throw new NotImplementedException();
         }
 
-        internal override object GetSessionStateItem(Path name)
+        internal override object GetSessionStateItem(string name)
         {
             throw new NotImplementedException();
         }
@@ -53,12 +53,12 @@ namespace Microsoft.PowerShell.Commands
             throw new NotImplementedException();
         }
 
-        internal override void RemoveSessionStateItem(Path name)
+        internal override void RemoveSessionStateItem(string name)
         {
             throw new NotImplementedException();
         }
 
-        internal override void SetSessionStateItem(Path name, object value, bool writeItem)
+        internal override void SetSessionStateItem(string name, object value, bool writeItem)
         {
             throw new NotImplementedException();
         }

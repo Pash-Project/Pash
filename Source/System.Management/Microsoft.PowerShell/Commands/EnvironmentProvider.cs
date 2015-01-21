@@ -23,7 +23,7 @@ namespace Microsoft.PowerShell.Commands
             return collection;
         }
 
-        internal override object GetSessionStateItem(Path name)
+        internal override object GetSessionStateItem(string name)
         {
             Path path = PathIntrinsics.RemoveDriveName(name);
             path = path.TrimStartSlash();
@@ -45,12 +45,12 @@ namespace Microsoft.PowerShell.Commands
             return dictionary;
         }
 
-        internal override void RemoveSessionStateItem(Path name)
+        internal override void RemoveSessionStateItem(string name)
         {
             Environment.SetEnvironmentVariable(name, null);
         }
 
-        internal override void SetSessionStateItem(Path path, object value, bool writeItem)
+        internal override void SetSessionStateItem(string path, object value, bool writeItem)
         {
             if (value == null)
             {
@@ -76,9 +76,9 @@ namespace Microsoft.PowerShell.Commands
             }
         }
 
-        protected override void GetItem(Path name)
+        protected override void GetItem(string name)
         {
-            Path path = PathIntrinsics.RemoveDriveName(name.TrimEndSlash());
+            Path path = PathIntrinsics.RemoveDriveName(new Path(name).TrimEndSlash());
             GetChildItems(path, false);
         }
     }

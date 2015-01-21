@@ -7,11 +7,11 @@ namespace System.Management.Automation.Provider
 {
     public interface IContentCmdletProvider
     {
-        void ClearContent(Path path);
-        object ClearContentDynamicParameters(Path path);
-        IContentReader GetContentReader(Path path);
-        object GetContentReaderDynamicParameters(Path path);
-        IContentWriter GetContentWriter(Path path);
-        object GetContentWriterDynamicParameters(Path path);
+        void ClearContent(string path);
+        object ClearContentDynamicParameters(string path);
+        IContentReader GetContentReader(string path);
+        object GetContentReaderDynamicParameters(string path);
+        IContentWriter GetContentWriter(string path);
+        object GetContentWriterDynamicParameters(string path);
     }
 }
