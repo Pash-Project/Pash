@@ -61,11 +61,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ContentCommandBase.cs" />
     <Compile Include="ConvertPathCommand.cs" />
     <Compile Include="CopyItemCommand.cs" />
     <Compile Include="CoreCommandBase.cs" />
     <Compile Include="DriveMatchingCoreCommandBase.cs" />
     <Compile Include="GetChildItemCommand.cs" />
+    <Compile Include="GetContentCommand.cs" />
     <Compile Include="GetLocationCommand.cs" />
     <Compile Include="GetProcessCommand.cs" />
     <Compile Include="GetPSDriveCommand.cs" />

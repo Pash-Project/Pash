@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Commands\AddMemberTests.cs" />
     <Compile Include="Commands\AddTypeTests.cs" />
+    <Compile Include="Commands\GetContentTests.cs" />
     <Compile Include="Commands\ImportModuleTests.cs" />
     <Compile Include="Commands\RemoveModuleTests.cs" />
     <Compile Include="Commands\WhereObjectTests.cs" />
