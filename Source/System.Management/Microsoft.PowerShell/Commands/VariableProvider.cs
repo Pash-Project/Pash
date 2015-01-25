@@ -25,11 +25,9 @@ namespace Microsoft.PowerShell.Commands
 
         internal override object GetSessionStateItem(string name)
         {
-            // TODO: deal with empty path
-            if (string.Equals("variable:" + new Path(name).CorrectSlash, name, StringComparison.CurrentCultureIgnoreCase))
-                return true;
-
-            return SessionState.PSVariable.Get(name);
+            Path path = PathIntrinsics.RemoveDriveName(name);
+            path = path.TrimStartSlash();
+            return SessionState.PSVariable.Get(path);
         }
 
         internal override bool CanRenameItem(object item)
@@ -90,17 +88,18 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void GetItem(string name)
         {
-            // HACK: should it be this way?
+            name = PathIntrinsics.RemoveDriveName(new Path(name).TrimEndSlash());
+            GetChildItems(name, false);
+        }
 
-            if (string.Equals("variable:\\", name, StringComparison.CurrentCultureIgnoreCase))
+        internal override object GetValueOfItem(object item)
+        {
+            var variable = item as PSVariable;
+            if (variable != null)
             {
-                name = PathIntrinsics.RemoveDriveName(name);
-                GetChildItems(name, false);
+                return variable.Value;
             }
-            else
-            {
-                GetItem(PathIntrinsics.RemoveDriveName(name));
-            }
+            return base.GetValueOfItem(item);
         }
     }
 }
