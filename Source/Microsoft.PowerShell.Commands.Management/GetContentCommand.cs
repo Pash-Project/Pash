@@ -1,9 +1,12 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Management.Automation;
 using System.IO;
+using System.Management.Automation;
+using System.Management.Automation.Provider;
+using System.Management.Pash.Implementation;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -27,92 +30,98 @@ namespace Microsoft.PowerShell.Commands
             TotalCount = -1;
         }
 
-        List<object> pendingLines = new List<object>();
+        List<object> pendingItems = new List<object>();
+        IContentReader contentReader;
 
         protected override void ProcessRecord()
         {
             foreach (string fileName in Path)
             {
-                CheckPathHasSupportedProvider(fileName);
-
-                if (Tail > 0)
+                using (contentReader = InvokeProvider.Content.GetReader(fileName).Single())
                 {
-                    WriteLastLinesToPipeline(fileName);
+                    if (Tail > 0)
+                    {
+                        WriteLastItemsToPipeline();
+                    }
+                    else
+                    {
+                        WriteItemsToPipeline();
+                    }
+
+                    WritePendingItems();
                 }
-                else
-                {
-                    WriteLinesToPipeline(fileName);
-                }
-
-                WritePendingLines();
             }
         }
 
-        private void CheckPathHasSupportedProvider(string fileName)
+        private void WriteLastItemsToPipeline()
         {
-            PSDriveInfo drive;
-            var provider = SessionState.SessionStateGlobal.GetProviderByPath(fileName, out drive) as FileSystemProvider;
-            if (provider == null)
+            foreach (object item in ReadItems().Reverse().Take(Tail).Reverse())
             {
-                throw new NotImplementedException("Not supported by FileSystemProvider");
+                WriteItem(item);
             }
         }
 
-        private void WriteLastLinesToPipeline(string fileName)
-        {
-            foreach (string line in File.ReadLines(fileName).Reverse().Take(Tail).Reverse())
-            {
-                WriteLine(line);
-            }
-        }
-
-        private void WriteLine(string line)
+        private void WriteItem(object item)
         {
             if (ReadCount > 1)
             {
-                pendingLines.Add(line);
+                pendingItems.Add(item);
 
-                if (pendingLines.Count >= ReadCount)
+                if (pendingItems.Count >= ReadCount)
                 {
-                    WritePendingLines();
+                    WritePendingItems();
                 }
             }
             else
             {
-                WriteObject(line);
+                WriteObject(item);
             }
         }
 
-        private void WritePendingLines()
+        private void WritePendingItems()
         {
-            if ((pendingLines != null) && (pendingLines.Count > 0))
+            if ((pendingItems != null) && (pendingItems.Count > 0))
             {
-                WriteObject(pendingLines.ToArray());
-                pendingLines.Clear();
+                WriteObject(pendingItems.ToArray());
+                pendingItems.Clear();
             }
         }
 
-        private void WriteLinesToPipeline(string fileName)
+        private void WriteItemsToPipeline()
         {
-            int currentLineNumber = 1;
-            if (!ReadMoreLines(currentLineNumber))
+            int currentItemNumber = 1;
+            if (!ReadMoreItems(currentItemNumber))
             {
                 return;
             }
 
-            foreach (string line in File.ReadLines(fileName))
+            foreach (object item in ReadItems())
             {
-                WriteLine(line);
+                WriteItem(item);
 
-                currentLineNumber++;
-                if (!ReadMoreLines(currentLineNumber))
+                currentItemNumber++;
+                if (!ReadMoreItems(currentItemNumber))
                 {
                     return;
                 }
             }
         }
 
-        private bool ReadMoreLines(int currentLineNumber)
+        private IEnumerable<object> ReadItems()
+        {
+            IList items;
+            do
+            {
+                items = contentReader.Read(1);
+                if (items.Count > 0)
+                {
+                    yield return items[0];
+                }
+            }
+            while (items.Count > 0);
+        }
+
+        private bool ReadMoreItems(int currentLineNumber)
         {
             return (TotalCount == -1) || (currentLineNumber <= TotalCount);
         }

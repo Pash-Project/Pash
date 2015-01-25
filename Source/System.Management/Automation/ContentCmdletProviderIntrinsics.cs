@@ -18,7 +18,21 @@ namespace System.Management.Automation
         }
 
         public void Clear(string path) { throw new NotImplementedException(); }
-        public Collection<IContentReader> GetReader(string path) { throw new NotImplementedException(); }
+
+        public Collection<IContentReader> GetReader(string path)
+        {
+            PSDriveInfo drive;
+            var provider = _cmdlet.State.SessionStateGlobal.GetProviderByPath(path, out drive) as IContentCmdletProvider;
+            if (provider != null)
+            {
+                var readers = new Collection<IContentReader>();
+                readers.Add(provider.GetContentReader(path));
+                return readers;
+            }
+
+            throw new PSInvalidOperationException(String.Format("The provider for path '{0}' is not a IContentCmdletProvider", path));
+        }
+
         public Collection<IContentWriter> GetWriter(string path) { throw new NotImplementedException(); }
     }
 }

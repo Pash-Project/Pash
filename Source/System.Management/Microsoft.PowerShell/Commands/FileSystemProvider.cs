@@ -7,6 +7,7 @@ using System.Management.Automation.Provider;
 using System.Security;
 using System.Security.AccessControl;
 using System.Management;
+using System.Management.Pash.Implementation;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -374,7 +375,7 @@ namespace Microsoft.PowerShell.Commands
 
         public IContentReader GetContentReader(string path)
         {
-            throw new NotImplementedException();
+            return new FileContentReader(path);
         }
 
         public object GetContentReaderDynamicParameters(string path)
