@@ -92,5 +92,15 @@ namespace ReferenceTests.Providers
 
             StringAssert.Contains("TestValue" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void GetContentForEnviromentVariable()
+        {
+            Environment.SetEnvironmentVariable(PashTestEnvironmentVariableName, "TestValue");
+            string command = string.Format("Get-Content env:{0}{1}", Path.DirectorySeparatorChar, PashTestEnvironmentVariableName);
+            string result = ReferenceHost.Execute(command);
+
+            StringAssert.Contains("TestValue" + Environment.NewLine, result);
+        }
     }
 }
