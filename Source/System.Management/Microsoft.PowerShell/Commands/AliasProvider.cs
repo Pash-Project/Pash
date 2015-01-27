@@ -40,7 +40,9 @@ namespace Microsoft.PowerShell.Commands
 
         internal override object GetSessionStateItem(string name)
         {
-            throw new NotImplementedException();
+            Path path = PathIntrinsics.RemoveDriveName(name);
+            path = path.TrimStartSlash();
+            return SessionState.Alias.Get(path);
         }
 
         internal override System.Collections.IDictionary GetSessionStateTable()
@@ -50,7 +52,12 @@ namespace Microsoft.PowerShell.Commands
 
         internal override object GetValueOfItem(object item)
         {
-            throw new NotImplementedException();
+            var aliasInfo = item as AliasInfo;
+            if (aliasInfo != null)
+            {
+                return aliasInfo.Definition;
+            }
+            return base.GetValueOfItem(item);
         }
 
         internal override void RemoveSessionStateItem(string name)
@@ -61,6 +68,12 @@ namespace Microsoft.PowerShell.Commands
         internal override void SetSessionStateItem(string name, object value, bool writeItem)
         {
             throw new NotImplementedException();
+        }
+
+        protected override void GetItem(string path)
+        {
+            path = PathIntrinsics.RemoveDriveName(new Path(path).TrimEndSlash());
+            GetChildItems(path, false);
         }
     }
 }
