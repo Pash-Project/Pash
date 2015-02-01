@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClearContentCommand.cs" />
     <Compile Include="ContentCommandBase.cs" />
     <Compile Include="ConvertPathCommand.cs" />
     <Compile Include="CopyItemCommand.cs" />
