@@ -32,7 +32,7 @@ namespace ReferenceTests.Providers
                 "ContentWriter.Close()");
         }
 
-        [Test, Explicit("Not implemented")]
+        [Test]
         public void GetContent()
         {
             string result = ReferenceHost.Execute("Get-Content -path TestContentCmdletProvider::foo");

@@ -39,6 +39,11 @@ namespace System.Management.Automation
 
         private string GetProviderPath(string path)
         {
+            if (path.IndexOf("::") == -1)
+            {
+                return path;
+            }
+
             PSDriveInfo drive;
             ProviderInfo providerInfo;
             var globber = new PathGlobber(_cmdlet.ExecutionContext.SessionState);
@@ -49,7 +54,8 @@ namespace System.Management.Automation
         {
             IContentCmdletProvider provider = GetContentCmdletProvider(path);
             var readers = new Collection<IContentReader>();
-            readers.Add(provider.GetContentReader(path));
+            string providerPath = GetProviderPath(path);
+            readers.Add(provider.GetContentReader(providerPath));
             return readers;
        }
 

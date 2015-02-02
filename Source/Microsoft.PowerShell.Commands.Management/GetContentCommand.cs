@@ -37,7 +37,8 @@ namespace Microsoft.PowerShell.Commands
         {
             foreach (string fileName in Path)
             {
-                using (contentReader = InvokeProvider.Content.GetReader(fileName).Single())
+                contentReader = InvokeProvider.Content.GetReader(fileName).Single();
+                try
                 {
                     if (Tail > 0)
                     {
@@ -49,6 +50,10 @@ namespace Microsoft.PowerShell.Commands
                     }
 
                     WritePendingItems();
+                }
+                finally
+                {
+                    contentReader.Close();
                 }
             }
         }
