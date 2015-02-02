@@ -214,6 +214,11 @@ namespace System.Management.Automation
                 throw new PSInvalidOperationException("The default drive collection for this null!");
             }
 
+            if (drives.Count == 0)
+            {
+                drives = providerInstance.GetDriveFromProviderInfo();
+            }
+
             foreach (PSDriveInfo driveInfo in drives)
             {
                 if (driveInfo == null)

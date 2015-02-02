@@ -216,5 +216,13 @@ namespace System.Management.Automation.Provider
             psObject.Properties.Add(new PSNoteProperty("PSProvider", ProviderInfo));
             return psObject;
         }
+
+        internal Collection<PSDriveInfo> GetDriveFromProviderInfo()
+        {
+            var drives = new Collection<PSDriveInfo>();
+            var drive = new PSDriveInfo(ProviderInfo.Name, ProviderInfo, string.Empty, string.Empty, null);
+            drives.Add(drive);
+            return drives;
+        }
     }
 }
