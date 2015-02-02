@@ -1,6 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Management.Automation.Host;
 using System.Collections.ObjectModel;
@@ -220,8 +221,17 @@ namespace System.Management.Automation.Provider
         internal Collection<PSDriveInfo> GetDriveFromProviderInfo()
         {
             var drives = new Collection<PSDriveInfo>();
-            var drive = new PSDriveInfo(ProviderInfo.Name, ProviderInfo, string.Empty, string.Empty, null);
-            drives.Add(drive);
+
+            string providerName = GetType().GetCustomAttributes(typeof(CmdletProviderAttribute), true)
+                .OfType<CmdletProviderAttribute>()
+                .Select(attribute => attribute.ProviderName)
+                .FirstOrDefault();
+
+            if (!String.IsNullOrEmpty(providerName))
+            {
+                var drive = new PSDriveInfo(ProviderInfo.Name, ProviderInfo, string.Empty, string.Empty, null);
+                drives.Add(drive);
+            }
             return drives;
         }
     }
