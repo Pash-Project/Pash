@@ -43,7 +43,7 @@ namespace ReferenceTests.Providers
                 "ContentReader.Close()");
         }
 
-        [Test, Explicit("Not implemented")]
+        [Test]
         public void ClearContent()
         {
             string result = ReferenceHost.Execute("Clear-Content -path TestContentCmdletProvider::foo");

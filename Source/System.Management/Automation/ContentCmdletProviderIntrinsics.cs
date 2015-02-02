@@ -3,6 +3,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Management.Automation.Internal;
 using System.Management.Automation.Provider;
+using Pash.Implementation;
 
 namespace System.Management.Automation
 {
@@ -20,7 +21,8 @@ namespace System.Management.Automation
         public void Clear(string path)
         {
             IContentCmdletProvider provider = GetContentCmdletProvider(path);
-            provider.ClearContent(path);
+            string providerPath = GetProviderPath(path);
+            provider.ClearContent(providerPath);
         }
 
         private IContentCmdletProvider GetContentCmdletProvider(string path)
@@ -33,6 +35,14 @@ namespace System.Management.Automation
             }
 
             throw new PSInvalidOperationException(String.Format("The provider for path '{0}' is not a IContentCmdletProvider", path));
+        }
+
+        private string GetProviderPath(string path)
+        {
+            PSDriveInfo drive;
+            ProviderInfo providerInfo;
+            var globber = new PathGlobber(_cmdlet.ExecutionContext.SessionState);
+            return globber.GetProviderSpecificPath(path, out providerInfo, out drive);
         }
 
         public Collection<IContentReader> GetReader(string path)
