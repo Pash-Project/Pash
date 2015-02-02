@@ -66,6 +66,9 @@
     <Compile Include="Language\ScopeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\AliasProviderTests.cs" />
+    <Compile Include="Providers\ContentCmdletProviderTests.cs" />
+    <Compile Include="Providers\ContentReaderTests.cs" />
+    <Compile Include="Providers\ContentWriterTests.cs" />
     <Compile Include="Providers\FunctionProviderTests.cs" />
     <Compile Include="Providers\ItemCmdletProviderTests.cs" />
     <Compile Include="Providers\EnvironmentProviderTests.cs" />
