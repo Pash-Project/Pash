@@ -88,7 +88,13 @@ namespace Pash.Implementation
 
         string GetProviderPathFromDriveQualifiedPath(string path, out ProviderInfo providerInfo, out PSDriveInfo drive)
         {
-            throw new NotImplementedException("No support for drive qualified paths, yet");
+            var idx = path.IndexOf(":");
+            var driveName = path.Substring(0, idx);
+            // TODO: validate drive name?
+            drive = _sessionState.Drive.Get(driveName);
+            providerInfo = drive.Provider;
+            path = path.Substring(idx + 1);
+            return new Path(path).NormalizeSlashes().TrimStartSlash().ToString();
         }
 
         private bool IsProviderQualifiedPath(string path)

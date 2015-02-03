@@ -187,7 +187,18 @@ namespace System.Management.Automation
 
         internal bool Exists(string path, ProviderRuntime runtime)
         {
-            throw new NotImplementedException();
+            CmdletProvider provider;
+            var globber = new PathGlobber(_executionContext.SessionState);
+            var globbedPaths = globber.GetGlobbedProviderPaths(path, runtime, out provider);
+            var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
+            foreach (var p in globbedPaths)
+            {
+                if (!containerProvider.ItemExists(p, runtime))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         internal void Get(string[] path, ProviderRuntime runtime)
@@ -212,7 +223,31 @@ namespace System.Management.Automation
 
         internal bool IsContainer(string path, ProviderRuntime runtime)
         {
-            throw new NotImplementedException();
+            CmdletProvider provider;
+            var globber = new PathGlobber(_executionContext.SessionState);
+            var globbedPaths = globber.GetGlobbedProviderPaths(path, runtime, out provider);
+            var isContainerProvider = (provider is ContainerCmdletProvider);
+            var navProvider = provider as NavigationCmdletProvider;
+            if (!isContainerProvider && navProvider == null)
+            {
+                throw new NotSupportedException("The affected provider doesn't support container related operations.");
+            }
+            foreach (var p in globbedPaths)
+            {
+                if (navProvider != null)
+                {
+                    throw new NotImplementedException("No support for provider specific container check, yet.");
+                }
+                // otherwise it's just a ContainerCmdletProvider. It doesn't support hierarchies, only drives can be containers
+                // an empty path means "root" path in a drive
+                if (p.Length > 0)
+                {
+                    // path isn't a drives root path
+                    return false;
+                }
+            }
+            // all globbed paths are containers
+            return true;
         }
 
         internal object ItemExistsDynamicParameters(string path, ProviderRuntime runtime)
