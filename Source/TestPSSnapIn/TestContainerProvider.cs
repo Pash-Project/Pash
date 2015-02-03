@@ -75,6 +75,9 @@ namespace TestPSSnapIn
         public const string DefaultDriveName = "TestContainerItems";
         public const string DefaultDriveRoot = "/def";
         public const string ProviderName = "TestContainerProvider";
+        public const string DefaultItemName = "defItem";
+        public const string DefaultItemPath = DefaultDriveName + ":/" + DefaultItemName;
+        public const string DefaultItemValue = "defValue";
 
         private const string _pathSeparator = "/";
 
@@ -213,7 +216,7 @@ namespace TestPSSnapIn
 
         protected override bool ItemExists(string path)
         {
-            return FindNode(path) != null;
+            return FindNode(path, false) != null;
         }
 
         #endregion
@@ -222,14 +225,21 @@ namespace TestPSSnapIn
 
         protected override PSDriveInfo NewDrive(PSDriveInfo drive)
         {
+            if (drive is TestContainerDrive)
+            {
+                return drive;
+            }
             return new TestContainerDrive(drive);
         }
 
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
             var defDrives = new Collection<PSDriveInfo>();
-            defDrives.Add(new TestContainerDrive(new PSDriveInfo(DefaultDriveName, ProviderInfo, DefaultDriveRoot,
-                "Default drive for testing container items", null)));
+            var drive = new TestContainerDrive(new PSDriveInfo(DefaultDriveName, ProviderInfo, DefaultDriveRoot,
+                "Default drive for testing container items", null));
+            var defItem = new TestTreeLeaf(drive.Tree, DefaultItemName, DefaultItemValue);
+            drive.Tree.AddChild(defItem);
+            defDrives.Add(drive);
             return defDrives;
         }
 
@@ -251,7 +261,7 @@ namespace TestPSSnapIn
             return FindNode(path);
         }
 
-        private TestTreeNode FindNode(string path)
+        private TestTreeNode FindNode(string path, bool throwOnError = true)
         {
             var root = (PSDriveInfo as TestContainerDrive).Tree;
             var relpath = PathWithoutDrive(path);
@@ -266,6 +276,10 @@ namespace TestPSSnapIn
             {
                 if (curnode.Children == null || !curnode.Children.ContainsKey(comp))
                 {
+                    if (!throwOnError)
+                    {
+                        return null;
+                    }
                     throw new ItemNotFoundException("Item of path '" + path + "' doesn't exist");
                 }
                 curnode = curnode.Children[comp];
