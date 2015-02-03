@@ -74,7 +74,7 @@ namespace TestPSSnapIn
     {
         public const string ProviderName = "TestContainerProvider";
         public const string DefaultDriveName = "TestContainerItems";
-        public const string DefaultDriveRoot = "/def";
+        public const string DefaultDriveRoot = "/def/";
         public const string DefaultDrivePath = DefaultDriveName + ":/";
         public const string DefaultItemName = "defItem";
         public const string DefaultItemPath = DefaultDrivePath + DefaultItemName;
@@ -88,7 +88,10 @@ namespace TestPSSnapIn
 
         protected override void CopyItem(string path, string copyPath, bool recurse)
         {
-            // !HasChildItem || Recurse check is done by PS/Pash itself
+            if (HasChildItems(path) && !recurse)
+            {
+                throw new ArgumentException("Item at path '" + path + "' has child items. Use recursion");
+            }
             if (ItemExists(copyPath))
             {
                 throw new ArgumentException("Destination '" + copyPath + "' already exists");
@@ -96,7 +99,9 @@ namespace TestPSSnapIn
             string newName;
             var destParent = FindParent(copyPath, out newName);
             var srcNode = FindNode(path);
-            destParent.AddChild(srcNode.DetachedCopy(newName));
+            var copiedNode = srcNode.DetachedCopy(newName);
+            destParent.AddChild(copiedNode);
+            WriteItemObject(copiedNode, copyPath, IsContainer(copiedNode));
         }
 
         protected override void GetChildItems(string path, bool recurse)
@@ -113,7 +118,7 @@ namespace TestPSSnapIn
             foreach (var child in node.Children.Values)
             {
                 var childPath = String.Join(_pathSeparator, new [] { path, child.Name });
-                WriteItemObject(child.Name, childPath, IsContainer(child));
+                WriteItemObject(child, childPath, IsContainer(child));
                 if (recurse)
                 {
                     GetChildItems(childPath, true);
@@ -172,10 +177,7 @@ namespace TestPSSnapIn
 
         protected override void RemoveItem(string path, bool recurse)
         {
-            if (HasChildItems(path) && !recurse)
-            {
-                throw new ArgumentException("Item at path '" + path + "' has child items. Use recursion");
-            }
+            // !HasChildItem || Recurse check is done by PS/Pash itself
             var node = FindNode(path);
             node.Parent.Children.Remove(node.Name);
         }
