@@ -88,7 +88,6 @@ namespace Microsoft.PowerShell.Commands
 
         public void ClearContent(string path)
         {
-            throw new NotImplementedException();
         }
 
         public object ClearContentDynamicParameters(string path)
@@ -108,7 +107,7 @@ namespace Microsoft.PowerShell.Commands
 
         public IContentWriter GetContentWriter(string path)
         {
-            throw new NotImplementedException();
+            return new SessionStateContentWriter(this, path);
         }
 
         public object GetContentWriterDynamicParameters(string path)

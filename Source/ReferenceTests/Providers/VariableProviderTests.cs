@@ -64,5 +64,32 @@ namespace ReferenceTests.Providers
 
             Assert.AreEqual("abc" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void SetContentForVariable()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$VariableProviderTestsVariable = 'abc'",
+                @"Set-Content variable:VariableProviderTestsVariable 'test'",
+                "$VariableProviderTestsVariable"
+            });
+
+            Assert.AreEqual("test" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void SetContentForVariableUsingTwoItems()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$VariableProviderTestsVariable = 'abc'",
+                @"Set-Content variable:VariableProviderTestsVariable 'test1','test2'",
+                "$type = $VariableProviderTestsVariable.GetType().Name",
+                "$first = $VariableProviderTestsVariable[0]",
+                "$second = $VariableProviderTestsVariable[1]",
+                "\"$type - $first - $second\""
+            });
+
+            Assert.AreEqual("Object[] - test1 - test2" + Environment.NewLine, result);
+        }
     }
 }
