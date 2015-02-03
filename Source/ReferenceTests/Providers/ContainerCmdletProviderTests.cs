@@ -148,13 +148,48 @@ namespace ReferenceTests.Providers
         [Test]
         public void ContainerProviderSupportsRenameItem()
         {
-
+            var itemPath = TestContainerProvider.DefaultItemPath;
+            var newPath = TestContainerProvider.DefaultDrivePath + "newName";
+            var cmd = NewlineJoin(
+                "Test-Path " + itemPath, // exists
+                "Test-Path " + newPath, // doesn't
+                "Rename-Item " + itemPath + " -NewName newName",
+                "Test-Path " + itemPath, // doesn't exist anymore
+                "Test-Path " + newPath // should eixt now
+            );
+            ExecuteAndCompareTypedResult(cmd, true, false, false, true);
         }
 
         [Test]
-        public void ContainerProviderSupportsRenameItemWithError()
+        public void ContainerProviderSupportsRenameItemWithChildren()
         {
+            var nodePath = TestContainerProvider.DefaultNodePath;
+            var itemPath = TestContainerProvider.DefaultNodePath + "someItem";
+            var newPath = TestContainerProvider.DefaultDrivePath + "newNodeName";
+            var newItemPath = newPath + "/someItem";
+            var cmd = NewlineJoin(
+                "$ni = New-Item " + itemPath + " -ItemType 'leaf' -Value 'testValue'",
+                "Test-Path " + nodePath, // exists
+                "Test-Path " + itemPath, // was creted before
+                "Test-Path " + newPath, // should exist
+                "Test-Path " + newItemPath, // should exist
+                "$ri = Rename-Item " + nodePath + " -NewName newNodeName -PassThru",
+                "Test-Path " + nodePath, // was renamed
+                "Test-Path " + itemPath, // child exists under new name now
+                "Test-Path " + newPath, // renamed node
+                "Test-Path " + newItemPath, // same child, under new parent
+                "[object]::ReferenceEquals($ni.Parent, $ri)" // still same item
+            );
+            ExecuteAndCompareTypedResult(cmd, true, true, false, false, false, false, true, true, true);
+        }
 
+        [Test]
+        public void ContainerProviderThrowsOnRenameItemWithWithExistingDestination()
+        {
+            var cmd = "Rename-Item " + TestContainerProvider.DefaultItemPath + " -NewName " +  TestContainerProvider.DefaultNodeName;
+            Assert.Throws<CmdletProviderInvocationException>(delegate {
+                ReferenceHost.Execute(cmd);
+            });
         }
 
         [Test]

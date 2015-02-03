@@ -200,6 +200,7 @@ namespace TestPSSnapIn
             node.Parent.Children.Remove(node.Name);
             node.Name = newName;
             node.Parent.Children[newName] = node;
+            WriteItemObject(node, "", IsContainer(node));
         }
 
         protected override void GetItem(string path)
