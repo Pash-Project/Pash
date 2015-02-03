@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Management.Automation;
 using System.Text;
 using TestPSSnapIn;
 
@@ -42,22 +43,59 @@ namespace ReferenceTests.Providers
             ExecuteAndCompareTypedResult(cmd, expected);
         }
 
-        [Test]
-        public void ContainerProviderSupportsNewItem()
+        [TestCase("newLeaf2", "leaf", "testValue")]
+        [TestCase("newNode", "node", null)]
+        public void ContainerProviderSupportsNewItem(string path, string type, string value)
         {
+            path = TestContainerProvider.DefaultDrivePath + path;
+            var psValue = value == null ? "$null" : "'" + value + "'";
+            var cmd = NewlineJoin(
+                "$ni = New-Item " + path + " -ItemType " + type + " -Value " + psValue,
+                "$gi = Get-Item " + path,
+                "[object]::ReferenceEquals($ni, $gi)",
+                "$gi.Value"
+            );
+            ExecuteAndCompareTypedResult(cmd, true, value);
+        }
 
+        [TestCase("node", null)] // custom type of provider
+        [TestCase("leaf", "leafValue")]
+        public void ContainerProviderSupportsNewItemByName(string type, string value)
+        {
+            var psValue = value == null ? "" : " -Value '" + value + "'";
+            var cmd = NewlineJoin(
+                "$ni = New-Item " + TestContainerProvider.DefaultDrivePath + "foo/bar/baz -Name new -ItemType " + type + psValue,
+                "$gi = Get-Item " + TestContainerProvider.DefaultDrivePath + "new", // important: ContainerProvider ignores the path if name is provided
+                "[object]::ReferenceEquals($ni, $gi)",
+                "$gi.Value"
+            );
+            ExecuteAndCompareTypedResult(cmd, true, value);
         }
 
         [Test]
-        public void ContainerProviderSupportsNewItemWithContent()
+        public void ContainerProviderThrowsOnNewItemWithInvalidType()
         {
-
+            Assert.Throws<CmdletProviderInvocationException>(delegate {
+                // "container" is not a valid type for out test provider
+                ReferenceHost.Execute("New-Item " + TestContainerProvider.DefaultDrivePath + "foo -ItemType 'container'");
+            });
         }
 
         [Test]
-        public void ContainerProviderSupportsNewItemWithError()
+        public void ContainerProviderThrowsOnNewItemAlreadyExists()
         {
+            Assert.Throws<CmdletProviderInvocationException>(delegate {
+                ReferenceHost.Execute("New-Item " + TestContainerProvider.DefaultItemPath + " -ItemType 'leaf'");
+            });
+        }
 
+        [Test]
+        public void ContainerProviderThrowsOnNewItemInvalidPath()
+        {
+            Assert.Throws<CmdletProviderInvocationException>(delegate {
+                // nonExisting is a not existing parent, so item creation fails here
+                ReferenceHost.Execute("New-Item " + TestContainerProvider.DefaultDrivePath + "notExisting/foo -ItemType 'leaf'");
+            });
         }
 
         [Test]

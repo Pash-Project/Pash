@@ -169,6 +169,7 @@ namespace TestPSSnapIn
             }
             var newItem = isLeaf ? new TestTreeLeaf(parent, itemName, strValue) : new TestTreeNode(parent, itemName);
             parent.Children[itemName] = newItem;
+            WriteItemObject(newItem, path, IsContainer(newItem));
         }
             
 
@@ -253,12 +254,8 @@ namespace TestPSSnapIn
                 path = path.Substring(0, path.Length - _pathSeparator.Length);
             }
             var sepIdx = path.LastIndexOf(_pathSeparator);
-            if (sepIdx < 0)
-            {
-                throw new ArgumentException("Item at path '" + path + "' doesn't have as parent.");
-            }
             itemName = path.Substring(sepIdx + 1);
-            path = path.Substring(0, path.Length - sepIdx);
+            path = sepIdx < 0 ? "" : path.Substring(0, path.Length - sepIdx);
             return FindNode(path);
         }
 
