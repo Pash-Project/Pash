@@ -80,7 +80,7 @@ namespace TestPSSnapIn
         public const string DefaultItemPath = DefaultDrivePath + DefaultItemName;
         public const string DefaultItemValue = "defValue";
         public const string DefaultNodeName = "defNode";
-        public const string DefaultNodePath = DefaultDrivePath + DefaultNodeName;
+        public const string DefaultNodePath = DefaultDrivePath + DefaultNodeName + "/";
 
         private const string _pathSeparator = "/";
 
@@ -88,10 +88,7 @@ namespace TestPSSnapIn
 
         protected override void CopyItem(string path, string copyPath, bool recurse)
         {
-            if (HasChildItems(path) && !recurse)
-            {
-                throw new ArgumentException("Item at path '" + path + "' has child items. Use recursion");
-            }
+            // !HasChildItem || Recurse check is done by PS/Pash itself
             if (ItemExists(copyPath))
             {
                 throw new ArgumentException("Destination '" + copyPath + "' already exists");
@@ -255,7 +252,7 @@ namespace TestPSSnapIn
             }
             var sepIdx = path.LastIndexOf(_pathSeparator);
             itemName = path.Substring(sepIdx + 1);
-            path = sepIdx < 0 ? "" : path.Substring(0, path.Length - sepIdx);
+            path = sepIdx < 0 ? "" : path.Substring(0, sepIdx);
             return FindNode(path);
         }
 

@@ -43,11 +43,11 @@ namespace ReferenceTests.Providers
             ExecuteAndCompareTypedResult(cmd, expected);
         }
 
-        [TestCase("newLeaf2", "leaf", "testValue")]
-        [TestCase("newNode", "node", null)]
+        [TestCase(TestContainerProvider.DefaultDrivePath + "newLeaf1", "leaf", "testValue")]
+        [TestCase(TestContainerProvider.DefaultDrivePath + "newNode", "node", null)]
+        [TestCase(TestContainerProvider.DefaultNodePath + "newLeaf2", "leaf", "testValue2")]
         public void ContainerProviderSupportsNewItem(string path, string type, string value)
         {
-            path = TestContainerProvider.DefaultDrivePath + path;
             var psValue = value == null ? "$null" : "'" + value + "'";
             var cmd = NewlineJoin(
                 "$ni = New-Item " + path + " -ItemType " + type + " -Value " + psValue,
@@ -98,22 +98,51 @@ namespace ReferenceTests.Providers
             });
         }
 
-        [Test]
-        public void ContainerProviderSupportsRemoveItem()
+        [TestCase(TestContainerProvider.DefaultItemPath)]
+        [TestCase(TestContainerProvider.DefaultNodePath)]
+        public void ContainerProviderSupportsRemoveItem(string path)
         {
-
+            var cmd = "Remove-Item " + path;
+            Assert.DoesNotThrow(delegate {
+                ReferenceHost.Execute(cmd);
+            });
         }
 
         [Test]
         public void ContainerProviderSupportsRemoveItemWithRecursion()
         {
-
+            var parentPath = TestContainerProvider.DefaultNodePath;
+            var childPath = parentPath + "testItem";
+            var cmd = NewlineJoin(
+                "$ni = New-Item " + childPath + " -ItemType leaf -Value 'testValue'",
+                "Test-Path " + childPath,
+                "Test-Path " + parentPath,
+                "Remove-Item " + parentPath + " -Recurse",
+                "Test-Path " + childPath,
+                "Test-Path " + parentPath
+            );
+            ExecuteAndCompareTypedResult(cmd, true, true, false, false);
         }
 
         [Test]
-        public void ContainerProviderSupportsRemoveItemWithError()
+        public void ContainerProviderThrowsOnRemoveItemNotExisting()
         {
+            var cmd = "Remove-Item " + TestContainerProvider.DefaultDrivePath + "notExisting";
+            Assert.Throws<ExecutionWithErrorsException>(delegate {
+                ReferenceHost.Execute(cmd);
+            });
+        }
 
+        [Test]
+        public void ContainerProviderThrowsOnRemoveNodeWithoutRecursion()
+        {
+            var parentPath = TestContainerProvider.DefaultNodePath;
+            var childPath = parentPath + "testItem";
+            ReferenceHost.Execute("New-Item " + childPath + " -ItemType leaf -Value 'testValue'");
+            var cmd = "Remove-Item " + parentPath;
+            Assert.Throws<CmdletInvocationException>(delegate {
+                ReferenceHost.RawExecuteInLastRunspace(cmd);
+            });
         }
 
         [Test]
