@@ -59,6 +59,13 @@ namespace System.Management.Automation
             return readers;
        }
 
-        public Collection<IContentWriter> GetWriter(string path) { throw new NotImplementedException(); }
+        public Collection<IContentWriter> GetWriter(string path)
+        {
+            IContentCmdletProvider provider = GetContentCmdletProvider(path);
+            var writers = new Collection<IContentWriter>();
+            string providerPath = GetProviderPath(path);
+            writers.Add(provider.GetContentWriter(providerPath));
+            return writers;
+        }
     }
 }

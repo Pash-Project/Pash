@@ -17,19 +17,22 @@ namespace Microsoft.Commands.Management
         {
             foreach (string path in Path)
             {
+                InvokeProvider.Content.Clear(path);
                 WriteValues(path);
             }
         }
 
         private void WriteValues(string path)
         {
-            // Default file encoding is ASCII.
-            using (var writer = new StreamWriter(path, false, Encoding.ASCII))
+            IContentWriter writer = InvokeProvider.Content.GetWriter(path).Single();
+
+            try
             {
-                foreach (object obj in Value)
-                {
-                    writer.WriteLine(obj);
-                }
+                writer.Write(Value);
+            }
+            finally
+            {
+                writer.Close();
             }
         }
     }

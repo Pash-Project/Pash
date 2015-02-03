@@ -20,7 +20,7 @@ namespace ReferenceTests.Providers
             CollectionAssert.AreEqual(expected, TestContentCmdletProvider.Messages);
         }
 
-        [Test, Explicit("Not implemented")]
+        [Test]
         public void SetContent()
         {
             string result = ReferenceHost.Execute("Set-Content -value 'abc' -path TestContentCmdletProvider::foo");
@@ -29,6 +29,18 @@ namespace ReferenceTests.Providers
                 "ClearContent foo",
                 "GetContentWriter foo",
                 "ContentWriter.Write(abc)",
+                "ContentWriter.Close()");
+        }
+
+        [Test]
+        public void SetContentWithTwoItems()
+        {
+            string result = ReferenceHost.Execute("Set-Content -value '1','2' -path TestContentCmdletProvider::foo");
+
+            AssertMessagesAreEqual(
+                "ClearContent foo",
+                "GetContentWriter foo",
+                "ContentWriter.Write(1,2)",
                 "ContentWriter.Close()");
         }
 

@@ -10,7 +10,7 @@ namespace ReferenceTests.Providers
     [TestFixture]
     public class ContentWriterTests : ReferenceTestBaseWithTestModule
     {
-        [Test, Explicit("Not implemented")]
+        [Test]
         public void WriteStringArrayToFileByDefaultAppendsText()
         {
             string fileName = CreateFile(NewlineJoin("first", "second"), ".txt");

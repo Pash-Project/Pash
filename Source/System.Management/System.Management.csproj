@@ -422,6 +422,7 @@
     <Compile Include="Microsoft.PowerShell\PSCorePSSnapIn.cs" />
     <Compile Include="Pash\BitwiseOperation.cs" />
     <Compile Include="Pash\Implementation\Commands\FileContentReader.cs" />
+    <Compile Include="Pash\Implementation\Commands\FileContentWriter.cs" />
     <Compile Include="Pash\Implementation\Commands\SessionStateContentReader.cs" />
     <Compile Include="Pash\Implementation\CommonCmdlet.cs" />
     <Compile Include="Pash\Implementation\CommonCmdletParameters.cs" />

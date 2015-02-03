@@ -393,7 +393,7 @@ namespace Microsoft.PowerShell.Commands
 
         public IContentWriter GetContentWriter(string path)
         {
-            throw new NotImplementedException();
+            return new FileContentWriter(path);
         }
 
         public object GetContentWriterDynamicParameters(string path)
