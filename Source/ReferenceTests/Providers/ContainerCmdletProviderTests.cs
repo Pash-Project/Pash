@@ -18,9 +18,28 @@ namespace ReferenceTests.Providers
         }
 
         [Test]
-        public void ContainerProviderSupportsTestPath()
+        public void ContainerProviderSupportsGetItemWithNode()
         {
+            var cmd = "Get-Item " + TestContainerProvider.DefaultNodePath;
+            ExecuteAndCompareType(cmd, typeof(TestTreeNode));
+        }
 
+        [TestCase(TestContainerProvider.DefaultDrivePath + "notExisting", "any", false)]
+        [TestCase(TestContainerProvider.DefaultDrivePath + "notExisting", "leaf", false)]
+        [TestCase(TestContainerProvider.DefaultDrivePath + "notExisting", "container", false)]
+        [TestCase(TestContainerProvider.DefaultItemPath, "leaf", true)]
+        [TestCase(TestContainerProvider.DefaultItemPath, "container", false)]
+        [TestCase(TestContainerProvider.DefaultItemPath, "any", true)]
+        [TestCase(TestContainerProvider.DefaultDrivePath, "leaf", false)]
+        [TestCase(TestContainerProvider.DefaultDrivePath, "container", true)]
+        [TestCase(TestContainerProvider.DefaultDrivePath, "any", true)]
+        [TestCase(TestContainerProvider.DefaultNodePath, "any", true)]
+        [TestCase(TestContainerProvider.DefaultNodePath, "leaf", true)] // is technically a container, but ContainerProvider only supports drives as containers
+        [TestCase(TestContainerProvider.DefaultNodePath, "container", false)] // is technically a container, but ContainerProvider only supports drives as containers
+        public void ContainerProviderSupportsTestPath(string path, string type, bool expected)
+        {
+            var cmd = "Test-Path " + path + " -PathType " + type;
+            ExecuteAndCompareTypedResult(cmd, expected);
         }
 
         [Test]

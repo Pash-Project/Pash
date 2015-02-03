@@ -72,12 +72,15 @@ namespace TestPSSnapIn
     [CmdletProvider(TestContainerProvider.ProviderName, ProviderCapabilities.None)]
     public class TestContainerProvider : ContainerCmdletProvider
     {
+        public const string ProviderName = "TestContainerProvider";
         public const string DefaultDriveName = "TestContainerItems";
         public const string DefaultDriveRoot = "/def";
-        public const string ProviderName = "TestContainerProvider";
+        public const string DefaultDrivePath = DefaultDriveName + ":/";
         public const string DefaultItemName = "defItem";
-        public const string DefaultItemPath = DefaultDriveName + ":/" + DefaultItemName;
+        public const string DefaultItemPath = DefaultDrivePath + DefaultItemName;
         public const string DefaultItemValue = "defValue";
+        public const string DefaultNodeName = "defNode";
+        public const string DefaultNodePath = DefaultDrivePath + DefaultNodeName;
 
         private const string _pathSeparator = "/";
 
@@ -141,15 +144,8 @@ namespace TestPSSnapIn
 
         protected override bool HasChildItems(string path)
         {
-            try
-            {
-                var node = FindNode(path);
-                return node.Children != null && node.Children.Count > 0;
-            }
-            catch (ItemNotFoundException)
-            {
-                return false;
-            }
+            var node = FindNode(path, false);
+            return node != null && node.Children != null && node.Children.Count > 0;
         }
 
         protected override void NewItem(string path, string itemTypeName, object newItemValue)
@@ -237,8 +233,13 @@ namespace TestPSSnapIn
             var defDrives = new Collection<PSDriveInfo>();
             var drive = new TestContainerDrive(new PSDriveInfo(DefaultDriveName, ProviderInfo, DefaultDriveRoot,
                 "Default drive for testing container items", null));
+
             var defItem = new TestTreeLeaf(drive.Tree, DefaultItemName, DefaultItemValue);
             drive.Tree.AddChild(defItem);
+
+            var defNode = new TestTreeNode(drive.Tree, DefaultNodeName);
+            drive.Tree.AddChild(defNode);
+
             defDrives.Add(drive);
             return defDrives;
         }
