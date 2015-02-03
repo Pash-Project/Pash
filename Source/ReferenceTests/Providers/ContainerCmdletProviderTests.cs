@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -327,34 +328,35 @@ namespace ReferenceTests.Providers
         }
 
         [Test]
-        public void ContainerProviderSupportsGetLocation()
+        public void ContainerProviderSupportsSetGetLocation()
         {
-
+            // container providers usually don't support hierarchy, so we cannt set-location to a node
+            var cmd = NewlineJoin(
+                "Set-Location " + TestContainerProvider.DefaultDrivePath,
+                "(Get-Location).Path",
+                "(Get-Item " + TestContainerProvider.DefaultItemPath + ").Value" // make sure we interact in the new location
+            );
+            var adjustedDrivePath = AdjustSlashes(TestContainerProvider.DefaultDrivePath);
+            ExecuteAndCompareTypedResult(cmd, adjustedDrivePath, TestContainerProvider.DefaultItemValue);
         }
 
         [Test]
-        public void ContainerProviderSupportsSetLocation()
+        public void ContainerProviderSupportsPushPopLocation()
         {
-
+            var cmd = NewlineJoin(
+                "$origLoc = (Get-Location).Path",
+                "Push-Location " + TestContainerProvider.DefaultDrivePath,
+                "(Get-Location).Path",
+                "Pop-Location",
+                "$origLoc -eq (Get-Location).Path"
+            );
+            var adjustedDrivePath = AdjustSlashes(TestContainerProvider.DefaultDrivePath);
+            ExecuteAndCompareTypedResult(cmd, adjustedDrivePath, true);
         }
 
-        [Test]
-        public void ContainerProviderSupportsSetLocationWithError()
+        private static string AdjustSlashes(string path)
         {
-
+            return path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
         }
-
-        [Test]
-        public void ContainerProviderSupportsPushLocation()
-        {
-
-        }
-
-        [Test]
-        public void ContainerProviderSupportsPopLocation()
-        {
-
-        }
-
     }
 }
