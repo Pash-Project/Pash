@@ -48,13 +48,9 @@ namespace System.Management.Automation
                 {
                     Command.DoBeginProcessing();
                 }
-                catch (CmdletInvocationException)
-                {
-                    throw;
-                }
                 catch(Exception e)
                 {
-                    throw new CmdletInvocationException(e.Message, e);
+                    HandleInvocationException(e);
                 }
                 _beganProcessing = true;
             }
@@ -93,13 +89,9 @@ namespace System.Management.Automation
                 {
                     Command.DoProcessRecord();
                 }
-                catch (CmdletInvocationException)
-                {
-                    throw;
-                }
                 catch(Exception e)
                 {
-                    throw new CmdletInvocationException(e.Message, e);
+                    HandleInvocationException(e);
                 }
             }
             _argumentBinder.RestoreCommandLineParameterValues();
@@ -117,13 +109,9 @@ namespace System.Management.Automation
                 ExecutionContext.SetSuccessVariable(true); // only false if we got an exception
                 ProcessRedirects();
             }
-            catch (CmdletInvocationException)
-            {
-                throw;
-            }
             catch(Exception e)
             {
-                throw new CmdletInvocationException(e.Message, e);
+                HandleInvocationException(e);
             }
         }
 

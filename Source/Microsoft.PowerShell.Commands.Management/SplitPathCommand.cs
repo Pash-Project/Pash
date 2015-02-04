@@ -10,7 +10,7 @@ using System.Management.Automation;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Split", "Path")]
-    public class SplitPathCommand : ProviderCommandBase
+    public class SplitPathCommand : CoreCommandWithCredentialsBase
     {
         protected override void ProcessRecord()
         {

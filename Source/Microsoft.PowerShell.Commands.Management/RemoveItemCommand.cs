@@ -6,45 +6,26 @@ using System.Management.Automation;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Remove", "Item", SupportsShouldProcess = true, DefaultParameterSetName = "Path")]
-    public class RemoveItemCommand : ProviderCommandBase
+    public class RemoveItemCommand : CoreCommandWithPathsBase
     {
-        protected override void ProcessRecord()
+        protected override bool ProviderSupportsShouldProcess
         {
-            foreach (String _path in Path)
-                InvokeProvider.Item.Remove(_path, Recurse.ToBool());
+            get
+            {
+                // TODO: useful implementation based on _paths and the affected providers
+                return false;
+            }
         }
-
-        [Parameter]
-        public override string[] Exclude { get; set; }
-
-        [Parameter]
-        public override string[] Include { get; set; }
-
-        [Parameter]
-        public override string Filter { get; set; }
 
         [Parameter]
         public override SwitchParameter Force { get; set; }
 
-        [Alias(new string[] { "PSPath" }),
-        Parameter(
-            ParameterSetName = "LiteralPath",
-            Position = 0,
-            Mandatory = true, ValueFromPipeline = false,
-            ValueFromPipelineByPropertyName = true)]
-        public string[] LiteralPath { get; set; }
-
-        [Parameter(
-            ParameterSetName = "Path",
-            Position = 0,
-            Mandatory = true,
-            ValueFromPipeline = true,
-            ValueFromPipelineByPropertyName = true)]
-        public string[] Path { get; set; }
-
         [Parameter]
         public SwitchParameter Recurse { get; set; }
 
-        //protected override bool ProviderSupportsShouldProcess { get; }
+        protected override void ProcessRecord()
+        {
+            InvokeProvider.Item.Remove(InternalPaths, Recurse.IsPresent, ProviderRuntime);
+        }
     }
 }

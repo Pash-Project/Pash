@@ -167,7 +167,9 @@ namespace System.Management.Automation
 
         internal void Clear(string[] path, ProviderRuntime runtime)
         {
-            GlobAndInvoke(path, runtime, (curPath, provider) => provider.ClearItem(curPath, runtime));
+            GlobAndInvoke<ItemCmdletProvider>(path, runtime,
+                (curPath, provider) => provider.ClearItem(curPath, runtime)
+            );
         }
 
         internal object ClearItemDynamicParameters(string path, ProviderRuntime runtime)
@@ -212,12 +214,14 @@ namespace System.Management.Automation
 
         internal void Get(string[] path, ProviderRuntime runtime)
         {
-            GlobAndInvoke(path, runtime, (curPath, provider) => {
-                if (VerifyItemExists(provider, curPath, runtime))
-                {
-                    provider.GetItem(curPath, runtime);
+            GlobAndInvoke<ItemCmdletProvider>(path, runtime,
+                (curPath, provider) => {
+                    if (VerifyItemExists(provider, curPath, runtime))
+                    {
+                        provider.GetItem(curPath, runtime);
+                    }
                 }
-            });
+            );
         }
 
         internal object GetItemDynamicParameters(string path, ProviderRuntime runtime)
@@ -227,7 +231,9 @@ namespace System.Management.Automation
 
         internal void Invoke(string[] path, ProviderRuntime runtime)
         {
-            GlobAndInvoke(path, runtime, (curPath, provider) => provider.InvokeDefaultAction(curPath, runtime));
+            GlobAndInvoke<ItemCmdletProvider>(path, runtime,
+                (curPath, provider) => provider.InvokeDefaultAction(curPath, runtime)
+            );
         }
 
         internal object InvokeItemDynamicParameters(string path, ProviderRuntime runtime)
@@ -330,7 +336,34 @@ namespace System.Management.Automation
 
         internal void Remove(string[] path, bool recurse, ProviderRuntime runtime)
         {
-            throw new NotImplementedException();
+            GlobAndInvoke<ContainerCmdletProvider>(path, runtime,
+                (curPath, provider) => {
+                    if (!VerifyItemExists(provider, curPath, runtime))
+                    {
+                        return;
+                    }
+                    // TODO: I think Powershell checks whether we are currently in the path we want to remove
+                    //       (or a subpath). Check this and throw an error if it's true
+                    if (!recurse && provider.HasChildItems(curPath, runtime))
+                    {
+                        // TODO: I think Powershell invokes ShouldContinue here and asks whether to remove
+                        //       items recursively or not. We should somehow do this too. Maybe by getting
+                        //       access to runtime._cmdlet, or by implementing a wrapper function in ProviderRuntime
+                        var msg = String.Format("The item at path '{0}' has child items. Use recursion to remove it",
+                            curPath);
+                        var invOpEx = new PSInvalidOperationException(msg, "CannotRemoveItemWithChildrenWithoutRecursion",
+                            ErrorCategory.InvalidOperation, null);
+                        // FIXME: In this case, Powershell does throw a CmdletInvocationException. Maybe because
+                        //        this check is done directly inside the Remove-Item cmdlet, or maybe it only
+                        //        happens if ShouldContinue doesn't work in a non-interactive environment.
+                        //        Anyway, it feels right that the work is done here and we will simply throw this
+                        //        kind of exception for compatability. Maybe when the TODO before is approach we should
+                        //        keep in mind that this kind of exception is required to be thrown
+                        throw new CmdletInvocationException(invOpEx.Message, invOpEx);
+                    }
+                    provider.RemoveItem(curPath, recurse, runtime);
+                }
+            );
         }
 
         internal object RemoveItemDynamicParameters(string path, bool recurse, ProviderRuntime runtime)
@@ -350,7 +383,9 @@ namespace System.Management.Automation
 
         internal void Set(string[] path, object value, ProviderRuntime runtime)
         {
-            GlobAndInvoke(path, runtime, (curPath, provider) => provider.SetItem(curPath, value, runtime));
+            GlobAndInvoke<ItemCmdletProvider>(path, runtime,
+                (curPath, provider) => provider.SetItem(curPath, value, runtime)
+            );
         }
 
         internal object SetItemDynamicParameters(string path, object value, ProviderRuntime runtime)
@@ -406,14 +441,14 @@ namespace System.Management.Automation
             return runtime.RetreiveAllProviderData();
         }
 
-        private void GlobAndInvoke(string[] paths, ProviderRuntime runtime, Action<string, ItemCmdletProvider> method)
+        private void GlobAndInvoke<T>(string[] paths, ProviderRuntime runtime, Action<string, T> method) where T : CmdletProvider
         {
             foreach (var curPath in paths)
             {
                 CmdletProvider provider;
                 var globber = new PathGlobber(_executionContext.SessionState);
                 var globbedPaths = globber.GetGlobbedProviderPaths(curPath, runtime, out provider);
-                var itemProvider = CmdletProvider.As<ItemCmdletProvider>(provider);
+                var itemProvider = CmdletProvider.As<T>(provider);
                 foreach (var p in globbedPaths)
                 {
                     try
@@ -434,7 +469,7 @@ namespace System.Management.Automation
             // Whenever we call some function of a provider, we should check for exceptions
             // and handle them here in a unique way.
             // For now: Only check if we already deal with a CmdletProviderInvocationException or create one
-            if (e is CmdletProviderInvocationException)
+            if ((e is CmdletProviderInvocationException) || (e is CmdletInvocationException))
             {
                 throw e;
             }

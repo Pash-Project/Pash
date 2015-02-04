@@ -27,7 +27,7 @@ namespace System.Management.Automation
         }
 
         internal ItemNotFoundException(string message, Exception innerException, string errorId)
-            : this(message, innerException)
+            : base(message, innerException)
         {
             ErrorRecord = new ErrorRecord(this, errorId, ErrorCategory.ObjectNotFound, null);
         }

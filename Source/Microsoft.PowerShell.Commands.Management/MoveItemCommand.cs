@@ -22,11 +22,11 @@ namespace Microsoft.PowerShell.Commands
     ///   mv
     /// </summary>
     [Cmdlet("Move", "Item", DefaultParameterSetName = "Path", SupportsShouldProcess = true)]
-    public class MoveItemCommand : ProviderCommandBase
+    public class MoveItemCommand : CoreCommandWithPathsBase
     {
         protected override void ProcessRecord()
         {
-            foreach (String _path in Path)
+            foreach (String _path in InternalPaths)
             {
                 InvokeProvider.Item.Move(_path, Destination);
 
@@ -38,36 +38,10 @@ namespace Microsoft.PowerShell.Commands
         public string Destination { get; set; }
 
         [Parameter]
-        public override string[] Exclude { get; set; }
-
-        [Parameter]
-        public override string Filter { get; set; }
-
-        [Parameter]
         public override SwitchParameter Force { get; set; }
 
         [Parameter]
-        public override string[] Include { get; set; }
-
-        [Alias(new string[] { "PSPath" }),
-        Parameter(
-            ParameterSetName = "LiteralPath",
-            Position = 0,
-            Mandatory = true,
-            ValueFromPipeline = false,
-            ValueFromPipelineByPropertyName = true)]
-        public string[] LiteralPath { get; set; }
-
-        [Parameter]
         public SwitchParameter PassThru { get; set; }
-
-        [Parameter(
-            ParameterSetName = "Path",
-            Position = 0,
-            Mandatory = true,
-            ValueFromPipeline = true,
-            ValueFromPipelineByPropertyName = true)]
-        public string[] Path { get; set; }
 
         //protected override bool ProviderSupportsShouldProcess { get; }
     }

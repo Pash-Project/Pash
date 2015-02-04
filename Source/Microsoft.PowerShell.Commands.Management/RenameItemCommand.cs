@@ -6,7 +6,7 @@ using System.Management.Automation;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Rename", "Item", SupportsShouldProcess = true)]
-    public class RenameItemCommand : ProviderCommandBase
+    public class RenameItemCommand : CoreCommandWithCredentialsBase
     {
         protected override void ProcessRecord()
         {

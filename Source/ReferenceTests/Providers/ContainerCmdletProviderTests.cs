@@ -103,10 +103,12 @@ namespace ReferenceTests.Providers
         [TestCase(TestContainerProvider.DefaultNodePath)]
         public void ContainerProviderSupportsRemoveItem(string path)
         {
-            var cmd = "Remove-Item " + path;
-            Assert.DoesNotThrow(delegate {
-                ReferenceHost.Execute(cmd);
-            });
+            var cmd = NewlineJoin(
+                "Test-Path " + path,
+                "Remove-Item " + path,
+                "Test-Path " + path
+            );
+            ExecuteAndCompareTypedResult(cmd, true, false);
         }
 
         [Test]
