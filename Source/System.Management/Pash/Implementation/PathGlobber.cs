@@ -41,6 +41,7 @@ namespace Pash.Implementation
 
             if (providerInfo.Capabilities.HasFlag(ProviderCapabilities.ExpandWildcards))
             {
+                // TODO: what about the filter?
                 foreach (var expanded in CmdletProvider.As<ItemCmdletProvider>(provider).ExpandPath(path, runtime))
                 {
                     results.Add(expanded);
@@ -49,7 +50,7 @@ namespace Pash.Implementation
             else
             {
                 throw new NotImplementedException("Default globbing not yet implemented");
-                // TODO: use a default implementation for ContainerCmdletProviders
+                // TODO: use a default implementation for ContainerCmdletProviders. Also support include/exclude flags
             }
 
             // TODO: when to apply the filter?

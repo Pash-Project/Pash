@@ -95,7 +95,7 @@ namespace ReferenceTests.Providers
         {
             Assert.Throws<CmdletProviderInvocationException>(delegate {
                 // nonExisting is a not existing parent, so item creation fails here
-                ReferenceHost.Execute("New-Item " + TestContainerProvider.DefaultDrivePath + "notExisting/foo -ItemType 'leaf'");
+                ReferenceHost.Execute("New-Item " + TestContainerProvider.DefaultDrivePath + "notExisting/foo -ItemType 'leaf' -Value 'x'");
             });
         }
 

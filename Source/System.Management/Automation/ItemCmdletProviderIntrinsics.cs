@@ -193,7 +193,16 @@ namespace System.Management.Automation
             var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
             foreach (var p in globbedPaths)
             {
-                if (!containerProvider.ItemExists(p, runtime))
+                var exists = false;
+                try
+                {
+                    exists = containerProvider.ItemExists(p, runtime);
+                }
+                catch (Exception e)
+                {
+                    HandleCmdletProviderInvocationException(e);
+                }
+                if (!exists)
                 {
                     return false;
                 }
@@ -203,7 +212,12 @@ namespace System.Management.Automation
 
         internal void Get(string[] path, ProviderRuntime runtime)
         {
-            GlobAndInvoke(path, runtime, (curPath, provider) => provider.GetItem(curPath, runtime));
+            GlobAndInvoke(path, runtime, (curPath, provider) => {
+                if (VerifyItemExists(provider, curPath, runtime))
+                {
+                    provider.GetItem(curPath, runtime);
+                }
+            });
         }
 
         internal object GetItemDynamicParameters(string path, ProviderRuntime runtime)
@@ -269,10 +283,43 @@ namespace System.Management.Automation
         {
             // TODO: support globbing (e.g. * in filename)
             Path normalizedPath;
+            var validName = !String.IsNullOrEmpty(name);
+            CmdletProvider provider;
+            var globber = new PathGlobber(_executionContext.SessionState);
             foreach (var path in paths)
             {
-                var provider = GetContainerProviderByPath(path, name, out normalizedPath);
-                provider.NewItem(normalizedPath, type, content, runtime);
+                Collection<string> resolvedPaths;
+                // only allow globbing if name is used. otherwise it doesn't make sense
+                if (validName)
+                {
+                    resolvedPaths = globber.GetGlobbedProviderPaths(path, runtime, out provider);
+                }
+                else
+                {
+                    PSDriveInfo drive;
+                    ProviderInfo providerInfo;
+                    resolvedPaths = new Collection<string>();
+                    resolvedPaths.Add(globber.GetProviderSpecificPath(path, out providerInfo, out drive));
+                    runtime.PSDriveInfo = drive;
+                    provider = _executionContext.SessionState.Provider.GetInstance(providerInfo);
+                }
+                var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
+                foreach (var curResolvedPath in resolvedPaths)
+                {
+                    var resPath = curResolvedPath;
+                    if (validName)
+                    {
+                        resPath = JoinPath(containerProvider, resPath, name, runtime);
+                    }
+                    try
+                    {
+                        containerProvider.NewItem(resPath, type, content, runtime);
+                    }
+                    catch (Exception e)
+                    {
+                        HandleCmdletProviderInvocationException(e);
+                    }
+                }
             }
         }
 
@@ -311,26 +358,46 @@ namespace System.Management.Automation
             throw new NotImplementedException();
         }
 
+        internal string JoinPath(CmdletProvider provider, string parent, string child, ProviderRuntime runtime)
+        {
+            var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider); // throws if it's not
+            var navigationPorivder = provider as NavigationCmdletProvider;
+            // for a container provider, this is always just the child string (yep, this is PS behavior)
+            if (navigationPorivder == null)
+            {
+                return child;
+            }
+
+            // otherwise use the NavigationCmdletProvider's method
+
+            // TODO: first of all a not really correct implementation to not break the existing FilesystemProvider
+            // support that. We will change this when we have full NavigationCmdletProvider support
+            return new Path(parent).Combine(child).NormalizeSlashes();
+        }
+
         #endregion
 
         #region private helpers
 
-        private ContainerCmdletProvider GetContainerProviderByPath(string path, string name, out Path normalizedPath)
+        private bool VerifyItemExists(ItemCmdletProvider provider, string path, ProviderRuntime runtime)
         {
-            // TODO: don't use the Path class, use the provider stuff, like the container's MakePath
-            PSDriveInfo drive;
-            var provider = _cmdlet.State.SessionStateGlobal.GetProviderByPath(path, out drive) as ContainerCmdletProvider;
-            if (provider == null)
+            var exists = false;
+            try
             {
-                throw new PSInvalidOperationException(String.Format("The provider for path '{0}' is not a ContainerProvider", path));
+                exists = provider.ItemExists(path, runtime);
             }
-            normalizedPath = new Path(path);
-            if (!String.IsNullOrEmpty(name))
+            catch (Exception e)
             {
-                normalizedPath = normalizedPath.Combine(name);
+                HandleCmdletProviderInvocationException(e);
             }
-            normalizedPath = normalizedPath.NormalizeSlashes();
-            return provider;
+
+            if (exists)
+            {
+                return true;
+            }
+            var msg = String.Format("An item with path {0} doesn't exist", path);
+            runtime.WriteError(new ItemNotFoundException(msg).ErrorRecord);
+            return false;
         }
 
         private Collection<PSObject> ThrowOnErrorOrReturnResults(ProviderRuntime runtime)
@@ -349,11 +416,30 @@ namespace System.Management.Automation
                 var itemProvider = CmdletProvider.As<ItemCmdletProvider>(provider);
                 foreach (var p in globbedPaths)
                 {
-                    method(p, itemProvider);
+                    try
+                    {
+                        method(p, itemProvider);
+                    }
+                    catch (Exception e)
+                    {
+                        HandleCmdletProviderInvocationException(e);
+                    }
                 }
             }
         }
 
+
+        private void HandleCmdletProviderInvocationException(Exception e)
+        {
+            // Whenever we call some function of a provider, we should check for exceptions
+            // and handle them here in a unique way.
+            // For now: Only check if we already deal with a CmdletProviderInvocationException or create one
+            if (e is CmdletProviderInvocationException)
+            {
+                throw e;
+            }
+            throw new CmdletProviderInvocationException(e.Message, e);
+        }
         #endregion
     }
 }

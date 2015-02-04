@@ -192,5 +192,17 @@ namespace System.Management.Automation
             }
             return false;
         }
+
+        private void HandleInvocationException(Exception e)
+        {
+            // called when one of the processing phases resultet in an exception.
+            // For now: Handle the exception type
+            // TODO: This would be the place to invoke rollbacks if we support transactions
+            if ((e is CmdletInvocationException) || (e is CmdletProviderInvocationException))
+            {
+                throw e;
+            }
+            throw new CmdletInvocationException(e.Message, e);
+        }
     }
 }
