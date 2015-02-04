@@ -150,12 +150,17 @@ namespace System.Management.Automation.Provider
 
         internal static T As<T>(CmdletProvider provider) where T : CmdletProvider
         {
+            VerifyType<T>(provider);
+            return provider as T;
+        }
+
+        internal static void VerifyType<T>(CmdletProvider provider) where T : CmdletProvider
+        {
             var casted = provider as T;
             if (casted == null)
             {
                 throw new NotSupportedException("The provider is not a valid provider of type '" + typeof(T).Name + "'");
             }
-            return casted;
         }
 
         private PSObject GetItemAsPSObject(object item, Path path)

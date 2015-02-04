@@ -143,7 +143,7 @@ namespace System.Management.Automation
         public Collection<PSObject> Rename(string path, string newName, bool force)
         {
             var runtime = new ProviderRuntime(_executionContext, force, true);
-            Rename(new [] { path }, newName, runtime);
+            Rename(path, newName, runtime);
             return ThrowOnErrorOrReturnResults(runtime);
         }
 
@@ -200,16 +200,20 @@ namespace System.Management.Automation
                 {
                     exists = containerProvider.ItemExists(p, runtime);
                 }
+                catch (ItemNotFoundException e)
+                {
+                    return false;
+                }
                 catch (Exception e)
                 {
                     HandleCmdletProviderInvocationException(e);
                 }
-                if (!exists)
+                if (exists)
                 {
-                    return false;
+                    return true;
                 }
             }
-            return true;
+            return false;
         }
 
         internal void Get(string[] path, ProviderRuntime runtime)
@@ -287,8 +291,6 @@ namespace System.Management.Automation
 
         internal void New(string[] paths, string name, string type, object content, ProviderRuntime runtime)
         {
-            // TODO: support globbing (e.g. * in filename)
-            Path normalizedPath;
             var validName = !String.IsNullOrEmpty(name);
             CmdletProvider provider;
             var globber = new PathGlobber(_executionContext.SessionState);
@@ -371,9 +373,31 @@ namespace System.Management.Automation
             throw new NotImplementedException();
         }
 
-        internal void Rename(string[] path, string newName, ProviderRuntime runtime)
+        internal void Rename(string path, string newName, ProviderRuntime runtime)
         {
-            throw new NotImplementedException();
+            CmdletProvider provider;
+            var globber = new PathGlobber(_executionContext.SessionState);
+            var globbed = globber.GetGlobbedProviderPaths(path, runtime, out provider);
+            if (globbed.Count != 1)
+            {
+                throw new PSArgumentException("Cannot rename more than one item", "MultipleItemsRename", ErrorCategory.InvalidArgument);
+            }
+            path = globbed[0];
+            var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
+            if (!VerifyItemExists(containerProvider, path, runtime))
+            {
+                return;
+            }
+            // TODO: I think Powershell checks whether we are currently in the path we want to remove
+            //       (or a subpath). Check this and throw an error if it's true
+            try
+            {
+                containerProvider.RenameItem(path, newName, runtime);
+            }
+            catch (Exception e)
+            {
+                HandleCmdletProviderInvocationException(e);
+            }
         }
 
         internal object RenameItemDynamicParameters(string path, string newName, ProviderRuntime runtime)
@@ -395,7 +419,7 @@ namespace System.Management.Automation
 
         internal string JoinPath(CmdletProvider provider, string parent, string child, ProviderRuntime runtime)
         {
-            var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider); // throws if it's not
+            CmdletProvider.VerifyType<ContainerCmdletProvider>(provider); // throws if it's not
             var navigationPorivder = provider as NavigationCmdletProvider;
             // for a container provider, this is always just the child string (yep, this is PS behavior)
             if (navigationPorivder == null)

@@ -69,7 +69,9 @@ namespace Pash.Implementation
 
         internal void WriteError(ErrorRecord errorRecord)
         {
-            if (_cmdlet != null && PassThru)
+            // Don't check PassThru here. Cmdlets that don't want to see output are likely to see the errors anyway.
+            // Introduce another flag if something similar is needed at som time
+            if (_cmdlet != null)
             {
                 _cmdlet.WriteError(errorRecord);
             }
