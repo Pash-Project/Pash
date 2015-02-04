@@ -89,7 +89,7 @@ namespace System.Management.Automation
             BindPositionalParameters(parameters, ActiveOrDefaultParameterSet);
 
             // 4. This would be the place for common parameters, support of ShouldProcess and dynamic parameters
-            // TODO: care about "common" parameters and dynamic parameters
+            // TODO: care about "common" parameters and #DynamicParameters
 
             // 6. There might be parameter sets with parameters that are still unbound but will be set by pipeline.
             //    If not, and if we have an (active or default) parameter set that is still a candidate, then get the

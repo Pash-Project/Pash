@@ -10,7 +10,7 @@ namespace Microsoft.PowerShell.Commands
         [Parameter]
         public override SwitchParameter Force { get; set; }
 
-        // TODO: support for DynamicParameters (calling the providers appropriate method)
+        // TODO: support for #DynamicParameters (calling the providers appropriate method)
 
         protected override void ProcessRecord()
         {

@@ -8,7 +8,7 @@ namespace Microsoft.PowerShell.Commands
     [Cmdlet("Remove", "Item", SupportsShouldProcess = true, DefaultParameterSetName = "Path")]
     public class RemoveItemCommand : CoreCommandWithFilteredPathsBase
     {
-        // TODO: support for DynamicParameters (calling the providers appropriate method)
+        // TODO: support for #DynamicParameters (calling the providers appropriate method)
 
         [Parameter]
         public override SwitchParameter Force { get; set; }

@@ -7,7 +7,7 @@ namespace Microsoft.PowerShell.Commands
             /* , SupportsTransactions=true, HelpUri="http://go.microsoft.com/fwlink/?LinkID=113345" */)]
     public class InvokeItemCommand : CoreCommandWithFilteredPathsBase
     {
-        // TODO: support for DynamicParameters (calling the providers appropriate method)
+        // TODO: support for #DynamicParameters (calling the providers appropriate method)
 
         protected override void ProcessRecord()
         {
