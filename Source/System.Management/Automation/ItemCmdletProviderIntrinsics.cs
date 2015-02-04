@@ -143,7 +143,7 @@ namespace System.Management.Automation
         public Collection<PSObject> Rename(string path, string newName, bool force)
         {
             var runtime = new ProviderRuntime(_executionContext, force, true);
-            Rename(path, newName, runtime);
+            Rename(new [] { path }, newName, runtime);
             return ThrowOnErrorOrReturnResults(runtime);
         }
 
@@ -371,7 +371,7 @@ namespace System.Management.Automation
             throw new NotImplementedException();
         }
 
-        internal void Rename(string path, string newName, ProviderRuntime runtime)
+        internal void Rename(string[] path, string newName, ProviderRuntime runtime)
         {
             throw new NotImplementedException();
         }

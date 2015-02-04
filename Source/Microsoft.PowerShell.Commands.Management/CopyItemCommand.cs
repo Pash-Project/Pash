@@ -6,7 +6,7 @@ using System.Management.Automation;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Copy", "Item", DefaultParameterSetName = "Path", SupportsShouldProcess = true)]
-    public class CopyItemCommand : CoreCommandWithPathsBase
+    public class CopyItemCommand : CoreCommandWithFilteredPathsBase
     {
         protected override void ProcessRecord()
         {
@@ -33,7 +33,5 @@ namespace Microsoft.PowerShell.Commands
 
         [Parameter]
         public SwitchParameter Recurse { get; set; }
-
-        //protected override bool ProviderSupportsShouldProcess { get; }
     }
 }

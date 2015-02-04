@@ -22,7 +22,7 @@ namespace Microsoft.PowerShell.Commands
     ///   mv
     /// </summary>
     [Cmdlet("Move", "Item", DefaultParameterSetName = "Path", SupportsShouldProcess = true)]
-    public class MoveItemCommand : CoreCommandWithPathsBase
+    public class MoveItemCommand : CoreCommandWithFilteredPathsBase
     {
         protected override void ProcessRecord()
         {
@@ -42,8 +42,6 @@ namespace Microsoft.PowerShell.Commands
 
         [Parameter]
         public SwitchParameter PassThru { get; set; }
-
-        //protected override bool ProviderSupportsShouldProcess { get; }
     }
 
 }

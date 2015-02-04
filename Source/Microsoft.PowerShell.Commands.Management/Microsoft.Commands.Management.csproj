@@ -97,6 +97,7 @@
     <Compile Include="InvokeItemCommand.cs" />
     <Compile Include="TestPathCommand.cs" />
     <Compile Include="TestPathType.cs" />
+    <Compile Include="CoreCommandWithFilteredPathsBase.cs" />
     <Compile Include="CoreCommandWithPathsBase.cs" />
   </ItemGroup>
   <ItemGroup>

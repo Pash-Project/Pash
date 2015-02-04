@@ -6,15 +6,8 @@ using System.Management.Automation;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Rename", "Item", SupportsShouldProcess = true)]
-    public class RenameItemCommand : CoreCommandWithCredentialsBase
+    public class RenameItemCommand : CoreCommandWithPathsBase
     {
-        protected override void ProcessRecord()
-        {
-            InvokeProvider.Item.Rename(Path, NewName);
-
-            if (PassThru.ToBool()) WriteObject(Path);
-        }
-
         [Parameter(
             Position = 1,
             Mandatory = true,
@@ -27,15 +20,12 @@ namespace Microsoft.PowerShell.Commands
         [Parameter]
         public SwitchParameter PassThru { get; set; }
 
-        [Alias(new string[] { "PSPath" }),
-        Parameter(
-            Position = 0,
-            Mandatory = true,
-            ValueFromPipeline = true,
-            ValueFromPipelineByPropertyName = true)]
-        public string Path { get; set; }
-
-        //protected override bool ProviderSupportsShouldProcess { get; }
+        protected override void ProcessRecord()
+        {
+            var runtime = ProviderRuntime;
+            runtime.PassThru = PassThru.IsPresent;
+            InvokeProvider.Item.Rename(InternalPaths, NewName, runtime);
+        }
     }
 
 

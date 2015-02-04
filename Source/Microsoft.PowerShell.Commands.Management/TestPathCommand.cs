@@ -5,8 +5,12 @@ namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Test", "Path", DefaultParameterSetName="Path" /*, SupportsTransactions=true
             , HelpUri="http://go.microsoft.com/fwlink/?LinkID=113418" */)]
-    public class TestPathCommand : CoreCommandWithPathsBase
+    public class TestPathCommand : CoreCommandWithFilteredPathsBase
     {
+        protected override bool ProviderSupportsShouldProcess {
+            get { return false; } // this cmdlet doesn't change anything anyhow
+        }
+
         [Alias("Type")]
         [Parameter]
         public TestPathType PathType { get; set; }

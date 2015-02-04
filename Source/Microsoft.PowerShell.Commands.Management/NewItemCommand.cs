@@ -31,7 +31,7 @@ namespace Microsoft.PowerShell.Commands
         {
             get
             {
-                // TODO: useful implementation based on _paths and the affected providers
+                // TODO: useful implementation based on Path and the affected providers
                 return false;
             }
         }
@@ -80,6 +80,8 @@ namespace Microsoft.PowerShell.Commands
             ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true)]
         public object Value { get; set; }
+
+        // TODO: support for #DynamicParameters
 
         protected override void ProcessRecord()
         {

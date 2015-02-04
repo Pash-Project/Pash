@@ -6,16 +6,9 @@ using System.Management.Automation;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Remove", "Item", SupportsShouldProcess = true, DefaultParameterSetName = "Path")]
-    public class RemoveItemCommand : CoreCommandWithPathsBase
+    public class RemoveItemCommand : CoreCommandWithFilteredPathsBase
     {
-        protected override bool ProviderSupportsShouldProcess
-        {
-            get
-            {
-                // TODO: useful implementation based on _paths and the affected providers
-                return false;
-            }
-        }
+        // TODO: support for DynamicParameters (calling the providers appropriate method)
 
         [Parameter]
         public override SwitchParameter Force { get; set; }
