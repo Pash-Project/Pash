@@ -64,7 +64,7 @@ namespace TestPSSnapIn
 
             public void Seek(long offset, SeekOrigin origin)
             {
-                _provider.AddMessage(string.Format("ContentWriter.Seek({0}, {1}", offset, origin));
+                _provider.AddMessage(string.Format("ContentWriter.Seek({0}, {1})", offset, origin));
             }
 
             public IList Write(IList content)

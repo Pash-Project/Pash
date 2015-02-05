@@ -5,14 +5,14 @@ using Microsoft.PowerShell.Commands;
 
 namespace Microsoft.Commands.Management
 {
-    [Cmdlet(VerbsCommon.Clear, "Content", DefaultParameterSetName="Path" /*HelpUri="http://go.microsoft.com/fwlink/?LinkID=113282" */)]
-    public class ClearContentCommand : ContentCommandBase
+    [CmdletAttribute(VerbsCommon.Add, "Content", DefaultParameterSetName = "Path" /* HelpUri = "http://go.microsoft.com/fwlink/?LinkID=113278"*/)]
+    public class AddContentCommand : WriteContentCommandBase
     {
         protected override void ProcessRecord()
         {
             foreach (string path in Path)
             {
-                InvokeProvider.Content.Clear(path);
+                WriteValues(path, true);
             }
         }
     }

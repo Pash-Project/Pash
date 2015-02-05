@@ -62,5 +62,29 @@ namespace ReferenceTests.Providers
 
             AssertMessagesAreEqual("ClearContent foo");
         }
+
+        [Test]
+        public void AddContent()
+        {
+            string result = ReferenceHost.Execute("Add-Content -value 'abc' -path TestContentCmdletProvider::foo");
+
+            AssertMessagesAreEqual(
+                "GetContentWriter foo",
+                "ContentWriter.Seek(0, End)",
+                "ContentWriter.Write(abc)",
+                "ContentWriter.Close()");
+        }
+
+        [Test]
+        public void AddContentWithTwoItems()
+        {
+            string result = ReferenceHost.Execute("Add-Content -value '1','2' -path TestContentCmdletProvider::foo");
+
+            AssertMessagesAreEqual(
+                "GetContentWriter foo",
+                "ContentWriter.Seek(0, End)",
+                "ContentWriter.Write(1,2)",
+                "ContentWriter.Close()");
+        }
     }
 }

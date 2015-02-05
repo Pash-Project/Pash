@@ -28,7 +28,10 @@ namespace System.Management.Pash.Implementation
 
         public void Seek(long offset, SeekOrigin origin)
         {
-            throw new NotImplementedException();
+            if ((offset != 0) || (origin != SeekOrigin.End))
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public IList Write(IList content)
