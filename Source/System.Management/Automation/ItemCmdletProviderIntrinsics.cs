@@ -1,9 +1,9 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Linq;
 using System.Collections.ObjectModel;
 using System.Management.Automation.Internal;
 using System.Management.Automation.Provider;
-using System.IO;
 using Pash.Implementation;
 
 namespace System.Management.Automation
@@ -159,9 +159,26 @@ namespace System.Management.Automation
             return ThrowOnErrorOrReturnResults(runtime);
         }
 
+
         #endregion
 
         #region internal API
+
+        // stuff like the public api... but internal
+        internal Collection<string> GetChildNames(string path, ReturnContainers returnContainers, bool recurse, bool force, bool literalPath)
+        {
+            return GetChildNames(new [] { path }, returnContainers, recurse, force, literalPath);
+        }
+
+        internal Collection<string> GetChildNames(string[] paths, ReturnContainers returnContainers, bool recurse, bool force, bool literalPath)
+        {
+            var runtime = new ProviderRuntime(_executionContext, force, literalPath);
+            GetChildNames(paths, returnContainers, recurse, runtime);
+            var packedResults = ThrowOnErrorOrReturnResults(runtime);
+            var results = (from r in packedResults select r.ToString()).ToList();
+            return new Collection<string>(results);
+        }
+
         // these function calls use directly a ProviderRuntime and don't return objects, but write it to the
         // ProviderRuntime's result buffer (which might be the cmdlet's result buffer)
 
@@ -179,7 +196,35 @@ namespace System.Management.Automation
 
         internal void Copy(string[] path, string destinationPath, bool recurse, CopyContainers copyContainers, ProviderRuntime runtime)
         {
-            throw new NotImplementedException();
+            ProviderInfo providerInfo;
+            PSDriveInfo driveInfo;
+            var globber = new PathGlobber(_executionContext.SessionState);
+            var destination = globber.GetProviderSpecificPath(destinationPath, out providerInfo, out driveInfo);
+            var destIsContainer = IsContainer(destination, runtime);
+
+            GlobAndInvoke<ContainerCmdletProvider>(path, runtime,
+                (curPath, provider) => {
+                    if (IsContainer(curPath, runtime))
+                    {
+                        // if we copy a container to another, invoke a special method for this
+                        if (destIsContainer)
+                        {
+                            CopyContainerToContainer(provider, curPath, destination, recurse, copyContainers, runtime);
+                            return;
+                        }
+                        // otherwise the destination doesn't exist or is a leaf. Copying a container to a leaf doesn't work
+                        if (Exists(destination, runtime))
+                        {
+                            var error = new PSArgumentException("Cannot copy container to existing leaf", 
+                                "CopyContainerItemToLeafError", ErrorCategory.InvalidArgument).ErrorRecord;
+                            runtime.WriteError(error);
+                        }
+                        // otherwise we just proceed as normal
+                    }
+                    // either leaf to leaf, leaf to container, or container to not-existing (i.e. copy the container)
+                    provider.CopyItem(curPath, destination, recurse, runtime);
+                }
+            );
         }
 
         internal object CopyItemDynamicParameters(string[] path, string destination, bool recurse, ProviderRuntime runtime)
@@ -434,9 +479,57 @@ namespace System.Management.Automation
             return new Path(parent).Combine(child).NormalizeSlashes();
         }
 
+        internal void GetChildNames(string[] paths, ReturnContainers returnContainers, bool recurse, ProviderRuntime runtime)
+        {
+            // glob, call GetChildNamesFromProviderPath and filter
+        }
+
         #endregion
 
         #region private helpers
+
+        private void GetChildNamesFromProviderPath(ContainerCmdletProvider provider, string providerPath, string relativePath,
+                                                   ReturnContainers returnContainers, bool recurse, ProviderRuntime runtime)
+        {
+            var subRuntime = new ProviderRuntime(runtime);
+            subRuntime.PassThru = false;
+            provider.GetChildNames(providerPath, returnContainers, subRuntime);
+            var childNames = ThrowOnErrorOrReturnResults(subRuntime);
+            foreach (var childNameObj in childNames)
+            {
+                var childName = childNameObj.BaseObject as string;
+                if (childName == null)
+                {
+                    continue;
+                }
+                // TODO: check runtime's include/exclude filters
+                var path = JoinPath(provider, relativePath, childName, runtime);
+                runtime.WriteObject(path);
+            }
+            // now check if we need to handle this recursively
+            if (!recurse)
+            {
+                return;
+            }
+            // this is recursion, so get all containers from item
+            provider.GetChildNames(providerPath, ReturnContainers.ReturnAllContainers, subRuntime);
+            childNames = ThrowOnErrorOrReturnResults(subRuntime);
+            foreach (var containerChild in childNames)
+            {
+                var childName = containerChild.BaseObject as string;
+                if (childName == null)
+                {
+                    continue;
+                }
+                var providerChildPath = JoinPath(provider, providerPath, childName, runtime);
+                if (IsContainer(providerChildPath, runtime))
+                {
+                    // recursive call wirth child's provider path and relative path
+                    var relativeChildPath = JoinPath(provider, relativePath, childName, runtime);
+                    GetChildNamesFromProviderPath(provider, providerChildPath, relativeChildPath, returnContainers, true, runtime);
+                }
+            }
+        }
 
         private bool VerifyItemExists(ItemCmdletProvider provider, string path, ProviderRuntime runtime)
         {
@@ -498,6 +591,34 @@ namespace System.Management.Automation
                 throw e;
             }
             throw new CmdletProviderInvocationException(e.Message, e);
+        }
+
+        void CopyContainerToContainer(ContainerCmdletProvider provider, string srcPath, string destPath, bool recurse,
+                                      CopyContainers copyContainers, ProviderRuntime runtime)
+        {
+            // the "usual" case: if we don't use recursion (empty container is copied) or we want to maintain the
+            // original hierarchy
+            if (!recurse || copyContainers.Equals(CopyContainers.CopyTargetContainer))
+            {
+                provider.CopyItem(srcPath, destPath, recurse, runtime);
+                return;
+            }
+            // Otherwise we want a flat-hierachy copy of a folder (because copyContainers is CopyChildrenOfTargetContainer)
+            // Make sure recurse is set
+            if (!recurse)
+            {
+                var error = new PSArgumentException("Cannot copy container to existing leaf",
+                    "CopyContainerItemToLeafError", ErrorCategory.InvalidArgument).ErrorRecord;
+                runtime.WriteError(error);
+                return;
+            }
+            // otherwise do the flat copy. To do this: get all child names (recursively) and invoke copying without recursion
+            var childNames = GetChildNames(srcPath, ReturnContainers.ReturnMatchingContainers, true, false, false);
+            foreach (var child in childNames)
+            {
+                var childPath = JoinPath(provider, srcPath, child, runtime);
+                provider.CopyItem(childPath, destPath, false, runtime);
+            }
         }
         #endregion
     }

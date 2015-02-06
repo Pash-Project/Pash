@@ -5,20 +5,10 @@ using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands
 {
-    [Cmdlet("Copy", "Item", DefaultParameterSetName = "Path", SupportsShouldProcess = true)]
+    [CmdletAttribute("Copy", "Item", DefaultParameterSetName="Path", SupportsShouldProcess=true
+        /*, SupportsTransactions=true, HelpUri="http://go.microsoft.com/fwlink/?LinkID=113292"*/)]
     public class CopyItemCommand : CoreCommandWithFilteredPathsBase
     {
-        protected override void ProcessRecord()
-        {
-            foreach (String _path in Path)
-            {
-                InvokeProvider.Item.Copy(_path, Destination, Recurse.ToBool(),
-                    (Container.ToBool()) ? CopyContainers.CopyTargetContainer : CopyContainers.CopyChildrenOfTargetContainer);
-
-                if (PassThru.ToBool()) WriteObject(Path);
-            }
-        }
-
         [Parameter]
         public SwitchParameter Container { get; set; }
 
@@ -33,5 +23,19 @@ namespace Microsoft.PowerShell.Commands
 
         [Parameter]
         public SwitchParameter Recurse { get; set; }
+
+        public CopyItemCommand() : base()
+        {
+            Container = true; // Documentation states that this must explicitly disabled (yep, that's strange, but true)
+        }
+
+        protected override void ProcessRecord()
+        {
+            var runtime = ProviderRuntime;
+            runtime.PassThru = PassThru;
+            var container = Container.IsPresent ? CopyContainers.CopyTargetContainer
+                                                : CopyContainers.CopyChildrenOfTargetContainer;
+            InvokeProvider.Item.Copy(InternalPaths, Destination, Recurse.IsPresent, container, runtime);
+        }
     }
 }
