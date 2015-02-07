@@ -102,5 +102,40 @@ namespace ReferenceTests.Providers
 
             StringAssert.Contains("TestValue" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void SetEnvironmentVariableToIntegerArray()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$env:SetEnvironmentVariableToIntegerArrayTest = 1,2",
+                "$env:SetEnvironmentVariableToIntegerArrayTest"
+            });
+
+            Assert.AreEqual("1 2" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void SetContentForEnvironmentVariable()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$env:EnvironmentProviderTestVariable = 'abc'",
+                "Set-Content env:EnvironmentProviderTestVariable 'test'",
+                "$env:EnvironmentProviderTestVariable"
+            });
+
+            Assert.AreEqual("test" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void SetContentForEnvironmentVariableUsingTwoItems()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$env:EnvironmentProviderTestVariable = 'abc'",
+                "Set-Content env:EnvironmentProviderTestVariable 'test1','test2'",
+                "$env:EnvironmentProviderTestVariable"
+            });
+
+            Assert.AreEqual("test1 test2" + Environment.NewLine, result);
+        }
     }
 }
