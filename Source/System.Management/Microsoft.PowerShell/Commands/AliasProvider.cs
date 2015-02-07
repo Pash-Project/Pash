@@ -67,7 +67,24 @@ namespace Microsoft.PowerShell.Commands
 
         internal override void SetSessionStateItem(string name, object value, bool writeItem)
         {
-            throw new NotImplementedException();
+            Path path = PathIntrinsics.RemoveDriveName(name);
+            path = path.TrimStartSlash();
+
+            if (value is Array)
+            {
+                var array = (Array)value;
+                if (array.Length > 1)
+                {
+                    throw new PSArgumentException("value");
+                }
+                value = array.GetValue(0);
+            }
+            
+            var aliasInfo = new AliasInfo(path, value.ToString(), null);
+            SessionState.Alias.Set(aliasInfo, "global");
+
+            var a = SessionState.Alias.Get(path);
+            Console.WriteLine(a.Definition);
         }
 
         protected override void GetItem(string path)

@@ -64,5 +64,40 @@ namespace ReferenceTests.Providers
 
             Assert.AreEqual("Get-ChildItem" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void SetAlias()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$alias:AliasProviderTest = 'abc'",
+                "$alias:AliasProviderTest"
+            });
+
+            Assert.AreEqual("abc" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void SetContentForAlias()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$alias:AliasProviderTest = 'abc'",
+                "Set-Content alias:AliasProviderTest 'test'",
+                "$alias:AliasProviderTest"
+            });
+
+            Assert.AreEqual("test" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void SetContentForAliasUsingTwoItems()
+        {
+            Assert.Throws(Is.InstanceOf(typeof(Exception)), delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "$alias:AliasProviderTest = 'abc'",
+                    "Set-Content alias:AliasProviderTest 'test1','test2'",
+                });
+            });
+        }
     }
 }
