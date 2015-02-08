@@ -60,7 +60,7 @@ namespace ReferenceTests.Commands
             string fileName1 = GenerateTempFile("1" + Environment.NewLine);
             string fileName2 = GenerateTempFile("2" + Environment.NewLine);
 
-            string result = ReferenceHost.Execute("'abc' | Add-Content " + fileName1 + "," + fileName2);
+            ReferenceHost.Execute("'abc' | Add-Content " + fileName1 + "," + fileName2);
 
             string input1Text = File.ReadAllText(fileName1);
             string input2Text = File.ReadAllText(fileName2);

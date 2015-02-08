@@ -41,7 +41,7 @@ namespace ReferenceTests.Commands
             string fileName1 = CreateFile("1", ".txt");
             string fileName2 = CreateFile("2", ".txt");
 
-            string result = ReferenceHost.Execute("Clear-Content " + fileName1 + "," + fileName2);
+            ReferenceHost.Execute("Clear-Content " + fileName1 + "," + fileName2);
 
             string input1Text = File.ReadAllText(fileName1);
             string input2Text = File.ReadAllText(fileName2);

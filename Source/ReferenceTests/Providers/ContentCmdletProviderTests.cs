@@ -23,7 +23,7 @@ namespace ReferenceTests.Providers
         [Test]
         public void SetContent()
         {
-            string result = ReferenceHost.Execute("Set-Content -value 'abc' -path TestContentCmdletProvider::foo");
+            ReferenceHost.Execute("Set-Content -value 'abc' -path TestContentCmdletProvider::foo");
 
             AssertMessagesAreEqual(
                 "ClearContent foo",
@@ -35,7 +35,7 @@ namespace ReferenceTests.Providers
         [Test]
         public void SetContentWithTwoItems()
         {
-            string result = ReferenceHost.Execute("Set-Content -value '1','2' -path TestContentCmdletProvider::foo");
+            ReferenceHost.Execute("Set-Content -value '1','2' -path TestContentCmdletProvider::foo");
 
             AssertMessagesAreEqual(
                 "ClearContent foo",
@@ -47,7 +47,7 @@ namespace ReferenceTests.Providers
         [Test]
         public void GetContent()
         {
-            string result = ReferenceHost.Execute("Get-Content -path TestContentCmdletProvider::foo");
+            ReferenceHost.Execute("Get-Content -path TestContentCmdletProvider::foo");
 
             AssertMessagesAreEqual(
                 "GetContentReader foo",
@@ -58,7 +58,7 @@ namespace ReferenceTests.Providers
         [Test]
         public void ClearContent()
         {
-            string result = ReferenceHost.Execute("Clear-Content -path TestContentCmdletProvider::foo");
+            ReferenceHost.Execute("Clear-Content -path TestContentCmdletProvider::foo");
 
             AssertMessagesAreEqual("ClearContent foo");
         }
@@ -66,7 +66,7 @@ namespace ReferenceTests.Providers
         [Test]
         public void AddContent()
         {
-            string result = ReferenceHost.Execute("Add-Content -value 'abc' -path TestContentCmdletProvider::foo");
+            ReferenceHost.Execute("Add-Content -value 'abc' -path TestContentCmdletProvider::foo");
 
             AssertMessagesAreEqual(
                 "GetContentWriter foo",
@@ -78,7 +78,7 @@ namespace ReferenceTests.Providers
         [Test]
         public void AddContentWithTwoItems()
         {
-            string result = ReferenceHost.Execute("Add-Content -value '1','2' -path TestContentCmdletProvider::foo");
+            ReferenceHost.Execute("Add-Content -value '1','2' -path TestContentCmdletProvider::foo");
 
             AssertMessagesAreEqual(
                 "GetContentWriter foo",
