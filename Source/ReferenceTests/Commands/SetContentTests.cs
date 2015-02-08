@@ -99,5 +99,19 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual(NewlineJoin("abc", "def"), result);
         }
+
+        [Test]
+        public void FileDoesNotExist()
+        {
+            string fileName = GenerateTempFile("test");
+            File.Delete(fileName);
+
+            string result = ReferenceHost.Execute(new string[] {
+                "Set-Content -value 'abc' -path " + fileName,
+                "Get-Content " + fileName
+            });
+
+            Assert.AreEqual("abc" + Environment.NewLine, result);
+        }
     }
 }

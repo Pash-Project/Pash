@@ -12,7 +12,10 @@ namespace Microsoft.Commands.Management
         {
             foreach (string path in Path)
             {
-                InvokeProvider.Content.Clear(path);
+                if (InvokeProvider.Item.Exists(path))
+                {
+                    InvokeProvider.Content.Clear(path);
+                }
                 WriteValues(path);
             }
         }
