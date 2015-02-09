@@ -49,6 +49,10 @@ Not every test needs to be duplicated as a reference test, but a few things prob
 * Behavior we have trouble getting right
 
 
+Code Analysis
+----
+Code Analysis is enabled for Visual Studio builds. See the [code analysis documenation](/Documents/FxCop.md) for more details.
+
 Travis
 ----
 
