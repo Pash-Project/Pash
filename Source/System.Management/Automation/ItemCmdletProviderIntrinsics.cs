@@ -187,7 +187,13 @@ namespace System.Management.Automation
 
         internal bool Exists(string path, ProviderRuntime runtime)
         {
-            throw new NotImplementedException();
+            PSDriveInfo drive;
+            var itemProvider = _cmdlet.State.SessionStateGlobal.GetProviderByPath(path, out drive) as ItemCmdletProvider;
+            if (itemProvider != null)
+            {
+                return itemProvider.ItemExists(path, runtime);
+            }
+            return true;
         }
 
         internal void Get(string[] path, ProviderRuntime runtime)

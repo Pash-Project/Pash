@@ -44,10 +44,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\AddContentTests.cs" />
     <Compile Include="Commands\AddMemberTests.cs" />
     <Compile Include="Commands\AddTypeTests.cs" />
+    <Compile Include="Commands\ClearContentTests.cs" />
+    <Compile Include="Commands\GetContentTests.cs" />
     <Compile Include="Commands\ImportModuleTests.cs" />
     <Compile Include="Commands\RemoveModuleTests.cs" />
+    <Compile Include="Commands\SetContentTests.cs" />
     <Compile Include="Commands\WhereObjectTests.cs" />
     <Compile Include="Integration\RosettaCode.cs" />
     <Compile Include="Language\FileRedirectionTests.cs" />
@@ -62,7 +66,14 @@
     <Compile Include="Language\Operators\RangeOperatorTests_7_4.cs" />
     <Compile Include="Language\ScopeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Providers\AliasProviderTests.cs" />
+    <Compile Include="Providers\ContentCmdletProviderTests.cs" />
+    <Compile Include="Providers\ContentReaderTests.cs" />
+    <Compile Include="Providers\ContentWriterTests.cs" />
+    <Compile Include="Providers\FunctionProviderTests.cs" />
     <Compile Include="Providers\ItemCmdletProviderTests.cs" />
+    <Compile Include="Providers\EnvironmentProviderTests.cs" />
+    <Compile Include="Providers\VariableProviderTests.cs" />
     <Compile Include="ReferenceHost.cs" />
     <Compile Include="Language\PipelineExecutionTests.cs" />
     <Compile Include="ReferenceTestBase.cs" />

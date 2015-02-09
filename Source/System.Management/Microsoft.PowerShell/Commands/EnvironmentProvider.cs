@@ -52,6 +52,9 @@ namespace Microsoft.PowerShell.Commands
 
         internal override void SetSessionStateItem(string path, object value, bool writeItem)
         {
+            Path name = PathIntrinsics.RemoveDriveName(path);
+            path = name.TrimStartSlash();
+
             if (value == null)
             {
                 Environment.SetEnvironmentVariable(path, null);

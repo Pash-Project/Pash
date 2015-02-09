@@ -6,6 +6,7 @@ using System.Text;
 using System.Management.Automation.Provider;
 using System.Management.Automation;
 using System.Management;
+using System.Management.Pash.Implementation;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -87,7 +88,6 @@ namespace Microsoft.PowerShell.Commands
 
         public void ClearContent(string path)
         {
-            throw new NotImplementedException();
         }
 
         public object ClearContentDynamicParameters(string path)
@@ -97,7 +97,7 @@ namespace Microsoft.PowerShell.Commands
 
         public IContentReader GetContentReader(string path)
         {
-            throw new NotImplementedException();
+            return new SessionStateContentReader(this, path);
         }
 
         public object GetContentReaderDynamicParameters(string path)
@@ -107,7 +107,7 @@ namespace Microsoft.PowerShell.Commands
 
         public IContentWriter GetContentWriter(string path)
         {
-            throw new NotImplementedException();
+            return new SessionStateContentWriter(this, path);
         }
 
         public object GetContentWriterDynamicParameters(string path)

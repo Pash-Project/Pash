@@ -38,7 +38,9 @@ namespace Microsoft.PowerShell.Commands
 
         internal override object GetSessionStateItem(string name)
         {
-            throw new NotImplementedException();
+            Path path = PathIntrinsics.RemoveDriveName(name);
+            path = path.TrimStartSlash();
+            return SessionState.Function.Get(path);
         }
 
         internal override IDictionary GetSessionStateTable()
@@ -70,6 +72,12 @@ namespace Microsoft.PowerShell.Commands
         internal override void SetSessionStateItem(string name, object value, bool writeItem)
         {
             throw new NotImplementedException();
+        }
+
+        protected override void GetItem(string name)
+        {
+            name = PathIntrinsics.RemoveDriveName(new Path(name).TrimEndSlash());
+            GetChildItems(name, false);
         }
     }
 }
