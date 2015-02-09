@@ -8,20 +8,15 @@ using Pash.Implementation;
 
 namespace System.Management.Automation
 {
-    public sealed class ItemCmdletProviderIntrinsics
+    public sealed class ItemCmdletProviderIntrinsics : CmdletProviderIntrinsicsBase
     {
-        private InternalCommand _cmdlet;
-        private ExecutionContext _executionContext;
+        private ChildItemCmdletProviderIntrinsics ChildItem { get; set; }
 
-        internal ItemCmdletProviderIntrinsics(Cmdlet cmdlet) : this(cmdlet.ExecutionContext)
+        internal ItemCmdletProviderIntrinsics(Cmdlet cmdlet) : base(cmdlet)
         {
-            _cmdlet = cmdlet;
+            ChildItem = new ChildItemCmdletProviderIntrinsics(cmdlet);
         }
 
-        internal ItemCmdletProviderIntrinsics(ExecutionContext context)
-        {
-            _executionContext = context;
-        }
 
         #region Public API
         // They work without the use of ProviderRuntime. All these functions basically create a ProviderRuntime,
@@ -34,9 +29,9 @@ namespace System.Management.Automation
 
         public Collection<PSObject> Clear(string[] path, bool force, bool literalPath)
         {
-            var runtime = new ProviderRuntime(_executionContext, force, literalPath);
+            var runtime = new ProviderRuntime(SessionState, force, literalPath);
             Clear(path, runtime);
-            return ThrowOnErrorOrReturnResults(runtime);
+            return runtime.ThrowFirstErrorOrReturnResults();
         }
 
         public Collection<PSObject> Copy(string path, string destinationPath, bool recurse, CopyContainers copyContainers)
@@ -47,9 +42,9 @@ namespace System.Management.Automation
         public Collection<PSObject> Copy(string[] path, string destinationPath, bool recurse, CopyContainers copyContainers,
                                          bool force, bool literalPath)
         {
-            var runtime = new ProviderRuntime(_executionContext, force, literalPath);
+            var runtime = new ProviderRuntime(SessionState, force, literalPath);
             Copy(path, destinationPath, recurse, copyContainers, runtime);
-            return ThrowOnErrorOrReturnResults(runtime);
+            return runtime.ThrowFirstErrorOrReturnResults();
         }
 
         public bool Exists(string path)
@@ -59,7 +54,7 @@ namespace System.Management.Automation
 
         public bool Exists(string path, bool force, bool literalPath)
         {
-            var runtime = new ProviderRuntime(_executionContext, force, literalPath);
+            var runtime = new ProviderRuntime(SessionState, force, literalPath);
             bool result = Exists(path, runtime);
             runtime.ThrowFirstErrorOrContinue();
             return result;
@@ -72,9 +67,9 @@ namespace System.Management.Automation
 
         public Collection<PSObject> Get(string[] path, bool force, bool literalPath)
         {
-            var runtime = new ProviderRuntime(_executionContext, force, literalPath);
+            var runtime = new ProviderRuntime(SessionState, force, literalPath);
             Get(path, runtime);
-            return ThrowOnErrorOrReturnResults(runtime);
+            return runtime.ThrowFirstErrorOrReturnResults();
         }
 
         public void Invoke(string path)
@@ -84,7 +79,7 @@ namespace System.Management.Automation
 
         public void Invoke(string[] path, bool literalPath)
         {
-            var runtime = new ProviderRuntime(_executionContext);
+            var runtime = new ProviderRuntime(SessionState);
             runtime.AvoidWildcardExpansion = literalPath;
             Invoke(path, runtime);
             runtime.ThrowFirstErrorOrContinue();
@@ -92,7 +87,7 @@ namespace System.Management.Automation
 
         public bool IsContainer(string path)
         {
-            var runtime = new ProviderRuntime(_executionContext);
+            var runtime = new ProviderRuntime(SessionState);
             bool result = IsContainer(path, runtime);
             runtime.ThrowFirstErrorOrContinue();
             return result;
@@ -105,9 +100,9 @@ namespace System.Management.Automation
 
         public Collection<PSObject> Move(string[] path, string destination, bool force, bool literalPath)
         {
-            var runtime = new ProviderRuntime(_executionContext, force, literalPath);
+            var runtime = new ProviderRuntime(SessionState, force, literalPath);
             Move(path, destination, runtime);
-            return ThrowOnErrorOrReturnResults(runtime);
+            return runtime.ThrowFirstErrorOrReturnResults();
         }
 
 
@@ -118,9 +113,9 @@ namespace System.Management.Automation
 
         public Collection<PSObject> New(string[] paths, string name, string itemTypeName, object content, bool force)
         {
-            var runtime = new ProviderRuntime(_executionContext, force, true);
+            var runtime = new ProviderRuntime(SessionState, force, true);
             New(paths, name, itemTypeName, content, runtime);
-            return ThrowOnErrorOrReturnResults(runtime);
+            return runtime.ThrowFirstErrorOrReturnResults();
         }
 
         public void Remove(string path, bool recurse)
@@ -130,7 +125,7 @@ namespace System.Management.Automation
 
         public void Remove(string[] path, bool recurse, bool force, bool literalPath)
         {
-            var runtime = new ProviderRuntime(_executionContext, force, literalPath);
+            var runtime = new ProviderRuntime(SessionState, force, literalPath);
             Remove(path, recurse, runtime);
             runtime.ThrowFirstErrorOrContinue();
         }
@@ -142,9 +137,9 @@ namespace System.Management.Automation
 
         public Collection<PSObject> Rename(string path, string newName, bool force)
         {
-            var runtime = new ProviderRuntime(_executionContext, force, true);
+            var runtime = new ProviderRuntime(SessionState, force, true);
             Rename(path, newName, runtime);
-            return ThrowOnErrorOrReturnResults(runtime);
+            return runtime.ThrowFirstErrorOrReturnResults();
         }
 
         public Collection<PSObject> Set(string path, object value)
@@ -154,30 +149,15 @@ namespace System.Management.Automation
 
         public Collection<PSObject> Set(string[] path, object value, bool force, bool literalPath)
         {
-            var runtime = new ProviderRuntime(_executionContext, force, literalPath);
+            var runtime = new ProviderRuntime(SessionState, force, literalPath);
             Set(path, value, runtime);
-            return ThrowOnErrorOrReturnResults(runtime);
+            return runtime.ThrowFirstErrorOrReturnResults();
         }
 
 
         #endregion
 
         #region internal API
-
-        // stuff like the public api... but internal
-        internal Collection<string> GetChildNames(string path, ReturnContainers returnContainers, bool recurse, bool force, bool literalPath)
-        {
-            return GetChildNames(new [] { path }, returnContainers, recurse, force, literalPath);
-        }
-
-        internal Collection<string> GetChildNames(string[] paths, ReturnContainers returnContainers, bool recurse, bool force, bool literalPath)
-        {
-            var runtime = new ProviderRuntime(_executionContext, force, literalPath);
-            GetChildNames(paths, returnContainers, recurse, runtime);
-            var packedResults = ThrowOnErrorOrReturnResults(runtime);
-            var results = (from r in packedResults select r.ToString()).ToList();
-            return new Collection<string>(results);
-        }
 
         // these function calls use directly a ProviderRuntime and don't return objects, but write it to the
         // ProviderRuntime's result buffer (which might be the cmdlet's result buffer)
@@ -198,7 +178,7 @@ namespace System.Management.Automation
         {
             ProviderInfo providerInfo;
             PSDriveInfo driveInfo;
-            var globber = new PathGlobber(_executionContext.SessionState);
+            var globber = new PathGlobber(ExecutionContext.SessionState);
             var destination = globber.GetProviderSpecificPath(destinationPath, runtime, out providerInfo);
             var destIsContainer = IsContainer(destination, runtime);
 
@@ -242,7 +222,7 @@ namespace System.Management.Automation
         internal bool Exists(string path, ProviderRuntime runtime)
         {
             CmdletProvider provider;
-            var globber = new PathGlobber(_executionContext.SessionState);
+            var globber = new PathGlobber(ExecutionContext.SessionState);
             var globbedPaths = globber.GetGlobbedProviderPaths(path, runtime, out provider);
             var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
             foreach (var p in globbedPaths)
@@ -300,7 +280,7 @@ namespace System.Management.Automation
         internal bool IsContainer(string path, ProviderRuntime runtime)
         {
             CmdletProvider provider;
-            var globber = new PathGlobber(_executionContext.SessionState);
+            var globber = new PathGlobber(ExecutionContext.SessionState);
             var globbedPaths = globber.GetGlobbedProviderPaths(path, runtime, out provider);
             var isContainerProvider = (provider is ContainerCmdletProvider);
             var navProvider = provider as NavigationCmdletProvider;
@@ -345,7 +325,7 @@ namespace System.Management.Automation
         {
             var validName = !String.IsNullOrEmpty(name);
             CmdletProvider provider;
-            var globber = new PathGlobber(_executionContext.SessionState);
+            var globber = new PathGlobber(ExecutionContext.SessionState);
             foreach (var path in paths)
             {
                 Collection<string> resolvedPaths;
@@ -359,7 +339,7 @@ namespace System.Management.Automation
                     ProviderInfo providerInfo;
                     resolvedPaths = new Collection<string>();
                     resolvedPaths.Add(globber.GetProviderSpecificPath(path, runtime, out providerInfo));
-                    provider = _executionContext.SessionState.Provider.GetInstance(providerInfo);
+                    provider = ExecutionContext.SessionState.Provider.GetInstance(providerInfo);
                 }
                 var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
                 foreach (var curResolvedPath in resolvedPaths)
@@ -367,7 +347,7 @@ namespace System.Management.Automation
                     var resPath = curResolvedPath;
                     if (validName)
                     {
-                        resPath = JoinPath(containerProvider, resPath, name, runtime);
+                        resPath = Path.Combine(containerProvider, resPath, name, runtime);
                     }
                     try
                     {
@@ -426,7 +406,7 @@ namespace System.Management.Automation
         internal void Rename(string path, string newName, ProviderRuntime runtime)
         {
             CmdletProvider provider;
-            var globber = new PathGlobber(_executionContext.SessionState);
+            var globber = new PathGlobber(ExecutionContext.SessionState);
             var globbed = globber.GetGlobbedProviderPaths(path, runtime, out provider);
             if (globbed.Count != 1)
             {
@@ -466,79 +446,9 @@ namespace System.Management.Automation
         {
             throw new NotImplementedException();
         }
-
-        internal string JoinPath(CmdletProvider provider, string parent, string child, ProviderRuntime runtime)
-        {
-            CmdletProvider.VerifyType<ContainerCmdletProvider>(provider); // throws if it's not
-            var navigationPorivder = provider as NavigationCmdletProvider;
-            // for a container provider, this is always just the child string (yep, this is PS behavior)
-            if (navigationPorivder == null)
-            {
-                return child;
-            }
-
-            // otherwise use the NavigationCmdletProvider's method
-
-            // TODO: first of all a not really correct implementation to not break the existing FilesystemProvider
-            // support that. We will change this when we have full NavigationCmdletProvider support
-            return new Path(parent).Combine(child).NormalizeSlashes();
-        }
-
-        internal void GetChildNames(string[] paths, ReturnContainers returnContainers, bool recurse, ProviderRuntime runtime)
-        {
-            GlobAndInvoke<ContainerCmdletProvider>(paths, runtime,
-                (curPath, Provider) => {
-                    GetChildNamesFromProviderPath(Provider, curPath, "", returnContainers, recurse, runtime);
-                }
-            );
-        }
-
         #endregion
 
         #region private helpers
-
-        private void GetChildNamesFromProviderPath(ContainerCmdletProvider provider, string providerPath, string relativePath,
-                                                   ReturnContainers returnContainers, bool recurse, ProviderRuntime runtime)
-        {
-            var subRuntime = new ProviderRuntime(runtime);
-            subRuntime.PassThru = false;
-            provider.GetChildNames(providerPath, returnContainers, subRuntime);
-            var childNames = ThrowOnErrorOrReturnResults(subRuntime);
-            foreach (var childNameObj in childNames)
-            {
-                var childName = childNameObj.BaseObject as string;
-                if (childName == null)
-                {
-                    continue;
-                }
-                // TODO: check runtime's include/exclude filters
-                var path = JoinPath(provider, relativePath, childName, runtime);
-                runtime.WriteObject(path);
-            }
-            // now check if we need to handle this recursively
-            if (!recurse)
-            {
-                return;
-            }
-            // this is recursion, so get all containers from item
-            provider.GetChildNames(providerPath, ReturnContainers.ReturnAllContainers, subRuntime);
-            childNames = ThrowOnErrorOrReturnResults(subRuntime);
-            foreach (var containerChild in childNames)
-            {
-                var childName = containerChild.BaseObject as string;
-                if (childName == null)
-                {
-                    continue;
-                }
-                var providerChildPath = JoinPath(provider, providerPath, childName, runtime);
-                if (IsContainer(providerChildPath, runtime))
-                {
-                    // recursive call wirth child's provider path and relative path
-                    var relativeChildPath = JoinPath(provider, relativePath, childName, runtime);
-                    GetChildNamesFromProviderPath(provider, providerChildPath, relativeChildPath, returnContainers, true, runtime);
-                }
-            }
-        }
 
         private bool VerifyItemExists(ItemCmdletProvider provider, string path, ProviderRuntime runtime)
         {
@@ -561,47 +471,6 @@ namespace System.Management.Automation
             return false;
         }
 
-        private Collection<PSObject> ThrowOnErrorOrReturnResults(ProviderRuntime runtime)
-        {
-            runtime.ThrowFirstErrorOrContinue();
-            return runtime.RetreiveAllProviderData();
-        }
-
-        private void GlobAndInvoke<T>(string[] paths, ProviderRuntime runtime, Action<string, T> method) where T : CmdletProvider
-        {
-            foreach (var curPath in paths)
-            {
-                CmdletProvider provider;
-                var globber = new PathGlobber(_executionContext.SessionState);
-                var globbedPaths = globber.GetGlobbedProviderPaths(curPath, runtime, out provider);
-                var itemProvider = CmdletProvider.As<T>(provider);
-                foreach (var p in globbedPaths)
-                {
-                    try
-                    {
-                        method(p, itemProvider);
-                    }
-                    catch (Exception e)
-                    {
-                        HandleCmdletProviderInvocationException(e);
-                    }
-                }
-            }
-        }
-
-
-        private void HandleCmdletProviderInvocationException(Exception e)
-        {
-            // Whenever we call some function of a provider, we should check for exceptions
-            // and handle them here in a unique way.
-            // For now: Only check if we already deal with a CmdletProviderInvocationException or create one
-            if ((e is CmdletProviderInvocationException) || (e is CmdletInvocationException))
-            {
-                throw e;
-            }
-            throw new CmdletProviderInvocationException(e.Message, e);
-        }
-
         void CopyContainerToContainer(ContainerCmdletProvider provider, string srcPath, string destPath, bool recurse,
                                       CopyContainers copyContainers, ProviderRuntime runtime)
         {
@@ -622,10 +491,10 @@ namespace System.Management.Automation
                 return;
             }
             // otherwise do the flat copy. To do this: get all child names (recursively) and invoke copying without recursion
-            var childNames = GetChildNames(srcPath, ReturnContainers.ReturnMatchingContainers, true, false, false);
+            var childNames = ChildItem.GetNames(srcPath, ReturnContainers.ReturnMatchingContainers, true);
             foreach (var child in childNames)
             {
-                var childPath = JoinPath(provider, srcPath, child, runtime);
+                var childPath = Path.Combine(provider, srcPath, child, runtime);
                 provider.CopyItem(childPath, destPath, false, runtime);
             }
         }

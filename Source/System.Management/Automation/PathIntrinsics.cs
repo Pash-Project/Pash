@@ -23,7 +23,8 @@ namespace System.Management.Automation
 
         public string Combine(string parent, string child)
         {
-            return _sessionStateGlobal.MakePath(parent, child);
+            var runtime = new ProviderRuntime(_sessionState);
+            return Combine(parent, child, runtime);
         }
 
         public PathInfo CurrentProviderLocation(string providerName)
@@ -68,8 +69,7 @@ namespace System.Management.Automation
 
         public bool IsValid(string path)
         {
-            // Runspace.DefaultRunspace.ExecutionContext should be the used one as it's set during the #ExecutionContextChange
-            var runtime = new ProviderRuntime(Runspace.DefaultRunspace.ExecutionContext);
+            var runtime = new ProviderRuntime(_sessionState);
             return IsValid(path, runtime);
         }
 
@@ -123,7 +123,31 @@ namespace System.Management.Automation
             return itemProvider.IsValidPath(path, runtime);
         }
 
-        //internal string Combine(string parent, string child, CmdletProviderContext context);
+
+        internal string Combine(string parent, string child, ProviderRuntime runtime)
+        {
+            ProviderInfo providerInfo;
+            parent = new PathGlobber(_sessionState).GetProviderSpecificPath(parent, runtime, out providerInfo);
+            var provider = _sessionStateGlobal.Provider.GetInstance(providerInfo);
+            return Combine(provider, parent, child, runtime);
+        }
+
+        internal string Combine(CmdletProvider provider, string parent, string child, ProviderRuntime runtime)
+        {
+            CmdletProvider.VerifyType<ContainerCmdletProvider>(provider); // throws if it's not
+            var navigationPorivder = provider as NavigationCmdletProvider;
+            // for a container provider, this is always just the child string (yep, this is PS behavior)
+            if (navigationPorivder == null)
+            {
+                return child;
+            }
+
+            // otherwise use the NavigationCmdletProvider's MakePath method
+
+            // TODO: first of all a not really correct implementation to not break the existing FilesystemProvider
+            // support that. We will change this when we have full NavigationCmdletProvider support
+            return new Path(parent).Combine(child).NormalizeSlashes();
+        }
         //internal Collection<string> GetResolvedProviderPathFromProviderPath(string path, string providerId, CmdletProviderContext context);
         //internal Collection<string> GetResolvedProviderPathFromPSPath(string path, CmdletProviderContext context, out ProviderInfo provider);
         //internal Collection<PathInfo> GetResolvedPSPathFromPSPath(string path, CmdletProviderContext context);

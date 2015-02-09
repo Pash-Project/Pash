@@ -71,7 +71,7 @@ namespace System.Management.Automation.Provider
         {
             get
             {
-                return this.ProviderRuntime.ExecutionContext.SessionState;
+                return ProviderRuntime.SessionState;
             }
         }
 

@@ -221,10 +221,6 @@ namespace Pash.Implementation
 
         #region PathIntrinsics
         //TODO: move this (and implement it) in the appropriate class, not here
-        internal string MakePath(string parent, string child)
-        {
-            throw new NotImplementedException();
-        }
 
         internal PathInfo CurrentProviderLocation(string providerName)
         {
@@ -268,108 +264,9 @@ namespace Pash.Implementation
 
         internal PathInfo SetLocation(string path)
         {
-            return SetLocation(path, new ProviderRuntime(_globalExecutionContext));
+            return SetLocation(path, new ProviderRuntime(_globalExecutionContext.SessionState));
         }
         #endregion
-
-        // TODO: it would be nice if these functions would be in the intrinsics itself, not called from there
-        internal Collection<PSObject> GetChildItems(string path, bool recurse)
-        {
-            ProviderRuntime providerRuntime = new ProviderRuntime(_globalExecutionContext);
-
-            return GetChildItems(path, recurse, providerRuntime);
-        }
-
-        internal Collection<PSObject> GetChildItems(string path, bool recurse, ProviderRuntime providerRuntime)
-        {
-            if (string.IsNullOrEmpty(path))
-                path = CurrentLocation.Path;
-
-            PSDriveInfo drive;
-            CmdletProvider provider = GetProviderByPath(path, out drive);
-
-            if ((path != null) && (ItemExists(provider, path, providerRuntime)))
-            {
-                if (IsItemContainer(provider, path, providerRuntime))
-                {
-                    ContainerCmdletProvider containerProvider = provider as ContainerCmdletProvider;
-
-                    if (containerProvider != null)
-                        containerProvider.GetChildItems(path, recurse, providerRuntime);
-                }
-                else
-                {
-                    ItemCmdletProvider itemProvider = provider as ItemCmdletProvider;
-
-                    if (itemProvider != null)
-                        itemProvider.GetItem(path, providerRuntime);
-                }
-            }
-
-            return providerRuntime.RetreiveAllProviderData();
-        }
-
-        internal CmdletProvider GetProviderByPath(Path path, out PSDriveInfo drive)
-        {
-            // MUST: implement for "dir"
-            if (string.IsNullOrEmpty(path))
-                path = CurrentLocation.Path;
-
-            drive = GetDrive(path);
-
-            if (drive == null)
-            {
-                drive = CurrentLocation.Drive;
-            }
-
-
-            if (drive == null)
-                return null;
-
-            return RootSessionState.Provider.GetInstance(drive.Provider.Name);
-        }
-
-        private PSDriveInfo GetDrive(Path path)
-        {
-            string driveName = path.GetDrive();
-            if (!string.IsNullOrEmpty(driveName))
-            {
-                return RootSessionState.Drive.Get(driveName);
-            }
-            return null;
-        }
-
-        private bool ItemExists(CmdletProvider provider, string path, ProviderRuntime providerRuntime)
-        {
-            ItemCmdletProvider itemProvider = provider as ItemCmdletProvider;
-
-            if (itemProvider == null)
-                return false;
-
-            return itemProvider.ItemExists(path, providerRuntime);
-        }
-
-        private bool IsItemContainer(CmdletProvider provider, string path, ProviderRuntime providerRuntime)
-        {
-            NavigationCmdletProvider navigationProvider = provider as NavigationCmdletProvider;
-
-            if (navigationProvider == null)
-                return false;
-
-            return navigationProvider.IsItemContainer(path, providerRuntime);
-        }
-
-        internal Collection<string> GetChildNames(string path, ReturnContainers returnContainers, bool recurse)
-        {
-            // MUST: fix
-            throw new NotImplementedException();
-        }
-
-        internal Collection<string> GetChildNames(string path, ReturnContainers returnContainers, bool recurse, ProviderRuntime providerRuntime)
-        {
-            // MUST: fix
-            throw new NotImplementedException();
-        }
 
         internal PathInfo SetLocation(Path path, ProviderRuntime providerRuntime)
         {

@@ -11,7 +11,7 @@ namespace Pash.Implementation
         internal Collection<string> Exclude { get; set; }
         internal string Filter { get; set; }
         internal SwitchParameter Force { get; set; }
-        internal ExecutionContext ExecutionContext { get; private set; }
+        internal SessionState SessionState { get; private set; }
         internal PSCredential Credential { get; set; }
         internal SwitchParameter AvoidWildcardExpansion { get; set; }
         internal PSDriveInfo PSDriveInfo { get; set; }
@@ -30,26 +30,26 @@ namespace Pash.Implementation
         }
 
         internal ProviderRuntime(Cmdlet cmdlet)
-            : this(cmdlet.ExecutionContext)
+            : this(cmdlet.ExecutionContext.SessionState)
         {
             _cmdlet = cmdlet;
         }
 
-        internal ProviderRuntime(ExecutionContext executionContext)
-            : this(executionContext, false, false)
+        internal ProviderRuntime(SessionState sessionState)
+            : this(sessionState, false, false)
         {
         }
 
-        internal ProviderRuntime(ExecutionContext executionContext, bool force, bool avoidWildcardExpansion)
+        internal ProviderRuntime(SessionState sessionState, bool force, bool avoidWildcardExpansion)
             : this()
         {
-            ExecutionContext = executionContext;
+            SessionState = sessionState;
             AvoidWildcardExpansion = avoidWildcardExpansion;
             Force = force;
         }
 
         public ProviderRuntime(ProviderRuntime runtime)
-            : this(runtime.ExecutionContext, runtime.Force, runtime.AvoidWildcardExpansion)
+            : this(runtime.SessionState, runtime.Force, runtime.AvoidWildcardExpansion)
         {
             _cmdlet = runtime._cmdlet;
             PassThru = runtime.PassThru;
@@ -102,6 +102,12 @@ namespace Pash.Implementation
             {
                 throw new ProviderInvocationException(_errorData[0]);
             }
+        }
+
+        internal Collection<PSObject> ThrowFirstErrorOrReturnResults()
+        {
+            ThrowFirstErrorOrContinue();
+            return RetreiveAllProviderData();
         }
     }
 }

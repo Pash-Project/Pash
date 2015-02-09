@@ -106,9 +106,7 @@ namespace System.Management.Automation
 
         public PSDriveInfo New(PSDriveInfo drive, string scope)
         {
-            // we take the Runspace.DefaultRunspace.ExecutionContext because on every #ExecutionContextChange
-            // this variable is set to the current
-            var runtime = new ProviderRuntime(Runspace.DefaultRunspace.ExecutionContext);
+            var runtime = new ProviderRuntime(_scope.SessionState);
             return New(drive, scope, runtime);
         }
 
@@ -133,9 +131,7 @@ namespace System.Management.Automation
 
         public void Remove(string driveName, bool force, string scope)
         {
-            // we take the Runspace.DefaultRunspace.ExecutionContext because on every #ExecutionContextChange
-            // this variable is set to the current
-            var runtime = new ProviderRuntime(Runspace.DefaultRunspace.ExecutionContext);
+            var runtime = new ProviderRuntime(_scope.SessionState);
             runtime.Force = new SwitchParameter(force);
             Remove(driveName, scope, runtime);
         }
