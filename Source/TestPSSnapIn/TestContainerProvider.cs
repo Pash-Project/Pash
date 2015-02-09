@@ -56,7 +56,7 @@ namespace TestPSSnapIn
 
         public override void AddChild(TestTreeNode node)
         {
-            throw new InvalidOperationException("Cannot add child to lead node");
+            throw new InvalidOperationException("Cannot add child to leaf node");
         }
     }
 
@@ -88,20 +88,40 @@ namespace TestPSSnapIn
 
         protected override void CopyItem(string path, string copyPath, bool recurse)
         {
-            if (HasChildItems(path) && !recurse)
-            {
-                throw new ArgumentException("Item at path '" + path + "' has child items. Use recursion");
-            }
-            if (ItemExists(copyPath))
-            {
-                throw new ArgumentException("Destination '" + copyPath + "' already exists");
-            }
+            var srcNode = FindNode(path);
             string newName;
             var destParent = FindParent(copyPath, out newName);
-            var srcNode = FindNode(path);
-            var copiedNode = srcNode.DetachedCopy(newName);
-            destParent.AddChild(copiedNode);
-            WriteItemObject(copiedNode, copyPath, IsContainer(copiedNode));
+            // copy container without recursion: create empty container
+            if (IsContainer(srcNode) && !recurse)
+            {
+                var copy = new TestTreeNode(destParent, srcNode.Name);
+                destParent.AddChild(copy);
+                WriteItemObject(copy, copyPath, true);
+                return;
+            }
+            // create a full copy if destination doesn't exist or is a leaf and should get ovewritten
+            if (!ItemExists(copyPath) || !IsContainer(FindNode(copyPath)))
+            {
+                var copiedNode = srcNode.DetachedCopy(newName);
+                destParent.AddChild(copiedNode);
+                WriteItemObject(copiedNode, copyPath, IsContainer(copiedNode));
+                return;
+            }
+            // else dest is an existing container. copy into it
+            var destNode = FindNode(copyPath);
+            if (!IsContainer(srcNode))
+            {
+                var copy = srcNode.DetachedCopy(srcNode.Name);
+                destNode.AddChild(copy);
+                WriteItemObject(copy, copyPath + "/" + srcNode.Name, false);
+                return;
+            }
+            // otherwise we copy the contents of src into dest
+            foreach (var child in srcNode.Children.Values)
+            {
+                var copy = child.DetachedCopy(child.Name);
+                destNode.AddChild(copy);
+            }
         }
 
         protected override void GetChildItems(string path, bool recurse)
@@ -287,7 +307,7 @@ namespace TestPSSnapIn
 
         private bool IsContainer(TestTreeNode node)
         {
-            return node is TestTreeLeaf;
+            return !(node is TestTreeLeaf);
         }
 
         private string PathWithoutDrive(string path)

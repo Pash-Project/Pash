@@ -117,8 +117,7 @@ namespace System.Management.Automation
         internal bool IsValid(string path, ProviderRuntime runtime)
         {
             ProviderInfo providerInfo;
-            PSDriveInfo driveInfo;
-            path = new PathGlobber(_sessionState).GetProviderSpecificPath(path, out providerInfo, out driveInfo);
+            path = new PathGlobber(_sessionState).GetProviderSpecificPath(path, runtime, out providerInfo);
             var provider = _sessionStateGlobal.Provider.GetInstance(providerInfo);
             var itemProvider = CmdletProvider.As<ItemCmdletProvider>(provider);
             return itemProvider.IsValidPath(path, runtime);

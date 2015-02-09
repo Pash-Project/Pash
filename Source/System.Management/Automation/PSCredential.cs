@@ -40,6 +40,12 @@ namespace System.Management.Automation
 			this.password = password;
 		}
 
+        public PSCredential(PSCredential credential)
+        {
+            username = credential.username;
+            password = credential.Password.Copy();
+        }
+
 		public NetworkCredential GetNetworkCredential()
 		{
 			throw new NotImplementedException ();

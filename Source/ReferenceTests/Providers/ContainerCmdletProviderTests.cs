@@ -238,32 +238,16 @@ namespace ReferenceTests.Providers
         }
 
         [Test]
-        public void ContainerProviderThrowsOnCopyItemWithoutRecursion()
-        {
-            var nodePath = TestContainerProvider.DefaultNodePath;
-            var itemPath = TestContainerProvider.DefaultNodePath + "someItem";
-            var newPath = TestContainerProvider.DefaultDrivePath + "copiedNodeName";
-            var cmd = NewlineJoin(
-                "$ni = New-Item " + itemPath + " -ItemType 'leaf' -Value 'testValue'",
-                "Copy-Item " + nodePath + " " + newPath
-            );
-            Assert.Throws<CmdletProviderInvocationException>(delegate {
-                ReferenceHost.Execute(cmd);
-            });
-        }
-
-        [Test]
-        public void ContainerProviderThrowsOnCopyItemWithExistingDestination()
+        public void ContainerProviderSupportsCopyItemToExistingDestination()
         {
             var itemPath = TestContainerProvider.DefaultItemPath;
             var newPath = TestContainerProvider.DefaultDrivePath + "copiedItem";
             var cmd = NewlineJoin(
                 "$ni = New-Item " + newPath + " -ItemType 'leaf' -Value 'testValue'",
-                "Copy-Item " + itemPath + " " + newPath
+                "Copy-Item " + newPath + " " + itemPath,
+                "(Get-Item " + itemPath + ").Value"
             );
-            Assert.Throws<CmdletProviderInvocationException>(delegate {
-                ReferenceHost.Execute(cmd);
-            });
+            ExecuteAndCompareTypedResult(cmd, "testValue");
         }
 
         [Test]

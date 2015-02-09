@@ -199,11 +199,17 @@ namespace System.Management.Automation
             ProviderInfo providerInfo;
             PSDriveInfo driveInfo;
             var globber = new PathGlobber(_executionContext.SessionState);
-            var destination = globber.GetProviderSpecificPath(destinationPath, out providerInfo, out driveInfo);
+            var destination = globber.GetProviderSpecificPath(destinationPath, runtime, out providerInfo);
             var destIsContainer = IsContainer(destination, runtime);
 
             GlobAndInvoke<ContainerCmdletProvider>(path, runtime,
                 (curPath, provider) => {
+                    // make sure the src exists
+                    if(!VerifyItemExists(provider, curPath, runtime))
+                    {
+                        return;
+                    }
+                    // check if src is a container
                     if (IsContainer(curPath, runtime))
                     {
                         // if we copy a container to another, invoke a special method for this
@@ -218,6 +224,7 @@ namespace System.Management.Automation
                             var error = new PSArgumentException("Cannot copy container to existing leaf", 
                                 "CopyContainerItemToLeafError", ErrorCategory.InvalidArgument).ErrorRecord;
                             runtime.WriteError(error);
+                            return;
                         }
                         // otherwise we just proceed as normal
                     }
@@ -349,11 +356,9 @@ namespace System.Management.Automation
                 }
                 else
                 {
-                    PSDriveInfo drive;
                     ProviderInfo providerInfo;
                     resolvedPaths = new Collection<string>();
-                    resolvedPaths.Add(globber.GetProviderSpecificPath(path, out providerInfo, out drive));
-                    runtime.PSDriveInfo = drive;
+                    resolvedPaths.Add(globber.GetProviderSpecificPath(path, runtime, out providerInfo));
                     provider = _executionContext.SessionState.Provider.GetInstance(providerInfo);
                 }
                 var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
@@ -481,7 +486,11 @@ namespace System.Management.Automation
 
         internal void GetChildNames(string[] paths, ReturnContainers returnContainers, bool recurse, ProviderRuntime runtime)
         {
-            // glob, call GetChildNamesFromProviderPath and filter
+            GlobAndInvoke<ContainerCmdletProvider>(paths, runtime,
+                (curPath, Provider) => {
+                    GetChildNamesFromProviderPath(Provider, curPath, "", returnContainers, recurse, runtime);
+                }
+            );
         }
 
         #endregion

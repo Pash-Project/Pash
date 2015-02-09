@@ -48,6 +48,21 @@ namespace Pash.Implementation
             Force = force;
         }
 
+        public ProviderRuntime(ProviderRuntime runtime)
+            : this(runtime.ExecutionContext, runtime.Force, runtime.AvoidWildcardExpansion)
+        {
+            _cmdlet = runtime._cmdlet;
+            PassThru = runtime.PassThru;
+            PSDriveInfo = runtime.PSDriveInfo;
+            Include = new Collection<string>(runtime.Include);
+            Exclude = new Collection<string>(runtime.Exclude);
+            Filter = runtime.Filter;
+            if (runtime.Credential != null)
+            {
+                Credential = new PSCredential(runtime.Credential);
+            }
+        }
+
         internal Collection<PSObject> RetreiveAllProviderData()
         {
             Collection<PSObject> output = _outputData;

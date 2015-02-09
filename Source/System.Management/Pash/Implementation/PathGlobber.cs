@@ -23,13 +23,10 @@ namespace Pash.Implementation
                                                             out CmdletProvider provider)
         {
             var results = new Collection<string>();
-
             ProviderInfo providerInfo;
-            PSDriveInfo drive;
 
             // get internal path, resolve home path and set provider info and drive info (if resolved)
-            path = GetProviderSpecificPath(path, out providerInfo, out drive);
-            runtime.PSDriveInfo = drive;
+            path = GetProviderSpecificPath(path, runtime, out providerInfo);
 
             provider = _sessionState.Provider.GetInstance(providerInfo);
 
@@ -58,23 +55,31 @@ namespace Pash.Implementation
             return results;
         }
 
-        internal string GetProviderSpecificPath(string path, out ProviderInfo providerInfo, out PSDriveInfo drive)
+        internal string GetProviderSpecificPath(string path, ProviderRuntime runtime, out ProviderInfo providerInfo)
         {
             // differentiate between drive-qualified, provider-qualified, provider-internal, and provider-direct paths
             // then strip provider prefix, set provider, set drive is possible or get from Drive.Current
-            drive = null;
+            PSDriveInfo drive;
             if (IsProviderQualifiedPath(path))
             {
                 path = GetProviderPathFromProviderQualifiedPath(path, out providerInfo);
+                drive = providerInfo.CurrentDrive;
             }
             else if (IsDriveQualifiedPath(path))
             {
                 path = GetProviderPathFromDriveQualifiedPath(path, out providerInfo, out drive);
             }
+            else if (runtime.PSDriveInfo != null)
+            {
+                drive = runtime.PSDriveInfo;
+                providerInfo = drive.Provider;
+            }
             else
             {
+                drive = _sessionState.Path.CurrentLocation.Drive;
                 providerInfo = _sessionState.Path.CurrentLocation.Provider;
             }
+            runtime.PSDriveInfo = drive;
             path = ResolveHomePath(path, providerInfo);
             return path;
         }
