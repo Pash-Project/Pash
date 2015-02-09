@@ -41,7 +41,7 @@ namespace Microsoft.PowerShell.Commands
                 runtime.Exclude = Exclude == null ? new Collection<string>() : new Collection<string>(Exclude.ToList());
                 runtime.Filter = Filter;
                 runtime.Force = Force;
-                runtime.AvoidWildcardExpansion = AvoidWildcardExpansion;
+                runtime.AvoidGlobbing = AvoidWildcardExpansion;
                 return runtime;
             }
         }

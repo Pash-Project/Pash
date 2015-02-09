@@ -21,6 +21,7 @@ namespace System.Management.Automation
         }
 
         #region Public API
+        // Public API creating a default ProviderRuntime, calling the internal API and returning the results
         public Collection<PSObject> Get(string path, bool recurse)
         {
             return Get(new [] { path }, recurse, false, false);
@@ -61,18 +62,24 @@ namespace System.Management.Automation
         #endregion
 
         #region internal API
+        // actual work with callid the providers
 
-        internal void Get(string[] path, bool recurse, ProviderRuntime providerRuntime)
+        internal void Get(string[] path, bool recurse, ProviderRuntime runtime)
         {
-            throw new NotImplementedException();
+            // the include/exclude filters apply to the results, not to the globbing process. Make this sure
+            runtime.IgnoreFiltersForGlobbing = true;
+
         }
 
         internal void GetNames(string[] path, ReturnContainers returnContainers, bool recurse, ProviderRuntime runtime)
         {
+            // the include/exclude filters apply to the results, not to the globbing process. Make this sure
+            runtime.IgnoreFiltersForGlobbing = true;
+            // compile here, not in every recursive iteration
+            var filter = new IncludeExcludeFilter(runtime.Include, runtime.Exclude, false);
+
             GlobAndInvoke<ContainerCmdletProvider>(path, runtime,
-                (curPath, Provider) => {
-                    GetChildNamesFromProviderPath(Provider, curPath, "", returnContainers, recurse, runtime);
-                }
+                (curPath, Provider) => GetNamesRecursively(Provider, curPath, "", returnContainers, recurse, runtime, filter)
             );
         }
 
@@ -80,11 +87,13 @@ namespace System.Management.Automation
 
         #region private helpers
 
-        private void GetChildNamesFromProviderPath(ContainerCmdletProvider provider, string providerPath, string relativePath,
-            ReturnContainers returnContainers, bool recurse, ProviderRuntime runtime)
+        private void GetNamesRecursively(ContainerCmdletProvider provider, string providerPath, string relativePath,
+            ReturnContainers returnContainers, bool recurse, ProviderRuntime runtime, IncludeExcludeFilter filter)
         {
+            // this function doesn't use a globber, it expects a finished provider path. But it uses recursion
             var subRuntime = new ProviderRuntime(runtime);
             subRuntime.PassThru = false;
+            // get child names for the current providerPath
             provider.GetChildNames(providerPath, returnContainers, subRuntime);
             var childNames = subRuntime.ThrowFirstErrorOrReturnResults();
             foreach (var childNameObj in childNames)
@@ -94,16 +103,21 @@ namespace System.Management.Automation
                 {
                     continue;
                 }
-                // TODO: check runtime's include/exclude filters
+                // add the child only if the filter accepts it
+                if (!filter.Accepts(childName))
+                {
+                    continue;
+                }
                 var path = Path.Combine(provider, relativePath, childName, runtime);
                 runtime.WriteObject(path);
             }
+
             // now check if we need to handle this recursively
             if (!recurse)
             {
                 return;
             }
-            // this is recursion, so get all containers from item
+            // okay, we should use recursion, so get all child containers and call this function again
             provider.GetChildNames(providerPath, ReturnContainers.ReturnAllContainers, subRuntime);
             childNames = subRuntime.ThrowFirstErrorOrReturnResults();
             foreach (var containerChild in childNames)
@@ -118,7 +132,7 @@ namespace System.Management.Automation
                 {
                     // recursive call wirth child's provider path and relative path
                     var relativeChildPath = Path.Combine(provider, relativePath, childName, runtime);
-                    GetChildNamesFromProviderPath(provider, providerChildPath, relativeChildPath, returnContainers, true, runtime);
+                    GetNamesRecursively(provider, providerChildPath, relativeChildPath, returnContainers, true, runtime, filter);
                 }
             }
         }

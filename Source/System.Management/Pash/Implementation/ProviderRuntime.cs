@@ -13,8 +13,9 @@ namespace Pash.Implementation
         internal SwitchParameter Force { get; set; }
         internal SessionState SessionState { get; private set; }
         internal PSCredential Credential { get; set; }
-        internal SwitchParameter AvoidWildcardExpansion { get; set; }
+        internal SwitchParameter AvoidGlobbing { get; set; }
         internal PSDriveInfo PSDriveInfo { get; set; }
+        internal bool IgnoreFiltersForGlobbing { get; set; }
 
         internal bool PassThru { get; set; }
 
@@ -44,12 +45,12 @@ namespace Pash.Implementation
             : this()
         {
             SessionState = sessionState;
-            AvoidWildcardExpansion = avoidWildcardExpansion;
+            AvoidGlobbing = avoidWildcardExpansion;
             Force = force;
         }
 
         public ProviderRuntime(ProviderRuntime runtime)
-            : this(runtime.SessionState, runtime.Force, runtime.AvoidWildcardExpansion)
+            : this(runtime.SessionState, runtime.Force, runtime.AvoidGlobbing)
         {
             _cmdlet = runtime._cmdlet;
             PassThru = runtime.PassThru;
@@ -57,6 +58,8 @@ namespace Pash.Implementation
             Include = new Collection<string>(runtime.Include);
             Exclude = new Collection<string>(runtime.Exclude);
             Filter = runtime.Filter;
+            AvoidGlobbing = runtime.AvoidGlobbing;
+            IgnoreFiltersForGlobbing = runtime.IgnoreFiltersForGlobbing;
             if (runtime.Credential != null)
             {
                 Credential = new PSCredential(runtime.Credential);
@@ -96,7 +99,7 @@ namespace Pash.Implementation
             }
         }
 
-        public void ThrowFirstErrorOrContinue()
+        internal void ThrowFirstErrorOrContinue()
         {
             if (_errorData.Count > 0)
             {
@@ -108,6 +111,11 @@ namespace Pash.Implementation
         {
             ThrowFirstErrorOrContinue();
             return RetreiveAllProviderData();
+        }
+
+        internal bool HasFilters()
+        {
+            return (Include != null && Include.Count > 0) || (Exclude != null && Exclude.Count > 0);
         }
     }
 }

@@ -80,7 +80,7 @@ namespace System.Management.Automation
         public void Invoke(string[] path, bool literalPath)
         {
             var runtime = new ProviderRuntime(SessionState);
-            runtime.AvoidWildcardExpansion = literalPath;
+            runtime.AvoidGlobbing = literalPath;
             Invoke(path, runtime);
             runtime.ThrowFirstErrorOrContinue();
         }
@@ -177,9 +177,7 @@ namespace System.Management.Automation
         internal void Copy(string[] path, string destinationPath, bool recurse, CopyContainers copyContainers, ProviderRuntime runtime)
         {
             ProviderInfo providerInfo;
-            PSDriveInfo driveInfo;
-            var globber = new PathGlobber(ExecutionContext.SessionState);
-            var destination = globber.GetProviderSpecificPath(destinationPath, runtime, out providerInfo);
+            var destination = Globber.GetProviderSpecificPath(destinationPath, runtime, out providerInfo);
             var destIsContainer = IsContainer(destination, runtime);
 
             GlobAndInvoke<ContainerCmdletProvider>(path, runtime,
@@ -222,8 +220,7 @@ namespace System.Management.Automation
         internal bool Exists(string path, ProviderRuntime runtime)
         {
             CmdletProvider provider;
-            var globber = new PathGlobber(ExecutionContext.SessionState);
-            var globbedPaths = globber.GetGlobbedProviderPaths(path, runtime, out provider);
+            var globbedPaths = Globber.GetGlobbedProviderPaths(path, runtime, out provider);
             var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
             foreach (var p in globbedPaths)
             {
@@ -232,7 +229,7 @@ namespace System.Management.Automation
                 {
                     exists = containerProvider.ItemExists(p, runtime);
                 }
-                catch (ItemNotFoundException e)
+                catch (ItemNotFoundException)
                 {
                     return false;
                 }
@@ -280,8 +277,7 @@ namespace System.Management.Automation
         internal bool IsContainer(string path, ProviderRuntime runtime)
         {
             CmdletProvider provider;
-            var globber = new PathGlobber(ExecutionContext.SessionState);
-            var globbedPaths = globber.GetGlobbedProviderPaths(path, runtime, out provider);
+            var globbedPaths = Globber.GetGlobbedProviderPaths(path, runtime, out provider);
             var isContainerProvider = (provider is ContainerCmdletProvider);
             var navProvider = provider as NavigationCmdletProvider;
             if (!isContainerProvider && navProvider == null)
@@ -325,20 +321,19 @@ namespace System.Management.Automation
         {
             var validName = !String.IsNullOrEmpty(name);
             CmdletProvider provider;
-            var globber = new PathGlobber(ExecutionContext.SessionState);
             foreach (var path in paths)
             {
                 Collection<string> resolvedPaths;
                 // only allow globbing if name is used. otherwise it doesn't make sense
                 if (validName)
                 {
-                    resolvedPaths = globber.GetGlobbedProviderPaths(path, runtime, out provider);
+                    resolvedPaths = Globber.GetGlobbedProviderPaths(path, runtime, out provider);
                 }
                 else
                 {
                     ProviderInfo providerInfo;
                     resolvedPaths = new Collection<string>();
-                    resolvedPaths.Add(globber.GetProviderSpecificPath(path, runtime, out providerInfo));
+                    resolvedPaths.Add(Globber.GetProviderSpecificPath(path, runtime, out providerInfo));
                     provider = ExecutionContext.SessionState.Provider.GetInstance(providerInfo);
                 }
                 var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
@@ -406,8 +401,7 @@ namespace System.Management.Automation
         internal void Rename(string path, string newName, ProviderRuntime runtime)
         {
             CmdletProvider provider;
-            var globber = new PathGlobber(ExecutionContext.SessionState);
-            var globbed = globber.GetGlobbedProviderPaths(path, runtime, out provider);
+            var globbed = Globber.GetGlobbedProviderPaths(path, runtime, out provider);
             if (globbed.Count != 1)
             {
                 throw new PSArgumentException("Cannot rename more than one item", "MultipleItemsRename", ErrorCategory.InvalidArgument);

@@ -11,12 +11,14 @@ namespace System.Management.Automation
         internal ExecutionContext ExecutionContext { get; private set; }
         internal SessionState SessionState { get { return ExecutionContext.SessionState; } }
         internal PathIntrinsics Path { get; private set; }
+        internal PathGlobber Globber { get; private set; }
 
         internal CmdletProviderIntrinsicsBase(Cmdlet cmdlet)
         {
             Cmdlet = cmdlet;
             ExecutionContext = cmdlet.ExecutionContext;
             Path = new PathIntrinsics(cmdlet.ExecutionContext.SessionState);
+            Globber = new PathGlobber(ExecutionContext.SessionState);
         }
 
         internal void GlobAndInvoke<T>(string[] paths, ProviderRuntime runtime, Action<string, T> method) where T : CmdletProvider
@@ -24,8 +26,7 @@ namespace System.Management.Automation
             foreach (var curPath in paths)
             {
                 CmdletProvider provider;
-                var globber = new PathGlobber(ExecutionContext.SessionState);
-                var globbedPaths = globber.GetGlobbedProviderPaths(curPath, runtime, out provider);
+                var globbedPaths = Globber.GetGlobbedProviderPaths(curPath, runtime, out provider);
                 var itemProvider = CmdletProvider.As<T>(provider);
                 foreach (var p in globbedPaths)
                 {

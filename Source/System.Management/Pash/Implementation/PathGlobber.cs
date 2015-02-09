@@ -30,7 +30,7 @@ namespace Pash.Implementation
 
             provider = _sessionState.Provider.GetInstance(providerInfo);
 
-            if (!WildcardPattern.ContainsWildcardCharacters(path) || runtime.AvoidWildcardExpansion.IsPresent)
+            if (!ShouldGlob(path, runtime))
             {
                 results.Add(path);
                 return results;
@@ -38,10 +38,13 @@ namespace Pash.Implementation
 
             if (providerInfo.Capabilities.HasFlag(ProviderCapabilities.ExpandWildcards))
             {
-                // TODO: what about the filter?
+                var filter = new IncludeExcludeFilter(runtime.Include, runtime.Exclude, runtime.IgnoreFiltersForGlobbing);
                 foreach (var expanded in CmdletProvider.As<ItemCmdletProvider>(provider).ExpandPath(path, runtime))
                 {
-                    results.Add(expanded);
+                    if (filter.Accepts(expanded))
+                    {
+                        results.Add(expanded);
+                    }
                 }
             }
             else
@@ -50,9 +53,12 @@ namespace Pash.Implementation
                 // TODO: use a default implementation for ContainerCmdletProviders. Also support include/exclude flags
             }
 
-            // TODO: when to apply the filter?
-
             return results;
+        }
+
+        internal bool ShouldGlob(string path, ProviderRuntime runtime)
+        {
+            return WildcardPattern.ContainsWildcardCharacters(path) && !runtime.AvoidGlobbing.IsPresent;
         }
 
         internal string GetProviderSpecificPath(string path, ProviderRuntime runtime, out ProviderInfo providerInfo)
