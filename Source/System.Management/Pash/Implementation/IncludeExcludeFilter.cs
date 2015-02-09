@@ -7,24 +7,25 @@ namespace Pash.Implementation
 {
     public class IncludeExcludeFilter
     {
-        bool _ignoreFilters;
-        WildcardPattern[] _include;
-        WildcardPattern[] _exclude;
+        private readonly WildcardPattern[] _include;
+        private readonly WildcardPattern[] _exclude;
+
+        public bool CanBeIgnored { get; private set; }
 
         public IncludeExcludeFilter(IList<string> include, IList<string> exclude, bool ignoreFilters)
         {
-            _ignoreFilters = ignoreFilters;
-            if (!_ignoreFilters)
+            CanBeIgnored = ignoreFilters;
+            if (!CanBeIgnored)
             {
                 _include = WildcardPattern.CreateWildcards(include);
                 _exclude = WildcardPattern.CreateWildcards(exclude);
             }
-            _ignoreFilters = _include.Length == 0 && _exclude.Length == 0; // shortcut if no filters set
+            CanBeIgnored = _include.Length == 0 && _exclude.Length == 0; // shortcut if no filters set
         }
 
         public bool Accepts(string value)
         {
-            if (_ignoreFilters)
+            if (CanBeIgnored)
             {
                 return true;
             }

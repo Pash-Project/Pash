@@ -2,6 +2,7 @@
 using System.Management.Automation.Internal;
 using Pash.Implementation;
 using System.Management.Automation.Provider;
+using System.Collections.Generic;
 
 namespace System.Management.Automation
 {
@@ -21,7 +22,7 @@ namespace System.Management.Automation
             Globber = new PathGlobber(ExecutionContext.SessionState);
         }
 
-        internal void GlobAndInvoke<T>(string[] paths, ProviderRuntime runtime, Action<string, T> method) where T : CmdletProvider
+        internal void GlobAndInvoke<T>(IList<string> paths, ProviderRuntime runtime, Action<string, T> method) where T : CmdletProvider
         {
             foreach (var curPath in paths)
             {
