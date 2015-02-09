@@ -73,7 +73,6 @@
   <ItemGroup>
     <Compile Include="Cmdlets\AddTypeCommandTests.cs" />
     <Compile Include="Cmdlets\JoinPathTests.cs" />
-    <Compile Include="Cmdlets\SplitPathTests.cs" />
     <Compile Include="Cmdlets\SortObjectTests.cs" />
     <Compile Include="Cmdlets\GetCommandTests.cs" />
     <Compile Include="Cmdlets\NewObjectCommandTests.cs" />
