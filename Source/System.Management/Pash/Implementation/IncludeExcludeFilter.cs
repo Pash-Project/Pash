@@ -14,7 +14,8 @@ namespace Pash.Implementation
 
         public IncludeExcludeFilter(IList<string> include, IList<string> exclude, bool ignoreFilters)
         {
-            CanBeIgnored = ignoreFilters;
+            CanBeIgnored = ignoreFilters ||
+                           ((include == null || include.Count == 0) && (exclude == null || exclude.Count == 0));
             if (CanBeIgnored)
             {
                 return;
@@ -23,7 +24,6 @@ namespace Pash.Implementation
             include = include == null || include.Count == 0 ? new [] { "*" } : include;
             _include = WildcardPattern.CreateWildcards(include);
             _exclude = WildcardPattern.CreateWildcards(exclude);
-            CanBeIgnored = _include.Length == 0 && _exclude.Length == 0; // shortcut if no filters set
         }
 
         public bool Accepts(string value)

@@ -183,7 +183,7 @@ namespace System.Management.Automation
                                            IncludeExcludeFilter filter, ProviderRuntime runtime)
         {
             // recursively get child names of containers or just the current child if the filter accepts it
-            if (Item.IsContainer(path, runtime))
+            if (recurse && Item.IsContainer(path, runtime))
             {
                 ManuallyGetChildItemsFromContainer(provider, path, recurse, filter, runtime);
                 return;

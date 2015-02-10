@@ -11,7 +11,20 @@ namespace System.Management.Automation.Provider
 {
     public abstract class CmdletProvider : IResourceSupplier
     {
-        internal ProviderRuntime ProviderRuntime { get; set; }
+        private ProviderRuntime _providerRuntime;
+        internal ProviderRuntime ProviderRuntime
+        {
+            get
+            {
+                return _providerRuntime;
+            }
+
+            set
+            {
+                VerifyProviderCapabilities(value);
+                _providerRuntime = value;
+            }
+        }
 
         // TODO: use CmdletProviderManagementIntrinsics
 
@@ -220,6 +233,20 @@ namespace System.Management.Automation.Provider
 
             psObject.Properties.Add(new PSNoteProperty("PSProvider", ProviderInfo));
             return psObject;
+        }
+
+        private void VerifyProviderCapabilities(ProviderRuntime runtime)
+        {
+            if (!String.IsNullOrEmpty(runtime.Filter) &&
+                !ProviderInfo.Capabilities.HasFlag(ProviderCapabilities.Filter))
+            {
+                throw new NotSupportedException("This provider doesn't support filters");
+            }
+            if (runtime.Credential != null &&
+                !ProviderInfo.Capabilities.HasFlag(ProviderCapabilities.Credentials))
+            {
+                throw new NotSupportedException("This provider doesn't support credentials");
+            }
         }
     }
 }

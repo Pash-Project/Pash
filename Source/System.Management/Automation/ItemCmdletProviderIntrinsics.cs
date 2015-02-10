@@ -346,7 +346,7 @@ namespace System.Management.Automation
                     }
                     try
                     {
-                        containerProvider.NewItem(resPath, type ?? "", content, runtime);
+                        containerProvider.NewItem(resPath, type, content, runtime);
                     }
                     catch (Exception e)
                     {
