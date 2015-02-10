@@ -65,24 +65,25 @@ namespace System.Management.Automation
         #region internal API
         // actual work with callid the providers
 
-        internal void Get(string[] path, bool recurse, ProviderRuntime runtime)
+        internal void Get(string[] paths, bool recurse, ProviderRuntime runtime)
         {
             // the include/exclude filters apply to the results, not to the globbing process. Make this sure
             runtime.IgnoreFiltersForGlobbing = true;
 
             // globbing is here a little more complicated, so we do it "manually" (without GlobAndInvoke)
-            foreach (var curPath in path)
+            foreach (var curPath in paths)
             {
+                var path = curPath;
                 // if the path won't be globbed or filtered, we will directly list it's child
-                var listChildsWithoutRecursion = (Globber.ShouldGlob(curPath, runtime) || runtime.HasFilters());
+                var listChildsWithoutRecursion = (Globber.ShouldGlob(path, runtime) || runtime.HasFilters());
 
                 // the Path might be a mixture of a path and an include filter
                 bool clearIncludeFilter;
-                curPath = SplitFilterFromPath(curPath, runtime, out clearIncludeFilter);
+                path = SplitFilterFromPath(path, runtime, out clearIncludeFilter);
 
                 // now perform the actual globbing
                 CmdletProvider provider;
-                var globbed = Globber.GetGlobbedProviderPaths(curPath, runtime, out provider);
+                var globbed = Globber.GetGlobbedProviderPaths(path, runtime, out provider);
                 var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
                 var filter = new IncludeExcludeFilter(runtime.Include, runtime.Exclude, false);
 
@@ -126,21 +127,21 @@ namespace System.Management.Automation
             var filter = new IncludeExcludeFilter(runtime.Include, runtime.Exclude, false);
 
             GlobAndInvoke<ContainerCmdletProvider>(path, runtime,
-                (curPath, Provider) => GetNamesRecursively(Provider, curPath, "", returnContainers, recurse, runtime, filter)
+                (curPath, Provider) => ManuallyGetChildNames(Provider, curPath, returnContainers, recurse, filter, runtime)
             );
         }
 
-        internal string GetChildName(string path, ProviderRuntime runtime)
+        #endregion
+
+        #region private helpers
+
+        private string GetChildName(string path, ProviderRuntime runtime)
         {
             ProviderInfo info;
             path = Globber.GetProviderSpecificPath(path, runtime, out info);
             var provider = SessionState.Provider.GetInstance(info) as NavigationCmdletProvider;
             return provider == null ? path : provider.GetChildName(path, runtime);
         }
-
-        #endregion
-
-        #region private helpers
 
         string SplitFilterFromPath(string curPath, ProviderRuntime runtime, out bool clearIncludeFilter)
         {
@@ -165,34 +166,80 @@ namespace System.Management.Automation
             // If path identifies a container it gets all child items (recursively or not). Otherwise it returns the leaf
             if (Item.IsContainer(path, runtime))
             {
-                provider.GetItem(path, runtime);
+                provider.GetChildItems(path, recurse, runtime);
                 return;
             }
-            provider.GetChildItems(path, recurse, runtime);
+            provider.GetItem(path, runtime);
         }
 
         private void ManuallyGetChildItems(ContainerCmdletProvider provider, string path, bool recurse, 
-                                         IncludeExcludeFilter filter, ProviderRuntime runtime)
+                                           IncludeExcludeFilter filter, ProviderRuntime runtime)
         {
-            throw new NotImplementedException();
+            // recursively get child names of containers or just the current child if the filter accepts it
+            if (Item.IsContainer(path, runtime))
+            {
+                ManuallyGetChildItemsFromContainer(provider, path, recurse, filter, runtime);
+                return;
+            }
+            var childName = GetChildName(path, runtime);
+            if (filter.Accepts(childName))
+            {
+                provider.GetItem(path, runtime);
+            }
         }
 
-        private void GetNamesRecursively(ContainerCmdletProvider provider, string providerPath, string relativePath,
-            ReturnContainers returnContainers, bool recurse, ProviderRuntime runtime, IncludeExcludeFilter filter)
+        private void ManuallyGetChildItemsFromContainer(ContainerCmdletProvider provider, string path, bool recurse, 
+                                                        IncludeExcludeFilter filter, ProviderRuntime runtime)
         {
-            // this function doesn't use a globber, it expects a finished provider path. But it uses recursion
-            var subRuntime = new ProviderRuntime(runtime);
-            subRuntime.PassThru = false;
-            // get child names for the current providerPath
-            provider.GetChildNames(providerPath, returnContainers, subRuntime);
-            var childNames = subRuntime.ThrowFirstErrorOrReturnResults();
-            foreach (var childNameObj in childNames)
+            // we deal with a container: get all child items (all containers if we recurse)
+            var childNames = GetValidChildNames(provider, path, ReturnContainers.ReturnMatchingContainers);
+            foreach (var childName in childNames)
             {
-                var childName = childNameObj.BaseObject as string;
-                if (childName == null)
+                // if the filter accepts the child (leaf or container), get it
+                if (filter.Accepts(childName))
                 {
-                    continue;
+                    provider.GetItem(path, runtime);
                 }
+            }
+            // check for recursion
+            if (!recurse)
+            {
+                return;
+            }
+            // we are in recursion: dive into child containers
+            foreach (var childName in childNames)
+            {
+                var childPath = Path.Combine(provider, path, childName, runtime);
+                if (Item.IsContainer(childPath, runtime))
+                {
+                    ManuallyGetChildItemsFromContainer(provider, childPath, true, filter, runtime);
+                }
+            }
+        }
+
+        private void ManuallyGetChildNames(ContainerCmdletProvider provider, string providerPath,
+            ReturnContainers returnContainers, bool recurse, IncludeExcludeFilter filter, ProviderRuntime runtime)
+        {
+            // this function doesn't use a globber, it expects a finished provider path. But it can invoke recursion
+            if (Item.IsContainer(providerPath, runtime))
+            {
+                ManuallyGetChildNamesFromContainer(provider, providerPath, "", returnContainers, recurse, filter, runtime);
+                return;
+            }
+            var childName = GetChildName(providerPath, runtime);
+            if (filter.Accepts(childName))
+            {
+                runtime.WriteObject(childName);
+            }
+        }
+
+        private void ManuallyGetChildNamesFromContainer(ContainerCmdletProvider provider, string providerPath, string relativePath,
+            ReturnContainers returnContainers, bool recurse, IncludeExcludeFilter filter, ProviderRuntime runtime)
+        {
+            // we deal with a container
+            var childNames = GetValidChildNames(provider, providerPath, returnContainers);
+            foreach (var childName in childNames)
+            {
                 // add the child only if the filter accepts it
                 if (!filter.Accepts(childName))
                 {
@@ -201,32 +248,34 @@ namespace System.Management.Automation
                 var path = Path.Combine(provider, relativePath, childName, runtime);
                 runtime.WriteObject(path);
             }
-
-            // now check if we need to handle this recursively
+            // check if we need to handle this recursively
             if (!recurse)
             {
                 return;
             }
             // okay, we should use recursion, so get all child containers and call this function again
-            provider.GetChildNames(providerPath, ReturnContainers.ReturnAllContainers, subRuntime);
-            childNames = subRuntime.ThrowFirstErrorOrReturnResults();
-            foreach (var containerChild in childNames)
+            childNames = GetValidChildNames(provider, providerPath, ReturnContainers.ReturnAllContainers);
+            foreach (var childName in childNames)
             {
-                var childName = containerChild.BaseObject as string;
-                if (childName == null)
-                {
-                    continue;
-                }
                 var providerChildPath = Path.Combine(provider, providerPath, childName, runtime);
                 if (Item.IsContainer(providerChildPath, runtime))
                 {
                     // recursive call wirth child's provider path and relative path
                     var relativeChildPath = Path.Combine(provider, relativePath, childName, runtime);
-                    GetNamesRecursively(provider, providerChildPath, relativeChildPath, returnContainers, true, runtime, filter);
+                    ManuallyGetChildNamesFromContainer(provider, providerChildPath, relativeChildPath, returnContainers,
+                        true, filter, runtime);
                 }
             }
         }
 
+        List<string> GetValidChildNames(ContainerCmdletProvider provider, string providerPath, ReturnContainers returnContainers)
+        {
+            var runtime = new ProviderRuntime(SessionState);
+            provider.GetChildNames(providerPath, returnContainers, runtime);
+            return (from c in runtime.ThrowFirstErrorOrReturnResults()
+                    where c.BaseObject is string
+                    select ((string)c.BaseObject)).ToList();
+        }
         #endregion
     }
 }
