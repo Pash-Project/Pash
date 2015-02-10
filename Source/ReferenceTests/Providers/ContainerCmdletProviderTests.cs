@@ -142,7 +142,7 @@ namespace ReferenceTests.Providers
         {
             var newPath = TestContainerProvider.DefaultDrivePath + "copiedItem";
             var cmd = NewlineJoin(
-                "$ni = New-Item " + newPath + " -ItemType -Value 'testValue'",
+                "$ni = New-Item " + newPath + " -Value 'testValue'",
                 "Rename-Item " + TestContainerProvider.DefaultItemPath + " -NewName copiedItem"
             );
             Assert.Throws<CmdletProviderInvocationException>(delegate {
@@ -175,7 +175,7 @@ namespace ReferenceTests.Providers
             var itemPath = TestContainerProvider.DefaultItemPath;
             var newPath = TestContainerProvider.DefaultDrivePath + "copiedItem";
             var cmd = NewlineJoin(
-                "$ni = New-Item " + newPath + " -ItemType -Value 'testValue'",
+                "$ni = New-Item " + newPath + " -Value 'testValue'",
                 "Copy-Item " + newPath + " " + itemPath,
                 "Get-Item " + itemPath
             );

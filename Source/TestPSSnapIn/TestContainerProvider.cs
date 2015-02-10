@@ -17,7 +17,7 @@ namespace TestPSSnapIn
         }
     }
 
-    [CmdletProvider(TestContainerProvider.ProviderName, ProviderCapabilities.ExpandWildcards)]
+    [CmdletProvider(TestContainerProvider.ProviderName, ProviderCapabilities.Filter)]
     public class TestContainerProvider : ContainerCmdletProvider
     {
         public const string ProviderName = "TestContainerProvider";
@@ -126,15 +126,6 @@ namespace TestPSSnapIn
         #endregion
 
         #region item related
-
-        protected override string[] ExpandPath(string path)
-        {
-            path = NormalizePath(path);
-            var wildcard = new WildcardPattern(path, WildcardOptions.IgnoreCase);
-            return (from name in GetFilteredItems().Keys
-                    where wildcard.IsMatch(name)
-                    select name).ToArray();
-        }
 
         protected override bool IsValidPath(string path)
         {
