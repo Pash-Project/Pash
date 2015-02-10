@@ -253,12 +253,7 @@ namespace System.Management.Automation
         internal void Get(string[] path, ProviderRuntime runtime)
         {
             GlobAndInvoke<ItemCmdletProvider>(path, runtime,
-                (curPath, provider) => {
-                    if (VerifyItemExists(provider, curPath, runtime))
-                    {
-                        provider.GetItem(curPath, runtime);
-                    }
-                }
+                (curPath, provider) => provider.GetItem(curPath, runtime)
             );
         }
 
