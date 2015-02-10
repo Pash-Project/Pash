@@ -15,15 +15,8 @@ namespace ReferenceTests.Providers
         [Test]
         public void ContainerProviderSupportsGetItem()
         {
-            var cmd = "(Get-Item " + TestContainerProvider.DefaultItemPath + ").Value";
+            var cmd = "Get-Item " + TestContainerProvider.DefaultItemPath;
             ExecuteAndCompareTypedResult(cmd, TestContainerProvider.DefaultItemValue);
-        }
-
-        [Test]
-        public void ContainerProviderSupportsGetItemWithNode()
-        {
-            var cmd = "Get-Item " + TestContainerProvider.DefaultNodePath;
-            ExecuteAndCompareType(cmd, typeof(TestTreeNode));
         }
 
         [TestCase(TestContainerProvider.DefaultDrivePath + "notExisting", "any", false)]
@@ -35,42 +28,35 @@ namespace ReferenceTests.Providers
         [TestCase(TestContainerProvider.DefaultDrivePath, "leaf", false)]
         [TestCase(TestContainerProvider.DefaultDrivePath, "container", true)]
         [TestCase(TestContainerProvider.DefaultDrivePath, "any", true)]
-        [TestCase(TestContainerProvider.DefaultNodePath, "any", true)]
-        [TestCase(TestContainerProvider.DefaultNodePath, "leaf", true)] // is technically a container, but ContainerProvider only supports drives as containers
-        [TestCase(TestContainerProvider.DefaultNodePath, "container", false)] // is technically a container, but ContainerProvider only supports drives as containers
         public void ContainerProviderSupportsTestPath(string path, string type, bool expected)
         {
             var cmd = "Test-Path " + path + " -PathType " + type;
             ExecuteAndCompareTypedResult(cmd, expected);
         }
 
-        [TestCase(TestContainerProvider.DefaultDrivePath + "newLeaf1", "leaf", "testValue")]
-        [TestCase(TestContainerProvider.DefaultDrivePath + "newNode", "node", null)]
-        [TestCase(TestContainerProvider.DefaultNodePath + "newLeaf2", "leaf", "testValue2")]
-        public void ContainerProviderSupportsNewItem(string path, string type, string value)
+        [TestCase(TestContainerProvider.DefaultDrivePath + "newLeaf1", "", "testValue", "testValue")]
+        [TestCase(TestContainerProvider.DefaultDrivePath + "newLeaf2", "uppercase", "lower", "LOWER")]
+        public void ContainerProviderSupportsNewItem(string path, string type, string value, string expected)
         {
-            var psValue = value == null ? "$null" : "'" + value + "'";
             var cmd = NewlineJoin(
-                "$ni = New-Item " + path + " -ItemType " + type + " -Value " + psValue,
+                "$ni = New-Item " + path + " -ItemType " + type + " -Value '" + value + "'",
                 "$gi = Get-Item " + path,
                 "[object]::ReferenceEquals($ni, $gi)",
-                "$gi.Value"
+                "$gi"
             );
-            ExecuteAndCompareTypedResult(cmd, true, value);
+            ExecuteAndCompareTypedResult(cmd, true, expected);
         }
 
-        [TestCase("node", null)] // custom type of provider
-        [TestCase("leaf", "leafValue")]
-        public void ContainerProviderSupportsNewItemByName(string type, string value)
+        [Test]
+        public void ContainerProviderSupportsNewItemByName()
         {
-            var psValue = value == null ? "" : " -Value '" + value + "'";
             var cmd = NewlineJoin(
-                "$ni = New-Item " + TestContainerProvider.DefaultDrivePath + "foo/bar/baz -Name new -ItemType " + type + psValue,
+                "$ni = New-Item " + TestContainerProvider.DefaultDrivePath + "foo/bar/baz -Name new -Value 'leafValue'",
                 "$gi = Get-Item " + TestContainerProvider.DefaultDrivePath + "new", // important: ContainerProvider ignores the path if name is provided
                 "[object]::ReferenceEquals($ni, $gi)",
-                "$gi.Value"
+                "$gi"
             );
-            ExecuteAndCompareTypedResult(cmd, true, value);
+            ExecuteAndCompareTypedResult(cmd, true, "leafValue");
         }
 
         [Test]
@@ -90,19 +76,11 @@ namespace ReferenceTests.Providers
             });
         }
 
-        [Test]
-        public void ContainerProviderThrowsOnNewItemInvalidPath()
-        {
-            Assert.Throws<CmdletProviderInvocationException>(delegate {
-                // nonExisting is a not existing parent, so item creation fails here
-                ReferenceHost.Execute("New-Item " + TestContainerProvider.DefaultDrivePath + "notExisting/foo -ItemType 'leaf' -Value 'x'");
-            });
-        }
 
-        [TestCase(TestContainerProvider.DefaultItemPath)]
-        [TestCase(TestContainerProvider.DefaultNodePath)]
-        public void ContainerProviderSupportsRemoveItem(string path)
+        [Test]
+        public void ContainerProviderSupportsRemoveItem()
         {
+            var path = TestContainerProvider.DefaultItemPath;
             var cmd = NewlineJoin(
                 "Test-Path " + path,
                 "Remove-Item " + path,
@@ -114,15 +92,14 @@ namespace ReferenceTests.Providers
         [Test]
         public void ContainerProviderSupportsRemoveItemWithRecursion()
         {
-            var parentPath = TestContainerProvider.DefaultNodePath;
-            var childPath = parentPath + "testItem";
+            var childPath = TestContainerProvider.DefaultDrivePath + "someItem";
             var cmd = NewlineJoin(
-                "$ni = New-Item " + childPath + " -ItemType leaf -Value 'testValue'",
+                "$ni = New-Item " + childPath + " -Value 'testValue'",
                 "Test-Path " + childPath,
-                "Test-Path " + parentPath,
-                "Remove-Item " + parentPath + " -Recurse",
+                "Test-Path " + TestContainerProvider.DefaultItemPath,
+                "Remove-Item " + TestContainerProvider.DefaultDrivePath + " -Recurse",
                 "Test-Path " + childPath,
-                "Test-Path " + parentPath
+                "Test-Path " + TestContainerProvider.DefaultItemPath
             );
             ExecuteAndCompareTypedResult(cmd, true, true, false, false);
         }
@@ -139,10 +116,7 @@ namespace ReferenceTests.Providers
         [Test]
         public void ContainerProviderThrowsOnRemoveNodeWithoutRecursion()
         {
-            var parentPath = TestContainerProvider.DefaultNodePath;
-            var childPath = parentPath + "testItem";
-            ReferenceHost.Execute("New-Item " + childPath + " -ItemType leaf -Value 'testValue'");
-            var cmd = "Remove-Item " + parentPath;
+            var cmd = "Remove-Item " +  TestContainerProvider.DefaultDrivePath;
             Assert.Throws<CmdletInvocationException>(delegate {
                 ReferenceHost.RawExecuteInLastRunspace(cmd);
             });
@@ -164,32 +138,13 @@ namespace ReferenceTests.Providers
         }
 
         [Test]
-        public void ContainerProviderSupportsRenameItemWithChildren()
-        {
-            var nodePath = TestContainerProvider.DefaultNodePath;
-            var itemPath = TestContainerProvider.DefaultNodePath + "someItem";
-            var newPath = TestContainerProvider.DefaultDrivePath + "newNodeName";
-            var newItemPath = newPath + "/someItem";
-            var cmd = NewlineJoin(
-                "$ni = New-Item " + itemPath + " -ItemType 'leaf' -Value 'testValue'",
-                "Test-Path " + nodePath, // exists
-                "Test-Path " + itemPath, // was created before
-                "Test-Path " + newPath, // shouldnt exist
-                "Test-Path " + newItemPath, // shouldnt exist
-                "$ri = Rename-Item " + nodePath + " -NewName newNodeName -PassThru",
-                "Test-Path " + nodePath, // was renamed
-                "Test-Path " + itemPath, // child exists under new name now
-                "Test-Path " + newPath, // renamed node
-                "Test-Path " + newItemPath, // same child, under new parent
-                "[object]::ReferenceEquals($ni.Parent, $ri)" // still same item
-            );
-            ExecuteAndCompareTypedResult(cmd, true, true, false, false, false, false, true, true, true);
-        }
-
-        [Test]
         public void ContainerProviderThrowsOnRenameItemWithWithExistingDestination()
         {
-            var cmd = "Rename-Item " + TestContainerProvider.DefaultItemPath + " -NewName " +  TestContainerProvider.DefaultNodeName;
+            var newPath = TestContainerProvider.DefaultDrivePath + "copiedItem";
+            var cmd = NewlineJoin(
+                "$ni = New-Item " + newPath + " -ItemType -Value 'testValue'",
+                "Rename-Item " + TestContainerProvider.DefaultItemPath + " -NewName copiedItem"
+            );
             Assert.Throws<CmdletProviderInvocationException>(delegate {
                 ReferenceHost.Execute(cmd);
             });
@@ -199,7 +154,7 @@ namespace ReferenceTests.Providers
         public void ContainerProviderSupportsCopyItem()
         {
             var origPath = TestContainerProvider.DefaultItemPath;
-            var copyPath = TestContainerProvider.DefaultNodePath + "copiedItem";
+            var copyPath = TestContainerProvider.DefaultDrivePath + "copiedItem";
             var cmd = NewlineJoin(
                 "Test-Path " + origPath,
                 "Test-Path " + copyPath,
@@ -207,34 +162,11 @@ namespace ReferenceTests.Providers
                 "Test-Path " + origPath,
                 "Test-Path " + copyPath,
                 "$gi = Get-Item " + copyPath,
-                "[object]::ReferenceEquals($ci, $gi)",
-                "$ci.Value"
+                "$ci",
+                "$gi"
             );
-            ExecuteAndCompareTypedResult(cmd, true, false, true, true, true, TestContainerProvider.DefaultItemValue);
-        }
-
-        [Test]
-        public void ContainerProviderSupportsCopyItemWithRecursion()
-        {
-            var nodePath = TestContainerProvider.DefaultNodePath;
-            var itemPath = TestContainerProvider.DefaultNodePath + "someItem";
-            var newPath = TestContainerProvider.DefaultDrivePath + "copiedNodeName";
-            var newItemPath = newPath + "/someItem";
-            var cmd = NewlineJoin(
-                "$ni = New-Item " + itemPath + " -ItemType 'leaf' -Value 'testValue'",
-                "Test-Path " + nodePath, // exists
-                "Test-Path " + itemPath, // was creted before
-                "Test-Path " + newPath, // shouldnt exist
-                "Test-Path " + newItemPath, // shouldnt exist
-                "Copy-Item " + nodePath + " " + newPath + " -Recurse",
-                "Test-Path " + nodePath, // still eixsting
-                "Test-Path " + itemPath, // still eixsting
-                "Test-Path " + newPath, // copied node
-                "Test-Path " + newItemPath, // copied child
-                "$gi = Get-Item " + newItemPath,
-                "$gi.Value"
-            );
-            ExecuteAndCompareTypedResult(cmd, true, true, false, false, true, true, true, true, "testValue");
+            var val = TestContainerProvider.DefaultItemValue;
+            ExecuteAndCompareTypedResult(cmd, true, false, true, true, val, val);
         }
 
         [Test]
@@ -243,9 +175,9 @@ namespace ReferenceTests.Providers
             var itemPath = TestContainerProvider.DefaultItemPath;
             var newPath = TestContainerProvider.DefaultDrivePath + "copiedItem";
             var cmd = NewlineJoin(
-                "$ni = New-Item " + newPath + " -ItemType 'leaf' -Value 'testValue'",
+                "$ni = New-Item " + newPath + " -ItemType -Value 'testValue'",
                 "Copy-Item " + newPath + " " + itemPath,
-                "(Get-Item " + itemPath + ").Value"
+                "Get-Item " + itemPath
             );
             ExecuteAndCompareTypedResult(cmd, "testValue");
         }
@@ -253,63 +185,30 @@ namespace ReferenceTests.Providers
         [Test]
         public void ContainerProviderSupportsGetChildItem()
         {
-            var newPath = TestContainerProvider.DefaultNodePath + "someItem";
+            var newPath = TestContainerProvider.DefaultDrivePath + "someItem";
             var cmd = NewlineJoin(
-                "$ni = New-Item " + newPath + " -ItemType 'leaf' -Value 'someValue'",
-                "Get-ChildItem " + TestContainerProvider.DefaultDrivePath + " | % { $_.Name }"
+                "$ni = New-Item " + newPath + " -Value 'someValue'",
+                "Get-ChildItem " + TestContainerProvider.DefaultDrivePath
             );
             var psObjResults = ReferenceHost.RawExecute(cmd);
             var results = (from r in psObjResults select r.BaseObject).ToList();
             Assert.That(results.Count, Is.EqualTo(2));
-            Assert.That(results, Contains.Item(TestContainerProvider.DefaultNodeName));
-            Assert.That(results, Contains.Item(TestContainerProvider.DefaultItemName));
+            Assert.That(results, Contains.Item("someValue"));
+            Assert.That(results, Contains.Item(TestContainerProvider.DefaultItemValue));
         }
 
         [Test]
         public void ContainerProviderSupportsGetChildItemNames()
         {
-            var newPath = TestContainerProvider.DefaultNodePath + "someItem";
+            var newPath = TestContainerProvider.DefaultDrivePath + "someItem";
             var cmd = NewlineJoin(
-                "$ni = New-Item " + newPath + " -ItemType 'leaf' -Value 'someValue'",
-                "Get-ChildItem " + TestContainerProvider.DefaultDrivePath + " -Name"
+                "$ni = New-Item " + newPath + " -Value 'someValue'",
+                "Get-ChildItem -Name " + TestContainerProvider.DefaultDrivePath
             );
             var psObjResults = ReferenceHost.RawExecute(cmd);
             var results = (from r in psObjResults select r.BaseObject).ToList();
             Assert.That(results.Count, Is.EqualTo(2));
-            Assert.That(results, Contains.Item(TestContainerProvider.DefaultNodeName));
-            Assert.That(results, Contains.Item(TestContainerProvider.DefaultItemName));
-        }
-
-        [Test]
-        public void ContainerProviderSupportsGetChildItemWithRecursion()
-        {
-            var newPath = TestContainerProvider.DefaultNodePath + "someItem";
-            var cmd = NewlineJoin(
-                "$ni = New-Item " + newPath + " -ItemType 'leaf' -Value 'someValue'",
-                "Get-ChildItem " + TestContainerProvider.DefaultDrivePath + " -Recurse | % { $_.Name }"
-            );
-            var psObjResults = ReferenceHost.RawExecute(cmd);
-            var results = (from r in psObjResults select r.BaseObject).ToList();
-            Assert.That(results.Count, Is.EqualTo(3));
-            Assert.That(results, Contains.Item(TestContainerProvider.DefaultNodeName));
-            Assert.That(results, Contains.Item(TestContainerProvider.DefaultItemName));
             Assert.That(results, Contains.Item("someItem"));
-        }
-
-        [Test]
-        public void ContainerProviderDoesntSupportGetChildItemNamesWithRecursion()
-        {
-            var newPath = TestContainerProvider.DefaultNodePath + "someItem";
-            var cmd = NewlineJoin(
-                "$ni = New-Item " + newPath + " -ItemType 'leaf' -Value 'someValue'",
-                "Get-ChildItem " + TestContainerProvider.DefaultDrivePath + " -Recurse -Name"
-            );
-            // only two results, because recursion with names only works for navigation providers
-            // as PS itself controls the recursion here
-            var psObjResults = ReferenceHost.RawExecute(cmd);
-            var results = (from r in psObjResults select r.BaseObject).ToList();
-            Assert.That(results.Count, Is.EqualTo(2));
-            Assert.That(results, Contains.Item(TestContainerProvider.DefaultNodeName));
             Assert.That(results, Contains.Item(TestContainerProvider.DefaultItemName));
         }
 
@@ -318,11 +217,11 @@ namespace ReferenceTests.Providers
         {
             // container providers usually don't support hierarchy, so we cannt set-location to a node
             var cmd = NewlineJoin(
-                "Set-Location " + TestContainerProvider.DefaultDrivePath,
+                "Set-Location " + TestContainerProvider.DefaultDriveRoot,
                 "(Get-Location).Path",
-                "(Get-Item " + TestContainerProvider.DefaultItemPath + ").Value" // make sure we interact in the new location
+                "Get-Item " + TestContainerProvider.DefaultItemName // make sure we interact in the new location
             );
-            var adjustedDrivePath = AdjustSlashes(TestContainerProvider.DefaultDrivePath);
+            var adjustedDrivePath = AdjustSlashes(TestContainerProvider.DefaultDriveRoot);
             ExecuteAndCompareTypedResult(cmd, adjustedDrivePath, TestContainerProvider.DefaultItemValue);
         }
 
@@ -331,7 +230,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = NewlineJoin(
                 "$origLoc = (Get-Location).Path",
-                "Push-Location " + TestContainerProvider.DefaultDrivePath,
+                "Push-Location " + TestContainerProvider.DefaultDriveRoot,
                 "(Get-Location).Path",
                 "Pop-Location",
                 "$origLoc -eq (Get-Location).Path"

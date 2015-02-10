@@ -1,71 +1,18 @@
 ﻿using System;
+using System.Management.Automation.Provider;
+using System.Management.Automation;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Management.Automation;
-using System.Management.Automation.Provider;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace TestPSSnapIn
 {
-    /* First a very simple and unsecure tree structure that can be used by the classes */
-    public class TestTreeNode
-    {
-        public string Name { get; set; }
-        public TestTreeNode Parent { get; private set; }
-        public virtual Dictionary<string, TestTreeNode> Children { get; private set; }
-
-        public TestTreeNode(TestTreeNode parent, string name)
-        {
-            Name = name;
-            Parent = parent;
-            Children = new Dictionary<string, TestTreeNode>();
-        }
-
-        public virtual TestTreeNode DetachedCopy(string newName)
-        {
-            var copy = new TestTreeNode(null, newName);
-            foreach (var pair in Children)
-            {
-                copy.Children[pair.Key] = pair.Value;
-            }
-            return copy;
-        }
-
-        public virtual void AddChild(TestTreeNode node)
-        {
-            Children[node.Name] = node;
-            node.Parent = this;
-        }
-    }
-    public class TestTreeLeaf : TestTreeNode
-    {
-        public override Dictionary<string, TestTreeNode> Children { get { return null; } }
-        public string Value { get; set; }
-
-        public TestTreeLeaf(TestTreeNode parent, string name, string value) : base(parent, name)
-        {
-            Value = value;
-        }
-
-        public override TestTreeNode DetachedCopy(string newName)
-        {
-            return new TestTreeLeaf(null, newName, Value);
-        }
-
-        public override void AddChild(TestTreeNode node)
-        {
-            throw new InvalidOperationException("Cannot add child to leaf node");
-        }
-    }
-
     public class TestContainerDrive : PSDriveInfo
     {
-        public TestTreeNode Tree { get; private set; }
+        public Dictionary<string, string> Items { get; private set; }
         public TestContainerDrive(PSDriveInfo info) : base(info)
         {
-            Tree = new TestTreeNode(null, "root");
+            Items = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
     }
 
@@ -79,127 +26,100 @@ namespace TestPSSnapIn
         public const string DefaultItemName = "defItem";
         public const string DefaultItemPath = DefaultDrivePath + DefaultItemName;
         public const string DefaultItemValue = "defValue";
-        public const string DefaultNodeName = "defNode";
-        public const string DefaultNodePath = DefaultDrivePath + DefaultNodeName + "/";
 
-        private const string _pathSeparator = "/";
+        public TestContainerDrive CurrentDrive
+        {
+            get
+            {
+                return PSDriveInfo as TestContainerDrive;
+            }
+        }
 
         #region container related
 
         protected override void CopyItem(string path, string copyPath, bool recurse)
         {
-            var srcNode = FindNode(path);
-            string newName;
-            var destParent = FindParent(copyPath, out newName);
-            // copy container without recursion: create empty container
-            if (IsContainer(srcNode) && !recurse)
-            {
-                var copy = new TestTreeNode(destParent, srcNode.Name);
-                destParent.AddChild(copy);
-                WriteItemObject(copy, copyPath, true);
-                return;
-            }
-            // create a full copy if destination doesn't exist or is a leaf and should get ovewritten
-            if (!ItemExists(copyPath) || !IsContainer(FindNode(copyPath)))
-            {
-                var copiedNode = srcNode.DetachedCopy(newName);
-                destParent.AddChild(copiedNode);
-                WriteItemObject(copiedNode, copyPath, IsContainer(copiedNode));
-                return;
-            }
-            // else dest is an existing container. copy into it
-            var destNode = FindNode(copyPath);
-            if (!IsContainer(srcNode))
-            {
-                var copy = srcNode.DetachedCopy(srcNode.Name);
-                destNode.AddChild(copy);
-                WriteItemObject(copy, copyPath + "/" + srcNode.Name, false);
-                return;
-            }
-            // otherwise we copy the contents of src into dest
-            foreach (var child in srcNode.Children.Values)
-            {
-                var copy = child.DetachedCopy(child.Name);
-                destNode.AddChild(copy);
-            }
+            path = NormalizePath(path);
+            copyPath = NormalizePath(copyPath);
+            var value = CurrentDrive.Items[path];
+            CurrentDrive.Items[copyPath] = value;
+            WriteItemObject(value, copyPath, false);
         }
 
         protected override void GetChildItems(string path, bool recurse)
         {
-            if (!HasChildItems(path))
+            path = NormalizePath(path);
+            if (path.Length == 0)
             {
+                foreach (var pair in CurrentDrive.Items)
+                {
+                    WriteItemObject(pair.Value, pair.Key, false);
+                }
                 return;
             }
-            var node = FindNode(path);
-            if (path.EndsWith(_pathSeparator))
-            {
-                path = path.Substring(0, path.Length - _pathSeparator.Length);
-            }
-            foreach (var child in node.Children.Values)
-            {
-                var childPath = String.Join(_pathSeparator, new [] { path, child.Name });
-                WriteItemObject(child, childPath, IsContainer(child));
-                if (recurse)
-                {
-                    GetChildItems(childPath, true);
-                }
-            }
+            GetItem(path);
         }
 
         protected override void GetChildNames(string path, ReturnContainers returnContainers)
         {
-            if (!HasChildItems(path))
+            path = NormalizePath(path);
+            if (path.Length == 0)
             {
+                foreach (var key in CurrentDrive.Items.Keys)
+                {
+                    WriteItemObject(key, key, false);
+                }
                 return;
             }
-            var node = FindNode(path);
-            if (path.EndsWith(_pathSeparator))
+            if (ItemExists(path))
             {
-                path = path.Substring(0, path.Length - _pathSeparator.Length);
-            }
-            foreach (var child in node.Children.Values)
-            {
-                var childPath = String.Join(_pathSeparator, new [] { path, child.Name });
-                WriteItemObject(child.Name, childPath, IsContainer(child));
+                WriteItemObject(path, path, false);
             }
         }
 
         protected override bool HasChildItems(string path)
         {
-            var node = FindNode(path, false);
-            return node != null && node.Children != null && node.Children.Count > 0;
+            path = NormalizePath(path);
+            return path.Length == 0 && CurrentDrive.Items.Count > 0;
         }
 
         protected override void NewItem(string path, string itemTypeName, object newItemValue)
         {
-            var strValue = newItemValue as string;
-            var isLeaf = itemTypeName.Equals("leaf", StringComparison.OrdinalIgnoreCase);
-            if (!isLeaf && !itemTypeName.Equals("node", StringComparison.OrdinalIgnoreCase))
+            var strVal = (newItemValue as string) ?? "";
+
+            if (itemTypeName.Equals("uppercase", StringComparison.OrdinalIgnoreCase))
             {
-                throw new ArgumentException("The item type must be either 'Leaf' or 'Node'");
+                strVal = strVal.ToUpper();
             }
-            if (isLeaf && strValue == null)
+            else if (!String.IsNullOrEmpty(itemTypeName))
             {
-                throw new ArgumentException("Value for new leaf is either null or not a string");
+                throw new ArgumentException("The item type must be either 'uppercase' or nothing");
             }
 
-            string itemName;
-            var parent = FindParent(path, out itemName);
-            if (parent.Children.ContainsKey(itemName))
+            path = NormalizePath(path);
+
+            if (CurrentDrive.Items.ContainsKey(path))
             {
                 throw new ArgumentException("Item with path '" + path + "' already exists.");
             }
-            var newItem = isLeaf ? new TestTreeLeaf(parent, itemName, strValue) : new TestTreeNode(parent, itemName);
-            parent.Children[itemName] = newItem;
-            WriteItemObject(newItem, path, IsContainer(newItem));
+            CurrentDrive.Items[path] = strVal;
+            WriteItemObject(strVal, path, false);
         }
-            
+
 
         protected override void RemoveItem(string path, bool recurse)
         {
-            // !HasChildItem || Recurse check is done by PS/Pash itself
-            var node = FindNode(path);
-            node.Parent.Children.Remove(node.Name);
+            path = NormalizePath(path);
+            if (path.Length > 0)
+            {
+                CurrentDrive.Items.Remove(path);
+                return;
+            }
+            // otherwise the whole drive
+            if (recurse)
+            {
+                CurrentDrive.Items.Clear();
+            }
         }
 
         #endregion
@@ -209,31 +129,44 @@ namespace TestPSSnapIn
         protected override bool IsValidPath(string path)
         {
             // path with '/' as delimiter and names consisting of alphanumeric chars. first and last delimiter are optional
-            return Regex.IsMatch(path, "^/?([a-zA-Z0-9]+/)*([a-zA-Z0-9]*)$");
+            return Regex.IsMatch(path, "^/?[a-zA-Z0-9]+$");
         }
 
         protected override void RenameItem(string path, string newName)
         {
-            var node = FindNode(path);
-            if (node.Parent.Children.ContainsKey(newName))
+            path = NormalizePath(path);
+            if (CurrentDrive.Items.ContainsKey(newName))
             {
                 throw new ArgumentException("Item with name '" + newName + "' already exists");
             }
-            node.Parent.Children.Remove(node.Name);
-            node.Name = newName;
-            node.Parent.Children[newName] = node;
-            WriteItemObject(node, "", IsContainer(node));
+            var value = CurrentDrive.Items[path];
+            CurrentDrive.Items[newName] = value;
+            CurrentDrive.Items.Remove(path);
+            WriteItemObject(value, newName, false);
         }
 
         protected override void GetItem(string path)
         {
-            var node = FindNode(path);
-            WriteItemObject(node, path, IsContainer(node));
+            path = NormalizePath(path);
+            if (path.Length == 0)
+            {
+                WriteItemObject(CurrentDrive, path, true);
+                return;
+            }
+            if (CurrentDrive.Items.ContainsKey(path))
+            {
+                WriteItemObject(CurrentDrive.Items[path], path, false);
+            }
         }
 
         protected override bool ItemExists(string path)
         {
-            return FindNode(path, false) != null;
+            path = NormalizePath(path);
+            if (path.Length == 0)
+            {
+                return true;
+            }
+            return CurrentDrive.Items.ContainsKey(path);
         }
 
         #endregion
@@ -255,11 +188,7 @@ namespace TestPSSnapIn
             var drive = new TestContainerDrive(new PSDriveInfo(DefaultDriveName, ProviderInfo, DefaultDriveRoot,
                 "Default drive for testing container items", null));
 
-            var defItem = new TestTreeLeaf(drive.Tree, DefaultItemName, DefaultItemValue);
-            drive.Tree.AddChild(defItem);
-
-            var defNode = new TestTreeNode(drive.Tree, DefaultNodeName);
-            drive.Tree.AddChild(defNode);
+            drive.Items[DefaultItemName] = DefaultItemValue;
 
             defDrives.Add(drive);
             return defDrives;
@@ -267,60 +196,19 @@ namespace TestPSSnapIn
 
         #endregion
 
-        private TestTreeNode FindParent(string path, out string itemName)
-        {
-            if (path.EndsWith(_pathSeparator))
-            {
-                path = path.Substring(0, path.Length - _pathSeparator.Length);
-            }
-            var sepIdx = path.LastIndexOf(_pathSeparator);
-            itemName = path.Substring(sepIdx + 1);
-            path = sepIdx < 0 ? "" : path.Substring(0, sepIdx);
-            return FindNode(path);
-        }
+        #region private helpers
 
-        private TestTreeNode FindNode(string path, bool throwOnError = true)
-        {
-            var root = (PSDriveInfo as TestContainerDrive).Tree;
-            var relpath = PathWithoutDrive(path);
-            if (String.IsNullOrEmpty(relpath))
-            {
-                return root;
-            }
-            var components = relpath.Split(new [] { _pathSeparator }, StringSplitOptions.RemoveEmptyEntries);
-            var curnode = root;
-            // simply go through the tree
-            foreach (var comp in components)
-            {
-                if (curnode.Children == null || !curnode.Children.ContainsKey(comp))
-                {
-                    if (!throwOnError)
-                    {
-                        return null;
-                    }
-                    throw new ItemNotFoundException("Item of path '" + path + "' doesn't exist");
-                }
-                curnode = curnode.Children[comp];
-            }
-            return curnode;
-        }
-
-        private bool IsContainer(TestTreeNode node)
-        {
-            return !(node is TestTreeLeaf);
-        }
-
-        private string PathWithoutDrive(string path)
+        private string NormalizePath(string path)
         {
             if (path.StartsWith(PSDriveInfo.Root))
             {
                 path = path.Substring(PSDriveInfo.Root.Length);
             }
-            if (path.StartsWith(_pathSeparator))
-            {
-                path = path.Substring(_pathSeparator.Length);
-            }
+            path = path.Trim('\\', '/');
             return path;
         }
+
+        #endregion
     }
 }
+

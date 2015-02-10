@@ -35,10 +35,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PashTestSnapIn.cs" />
     <Compile Include="TestCommands.cs" />
-    <Compile Include="TestContainerProvider.cs" />
     <Compile Include="TestCreateErrorCommand.cs" />
     <Compile Include="TestDriveProvider.cs" />
     <Compile Include="TestItemProvider.cs" />
+    <Compile Include="TestNavigationProvider.cs" />
+    <Compile Include="TestContainerProvider.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

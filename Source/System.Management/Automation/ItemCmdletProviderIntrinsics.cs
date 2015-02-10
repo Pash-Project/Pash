@@ -288,7 +288,7 @@ namespace System.Management.Automation
             {
                 if (navProvider != null)
                 {
-                    return navProvider.IsItemContainer(path, runtime);
+                    return navProvider.IsItemContainer(p, runtime);
                 }
                 // otherwise it's just a ContainerCmdletProvider. It doesn't support hierarchies, only drives can be containers
                 // an empty path means "root" path in a drive
@@ -346,7 +346,7 @@ namespace System.Management.Automation
                     }
                     try
                     {
-                        containerProvider.NewItem(resPath, type, content, runtime);
+                        containerProvider.NewItem(resPath, type ?? "", content, runtime);
                     }
                     catch (Exception e)
                     {
