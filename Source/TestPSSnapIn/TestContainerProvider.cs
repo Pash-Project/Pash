@@ -88,7 +88,7 @@ namespace TestPSSnapIn
         {
             var strVal = (newItemValue as string) ?? "";
 
-            if (itemTypeName.Equals("uppercase", StringComparison.OrdinalIgnoreCase))
+            if (itemTypeName != null && itemTypeName.Equals("uppercase", StringComparison.OrdinalIgnoreCase))
             {
                 strVal = strVal.ToUpper();
             }

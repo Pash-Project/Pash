@@ -35,11 +35,11 @@ namespace ReferenceTests.Providers
         }
 
         [TestCase(TestContainerProvider.DefaultDrivePath + "newLeaf1", "", "testValue", "testValue")]
-        [TestCase(TestContainerProvider.DefaultDrivePath + "newLeaf2", "uppercase", "lower", "LOWER")]
+        [TestCase(TestContainerProvider.DefaultDrivePath + "newLeaf2", "-ItemType uppercase", "lower", "LOWER")]
         public void ContainerProviderSupportsNewItem(string path, string type, string value, string expected)
         {
             var cmd = NewlineJoin(
-                "$ni = New-Item " + path + " -ItemType " + type + " -Value '" + value + "'",
+                "$ni = New-Item " + path + " " + type + " -Value '" + value + "'",
                 "$gi = Get-Item " + path,
                 "[object]::ReferenceEquals($ni, $gi)",
                 "$gi"
