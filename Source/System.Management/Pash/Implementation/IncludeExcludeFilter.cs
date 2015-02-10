@@ -17,6 +17,8 @@ namespace Pash.Implementation
             CanBeIgnored = ignoreFilters;
             if (!CanBeIgnored)
             {
+                // no include set: include everything
+                include = include == null || include.Count == 0 ? new [] { "*" } : include;
                 _include = WildcardPattern.CreateWildcards(include);
                 _exclude = WildcardPattern.CreateWildcards(exclude);
             }

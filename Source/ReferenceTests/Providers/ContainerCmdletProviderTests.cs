@@ -197,6 +197,26 @@ namespace ReferenceTests.Providers
             Assert.That(results, Contains.Item(TestContainerProvider.DefaultItemValue));
         }
 
+        // multiple ways to only get test1 and test3, but not test2 or the default item
+        [TestCase("*[13]")]
+        [TestCase(" -Include 'test*' -Exclude '*2'")]
+        [TestCase(" -Exclude '*2','" + TestContainerProvider.DefaultItemName + "'")]
+        public void ContainerProviderSupportsGetChildItemWithFilters(string args)
+        {
+            var pathPrefix = TestContainerProvider.DefaultDrivePath;
+            var cmd = NewlineJoin(
+                "$ni = New-Item " + pathPrefix + "test1 -Value 't1'",
+                "$ni = New-Item " + pathPrefix + "test2 -Value 't2'",
+                "$ni = New-Item " + pathPrefix + "test3 -Value 't3'",
+                "Get-ChildItem " + TestContainerProvider.DefaultDrivePath + args
+            );
+            var psObjResults = ReferenceHost.RawExecute(cmd);
+            var results = (from r in psObjResults select r.BaseObject).ToList();
+            Assert.That(results.Count, Is.EqualTo(2));
+            Assert.That(results, Contains.Item("t1"));
+            Assert.That(results, Contains.Item("t3"));
+        }
+
         [Test]
         public void ContainerProviderSupportsGetChildItemNames()
         {
@@ -210,6 +230,26 @@ namespace ReferenceTests.Providers
             Assert.That(results.Count, Is.EqualTo(2));
             Assert.That(results, Contains.Item("someItem"));
             Assert.That(results, Contains.Item(TestContainerProvider.DefaultItemName));
+        }
+
+        // multiple ways to only get test1 and test3, but not test2 or the default item
+        [TestCase("*[13]")]
+        [TestCase(" -Include 'test*' -Exclude '*2'")]
+        [TestCase(" -Exclude '*2','" + TestContainerProvider.DefaultItemName + "'")]
+        public void ContainerProviderSupportsGetChildItemNameWithFilters(string args)
+        {
+            var pathPrefix = TestContainerProvider.DefaultDrivePath;
+            var cmd = NewlineJoin(
+                "$ni = New-Item " + pathPrefix + "test1 -Value 't1'",
+                "$ni = New-Item " + pathPrefix + "test2 -Value 't2'",
+                "$ni = New-Item " + pathPrefix + "test3 -Value 't3'",
+                "Get-ChildItem -Name " + TestContainerProvider.DefaultDrivePath + args
+            );
+            var psObjResults = ReferenceHost.RawExecute(cmd);
+            var results = (from r in psObjResults select r.BaseObject).ToList();
+            Assert.That(results.Count, Is.EqualTo(2));
+            Assert.That(results, Contains.Item("test1"));
+            Assert.That(results, Contains.Item("test3"));
         }
 
         [Test]
