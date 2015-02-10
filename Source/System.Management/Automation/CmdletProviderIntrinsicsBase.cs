@@ -9,17 +9,20 @@ namespace System.Management.Automation
     public class CmdletProviderIntrinsicsBase
     {
         internal Cmdlet InvokingCmdlet { get; private set; }
-        internal ExecutionContext ExecutionContext { get; private set; }
-        internal SessionState SessionState { get { return ExecutionContext.SessionState; } }
+        internal SessionState SessionState { get; private set; }
         internal PathIntrinsics Path { get; private set; }
         internal PathGlobber Globber { get; private set; }
 
-        internal CmdletProviderIntrinsicsBase(Cmdlet cmdlet)
+        internal CmdletProviderIntrinsicsBase(SessionState sessionState)
+        {
+            SessionState = sessionState;
+            Path = new PathIntrinsics(sessionState);
+            Globber = new PathGlobber(sessionState);
+        }
+
+        internal CmdletProviderIntrinsicsBase(Cmdlet cmdlet) : this(cmdlet.ExecutionContext.SessionState)
         {
             InvokingCmdlet = cmdlet;
-            ExecutionContext = cmdlet.ExecutionContext;
-            Path = new PathIntrinsics(cmdlet.ExecutionContext.SessionState);
-            Globber = new PathGlobber(ExecutionContext.SessionState);
         }
 
         internal void GlobAndInvoke<T>(IList<string> paths, ProviderRuntime runtime, Action<string, T> method) where T : CmdletProvider

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.ObjectModel;
 using System.Management.Automation.Provider;
 using System.Management.Automation;
 using System.Text.RegularExpressions;
 using System.Management;
+using System.Collections.Generic;
 
 namespace Pash.Implementation
 {
@@ -49,8 +51,7 @@ namespace Pash.Implementation
             }
             else
             {
-                throw new NotImplementedException("Default globbing not yet implemented");
-                // TODO: use a default implementation for ContainerCmdletProviders. Also support include/exclude flags
+                results = BuiltInGlobbing(provider, path, runtime);
             }
 
             return results;
@@ -136,6 +137,57 @@ namespace Pash.Implementation
         private static bool IsHomePath(string path)
         {
             return _homePathRegex.IsMatch(path);
+        }
+
+        Collection<string> BuiltInGlobbing(CmdletProvider provider, string path, ProviderRuntime runtime)
+        {
+            var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
+            var ciIntrinsics = new ChildItemCmdletProviderIntrinsics(_sessionState);
+            var pathIntrinsics = new PathIntrinsics(_sessionState);
+            var componentStack = new Stack<string>();
+            // first we split the path into globbable components and put them on a stack to work with
+            while (!String.IsNullOrEmpty(path))
+            {
+                var child = ciIntrinsics.GetChildName(path, runtime);
+                componentStack.Push(child);
+                path = path.Substring(0, path.Length - child.Length);
+            }
+
+            // we create a working list with partially globbed paths. each iteration will take all items from the
+            // list and add the newly globbed part
+            var workingPaths = new List<string>() { "" };
+            while (componentStack.Count > 0)
+            {
+                var partialPaths = new List<string>(workingPaths);
+                workingPaths.Clear();
+                var globComp = componentStack.Pop();
+                // check if the current stack component has wildcards. If not, simply append it to all partialPaths
+                // and add to workingPaths
+                if (!WildcardPattern.ContainsWildcardCharacters(globComp))
+                {
+                    workingPaths.AddRange(from p in partialPaths select pathIntrinsics.Combine(p, globComp));
+                    continue;
+                }
+
+                // otherwise get all childnames, check wildcard and combine the paths
+                var globWC = new WildcardPattern(globComp, WildcardOptions.IgnoreCase);
+                foreach (var partPath in partialPaths)
+                {
+                    // TODO: verify if we should only consider matching containers or all. maybe the filter won't
+                    // apply to partial parts and we need to consider all
+                    var childNames = ciIntrinsics.GetValidChildNames(containerProvider, partPath,
+                                         ReturnContainers.ReturnMatchingContainers, runtime);
+                    // TODO: check if Include/Exclude also match partial parts, but i guess only complete ones
+                    // add all combined path to the workingPaths for the next stack globbing iteration
+                    workingPaths.AddRange(from c in childNames
+                                          where globWC.IsMatch(c)
+                                          select pathIntrinsics.Combine(partPath, c, runtime));
+                }
+            }
+            // now filter the working paths by include/exlude. last flag is false or we wouldn't be globbing
+            var filter = new IncludeExcludeFilter(runtime.Include, runtime.Exclude, false);
+            var globbedPaths = from p in workingPaths where filter.Accepts(p) select p;
+            return new Collection<string>(globbedPaths.ToList());
         }
     }
 }

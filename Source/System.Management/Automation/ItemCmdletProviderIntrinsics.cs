@@ -22,6 +22,9 @@ namespace System.Management.Automation
         {
         }
 
+        internal ItemCmdletProviderIntrinsics(SessionState sessionState) : base(sessionState)
+        {
+        }
 
         #region Public API
         // They work without the use of ProviderRuntime. All these functions basically create a ProviderRuntime,
@@ -334,7 +337,7 @@ namespace System.Management.Automation
                     ProviderInfo providerInfo;
                     resolvedPaths = new Collection<string>();
                     resolvedPaths.Add(Globber.GetProviderSpecificPath(path, runtime, out providerInfo));
-                    provider = ExecutionContext.SessionState.Provider.GetInstance(providerInfo);
+                    provider = SessionState.Provider.GetInstance(providerInfo);
                 }
                 var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
                 foreach (var curResolvedPath in resolvedPaths)

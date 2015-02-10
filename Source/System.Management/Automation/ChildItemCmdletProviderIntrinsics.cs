@@ -26,6 +26,11 @@ namespace System.Management.Automation
         {
         }
 
+        internal ChildItemCmdletProviderIntrinsics(SessionState sessionState) : base(sessionState)
+        {
+        }
+
+
         #region Public API
         // Public API creating a default ProviderRuntime, calling the internal API and returning the results
         public Collection<PSObject> Get(string path, bool recurse)
@@ -136,17 +141,28 @@ namespace System.Management.Automation
             );
         }
 
-        #endregion
-
-        #region private helpers
-
-        private string GetChildName(string path, ProviderRuntime runtime)
+        internal string GetChildName(string path, ProviderRuntime runtime)
         {
             ProviderInfo info;
             path = Globber.GetProviderSpecificPath(path, runtime, out info);
             var provider = SessionState.Provider.GetInstance(info) as NavigationCmdletProvider;
             return provider == null ? path : provider.GetChildName(path, runtime);
         }
+
+        internal List<string> GetValidChildNames(ContainerCmdletProvider provider, string providerPath, ReturnContainers returnContainers, ProviderRuntime runtime)
+        {
+            var subRuntime = new ProviderRuntime(runtime);
+            subRuntime.PassThru = false; // so we can catch the results
+            provider.GetChildNames(providerPath, returnContainers, subRuntime);
+            var results = subRuntime.ThrowFirstErrorOrReturnResults();
+            return (from c in results
+                where c.BaseObject is string
+                select ((string)c.BaseObject)).ToList();
+        }
+
+        #endregion
+
+        #region private helpers
 
         string SplitFilterFromPath(string curPath, ProviderRuntime runtime, out bool clearIncludeFilter)
         {
@@ -277,16 +293,6 @@ namespace System.Management.Automation
             }
         }
 
-        List<string> GetValidChildNames(ContainerCmdletProvider provider, string providerPath, ReturnContainers returnContainers, ProviderRuntime runtime)
-        {
-            var subRuntime = new ProviderRuntime(runtime);
-            subRuntime.PassThru = false; // so we can catch the results
-            provider.GetChildNames(providerPath, returnContainers, subRuntime);
-            var results = subRuntime.ThrowFirstErrorOrReturnResults();
-            return (from c in results
-                    where c.BaseObject is string
-                    select ((string)c.BaseObject)).ToList();
-        }
         #endregion
     }
 }
