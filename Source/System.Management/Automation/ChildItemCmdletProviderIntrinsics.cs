@@ -156,7 +156,9 @@ namespace System.Management.Automation
             // "Get-ChildItem .\Source -recurse -include *.cs", but of course the first is easier to write :)
             clearIncludeFilter = false;
             // first check if we deal with a LiteralPath, a container, or include is set. If so, this won't work
-            if (runtime.AvoidGlobbing || runtime.Include != null && runtime.Include.Count > 0 || Item.IsContainer(curPath, runtime))
+            if (!Globber.ShouldGlob(curPath, runtime) ||
+                (runtime.Include != null && runtime.Include.Count > 0) ||
+                Item.IsContainer(curPath, runtime))
             {
                 return curPath;
             }
@@ -203,7 +205,8 @@ namespace System.Management.Automation
                 // if the filter accepts the child (leaf or container), get it
                 if (filter.Accepts(childName))
                 {
-                    provider.GetItem(path, runtime);
+                    var childPath = Path.Combine(provider, path, childName, runtime);
+                    provider.GetItem(childPath, runtime);
                 }
             }
             // check for recursion

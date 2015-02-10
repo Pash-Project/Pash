@@ -20,7 +20,7 @@ namespace Microsoft.PowerShell.Commands
 
         [Parameter(Position=0,
             ParameterSetName="Items",
-            Mandatory=true,
+            Mandatory=false,
             ValueFromPipeline=true,
             ValueFromPipelineByPropertyName=true)]
         public string[] Path
@@ -56,14 +56,15 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
+            var paths = InternalPaths ?? new [] { "." }; // no path means the current location
             if (Name.IsPresent)
             {
-                InvokeProvider.ChildItem.GetNames(InternalPaths, ReturnContainers.ReturnMatchingContainers,
+                InvokeProvider.ChildItem.GetNames(paths, ReturnContainers.ReturnMatchingContainers,
                     Recurse.IsPresent, ProviderRuntime);
             }
             else
             {
-                InvokeProvider.ChildItem.Get(InternalPaths, Recurse.IsPresent, ProviderRuntime);
+                InvokeProvider.ChildItem.Get(paths, Recurse.IsPresent, ProviderRuntime);
             }
         }
     }

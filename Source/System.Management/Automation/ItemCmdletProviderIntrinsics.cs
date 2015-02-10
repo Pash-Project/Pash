@@ -293,7 +293,7 @@ namespace System.Management.Automation
             {
                 if (navProvider != null)
                 {
-                    throw new NotImplementedException("No support for provider specific container check, yet.");
+                    return navProvider.IsItemContainer(path, runtime);
                 }
                 // otherwise it's just a ContainerCmdletProvider. It doesn't support hierarchies, only drives can be containers
                 // an empty path means "root" path in a drive

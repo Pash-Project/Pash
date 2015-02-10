@@ -118,7 +118,8 @@ namespace Pash.Implementation
         private bool IsDriveQualifiedPath(string path)
         {
             var idx = path.IndexOf(":");
-            return idx > 0 && idx + 1 < path.Length && path[idx + 1] != ':';
+            // make sure colon isn't followed by another one
+            return idx > 0 && (idx + 1 == path.Length || path[idx + 1] != ':');
         }
 
         private string ResolveHomePath(string path, ProviderInfo providerInfo)
