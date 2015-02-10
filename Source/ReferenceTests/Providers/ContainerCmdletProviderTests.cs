@@ -256,6 +256,40 @@ namespace ReferenceTests.Providers
             Assert.That(results, Contains.Item("test3"));
         }
 
+        [TestCase("* -Include 'test*' -Exclude '*2'")]
+        [TestCase("* -Exclude '*2','" + TestContainerProvider.DefaultItemName + "'")]
+        [TestCase("* -Filter '(test1|test3)'")] // custom filter understands regex
+        [TestCase("* -Filter 'test\\d' -Exclude 'test2'")] // custom filter with exclude mixed
+        [TestCase("*[123] -Exclude 'test2'")] // path gets globbed
+        public void ContainerProviderSupportsGetItemWithGlobbingAndFilters(string args)
+        {
+            var pathPrefix = TestContainerProvider.DefaultDrivePath;
+            var cmd = NewlineJoin(
+                "$ni = New-Item " + pathPrefix + "test1 -Value 't1'",
+                "$ni = New-Item " + pathPrefix + "test2 -Value 't2'",
+                "$ni = New-Item " + pathPrefix + "test3 -Value 't3'",
+                "Get-Item " + TestContainerProvider.DefaultDrivePath + args
+            );
+            var psObjResults = ReferenceHost.RawExecute(cmd);
+            var results = (from r in psObjResults select r.BaseObject).ToList();
+            Assert.That(results.Count, Is.EqualTo(2));
+            Assert.That(results, Contains.Item("t1"));
+            Assert.That(results, Contains.Item("t3"));
+        }
+
+        [Test]
+        public void ContainerProviderSupportsGetItemWithLiteralPath()
+        {
+            var pathPrefix = TestContainerProvider.DefaultDrivePath;
+            var cmd = NewlineJoin(
+                "$ni = New-Item " + pathPrefix + "test1 -Value 't1'",
+                "$ni = New-Item '" + pathPrefix + "*' -Value 'asterisk'", // '*' is part of the name
+                // should avoid globbing and just return the one item instead of all
+                "Get-Item -LiteralPath " + TestContainerProvider.DefaultDrivePath + "*"
+            );
+            ExecuteAndCompareTypedResult(cmd, "asterisk");
+        }
+
         [Test]
         public void ContainerProviderSupportsSetGetLocation()
         {
