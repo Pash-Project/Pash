@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Management.Automation.Provider;
 using System.Management.Automation;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace TestPSSnapIn
         }
     }
 
-    [CmdletProvider(TestContainerProvider.ProviderName, ProviderCapabilities.None)]
+    [CmdletProvider(TestContainerProvider.ProviderName, ProviderCapabilities.ExpandWildcards)]
     public class TestContainerProvider : ContainerCmdletProvider
     {
         public const string ProviderName = "TestContainerProvider";
@@ -51,7 +52,7 @@ namespace TestPSSnapIn
             path = NormalizePath(path);
             if (path.Length == 0)
             {
-                foreach (var pair in CurrentDrive.Items)
+                foreach (var pair in GetFilteredItems())
                 {
                     WriteItemObject(pair.Value, pair.Key, false);
                 }
@@ -65,7 +66,7 @@ namespace TestPSSnapIn
             path = NormalizePath(path);
             if (path.Length == 0)
             {
-                foreach (var key in CurrentDrive.Items.Keys)
+                foreach (var key in GetFilteredItems().Keys)
                 {
                     WriteItemObject(key, key, false);
                 }
@@ -125,6 +126,15 @@ namespace TestPSSnapIn
         #endregion
 
         #region item related
+
+        protected override string[] ExpandPath(string path)
+        {
+            path = NormalizePath(path);
+            var wildcard = new WildcardPattern(path, WildcardOptions.IgnoreCase);
+            return (from name in GetFilteredItems().Keys
+                    where wildcard.IsMatch(name)
+                    select name).ToArray();
+        }
 
         protected override bool IsValidPath(string path)
         {
@@ -197,6 +207,22 @@ namespace TestPSSnapIn
         #endregion
 
         #region private helpers
+
+        private Dictionary<string, string> GetFilteredItems()
+        {
+            // our custom filter understands c# regex
+            var items = new Dictionary<string, string>(CurrentDrive.Items);
+            if (String.IsNullOrEmpty(Filter))
+            {
+                return items;
+            }
+            var regex = new Regex(Filter, RegexOptions.IgnoreCase);
+            foreach (var rm in items.Keys.Where(k => !regex.IsMatch(k)).ToArray())
+            {
+                items.Remove(rm);
+            }
+            return items;
+        }
 
         private string NormalizePath(string path)
         {

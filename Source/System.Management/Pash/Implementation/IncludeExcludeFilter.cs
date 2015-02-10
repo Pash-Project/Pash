@@ -15,13 +15,14 @@ namespace Pash.Implementation
         public IncludeExcludeFilter(IList<string> include, IList<string> exclude, bool ignoreFilters)
         {
             CanBeIgnored = ignoreFilters;
-            if (!CanBeIgnored)
+            if (CanBeIgnored)
             {
-                // no include set: include everything
-                include = include == null || include.Count == 0 ? new [] { "*" } : include;
-                _include = WildcardPattern.CreateWildcards(include);
-                _exclude = WildcardPattern.CreateWildcards(exclude);
+                return;
             }
+            // no include set: include everything
+            include = include == null || include.Count == 0 ? new [] { "*" } : include;
+            _include = WildcardPattern.CreateWildcards(include);
+            _exclude = WildcardPattern.CreateWildcards(exclude);
             CanBeIgnored = _include.Length == 0 && _exclude.Length == 0; // shortcut if no filters set
         }
 

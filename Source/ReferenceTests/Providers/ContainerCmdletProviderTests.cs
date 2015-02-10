@@ -200,6 +200,9 @@ namespace ReferenceTests.Providers
         // multiple ways to only get test1 and test3, but not test2 or the default item
         [TestCase(" -Include 'test*' -Exclude '*2'")]
         [TestCase(" -Exclude '*2','" + TestContainerProvider.DefaultItemName + "'")]
+        [TestCase(" -Filter '(test1|test3)'")] // custom filter understands regex
+        [TestCase(" -Filter 'test\\d' -Exclude 'test2'")] // custom filter with exclude mixed
+        [TestCase("*[123] -Exclude 'test2'")] // as part of the path
         public void ContainerProviderSupportsGetChildItemWithFilters(string args)
         {
             var pathPrefix = TestContainerProvider.DefaultDrivePath;
@@ -234,6 +237,9 @@ namespace ReferenceTests.Providers
         // multiple ways to only get test1 and test3, but not test2 or the default item
         [TestCase(" -Include 'test*' -Exclude '*2'")]
         [TestCase(" -Exclude '*2','" + TestContainerProvider.DefaultItemName + "'")]
+        [TestCase(" -Filter '(test1|test3)'")] // custom filter understands regex
+        [TestCase(" -Filter 'test\\d' -Exclude 'test2'")] // custom filter with exclude mixed
+        [TestCase("*[123] -Exclude 'test2'")] // as part of the path
         public void ContainerProviderSupportsGetChildItemNameWithFilters(string args)
         {
             var pathPrefix = TestContainerProvider.DefaultDrivePath;
