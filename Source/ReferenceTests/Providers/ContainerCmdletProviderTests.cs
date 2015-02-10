@@ -198,7 +198,6 @@ namespace ReferenceTests.Providers
         }
 
         // multiple ways to only get test1 and test3, but not test2 or the default item
-        [TestCase("*[13]")]
         [TestCase(" -Include 'test*' -Exclude '*2'")]
         [TestCase(" -Exclude '*2','" + TestContainerProvider.DefaultItemName + "'")]
         public void ContainerProviderSupportsGetChildItemWithFilters(string args)
@@ -233,7 +232,6 @@ namespace ReferenceTests.Providers
         }
 
         // multiple ways to only get test1 and test3, but not test2 or the default item
-        [TestCase("*[13]")]
         [TestCase(" -Include 'test*' -Exclude '*2'")]
         [TestCase(" -Exclude '*2','" + TestContainerProvider.DefaultItemName + "'")]
         public void ContainerProviderSupportsGetChildItemNameWithFilters(string args)
