@@ -10,11 +10,16 @@ namespace System.Management.Automation
 {
     public sealed class ItemCmdletProviderIntrinsics : CmdletProviderIntrinsicsBase
     {
-        private ChildItemCmdletProviderIntrinsics ChildItem { get; set; }
+        private ChildItemCmdletProviderIntrinsics ChildItem
+        {
+            get
+            {
+                return new ChildItemCmdletProviderIntrinsics(InvokingCmdlet);
+            }
+        }
 
         internal ItemCmdletProviderIntrinsics(Cmdlet cmdlet) : base(cmdlet)
         {
-            ChildItem = new ChildItemCmdletProviderIntrinsics(cmdlet);
         }
 
 

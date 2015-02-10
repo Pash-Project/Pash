@@ -14,11 +14,16 @@ namespace System.Management.Automation
     /// </summary>
     public sealed class ChildItemCmdletProviderIntrinsics : CmdletProviderIntrinsicsBase
     {
-        private ItemCmdletProviderIntrinsics Item { get; set; }
+        private ItemCmdletProviderIntrinsics Item
+        {
+            get
+            {
+                return new ItemCmdletProviderIntrinsics(InvokingCmdlet);
+            }
+        }
 
         internal ChildItemCmdletProviderIntrinsics(Cmdlet cmdlet) : base(cmdlet)
         {
-            Item = new ItemCmdletProviderIntrinsics(cmdlet);
         }
 
         #region Public API
@@ -75,7 +80,7 @@ namespace System.Management.Automation
             {
                 var path = curPath;
                 // if the path won't be globbed or filtered, we will directly list it's child
-                var listChildsWithoutRecursion = (Globber.ShouldGlob(path, runtime) || runtime.HasFilters());
+                var listChildsWithoutRecursion = !Globber.ShouldGlob(path, runtime) && !runtime.HasFilters();
 
                 // the Path might be a mixture of a path and an include filter
                 bool clearIncludeFilter;
@@ -192,7 +197,7 @@ namespace System.Management.Automation
                                                         IncludeExcludeFilter filter, ProviderRuntime runtime)
         {
             // we deal with a container: get all child items (all containers if we recurse)
-            var childNames = GetValidChildNames(provider, path, ReturnContainers.ReturnMatchingContainers);
+            var childNames = GetValidChildNames(provider, path, ReturnContainers.ReturnMatchingContainers, runtime);
             foreach (var childName in childNames)
             {
                 // if the filter accepts the child (leaf or container), get it
@@ -207,6 +212,7 @@ namespace System.Management.Automation
                 return;
             }
             // we are in recursion: dive into child containers
+            childNames = GetValidChildNames(provider, path, ReturnContainers.ReturnAllContainers, runtime);
             foreach (var childName in childNames)
             {
                 var childPath = Path.Combine(provider, path, childName, runtime);
@@ -237,7 +243,7 @@ namespace System.Management.Automation
             ReturnContainers returnContainers, bool recurse, IncludeExcludeFilter filter, ProviderRuntime runtime)
         {
             // we deal with a container
-            var childNames = GetValidChildNames(provider, providerPath, returnContainers);
+            var childNames = GetValidChildNames(provider, providerPath, returnContainers, runtime);
             foreach (var childName in childNames)
             {
                 // add the child only if the filter accepts it
@@ -254,7 +260,7 @@ namespace System.Management.Automation
                 return;
             }
             // okay, we should use recursion, so get all child containers and call this function again
-            childNames = GetValidChildNames(provider, providerPath, ReturnContainers.ReturnAllContainers);
+            childNames = GetValidChildNames(provider, providerPath, ReturnContainers.ReturnAllContainers, runtime);
             foreach (var childName in childNames)
             {
                 var providerChildPath = Path.Combine(provider, providerPath, childName, runtime);
@@ -268,11 +274,13 @@ namespace System.Management.Automation
             }
         }
 
-        List<string> GetValidChildNames(ContainerCmdletProvider provider, string providerPath, ReturnContainers returnContainers)
+        List<string> GetValidChildNames(ContainerCmdletProvider provider, string providerPath, ReturnContainers returnContainers, ProviderRuntime runtime)
         {
-            var runtime = new ProviderRuntime(SessionState);
-            provider.GetChildNames(providerPath, returnContainers, runtime);
-            return (from c in runtime.ThrowFirstErrorOrReturnResults()
+            var subRuntime = new ProviderRuntime(runtime);
+            subRuntime.PassThru = false; // so we can catch the results
+            provider.GetChildNames(providerPath, returnContainers, subRuntime);
+            var results = subRuntime.ThrowFirstErrorOrReturnResults();
+            return (from c in results
                     where c.BaseObject is string
                     select ((string)c.BaseObject)).ToList();
         }

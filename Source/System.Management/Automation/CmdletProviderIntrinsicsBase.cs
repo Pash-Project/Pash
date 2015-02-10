@@ -8,7 +8,7 @@ namespace System.Management.Automation
 {
     public class CmdletProviderIntrinsicsBase
     {
-        internal InternalCommand Cmdlet { get; private set; }
+        internal Cmdlet InvokingCmdlet { get; private set; }
         internal ExecutionContext ExecutionContext { get; private set; }
         internal SessionState SessionState { get { return ExecutionContext.SessionState; } }
         internal PathIntrinsics Path { get; private set; }
@@ -16,7 +16,7 @@ namespace System.Management.Automation
 
         internal CmdletProviderIntrinsicsBase(Cmdlet cmdlet)
         {
-            Cmdlet = cmdlet;
+            InvokingCmdlet = cmdlet;
             ExecutionContext = cmdlet.ExecutionContext;
             Path = new PathIntrinsics(cmdlet.ExecutionContext.SessionState);
             Globber = new PathGlobber(ExecutionContext.SessionState);
