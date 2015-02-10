@@ -210,7 +210,7 @@ namespace ReferenceTests.Providers
                 "$ni = New-Item " + pathPrefix + "test1 -Value 't1'",
                 "$ni = New-Item " + pathPrefix + "test2 -Value 't2'",
                 "$ni = New-Item " + pathPrefix + "test3 -Value 't3'",
-                "Get-ChildItem " + TestContainerProvider.DefaultDrivePath + args
+                "Get-ChildItem -recurse " + TestContainerProvider.DefaultDrivePath + args
             );
             var psObjResults = ReferenceHost.RawExecute(cmd);
             var results = (from r in psObjResults select r.BaseObject).ToList();
@@ -239,7 +239,7 @@ namespace ReferenceTests.Providers
         [TestCase(" -Exclude '*2','" + TestContainerProvider.DefaultItemName + "'")]
         [TestCase(" -Filter '(test1|test3)'")] // custom filter understands regex
         [TestCase(" -Filter 'test\\d' -Exclude 'test2'")] // custom filter with exclude mixed
-        [TestCase("*[123] -Exclude 'test2'")] // as part of the path
+        [TestCase("*[123] -Exclude 'test2'", Explicit=true)] // with names this test doesnt work with PS. feels wrong
         public void ContainerProviderSupportsGetChildItemNameWithFilters(string args)
         {
             var pathPrefix = TestContainerProvider.DefaultDrivePath;
@@ -295,11 +295,11 @@ namespace ReferenceTests.Providers
         {
             // container providers usually don't support hierarchy, so we cannt set-location to a node
             var cmd = NewlineJoin(
-                "Set-Location " + TestContainerProvider.DefaultDriveRoot,
+                "Set-Location " + TestContainerProvider.DefaultDrivePath,
                 "(Get-Location).Path",
                 "Get-Item " + TestContainerProvider.DefaultItemName // make sure we interact in the new location
             );
-            var adjustedDrivePath = AdjustSlashes(TestContainerProvider.DefaultDriveRoot);
+            var adjustedDrivePath = AdjustSlashes(TestContainerProvider.DefaultDrivePath);
             ExecuteAndCompareTypedResult(cmd, adjustedDrivePath, TestContainerProvider.DefaultItemValue);
         }
 
@@ -308,7 +308,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = NewlineJoin(
                 "$origLoc = (Get-Location).Path",
-                "Push-Location " + TestContainerProvider.DefaultDriveRoot,
+                "Push-Location " + TestContainerProvider.DefaultDrivePath,
                 "(Get-Location).Path",
                 "Pop-Location",
                 "$origLoc -eq (Get-Location).Path"
