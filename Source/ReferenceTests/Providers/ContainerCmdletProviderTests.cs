@@ -220,6 +220,19 @@ namespace ReferenceTests.Providers
         }
 
         [Test]
+        public void ContainerProviderGetChildItemWithFiltersWithoutRecursionDoesntGetItems()
+        {
+            var pathPrefix = TestContainerProvider.DefaultDrivePath;
+            var cmd = NewlineJoin(
+                "$ni = New-Item " + pathPrefix + "test1 -Value 't1'",
+                "$ni = New-Item " + pathPrefix + "test2 -Value 't2'",
+                "Get-ChildItem " + TestContainerProvider.DefaultDrivePath + " -Include 'test*' -Exclude '*2'"
+            );
+            var psObjResults = ReferenceHost.RawExecute(cmd);
+            Assert.That(psObjResults.Count, Is.EqualTo(0));
+        }
+
+        [Test]
         public void ContainerProviderSupportsGetChildItemNames()
         {
             var newPath = TestContainerProvider.DefaultDrivePath + "someItem";
