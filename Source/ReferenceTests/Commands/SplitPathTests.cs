@@ -33,6 +33,24 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
+        public void PathFromPipelineHasOneParentFolder()
+        {
+            string result = ReferenceHost.Execute(string.Format("'parent{0}child' | Split-Path", Path.DirectorySeparatorChar));
+
+            Assert.AreEqual("parent" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void FullFilePathIncludingDrive()
+        {
+            string fullPath = CreateFile(String.Empty, ".txt");
+            string directory = Path.GetDirectoryName(fullPath);
+            string result = ReferenceHost.Execute(string.Format("Split-Path '{0}'", fullPath));
+
+            Assert.AreEqual(directory + Environment.NewLine, result);
+        }
+
+        [Test]
         public void Leaf()
         {
             string command = string.Format("Split-Path -Leaf parent{0}child.txt", Path.DirectorySeparatorChar);
@@ -90,6 +108,16 @@ namespace ReferenceTests.Commands
             string result = ReferenceHost.Execute(command);
 
             Assert.AreEqual("foo" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void LeafForFullFilePathIncludingDrive()
+        {
+            string fullPath = CreateFile(String.Empty, ".txt");
+            string fileName = Path.GetFileName(fullPath);
+            string result = ReferenceHost.Execute(string.Format("Split-Path -Leaf '{0}'", fullPath));
+
+            Assert.AreEqual(fileName + Environment.NewLine, result);
         }
     }
 }
