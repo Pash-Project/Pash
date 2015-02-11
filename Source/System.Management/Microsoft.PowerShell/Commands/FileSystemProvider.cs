@@ -461,6 +461,16 @@ namespace Microsoft.PowerShell.Commands
 
         #endregion
 
+        internal override string NormalizePath(string path)
+        {
+            // FIXME: this is more a workaround until we properly reimplement this provider
+            if (PSDriveInfo != null && !new Path(path).HasDrive())
+            {
+                path = new Path(PSDriveInfo.Root).Combine(path);
+            }
+            return base.NormalizePath(path);
+        }
+
         private ItemType GetItemType(string type)
         {
             var pattern = new WildcardPattern(type + "*", WildcardOptions.IgnoreCase);

@@ -73,7 +73,7 @@ namespace System.Management.Automation.Provider
         //internal object MoveItemDynamicParameters(Path path, string destination, System.Management.Automation.CmdletProviderContext context);
         //internal string NormalizeRelativePath(Path path, string basePath, System.Management.Automation.CmdletProviderContext context);
 
-        internal static string NormalizePath(string path)
+        internal virtual string NormalizePath(string path)
         {
             return PathIntrinsics.NormalizePath(path);
         }
