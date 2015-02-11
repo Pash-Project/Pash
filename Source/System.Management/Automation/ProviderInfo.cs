@@ -7,7 +7,6 @@ namespace System.Management.Automation
     public class ProviderInfo : IComparable
     {
         internal PSDriveInfo CurrentDrive { get; set; }
-
         public PSSnapInInfo PSSnapIn { get; private set; }
         public string Name { get; private set; }
         public string Description { get; set; }

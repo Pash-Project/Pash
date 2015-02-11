@@ -162,16 +162,15 @@ namespace System.Management.Automation.Provider
             ProviderInfo = providerInfo;
         }
 
-        internal static T As<T>(CmdletProvider provider) where T : CmdletProvider
+        internal static T As<T>(object provider)
         {
             VerifyType<T>(provider);
-            return provider as T;
+            return ((T) provider);
         }
 
-        internal static void VerifyType<T>(CmdletProvider provider) where T : CmdletProvider
+        internal static void VerifyType<T>(object provider)
         {
-            var casted = provider as T;
-            if (casted == null)
+            if (!(provider is T))
             {
                 throw new NotSupportedException("The provider is not a valid provider of type '" + typeof(T).Name + "'");
             }

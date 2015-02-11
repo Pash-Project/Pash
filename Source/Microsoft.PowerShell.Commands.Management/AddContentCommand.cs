@@ -10,10 +10,7 @@ namespace Microsoft.Commands.Management
     {
         protected override void ProcessRecord()
         {
-            foreach (string path in Path)
-            {
-                WriteValues(path, true);
-            }
+            WriteValues(InternalPaths, true);
         }
     }
 }

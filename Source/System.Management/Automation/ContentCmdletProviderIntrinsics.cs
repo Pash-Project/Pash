@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Management.Automation.Internal;
 using System.Management.Automation.Provider;
 using Pash.Implementation;
+using System.Collections.Generic;
 
 namespace System.Management.Automation
 {
@@ -12,6 +13,13 @@ namespace System.Management.Automation
     /// </summary>
     public sealed class ContentCmdletProviderIntrinsics : CmdletProviderIntrinsicsBase
     {
+        private ItemCmdletProviderIntrinsics Item
+        {
+            get
+            {
+                return new ItemCmdletProviderIntrinsics(InvokingCmdlet);
+            }
+        }
 
         internal ContentCmdletProviderIntrinsics(Cmdlet cmdlet) : base (cmdlet)
         {
@@ -41,14 +49,8 @@ namespace System.Management.Automation
 
         public Collection<IContentReader> GetReader(string[] path, bool force, bool literalPath)
         {
-            var readers = new Collection<IContentReader>();
-            foreach (var p in path)
-            {
-                IContentCmdletProvider provider = GetContentCmdletProvider(p);
-                string providerPath = GetProviderPath(p);
-                readers.Add(provider.GetContentReader(providerPath));
-            }
-            return readers;
+            var runtime = new ProviderRuntime(SessionState, force, literalPath);
+            return GetReader(path, runtime);
        }
 
         public Collection<IContentWriter> GetWriter(string path)
@@ -58,14 +60,8 @@ namespace System.Management.Automation
 
         public Collection<IContentWriter> GetWriter(string[] path, bool force, bool literalPath)
         {
-            var writers = new Collection<IContentWriter>();
-            foreach (var p in path)
-            {
-                IContentCmdletProvider provider = GetContentCmdletProvider(p);
-                string providerPath = GetProviderPath(p);
-                writers.Add(provider.GetContentWriter(providerPath));
-            }
-            return writers;
+            var runtime = new ProviderRuntime(SessionState, force, literalPath);
+            return GetWriter(path, runtime);
         }
 
         #endregion
@@ -74,40 +70,68 @@ namespace System.Management.Automation
 
         internal void Clear(string[] path, ProviderRuntime runtime)
         {
-            GlobAndInvoke<IContentCmdletProvider>(path, runtime,
-                (curPath, provider) => provider.ClearContent(curPath)
+            foreach (var curPath in path)
+            {
+                CmdletProvider provider;
+                var globbedPaths = Globber.GetGlobbedProviderPaths(curPath, runtime, out provider);
+                var contentProvider = CmdletProvider.As<IContentCmdletProvider>(provider);
+                foreach (var p in globbedPaths)
+                {
+                    try
+                    {
+                        if (Item.Exists(p, runtime))
+                        {
+                            contentProvider.ClearContent(p);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        HandleCmdletProviderInvocationException(e);
+                    }
+                }
+            }
+        }
+
+        internal Collection<IContentReader> GetReader(string[] path, ProviderRuntime runtime)
+        {
+            return GlobAndCollect<IContentReader>(path, runtime,
+                (curPath, provider) => provider.GetContentReader(curPath)
             );
         }
 
+        internal Collection<IContentWriter> GetWriter(string[] path, ProviderRuntime runtime)
+        {
+            return GlobAndCollect<IContentWriter>(path, runtime,
+                (curPath, provider) => provider.GetContentWriter(curPath)
+            );
+        }
 
         #endregion
 
         #region private helpers
 
-        private IContentCmdletProvider GetContentCmdletProvider(string path)
+        private Collection<T> GlobAndCollect<T>(IList<string> paths, ProviderRuntime runtime,
+            Func<string, IContentCmdletProvider, T> method)
         {
-            ProviderInfo providerInfo;
-            var globber = new PathGlobber(SessionState);
-            globber.GetProviderSpecificPath(path, new ProviderRuntime(SessionState), out providerInfo);
-            var provider = SessionState.Provider.GetInstance(providerInfo) as IContentCmdletProvider;
-            if (provider != null)
+            var returnCollection = new Collection<T>();
+            foreach (var curPath in paths)
             {
-                return provider;
+                CmdletProvider provider;
+                var globbedPaths = Globber.GetGlobbedProviderPaths(curPath, runtime, out provider);
+                var contentProvider = CmdletProvider.As<IContentCmdletProvider>(provider);
+                foreach (var p in globbedPaths)
+                {
+                    try
+                    {
+                        returnCollection.Add(method(p, contentProvider));
+                    }
+                    catch (Exception e)
+                    {
+                        HandleCmdletProviderInvocationException(e);
+                    }
+                }
             }
-
-            throw new PSInvalidOperationException(String.Format("The provider for path '{0}' is not a IContentCmdletProvider", path));
-        }
-
-        private string GetProviderPath(string path)
-        {
-            if (path.IndexOf("::") == -1)
-            {
-                return path;
-            }
-
-            ProviderInfo providerInfo;
-            var globber = new PathGlobber(SessionState);
-            return globber.GetProviderSpecificPath(path, new ProviderRuntime(SessionState), out providerInfo);
+            return returnCollection;
         }
 
         #endregion

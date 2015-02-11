@@ -13,21 +13,29 @@ namespace Microsoft.PowerShell.Commands
         [AllowEmptyCollection]
         public object[] Value { get; set; }
 
-        internal void WriteValues(string path, bool seekEnd = false)
+        internal void WriteValues(string[] path, bool seekEnd = false)
         {
-            IContentWriter writer = InvokeProvider.Content.GetWriter(path).Single();
+            var writers = InvokeProvider.Content.GetWriter(path, ProviderRuntime);
 
-            try
+            foreach (var writer in writers)
             {
-                if (seekEnd)
+                try
                 {
-                    writer.Seek(0, SeekOrigin.End);
+                    if (seekEnd)
+                    {
+                        writer.Seek(0, SeekOrigin.End);
+                    }
+                    writer.Write(Value);
+
+                    if (PassThru.IsPresent)
+                    {
+                        WriteObject(Value, true);
+                    }
                 }
-                writer.Write(Value);
-            }
-            finally
-            {
-                writer.Close();
+                finally
+                {
+                    writer.Close();
+                }
             }
         }
     }
