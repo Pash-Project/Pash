@@ -119,5 +119,30 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual(fileName + Environment.NewLine, result);
         }
+
+        [Test]
+        public void IsAbsoluteIsFalseForNonAbsoluteFilePath()
+        {
+            string result = ReferenceHost.Execute("Split-Path -IsAbsolute abc");
+
+            Assert.AreEqual("False" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void IsAbsoluteIsTrueForFullPath()
+        {
+            string fullPath = CreateFile(String.Empty, ".txt");
+            string result = ReferenceHost.Execute(string.Format("Split-Path -IsAbsolute -Path '{0}'", fullPath));
+
+            Assert.AreEqual("True" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void BackslashIsNotAbsolute()
+        {
+            string result = ReferenceHost.Execute(@"Split-Path -IsAbsolute \ ");
+
+            Assert.AreEqual("False" + Environment.NewLine, result);
+        }
     }
 }

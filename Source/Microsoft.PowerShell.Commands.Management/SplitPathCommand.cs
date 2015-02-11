@@ -25,6 +25,10 @@ namespace Microsoft.PowerShell.Commands
             Position = 0,
             ParameterSetName = "LeafSet",
             ValueFromPipeline = true)]
+        [Parameter(
+            Position = 0,
+            ParameterSetName = "IsAbsoluteSet",
+            ValueFromPipeline = true)]
         public string[] Path { get; set; }
 
         [Parameter]
@@ -65,10 +69,20 @@ namespace Microsoft.PowerShell.Commands
             {
                 WritePath(path.GetChildNameOrSelfIfNoChild().RemoveDrive());
             }
+            else if (IsAbsolute.IsPresent)
+            {
+                WriteObject(PathIsAbsolute(path));
+            }
             else
             {
                 WritePath(path.GetParentPath(string.Empty));
             }
+        }
+
+        private bool PathIsAbsolute(Path path)
+        {
+            string drive = path.GetDrive();
+            return !String.IsNullOrEmpty(drive) && (drive != path.CorrectSlash);
         }
 
         private void WritePath(Path path)
