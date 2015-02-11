@@ -10,12 +10,15 @@ namespace System.Management.Automation
     /// <summary>
     /// Exposes functionality to cmdlets from providers.
     /// </summary>
-    public sealed class ContentCmdletProviderIntrinsics
+    public sealed class ContentCmdletProviderIntrinsics : CmdletProviderIntrinsicsBase
     {
-        private Cmdlet _cmdlet;
-        internal ContentCmdletProviderIntrinsics(Cmdlet cmdlet)
+
+        internal ContentCmdletProviderIntrinsics(Cmdlet cmdlet) : base (cmdlet)
         {
-            _cmdlet = cmdlet;
+        }
+
+        internal ContentCmdletProviderIntrinsics(SessionState sessionState) : base (sessionState)
+        {
         }
 
         #region public API
@@ -27,12 +30,8 @@ namespace System.Management.Automation
 
         public void Clear(string[] path, bool force, bool literalPath)
         {
-            foreach (var p in path)
-            {
-                IContentCmdletProvider provider = GetContentCmdletProvider(p);
-                string providerPath = GetProviderPath(p);
-                provider.ClearContent(providerPath);
-            }
+            var runtime = new ProviderRuntime(SessionState, force, literalPath);
+            Clear(path, runtime);
         }
 
         public Collection<IContentReader> GetReader(string path)
@@ -73,6 +72,12 @@ namespace System.Management.Automation
 
         #region internal API
 
+        internal void Clear(string[] path, ProviderRuntime runtime)
+        {
+            GlobAndInvoke<IContentCmdletProvider>(path, runtime,
+                (curPath, provider) => provider.ClearContent(curPath)
+            );
+        }
 
 
         #endregion
@@ -82,9 +87,9 @@ namespace System.Management.Automation
         private IContentCmdletProvider GetContentCmdletProvider(string path)
         {
             ProviderInfo providerInfo;
-            var globber = new PathGlobber(_cmdlet.ExecutionContext.SessionState);
-            globber.GetProviderSpecificPath(path, new ProviderRuntime(_cmdlet), out providerInfo);
-            var provider = _cmdlet.State.Provider.GetInstance(providerInfo) as IContentCmdletProvider;
+            var globber = new PathGlobber(SessionState);
+            globber.GetProviderSpecificPath(path, new ProviderRuntime(SessionState), out providerInfo);
+            var provider = SessionState.Provider.GetInstance(providerInfo) as IContentCmdletProvider;
             if (provider != null)
             {
                 return provider;
@@ -101,8 +106,8 @@ namespace System.Management.Automation
             }
 
             ProviderInfo providerInfo;
-            var globber = new PathGlobber(_cmdlet.ExecutionContext.SessionState);
-            return globber.GetProviderSpecificPath(path, new ProviderRuntime(_cmdlet), out providerInfo);
+            var globber = new PathGlobber(SessionState);
+            return globber.GetProviderSpecificPath(path, new ProviderRuntime(SessionState), out providerInfo);
         }
 
         #endregion
