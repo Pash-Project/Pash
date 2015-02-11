@@ -303,7 +303,7 @@ namespace ReferenceTests.Providers
             ExecuteAndCompareTypedResult(cmd, "asterisk");
         }
 
-        [Test]
+        [Test, Ignore] // support for this will follow, I don't want to throw these tests away
         public void ContainerProviderSupportsSetGetLocation()
         {
             // container providers usually don't support hierarchy, so we cannt set-location to a node
@@ -316,7 +316,7 @@ namespace ReferenceTests.Providers
             ExecuteAndCompareTypedResult(cmd, adjustedDrivePath, TestContainerProvider.DefaultItemValue);
         }
 
-        [Test]
+        [Test, Ignore] // support for this will follow, I don't want to throw these tests away
         public void ContainerProviderSupportsPushPopLocation()
         {
             var cmd = NewlineJoin(
