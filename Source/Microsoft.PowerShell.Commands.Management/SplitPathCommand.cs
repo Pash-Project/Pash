@@ -29,6 +29,10 @@ namespace Microsoft.PowerShell.Commands
             Position = 0,
             ParameterSetName = "IsAbsoluteSet",
             ValueFromPipeline = true)]
+        [Parameter(
+            Position = 0,
+            ParameterSetName = "NoQualifierSet",
+            ValueFromPipeline = true)]
         public string[] Path { get; set; }
 
         [Parameter]
@@ -73,6 +77,14 @@ namespace Microsoft.PowerShell.Commands
             {
                 WriteObject(PathIsAbsolute(path));
             }
+            else if (NoQualifier.IsPresent)
+            {
+                WritePath(path.RemoveDrive());
+            }
+            else if (Qualifier.IsPresent)
+            {
+                WritePath(GetDriveOrThrow(path));
+            }
             else
             {
                 WritePath(path.GetParentPath(string.Empty));
@@ -83,6 +95,17 @@ namespace Microsoft.PowerShell.Commands
         {
             string drive = path.GetDrive();
             return !String.IsNullOrEmpty(drive) && (drive != path.CorrectSlash);
+        }
+
+
+        private Path GetDriveOrThrow(Path path)
+        {
+            string drive = path.GetDrive();
+            if (drive != null)
+            {
+                return drive + ":";
+            }
+            throw new FormatException(string.Format("Cannot parse path because path '{0}' does not have a qualifier specified.", path));
         }
 
         private void WritePath(Path path)

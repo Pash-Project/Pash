@@ -144,5 +144,83 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual("False" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void NoQualifierForEnvironmentDriveWithOneChild()
+        {
+            string result = ReferenceHost.Execute("Split-Path -NoQualifier env:foo");
+
+            Assert.AreEqual("foo" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void NoQualifierForEnvironmentDriveWithNoChild()
+        {
+            string result = ReferenceHost.Execute("Split-Path -NoQualifier env:");
+
+            Assert.AreEqual(Environment.NewLine, result);
+        }
+
+        [Test]
+        public void NoQualifierForEnvironmentDriveWithDirectorySeparatorAndOneChild()
+        {
+            string command = string.Format("Split-Path -NoQualifier env:{0}foo", Path.DirectorySeparatorChar);
+            string result = ReferenceHost.Execute(command);
+
+            Assert.AreEqual(Path.DirectorySeparatorChar + "foo" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void NoQualifierForDriveWithTwoSubDirectories()
+        {
+            string command = string.Format("Split-Path -NoQualifier C:{0}foo{0}bar", Path.DirectorySeparatorChar);
+            string result = ReferenceHost.Execute(command);
+
+            Assert.AreEqual(String.Format("{0}foo{0}bar", Path.DirectorySeparatorChar) + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void QualifierForEnvironmentDriveWithOneChild()
+        {
+            string result = ReferenceHost.Execute("Split-Path -Qualifier env:foo");
+
+            Assert.AreEqual("env:" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void QualifierForEnvironmentDriveWithNoChild()
+        {
+            string result = ReferenceHost.Execute("Split-Path -Qualifier env:");
+
+            Assert.AreEqual("env:" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void QualifierForEnvironmentDriveWithDirectorySeparatorAndOneChild()
+        {
+            string command = string.Format("Split-Path -Qualifier env:{0}foo", Path.DirectorySeparatorChar);
+            string result = ReferenceHost.Execute(command);
+
+            Assert.AreEqual("env:" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void QualifierForDriveWithTwoSubDirectories()
+        {
+            string command = string.Format("Split-Path -Qualifier C:{0}foo{0}bar", Path.DirectorySeparatorChar);
+            string result = ReferenceHost.Execute(command);
+
+            Assert.AreEqual("C:" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void QualifierForPathWithNoDrive()
+        {
+            string command = string.Format("Split-Path -Qualifier foo{0}bar", Path.DirectorySeparatorChar);
+            Assert.Throws(Is.InstanceOf(typeof(Exception)), delegate
+            {
+                ReferenceHost.Execute(command);
+            });
+        }
     }
 }
