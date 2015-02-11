@@ -1,8 +1,12 @@
 using System;
-using System.Management.Automation;
-using System.ComponentModel;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
+using System.Management.Automation;
+using System.Management.Automation.Provider;
+using Microsoft.PowerShell.Commands;
 
 namespace TestPSSnapIn
 {
@@ -35,6 +39,7 @@ namespace TestPSSnapIn
         {
             _msg = msg;
         }
+
         public string GetMessage()
         {
             return _msg;
@@ -582,6 +587,51 @@ namespace TestPSSnapIn
         {
             string stringValue = value as string;
             return new Custom { Id = stringValue };
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "ContentWriter", DefaultParameterSetName = "Path")]
+    public class TestContentWriter : WriteContentCommandBase
+    {
+        protected override void ProcessRecord()
+        {
+            foreach (string path in Path)
+            {
+                using (IContentWriter writer = InvokeProvider.Content.GetWriter(path).Single())
+                {
+                    IList items = writer.Write(Value);
+                    // Need to close writer before disposing it otherwise Microsoft's
+                    // FileSystemProvider throws an exception.
+                    writer.Close();
+                }
+            }
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "ContentReader", DefaultParameterSetName = "Path")]
+    public class TestContentReader : ContentCommandBase
+    {
+        protected override void ProcessRecord()
+        {
+            foreach (string path in Path)
+            {
+                using (IContentReader reader = InvokeProvider.Content.GetReader(path).Single())
+                {
+                    while (true)
+                    {
+                        IList items = reader.Read(1);
+                        if (items.Count > 0)
+                        {
+                            WriteObject(items[0]);
+                        }
+                        else
+                        {
+                            reader.Close();
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
 }

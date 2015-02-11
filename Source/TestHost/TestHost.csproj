@@ -91,7 +91,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FileSystemTests\ProcessBlockingTests.cs" />
     <Compile Include="2.3.5.1.2 Real literals.cs" />
-    <Compile Include="ProviderTests\EnvironmentProviderTests.cs" />
     <Compile Include="ScriptParameterTests.cs" />
     <Compile Include="7.1.6 - SubexpressionOperator.cs" />
     <Compile Include="TestHelpers\TestCommand.cs" />

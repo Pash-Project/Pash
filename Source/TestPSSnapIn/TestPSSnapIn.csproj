@@ -35,6 +35,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PashTestSnapIn.cs" />
     <Compile Include="TestCommands.cs" />
+    <Compile Include="TestContentCmdletProvider.cs" />
     <Compile Include="TestCreateErrorCommand.cs" />
     <Compile Include="TestDriveProvider.cs" />
     <Compile Include="TestItemProvider.cs" />
@@ -43,6 +44,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.PowerShell.Commands.Management\Microsoft.Commands.Management.csproj">
+      <Project>{91225A72-A021-4B7D-BA56-5E1B7AC02F03}</Project>
+      <Name>Microsoft.Commands.Management</Name>
+    </ProjectReference>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
       <Project>{C5E303EC-5684-4C95-B0EC-2593E6662403}</Project>
       <Name>System.Management</Name>

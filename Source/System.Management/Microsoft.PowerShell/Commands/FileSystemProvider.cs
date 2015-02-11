@@ -7,6 +7,8 @@ using System.Management.Automation.Provider;
 using System.Security;
 using System.Security.AccessControl;
 using System.Management;
+using System.Management.Pash.Implementation;
+using System.Text;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -364,7 +366,14 @@ namespace Microsoft.PowerShell.Commands
 
         public void ClearContent(string path)
         {
-            throw new NotImplementedException();
+            if (!ItemExists(path))
+            {
+                throw new ItemNotFoundException(string.Format("Cannot find path '{0}' because it does not exist.", path));
+            }
+
+            using (var writer = new System.IO.StreamWriter(path, false, Encoding.ASCII))
+            {
+            }
         }
 
         public object ClearContentDynamicParameters(string path)
@@ -374,7 +383,7 @@ namespace Microsoft.PowerShell.Commands
 
         public IContentReader GetContentReader(string path)
         {
-            throw new NotImplementedException();
+            return new FileContentReader(path);
         }
 
         public object GetContentReaderDynamicParameters(string path)
@@ -384,7 +393,7 @@ namespace Microsoft.PowerShell.Commands
 
         public IContentWriter GetContentWriter(string path)
         {
-            throw new NotImplementedException();
+            return new FileContentWriter(path);
         }
 
         public object GetContentWriterDynamicParameters(string path)

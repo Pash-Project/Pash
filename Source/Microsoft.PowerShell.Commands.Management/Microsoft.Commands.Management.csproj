@@ -24,6 +24,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>..\..\Tools\FxCop\PashRules.Warnings.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,6 +34,8 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>..\..\Tools\FxCop\PashRules.Errors.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -61,11 +65,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddContentCommand.cs" />
+    <Compile Include="ClearContentCommand.cs" />
+    <Compile Include="ContentCommandBase.cs" />
     <Compile Include="ConvertPathCommand.cs" />
     <Compile Include="CopyItemCommand.cs" />
     <Compile Include="CoreCommandBase.cs" />
     <Compile Include="DriveMatchingCoreCommandBase.cs" />
     <Compile Include="GetChildItemCommand.cs" />
+    <Compile Include="GetContentCommand.cs" />
     <Compile Include="GetLocationCommand.cs" />
     <Compile Include="GetProcessCommand.cs" />
     <Compile Include="GetPSDriveCommand.cs" />
@@ -75,6 +83,7 @@
     <Compile Include="JoinPathCommand.cs" />
     <Compile Include="MoveItemCommand.cs" />
     <Compile Include="NewItemCommand.cs" />
+    <Compile Include="PassThroughContentCommandBase.cs" />
     <Compile Include="ProcessBaseCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PSManagementPSSnapIn.cs" />
@@ -82,6 +91,7 @@
     <Compile Include="RenameItemCommand.cs" />
     <Compile Include="RestartServiceCommand.cs" />
     <Compile Include="ResumeServiceCommand.cs" />
+    <Compile Include="SetContentCommand.cs" />
     <Compile Include="SetLocationCommand.cs" />
     <Compile Include="SplitPathCommand.cs" />
     <Compile Include="StartServiceCommand.cs" />
@@ -99,6 +109,7 @@
     <Compile Include="TestPathType.cs" />
     <Compile Include="CoreCommandWithFiltersBase.cs" />
     <Compile Include="CoreCommandWithFilteredPathsBase.cs" />
+    <Compile Include="WriteContentCommandBase .cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

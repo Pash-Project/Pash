@@ -229,7 +229,13 @@ namespace System.Management.Automation
         {
             CmdletProvider provider;
             var globbedPaths = Globber.GetGlobbedProviderPaths(path, runtime, out provider);
-            var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
+            var containerProvider = provider as ItemCmdletProvider;
+            // we assume that in a low level CmdletProvider all items exists. Not sure about this, but I don't want to
+            // break existing functionality
+            if (containerProvider == null)
+            {
+                return true;
+            }
             foreach (var p in globbedPaths)
             {
                 var exists = false;
