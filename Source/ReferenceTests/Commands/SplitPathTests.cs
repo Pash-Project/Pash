@@ -138,11 +138,12 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
-        public void BackslashIsNotAbsolute()
+        public void BackslashIsNotAbsoluteOnPlatformsWithCorrectSeparatorAsBackslash()
         {
             string result = ReferenceHost.Execute(@"Split-Path -IsAbsolute \ ");
 
-            Assert.AreEqual("False" + Environment.NewLine, result);
+            bool expected = (Path.DirectorySeparatorChar != '\\');
+            Assert.AreEqual(expected.ToString() + Environment.NewLine, result);
         }
 
         [Test]

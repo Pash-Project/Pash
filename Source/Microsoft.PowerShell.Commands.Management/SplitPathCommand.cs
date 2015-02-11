@@ -93,8 +93,16 @@ namespace Microsoft.PowerShell.Commands
 
         private bool PathIsAbsolute(Path path)
         {
-            string drive = path.GetDrive();
-            return !String.IsNullOrEmpty(drive) && (drive != path.CorrectSlash);
+            string drive = null;
+            if (path.TryGetDriveName(out drive))
+            {
+                if (System.IO.Path.DirectorySeparatorChar == '\\')
+                {
+                    return drive != @"\";
+                }
+                return true;
+            }
+            return false;
         }
 
 
