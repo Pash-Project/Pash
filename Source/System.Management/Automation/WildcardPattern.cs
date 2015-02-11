@@ -80,7 +80,7 @@ namespace System.Management.Automation
             return UnescapeWildcardsIn(pattern, new[] { "*", "?", "]", "[" });
         }
 
-        internal static WildcardPattern[] CreateWildcards(string[] strs)
+        internal static WildcardPattern[] CreateWildcards(IList<string> strs)
         {
             if (strs == null)
             {

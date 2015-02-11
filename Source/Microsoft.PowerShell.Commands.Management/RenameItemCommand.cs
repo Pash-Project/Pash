@@ -5,15 +5,11 @@ using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands
 {
-    [Cmdlet("Rename", "Item", SupportsShouldProcess = true)]
-    public class RenameItemCommand : ProviderCommandBase
+    [Cmdlet("Rename", "Item", DefaultParameterSetName="ByPath"
+        /*, SupportsTransactions=true, HelpUri="http://go.microsoft.com/fwlink/?LinkID=113382"*/)] 
+    public class RenameItemCommand : CoreCommandWithCredentialsBase
     {
-        protected override void ProcessRecord()
-        {
-            InvokeProvider.Item.Rename(Path, NewName);
-
-            if (PassThru.ToBool()) WriteObject(Path);
-        }
+        protected string InternalPath;
 
         [Parameter(
             Position = 1,
@@ -27,15 +23,36 @@ namespace Microsoft.PowerShell.Commands
         [Parameter]
         public SwitchParameter PassThru { get; set; }
 
-        [Alias(new string[] { "PSPath" }),
-        Parameter(
-            Position = 0,
-            Mandatory = true,
-            ValueFromPipeline = true,
-            ValueFromPipelineByPropertyName = true)]
-        public string Path { get; set; }
 
-        //protected override bool ProviderSupportsShouldProcess { get; }
+        [Parameter(Position=0, ParameterSetName="ByPath", Mandatory=true, ValueFromPipeline=true,
+            ValueFromPipelineByPropertyName=true)]
+        public string Path
+        {
+            get { return InternalPath; }
+            set { InternalPath = value; }
+        }
+
+        [Parameter(ParameterSetName="ByLiteralPath", Mandatory=true, ValueFromPipeline=false,
+            ValueFromPipelineByPropertyName=true)]
+        [Alias("PSPath")]
+        public string LiteralPath
+        {
+            get { return InternalPath; }
+            set
+            {
+                AvoidWildcardExpansion = true;
+                InternalPath = value;
+            }
+        }
+
+        // TODO: support for #DynamicParameters (calling the providers appropriate method)
+
+        protected override void ProcessRecord()
+        {
+            var runtime = ProviderRuntime;
+            runtime.PassThru = PassThru.IsPresent;
+            InvokeProvider.Item.Rename(InternalPath, NewName, runtime);
+        }
     }
 
 

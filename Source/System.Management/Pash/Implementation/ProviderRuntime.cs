@@ -11,10 +11,11 @@ namespace Pash.Implementation
         internal Collection<string> Exclude { get; set; }
         internal string Filter { get; set; }
         internal SwitchParameter Force { get; set; }
-        internal ExecutionContext ExecutionContext { get; private set; }
+        internal SessionState SessionState { get; private set; }
         internal PSCredential Credential { get; set; }
-        internal SwitchParameter AvoidWildcardExpansion { get; set; }
+        internal SwitchParameter AvoidGlobbing { get; set; }
         internal PSDriveInfo PSDriveInfo { get; set; }
+        internal bool IgnoreFiltersForGlobbing { get; set; }
 
         internal bool PassThru { get; set; }
 
@@ -30,22 +31,39 @@ namespace Pash.Implementation
         }
 
         internal ProviderRuntime(Cmdlet cmdlet)
-            : this(cmdlet.ExecutionContext)
+            : this(cmdlet.ExecutionContext.SessionState)
         {
             _cmdlet = cmdlet;
         }
 
-        internal ProviderRuntime(ExecutionContext executionContext)
-            : this(executionContext, false, false)
+        internal ProviderRuntime(SessionState sessionState)
+            : this(sessionState, false, false)
         {
         }
 
-        internal ProviderRuntime(ExecutionContext executionContext, bool force, bool avoidWildcardExpansion)
+        internal ProviderRuntime(SessionState sessionState, bool force, bool avoidWildcardExpansion)
             : this()
         {
-            ExecutionContext = executionContext;
-            AvoidWildcardExpansion = avoidWildcardExpansion;
+            SessionState = sessionState;
+            AvoidGlobbing = avoidWildcardExpansion;
             Force = force;
+        }
+
+        public ProviderRuntime(ProviderRuntime runtime)
+            : this(runtime.SessionState, runtime.Force, runtime.AvoidGlobbing)
+        {
+            _cmdlet = runtime._cmdlet;
+            PassThru = runtime.PassThru;
+            PSDriveInfo = runtime.PSDriveInfo;
+            Include = new Collection<string>(runtime.Include);
+            Exclude = new Collection<string>(runtime.Exclude);
+            Filter = runtime.Filter;
+            AvoidGlobbing = runtime.AvoidGlobbing;
+            IgnoreFiltersForGlobbing = runtime.IgnoreFiltersForGlobbing;
+            if (runtime.Credential != null)
+            {
+                Credential = new PSCredential(runtime.Credential);
+            }
         }
 
         internal Collection<PSObject> RetreiveAllProviderData()
@@ -69,7 +87,9 @@ namespace Pash.Implementation
 
         internal void WriteError(ErrorRecord errorRecord)
         {
-            if (_cmdlet != null && PassThru)
+            // Don't check PassThru here. Cmdlets that don't want to see output are likely to see the errors anyway.
+            // Introduce another flag if something similar is needed at som time
+            if (_cmdlet != null)
             {
                 _cmdlet.WriteError(errorRecord);
             }
@@ -79,12 +99,23 @@ namespace Pash.Implementation
             }
         }
 
-        public void ThrowFirstErrorOrContinue()
+        internal void ThrowFirstErrorOrContinue()
         {
             if (_errorData.Count > 0)
             {
                 throw new ProviderInvocationException(_errorData[0]);
             }
+        }
+
+        internal Collection<PSObject> ThrowFirstErrorOrReturnResults()
+        {
+            ThrowFirstErrorOrContinue();
+            return RetreiveAllProviderData();
+        }
+
+        internal bool HasFilters()
+        {
+            return (Include != null && Include.Count > 0) || (Exclude != null && Exclude.Count > 0);
         }
     }
 }

@@ -10,7 +10,7 @@ using System.Management.Automation;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Join", "Path")]
-    public class JoinPathCommand : ProviderCommandBase
+    public class JoinPathCommand : CoreCommandWithCredentialsBase
     {
         protected override void ProcessRecord()
         {

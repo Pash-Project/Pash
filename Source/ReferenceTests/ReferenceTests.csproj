@@ -72,6 +72,7 @@
     <Compile Include="Providers\ContentWriterTests.cs" />
     <Compile Include="Providers\FunctionProviderTests.cs" />
     <Compile Include="Providers\ItemCmdletProviderTests.cs" />
+    <Compile Include="Providers\ContainerCmdletProviderTests.cs" />
     <Compile Include="Providers\EnvironmentProviderTests.cs" />
     <Compile Include="Providers\VariableProviderTests.cs" />
     <Compile Include="ReferenceHost.cs" />
@@ -117,6 +118,7 @@
     <Compile Include="Language\IfElseTests.cs" />
     <Compile Include="Providers\ProviderLoadingTests.cs" />
     <Compile Include="Providers\DriveCmdletProviderTests.cs" />
+    <Compile Include="Providers\NavigationCmdletProviderTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">

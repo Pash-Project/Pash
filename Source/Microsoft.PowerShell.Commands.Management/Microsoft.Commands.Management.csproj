@@ -86,7 +86,6 @@
     <Compile Include="PassThroughContentCommandBase.cs" />
     <Compile Include="ProcessBaseCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProviderCommandBase.cs" />
     <Compile Include="PSManagementPSSnapIn.cs" />
     <Compile Include="RemoveItemCommand.cs" />
     <Compile Include="RenameItemCommand.cs" />
@@ -108,7 +107,8 @@
     <Compile Include="InvokeItemCommand.cs" />
     <Compile Include="TestPathCommand.cs" />
     <Compile Include="TestPathType.cs" />
-    <Compile Include="CoreCommandWithPathsBase.cs" />
+    <Compile Include="CoreCommandWithFiltersBase.cs" />
+    <Compile Include="CoreCommandWithFilteredPathsBase.cs" />
     <Compile Include="WriteContentCommandBase .cs" />
   </ItemGroup>
   <ItemGroup>

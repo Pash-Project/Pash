@@ -12,7 +12,7 @@ namespace System.Management.Automation
     /// </summary>
     public sealed class ContentCmdletProviderIntrinsics
     {
-        private InternalCommand _cmdlet;
+        private Cmdlet _cmdlet;
         internal ContentCmdletProviderIntrinsics(Cmdlet cmdlet)
         {
             _cmdlet = cmdlet;
@@ -27,8 +27,10 @@ namespace System.Management.Automation
 
         private IContentCmdletProvider GetContentCmdletProvider(string path)
         {
-            PSDriveInfo drive;
-            var provider = _cmdlet.State.SessionStateGlobal.GetProviderByPath(path, out drive) as IContentCmdletProvider;
+            ProviderInfo providerInfo;
+            var globber = new PathGlobber(_cmdlet.ExecutionContext.SessionState);
+            globber.GetProviderSpecificPath(path, new ProviderRuntime(_cmdlet), out providerInfo);
+            var provider = _cmdlet.State.Provider.GetInstance(providerInfo) as IContentCmdletProvider;
             if (provider != null)
             {
                 return provider;
@@ -44,10 +46,9 @@ namespace System.Management.Automation
                 return path;
             }
 
-            PSDriveInfo drive;
             ProviderInfo providerInfo;
             var globber = new PathGlobber(_cmdlet.ExecutionContext.SessionState);
-            return globber.GetProviderSpecificPath(path, out providerInfo, out drive);
+            return globber.GetProviderSpecificPath(path, new ProviderRuntime(_cmdlet), out providerInfo);
         }
 
         public Collection<IContentReader> GetReader(string path)

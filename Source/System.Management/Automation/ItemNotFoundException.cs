@@ -7,12 +7,12 @@ namespace System.Management.Automation
     [Serializable]
     public class ItemNotFoundException : SessionStateException
     {
-        public ItemNotFoundException()
+        public ItemNotFoundException() : this("Item not found")
         {
         }
 
         public ItemNotFoundException(string message)
-            : base(message)
+            : this(message, null)
         {
         }
 
@@ -22,8 +22,14 @@ namespace System.Management.Automation
         }
 
         public ItemNotFoundException(string message, Exception innerException)
+            : this(message, innerException, "ItemNotFound")
+        {
+        }
+
+        internal ItemNotFoundException(string message, Exception innerException, string errorId)
             : base(message, innerException)
         {
+            ErrorRecord = new ErrorRecord(this, errorId, ErrorCategory.ObjectNotFound, null);
         }
 
         internal ItemNotFoundException(string itemName, SessionStateCategory sessionStateCategory, 

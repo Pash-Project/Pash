@@ -48,13 +48,9 @@ namespace System.Management.Automation
                 {
                     Command.DoBeginProcessing();
                 }
-                catch (CmdletInvocationException)
-                {
-                    throw;
-                }
                 catch(Exception e)
                 {
-                    throw new CmdletInvocationException(e.Message, e);
+                    HandleInvocationException(e);
                 }
                 _beganProcessing = true;
             }
@@ -93,13 +89,9 @@ namespace System.Management.Automation
                 {
                     Command.DoProcessRecord();
                 }
-                catch (CmdletInvocationException)
-                {
-                    throw;
-                }
                 catch(Exception e)
                 {
-                    throw new CmdletInvocationException(e.Message, e);
+                    HandleInvocationException(e);
                 }
             }
             _argumentBinder.RestoreCommandLineParameterValues();
@@ -117,13 +109,9 @@ namespace System.Management.Automation
                 ExecutionContext.SetSuccessVariable(true); // only false if we got an exception
                 ProcessRedirects();
             }
-            catch (CmdletInvocationException)
-            {
-                throw;
-            }
             catch(Exception e)
             {
-                throw new CmdletInvocationException(e.Message, e);
+                HandleInvocationException(e);
             }
         }
 
@@ -191,6 +179,18 @@ namespace System.Management.Automation
                 // seems to be ambiguous. well, this is the wrong place to throw the error, it will be thrown later on
             }
             return false;
+        }
+
+        private void HandleInvocationException(Exception e)
+        {
+            // called when one of the processing phases resultet in an exception.
+            // For now: Handle the exception type
+            // TODO: This would be the place to invoke rollbacks if we support transactions
+            if ((e is CmdletInvocationException) || (e is CmdletProviderInvocationException))
+            {
+                throw e;
+            }
+            throw new CmdletInvocationException(e.Message, e);
         }
     }
 }

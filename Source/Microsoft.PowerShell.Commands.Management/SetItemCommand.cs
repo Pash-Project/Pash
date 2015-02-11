@@ -5,17 +5,8 @@ namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Set", "Item", SupportsShouldProcess=true, DefaultParameterSetName="Path"
             /*, SupportsTransactions=true, HelpUri="http://go.microsoft.com/fwlink/?LinkID=113395"*/)]
-    public class SetItemCommand : CoreCommandWithPathsBase
+    public class SetItemCommand : CoreCommandWithFilteredPathsBase
     {
-        protected override bool ProviderSupportsShouldProcess
-        {
-            get
-            {
-                // TODO: useful implementation based on _paths and the affected providers
-                return false;
-            }
-        }
-
         [ParameterAttribute(Position=1, ValueFromPipeline=true, ValueFromPipelineByPropertyName=true)]
         public Object Value { get; set; }
 
@@ -25,7 +16,7 @@ namespace Microsoft.PowerShell.Commands
         [Parameter]
         public SwitchParameter PassThru { get; set; }
 
-        // TODO: support for DynamicParameters (calling the providers appropriate method)
+        // TODO: support for #DynamicParameters (calling the providers appropriate method)
 
         protected override void ProcessRecord()
         {

@@ -166,14 +166,15 @@ namespace ReferenceTests.Language
             Assert.AreEqual(NewlineJoin("test"), res);
         }
 
-        [TestCase("$true", true)]
-        [TestCase("$false", false)]
-        [TestCase("$null", true)]
-        [TestCase("0.0", false)]
-        [TestCase("0.01", true)]
+        [TestCase("-Switch:$true", true)]
+        [TestCase("-Switch:$false", false)]
+        [TestCase("-Switch:$null", true)]
+        [TestCase("-Switch:0.0", false)]
+        [TestCase("-Switch:0.01", true)]
+        [TestCase("", false)] // makes sure the property isn't null
         public void SwitchParameterWithExplicitValue(string value, bool expected)
         {
-            var cmd = CmdletName(typeof(TestSwitchParameterCommand)) + " -Switch:" + value;
+            var cmd = CmdletName(typeof(TestSwitchParameterCommand)) + " " + value;
             var res = ReferenceHost.RawExecute(cmd);
             Assert.That(res.Count, Is.EqualTo(1));
             Assert.That(res[0].BaseObject, Is.EqualTo(expected));

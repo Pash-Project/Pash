@@ -12,7 +12,20 @@ namespace System.Management.Automation.Provider
 {
     public abstract class CmdletProvider : IResourceSupplier
     {
-        internal ProviderRuntime ProviderRuntime { get; set; }
+        private ProviderRuntime _providerRuntime;
+        internal ProviderRuntime ProviderRuntime
+        {
+            get
+            {
+                return _providerRuntime;
+            }
+
+            set
+            {
+                VerifyProviderCapabilities(value);
+                _providerRuntime = value;
+            }
+        }
 
         // TODO: use CmdletProviderManagementIntrinsics
 
@@ -72,7 +85,7 @@ namespace System.Management.Automation.Provider
         {
             get
             {
-                return this.ProviderRuntime.ExecutionContext.SessionState;
+                return ProviderRuntime.SessionState;
             }
         }
 
@@ -151,12 +164,17 @@ namespace System.Management.Automation.Provider
 
         internal static T As<T>(CmdletProvider provider) where T : CmdletProvider
         {
+            VerifyType<T>(provider);
+            return provider as T;
+        }
+
+        internal static void VerifyType<T>(CmdletProvider provider) where T : CmdletProvider
+        {
             var casted = provider as T;
             if (casted == null)
             {
                 throw new NotSupportedException("The provider is not a valid provider of type '" + typeof(T).Name + "'");
             }
-            return casted;
         }
 
         private PSObject GetItemAsPSObject(object item, Path path)
@@ -216,6 +234,21 @@ namespace System.Management.Automation.Provider
 
             psObject.Properties.Add(new PSNoteProperty("PSProvider", ProviderInfo));
             return psObject;
+        }
+
+
+        private void VerifyProviderCapabilities(ProviderRuntime runtime)
+        {
+            if (!String.IsNullOrEmpty(runtime.Filter) &&
+                !ProviderInfo.Capabilities.HasFlag(ProviderCapabilities.Filter))
+            {
+                throw new NotSupportedException("This provider doesn't support filters");
+            }
+            if (runtime.Credential != null &&
+                !ProviderInfo.Capabilities.HasFlag(ProviderCapabilities.Credentials))
+            {
+                throw new NotSupportedException("This provider doesn't support credentials");
+            }
         }
 
         internal Collection<PSDriveInfo> GetDriveFromProviderInfo()

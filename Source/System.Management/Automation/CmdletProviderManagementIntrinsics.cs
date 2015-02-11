@@ -155,7 +155,7 @@ namespace System.Management.Automation
         {
             CmdletProvider provider = providerInfo.CreateInstance();
 
-            var runtime = new ProviderRuntime(executionContext);
+            var runtime = new ProviderRuntime(executionContext.SessionState);
             providerInfo = provider.Start(providerInfo, runtime);
             provider.SetProviderInfo(providerInfo);
 
@@ -179,7 +179,7 @@ namespace System.Management.Automation
 
         private void Remove(ProviderInfo info, ExecutionContext executionContext)
         {
-            var runtime = new ProviderRuntime(executionContext);
+            var runtime = new ProviderRuntime(executionContext.SessionState);
             //remove all drives. TODO: I think _providers[name].Drive
             foreach (var drive in _sessionState.RootSessionState.Drive.GetAllForProvider(info.FullName))
             {

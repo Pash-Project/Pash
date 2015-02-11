@@ -7,8 +7,6 @@ namespace System.Management.Automation.Provider
 {
     public abstract class NavigationCmdletProvider : ContainerCmdletProvider
     {
-        private ProviderRuntime _providerRuntime;
-
         protected NavigationCmdletProvider()
         {
         }
@@ -25,7 +23,7 @@ namespace System.Management.Automation.Provider
 
         internal string GetChildName(string path, ProviderRuntime providerRuntime)
         {
-            _providerRuntime = providerRuntime;
+            ProviderRuntime = providerRuntime;
             return GetChildName(path);
         }
 
@@ -42,7 +40,7 @@ namespace System.Management.Automation.Provider
 
         internal string GetParentPath(string path, string root, ProviderRuntime providerRuntime)
         {
-            _providerRuntime = providerRuntime;
+            ProviderRuntime = providerRuntime;
             return GetParentPath(path, root);
         }
 
@@ -53,7 +51,7 @@ namespace System.Management.Automation.Provider
 
         internal bool IsItemContainer(string path, ProviderRuntime providerRuntime)
         {
-            _providerRuntime = providerRuntime;
+            ProviderRuntime = providerRuntime;
             return IsItemContainer(path);
         }
 
@@ -75,7 +73,7 @@ namespace System.Management.Automation.Provider
         //internal object MoveItemDynamicParameters(Path path, string destination, System.Management.Automation.CmdletProviderContext context);
         //internal string NormalizeRelativePath(Path path, string basePath, System.Management.Automation.CmdletProviderContext context);
 
-        internal static string NormalizePath(string path)
+        internal virtual string NormalizePath(string path)
         {
             return PathIntrinsics.NormalizePath(path);
         }

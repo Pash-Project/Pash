@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Management.Automation;
 using System.Text;
 using TestPSSnapIn;
 
@@ -37,6 +38,15 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-Item -Path '" + _providerQualification + TestItemProvider.DefaultItemName + "'";
             ExecuteAndCompareTypedResult(cmd, TestItemProvider.DefaultItemValue);
+        }
+
+        [Test]
+        public void ItemProviderWithoutFilterCapabilitiesFailsOnParameter()
+        {
+            var cmd = "Get-Item -Filter 'foo' -Path '" + _providerQualification + TestItemProvider.DefaultItemName + "'";
+            Assert.Throws<CmdletProviderInvocationException>(delegate {
+                ExecuteAndCompareTypedResult(cmd, TestItemProvider.DefaultItemValue);
+            });
         }
 
         [Test]

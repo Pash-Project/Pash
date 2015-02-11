@@ -3,17 +3,19 @@
 using System;
 using System.Management.Automation;
 
-namespace Microsoft.PowerShell.Commands.Microsoft.PowerShell.Commands.Provider
+namespace Microsoft.PowerShell.Commands
 {
-    [Cmdlet("New", "Item", DefaultParameterSetName = "pathSet", SupportsShouldProcess = true)]
-    public class NewItemCommand : ProviderCommandBase
+    [Cmdlet("New", "Item", DefaultParameterSetName = "pathSet"
+        /*, SupportsTransactions=true, HelpUri="http://go.microsoft.com/fwlink/?LinkID=113353" */)] 
+    public class NewItemCommand : CoreCommandWithCredentialsBase
     {
         /// <summary>
         /// NAME
         ///   New-Item
         /// 
         /// DESCRIPTION
-        ///   Creates a new item in the given provider path. The behavior depends on the provider you have loaded, but for the Filesystem provider this means making new files or folders.
+        ///   Creates a new item in the given provider path. The behavior depends on the provider you have loaded, but 
+        ///   for the Filesystem provider this means making new files or folders.
         /// 
         /// RELATED PASH COMMANDS
         ///   Get-ChildItem
@@ -24,10 +26,14 @@ namespace Microsoft.PowerShell.Commands.Microsoft.PowerShell.Commands.Provider
         /// RELATED POSIX COMMANDS
         ///   mkdir
         /// </summary>
-        protected override void ProcessRecord()
+
+        protected override bool ProviderSupportsShouldProcess
         {
-            var results = InvokeProvider.Item.New(Path, Name, ItemType, Value, Force);
-            WriteObject(results, true);
+            get
+            {
+                // TODO: useful implementation based on Path and the affected providers
+                return false;
+            }
         }
 
         /// <summary>
@@ -75,5 +81,11 @@ namespace Microsoft.PowerShell.Commands.Microsoft.PowerShell.Commands.Provider
             ValueFromPipelineByPropertyName = true)]
         public object Value { get; set; }
 
+        // TODO: support for #DynamicParameters
+
+        protected override void ProcessRecord()
+        {
+            InvokeProvider.Item.New(Path, Name, ItemType, Value, ProviderRuntime);
+        }
     }
 }

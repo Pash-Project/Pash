@@ -21,8 +21,7 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void GetChildItems(string path, bool recurse)
         {
-            if (path == "\\")
-                path = string.Empty;
+            path = NormalizePath(path);
 
             if (string.IsNullOrEmpty(path))
             {
@@ -44,8 +43,42 @@ namespace Microsoft.PowerShell.Commands
             }
         }
 
-        protected override void GetChildNames(string path, ReturnContainers returnContainers) { throw new NotImplementedException(); }
-        protected override void GetItem(string path) { throw new NotImplementedException(); }
+        protected override void GetChildNames(string path, ReturnContainers returnContainers)
+        {
+            path = NormalizePath(path);
+
+            // check for a named child
+            if (path.Length > 0)
+            {
+                object item = GetSessionStateItem(path);
+                if (item != null)
+                {
+                    WriteItemObject(path, path, false);
+                }
+                return;
+            }
+            // otherwise names of all children
+            IDictionary sessionStateTable = GetSessionStateTable();
+            foreach (DictionaryEntry entry in sessionStateTable)
+            {
+                var name = (string)entry.Key;
+                WriteItemObject(name, name, false);
+            }
+        }
+
+        protected override void GetItem(string path) {
+            path = NormalizePath(path);
+            if (path.Length == 0)
+            {
+                WriteItemObject(PSDriveInfo, path, true);
+            }
+            object item = GetSessionStateItem(path);
+            if (item != null)
+            {
+                WriteItemObject(item, path, false);
+            }
+        }
+
         protected override bool HasChildItems(string path) { throw new NotImplementedException(); }
         protected override bool IsValidPath(string path) { throw new NotImplementedException(); }
 
@@ -116,5 +149,10 @@ namespace Microsoft.PowerShell.Commands
         }
 
         #endregion
+
+        private string NormalizePath(string path)
+        {
+            return new Path(path).NormalizeSlashes().TrimEndSlash().ToString();
+        }
     }
 }
