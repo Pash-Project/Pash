@@ -18,12 +18,42 @@ namespace System.Management.Automation
             _cmdlet = cmdlet;
         }
 
+        #region public API
+
         public void Clear(string path)
         {
             IContentCmdletProvider provider = GetContentCmdletProvider(path);
             string providerPath = GetProviderPath(path);
             provider.ClearContent(providerPath);
         }
+
+        public Collection<IContentReader> GetReader(string path)
+        {
+            IContentCmdletProvider provider = GetContentCmdletProvider(path);
+            var readers = new Collection<IContentReader>();
+            string providerPath = GetProviderPath(path);
+            readers.Add(provider.GetContentReader(providerPath));
+            return readers;
+       }
+
+        public Collection<IContentWriter> GetWriter(string path)
+        {
+            IContentCmdletProvider provider = GetContentCmdletProvider(path);
+            var writers = new Collection<IContentWriter>();
+            string providerPath = GetProviderPath(path);
+            writers.Add(provider.GetContentWriter(providerPath));
+            return writers;
+        }
+
+        #endregion
+
+        #region internal API
+
+
+
+        #endregion
+
+        #region private helpers
 
         private IContentCmdletProvider GetContentCmdletProvider(string path)
         {
@@ -51,22 +81,6 @@ namespace System.Management.Automation
             return globber.GetProviderSpecificPath(path, new ProviderRuntime(_cmdlet), out providerInfo);
         }
 
-        public Collection<IContentReader> GetReader(string path)
-        {
-            IContentCmdletProvider provider = GetContentCmdletProvider(path);
-            var readers = new Collection<IContentReader>();
-            string providerPath = GetProviderPath(path);
-            readers.Add(provider.GetContentReader(providerPath));
-            return readers;
-       }
-
-        public Collection<IContentWriter> GetWriter(string path)
-        {
-            IContentCmdletProvider provider = GetContentCmdletProvider(path);
-            var writers = new Collection<IContentWriter>();
-            string providerPath = GetProviderPath(path);
-            writers.Add(provider.GetContentWriter(providerPath));
-            return writers;
-        }
+        #endregion
     }
 }
