@@ -22,26 +22,50 @@ namespace System.Management.Automation
 
         public void Clear(string path)
         {
-            IContentCmdletProvider provider = GetContentCmdletProvider(path);
-            string providerPath = GetProviderPath(path);
-            provider.ClearContent(providerPath);
+            Clear(new [] { path }, false, false);
+        }
+
+        public void Clear(string[] path, bool force, bool literalPath)
+        {
+            foreach (var p in path)
+            {
+                IContentCmdletProvider provider = GetContentCmdletProvider(p);
+                string providerPath = GetProviderPath(p);
+                provider.ClearContent(providerPath);
+            }
         }
 
         public Collection<IContentReader> GetReader(string path)
         {
-            IContentCmdletProvider provider = GetContentCmdletProvider(path);
+            return GetReader(new [] { path }, false, false);
+        }
+
+        public Collection<IContentReader> GetReader(string[] path, bool force, bool literalPath)
+        {
             var readers = new Collection<IContentReader>();
-            string providerPath = GetProviderPath(path);
-            readers.Add(provider.GetContentReader(providerPath));
+            foreach (var p in path)
+            {
+                IContentCmdletProvider provider = GetContentCmdletProvider(p);
+                string providerPath = GetProviderPath(p);
+                readers.Add(provider.GetContentReader(providerPath));
+            }
             return readers;
        }
 
         public Collection<IContentWriter> GetWriter(string path)
         {
-            IContentCmdletProvider provider = GetContentCmdletProvider(path);
+            return GetWriter(new [] { path }, false, false);
+        }
+
+        public Collection<IContentWriter> GetWriter(string[] path, bool force, bool literalPath)
+        {
             var writers = new Collection<IContentWriter>();
-            string providerPath = GetProviderPath(path);
-            writers.Add(provider.GetContentWriter(providerPath));
+            foreach (var p in path)
+            {
+                IContentCmdletProvider provider = GetContentCmdletProvider(p);
+                string providerPath = GetProviderPath(p);
+                writers.Add(provider.GetContentWriter(providerPath));
+            }
             return writers;
         }
 
