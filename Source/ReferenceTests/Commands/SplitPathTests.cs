@@ -223,5 +223,84 @@ namespace ReferenceTests.Commands
                 ReferenceHost.Execute(command);
             });
         }
+
+        [Test]
+        public void ResolveUnknownFile()
+        {
+            Assert.Throws(Is.InstanceOf(typeof(Exception)), delegate
+            {
+                ReferenceHost.Execute("Split-Path -Resolve UnknownFileToResolve.txt");
+            });
+        }
+
+        [Test]
+        public void ResolveLeafForTwoFilesUsingWildcard()
+        {
+            string fileName1 = CreateFile(String.Empty, ".test");
+            string leaf1 = Path.GetFileName(fileName1);
+            string fileName2 = CreateFile(String.Empty, ".test");
+            string leaf2 = Path.GetFileName(fileName2);
+            string directory = Path.GetDirectoryName(fileName1);
+
+            string result = ReferenceHost.Execute(new string[] {
+                string.Format("cd '{0}'", directory),
+                "Split-Path -Resolve -Leaf *.test"
+            });
+
+            Assert.AreEqual(NewlineJoin(leaf1, leaf2), result);
+        }
+
+        [Test]
+        public void ResolveLeafForTwoPathsUsingWildcard()
+        {
+            string fileName1 = CreateFile(String.Empty, ".test1");
+            string leaf1 = Path.GetFileName(fileName1);
+            string fileName2 = CreateFile(String.Empty, ".test2");
+            string leaf2 = Path.GetFileName(fileName2);
+            string directory = Path.GetDirectoryName(fileName1);
+
+            string result = ReferenceHost.Execute(new string[] {
+                string.Format("cd '{0}'", directory),
+                "Split-Path -Resolve -Leaf *.test1,*.test2"
+            });
+
+            Assert.AreEqual(NewlineJoin(leaf1, leaf2), result);
+        }
+
+        [Test]
+        public void ResolveParentForTwoFilesUsingWildcard()
+        {
+            string fileName1 = CreateFile(String.Empty, ".test");
+            string leaf1 = Path.GetFileName(fileName1);
+            string fileName2 = CreateFile(String.Empty, ".test");
+            string leaf2 = Path.GetFileName(fileName2);
+            string directory = Path.GetDirectoryName(fileName1);
+
+            string result = ReferenceHost.Execute(new string[] {
+                string.Format("cd '{0}'", directory),
+                "Split-Path -Resolve *.test"
+            });
+
+            Assert.AreEqual(NewlineJoin(directory, directory), result);
+        }
+
+        [Test]
+        public void ResolveLeafForTwoDirectoriesUsingWildcard()
+        {
+            string tempPath = Path.GetTempPath();
+            string directory1 = Path.Combine(tempPath, "TestDirectory1");
+            Directory.CreateDirectory(directory1);
+            string directory2 = Path.Combine(tempPath, "TestDirectory2");
+            Directory.CreateDirectory(directory2);
+            AddCleanupDir(directory1);
+            AddCleanupDir(directory2);
+
+            string result = ReferenceHost.Execute(new string[] {
+                string.Format("cd '{0}'", tempPath),
+                "Split-Path -Resolve -Leaf TestDirectory*"
+            });
+
+            Assert.AreEqual(NewlineJoin("TestDirectory1", "TestDirectory2"), result);
+        }
     }
 }

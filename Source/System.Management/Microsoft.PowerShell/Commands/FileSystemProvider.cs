@@ -132,7 +132,26 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void GetChildNames(string path, ReturnContainers returnContainers)
         {
-            throw new NotImplementedException();
+            if (path == String.Empty)
+            {
+                path = ".";
+            }
+
+            GetChildItems(path, false);
+
+            foreach (PSObject item in ProviderRuntime.ThrowFirstErrorOrReturnResults())
+            {
+                var fileInfo = item.BaseObject as System.IO.FileInfo;
+                var directoryInfo = item.BaseObject as System.IO.DirectoryInfo;
+                if (fileInfo != null)
+                {
+                    ProviderRuntime.WriteObject(fileInfo.Name);
+                }
+                else if (directoryInfo != null)
+                {
+                    ProviderRuntime.WriteObject(directoryInfo.Name);
+                }
+            }
         }
 
         protected override void GetItem(string path)

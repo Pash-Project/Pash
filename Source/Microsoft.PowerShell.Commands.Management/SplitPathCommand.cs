@@ -1,11 +1,12 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 
-//classtodo: Currently borked, needs Pash.Engine implementation
-
+using Pash.Implementation;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Management;
 using System.Management.Automation;
+using System.Management.Automation.Provider;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -61,9 +62,45 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            foreach (Path path in Path)
+            foreach (Path path in GetPathsToProcess())
             {
                 ProcessPath(path);
+            }
+        }
+
+        private IEnumerable<Path> GetPathsToProcess()
+        {
+            foreach (Path path in Path)
+            {
+                if (Resolve.IsPresent)
+                {
+                    foreach (Path resolvedPath in ResolvePaths(path))
+                    {
+                        yield return resolvedPath;
+                    }
+                }
+                else
+                {
+                    yield return path;
+                }
+            }
+        }
+
+        private IEnumerable<Path> ResolvePaths(Path path)
+        {
+            if (!WildcardPattern.ContainsWildcardCharacters(path))
+            {
+                if (InvokeProvider.Item.Exists(path))
+                {
+                    yield return path;
+                }
+                throw new ItemNotFoundException();
+            }
+
+            CmdletProvider provider;
+            foreach (Path resolvedPath in InvokeProvider.ChildItem.Globber.GetGlobbedProviderPaths(path, ProviderRuntime, out provider))
+            {
+                yield return System.IO.Path.GetFullPath(resolvedPath);
             }
         }
 
