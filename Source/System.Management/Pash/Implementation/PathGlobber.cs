@@ -150,7 +150,7 @@ namespace Pash.Implementation
             {
                 var child = ciIntrinsics.GetChildName(path, runtime);
                 componentStack.Push(child);
-                path = path.Substring(0, path.Length - child.Length);
+                path = path.Substring(0, path.Length - child.Length).AsPath().TrimEndSlash();
             }
 
             // we create a working list with partially globbed paths. each iteration will take all items from the

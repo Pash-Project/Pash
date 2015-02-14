@@ -302,5 +302,48 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual(NewlineJoin("TestDirectory1", "TestDirectory2"), result);
         }
+
+        [Test]
+        public void ResolveLeafForFullPathUsingWildcardForFileName()
+        {
+            string fileName1 = CreateFile(String.Empty, ".test");
+            string leaf1 = Path.GetFileName(fileName1);
+            string fileName2 = CreateFile(String.Empty, ".test");
+            string leaf2 = Path.GetFileName(fileName2);
+            string directory = Path.GetDirectoryName(fileName1);
+            string wildcard = Path.Combine(directory, "*.test");
+
+            string result = ReferenceHost.Execute(new string[] {
+                string.Format("cd '{0}'", directory),
+                string.Format("Split-Path -Resolve -Leaf '{0}'", wildcard)
+            });
+
+            Assert.AreEqual(NewlineJoin(leaf1, leaf2), result);
+        }
+
+        [Test]
+        public void ResolveLeafForTwoFilesUsingRelativePathInWildcard()
+        {
+            string tempPath = Path.GetTempPath();
+            string directory = Path.Combine(tempPath, "TestDirectory");
+            Directory.CreateDirectory(directory);
+            AddCleanupDir(directory);
+            string fileName1 = Path.Combine(directory, "a.test");
+            File.WriteAllText(fileName1, String.Empty);
+            AddCleanupFile(fileName1);
+            string fileName2 = Path.Combine(directory, "b.test");
+            File.WriteAllText(fileName2, String.Empty);
+            AddCleanupFile(fileName2);
+
+            string result = ReferenceHost.Execute(new string[] {
+                string.Format("cd '{0}'", directory),
+                string.Format("Split-Path -Resolve -Leaf ..{0}TestDirectory{0}*.test", Path.DirectorySeparatorChar),
+            });
+
+            // Workaround ReferenceHost when running with Pash locking directory that should be deleted.
+            ReferenceHost.Execute(string.Format("cd '{0}'", tempPath));
+
+            Assert.AreEqual(NewlineJoin("a.test", "b.test"), result);
+        }
     }
 }
