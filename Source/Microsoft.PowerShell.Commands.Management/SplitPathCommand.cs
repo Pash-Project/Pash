@@ -34,7 +34,13 @@ namespace Microsoft.PowerShell.Commands
             Position = 0,
             ParameterSetName = "NoQualifierSet",
             ValueFromPipeline = true)]
-        public string[] Path { get; set; }
+        public string[] Path
+        {
+            get { return InternalPaths; }
+            set { InternalPaths = value; }
+        }
+
+        string[] InternalPaths { get; set; }
 
         [Parameter]
         public SwitchParameter Resolve { get; set; }
@@ -49,7 +55,15 @@ namespace Microsoft.PowerShell.Commands
 
         [ParameterAttribute(ParameterSetName = "LiteralPathSet")]
         [Alias("PSPath")]
-        public string[] LiteralPath { get; set; }
+        public string[] LiteralPath
+        {
+            get { return InternalPaths; }
+            set
+            {
+                AvoidWildcardExpansion = true;
+                InternalPaths = value;
+            }
+        }
 
         [ParameterAttribute(ParameterSetName = "NoQualifierSet")]
         public SwitchParameter NoQualifier { get; set; }
@@ -70,7 +84,7 @@ namespace Microsoft.PowerShell.Commands
 
         private IEnumerable<Path> GetPathsToProcess()
         {
-            foreach (Path path in Path)
+            foreach (Path path in InternalPaths)
             {
                 if (Resolve.IsPresent)
                 {

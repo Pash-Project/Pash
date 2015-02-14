@@ -345,5 +345,25 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual(NewlineJoin("a.test", "b.test"), result);
         }
+
+        [Test]
+        public void ResolveParentForTwoFilesUsingLiteralPaths()
+        {
+            string tempPath = Path.GetTempPath();
+            string fileName1 = Path.Combine(tempPath, "File[1].txt");
+            string fileName2 = Path.Combine(tempPath, "File[2].txt");
+            string directory = Path.GetDirectoryName(fileName1);
+            File.WriteAllText(fileName1, String.Empty);
+            File.WriteAllText(fileName2, String.Empty);
+            AddCleanupFile(fileName1);
+            AddCleanupFile(fileName2);
+
+            string result = ReferenceHost.Execute(new string[] {
+                string.Format("cd '{0}'", tempPath),
+                "Split-Path -Resolve -LiteralPath File[1].txt,File[2].txt"
+            });
+
+            Assert.AreEqual(NewlineJoin(directory, directory), result);
+        }
     }
 }
