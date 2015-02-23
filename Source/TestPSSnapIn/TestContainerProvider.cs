@@ -219,7 +219,9 @@ namespace TestPSSnapIn
         {
             if (path.StartsWith(PSDriveInfo.Root))
             {
-                path = path.Substring(PSDriveInfo.Root.Length);
+                // for tests: throw an exception here to make sure all paths contain
+                // the drive's root
+                throw new ArgumentException("The path includes the drive's root. But shouldn't by default");
             }
             path = path.Trim('\\', '/');
             return path;

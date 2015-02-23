@@ -10,10 +10,7 @@ namespace Microsoft.Commands.Management
     {
         protected override void ProcessRecord()
         {
-            foreach (string path in Path)
-            {
-                InvokeProvider.Content.Clear(path);
-            }
+            InvokeProvider.Content.Clear(InternalPaths, ProviderRuntime);
         }
     }
 }

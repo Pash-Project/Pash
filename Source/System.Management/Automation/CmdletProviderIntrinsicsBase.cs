@@ -3,6 +3,7 @@ using System.Management.Automation.Internal;
 using Pash.Implementation;
 using System.Management.Automation.Provider;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace System.Management.Automation
 {

@@ -70,7 +70,8 @@ namespace Pash.Implementation
             if (IsProviderQualifiedPath(path))
             {
                 path = GetProviderPathFromProviderQualifiedPath(path, out providerInfo);
-                drive = providerInfo.CurrentDrive;
+                // in case there is no CurrentDrive, set a dummy drive to keep track of the used provider
+                drive = providerInfo.CurrentDrive ?? new PSDriveInfo(providerInfo.Name, providerInfo, "", "", null);
             }
             else if (IsDriveQualifiedPath(path))
             {
