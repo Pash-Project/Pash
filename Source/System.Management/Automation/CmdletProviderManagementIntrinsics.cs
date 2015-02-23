@@ -13,6 +13,7 @@ namespace System.Management.Automation
     {
         private SessionStateGlobal _sessionState;
         // Powershell seems to support multiple providers with the same name. So let's do it too
+        // TODO: move the actual data to SessionStateGlobal
         private Dictionary<string, List<ProviderInfo>> _providers;
         private Dictionary<ProviderInfo, CmdletProvider> _providerInstances;
 
