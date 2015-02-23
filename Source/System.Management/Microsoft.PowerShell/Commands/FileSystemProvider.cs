@@ -111,6 +111,7 @@ namespace Microsoft.PowerShell.Commands
 
         protected override string GetChildName(string path)
         {
+            path = NormalizePath(path);
             if (string.IsNullOrEmpty(path))
             {
                 throw new NullReferenceException("Path can't be null");
@@ -366,6 +367,7 @@ namespace Microsoft.PowerShell.Commands
 
         public void ClearContent(string path)
         {
+            path = NormalizePath(path);
             if (!ItemExists(path))
             {
                 throw new ItemNotFoundException(string.Format("Cannot find path '{0}' because it does not exist.", path));
@@ -383,6 +385,7 @@ namespace Microsoft.PowerShell.Commands
 
         public IContentReader GetContentReader(string path)
         {
+            path = NormalizePath(path);
             return new FileContentReader(path);
         }
 
@@ -393,6 +396,7 @@ namespace Microsoft.PowerShell.Commands
 
         public IContentWriter GetContentWriter(string path)
         {
+            path = NormalizePath(path);
             return new FileContentWriter(path);
         }
 
