@@ -72,28 +72,40 @@ namespace TestPSSnapIn
     {
         public const string ProviderName = "TestNavigationProvider";
         public const string DefaultDriveName = "TestNavigationItems";
-        public const string DefaultDriveRoot = "/def/";
+        public const string DefaultDriveRoot = "%def";
         public const string DefaultDrivePath = DefaultDriveName + ":/";
         public const string DefaultItemName = "defItem";
         public const string DefaultItemPath = DefaultDrivePath + DefaultItemName;
         public const string DefaultItemValue = "defValue";
         public const string DefaultNodeName = "defNode";
         public const string DefaultNodePath = DefaultDrivePath + DefaultNodeName + "/";
+        public const string SecondDriveName = "TestNavigationAlternative";
+        public const string SecondDriveRoot = "%alternative";
+        public const string SecondDrivePath = SecondDriveName + ":/";
 
         private const string _pathSeparator = "/";
 
         #region navigation related
 
-        protected override string GetChildName (string path)
+        protected override string GetChildName(string path)
         {
             string itemName;
+            path = PathWithoutDrive(path);
             ParentPath(path, out itemName);
             return itemName;
         }
 
         protected override string GetParentPath(string path, string root)
         {
-            // TODO: implement correctly with regard to root
+            // documentation says: if not root in path, we should return null
+            if (!path.Contains(root))
+            {
+                return null;
+            }
+            if (PathWithoutDrive(path).Length == 0)
+            {
+                return null;
+            }
             return ParentPath(path);
         }
 
@@ -105,7 +117,19 @@ namespace TestPSSnapIn
 
         protected override string MakePath(string parent, string child)
         {
-            throw new NotImplementedException();
+            if (String.IsNullOrEmpty(parent))
+            {
+                return child;
+            }
+            if (parent.EndsWith(_pathSeparator))
+            {
+                parent = parent.Substring(0, parent.Length - _pathSeparator.Length);
+            }
+            if (child.StartsWith(_pathSeparator))
+            {
+                child = child.Substring(_pathSeparator.Length);
+            }
+            return parent + _pathSeparator + child;
         }
 
         protected override void MoveItem(string path, string destination)
@@ -258,7 +282,7 @@ namespace TestPSSnapIn
             node.Parent.Children.Remove(node.Name);
             node.Name = newName;
             node.Parent.Children[newName] = node;
-            WriteItemObject(node, "", IsContainer(node));
+            WriteItemObject(node, NodePath(node), IsContainer(node));
         }
 
         protected override void GetItem(string path)
@@ -289,7 +313,7 @@ namespace TestPSSnapIn
         {
             var defDrives = new Collection<PSDriveInfo>();
             var drive = new TestNavigationDrive(new PSDriveInfo(DefaultDriveName, ProviderInfo, DefaultDriveRoot,
-                "Default drive for testing container items", null));
+                "Default drive for testing navigation items", null));
 
             var defItem = new TestTreeLeaf(drive.Tree, DefaultItemName, DefaultItemValue);
             drive.Tree.AddChild(defItem);
@@ -298,10 +322,26 @@ namespace TestPSSnapIn
             drive.Tree.AddChild(defNode);
 
             defDrives.Add(drive);
+
+            var secondDrive = new PSDriveInfo(SecondDriveName, ProviderInfo, SecondDriveRoot,
+                "Alternative drive for testing navigation items", null);
+            defDrives.Add(secondDrive);
             return defDrives;
         }
 
         #endregion
+
+        private string NodePath(TestTreeNode node)
+        {
+            var comps = new Stack<string>();
+            while (node != null)
+            {
+                comps.Push(node.Name);
+                node = node.Parent;
+            }
+            comps.Push(PSDriveInfo.Root);
+            return String.Join(_pathSeparator, comps);
+        }
 
         private string ParentPath(string path)
         {
@@ -317,7 +357,7 @@ namespace TestPSSnapIn
             }
             var sepIdx = path.LastIndexOf(_pathSeparator);
             itemName = path.Substring(sepIdx + 1);
-            return path = sepIdx < 0 ? "" : path.Substring(0, sepIdx);
+            return sepIdx < 0 ? _pathSeparator : path.Substring(0, sepIdx) + _pathSeparator;
         }
 
         private TestTreeNode FindParent(string path, out string itemName)
@@ -358,10 +398,12 @@ namespace TestPSSnapIn
 
         private string PathWithoutDrive(string path)
         {
-            if (path.StartsWith(PSDriveInfo.Root))
+            if (!path.StartsWith(PSDriveInfo.Root))
             {
-                path = path.Substring(PSDriveInfo.Root.Length);
+                // makes sure for our tests that the drive's root is always prepended
+                throw new ArgumentException("Drive root not included in path!");
             }
+            path = path.Substring(PSDriveInfo.Root.Length);
             if (path.StartsWith(_pathSeparator))
             {
                 path = path.Substring(_pathSeparator.Length);

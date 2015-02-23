@@ -20,14 +20,13 @@ namespace ReferenceTests.Providers
         [TestCase(TestNavigationProvider.DefaultNodePath, "any", true)]
         [TestCase(TestNavigationProvider.DefaultNodePath, "leaf", false)]
         [TestCase(TestNavigationProvider.DefaultNodePath, "container", true)]
-        [Ignore] // enable when TestNavigationProvider supports MakePath
         public void NavigationProviderSupportsTestPath(string path, string type, bool expected)
         {
             var cmd = "Test-Path " + path + " -PathType " + type;
             ExecuteAndCompareTypedResult(cmd, expected);
         }
 
-        [Test, Ignore] // enable when TestNavigationProvider supports MakePath
+        [Test]
         public void NavigationProviderSupportsGetItemWithNode()
         {
             var cmd = "Get-Item " + TestNavigationProvider.DefaultNodePath;
@@ -37,7 +36,6 @@ namespace ReferenceTests.Providers
         [TestCase(TestNavigationProvider.DefaultDrivePath + "newLeaf1", "leaf", "testValue")]
         [TestCase(TestNavigationProvider.DefaultDrivePath + "newNode", "node", null)]
         [TestCase(TestNavigationProvider.DefaultNodePath + "newLeaf2", "leaf", "testValue2")]
-        [Ignore] // enable when TestNavigationProvider supports MakePath
         public void NavigationProviderSupportsNewItem(string path, string type, string value)
         {
             var psValue = value == null ? "$null" : "'" + value + "'";
@@ -51,7 +49,7 @@ namespace ReferenceTests.Providers
         }
 
 
-        [Test, Ignore] // enable when TestNavigationProvider supports MakePath
+        [Test]
         public void NavigationProviderThrowsOnNewItemInvalidPath()
         {
             Assert.Throws<CmdletProviderInvocationException>(delegate {
@@ -62,7 +60,6 @@ namespace ReferenceTests.Providers
 
         [TestCase(TestNavigationProvider.DefaultItemPath)]
         [TestCase(TestNavigationProvider.DefaultNodePath)]
-        [Ignore] // enable when TestNavigationProvider supports MakePath
         public void NavigationProviderSupportsRemoveItem(string path)
         {
             var cmd = NewlineJoin(
@@ -73,7 +70,7 @@ namespace ReferenceTests.Providers
             ExecuteAndCompareTypedResult(cmd, true, false);
         }
 
-        [Test, Ignore] // enable when TestNavigationProvider supports MakePath
+        [Test]
         public void NavigationProviderSupportsRemoveItemWithRecursion()
         {
             var parentPath = TestNavigationProvider.DefaultNodePath;
@@ -89,7 +86,7 @@ namespace ReferenceTests.Providers
             ExecuteAndCompareTypedResult(cmd, true, true, false, false);
         }
 
-        [Test, Ignore] // enable when TestNavigationProvider supports MakePath
+        [Test]
         public void NavigationProviderThrowsOnRemoveNodeWithoutRecursion()
         {
             var parentPath = TestNavigationProvider.DefaultNodePath;
@@ -101,7 +98,7 @@ namespace ReferenceTests.Providers
             });
         }
 
-        [Test, Ignore] // enable when TestNavigationProvider supports MakePath
+        [Test]
         public void NavigationProviderSupportsRenameItemWithChildren()
         {
             var nodePath = TestNavigationProvider.DefaultNodePath;
@@ -124,7 +121,7 @@ namespace ReferenceTests.Providers
             ExecuteAndCompareTypedResult(cmd, true, true, false, false, false, false, true, true, true);
         }
 
-        [Test, Ignore] // enable when TestNavigationProvider supports MakePath
+        [Test]
         public void NavigationProviderSupportsCopyItemIntoSub()
         {
             var origPath = TestNavigationProvider.DefaultItemPath;
@@ -142,7 +139,7 @@ namespace ReferenceTests.Providers
             ExecuteAndCompareTypedResult(cmd, true, false, true, true, true, TestNavigationProvider.DefaultItemValue);
         }
 
-        [Test, Ignore] // enable when TestNavigationProvider supports MakePath
+        [Test]
         public void NavigationProviderSupportsGetChildItem()
         {
             var newPath = TestNavigationProvider.DefaultNodePath + "someItem";
@@ -157,7 +154,7 @@ namespace ReferenceTests.Providers
             Assert.That(results, Contains.Item(TestNavigationProvider.DefaultItemName));
         }
 
-        [Test, Ignore] // enable when TestNavigationProvider supports MakePath
+        [Test]
         public void NavigationProviderSupportsGetChildItemNames()
         {
             var newPath = TestNavigationProvider.DefaultNodePath + "someItem";
@@ -172,7 +169,7 @@ namespace ReferenceTests.Providers
             Assert.That(results, Contains.Item(TestNavigationProvider.DefaultItemName));
         }
 
-        [Test, Ignore] // enable when TestNavigationProvider supports MakePath
+        [Test]
         public void NavigationProviderSupportsGetChildItemWithRecursion()
         {
             var newPath = TestNavigationProvider.DefaultNodePath + "someItem";
@@ -188,8 +185,8 @@ namespace ReferenceTests.Providers
             Assert.That(results, Contains.Item("someItem"));
         }
 
-        [Test, Ignore] // enable when TestNavigationProvider supports MakePath
-        public void NavigationProviderDoesntSupportGetChildItemNamesWithRecursion()
+        [Test]
+        public void NavigationProviderSupportsGetChildItemNamesWithRecursion()
         {
             var newPath = TestNavigationProvider.DefaultNodePath + "someItem";
             var cmd = NewlineJoin(
