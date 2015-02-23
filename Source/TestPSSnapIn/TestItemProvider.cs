@@ -14,6 +14,8 @@ namespace TestPSSnapIn
         public const string ProviderName = "TestItemProvider";
         public const string DefaultItemName = "defItem";
         public const string DefaultItemValue = "defItemValue";
+        public const string DefaultDriveName = "itemDefaultDrive";
+        public const string DefaultDrivePath = DefaultDriveName + ":\\";
 
         public class ItemTestDrive : PSDriveInfo
         {
@@ -34,7 +36,7 @@ namespace TestPSSnapIn
 
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
-            var defDrive = new ItemTestDrive(new PSDriveInfo("testItemDrive", ProviderInfo, "/", "Test Item Drive", null));
+            var defDrive = new ItemTestDrive(new PSDriveInfo(DefaultDriveName, ProviderInfo, "", "Test Item Drive", null));
             return new Collection<PSDriveInfo>(new[] { defDrive });
         }
 

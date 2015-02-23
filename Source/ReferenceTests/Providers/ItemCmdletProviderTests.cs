@@ -41,6 +41,16 @@ namespace ReferenceTests.Providers
         }
 
         [Test]
+        public void ItemProviderCanNotGetItemByDrive()
+        {
+            var cmd = "Get-Item -Path '" + TestItemProvider.DefaultDrivePath + TestItemProvider.DefaultItemName + "'";
+            // don't check with .Throws<> for a ParameterBindingException. I'm not planning to adopt that stupid behavior
+            Assert.Catch<RuntimeException>(delegate {
+                ReferenceHost.Execute(cmd);
+            });
+        }
+
+        [Test]
         public void ItemProviderWithoutFilterCapabilitiesFailsOnParameter()
         {
             var cmd = "Get-Item -Filter 'foo' -Path '" + _providerQualification + TestItemProvider.DefaultItemName + "'";
