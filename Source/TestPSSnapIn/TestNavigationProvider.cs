@@ -15,7 +15,7 @@ namespace TestPSSnapIn
         public const string DefaultDriveRoot = "%def";
         public const string DefaultDrivePath = DefaultDriveName + ":/";
         public const string SecondDriveName = "TestNavigationAlternative";
-        public const string SecondDriveRoot = "/alt";
+        public const string SecondDriveRoot = "%alt";
         public const string SecondDrivePath = SecondDriveName + ":/";
 
         private const string _pathSeparator = "/";
@@ -40,17 +40,20 @@ namespace TestPSSnapIn
 
         protected override string GetParentPath(string path, string root)
         {
-            // documentation says: if not root in path, we should return null
-            if (!path.Contains(root))
+            // documentation says: if that the parent path should be in the same root tree... whatever this practically means
+            /*
+            if (!String.IsNullOrEmpty(root) && !path.Contains(root))
             {
                 return null;
             }
+            */
             return String.Join(_pathSeparator, SplitPath(path).Reverse().Skip(1).Reverse());
         }
 
         protected override bool IsItemContainer(string path)
         {
             // check if child contains an extension. otherwise we treat it as a container
+            Messages.Add("IsItemContainer " + path);
             return !SplitPath(path).Last().Contains(".");
         }
 
@@ -108,18 +111,18 @@ namespace TestPSSnapIn
         protected override bool HasChildItems(string path)
         {
             Messages.Add("HasChildItems " + path);
-            return ChildNames(path) > 0;
+            return ChildNames(path).Length > 0;
         }
 
         protected override void NewItem(string path, string itemTypeName, object newItemValue)
         {
-            Messages.Add("GetItem " + path + " " + itemTypeName + " " + newItemValue);
+            Messages.Add("NewItem " + path + " " + itemTypeName + " " + newItemValue);
         }
             
 
         protected override void RemoveItem(string path, bool recurse)
         {
-            Messages.Add("GetItem " + path + " " + recurse);
+            Messages.Add("RemoveItem " + path + " " + recurse);
         }
 
         #endregion
@@ -145,12 +148,17 @@ namespace TestPSSnapIn
         protected override bool ItemExists(string path)
         {
             Messages.Add("ItemExists " + path);
-            return (from p in ExistingPaths where p.StartsWith(path) select p).Count > 0;
+            return Exists(path);
         }
 
         #endregion
 
         #region drive related
+
+        private static bool Exists(string path)
+        {
+            return (from p in ExistingPaths where p.StartsWith(path) select p).Count() > 0;
+        }
 
         private static string[] ChildNames(string path)
         {

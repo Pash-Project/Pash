@@ -19,6 +19,30 @@ namespace ReferenceTests.Providers
             CollectionAssert.AreEqual(expected, TestNavigationProvider.Messages);
         }
 
+        void AssertMessagesContain(params string[] expected)
+        {
+            CollectionAssert.IsSubsetOf(expected, TestNavigationProvider.Messages);
+        }
+
+
+        void AssertMessagesDoesntContain(params string[] expected)
+        {
+            CollectionAssert.IsNotSubsetOf(expected, TestNavigationProvider.Messages);
+        }
+
+        string DriveToRoot(string path)
+        {
+            if (path.StartsWith(_defDrive))
+            {
+                return _defRoot + "/" + path.Substring(_defDrive.Length);
+            }
+            else if (path.StartsWith(_secDrive))
+            {
+                return _secRoot + "/" + path.Substring(_secDrive.Length);
+            }
+            return path;
+        }
+
         [SetUp]
         public override void SetUp()
         {
@@ -26,35 +50,43 @@ namespace ReferenceTests.Providers
             // set the "existing" items before each test
             TestNavigationProvider.ExistingPaths = new List<string>()
             {
-                _defRoot + "foo/bar.txt",
-                _defRoot + "foo/baz.doc",
-                _defRoot + "foo/foo/bla.txt",
-                _defRoot + "bar.doc",
-                _defRoot + "bar/foo.txt",
-                _secRoot + "foo/blub.doc"
+                _defRoot + "/foo/bar.txt",
+                _defRoot + "/foo/baz.doc",
+                _defRoot + "/foo/foo/bla.txt",
+                _defRoot + "/bar.doc",
+                _defRoot + "/bar/foo.txt",
+                _secRoot + "/foo/blub.doc"
             };
             TestNavigationProvider.Messages.Clear();
         }
 
+        [TestCase(_defDrive, "leaf", false)]
+        [TestCase(_defDrive, "any", true)]
         [TestCase(_defDrive + "notExisting", "any", false)]
         [TestCase(_defDrive + "notExisting", "leaf", false)]
-        [TestCase(_defDrive + "notExisting", "container", false)]
-        [TestCase(_defDrive + "leaf", false)]
-        [TestCase(_defDrive + "container", true)]
-        [TestCase(_defDrive + "any", true)]
         [TestCase(_defDrive + "foo", "leaf", false)]
-        [TestCase(_defDrive + "foo", "container", true)]
         [TestCase(_defDrive + "foo", "any", true)]
         [TestCase(_defDrive + "bar.doc", "leaf", true)]
-        [TestCase(_defDrive + "bar.doc", "container", false)]
         [TestCase(_defDrive + "bar.doc", "any", true)]
         [TestCase(_secDrive + "foo/blub.doc", "leaf", true)]
-        [TestCase(_secDrive + "foo/blub.doc", "container", false)]
         [TestCase(_secDrive + "foo/blub.doc", "any", true)]
-        public void NavigationProviderSupportsTestPath(string path, string type, bool expected)
+        public void NavigationProviderSupportsTestPathAnyLeaf(string path, string type, bool expected)
         {
             var cmd = "Test-Path " + path + " -PathType " + type;
             ExecuteAndCompareTypedResult(cmd, expected);
+            Assert.That(TestNavigationProvider.Messages[0], Is.EqualTo("ItemExists " + DriveToRoot(path)));
+        }
+
+        [TestCase(_defDrive, true)]
+        [TestCase(_defDrive + "notExisting", true)] // although not existing, because only IsContainer is checked
+        [TestCase(_defDrive + "foo", true)]
+        [TestCase(_defDrive + "bar.doc", false)]
+        [TestCase(_secDrive + "foo/blub.doc", false)]
+        public void NavigationProviderSupportsTestPathContainer(string path, bool expected)
+        {
+            var cmd = "Test-Path " + path + " -PathType container";
+            ExecuteAndCompareTypedResult(cmd, expected);
+            Assert.That(TestNavigationProvider.Messages[0], Is.EqualTo("IsItemContainer " + DriveToRoot(path)));
         }
 
         [TestCase(_defDrive, _defRoot)]
@@ -63,96 +95,89 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-Item " + drive + "foo";
             ReferenceHost.Execute(cmd);
-            AssertMessagesAreEqual("GetItem " + root + "/foo");
-        }
-/*
-        [TestCase(TestNavigationProvider.DefaultDrivePath + "newLeaf1", "leaf", "testValue")]
-        [TestCase(TestNavigationProvider.DefaultDrivePath + "newNode", "node", null)]
-        [TestCase(TestNavigationProvider.DefaultNodePath + "newLeaf2", "leaf", "testValue2")]
-        public void NavigationProviderSupportsNewItem(string path, string type, string value)
-        {
-            var psValue = value == null ? "$null" : "'" + value + "'";
-            var cmd = NewlineJoin(
-                "$ni = New-Item " + path + " -ItemType " + type + " -Value " + psValue,
-                "$gi = Get-Item " + path,
-                "[object]::ReferenceEquals($ni, $gi)",
-                "$gi.Value"
+            AssertMessagesAreEqual(
+                "ItemExists " + root + "/foo",
+                "GetItem " + root + "/foo"
             );
-            ExecuteAndCompareTypedResult(cmd, true, value);
         }
-
 
         [Test]
-        public void NavigationProviderThrowsOnNewItemInvalidPath()
+        public void NavigationProviderSupportsGetItemWithWildcard()
         {
-            Assert.Throws<CmdletProviderInvocationException>(delegate {
-                // nonExisting is a not existing parent, so item creation fails here
-                ReferenceHost.Execute("New-Item " + TestNavigationProvider.DefaultDrivePath + "notExisting/foo -ItemType 'leaf' -Value 'x'");
-            });
+            var cmd = "Get-Item " + _defDrive + "foo/b*";
+            ReferenceHost.Execute(cmd);
+            AssertMessagesContain(
+                "GetChildNames " + _defRoot + "/foo ReturnMatchingContainers",
+                "GetItem " + _defRoot + "/foo/bar.txt",
+                "GetItem " + _defRoot + "/foo/baz.doc"
+            );
+            AssertMessagesDoesntContain(
+                "GetItem " + _defRoot + "/foo/foo",
+                "GetItem " + _defRoot + "/foo/foo/bla.txt"
+            );
         }
 
-        [TestCase(TestNavigationProvider.DefaultItemPath)]
-        [TestCase(TestNavigationProvider.DefaultNodePath)]
-        public void NavigationProviderSupportsRemoveItem(string path)
+        [Test]
+        public void NavigationProviderSupportsNewItem()
         {
-            var cmd = NewlineJoin(
-                "Test-Path " + path,
-                "Remove-Item " + path,
-                "Test-Path " + path
+            var path = _defDrive + "newItem.tmp";
+            var rpath = _defRoot + "/newItem.tmp";
+            var cmd = "New-Item " + path  + " -ItemType testType -Value testValue";
+            ReferenceHost.Execute(cmd);
+            AssertMessagesAreEqual("NewItem " + rpath + " testType testValue");
+        }
+
+        [Test]
+        public void NavigationProviderSupportsRemoveItem()
+        {
+            var cmd = "Remove-Item " + _defDrive + "bar.doc";
+            var rpath = _defRoot + "/bar.doc";
+            ReferenceHost.Execute(cmd);
+            AssertMessagesAreEqual(
+                "ItemExists " + rpath,
+                "HasChildItems " + rpath,
+                "RemoveItem " + rpath + " False"
             );
-            ExecuteAndCompareTypedResult(cmd, true, false);
         }
 
         [Test]
         public void NavigationProviderSupportsRemoveItemWithRecursion()
         {
-            var parentPath = TestNavigationProvider.DefaultNodePath;
-            var childPath = parentPath + "testItem";
-            var cmd = NewlineJoin(
-                "$ni = New-Item " + childPath + " -ItemType leaf -Value 'testValue'",
-                "Test-Path " + childPath,
-                "Test-Path " + parentPath,
-                "Remove-Item " + parentPath + " -Recurse",
-                "Test-Path " + childPath,
-                "Test-Path " + parentPath
+            var cmd = "Remove-Item -Recurse " + _defDrive + "foo";
+            var rpath = _defRoot + "/foo";
+            ReferenceHost.Execute(cmd);
+            AssertMessagesAreEqual(
+                "ItemExists " + rpath,
+                "HasChildItems " + rpath,
+                "RemoveItem " + rpath + " True"
             );
-            ExecuteAndCompareTypedResult(cmd, true, true, false, false);
         }
 
         [Test]
         public void NavigationProviderThrowsOnRemoveNodeWithoutRecursion()
         {
-            var parentPath = TestNavigationProvider.DefaultNodePath;
-            var childPath = parentPath + "testItem";
-            ReferenceHost.Execute("New-Item " + childPath + " -ItemType leaf -Value 'testValue'");
-            var cmd = "Remove-Item " + parentPath;
+            var cmd = "Remove-Item " + _defDrive + "foo";
             Assert.Throws<CmdletInvocationException>(delegate {
                 ReferenceHost.RawExecuteInLastRunspace(cmd);
             });
         }
 
         [Test]
-        public void NavigationProviderSupportsRenameItemWithChildren()
+        public void NavigationProviderSupportsRenameItem()
         {
-            var nodePath = TestNavigationProvider.DefaultNodePath;
-            var itemPath = TestNavigationProvider.DefaultNodePath + "someItem";
-            var newPath = TestNavigationProvider.DefaultDrivePath + "newNodeName";
-            var newItemPath = newPath + "/someItem";
-            var cmd = NewlineJoin(
-                "$ni = New-Item " + itemPath + " -ItemType 'leaf' -Value 'testValue'",
-                "Test-Path " + nodePath, // exists
-                "Test-Path " + itemPath, // was created before
-                "Test-Path " + newPath, // shouldnt exist
-                "Test-Path " + newItemPath, // shouldnt exist
-                "$ri = Rename-Item " + nodePath + " -NewName newNodeName -PassThru",
-                "Test-Path " + nodePath, // was renamed
-                "Test-Path " + itemPath, // child exists under new name now
-                "Test-Path " + newPath, // renamed node
-                "Test-Path " + newItemPath, // same child, under new parent
-                "[object]::ReferenceEquals($ni.Parent, $ri)" // still same item
-            );
-            ExecuteAndCompareTypedResult(cmd, true, true, false, false, false, false, true, true, true);
+            var cmd = "Rename-Item " + _defDrive + "foo -NewName foobar";
+            var rpath = _defRoot + "/foo";
+            ReferenceHost.Execute(cmd);
+            var expectedMsgs = new[] {
+                "ItemExists " + rpath,
+                "RenameItem " + rpath + " foobar"
+            };
+            // Powershell shomehow calls ItemExists twice. We won't check for this behavior
+            var msgCount = TestNavigationProvider.Messages.Count;
+            Assert.That(TestNavigationProvider.Messages[msgCount - 2], Is.EqualTo("ItemExists " + rpath));
+            Assert.That(TestNavigationProvider.Messages[msgCount - 1], Is.EqualTo("RenameItem " + rpath + " foobar"));
         }
+        /*
 
         [Test]
         public void NavigationProviderSupportsCopyItemIntoSub()
