@@ -3,36 +3,69 @@ using System.Linq;
 using NUnit.Framework;
 using TestPSSnapIn;
 using System.Management.Automation;
+using System.Collections.Generic;
 
 namespace ReferenceTests.Providers
 {
     public class NavigationCmdletProviderTests : ReferenceTestBaseWithTestModule
     {
-        [TestCase(TestContainerProvider.DefaultDrivePath + "notExisting", "any", false)]
-        [TestCase(TestContainerProvider.DefaultDrivePath + "notExisting", "leaf", false)]
-        [TestCase(TestContainerProvider.DefaultDrivePath + "notExisting", "container", false)]
-        [TestCase(TestContainerProvider.DefaultItemPath, "leaf", true)]
-        [TestCase(TestContainerProvider.DefaultItemPath, "container", false)]
-        [TestCase(TestContainerProvider.DefaultItemPath, "any", true)]
-        [TestCase(TestContainerProvider.DefaultDrivePath, "leaf", false)]
-        [TestCase(TestContainerProvider.DefaultDrivePath, "container", true)]
-        [TestCase(TestContainerProvider.DefaultDrivePath, "any", true)]
-        [TestCase(TestNavigationProvider.DefaultNodePath, "any", true)]
-        [TestCase(TestNavigationProvider.DefaultNodePath, "leaf", false)]
-        [TestCase(TestNavigationProvider.DefaultNodePath, "container", true)]
+        private const string _defDrive = TestNavigationProvider.DefaultDrivePath;
+        private const string _defRoot = TestNavigationProvider.DefaultDriveRoot;
+        private const string _secDrive = TestNavigationProvider.SecondDrivePath;
+        private const string _secRoot = TestNavigationProvider.SecondDriveRoot;
+
+        void AssertMessagesAreEqual(params string[] expected)
+        {
+            CollectionAssert.AreEqual(expected, TestNavigationProvider.Messages);
+        }
+
+        [SetUp]
+        public override void SetUp()
+        {
+            base.SetUp();
+            // set the "existing" items before each test
+            TestNavigationProvider.ExistingPaths = new List<string>()
+            {
+                _defRoot + "foo/bar.txt",
+                _defRoot + "foo/baz.doc",
+                _defRoot + "foo/foo/bla.txt",
+                _defRoot + "bar.doc",
+                _defRoot + "bar/foo.txt",
+                _secRoot + "foo/blub.doc"
+            };
+            TestNavigationProvider.Messages.Clear();
+        }
+
+        [TestCase(_defDrive + "notExisting", "any", false)]
+        [TestCase(_defDrive + "notExisting", "leaf", false)]
+        [TestCase(_defDrive + "notExisting", "container", false)]
+        [TestCase(_defDrive + "leaf", false)]
+        [TestCase(_defDrive + "container", true)]
+        [TestCase(_defDrive + "any", true)]
+        [TestCase(_defDrive + "foo", "leaf", false)]
+        [TestCase(_defDrive + "foo", "container", true)]
+        [TestCase(_defDrive + "foo", "any", true)]
+        [TestCase(_defDrive + "bar.doc", "leaf", true)]
+        [TestCase(_defDrive + "bar.doc", "container", false)]
+        [TestCase(_defDrive + "bar.doc", "any", true)]
+        [TestCase(_secDrive + "foo/blub.doc", "leaf", true)]
+        [TestCase(_secDrive + "foo/blub.doc", "container", false)]
+        [TestCase(_secDrive + "foo/blub.doc", "any", true)]
         public void NavigationProviderSupportsTestPath(string path, string type, bool expected)
         {
             var cmd = "Test-Path " + path + " -PathType " + type;
             ExecuteAndCompareTypedResult(cmd, expected);
         }
 
-        [Test]
-        public void NavigationProviderSupportsGetItemWithNode()
+        [TestCase(_defDrive, _defRoot)]
+        [TestCase(_secDrive, _secRoot)]
+        public void NavigationProviderSupportsGetItem(string drive, string root)
         {
-            var cmd = "Get-Item " + TestNavigationProvider.DefaultNodePath;
-            ExecuteAndCompareType(cmd, typeof(TestTreeNode));
+            var cmd = "Get-Item " + drive + "foo";
+            ReferenceHost.Execute(cmd);
+            AssertMessagesAreEqual("GetItem " + root + "/foo");
         }
-
+/*
         [TestCase(TestNavigationProvider.DefaultDrivePath + "newLeaf1", "leaf", "testValue")]
         [TestCase(TestNavigationProvider.DefaultDrivePath + "newNode", "node", null)]
         [TestCase(TestNavigationProvider.DefaultNodePath + "newLeaf2", "leaf", "testValue2")]
@@ -202,6 +235,7 @@ namespace ReferenceTests.Providers
             Assert.That(results, Contains.Item(TestNavigationProvider.DefaultItemName));
             Assert.That(results, Contains.Item(TestNavigationProvider.DefaultNodeName + "/" + "someItem"));
         }
+*/
     }
 }
 
