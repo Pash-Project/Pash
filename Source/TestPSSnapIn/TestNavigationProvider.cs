@@ -162,9 +162,10 @@ namespace TestPSSnapIn
 
         private static string[] ChildNames(string path)
         {
+            path = path.EndsWith("/") ? path : path + "/";
             return (from p in ExistingPaths
-                    where p.StartsWith(path) && p.Length > path.Length
-                    select SplitPath(p.Substring(path.Length))[0]).ToArray();
+                    where p.StartsWith(path)
+                    select SplitPath(p.Substring(path.Length))[0]).Distinct().ToArray();
         }
 
         private static string[] SplitPath(string path)

@@ -10,9 +10,9 @@ namespace ReferenceTests.Providers
     public class NavigationCmdletProviderTests : ReferenceTestBaseWithTestModule
     {
         private const string _defDrive = TestNavigationProvider.DefaultDrivePath;
-        private const string _defRoot = TestNavigationProvider.DefaultDriveRoot;
+        private const string _defRoot = TestNavigationProvider.DefaultDriveRoot + "/";
         private const string _secDrive = TestNavigationProvider.SecondDrivePath;
-        private const string _secRoot = TestNavigationProvider.SecondDriveRoot;
+        private const string _secRoot = TestNavigationProvider.SecondDriveRoot + "/";
 
         void AssertMessagesAreEqual(params string[] expected)
         {
@@ -34,11 +34,11 @@ namespace ReferenceTests.Providers
         {
             if (path.StartsWith(_defDrive))
             {
-                return _defRoot + "/" + path.Substring(_defDrive.Length);
+                return _defRoot + path.Substring(_defDrive.Length);
             }
             else if (path.StartsWith(_secDrive))
             {
-                return _secRoot + "/" + path.Substring(_secDrive.Length);
+                return _secRoot + path.Substring(_secDrive.Length);
             }
             return path;
         }
@@ -50,12 +50,14 @@ namespace ReferenceTests.Providers
             // set the "existing" items before each test
             TestNavigationProvider.ExistingPaths = new List<string>()
             {
-                _defRoot + "/foo/bar.txt",
-                _defRoot + "/foo/baz.doc",
-                _defRoot + "/foo/foo/bla.txt",
-                _defRoot + "/bar.doc",
-                _defRoot + "/bar/foo.txt",
-                _secRoot + "/foo/blub.doc"
+                _defRoot + "foo/bar.txt",
+                _defRoot + "foo/baz.doc",
+                _defRoot + "foo/foo/bla.txt",
+                _defRoot + "bar.doc",
+                _defRoot + "bar/foo.txt",
+                _secRoot + "foo/blub.doc",
+                _secRoot + "foo/bar.txt",
+                _secRoot + "bar.txt"
             };
             TestNavigationProvider.Messages.Clear();
         }
@@ -96,8 +98,8 @@ namespace ReferenceTests.Providers
             var cmd = "Get-Item " + drive + "foo";
             ReferenceHost.Execute(cmd);
             AssertMessagesAreEqual(
-                "ItemExists " + root + "/foo",
-                "GetItem " + root + "/foo"
+                "ItemExists " + root + "foo",
+                "GetItem " + root + "foo"
             );
         }
 
@@ -106,22 +108,22 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-Item " + _defDrive + "foo/b*";
             ReferenceHost.Execute(cmd);
-            AssertMessagesContain(
-                "GetChildNames " + _defRoot + "/foo ReturnMatchingContainers",
-                "GetItem " + _defRoot + "/foo/bar.txt",
-                "GetItem " + _defRoot + "/foo/baz.doc"
-            );
-            AssertMessagesDoesntContain(
-                "GetItem " + _defRoot + "/foo/foo",
-                "GetItem " + _defRoot + "/foo/foo/bla.txt"
-            );
+            var getMsgs = (from m in TestNavigationProvider.Messages
+                           where m.StartsWith("Get")
+                           select m).ToArray();
+            Assert.That(getMsgs, Is.EquivalentTo(new []{
+                "GetChildNames " + _defRoot + "foo ReturnMatchingContainers",
+                "GetChildNames " + _defRoot + "foo ReturnMatchingContainers",
+                "GetItem " + _defRoot + "foo/bar.txt",
+                "GetItem " + _defRoot + "foo/baz.doc"
+            }));
         }
 
         [Test]
         public void NavigationProviderSupportsNewItem()
         {
             var path = _defDrive + "newItem.tmp";
-            var rpath = _defRoot + "/newItem.tmp";
+            var rpath = _defRoot + "newItem.tmp";
             var cmd = "New-Item " + path  + " -ItemType testType -Value testValue";
             ReferenceHost.Execute(cmd);
             AssertMessagesAreEqual("NewItem " + rpath + " testType testValue");
@@ -131,7 +133,7 @@ namespace ReferenceTests.Providers
         public void NavigationProviderSupportsRemoveItem()
         {
             var cmd = "Remove-Item " + _defDrive + "bar.doc";
-            var rpath = _defRoot + "/bar.doc";
+            var rpath = _defRoot + "bar.doc";
             ReferenceHost.Execute(cmd);
             AssertMessagesAreEqual(
                 "ItemExists " + rpath,
@@ -144,7 +146,7 @@ namespace ReferenceTests.Providers
         public void NavigationProviderSupportsRemoveItemWithRecursion()
         {
             var cmd = "Remove-Item -Recurse " + _defDrive + "foo";
-            var rpath = _defRoot + "/foo";
+            var rpath = _defRoot + "foo";
             ReferenceHost.Execute(cmd);
             AssertMessagesAreEqual(
                 "ItemExists " + rpath,
@@ -166,7 +168,7 @@ namespace ReferenceTests.Providers
         public void NavigationProviderSupportsRenameItem()
         {
             var cmd = "Rename-Item " + _defDrive + "foo -NewName foobar";
-            var rpath = _defRoot + "/foo";
+            var rpath = _defRoot + "foo";
             ReferenceHost.Execute(cmd);
             var expectedMsgs = new[] {
                 "ItemExists " + rpath,
@@ -177,90 +179,88 @@ namespace ReferenceTests.Providers
             Assert.That(TestNavigationProvider.Messages[msgCount - 2], Is.EqualTo("ItemExists " + rpath));
             Assert.That(TestNavigationProvider.Messages[msgCount - 1], Is.EqualTo("RenameItem " + rpath + " foobar"));
         }
-        /*
 
         [Test]
-        public void NavigationProviderSupportsCopyItemIntoSub()
+        public void NavigationProviderSupportsGetChildItemWithRecursion()
         {
-            var origPath = TestNavigationProvider.DefaultItemPath;
-            var copyPath = TestNavigationProvider.DefaultNodePath + "copiedItem";
-            var cmd = NewlineJoin(
-                "Test-Path " + origPath,
-                "Test-Path " + copyPath,
-                "$ci = Copy-Item " + origPath + " " + copyPath + " -PassThru",
-                "Test-Path " + origPath,
-                "Test-Path " + copyPath,
-                "$gi = Get-Item " + copyPath,
-                "[object]::ReferenceEquals($ci, $gi)",
-                "$ci.Value"
+            var cmd = "Get-ChildItem " + _defDrive + "foo -Recurse";
+            ReferenceHost.Execute(cmd);
+            AssertMessagesAreEqual(
+                "IsItemContainer " + _defRoot + "foo",
+                "ItemExists " + _defRoot + "foo",
+                "IsItemContainer " + _defRoot + "foo",
+                "GetChildItems " + _defRoot + "foo True"
             );
-            ExecuteAndCompareTypedResult(cmd, true, false, true, true, true, TestNavigationProvider.DefaultItemValue);
         }
 
         [Test]
         public void NavigationProviderSupportsGetChildItem()
         {
-            var newPath = TestNavigationProvider.DefaultNodePath + "someItem";
-            var cmd = NewlineJoin(
-                "$ni = New-Item " + newPath + " -ItemType 'leaf' -Value 'someValue'",
-                "Get-ChildItem " + TestNavigationProvider.DefaultDrivePath + " | % { $_.Name }"
+            var cmd = "Get-ChildItem " + _defDrive + "foo";
+            ReferenceHost.Execute(cmd);
+            AssertMessagesAreEqual(
+                "ItemExists " + _defRoot + "foo",
+                "IsItemContainer " + _defRoot + "foo",
+                "GetChildItems " + _defRoot + "foo False"
             );
-            var psObjResults = ReferenceHost.RawExecute(cmd);
-            var results = (from r in psObjResults select r.BaseObject).ToList();
-            Assert.That(results.Count, Is.EqualTo(2));
-            Assert.That(results, Contains.Item(TestNavigationProvider.DefaultNodeName));
-            Assert.That(results, Contains.Item(TestNavigationProvider.DefaultItemName));
+        }
+
+        [TestCase("-Include '*.txt'")]
+        [TestCase("-Include '*.*' -Exclude '*.doc'")]
+        public void NavigationProviderSupportsGetChildItemWithFilter(string filter)
+        {
+            var cmd = "Get-ChildItem -Recurse " + _defDrive + " " + filter;
+            ReferenceHost.Execute(cmd);
+            AssertMessagesAreEqual(
+                "ItemExists " + _defRoot,
+                "IsItemContainer " + _defRoot,
+                "GetChildNames " + _defRoot + " ReturnAllContainers",
+                "IsItemContainer " + _defRoot + "foo",
+                "GetChildNames " + _defRoot + "foo ReturnAllContainers",
+                "GetItem " + _defRoot + "foo/bar.txt",
+                "IsItemContainer " + _defRoot + "foo/bar.txt",
+                "IsItemContainer " + _defRoot + "foo/baz.doc",
+                "IsItemContainer " + _defRoot + "foo/foo",
+                "GetChildNames " + _defRoot + "foo/foo ReturnAllContainers",
+                "GetItem " + _defRoot + "foo/foo/bla.txt",
+                "IsItemContainer " + _defRoot + "foo/foo/bla.txt",
+                "IsItemContainer " + _defRoot + "bar.doc",
+                "IsItemContainer " + _defRoot + "bar",
+                "GetChildNames " + _defRoot + "bar ReturnAllContainers",
+                "GetItem " + _defRoot + "bar/foo.txt",
+                "IsItemContainer " + _defRoot + "bar/foo.txt"
+            );
         }
 
         [Test]
-        public void NavigationProviderSupportsGetChildItemNames()
+        public void NavigationProviderSupportsGetChildItemWithFilterInPath()
         {
-            var newPath = TestNavigationProvider.DefaultNodePath + "someItem";
-            var cmd = NewlineJoin(
-                "$ni = New-Item " + newPath + " -ItemType 'leaf' -Value 'someValue'",
-                "Get-ChildItem " + TestNavigationProvider.DefaultDrivePath + " -Name"
+            var cmd = "Get-ChildItem -Recurse " + _secDrive + "*.txt";
+            ReferenceHost.Execute(cmd);
+            AssertMessagesAreEqual(
+                "ItemExists " + _secRoot,
+                "HasChildItems " + _secRoot,
+                "GetChildNames " + _secRoot + " ReturnMatchingContainers",
+                "IsItemContainer " + _secRoot + "bar.txt",
+                "ItemExists " + _secRoot,
+                "IsItemContainer " + _secRoot,
+                "GetChildNames " + _secRoot + " ReturnAllContainers",
+                "IsItemContainer " + _secRoot + "foo",
+                "GetChildNames " + _secRoot + "foo ReturnAllContainers",
+                "IsItemContainer " + _secRoot + "foo/blub.doc",
+                "GetItem " + _secRoot + "foo/bar.txt",
+                "IsItemContainer " + _secRoot + "foo/bar.txt",
+                "GetItem " + _secRoot + "bar.txt",
+                "IsItemContainer " + _secRoot + "bar.txt"
             );
-            var psObjResults = ReferenceHost.RawExecute(cmd);
-            var results = (from r in psObjResults select r.BaseObject).ToList();
-            Assert.That(results.Count, Is.EqualTo(2));
-            Assert.That(results, Contains.Item(TestNavigationProvider.DefaultNodeName));
-            Assert.That(results, Contains.Item(TestNavigationProvider.DefaultItemName));
         }
 
-        [Test]
-        public void NavigationProviderSupportsGetChildItemWithRecursion()
-        {
-            var newPath = TestNavigationProvider.DefaultNodePath + "someItem";
-            var cmd = NewlineJoin(
-                "$ni = New-Item " + newPath + " -ItemType 'leaf' -Value 'someValue'",
-                "Get-ChildItem " + TestNavigationProvider.DefaultDrivePath + " -Recurse | % { $_.Name }"
-            );
-            var psObjResults = ReferenceHost.RawExecute(cmd);
-            var results = (from r in psObjResults select r.BaseObject).ToList();
-            Assert.That(results.Count, Is.EqualTo(3));
-            Assert.That(results, Contains.Item(TestNavigationProvider.DefaultNodeName));
-            Assert.That(results, Contains.Item(TestNavigationProvider.DefaultItemName));
-            Assert.That(results, Contains.Item("someItem"));
-        }
-
-        [Test]
-        public void NavigationProviderSupportsGetChildItemNamesWithRecursion()
-        {
-            var newPath = TestNavigationProvider.DefaultNodePath + "someItem";
-            var cmd = NewlineJoin(
-                "$ni = New-Item " + newPath + " -ItemType 'leaf' -Value 'someValue'",
-                "Get-ChildItem " + TestNavigationProvider.DefaultDrivePath + " -Recurse -Name"
-            );
-
-            var psObjResults = ReferenceHost.RawExecute(cmd);
-            var results = (from r in psObjResults select r.BaseObject).ToList();
-            Assert.That(results.Count, Is.EqualTo(3));
-            // relative path, not absolute!
-            Assert.That(results, Contains.Item(TestNavigationProvider.DefaultNodeName));
-            Assert.That(results, Contains.Item(TestNavigationProvider.DefaultItemName));
-            Assert.That(results, Contains.Item(TestNavigationProvider.DefaultNodeName + "/" + "someItem"));
-        }
-*/
+        /*
+         * copy
+         * getchildnames
+         * move
+         * resolve.path
+         */
     }
 }
 
