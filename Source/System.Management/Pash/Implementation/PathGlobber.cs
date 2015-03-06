@@ -144,15 +144,17 @@ namespace Pash.Implementation
         Collection<string> BuiltInGlobbing(CmdletProvider provider, string path, ProviderRuntime runtime)
         {
             var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
+            var navigationProvider = provider as NavigationCmdletProvider;
             var ciIntrinsics = new ChildItemCmdletProviderIntrinsics(_sessionState);
             var pathIntrinsics = new PathIntrinsics(_sessionState);
             var componentStack = new Stack<string>();
             // first we split the path into globbable components and put them on a stack to work with
+            var drive = runtime.PSDriveInfo;
             while (!String.IsNullOrEmpty(path))
             {
                 var child = ciIntrinsics.GetChildName(path, runtime);
                 componentStack.Push(child);
-                path = path.Substring(0, path.Length - child.Length);
+                path = navigationProvider == null ? "" : navigationProvider.GetParentPath(path, drive.Root, runtime);
             }
 
             // we create a working list with partially globbed paths. each iteration will take all items from the
