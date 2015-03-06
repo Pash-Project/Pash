@@ -76,12 +76,16 @@ namespace TestPSSnapIn
 
         protected override void MoveItem(string path, string destination)
         {
-            Messages.Add("CopyItem " + path + " " + " " + destination);
+            Messages.Add("MoveItem " + path + " " + destination);
         }
 
         protected override string NormalizeRelativePath(string path, string basePath)
         {
-            Messages.Add("NormalizeRelativePath " + path + " " + " " + basePath);
+            Messages.Add("NormalizeRelativePath " + path + " " + basePath);
+            if (path.StartsWith(basePath))
+            {
+                return "./" + path.Substring(basePath.Length);
+            }
             return path;
         }
 
@@ -91,7 +95,7 @@ namespace TestPSSnapIn
 
         protected override void CopyItem(string path, string copyPath, bool recurse)
         {
-            Messages.Add("CopyItem " + path + " " + " " + copyPath + " " + recurse);
+            Messages.Add("CopyItem " + path + " " + copyPath + " " + recurse);
         }
 
         protected override void GetChildItems(string path, bool recurse)

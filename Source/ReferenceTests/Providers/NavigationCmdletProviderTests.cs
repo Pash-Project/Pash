@@ -255,12 +255,210 @@ namespace ReferenceTests.Providers
             );
         }
 
-        /*
-         * copy
-         * getchildnames
-         * move
-         * resolve.path
-         */
+        [Test]
+        public void NavigationProviderSupportGetChildNames()
+        {
+            var cmd = "Get-ChildItem " + _defDrive + "foo -Name";
+            ReferenceHost.Execute(cmd);
+            AssertMessagesAreEqual(
+                "ItemExists " + _defRoot + "foo",
+                "GetChildNames " + _defRoot + "foo ReturnMatchingContainers"
+            );
+        }
+
+        [Test]
+        public void NavigationProviderSupportGetChildNamesWithRecursion()
+        {
+            var cmd = "Get-ChildItem " + _defDrive + "foo -Name -Recurse";
+            ExecuteAndCompareTypedResult(cmd, "bar.txt", "baz.doc", "foo", "foo/bla.txt");
+            AssertMessagesAreEqual(
+                "ItemExists " + _defRoot + "foo",
+                "GetChildNames " + _defRoot + "foo/ ReturnMatchingContainers",
+                "GetChildNames " + _defRoot + "foo/ ReturnAllContainers",
+                "IsItemContainer " + _defRoot + "foo/bar.txt",
+                "IsItemContainer " + _defRoot + "foo/baz.doc",
+                "IsItemContainer " + _defRoot + "foo/foo",
+                "GetChildNames " + _defRoot + "foo/foo ReturnMatchingContainers",
+                "GetChildNames " + _defRoot + "foo/foo ReturnAllContainers",
+                "IsItemContainer " + _defRoot + "foo/foo/bla.txt"
+            );
+        }
+
+        [TestCase("-Include *.txt")]
+        [TestCase("-Include *.* -Exclude *.doc")]
+        public void NavigationProviderSupportGetChildNamesWithRecursionAndFilter(string filter)
+        {
+            var cmd = "Get-ChildItem " + _defDrive + "foo -Name -Recurse " + filter;
+            ExecuteAndCompareTypedResult(cmd, "bar.txt", "foo/bla.txt");
+            AssertMessagesAreEqual(
+                "ItemExists " + _defRoot + "foo",
+                "IsItemContainer " + _defRoot + "foo",
+                "GetChildNames " + _defRoot + "foo/ ReturnMatchingContainers",
+                "GetChildNames " + _defRoot + "foo/ ReturnAllContainers",
+                "IsItemContainer " + _defRoot + "foo/bar.txt",
+                "IsItemContainer " + _defRoot + "foo/baz.doc",
+                "IsItemContainer " + _defRoot + "foo/foo",
+                "GetChildNames " + _defRoot + "foo/foo ReturnMatchingContainers",
+                "GetChildNames " + _defRoot + "foo/foo ReturnAllContainers",
+                "IsItemContainer " + _defRoot + "foo/foo/bla.txt"
+            );
+        }
+
+        [Test]
+        public void NavigationProviderSupportGetChildNamesWithFilterInPathDoesntWork()
+        {
+            var cmd = "Get-ChildItem " + _defDrive + "foo/*.txt -Name -Recurse";
+            ExecuteAndCompareTypedResult(cmd, "bar.txt");
+            AssertMessagesAreEqual(
+                "ItemExists " + _defRoot + "foo",
+                "HasChildItems " + _defRoot + "foo",
+                "GetChildNames " + _defRoot + "foo ReturnMatchingContainers",
+                "ItemExists " + _defRoot + "foo",
+                "HasChildItems " + _defRoot + "foo",
+                "GetChildNames " + _defRoot + "foo ReturnMatchingContainers",
+                "IsItemContainer " + _defRoot + "foo/bar.txt"
+            );
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void NavigationProviderSupportsCopyItem(bool recurse)
+        {
+            var recurseParam = recurse ? " -Recurse" : "";
+            var cmd = "Copy-Item " + _defDrive + "foo/ " + _secDrive + recurseParam;
+            ReferenceHost.Execute(cmd);
+            AssertMessagesAreEqual(
+                "ItemExists " + _defRoot + "foo",
+                "IsItemContainer " + _secRoot,
+                "IsItemContainer " + _defRoot + "foo",
+                "CopyItem " + _defRoot + "foo " + _secRoot + " " + recurse
+            );
+        }
+
+        [Test]
+        public void NavigationProviderThrowsOnCopyItemToOtherProvider()
+        {
+            var cmd = "Copy-Item " + _defDrive + "bar.doc variable:\\";
+            var e = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(cmd);
+            });
+            Assert.That(e.Errors.Length, Is.EqualTo(1));
+            Assert.That(e.Errors[0].Exception, Is.TypeOf(typeof(PSArgumentException)));
+        }
+
+        [Test]
+        public void NavigationProviderThrowsOnCopyItemContainerOnLeaf()
+        {
+            var cmd = "Copy-Item -Recurse " + _defDrive + "foo/ " + _secDrive + "bar.txt";
+            var e = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(cmd);
+            });
+            Assert.That(e.Errors.Length, Is.EqualTo(1));
+            Assert.That(e.Errors[0].Exception, Is.TypeOf(typeof(PSArgumentException)));
+        }
+
+        [Test, Ignore("This somehow doesn't work as Powershell mixes up provider with the last parameter")]
+        public void NavigationProviderSupportsCopyItemWithoutContainers()
+        {
+            var cmd = "Copy-Item " + _defDrive + "foo/ " + _secDrive + " -Recurse -Container:$false";
+            ReferenceHost.Execute(cmd);
+            AssertMessagesAreEqual(
+                // Mesages?
+            );
+        }
+
+        [Test]
+        public void NavigationProviderThrowsOnMoveItemToOtherProvider()
+        {
+            var cmd = "Move-Item " + _defDrive + "bar.doc variable:\\";
+            var e = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(cmd);
+            });
+            Assert.That(e.Errors.Length, Is.EqualTo(1));
+            Assert.That(e.Errors[0].Exception, Is.TypeOf(typeof(PSArgumentException)));
+        }
+
+        [Test]
+        public void NavigationProviderSupportsMoveItem()
+        {
+            var cmd = "Move-Item " + _defDrive + "foo/ " + _secDrive;
+            ReferenceHost.Execute(cmd);
+            AssertMessagesAreEqual(
+                // well we have here a triple-check. Maybe remove that for check against Pash
+                "ItemExists " + _defRoot + "foo",
+                "ItemExists " + _defRoot + "foo",
+                "ItemExists " + _defRoot + "foo",
+                "MoveItem " + _defRoot + "foo " + _secRoot
+            );
+        }
+
+        [Test]
+        public void NavigationProviderSupportsMoveItemContainerOnLeaf()
+        {
+            var cmd = "Move-Item " + _defDrive + "foo/ " + _secDrive + "bar.txt";
+            ReferenceHost.Execute(cmd);
+            AssertMessagesAreEqual(
+                // well we have here a triple-check. Maybe remove that for check against Pash
+                "ItemExists " + _defRoot + "foo",
+                "ItemExists " + _defRoot + "foo",
+                "ItemExists " + _defRoot + "foo",
+                "MoveItem " + _defRoot + "foo " + _secRoot + "bar.txt"
+            );
+        }
+
+        [Test]
+        public void NavigationProviderSupportsResolvePath()
+        {
+            var cmd = "(Resolve-Path " + _defDrive + "foo/*.txt).Path";
+            ExecuteAndCompareTypedResult(cmd, TestNavigationProvider.DefaultDriveName + ":\\foo/bar.txt");
+            AssertMessagesAreEqual(
+                "ItemExists " + _defRoot + "foo",
+                "HasChildItems " + _defRoot + "foo",
+                "GetChildNames " + _defRoot + "foo ReturnMatchingContainers"
+            );
+        }
+
+        [Test]
+        public void NavigationProviderSupportsResolvePathRelative()
+        {
+            var cmd = NewlineJoin(
+                "Set-Location " + _defDrive,
+                "Resolve-Path " + _defDrive + "foo/*.txt -Relative"
+            );
+            var rootWithoutSlash = _defRoot.Substring(0, _defRoot.Length -1);
+            ExecuteAndCompareTypedResult(cmd, "./foo/bar.txt");
+            AssertMessagesAreEqual(
+                "ItemExists " + _defRoot,
+                "NormalizeRelativePath " + _defRoot + " " + rootWithoutSlash,
+                "IsItemContainer " + _defRoot,
+                "ItemExists " + _defRoot + "foo",
+                "HasChildItems " + _defRoot + "foo",
+                "GetChildNames " + _defRoot + "foo ReturnMatchingContainers",
+                "NormalizeRelativePath " + _defRoot + "foo/bar.txt " + _defRoot
+            );
+        }
+
+        [Test]
+        public void NavigationProviderSupportsGetItemWithRelativePath()
+        {
+            var cmd = NewlineJoin(
+                "Set-Location " + _defDrive + "foo",
+                "Get-Item ../bar.doc"
+            );
+            ReferenceHost.Execute(cmd);
+            var rootWithoutSlash = _defRoot.Substring(0, _defRoot.Length - 1);
+            AssertMessagesAreEqual(
+                "ItemExists " + _defRoot + "foo",
+                "NormalizeRelativePath " + _defRoot + "foo " + rootWithoutSlash,
+                "IsItemContainer " + _defRoot + "foo",
+                "ItemExists " + _defRoot + "bar.doc",
+                "GetItem " + _defRoot + "bar.doc"
+            );
+        }
+
     }
 }
 
