@@ -143,10 +143,7 @@ namespace System.Management.Automation
             }
 
             // otherwise use the NavigationCmdletProvider's MakePath method
-
-            // TODO: first of all a not really correct implementation to not break the existing FilesystemProvider
-            // support that. We will change this when we have full NavigationCmdletProvider support
-            return new Path(parent).Combine(child).NormalizeSlashes();
+            return navigationPorivder.MakePath(parent, child, runtime);
         }
         //internal Collection<string> GetResolvedProviderPathFromProviderPath(string path, string providerId, CmdletProviderContext context);
         //internal Collection<string> GetResolvedProviderPathFromPSPath(string path, CmdletProviderContext context, out ProviderInfo provider);

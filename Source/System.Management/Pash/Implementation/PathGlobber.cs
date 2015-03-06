@@ -14,11 +14,13 @@ namespace Pash.Implementation
         private const string _homePlaceholder = "~";
         private static readonly Regex _homePathRegex = new Regex(@"^~[/\\]?");
 
+        private PathIntrinsics Path { get; set; }
         private SessionState _sessionState;
 
-        public PathGlobber(SessionState _sessionState)
+        public PathGlobber(SessionState sessionState)
         {
-            this._sessionState = _sessionState;
+            _sessionState = sessionState;
+            Path = new PathIntrinsics(sessionState);
         }
 
         internal Collection<string> GetGlobbedProviderPaths(string path, ProviderRuntime runtime,
@@ -74,7 +76,7 @@ namespace Pash.Implementation
             }
             else if (IsDriveQualifiedPath(path))
             {
-                path = GetProviderPathFromDriveQualifiedPath(path, out providerInfo, out drive);
+                path = GetProviderPathFromDriveQualifiedPath(path, runtime, out providerInfo, out drive);
             }
             else if (runtime.PSDriveInfo != null)
             {
@@ -99,7 +101,7 @@ namespace Pash.Implementation
             return path.Substring(idx + 2);
         }
 
-        string GetProviderPathFromDriveQualifiedPath(string path, out ProviderInfo providerInfo, out PSDriveInfo drive)
+        string GetProviderPathFromDriveQualifiedPath(string path, ProviderRuntime runtime, out ProviderInfo providerInfo, out PSDriveInfo drive)
         {
             var idx = path.IndexOf(":");
             var driveName = path.Substring(0, idx);
@@ -107,7 +109,7 @@ namespace Pash.Implementation
             drive = _sessionState.Drive.Get(driveName);
             providerInfo = drive.Provider;
             path = path.Substring(idx + 1);
-            return new Path(path).NormalizeSlashes().TrimStartSlash().ToString();
+            return Path.Combine(providerInfo.CreateInstance(), drive.Root, path, runtime);
         }
 
         private bool IsProviderQualifiedPath(string path)
@@ -165,7 +167,7 @@ namespace Pash.Implementation
                 // and add to workingPaths
                 if (!WildcardPattern.ContainsWildcardCharacters(globComp))
                 {
-                    workingPaths.AddRange(from p in partialPaths select pathIntrinsics.Combine(p, globComp));
+                    workingPaths.AddRange(from p in partialPaths select Path.Combine(provider, p, globComp, runtime));
                     continue;
                 }
 

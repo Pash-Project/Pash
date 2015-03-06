@@ -170,10 +170,6 @@ namespace ReferenceTests.Providers
             var cmd = "Rename-Item " + _defDrive + "foo -NewName foobar";
             var rpath = _defRoot + "foo";
             ReferenceHost.Execute(cmd);
-            var expectedMsgs = new[] {
-                "ItemExists " + rpath,
-                "RenameItem " + rpath + " foobar"
-            };
             // Powershell shomehow calls ItemExists twice. We won't check for this behavior
             var msgCount = TestNavigationProvider.Messages.Count;
             Assert.That(TestNavigationProvider.Messages[msgCount - 2], Is.EqualTo("ItemExists " + rpath));

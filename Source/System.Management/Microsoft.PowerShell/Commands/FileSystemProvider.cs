@@ -461,7 +461,7 @@ namespace Microsoft.PowerShell.Commands
 
         #endregion
 
-        internal override string NormalizePath(string path)
+        internal string NormalizePath(string path)
         {
             // FIXME: this is more a workaround until we properly reimplement this provider or check how PathGloberr
             // needs to behave in detail
@@ -469,12 +469,12 @@ namespace Microsoft.PowerShell.Commands
             // simply appending the PSDriveInfo.Root for all paths right in the globber would break other functionality
             // As currently the only provider affected by this is our FileSystemProvider, we will do this workaround
             // until it's evaluated what's the correct behavior
-            var p = new Path(path);
+            var p = new Path(path).NormalizeSlashes();
             if (PSDriveInfo != null && !p.HasDrive() && !p.StartsWith(".")) // only append drive root if not relative
             {
-                path = new Path(PSDriveInfo.Root).Combine(path);
+                p = new Path(PSDriveInfo.Root).Combine(path);
             }
-            return base.NormalizePath(path);
+            return p.ToString();
         }
 
         private ItemType GetItemType(string type)
