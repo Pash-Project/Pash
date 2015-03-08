@@ -271,10 +271,11 @@ namespace ReferenceTests.Commands
         public void ResolveParentForTwoFilesUsingWildcard()
         {
             string fileName1 = CreateFile(String.Empty, ".test");
-            string leaf1 = Path.GetFileName(fileName1);
+            Path.GetFileName(fileName1);
             string fileName2 = CreateFile(String.Empty, ".test");
-            string leaf2 = Path.GetFileName(fileName2);
+            Path.GetFileName(fileName2);
             string directory = Path.GetDirectoryName(fileName1);
+            directory = GetDirectoryFullPath(directory);
 
             string result = ReferenceHost.Execute(new string[] {
                 string.Format("cd '{0}'", directory),
@@ -357,6 +358,7 @@ namespace ReferenceTests.Commands
             File.WriteAllText(fileName2, String.Empty);
             AddCleanupFile(fileName1);
             AddCleanupFile(fileName2);
+            directory = GetDirectoryFullPath(directory);
 
             string result = ReferenceHost.Execute(new string[] {
                 string.Format("cd '{0}'", tempPath),
@@ -364,6 +366,24 @@ namespace ReferenceTests.Commands
             });
 
             Assert.AreEqual(NewlineJoin(directory, directory), result);
+        }
+
+        /// <summary>
+        /// Workaround on Mac to get the full path for /var on Mac
+        /// since /var is a symlink to /private/var
+        /// </summary>
+        string GetDirectoryFullPath(string directory)
+        {
+            string originalDirectory = Directory.GetCurrentDirectory();
+            try
+            {
+                Directory.SetCurrentDirectory(directory);
+                return Directory.GetCurrentDirectory();
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(originalDirectory);
+            }
         }
     }
 }
