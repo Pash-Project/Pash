@@ -1,6 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 
 namespace System.Management.Automation
@@ -40,6 +41,8 @@ namespace System.Management.Automation
                 return Module == null ? "" : this.Module.Name;
             }
         }
+
+        public abstract ReadOnlyCollection<PSTypeName> OutputType { get; }
 
         public override string ToString()
         {

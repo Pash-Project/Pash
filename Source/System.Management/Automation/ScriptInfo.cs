@@ -14,6 +14,11 @@ namespace System.Management.Automation
     {
         public override string Definition { get { return ScriptBlock.ToString(); } }
 
+        public override ReadOnlyCollection<PSTypeName> OutputType
+        {
+            get { throw new NotImplementedException(); }
+        }
+
         internal ScriptInfo(string name, ScriptBlock script, ScopeUsages scopeUsage = ScopeUsages.NewScope)
             : base(name, CommandTypes.Script)
         {

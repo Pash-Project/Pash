@@ -1,6 +1,7 @@
 // Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
 
 namespace System.Management.Automation
@@ -29,6 +30,11 @@ namespace System.Management.Automation
         public string Extension { get; private set; }
 
         public string Path { get; private set; }
+
+        public override ReadOnlyCollection<PSTypeName> OutputType
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 }
 
