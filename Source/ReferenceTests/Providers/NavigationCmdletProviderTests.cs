@@ -206,6 +206,19 @@ namespace ReferenceTests.Providers
             ));
         }
 
+
+        [Test]
+        public void NavigationProviderSupportsGetChildItemFromLeaf()
+        {
+            var cmd = "Get-ChildItem " + _defDrive + "bar.doc";
+            ReferenceHost.Execute(cmd);
+            Assert.That(ExecutionMessages, AreMatching(
+                "ItemExists " + _defRoot + "bar.doc",
+                "IsItemContainer " + _defRoot + "bar.doc",
+                "GetItem " + _defRoot + "bar.doc"
+            ));
+        }
+
         [TestCase("-Include '*.txt'")]
         [TestCase("-Include '*.*' -Exclude '*.doc'")]
         public void NavigationProviderSupportsGetChildItemWithFilter(string filter)
@@ -257,7 +270,7 @@ namespace ReferenceTests.Providers
         }
 
         [Test]
-        public void NavigationProviderSupportGetChildNames()
+        public void NavigationProviderSupportsGetChildNames()
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo -Name";
             ReferenceHost.Execute(cmd);
@@ -268,7 +281,18 @@ namespace ReferenceTests.Providers
         }
 
         [Test]
-        public void NavigationProviderSupportGetChildNamesWithRecursion()
+        public void NavigationProviderSupportsGetChildNamesFromLeaf()
+        {
+            var cmd = "Get-ChildItem " + _defDrive + "bar.doc -Name";
+            ReferenceHost.Execute(cmd);
+            Assert.That(ExecutionMessages, AreMatching(
+                "ItemExists " + _defRoot + "bar.doc",
+                "GetChildNames " + _defRoot + "bar.doc ReturnMatchingContainers"
+            ));
+        }
+
+        [Test]
+        public void NavigationProviderSupportsGetChildNamesWithRecursion()
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo -Name -Recurse";
             ExecuteAndCompareTypedResult(cmd, "bar.txt", "baz.doc", "foo", "foo/bla.txt");
@@ -287,7 +311,7 @@ namespace ReferenceTests.Providers
 
         [TestCase("-Include *.txt")]
         [TestCase("-Include *.* -Exclude *.doc")]
-        public void NavigationProviderSupportGetChildNamesWithRecursionAndFilter(string filter)
+        public void NavigationProviderSupportsGetChildNamesWithRecursionAndFilter(string filter)
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo -Name -Recurse " + filter;
             ExecuteAndCompareTypedResult(cmd, "bar.txt", "foo/bla.txt");
@@ -306,7 +330,7 @@ namespace ReferenceTests.Providers
         }
 
         [Test]
-        public void NavigationProviderSupportGetChildNamesWithFilterInPathDoesntWork()
+        public void NavigationProviderSupportsGetChildNamesWithFilterInPathDoesntWork()
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo/*.txt -Name -Recurse";
             ExecuteAndCompareTypedResult(cmd, "bar.txt");
