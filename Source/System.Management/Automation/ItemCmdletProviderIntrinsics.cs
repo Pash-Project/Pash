@@ -192,6 +192,8 @@ namespace System.Management.Automation
 
             GlobAndInvoke<ContainerCmdletProvider>(path, runtime,
                 (curPath, provider) => {
+                    // Affected by #trailingSeparatorAmbiguity
+                    // PS would make sure the trailing slash of curPath is removed
                     // check if src is a container
                     if (IsContainer(provider, curPath, runtime))
                     {

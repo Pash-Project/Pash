@@ -123,7 +123,6 @@ namespace System.Management.Automation
             return itemProvider.IsValidPath(path, runtime);
         }
 
-
         internal string Combine(string parent, string child, ProviderRuntime runtime)
         {
             ProviderInfo providerInfo;

@@ -42,16 +42,11 @@ namespace Pash.Implementation
             if (!ShouldGlob(path, runtime))
             {
                 var itemProvider = provider as ItemCmdletProvider;
-                if (itemMustExist)
+                if (itemMustExist && itemProvider != null && !itemProvider.ItemExists(path, runtime))
                 {
-                    // FIXME: it's akward that we only remove the trailing slash here, but it seems to match PS behavior
-                    path = ResolveTrailingSeparator(path, runtime, providerInfo);
-                    if (itemProvider != null && !itemProvider.ItemExists(path, runtime))
-                    {
-                        var msg = String.Format("An item with path {0} doesn't exist", path);
-                        runtime.WriteError(new ItemNotFoundException(msg).ErrorRecord);
-                        return results;
-                    }
+                    var msg = String.Format("An item with path {0} doesn't exist", path);
+                    runtime.WriteError(new ItemNotFoundException(msg).ErrorRecord);
+                    return results;
                 }
                 results.Add(path);
                 return results;
@@ -109,21 +104,6 @@ namespace Pash.Implementation
             path = ResolveHomePath(path, providerInfo);
             // TODO: resolve relative paths
             return path;
-        }
-
-        string ResolveTrailingSeparator(string path, ProviderRuntime runtime, ProviderInfo providerInfo)
-        {
-            var provider = providerInfo.CreateInstance() as NavigationCmdletProvider;
-            // we only support this behavior for navigation providers
-            if (provider == null)
-            {
-                return path;
-            }
-
-            // we don't know the spearator, so we simply rejoin the parent path and child
-            var parent = provider.GetParentPath(path, "", runtime);
-            var child = provider.GetChildName(path, runtime);
-            return provider.MakePath(parent, child, runtime);
         }
 
         string GetProviderPathFromProviderQualifiedPath(string path, out ProviderInfo providerInfo)

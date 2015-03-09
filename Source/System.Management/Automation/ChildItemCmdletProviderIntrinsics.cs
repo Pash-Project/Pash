@@ -137,7 +137,7 @@ namespace System.Management.Automation
             var filter = new IncludeExcludeFilter(runtime.Include, runtime.Exclude, false);
 
             GlobAndInvoke<ContainerCmdletProvider>(path, runtime,
-                (curPath, Provider) => ManuallyGetChildNames(Provider, curPath, returnContainers, recurse, filter, runtime)
+                (curPath, Provider) => ManuallyGetChildNames(Provider, curPath, "", returnContainers, recurse, filter, runtime)
             );
         }
 
@@ -242,26 +242,14 @@ namespace System.Management.Automation
             }
         }
 
-        private void ManuallyGetChildNames(ContainerCmdletProvider provider, string providerPath,
+        private void ManuallyGetChildNames(ContainerCmdletProvider provider, string providerPath, string relativePath,
             ReturnContainers returnContainers, bool recurse, IncludeExcludeFilter filter, ProviderRuntime runtime)
         {
-            // this function doesn't use a globber, it expects a finished provider path. But it can invoke recursion
-            if (Item.IsContainer(providerPath, runtime))
-            {
-                ManuallyGetChildNamesFromContainer(provider, providerPath, "", returnContainers, recurse, filter, runtime);
-                return;
-            }
-            var childName = GetChildName(providerPath, runtime);
-            if (filter.Accepts(childName))
-            {
-                runtime.WriteObject(childName);
-            }
-        }
-
-        private void ManuallyGetChildNamesFromContainer(ContainerCmdletProvider provider, string providerPath, string relativePath,
-            ReturnContainers returnContainers, bool recurse, IncludeExcludeFilter filter, ProviderRuntime runtime)
-        {
-            // we deal with a container
+            // Affected by #trailingSeparatorAmbiguity
+            // Sometimes, PS removes or appends a trailing slash to the providerPath
+            // E.g. when the recurse == true, there is a trailing slash, but not when recurse == false.
+            // As it calls the method with the slash being appended and not appended, PS doesn't seem to make
+            // promises to the provider implementation whether or not the path has a trailing slash
             var childNames = GetValidChildNames(provider, providerPath, returnContainers, runtime);
             foreach (var childName in childNames)
             {
@@ -287,7 +275,7 @@ namespace System.Management.Automation
                 {
                     // recursive call wirth child's provider path and relative path
                     var relativeChildPath = Path.Combine(provider, relativePath, childName, runtime);
-                    ManuallyGetChildNamesFromContainer(provider, providerChildPath, relativeChildPath, returnContainers,
+                    ManuallyGetChildNames(provider, providerChildPath, relativeChildPath, returnContainers,
                         true, filter, runtime);
                 }
             }
