@@ -17,7 +17,7 @@ namespace ReferenceTests.Providers
 
         private List<string> ExecutionMessages { get { return TestNavigationProvider.Messages; } }
 
-        EqualConstraint AreMatching(params string[] expected)
+        EqualConstraint AreMatchedBy(params string[] expected)
         {
             // constraint like EqualTo, but allowing messages to be prepended by "? " to be optional
             var msgs = TestNavigationProvider.Messages;
@@ -101,7 +101,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-Item " + drive + "foo";
             ReferenceHost.Execute(cmd);
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + root + "foo",
                 "GetItem " + root + "foo"
             ));
@@ -114,7 +114,7 @@ namespace ReferenceTests.Providers
             ReferenceHost.Execute(cmd);
             // with PS "GetChildNames " + _defRoot + "foo ReturnMatchingContainers" is called
             // twice at the beginning. We won't check for this behavior
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "GetChildNames " + _defRoot + "foo ReturnMatchingContainers",
                 "? GetChildNames " + _defRoot + "foo ReturnMatchingContainers", // optional
                 "GetItem " + _defRoot + "foo/bar.txt",
@@ -129,7 +129,7 @@ namespace ReferenceTests.Providers
             var rpath = _defRoot + "newItem.tmp";
             var cmd = "New-Item " + path  + " -ItemType testType -Value testValue";
             ReferenceHost.Execute(cmd);
-            Assert.That(ExecutionMessages, AreMatching("NewItem " + rpath + " testType testValue"));
+            Assert.That(ExecutionMessages, AreMatchedBy("NewItem " + rpath + " testType testValue"));
         }
 
         [Test]
@@ -138,7 +138,7 @@ namespace ReferenceTests.Providers
             var cmd = "Remove-Item " + _defDrive + "bar.doc";
             var rpath = _defRoot + "bar.doc";
             ReferenceHost.Execute(cmd);
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + rpath,
                 "HasChildItems " + rpath,
                 "RemoveItem " + rpath + " False"
@@ -151,7 +151,7 @@ namespace ReferenceTests.Providers
             var cmd = "Remove-Item -Recurse " + _defDrive + "foo";
             var rpath = _defRoot + "foo";
             ReferenceHost.Execute(cmd);
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + rpath,
                 "? HasChildItems " + rpath, // optional
                 "RemoveItem " + rpath + " True"
@@ -174,7 +174,7 @@ namespace ReferenceTests.Providers
             var rpath = _defRoot + "foo";
             ReferenceHost.Execute(cmd);
             // Powershell shomehow calls ItemExists twice. We won't check for this behavior
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + rpath,
                 "? ItemExists " + rpath, // optional
                 "RenameItem " + rpath + " foobar"
@@ -186,7 +186,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo -Recurse";
             ReferenceHost.Execute(cmd);
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "IsItemContainer " + _defRoot + "foo",
                 "ItemExists " + _defRoot + "foo",
                 "IsItemContainer " + _defRoot + "foo",
@@ -199,7 +199,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo";
             ReferenceHost.Execute(cmd);
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + _defRoot + "foo",
                 "IsItemContainer " + _defRoot + "foo",
                 "GetChildItems " + _defRoot + "foo False"
@@ -212,7 +212,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem " + _defDrive + "bar.doc";
             ReferenceHost.Execute(cmd);
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + _defRoot + "bar.doc",
                 "IsItemContainer " + _defRoot + "bar.doc",
                 "GetItem " + _defRoot + "bar.doc"
@@ -225,7 +225,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem -Recurse " + _defDrive + " " + filter;
             ReferenceHost.Execute(cmd);
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + _defRoot,
                 "IsItemContainer " + _defRoot,
                 "GetChildNames " + _defRoot + " ReturnAllContainers",
@@ -251,7 +251,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem -Recurse " + _secDrive + "*.txt";
             ReferenceHost.Execute(cmd);
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + _secRoot,
                 "HasChildItems " + _secRoot,
                 "GetChildNames " + _secRoot + " ReturnMatchingContainers",
@@ -274,7 +274,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo -Name";
             ReferenceHost.Execute(cmd);
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + _defRoot + "foo",
                 "GetChildNames " + _defRoot + "foo ReturnMatchingContainers"
             ));
@@ -285,7 +285,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem " + _defDrive + "bar.doc -Name";
             ReferenceHost.Execute(cmd);
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + _defRoot + "bar.doc",
                 "GetChildNames " + _defRoot + "bar.doc ReturnMatchingContainers"
             ));
@@ -296,7 +296,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo -Name -Recurse";
             ExecuteAndCompareTypedResult(cmd, "bar.txt", "baz.doc", "foo", "foo/bla.txt");
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + _defRoot + "foo",
                 "GetChildNames " + _defRoot + "foo/ ReturnMatchingContainers",
                 "GetChildNames " + _defRoot + "foo/ ReturnAllContainers",
@@ -315,7 +315,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo -Name -Recurse " + filter;
             ExecuteAndCompareTypedResult(cmd, "bar.txt", "foo/bla.txt");
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + _defRoot + "foo",
                 "IsItemContainer " + _defRoot + "foo",
                 "GetChildNames " + _defRoot + "foo/ ReturnMatchingContainers",
@@ -334,7 +334,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo/*.txt -Name -Recurse";
             ExecuteAndCompareTypedResult(cmd, "bar.txt");
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + _defRoot + "foo",
                 "HasChildItems " + _defRoot + "foo",
                 "GetChildNames " + _defRoot + "foo ReturnMatchingContainers",
@@ -354,12 +354,12 @@ namespace ReferenceTests.Providers
             ReferenceHost.Execute(cmd);
             // in Pash the first two operations are called in reverse order (because of our code design)
             // so we need one of the two outputs
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + _defRoot + "foo",
                 "IsItemContainer " + _secRoot,
                 "IsItemContainer " + _defRoot + "foo",
                 "CopyItem " + _defRoot + "foo " + _secRoot + " " + recurse
-            ).Or.Matches(AreMatching(
+            ).Or.Matches(AreMatchedBy(
                 "IsItemContainer " + _secRoot,
                 "ItemExists " + _defRoot + "foo",
                 "IsItemContainer " + _defRoot + "foo",
@@ -396,7 +396,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Copy-Item " + _defDrive + "foo/ " + _secDrive + " -Recurse -Container:$false";
             ReferenceHost.Execute(cmd);
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 // Mesages?
             ));
         }
@@ -418,7 +418,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Move-Item " + _defDrive + "foo/ " + _secDrive;
             ReferenceHost.Execute(cmd);
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 // well we have here a triple-check. Maybe remove that for check against Pash
                 "ItemExists " + _defRoot + "foo",
                 "ItemExists " + _defRoot + "foo",
@@ -432,7 +432,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Move-Item " + _defDrive + "foo/ " + _secDrive + "bar.txt";
             ReferenceHost.Execute(cmd);
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 // well we have here a triple-check. Maybe remove that for check against Pash
                 "ItemExists " + _defRoot + "foo",
                 "ItemExists " + _defRoot + "foo",
@@ -446,7 +446,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "(Resolve-Path " + _defDrive + "foo/*.txt).Path";
             ExecuteAndCompareTypedResult(cmd, TestNavigationProvider.DefaultDriveName + ":\\foo/bar.txt");
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + _defRoot + "foo",
                 "HasChildItems " + _defRoot + "foo",
                 "GetChildNames " + _defRoot + "foo ReturnMatchingContainers"
@@ -462,7 +462,7 @@ namespace ReferenceTests.Providers
             );
             var rootWithoutSlash = _defRoot.Substring(0, _defRoot.Length -1);
             ExecuteAndCompareTypedResult(cmd, "./foo/bar.txt");
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + _defRoot,
                 "NormalizeRelativePath " + _defRoot + " " + rootWithoutSlash,
                 "IsItemContainer " + _defRoot,
@@ -482,7 +482,7 @@ namespace ReferenceTests.Providers
             );
             ReferenceHost.Execute(cmd);
             var rootWithoutSlash = _defRoot.Substring(0, _defRoot.Length - 1);
-            Assert.That(ExecutionMessages, AreMatching(
+            Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + _defRoot + "foo",
                 "NormalizeRelativePath " + _defRoot + "foo " + rootWithoutSlash,
                 "IsItemContainer " + _defRoot + "foo",
