@@ -191,6 +191,13 @@ namespace Pash.Implementation
                 var globWC = new WildcardPattern(globComp, WildcardOptions.IgnoreCase);
                 foreach (var partPath in partialPaths)
                 {
+                    if (!containerProvider.ItemExists(partPath, runtime) ||
+                        !containerProvider.HasChildItems(partPath, runtime))
+                    {
+                        // TODO: throw an error if there was no globbing already performed (then the first part of
+                        // the path already did not exists as in a pattern like "/home/notExisting/*.txt"
+                        continue;
+                    }
                     // TODO: verify if we should only consider matching containers or all. maybe the filter won't
                     // apply to partial parts and we need to consider all
                     var childNames = ciIntrinsics.GetValidChildNames(containerProvider, partPath,

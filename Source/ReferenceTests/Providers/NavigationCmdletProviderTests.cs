@@ -8,6 +8,40 @@ using NUnit.Framework.Constraints;
 
 namespace ReferenceTests.Providers
 {
+    class MessageMatcher
+    {
+        List<string> _alternatives;
+
+        public MessageMatcher(string msg)
+        {
+            _alternatives = (from m in msg.Split(new [] { "__OR__" }, StringSplitOptions.None) select m.Trim()).ToList();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is string)
+            {
+                return _alternatives.Contains((string)obj);
+            }
+            else if (obj is MessageMatcher)
+            {
+                return _alternatives.SequenceEqual(((MessageMatcher)obj)._alternatives);
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            // XOR of all hashcodes from _alternatives
+            return (from a in _alternatives select a.GetHashCode()).Aggregate((l, r) => l ^ r);
+        }
+
+        public override string ToString()
+        {
+            return String.Join(" or ", from a in _alternatives select '"' + a + '"');
+        }
+    }
+
     public class NavigationCmdletProviderTests : ReferenceTestBaseWithTestModule
     {
         private const string _defDrive = TestNavigationProvider.DefaultDrivePath;
@@ -24,12 +58,12 @@ namespace ReferenceTests.Providers
             var optional = (from m in expected where m.StartsWith("? ") select m).Count();
             if (msgs.Count == expected.Length - optional)
             {
-                var nonOpts = (from m in expected where !m.StartsWith("? ") select m);
+                var nonOpts = (from m in expected where !m.StartsWith("? ") select new MessageMatcher(m));
                 return Is.EqualTo(nonOpts);
             }
             else
             {
-                var allExp = from m in expected select (m.StartsWith("? ") ? m.Substring(2) : m);
+                var allExp = from m in expected select new MessageMatcher(m.StartsWith("? ") ? m.Substring(2) : m);
                 return Is.EqualTo(allExp);
             }
         }
@@ -301,10 +335,13 @@ namespace ReferenceTests.Providers
             // Because we won't bother, we simply append the trialing slash in the cmd and PS/Pash will behave likewise
             var cmd = "Get-ChildItem " + _defDrive + "foo -Name -Recurse";
             ExecuteAndCompareTypedResult(cmd, "bar.txt", "baz.doc", "foo", "foo/bla.txt");
+            var gcnfooPrefix = "GetChildNames " + _defRoot + "foo";
             Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + _defRoot + "foo",
-                "GetChildNames " + _defRoot + "foo/ ReturnMatchingContainers",
-                "GetChildNames " + _defRoot + "foo/ ReturnAllContainers",
+                // because of #trailingSeparatorAmbiguity we allow the next two messages to either
+                // have a slash after 'foo' or not
+                gcnfooPrefix + "/ ReturnMatchingContainers __OR__ " + gcnfooPrefix + " ReturnMatchingContainers",
+                gcnfooPrefix + "/ ReturnAllContainers __OR__ " + gcnfooPrefix + " ReturnAllContainers",
                 "IsItemContainer " + _defRoot + "foo/bar.txt",
                 "IsItemContainer " + _defRoot + "foo/baz.doc",
                 "IsItemContainer " + _defRoot + "foo/foo",

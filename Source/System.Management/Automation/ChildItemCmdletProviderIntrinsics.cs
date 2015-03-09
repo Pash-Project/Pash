@@ -62,12 +62,15 @@ namespace System.Management.Automation
 
         public bool HasChild(string path)
         {
-            throw new NotImplementedException();
+            return HasChild(path, false, false);
         }
 
         public bool HasChild(string path, bool force, bool literalPath)
         {
-            throw new NotImplementedException();
+            var runtime = new ProviderRuntime(SessionState, force, literalPath);
+            var res = HasChild(path, runtime);
+            runtime.ThrowFirstErrorOrContinue();
+            return res;
         }
 
         #endregion
@@ -158,6 +161,17 @@ namespace System.Management.Automation
             return (from c in results
                 where c.BaseObject is string
                 select ((string)c.BaseObject)).ToList();
+        }
+
+        internal bool HasChild(string path, ProviderRuntime runtime)
+        {
+            var hasChild = false;
+            GlobAndInvoke<ContainerCmdletProvider>(new [] { path }, runtime,
+                (curPath, provider) => {
+                    hasChild = hasChild || provider.HasChildItems(curPath, runtime);
+                }
+            );
+            return hasChild;
         }
 
         #endregion
