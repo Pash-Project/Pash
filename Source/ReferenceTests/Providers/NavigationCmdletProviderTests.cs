@@ -4,6 +4,7 @@ using NUnit.Framework;
 using TestPSSnapIn;
 using System.Management.Automation;
 using System.Collections.Generic;
+using NUnit.Framework.Constraints;
 
 namespace ReferenceTests.Providers
 {
@@ -14,19 +15,22 @@ namespace ReferenceTests.Providers
         private const string _secDrive = TestNavigationProvider.SecondDrivePath;
         private const string _secRoot = TestNavigationProvider.SecondDriveRoot + "/";
 
-        void AssertMessagesAreEqual(params string[] expected)
+        private List<string> ExecutionMessages { get { return TestNavigationProvider.Messages; } }
+
+        EqualConstraint AreMatching(params string[] expected)
         {
+            // constraint like EqualTo, but allowing messages to be prepended by "? " to be optional
             var msgs = TestNavigationProvider.Messages;
             var optional = (from m in expected where m.StartsWith("? ") select m).Count();
             if (msgs.Count == expected.Length - optional)
             {
                 var nonOpts = (from m in expected where !m.StartsWith("? ") select m);
-                Assert.That(msgs, Is.EqualTo(nonOpts));
+                return Is.EqualTo(nonOpts);
             }
             else
             {
                 var allExp = from m in expected select (m.StartsWith("? ") ? m.Substring(2) : m);
-                Assert.That(msgs, Is.EqualTo(allExp));
+                return Is.EqualTo(allExp);
             }
         }
 
@@ -97,10 +101,10 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-Item " + drive + "foo";
             ReferenceHost.Execute(cmd);
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "ItemExists " + root + "foo",
                 "GetItem " + root + "foo"
-            );
+            ));
         }
 
         [Test]
@@ -110,12 +114,12 @@ namespace ReferenceTests.Providers
             ReferenceHost.Execute(cmd);
             // with PS "GetChildNames " + _defRoot + "foo ReturnMatchingContainers" is called
             // twice at the beginning. We won't check for this behavior
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "GetChildNames " + _defRoot + "foo ReturnMatchingContainers",
                 "? GetChildNames " + _defRoot + "foo ReturnMatchingContainers", // optional
                 "GetItem " + _defRoot + "foo/bar.txt",
                 "GetItem " + _defRoot + "foo/baz.doc"
-            );
+            ));
         }
 
         [Test]
@@ -125,7 +129,7 @@ namespace ReferenceTests.Providers
             var rpath = _defRoot + "newItem.tmp";
             var cmd = "New-Item " + path  + " -ItemType testType -Value testValue";
             ReferenceHost.Execute(cmd);
-            AssertMessagesAreEqual("NewItem " + rpath + " testType testValue");
+            Assert.That(ExecutionMessages, AreMatching("NewItem " + rpath + " testType testValue"));
         }
 
         [Test]
@@ -134,11 +138,11 @@ namespace ReferenceTests.Providers
             var cmd = "Remove-Item " + _defDrive + "bar.doc";
             var rpath = _defRoot + "bar.doc";
             ReferenceHost.Execute(cmd);
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "ItemExists " + rpath,
                 "HasChildItems " + rpath,
                 "RemoveItem " + rpath + " False"
-            );
+            ));
         }
 
         [Test]
@@ -147,11 +151,11 @@ namespace ReferenceTests.Providers
             var cmd = "Remove-Item -Recurse " + _defDrive + "foo";
             var rpath = _defRoot + "foo";
             ReferenceHost.Execute(cmd);
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "ItemExists " + rpath,
                 "? HasChildItems " + rpath, // optional
                 "RemoveItem " + rpath + " True"
-            );
+            ));
         }
 
         [Test]
@@ -170,11 +174,11 @@ namespace ReferenceTests.Providers
             var rpath = _defRoot + "foo";
             ReferenceHost.Execute(cmd);
             // Powershell shomehow calls ItemExists twice. We won't check for this behavior
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "ItemExists " + rpath,
                 "? ItemExists " + rpath, // optional
                 "RenameItem " + rpath + " foobar"
-            );
+            ));
         }
 
         [Test]
@@ -182,12 +186,12 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo -Recurse";
             ReferenceHost.Execute(cmd);
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "IsItemContainer " + _defRoot + "foo",
                 "ItemExists " + _defRoot + "foo",
                 "IsItemContainer " + _defRoot + "foo",
                 "GetChildItems " + _defRoot + "foo True"
-            );
+            ));
         }
 
         [Test]
@@ -195,11 +199,11 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo";
             ReferenceHost.Execute(cmd);
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "ItemExists " + _defRoot + "foo",
                 "IsItemContainer " + _defRoot + "foo",
                 "GetChildItems " + _defRoot + "foo False"
-            );
+            ));
         }
 
         [TestCase("-Include '*.txt'")]
@@ -208,7 +212,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem -Recurse " + _defDrive + " " + filter;
             ReferenceHost.Execute(cmd);
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "ItemExists " + _defRoot,
                 "IsItemContainer " + _defRoot,
                 "GetChildNames " + _defRoot + " ReturnAllContainers",
@@ -226,7 +230,7 @@ namespace ReferenceTests.Providers
                 "GetChildNames " + _defRoot + "bar ReturnAllContainers",
                 "GetItem " + _defRoot + "bar/foo.txt",
                 "IsItemContainer " + _defRoot + "bar/foo.txt"
-            );
+            ));
         }
 
         [Test]
@@ -234,7 +238,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem -Recurse " + _secDrive + "*.txt";
             ReferenceHost.Execute(cmd);
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "ItemExists " + _secRoot,
                 "HasChildItems " + _secRoot,
                 "GetChildNames " + _secRoot + " ReturnMatchingContainers",
@@ -249,7 +253,7 @@ namespace ReferenceTests.Providers
                 "IsItemContainer " + _secRoot + "foo/bar.txt",
                 "GetItem " + _secRoot + "bar.txt",
                 "IsItemContainer " + _secRoot + "bar.txt"
-            );
+            ));
         }
 
         [Test]
@@ -257,10 +261,10 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo -Name";
             ReferenceHost.Execute(cmd);
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "ItemExists " + _defRoot + "foo",
                 "GetChildNames " + _defRoot + "foo ReturnMatchingContainers"
-            );
+            ));
         }
 
         [Test]
@@ -268,7 +272,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo -Name -Recurse";
             ExecuteAndCompareTypedResult(cmd, "bar.txt", "baz.doc", "foo", "foo/bla.txt");
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "ItemExists " + _defRoot + "foo",
                 "GetChildNames " + _defRoot + "foo/ ReturnMatchingContainers",
                 "GetChildNames " + _defRoot + "foo/ ReturnAllContainers",
@@ -278,7 +282,7 @@ namespace ReferenceTests.Providers
                 "GetChildNames " + _defRoot + "foo/foo ReturnMatchingContainers",
                 "GetChildNames " + _defRoot + "foo/foo ReturnAllContainers",
                 "IsItemContainer " + _defRoot + "foo/foo/bla.txt"
-            );
+            ));
         }
 
         [TestCase("-Include *.txt")]
@@ -287,7 +291,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo -Name -Recurse " + filter;
             ExecuteAndCompareTypedResult(cmd, "bar.txt", "foo/bla.txt");
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "ItemExists " + _defRoot + "foo",
                 "IsItemContainer " + _defRoot + "foo",
                 "GetChildNames " + _defRoot + "foo/ ReturnMatchingContainers",
@@ -298,7 +302,7 @@ namespace ReferenceTests.Providers
                 "GetChildNames " + _defRoot + "foo/foo ReturnMatchingContainers",
                 "GetChildNames " + _defRoot + "foo/foo ReturnAllContainers",
                 "IsItemContainer " + _defRoot + "foo/foo/bla.txt"
-            );
+            ));
         }
 
         [Test]
@@ -306,7 +310,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo/*.txt -Name -Recurse";
             ExecuteAndCompareTypedResult(cmd, "bar.txt");
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "ItemExists " + _defRoot + "foo",
                 "HasChildItems " + _defRoot + "foo",
                 "GetChildNames " + _defRoot + "foo ReturnMatchingContainers",
@@ -314,7 +318,7 @@ namespace ReferenceTests.Providers
                 "HasChildItems " + _defRoot + "foo",
                 "GetChildNames " + _defRoot + "foo ReturnMatchingContainers",
                 "IsItemContainer " + _defRoot + "foo/bar.txt"
-            );
+            ));
         }
 
         [TestCase(true)]
@@ -324,12 +328,12 @@ namespace ReferenceTests.Providers
             var recurseParam = recurse ? " -Recurse" : "";
             var cmd = "Copy-Item " + _defDrive + "foo/ " + _secDrive + recurseParam;
             ReferenceHost.Execute(cmd);
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "ItemExists " + _defRoot + "foo",
                 "IsItemContainer " + _secRoot,
                 "IsItemContainer " + _defRoot + "foo",
                 "CopyItem " + _defRoot + "foo " + _secRoot + " " + recurse
-            );
+            ));
         }
 
         [Test]
@@ -361,9 +365,9 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Copy-Item " + _defDrive + "foo/ " + _secDrive + " -Recurse -Container:$false";
             ReferenceHost.Execute(cmd);
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 // Mesages?
-            );
+            ));
         }
 
         [Test]
@@ -383,13 +387,13 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Move-Item " + _defDrive + "foo/ " + _secDrive;
             ReferenceHost.Execute(cmd);
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 // well we have here a triple-check. Maybe remove that for check against Pash
                 "ItemExists " + _defRoot + "foo",
                 "ItemExists " + _defRoot + "foo",
                 "ItemExists " + _defRoot + "foo",
                 "MoveItem " + _defRoot + "foo " + _secRoot
-            );
+            ));
         }
 
         [Test]
@@ -397,13 +401,13 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Move-Item " + _defDrive + "foo/ " + _secDrive + "bar.txt";
             ReferenceHost.Execute(cmd);
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 // well we have here a triple-check. Maybe remove that for check against Pash
                 "ItemExists " + _defRoot + "foo",
                 "ItemExists " + _defRoot + "foo",
                 "ItemExists " + _defRoot + "foo",
                 "MoveItem " + _defRoot + "foo " + _secRoot + "bar.txt"
-            );
+            ));
         }
 
         [Test]
@@ -411,11 +415,11 @@ namespace ReferenceTests.Providers
         {
             var cmd = "(Resolve-Path " + _defDrive + "foo/*.txt).Path";
             ExecuteAndCompareTypedResult(cmd, TestNavigationProvider.DefaultDriveName + ":\\foo/bar.txt");
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "ItemExists " + _defRoot + "foo",
                 "HasChildItems " + _defRoot + "foo",
                 "GetChildNames " + _defRoot + "foo ReturnMatchingContainers"
-            );
+            ));
         }
 
         [Test]
@@ -427,7 +431,7 @@ namespace ReferenceTests.Providers
             );
             var rootWithoutSlash = _defRoot.Substring(0, _defRoot.Length -1);
             ExecuteAndCompareTypedResult(cmd, "./foo/bar.txt");
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "ItemExists " + _defRoot,
                 "NormalizeRelativePath " + _defRoot + " " + rootWithoutSlash,
                 "IsItemContainer " + _defRoot,
@@ -435,7 +439,7 @@ namespace ReferenceTests.Providers
                 "HasChildItems " + _defRoot + "foo",
                 "GetChildNames " + _defRoot + "foo ReturnMatchingContainers",
                 "NormalizeRelativePath " + _defRoot + "foo/bar.txt " + _defRoot
-            );
+            ));
         }
 
         [Test]
@@ -447,13 +451,13 @@ namespace ReferenceTests.Providers
             );
             ReferenceHost.Execute(cmd);
             var rootWithoutSlash = _defRoot.Substring(0, _defRoot.Length - 1);
-            AssertMessagesAreEqual(
+            Assert.That(ExecutionMessages, AreMatching(
                 "ItemExists " + _defRoot + "foo",
                 "NormalizeRelativePath " + _defRoot + "foo " + rootWithoutSlash,
                 "IsItemContainer " + _defRoot + "foo",
                 "ItemExists " + _defRoot + "bar.doc",
                 "GetItem " + _defRoot + "bar.doc"
-            );
+            ));
         }
 
     }
