@@ -388,6 +388,24 @@ namespace ReferenceTests.Providers
             ));
         }
 
+        [Test]
+        public void NavigationProviderSupportsGetChildNamesWithGlobbingDoesntCheckContainer()
+        {
+            // What does this mean? Calling this method with "foo" as path obviously returns the element names
+            // from foo. Globbing would resolve * to foo and others, but then we won't return the elements from foo, only
+            // the "foo" name itself!
+            var cmd = "Get-ChildItem " + _defDrive + "* -Name";
+            ExecuteAndCompareTypedResult(cmd, "foo", "bar.doc", "bar");
+            Assert.That(ExecutionMessages, AreMatchedBy(
+                "ItemExists " + _defRoot,
+                "HasChildItems " + _defRoot,
+                "GetChildNames " + _defRoot + " ReturnMatchingContainers",
+                "ItemExists " + _defRoot,
+                "HasChildItems " + _defRoot,
+                "GetChildNames " + _defRoot + " ReturnMatchingContainers"
+            ));
+        }
+
         [TestCase(true)]
         [TestCase(false)]
         public void NavigationProviderSupportsCopyItem(bool recurse)
