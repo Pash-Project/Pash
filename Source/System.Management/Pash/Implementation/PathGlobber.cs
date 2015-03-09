@@ -24,6 +24,12 @@ namespace Pash.Implementation
         }
 
         internal Collection<string> GetGlobbedProviderPaths(string path, ProviderRuntime runtime,
+            out CmdletProvider provider)
+        {
+            return GetGlobbedProviderPaths(path, runtime, true, out provider);
+        }
+
+        internal Collection<string> GetGlobbedProviderPaths(string path, ProviderRuntime runtime, bool itemMustExist,
                                                             out CmdletProvider provider)
         {
             var results = new Collection<string>();
@@ -37,7 +43,7 @@ namespace Pash.Implementation
             if (!ShouldGlob(path, runtime))
             {
                 var itemProvider = provider as ItemCmdletProvider;
-                if (provider != null && !itemProvider.ItemExists(path, runtime))
+                if (itemMustExist && itemProvider != null && !itemProvider.ItemExists(path, runtime))
                 {
                     var msg = String.Format("An item with path {0} doesn't exist", path);
                     runtime.WriteError(new ItemNotFoundException(msg).ErrorRecord);

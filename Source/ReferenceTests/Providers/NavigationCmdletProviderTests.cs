@@ -16,19 +16,17 @@ namespace ReferenceTests.Providers
 
         void AssertMessagesAreEqual(params string[] expected)
         {
-            AssertMessagesAreEqual(0, expected);
-        }
-
-        void AssertMessagesAreEqual(int optional, params string[] expected)
-        {
             var msgs = TestNavigationProvider.Messages;
+            var optional = (from m in expected where m.StartsWith("? ") select m).Count();
             if (msgs.Count == expected.Length - optional)
             {
-                Assert.That(msgs, Is.EqualTo(expected.Skip(optional)));
+                var nonOpts = (from m in expected where !m.StartsWith("? ") select m);
+                Assert.That(msgs, Is.EqualTo(nonOpts));
             }
             else
             {
-                Assert.That(msgs, Is.EqualTo(expected));
+                var allExp = from m in expected select (m.StartsWith("? ") ? m.Substring(2) : m);
+                Assert.That(msgs, Is.EqualTo(allExp));
             }
         }
 
@@ -113,9 +111,8 @@ namespace ReferenceTests.Providers
             // with PS "GetChildNames " + _defRoot + "foo ReturnMatchingContainers" is called
             // twice at the beginning. We won't check for this behavior
             AssertMessagesAreEqual(
-                1, // first is optional
                 "GetChildNames " + _defRoot + "foo ReturnMatchingContainers",
-                "GetChildNames " + _defRoot + "foo ReturnMatchingContainers",
+                "? GetChildNames " + _defRoot + "foo ReturnMatchingContainers", // optional
                 "GetItem " + _defRoot + "foo/bar.txt",
                 "GetItem " + _defRoot + "foo/baz.doc"
             );
@@ -152,7 +149,7 @@ namespace ReferenceTests.Providers
             ReferenceHost.Execute(cmd);
             AssertMessagesAreEqual(
                 "ItemExists " + rpath,
-                "HasChildItems " + rpath,
+                "? HasChildItems " + rpath, // optional
                 "RemoveItem " + rpath + " True"
             );
         }
@@ -174,9 +171,8 @@ namespace ReferenceTests.Providers
             ReferenceHost.Execute(cmd);
             // Powershell shomehow calls ItemExists twice. We won't check for this behavior
             AssertMessagesAreEqual(
-                1, // first is optional
                 "ItemExists " + rpath,
-                "ItemExists " + rpath,
+                "? ItemExists " + rpath, // optional
                 "RenameItem " + rpath + " foobar"
             );
         }

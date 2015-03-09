@@ -190,13 +190,8 @@ namespace System.Management.Automation
 
             GlobAndInvoke<ContainerCmdletProvider>(path, runtime,
                 (curPath, provider) => {
-                    // make sure the src exists
-                    if(!VerifyItemExists(provider, curPath, runtime))
-                    {
-                        return;
-                    }
                     // check if src is a container
-                    if (IsContainer(curPath, runtime))
+                    if (IsContainer(provider, curPath, runtime))
                     {
                         // if we copy a container to another, invoke a special method for this
                         if (destIsContainer)
@@ -228,7 +223,7 @@ namespace System.Management.Automation
         internal bool Exists(string path, ProviderRuntime runtime)
         {
             CmdletProvider provider;
-            var globbedPaths = Globber.GetGlobbedProviderPaths(path, runtime, out provider);
+            var globbedPaths = Globber.GetGlobbedProviderPaths(path, runtime, false, out provider);
             var containerProvider = provider as ItemCmdletProvider;
             // we assume that in a low level CmdletProvider all items exists. Not sure about this, but I don't want to
             // break existing functionality
@@ -284,29 +279,36 @@ namespace System.Management.Automation
         internal bool IsContainer(string path, ProviderRuntime runtime)
         {
             CmdletProvider provider;
-            var globbedPaths = Globber.GetGlobbedProviderPaths(path, runtime, out provider);
-            var isContainerProvider = (provider is ContainerCmdletProvider);
-            var navProvider = provider as NavigationCmdletProvider;
-            if (!isContainerProvider && navProvider == null)
+            var globbedPaths = Globber.GetGlobbedProviderPaths(path, runtime, false, out provider);
+            var containerProvider = provider as ContainerCmdletProvider;
+            var isNavProvider = provider is NavigationCmdletProvider;
+            if (containerProvider == null && !isNavProvider)
             {
                 throw new NotSupportedException("The affected provider doesn't support container related operations.");
             }
             foreach (var p in globbedPaths)
             {
-                if (navProvider != null)
+                if (!IsContainer(containerProvider, p, runtime))
                 {
-                    return navProvider.IsItemContainer(p, runtime);
-                }
-                // otherwise it's just a ContainerCmdletProvider. It doesn't support hierarchies, only drives can be containers
-                // an empty path means "root" path in a drive
-                if (p.Length > 0)
-                {
-                    // path isn't a drives root path
                     return false;
                 }
             }
             // all globbed paths are containers
             return true;
+        }
+
+        internal bool IsContainer(ContainerCmdletProvider provider, string path, ProviderRuntime runtime)
+        {
+            var navProvider = provider as NavigationCmdletProvider;
+            // path is an expanded path to a single location. no globbing and filtering is performed
+            if (navProvider != null)
+            {
+                return navProvider.IsItemContainer(path, runtime);
+            }
+            // otherwise it's just a ContainerCmdletProvider. It doesn't support hierarchies,
+            // only drives can be containers
+            // an empty path means "root" path in a drive
+            return path.Length == 0 || path.Equals(runtime.PSDriveInfo.Root);
         }
 
         internal object ItemExistsDynamicParameters(string path, ProviderRuntime runtime)
@@ -316,6 +318,8 @@ namespace System.Management.Automation
 
         internal void Move(string[] path, string destination, ProviderRuntime runtime)
         {
+            // TODO: I think Powershell checks whether we are currently in the path we want to remove
+            //       (or a subpath). Check this and throw an error if it's true
             throw new NotImplementedException();
         }
 
@@ -372,13 +376,9 @@ namespace System.Management.Automation
         {
             GlobAndInvoke<ContainerCmdletProvider>(path, runtime,
                 (curPath, provider) => {
-                    if (!VerifyItemExists(provider, curPath, runtime))
-                    {
-                        return;
-                    }
                     // TODO: I think Powershell checks whether we are currently in the path we want to remove
                     //       (or a subpath). Check this and throw an error if it's true
-                    if (!recurse && provider.HasChildItems(curPath, runtime))
+                    if (provider.HasChildItems(curPath, runtime) && !recurse)
                     {
                         // TODO: I think Powershell invokes ShouldContinue here and asks whether to remove
                         //       items recursively or not. We should somehow do this too. Maybe by getting
@@ -415,10 +415,6 @@ namespace System.Management.Automation
             }
             path = globbed[0];
             var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
-            if (!VerifyItemExists(containerProvider, path, runtime))
-            {
-                return;
-            }
             // TODO: I think Powershell checks whether we are currently in the path we want to remove
             //       (or a subpath). Check this and throw an error if it's true
             try
