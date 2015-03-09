@@ -112,10 +112,13 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-Item " + _defDrive + "foo/b*";
             ReferenceHost.Execute(cmd);
-            // with PS "GetChildNames " + _defRoot + "foo ReturnMatchingContainers" is called
-            // twice at the beginning. We won't check for this behavior
+            // with PS some operations are called twice at the beginning. We won't check for this behavior
             Assert.That(ExecutionMessages, AreMatchedBy(
+                "ItemExists " + _defRoot + "foo",
+                "HasChildItems " + _defRoot + "foo",
                 "GetChildNames " + _defRoot + "foo ReturnMatchingContainers",
+                "? ItemExists " + _defRoot + "foo", // optional
+                "? HasChildItems " + _defRoot + "foo", // optional
                 "? GetChildNames " + _defRoot + "foo ReturnMatchingContainers", // optional
                 "GetItem " + _defRoot + "foo/bar.txt",
                 "GetItem " + _defRoot + "foo/baz.doc"
@@ -296,10 +299,10 @@ namespace ReferenceTests.Providers
         {
             // We here have a #trailingSeparatorAmbiguity without a trailing slash after "foo" at this point.
             // Because we won't bother, we simply append the trialing slash in the cmd and PS/Pash will behave likewise
-            var cmd = "Get-ChildItem " + _defDrive + "foo/ -Name -Recurse";
+            var cmd = "Get-ChildItem " + _defDrive + "foo -Name -Recurse";
             ExecuteAndCompareTypedResult(cmd, "bar.txt", "baz.doc", "foo", "foo/bla.txt");
             Assert.That(ExecutionMessages, AreMatchedBy(
-                "ItemExists " + _defRoot + "foo/",
+                "ItemExists " + _defRoot + "foo",
                 "GetChildNames " + _defRoot + "foo/ ReturnMatchingContainers",
                 "GetChildNames " + _defRoot + "foo/ ReturnAllContainers",
                 "IsItemContainer " + _defRoot + "foo/bar.txt",
