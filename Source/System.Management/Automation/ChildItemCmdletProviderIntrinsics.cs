@@ -139,9 +139,33 @@ namespace System.Management.Automation
             // compile here, not in every recursive iteration
             var filter = new IncludeExcludeFilter(runtime.Include, runtime.Exclude, false);
 
-            GlobAndInvoke<ContainerCmdletProvider>(path, runtime,
-                (curPath, Provider) => ManuallyGetChildNames(Provider, curPath, "", returnContainers, recurse, filter, runtime)
-            );
+            // do the globbing manually, because the behavior depends on it...
+            foreach (var p in path)
+            {
+                CmdletProvider provider;
+                var doGlob = Globber.ShouldGlob(p, runtime);
+                // even if we don't actually glob, the next method will return the resolved path & provider
+                var resolved = Globber.GetGlobbedProviderPaths(p, runtime, out provider);
+                var navProvider = CmdletProvider.As<NavigationCmdletProvider>(provider);
+                foreach (var curPath in resolved)
+                {
+                    if (!doGlob && filter.CanBeIgnored && !recurse)
+                    {
+                        navProvider.GetChildNames(curPath, returnContainers, runtime);
+                        continue;
+                    }
+                    if ((recurse || !doGlob) && navProvider.IsItemContainer(curPath, runtime))
+                    {
+                        ManuallyGetChildNames(navProvider, curPath, "", returnContainers, recurse, filter, runtime);
+                        continue;
+                    }
+                    var cn = navProvider.GetChildName(curPath, runtime);
+                    if (filter.Accepts(cn))
+                    {
+                        runtime.WriteObject(cn);
+                    }
+                }
+            }
         }
 
         internal string GetChildName(string path, ProviderRuntime runtime)
