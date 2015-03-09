@@ -36,6 +36,13 @@ namespace Pash.Implementation
 
             if (!ShouldGlob(path, runtime))
             {
+                var itemProvider = provider as ItemCmdletProvider;
+                if (provider != null && !itemProvider.ItemExists(path, runtime))
+                {
+                    var msg = String.Format("An item with path {0} doesn't exist", path);
+                    runtime.WriteError(new ItemNotFoundException(msg).ErrorRecord);
+                    return results;
+                }
                 results.Add(path);
                 return results;
             }
@@ -144,12 +151,13 @@ namespace Pash.Implementation
         Collection<string> BuiltInGlobbing(CmdletProvider provider, string path, ProviderRuntime runtime)
         {
             var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
-            var navigationProvider = provider as NavigationCmdletProvider;
+            var navigationProvider = provider as NavigationCmdletProvider; // optional, so normal cast
             var ciIntrinsics = new ChildItemCmdletProviderIntrinsics(_sessionState);
             var pathIntrinsics = new PathIntrinsics(_sessionState);
             var componentStack = new Stack<string>();
             // first we split the path into globbable components and put them on a stack to work with
             var drive = runtime.PSDriveInfo;
+
             while (!String.IsNullOrEmpty(path))
             {
                 var child = ciIntrinsics.GetChildName(path, runtime);
@@ -169,7 +177,7 @@ namespace Pash.Implementation
                 // and add to workingPaths
                 if (!WildcardPattern.ContainsWildcardCharacters(globComp))
                 {
-                    workingPaths.AddRange(from p in partialPaths select Path.Combine(provider, p, globComp, runtime));
+                    workingPaths.AddRange(from p in partialPaths select pathIntrinsics.Combine(p, globComp, runtime));
                     continue;
                 }
 

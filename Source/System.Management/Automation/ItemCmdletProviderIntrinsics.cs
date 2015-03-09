@@ -243,10 +243,6 @@ namespace System.Management.Automation
                 {
                     exists = containerProvider.ItemExists(p, runtime);
                 }
-                catch (ItemNotFoundException)
-                {
-                    return false;
-                }
                 catch (Exception e)
                 {
                     HandleCmdletProviderInvocationException(e);
@@ -263,10 +259,7 @@ namespace System.Management.Automation
         {
             GlobAndInvoke<ItemCmdletProvider>(path, runtime,
                 (curPath, provider) => {
-                    if (VerifyItemExists(provider, curPath, runtime))
-                    {
-                        provider.GetItem(curPath, runtime);
-                    }
+                    provider.GetItem(curPath, runtime);
                 }
             );
         }

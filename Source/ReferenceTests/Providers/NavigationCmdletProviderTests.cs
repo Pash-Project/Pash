@@ -16,18 +16,20 @@ namespace ReferenceTests.Providers
 
         void AssertMessagesAreEqual(params string[] expected)
         {
-            CollectionAssert.AreEqual(expected, TestNavigationProvider.Messages);
+            AssertMessagesAreEqual(0, expected);
         }
 
-        void AssertMessagesContain(params string[] expected)
+        void AssertMessagesAreEqual(int optional, params string[] expected)
         {
-            CollectionAssert.IsSubsetOf(expected, TestNavigationProvider.Messages);
-        }
-
-
-        void AssertMessagesDoesntContain(params string[] expected)
-        {
-            CollectionAssert.IsNotSubsetOf(expected, TestNavigationProvider.Messages);
+            var msgs = TestNavigationProvider.Messages;
+            if (msgs.Count == expected.Length - optional)
+            {
+                Assert.That(msgs, Is.EqualTo(expected.Skip(optional)));
+            }
+            else
+            {
+                Assert.That(msgs, Is.EqualTo(expected));
+            }
         }
 
         string DriveToRoot(string path)
@@ -108,20 +110,15 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-Item " + _defDrive + "foo/b*";
             ReferenceHost.Execute(cmd);
-            var getMsgs = (from m in TestNavigationProvider.Messages
-                           where m.StartsWith("Get")
-                           select m).ToArray();
             // with PS "GetChildNames " + _defRoot + "foo ReturnMatchingContainers" is called
-            // twice at the beginning. don't know how to handle this other then the following:
-            if (TestNavigationProvider.Messages.Count > 3)
-            {
-                TestNavigationProvider.Messages.RemoveAt(0);
-            }
-            Assert.That(getMsgs, Is.EquivalentTo(new []{
+            // twice at the beginning. We won't check for this behavior
+            AssertMessagesAreEqual(
+                1, // first is optional
+                "GetChildNames " + _defRoot + "foo ReturnMatchingContainers",
                 "GetChildNames " + _defRoot + "foo ReturnMatchingContainers",
                 "GetItem " + _defRoot + "foo/bar.txt",
                 "GetItem " + _defRoot + "foo/baz.doc"
-            }));
+            );
         }
 
         [Test]
@@ -176,9 +173,12 @@ namespace ReferenceTests.Providers
             var rpath = _defRoot + "foo";
             ReferenceHost.Execute(cmd);
             // Powershell shomehow calls ItemExists twice. We won't check for this behavior
-            var msgCount = TestNavigationProvider.Messages.Count;
-            Assert.That(TestNavigationProvider.Messages[msgCount - 2], Is.EqualTo("ItemExists " + rpath));
-            Assert.That(TestNavigationProvider.Messages[msgCount - 1], Is.EqualTo("RenameItem " + rpath + " foobar"));
+            AssertMessagesAreEqual(
+                1, // first is optional
+                "ItemExists " + rpath,
+                "ItemExists " + rpath,
+                "RenameItem " + rpath + " foobar"
+            );
         }
 
         [Test]
