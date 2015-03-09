@@ -328,12 +328,19 @@ namespace ReferenceTests.Providers
             var recurseParam = recurse ? " -Recurse" : "";
             var cmd = "Copy-Item " + _defDrive + "foo/ " + _secDrive + recurseParam;
             ReferenceHost.Execute(cmd);
+            // in Pash the first two operations are called in reverse order (because of our code design)
+            // so we need one of the two outputs
             Assert.That(ExecutionMessages, AreMatching(
                 "ItemExists " + _defRoot + "foo",
                 "IsItemContainer " + _secRoot,
                 "IsItemContainer " + _defRoot + "foo",
                 "CopyItem " + _defRoot + "foo " + _secRoot + " " + recurse
-            ));
+            ).Or.Matches(AreMatching(
+                "IsItemContainer " + _secRoot,
+                "ItemExists " + _defRoot + "foo",
+                "IsItemContainer " + _defRoot + "foo",
+                "CopyItem " + _defRoot + "foo " + _secRoot + " " + recurse
+            )));
         }
 
         [Test]

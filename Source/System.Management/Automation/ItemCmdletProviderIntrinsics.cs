@@ -186,7 +186,9 @@ namespace System.Management.Automation
         {
             ProviderInfo providerInfo;
             var destination = Globber.GetProviderSpecificPath(destinationPath, runtime, out providerInfo);
-            var destIsContainer = IsContainer(destination, runtime);
+            // make sure we don't use the version of IsContainer that globs, or we will have unnecessary provider callbacks
+            var destProvider = providerInfo.CreateInstance() as ContainerCmdletProvider; // it's okay to be null
+            var destIsContainer = IsContainer(destProvider, destination, runtime);
 
             GlobAndInvoke<ContainerCmdletProvider>(path, runtime,
                 (curPath, provider) => {
