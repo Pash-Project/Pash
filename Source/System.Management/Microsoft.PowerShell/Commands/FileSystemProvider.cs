@@ -20,6 +20,7 @@ namespace Microsoft.PowerShell.Commands
         IPropertyCmdletProvider,
         ISecurityDescriptorCmdletProvider
     {
+        internal const string FallbackDriveName = "File";
         private enum ItemType {
             Unknown,
             Directory,
@@ -188,63 +189,62 @@ namespace Microsoft.PowerShell.Commands
 
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
-            Collection<PSDriveInfo> collection = new Collection<PSDriveInfo>();
-
-            // TODO: Console.WriteLine("Mono: Before GetDrives");
-            var drives = System.IO.DriveInfo.GetDrives();
-            // TODO: Console.WriteLine("Mono: After GetDrives");
-
-            System.Diagnostics.Debug.WriteLine("Number of drives: " + ((drives == null) ? "Null drives" : drives.Length.ToString()));
-
-            // TODO: Resolve hack to get around Mono bug where System.IO.DriveInfo.GetDrives() returns a single blank drive.
-            if (MonoHasBug11923())
+            /*
+             * The concept of drives in Powershell is obviously inspired by the
+             * Windows file system. However, in combination with providers, this concept
+             * has much more power as it allows access to arbitrary data stores.
+             * Handling paths is therefore a little bit more complicated, because we don't
+             * just deal with the FS. As a consequence, we need to make sure that
+             * drive qualified path can be identified with the colon and that drives have valid
+             * names.
+             * On non-Windows machines, mono would return "drives" like '/', '/proc', etc, because
+             * that's what's closest to Windows-drives. However, we can't adopt these drives,
+             * because their names are invalid and wouldn't be native on *nix systems with a colon.
+             * So instead, if we have a platform with mono drives that don't include a colon itself,
+             * and therefore aren't compatible to the PS/Pash drive concept, we will use a single
+             * default drive called "File" (see FallbackDriveName) instead to uniquely access the
+             * root of the file system.
+             * This drive get's a hidden flag, so it will be ignored in various places when Pash
+             * would for example display the path. Doing this should result in a feeling that is native
+             * for the platform.
+             */
+            var fsDrives = System.IO.DriveInfo.GetDrives();
+            var drives = (from fd in fsDrives
+                          where fd.Name.Contains(":")
+                          select NewDrive(fd)).ToList();
+            if (drives.Count == 0)
             {
-                PSDriveInfo info = new PSDriveInfo("/", base.ProviderInfo, "/", "Root", null);
-                info.RemovableDrive = false;
-
-                collection.Add(info);
-                return collection;
+                var root = System.IO.Path.GetPathRoot(Environment.CurrentDirectory);
+                var defaultDrive = new PSDriveInfo(FallbackDriveName, ProviderInfo, root, "Root", null);
+                defaultDrive.Hidden = true;
+                drives.Add(defaultDrive);
             }
-
-            if (drives != null)
-            {
-                foreach (System.IO.DriveInfo driveInfo in drives)
-                {
-                    System.Diagnostics.Debug.WriteLine(string.Format("drive '{0}' type '{1}' root '{2}'", driveInfo.Name, driveInfo.DriveType.ToString(), driveInfo.RootDirectory));
-
-                    // Support for Mono names - there are no ':' (colon) in the name
-                    Path name = driveInfo.Name;
-                    if (driveInfo.Name.IndexOf(':') > 0)
-                        name = driveInfo.Name.Substring(0, 1);
-
-                    Path description = string.Empty;
-                    Path root = driveInfo.Name;
-                    if (driveInfo.DriveType == System.IO.DriveType.Fixed)
-                    {
-                        try
-                        {
-                            description = driveInfo.VolumeLabel;
-                            root = driveInfo.RootDirectory.FullName;
-                        }
-                        catch
-                        {
-                        }
-                    }
-                    PSDriveInfo info = new PSDriveInfo(name, base.ProviderInfo, root, description, null);
-                    info.RemovableDrive = driveInfo.DriveType != System.IO.DriveType.Fixed;
-
-                    collection.Add(info);
-                }
-            }
-
-            return collection;
+            return new Collection<PSDriveInfo>(drives);
         }
 
-        // See: https://bugzilla.xamarin.com/show_bug.cgi?id=11923
-        static bool MonoHasBug11923()
+        private PSDriveInfo NewDrive(System.IO.DriveInfo fsDrive)
         {
-            var drives = System.IO.DriveInfo.GetDrives();
-            return drives.Length == 1 && drives[0].Name.Length == 0;
+            Path name = fsDrive.Name;
+            var iColon = fsDrive.Name.IndexOf(":");
+            if (iColon > 0)
+                name = fsDrive.Name.Substring(0, iColon);
+
+            Path description = string.Empty;
+            Path root = fsDrive.Name;
+            if (fsDrive.DriveType == System.IO.DriveType.Fixed)
+            {
+                try
+                {
+                    description = fsDrive.VolumeLabel;
+                    root = fsDrive.RootDirectory.FullName;
+                }
+                catch
+                {
+                }
+            }
+            PSDriveInfo info = new PSDriveInfo(name, base.ProviderInfo, root, description, null);
+            info.RemovableDrive = fsDrive.DriveType != System.IO.DriveType.Fixed;
+            return info;
         }
 
         protected override void InvokeDefaultAction(string path) { throw new NotImplementedException(); }

@@ -525,7 +525,7 @@ namespace ReferenceTests.Providers
         {
             var cmd = "(Resolve-Path " + _defDrive + "foo/*.txt).Path";
             var sep = System.IO.Path.DirectorySeparatorChar;
-            ExecuteAndCompareTypedResult(cmd, TestNavigationProvider.DefaultDriveName + ":" + sep + sep + "foo/bar.txt");
+            ExecuteAndCompareTypedResult(cmd, TestNavigationProvider.DefaultDriveName + ":" + sep + "foo/bar.txt");
             Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + _defRoot + "foo",
                 "HasChildItems " + _defRoot + "foo",

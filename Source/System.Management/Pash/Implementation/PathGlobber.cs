@@ -113,7 +113,10 @@ namespace Pash.Implementation
         internal string GetDriveQualifiedPath(string providerPath, PSDriveInfo drive)
         {
             // expects a provider specific path
-            if (drive == null || String.IsNullOrEmpty(drive.Name))
+            // NOTE: When a drive is hidden, it means that we usually don't want to see the
+            // drive qualifier. This is for example the case for the default file system drive
+            // on non-Windows systems
+            if (drive == null || String.IsNullOrEmpty(drive.Name) || drive.Hidden)
             {
                 return providerPath;
             }
@@ -123,7 +126,7 @@ namespace Pash.Implementation
             {
                 path = path.Substring(drive.Root.Length).TrimStart(sep, PathIntrinsics.WrongSlash);
             }
-            return drive.Name + ":" + sep + sep + path;
+            return drive.Name + ":" + sep + path;
         }
 
         internal string GetProviderQualifiedPath(string providerPath, ProviderInfo provider)

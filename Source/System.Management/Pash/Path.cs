@@ -2,6 +2,7 @@
 using System;
 using System.Management.Automation;
 using Pash.Implementation;
+using Microsoft.PowerShell.Commands;
 
 namespace System.Management
 {
@@ -312,7 +313,7 @@ namespace System.Management
             if (this.StartsWithSlash())
             {
                 // return unix drive
-                return CorrectSlash;
+                return FileSystemProvider.FallbackDriveName;
             }
 
             int iDelimiter = _rawPath.IndexOf(':');
