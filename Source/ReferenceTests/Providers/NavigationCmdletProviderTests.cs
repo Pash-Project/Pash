@@ -411,10 +411,10 @@ namespace ReferenceTests.Providers
             Assert.That(ExecutionMessages, AreMatchedBy(
                 "ItemExists " + _defRoot,
                 "HasChildItems " + _defRoot,
-                "GetChildNames " + _defRoot,
+                "GetChildNames " + _defRoot + " ReturnMatchingContainers",
                 "ItemExists " + _defRoot,
                 "HasChildItems " + _defRoot,
-                "GetChildNames " + _defRoot
+                "GetChildNames " + _defRoot + " ReturnMatchingContainers"
             ).Or.Matches(AreMatchedBy(
                 "ItemExists " + rootWithoutSlash,
                 "HasChildItems " + rootWithoutSlash,
