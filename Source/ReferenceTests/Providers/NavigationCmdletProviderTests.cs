@@ -223,8 +223,9 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem " + _defDrive + "foo -Recurse";
             ReferenceHost.Execute(cmd);
+            // Powershell calls "IsItemContainer " + _defRoot + "foo" twice, we don't
             Assert.That(ExecutionMessages, AreMatchedBy(
-                "IsItemContainer " + _defRoot + "foo",
+                "? IsItemContainer " + _defRoot + "foo",
                 "ItemExists " + _defRoot + "foo",
                 "IsItemContainer " + _defRoot + "foo",
                 "GetChildItems " + _defRoot + "foo True"
@@ -288,10 +289,15 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-ChildItem -Recurse " + _secDrive + "*.txt";
             ReferenceHost.Execute(cmd);
+            var secRootWithoutSlash = _secRoot.Substring(0, _secRoot.Length - 1);
             Assert.That(ExecutionMessages, AreMatchedBy(
-                "ItemExists " + _secRoot,
-                "HasChildItems " + _secRoot,
-                "GetChildNames " + _secRoot + " ReturnMatchingContainers",
+                // next 3 with or without last slash because of the #trailingSeparatorAmbiguity
+                "ItemExists " + _secRoot +
+                    " __OR__ ItemExists " + secRootWithoutSlash,
+                "HasChildItems " + _secRoot +
+                    " __OR__ HasChildItems " + secRootWithoutSlash,
+                "GetChildNames " + _secRoot + " ReturnMatchingContainers" +
+                    " __OR__ GetChildNames " + secRootWithoutSlash + " ReturnMatchingContainers",
                 "IsItemContainer " + _secRoot + "bar.txt",
                 "ItemExists " + _secRoot,
                 "IsItemContainer " + _secRoot,
@@ -489,13 +495,13 @@ namespace ReferenceTests.Providers
         [Test]
         public void NavigationProviderSupportsMoveItem()
         {
-            var cmd = "Move-Item " + _defDrive + "foo/ " + _secDrive;
+            var cmd = "Move-Item " + _defDrive + "foo " + _secDrive;
             ReferenceHost.Execute(cmd);
             Assert.That(ExecutionMessages, AreMatchedBy(
-                // well we have here a triple-check. Maybe remove that for check against Pash
                 "ItemExists " + _defRoot + "foo",
-                "ItemExists " + _defRoot + "foo",
-                "ItemExists " + _defRoot + "foo",
+                // PS triple checks the existance. In Pash we only need to get to know this once
+                "? ItemExists " + _defRoot + "foo",
+                "? ItemExists " + _defRoot + "foo",
                 "MoveItem " + _defRoot + "foo " + _secRoot
             ));
         }
@@ -503,13 +509,13 @@ namespace ReferenceTests.Providers
         [Test]
         public void NavigationProviderSupportsMoveItemContainerOnLeaf()
         {
-            var cmd = "Move-Item " + _defDrive + "foo/ " + _secDrive + "bar.txt";
+            var cmd = "Move-Item " + _defDrive + "foo " + _secDrive + "bar.txt";
             ReferenceHost.Execute(cmd);
             Assert.That(ExecutionMessages, AreMatchedBy(
-                // well we have here a triple-check. Maybe remove that for check against Pash
                 "ItemExists " + _defRoot + "foo",
-                "ItemExists " + _defRoot + "foo",
-                "ItemExists " + _defRoot + "foo",
+                // PS triple checks the existance. In Pash we only need to get to know this once
+                "? ItemExists " + _defRoot + "foo",
+                "? ItemExists " + _defRoot + "foo",
                 "MoveItem " + _defRoot + "foo " + _secRoot + "bar.txt"
             ));
         }
@@ -546,7 +552,7 @@ namespace ReferenceTests.Providers
             ));
         }
 
-        [Test]
+        [Test, Ignore("We need to wait for location support to enable this")]
         public void NavigationProviderSupportsGetItemWithRelativePath()
         {
             var cmd = NewlineJoin(

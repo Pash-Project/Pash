@@ -189,7 +189,7 @@ namespace System.Management.Automation
             // make sure we don't use the version of IsContainer that globs, or we will have unnecessary provider callbacks
             var destProvider = providerInfo.CreateInstance() as ContainerCmdletProvider; // it's okay to be null
             var destIsContainer = IsContainer(destProvider, destination, runtime);
-
+            // TODO: make sure destination is in the same provider
             GlobAndInvoke<ContainerCmdletProvider>(path, runtime,
                 (curPath, provider) => {
                     // Affected by #trailingSeparatorAmbiguity
@@ -320,11 +320,18 @@ namespace System.Management.Automation
             throw new NotImplementedException();
         }
 
-        internal void Move(string[] path, string destination, ProviderRuntime runtime)
+        internal void Move(string[] path, string destinationPath, ProviderRuntime runtime)
         {
-            // TODO: I think Powershell checks whether we are currently in the path we want to remove
-            //       (or a subpath). Check this and throw an error if it's true
-            throw new NotImplementedException();
+            ProviderInfo providerInfo;
+            var destination = Globber.GetProviderSpecificPath(destinationPath, runtime, out providerInfo);
+            GlobAndInvoke<NavigationCmdletProvider>(path, runtime,
+                (curPath, provider) => {
+                    // TODO: I think Powershell checks whether we are currently in the path we want to remove
+                    //       (or a subpath). Check this and throw an error if it's true
+                    // TODO: make sure destination is in the same provider
+                    provider.MoveItem(curPath, destination, runtime);
+                }
+            );
         }
 
         internal object MoveItemDynamicParameters(string path, string destination, ProviderRuntime runtime)

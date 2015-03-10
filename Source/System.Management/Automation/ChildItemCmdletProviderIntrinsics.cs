@@ -253,27 +253,27 @@ namespace System.Management.Automation
                                                         IncludeExcludeFilter filter, ProviderRuntime runtime)
         {
             // we deal with a container: get all child items (all containers if we recurse)
-            var childNames = GetValidChildNames(provider, path, ReturnContainers.ReturnMatchingContainers, runtime);
-            foreach (var childName in childNames)
+            Dictionary<string, bool> matches = null;
+            // When a provider specific filter is set, and we need to recurse, we need to check recurse into all
+            // containers, but just get those that match the internal filter. Therefore we construct a lookup dict.
+            // Looking up in a dictionary whether or not the itemis a match should be faster than using a list
+            // If there is no filter, then ReturnAllContainers and ReturnMatchingContainers don't differ
+            if (!String.IsNullOrEmpty(runtime.Filter))
             {
-                // if the filter accepts the child (leaf or container), get it
-                if (filter.Accepts(childName))
-                {
-                    var childPath = Path.Combine(provider, path, childName, runtime);
-                    provider.GetItem(childPath, runtime);
-                }
+                matches = GetValidChildNames(provider, path, ReturnContainers.ReturnMatchingContainers,
+                                             runtime).ToDictionary(c => c, c => true);
             }
-            // check for recursion
-            if (!recurse)
-            {
-                return;
-            }
-            // we are in recursion: dive into child containers
-            childNames = GetValidChildNames(provider, path, ReturnContainers.ReturnAllContainers, runtime);
+            var childNames = GetValidChildNames(provider, path, ReturnContainers.ReturnAllContainers, runtime);
             foreach (var childName in childNames)
             {
                 var childPath = Path.Combine(provider, path, childName, runtime);
-                if (Item.IsContainer(childPath, runtime))
+                // if the filter accepts the child (leaf or container) and it's potentially a filter match, get it
+                if (filter.Accepts(childName) && (matches == null || matches.ContainsKey(childName)))
+                {
+                    provider.GetItem(childPath, runtime);
+                }
+                // if we need to recurse and deal with a container, dive into it
+                if (recurse && Item.IsContainer(childPath, runtime))
                 {
                     ManuallyGetChildItemsFromContainer(provider, childPath, true, filter, runtime);
                 }
