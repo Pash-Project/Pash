@@ -104,12 +104,15 @@ namespace System.Management.Automation
 
         public string ParseChildName(string path)
         {
-            return _sessionStateGlobal.GetPathChildName(path);
+            var runtime = new ProviderRuntime(_sessionState);
+            var res = ParseChildName(path, runtime);
+            runtime.ThrowFirstErrorOrContinue();
+            return res;
         }
 
         public string ParseParent(string path, string root)
         {
-            return _sessionStateGlobal.GetParentPath(path, root);
+            throw new NotImplementedException();
         }
 
         public PathInfo PopLocation(string stackName)
@@ -202,7 +205,24 @@ namespace System.Management.Automation
             return navProvider.NormalizeRelativePath(path, basePath, runtime);
         }
 
-        //internal string ParseChildName(string path, ProviderRuntime runtime);
+        internal string ParseChildName(string path, ProviderRuntime runtime)
+        {
+            ProviderInfo info;
+            path = Globber.GetProviderSpecificPath(path, runtime, out info);
+            var provider = _sessionState.Provider.GetInstance(info);
+            return ParseChildName(provider, path, runtime);
+        }
+
+        internal string ParseChildName(CmdletProvider provider, string path, ProviderRuntime runtime)
+        {
+            var navProvider = provider as NavigationCmdletProvider;
+            if (navProvider == null)
+            {
+                return path;
+            }
+            return navProvider.GetChildName(path, runtime);
+        }
+
         //internal string ParseParent(string path, string root, ProviderRuntime runtime);
         //internal PathInfo SetLocation(string path, ProviderRuntime runtime);
 
@@ -212,9 +232,6 @@ namespace System.Management.Automation
         }
 
         #region Path Operations
-        // TODO: make a common class that works with a path
-
-        // TODO: reverse on Unix?
         public static readonly char CorrectSlash = System.IO.Path.DirectorySeparatorChar;
         public static readonly char WrongSlash = System.IO.Path.AltDirectorySeparatorChar;
 

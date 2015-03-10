@@ -41,8 +41,11 @@ namespace Pash.Implementation
 
             if (!ShouldGlob(path, runtime))
             {
-                var itemProvider = provider as ItemCmdletProvider;
-                if (itemMustExist && itemProvider != null && !itemProvider.ItemExists(path, runtime))
+                // Although even ItemCmdletProvider supports ItemExists, PS doesn't seem
+                // to throw errors when resolving paths with ItemProviders, only for ContainerProviders or higher
+                // this behavior can be seen in the tests
+                var containerProvider = provider as ContainerCmdletProvider;
+                if (itemMustExist && containerProvider != null && !containerProvider.ItemExists(path, runtime))
                 {
                     var msg = String.Format("An item with path {0} doesn't exist", path);
                     runtime.WriteError(new ItemNotFoundException(msg).ErrorRecord);
@@ -144,7 +147,7 @@ namespace Pash.Implementation
             // TODO: validate drive name?
             drive = _sessionState.Drive.Get(driveName);
             providerInfo = drive.Provider;
-            path = path.Substring(idx + 1);
+            path = path.Substring(idx + 1).TrimStart(PathIntrinsics.CorrectSlash, PathIntrinsics.WrongSlash);
             return Path.Combine(providerInfo.CreateInstance(), drive.Root, path, runtime);
         }
 
@@ -189,7 +192,7 @@ namespace Pash.Implementation
 
             while (!String.IsNullOrEmpty(path))
             {
-                var child = ciIntrinsics.GetChildName(path, runtime);
+                var child = pathIntrinsics.ParseChildName(containerProvider, path, runtime);
                 componentStack.Push(child);
                 path = navigationProvider == null ? "" : navigationProvider.GetParentPath(path, drive.Root, runtime);
 

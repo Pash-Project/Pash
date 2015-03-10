@@ -146,34 +146,26 @@ namespace System.Management.Automation
                 var doGlob = Globber.ShouldGlob(p, runtime);
                 // even if we don't actually glob, the next method will return the resolved path & provider
                 var resolved = Globber.GetGlobbedProviderPaths(p, runtime, out provider);
-                var navProvider = CmdletProvider.As<NavigationCmdletProvider>(provider);
+                var contProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
                 foreach (var curPath in resolved)
                 {
                     if (!doGlob && filter.CanBeIgnored && !recurse)
                     {
-                        navProvider.GetChildNames(curPath, returnContainers, runtime);
+                        contProvider.GetChildNames(curPath, returnContainers, runtime);
                         continue;
                     }
-                    if ((recurse || !doGlob) && navProvider.IsItemContainer(curPath, runtime))
+                    if ((recurse || !doGlob) && Item.IsContainer(contProvider, curPath, runtime))
                     {
-                        ManuallyGetChildNames(navProvider, curPath, "", returnContainers, recurse, filter, runtime);
+                        ManuallyGetChildNames(contProvider, curPath, "", returnContainers, recurse, filter, runtime);
                         continue;
                     }
-                    var cn = navProvider.GetChildName(curPath, runtime);
+                    var cn = Path.ParseChildName(contProvider, curPath, runtime);
                     if (filter.Accepts(cn))
                     {
                         runtime.WriteObject(cn);
                     }
                 }
             }
-        }
-
-        internal string GetChildName(string path, ProviderRuntime runtime)
-        {
-            ProviderInfo info;
-            path = Globber.GetProviderSpecificPath(path, runtime, out info);
-            var provider = SessionState.Provider.GetInstance(info) as NavigationCmdletProvider;
-            return provider == null ? path : provider.GetChildName(path, runtime);
         }
 
         internal List<string> GetValidChildNames(ContainerCmdletProvider provider, string providerPath, ReturnContainers returnContainers, ProviderRuntime runtime)
@@ -217,7 +209,7 @@ namespace System.Management.Automation
                 return curPath;
             }
             clearIncludeFilter = true;
-            var childName = GetChildName(curPath, runtime);
+            var childName = Path.ParseChildName(curPath, runtime);
             runtime.Include.Add(childName);
             return curPath.Substring(0, curPath.Length - childName.Length);
         }
@@ -225,7 +217,7 @@ namespace System.Management.Automation
         private void GetItemOrChildItems(ContainerCmdletProvider provider, string path, bool recurse, ProviderRuntime runtime)
         {
             // If path identifies a container it gets all child items (recursively or not). Otherwise it returns the leaf
-            if (Item.IsContainer(path, runtime))
+            if (Item.IsContainer(provider, path, runtime))
             {
                 provider.GetChildItems(path, recurse, runtime);
                 return;
@@ -242,7 +234,7 @@ namespace System.Management.Automation
                 ManuallyGetChildItemsFromContainer(provider, path, recurse, filter, runtime);
                 return;
             }
-            var childName = GetChildName(path, runtime);
+            var childName = Path.ParseChildName(provider, path, runtime);
             if (filter.Accepts(childName))
             {
                 provider.GetItem(path, runtime);

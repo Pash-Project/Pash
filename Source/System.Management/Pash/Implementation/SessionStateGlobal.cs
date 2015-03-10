@@ -232,16 +232,6 @@ namespace Pash.Implementation
             throw new NotImplementedException();
         }
 
-        internal string GetPathChildName(string path)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal string GetParentPath(string path, string root)
-        {
-            throw new NotImplementedException();
-        }
-
         internal PathInfo PopLocation(string stackName)
         {
             throw new NotImplementedException();

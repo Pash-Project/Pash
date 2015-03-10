@@ -164,7 +164,7 @@ namespace Microsoft.PowerShell.Commands
 
         protected override string GetParentPath(string path, string root)
         {
-            Path parentPath = base.GetParentPath(path, root);
+            Path parentPath = new Path(path).GetParentPath(root);
 
             // TODO: deal with UNC
             if (!path.StartsWith("\\\\")) // UNC?
@@ -486,17 +486,7 @@ namespace Microsoft.PowerShell.Commands
 
         internal string NormalizePath(string path)
         {
-            // FIXME: this is more a workaround until we properly reimplement this provider or check how PathGloberr
-            // needs to behave in detail
-            // Currently PathGlobber strips the drive in front (as it's provided through PSDriveInfo). However,
-            // simply appending the PSDriveInfo.Root for all paths right in the globber would break other functionality
-            // As currently the only provider affected by this is our FileSystemProvider, we will do this workaround
-            // until it's evaluated what's the correct behavior
             var p = new Path(path).NormalizeSlashes();
-            if (PSDriveInfo != null && !p.HasDrive() && !p.StartsWith(".")) // only append drive root if not relative
-            {
-                p = new Path(PSDriveInfo.Root).Combine(path);
-            }
             return p.ToString();
         }
 

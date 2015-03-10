@@ -219,7 +219,7 @@ namespace ReferenceTests
                     Assert.IsNull(results[i]);
                     continue;
                 }
-                Assert.NotNull(results[i], i + "th result is null, but should be" + expectedValues[i].ToString());
+                Assert.NotNull(results[i], i + "th result is null, but should be " + expectedValues[i].ToString());
                 var res = results[i].BaseObject;
                 var restype = res.GetType();
                 Assert.AreSame(expected.GetType(), restype);

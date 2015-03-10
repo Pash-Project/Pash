@@ -363,7 +363,7 @@ namespace System.Management.Automation
                 // only allow globbing if name is used. otherwise it doesn't make sense
                 if (validName)
                 {
-                    resolvedPaths = Globber.GetGlobbedProviderPaths(path, runtime, out provider);
+                    resolvedPaths = Globber.GetGlobbedProviderPaths(path, runtime, false, out provider);
                 }
                 else
                 {
