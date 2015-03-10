@@ -184,14 +184,21 @@ namespace System.Management.Automation
 
         internal void Copy(string[] path, string destinationPath, bool recurse, CopyContainers copyContainers, ProviderRuntime runtime)
         {
-            ProviderInfo providerInfo;
-            var destination = Globber.GetProviderSpecificPath(destinationPath, runtime, out providerInfo);
+            ProviderInfo destinationProvider;
+            var destination = Globber.GetProviderSpecificPath(destinationPath, runtime, out destinationProvider);
             // make sure we don't use the version of IsContainer that globs, or we will have unnecessary provider callbacks
-            var destProvider = providerInfo.CreateInstance() as ContainerCmdletProvider; // it's okay to be null
+            var destProvider = destinationProvider.CreateInstance() as ContainerCmdletProvider; // it's okay to be null
             var destIsContainer = IsContainer(destProvider, destination, runtime);
-            // TODO: make sure destination is in the same provider
             GlobAndInvoke<ContainerCmdletProvider>(path, runtime,
                 (curPath, provider) => {
+                    if (!runtime.PSDriveInfo.Provider.Equals(destinationProvider))
+                    {
+                        var msg = "The source cannot be copied to the destination, because they're not from the same provider";
+                        var error = new PSArgumentException(msg, "CopyItemSourceAndDestinationNotSameProvider",
+                            ErrorCategory.InvalidArgument);
+                        runtime.WriteError(error.ErrorRecord);
+                        return;
+                    }
                     // Affected by #trailingSeparatorAmbiguity
                     // PS would make sure the trailing slash of curPath is removed
                     // check if src is a container
@@ -322,13 +329,20 @@ namespace System.Management.Automation
 
         internal void Move(string[] path, string destinationPath, ProviderRuntime runtime)
         {
-            ProviderInfo providerInfo;
-            var destination = Globber.GetProviderSpecificPath(destinationPath, runtime, out providerInfo);
+            ProviderInfo destinationProvider;
+            var destination = Globber.GetProviderSpecificPath(destinationPath, runtime, out destinationProvider);
             GlobAndInvoke<NavigationCmdletProvider>(path, runtime,
                 (curPath, provider) => {
                     // TODO: I think Powershell checks whether we are currently in the path we want to remove
                     //       (or a subpath). Check this and throw an error if it's true
-                    // TODO: make sure destination is in the same provider
+                    if (!runtime.PSDriveInfo.Provider.Equals(destinationProvider))
+                    {
+                        var msg = "The source cannot be moved to the destination, because they're not from the same provider";
+                        var error = new PSArgumentException(msg, "MoveItemSourceAndDestinationNotSameProvider",
+                            ErrorCategory.InvalidArgument);
+                        runtime.WriteError(error.ErrorRecord);
+                        return;
+                    }
                     provider.MoveItem(curPath, destination, runtime);
                 }
             );
