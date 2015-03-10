@@ -1,5 +1,6 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
@@ -34,6 +35,11 @@ namespace Microsoft.PowerShell.Commands
         protected override void CopyItem(string path, string destinationPath, bool recurse)
         {
             throw new NotImplementedException();
+        }
+
+        protected override string MakePath(string parent, string child)
+        {
+            return new Path(parent).Combine(child).ToString();
         }
 
         protected override void GetChildItems(string path, bool recurse)
@@ -138,20 +144,10 @@ namespace Microsoft.PowerShell.Commands
                 path = ".";
             }
 
-            GetChildItems(path, false);
-
-            foreach (PSObject item in ProviderRuntime.ThrowFirstErrorOrReturnResults())
+            var names = GetChildNamesPrivate(path);
+            foreach (var name in names)
             {
-                var fileInfo = item.BaseObject as System.IO.FileInfo;
-                var directoryInfo = item.BaseObject as System.IO.DirectoryInfo;
-                if (fileInfo != null)
-                {
-                    ProviderRuntime.WriteObject(fileInfo.Name);
-                }
-                else if (directoryInfo != null)
-                {
-                    ProviderRuntime.WriteObject(directoryInfo.Name);
-                }
+                ProviderRuntime.WriteObject(name);
             }
         }
 
@@ -185,7 +181,10 @@ namespace Microsoft.PowerShell.Commands
             return path;
         }
 
-        protected override bool HasChildItems(string path) { throw new NotImplementedException(); }
+        protected override bool HasChildItems(string path)
+        {
+            return GetChildNamesPrivate(path).Count > 0;
+        }
 
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
@@ -298,6 +297,7 @@ namespace Microsoft.PowerShell.Commands
 
         protected override bool IsItemContainer(string path)
         {
+            path = path == "" ? "." : path; // Workaround until our globber handles relative paths
             path = NormalizePath(path);
 
             return (new System.IO.DirectoryInfo(path)).Exists;
@@ -307,6 +307,7 @@ namespace Microsoft.PowerShell.Commands
 
         protected override bool ItemExists(string path)
         {
+            path = path == "" ? "." : path; // Workaround until our globber handles relative paths
             path = NormalizePath(path);
             try
             {
@@ -488,6 +489,18 @@ namespace Microsoft.PowerShell.Commands
         {
             var p = new Path(path).NormalizeSlashes();
             return p.ToString();
+        }
+
+        private List<string> GetChildNamesPrivate(string path)
+        {
+            path = path == "" ? "." : path; // Workaround until our globber handles relative paths
+            path = NormalizePath(path);
+            System.IO.DirectoryInfo directory = new System.IO.DirectoryInfo(path);
+            if (!directory.Exists)
+            {
+                return new List<string> { new System.IO.FileInfo(path).Name };
+            }
+            return (from fs in directory.GetFileSystemInfos() select fs.Name).ToList();
         }
 
         private ItemType GetItemType(string type)

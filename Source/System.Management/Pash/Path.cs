@@ -133,12 +133,12 @@ namespace System.Management
         public Path GetParentPath(Path root)
         {
             var path = this;
-
-            path = path.NormalizeSlashes();
-            path = path.TrimEndSlash();
+            // normalize first
+            path = path.NormalizeSlashes().TrimEndSlash();
 
             if (root != null)
             {
+                root = root.NormalizeSlashes().TrimEndSlash();
                 if (string.Equals(path, root, StringComparison.CurrentCultureIgnoreCase))
                 {
                     return new Path(CorrectSlash, WrongSlash, string.Empty);
@@ -185,7 +185,7 @@ namespace System.Management
 
             if (string.IsNullOrEmpty(parent) && string.IsNullOrEmpty(child))
             {
-                return child;
+                return CorrectSlash; // root
             }
 
             if (string.IsNullOrEmpty(parent) && !string.IsNullOrEmpty(child))

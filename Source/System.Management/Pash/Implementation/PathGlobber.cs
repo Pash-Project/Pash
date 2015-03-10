@@ -194,8 +194,13 @@ namespace Pash.Implementation
             {
                 var child = pathIntrinsics.ParseChildName(containerProvider, path, runtime);
                 componentStack.Push(child);
-                path = navigationProvider == null ? "" : navigationProvider.GetParentPath(path, drive.Root, runtime);
-
+                var parentPath = navigationProvider == null ? "" : navigationProvider.GetParentPath(path, drive.Root, runtime);
+                if (parentPath.Equals(path))
+                {
+                    throw new PSInvalidOperationException("Provider's implementation of GetParentPath is inconsistent",
+                        "ParentOfPathIsPath", ErrorCategory.InvalidResult);
+                }
+                path = parentPath;
             }
 
             // we create a working list with partially globbed paths. each iteration will take all items from the
@@ -210,7 +215,7 @@ namespace Pash.Implementation
                 // and add to workingPaths
                 if (!WildcardPattern.ContainsWildcardCharacters(globComp))
                 {
-                    workingPaths.AddRange(from p in partialPaths select pathIntrinsics.Combine(p, globComp, runtime));
+                    workingPaths.AddRange(from p in partialPaths select pathIntrinsics.Combine(containerProvider, p, globComp, runtime));
                     continue;
                 }
 
