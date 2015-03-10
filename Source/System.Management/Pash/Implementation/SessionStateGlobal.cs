@@ -192,7 +192,7 @@ namespace Pash.Implementation
                     throw new NullReferenceException("CurrentDrive is null.");
                 }
                 PSDriveInfo driveInfo = CurrentDrive;
-                return new PathInfo(driveInfo, driveInfo.Provider, driveInfo.CurrentLocation, _globalExecutionContext.SessionState);
+                return new PathInfo(driveInfo, driveInfo.CurrentLocation, _globalExecutionContext.SessionState);
             }
         }
 
@@ -228,11 +228,6 @@ namespace Pash.Implementation
         }
 
         internal PathInfoStack LocationStack(string stackName)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal string NormalizeRelativePath(string path, string basePath)
         {
             throw new NotImplementedException();
         }

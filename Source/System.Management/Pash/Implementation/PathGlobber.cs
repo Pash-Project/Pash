@@ -106,6 +106,28 @@ namespace Pash.Implementation
             return path;
         }
 
+        internal string GetDriveQualifiedPath(string providerPath, PSDriveInfo drive)
+        {
+            // expects a provider specific path
+            if (drive == null || String.IsNullOrEmpty(drive.Name))
+            {
+                return providerPath;
+            }
+            var path = providerPath;
+            var sep = PathIntrinsics.CorrectSlash;
+            if (path.StartsWith(drive.Root))
+            {
+                path = path.Substring(drive.Root.Length).TrimStart(sep, PathIntrinsics.WrongSlash);
+            }
+            return drive.Name + ":" + sep + sep + path;
+        }
+
+        internal string GetProviderQualifiedPath(string providerPath, ProviderInfo provider)
+        {
+            // expects a provider specific path
+            return provider.Name + "::" + providerPath;
+        }
+
         string GetProviderPathFromProviderQualifiedPath(string path, out ProviderInfo providerInfo)
         {
             var idx = path.IndexOf("::");

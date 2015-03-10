@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands.Management
@@ -12,7 +13,15 @@ namespace Microsoft.PowerShell.Commands.Management
 
         protected override void ProcessRecord()
         {
-
+            var resolved = SessionState.Path.GetResolvedPSPathFromPSPath(InternalPaths, ProviderRuntime);
+            if (!Relative.IsPresent)
+            {
+                WriteObject(resolved, true);
+                return;
+            }
+            var currentLocation = SessionState.Path.CurrentLocation.Path;
+            var relatives = from r in resolved select SessionState.Path.NormalizeRelativePath(r.Path, currentLocation);
+            WriteObject(relatives, true);
         }
     }
 }

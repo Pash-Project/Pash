@@ -12,6 +12,19 @@ namespace System.Management.Automation
         private SessionStateGlobal _sessionStateGlobal;
         private SessionState _sessionState;
 
+        private PathGlobber _globber;
+        private PathGlobber Globber
+        {
+            get
+            {
+                if (_globber == null)
+                {
+                    _globber = new PathGlobber(_sessionState);
+                }
+                return _globber;
+            }
+        }
+
         internal PathIntrinsics(SessionState sessionState)
         {
             _sessionState = sessionState;
@@ -44,7 +57,10 @@ namespace System.Management.Automation
 
         public Collection<PathInfo> GetResolvedPSPathFromPSPath(string path)
         {
-            throw new NotImplementedException();
+            var runtime = new ProviderRuntime(_sessionState);
+            var res = GetResolvedPSPathFromPSPath(new [] { path }, runtime);
+            runtime.ThrowFirstErrorOrContinue();
+            return res;
         }
 
         public string GetUnresolvedProviderPathFromPSPath(string path)
@@ -80,7 +96,10 @@ namespace System.Management.Automation
 
         public string NormalizeRelativePath(string path, string basePath)
         {
-            return _sessionStateGlobal.NormalizeRelativePath(path, basePath);
+            var runtime = new ProviderRuntime(_sessionState);
+            var res = NormalizeRelativePath(path, basePath, runtime);
+            runtime.ThrowFirstErrorOrContinue();
+            return res;
         }
 
         public string ParseChildName(string path)
@@ -144,15 +163,48 @@ namespace System.Management.Automation
             // otherwise use the NavigationCmdletProvider's MakePath method
             return navigationPorivder.MakePath(parent, child, runtime);
         }
-        //internal Collection<string> GetResolvedProviderPathFromProviderPath(string path, string providerId, CmdletProviderContext context);
-        //internal Collection<string> GetResolvedProviderPathFromPSPath(string path, CmdletProviderContext context, out ProviderInfo provider);
-        //internal Collection<PathInfo> GetResolvedPSPathFromPSPath(string path, CmdletProviderContext context);
-        //internal string GetUnresolvedProviderPathFromPSPath(string path, CmdletProviderContext context, out ProviderInfo provider, out PSDriveInfo drive);
-        //internal bool IsCurrentLocationOrAncestor(string path, CmdletProviderContext context);
-        //internal string NormalizeRelativePath(string path, string basePath, CmdletProviderContext context);
-        //internal string ParseChildName(string path, CmdletProviderContext context);
-        //internal string ParseParent(string path, string root, CmdletProviderContext context);
-        //internal PathInfo SetLocation(string path, CmdletProviderContext context);
+        //internal Collection<string> GetResolvedProviderPathFromProviderPath(string path, string providerId, ProviderRuntime runtime);
+        //internal Collection<string> GetResolvedProviderPathFromPSPath(string path, ProviderRuntime runtime);
+
+        internal Collection<PathInfo> GetResolvedPSPathFromPSPath(string[] paths, ProviderRuntime runtime)
+        {
+            var resolved = new Collection<PathInfo>();
+            foreach (var path in paths)
+            {
+                CmdletProvider p;
+                // by using always a fresh copy of the runtime, we make sure that different paths don't affect each other
+                var runtimeCopy = new ProviderRuntime(runtime);
+                var globbed = Globber.GetGlobbedProviderPaths(path, runtimeCopy, out p);
+                foreach (var curPath in globbed)
+                {
+                    resolved.Add(new PathInfo(runtimeCopy.PSDriveInfo, curPath, _sessionState));
+                }
+            }
+            return resolved;
+        }
+
+        //internal string GetUnresolvedProviderPathFromPSPath(string path, ProviderRuntime runtime, out ProviderInfo provider, out PSDriveInfo drive);
+        //internal bool IsCurrentLocationOrAncestor(string path, ProviderRuntime runtime);
+       
+        internal string NormalizeRelativePath(string path, string basePath, ProviderRuntime runtime)
+        {
+            // path shouldn't contain wildcards. They are *not* resolved
+            ProviderInfo info;
+            path = Globber.GetProviderSpecificPath(path, runtime, out info);
+            var provider = _sessionState.Provider.GetInstance(info);
+            CmdletProvider.VerifyType<ContainerCmdletProvider>(provider);
+            var navProvider = provider as NavigationCmdletProvider;
+
+            if (navProvider == null)
+            {
+                return path;
+            }
+            return navProvider.NormalizeRelativePath(path, basePath, runtime);
+        }
+
+        //internal string ParseChildName(string path, ProviderRuntime runtime);
+        //internal string ParseParent(string path, string root, ProviderRuntime runtime);
+        //internal PathInfo SetLocation(string path, ProviderRuntime runtime);
 
         internal PathInfo SetLocation(string path, ProviderRuntime providerRuntime)
         {
@@ -163,8 +215,8 @@ namespace System.Management.Automation
         // TODO: make a common class that works with a path
 
         // TODO: reverse on Unix?
-        public const char CorrectSlash = '\\';
-        public const char WrongSlash = '/';
+        public static readonly char CorrectSlash = System.IO.Path.DirectorySeparatorChar;
+        public static readonly char WrongSlash = System.IO.Path.AltDirectorySeparatorChar;
 
         internal static Path NormalizePath(Path path)
         {
