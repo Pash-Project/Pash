@@ -146,7 +146,7 @@ namespace ReferenceTests
         public string CreateFile(string script, string extension)
         {
             var tempDir = Path.GetTempPath();
-            var fileName = String.Format("TempFile{0}.{1}", _createdFiles.Count, extension);
+            var fileName = String.Format("TempFile{0}.{1}", _createdFiles.Count, extension.TrimStart('.'));
             var filePath = Path.Combine(tempDir, fileName);
             File.WriteAllText(filePath, script);
             _createdFiles.Add(filePath);

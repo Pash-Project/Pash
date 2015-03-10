@@ -111,6 +111,7 @@ namespace Microsoft.PowerShell.Commands
 
         protected override string GetChildName(string path)
         {
+            path = NormalizePath(path);
             if (string.IsNullOrEmpty(path))
             {
                 throw new NullReferenceException("Path can't be null");
@@ -132,7 +133,26 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void GetChildNames(string path, ReturnContainers returnContainers)
         {
-            throw new NotImplementedException();
+            if (path == String.Empty)
+            {
+                path = ".";
+            }
+
+            GetChildItems(path, false);
+
+            foreach (PSObject item in ProviderRuntime.ThrowFirstErrorOrReturnResults())
+            {
+                var fileInfo = item.BaseObject as System.IO.FileInfo;
+                var directoryInfo = item.BaseObject as System.IO.DirectoryInfo;
+                if (fileInfo != null)
+                {
+                    ProviderRuntime.WriteObject(fileInfo.Name);
+                }
+                else if (directoryInfo != null)
+                {
+                    ProviderRuntime.WriteObject(directoryInfo.Name);
+                }
+            }
         }
 
         protected override void GetItem(string path)
@@ -366,6 +386,7 @@ namespace Microsoft.PowerShell.Commands
 
         public void ClearContent(string path)
         {
+            path = NormalizePath(path);
             if (!ItemExists(path))
             {
                 throw new ItemNotFoundException(string.Format("Cannot find path '{0}' because it does not exist.", path));
@@ -383,6 +404,7 @@ namespace Microsoft.PowerShell.Commands
 
         public IContentReader GetContentReader(string path)
         {
+            path = NormalizePath(path);
             return new FileContentReader(path);
         }
 
@@ -393,6 +415,7 @@ namespace Microsoft.PowerShell.Commands
 
         public IContentWriter GetContentWriter(string path)
         {
+            path = NormalizePath(path);
             return new FileContentWriter(path);
         }
 

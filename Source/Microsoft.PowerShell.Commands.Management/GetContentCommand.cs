@@ -35,9 +35,10 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            foreach (string fileName in Path)
+            var readers = InvokeProvider.Content.GetReader(InternalPaths, ProviderRuntime);
+            foreach (var curContentReader in readers)
             {
-                contentReader = InvokeProvider.Content.GetReader(fileName).Single();
+                contentReader = curContentReader;
                 try
                 {
                     if (Tail > 0)

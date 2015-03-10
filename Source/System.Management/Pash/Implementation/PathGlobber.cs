@@ -84,7 +84,8 @@ namespace Pash.Implementation
             if (IsProviderQualifiedPath(path))
             {
                 path = GetProviderPathFromProviderQualifiedPath(path, out providerInfo);
-                drive = providerInfo.CurrentDrive;
+                // in case there is no CurrentDrive, set a dummy drive to keep track of the used provider
+                drive = providerInfo.CurrentDrive ?? new PSDriveInfo(providerInfo.Name, providerInfo, "", "", null);
             }
             else if (IsDriveQualifiedPath(path))
             {
@@ -191,6 +192,7 @@ namespace Pash.Implementation
                 var child = ciIntrinsics.GetChildName(path, runtime);
                 componentStack.Push(child);
                 path = navigationProvider == null ? "" : navigationProvider.GetParentPath(path, drive.Root, runtime);
+
             }
 
             // we create a working list with partially globbed paths. each iteration will take all items from the
