@@ -235,10 +235,10 @@ namespace System.Management.Automation
         {
             CmdletProvider provider;
             var globbedPaths = Globber.GetGlobbedProviderPaths(path, runtime, false, out provider);
-            var containerProvider = provider as ItemCmdletProvider;
+            var itemProvider = provider as ItemCmdletProvider;
             // we assume that in a low level CmdletProvider all items exists. Not sure about this, but I don't want to
             // break existing functionality
-            if (containerProvider == null)
+            if (itemProvider == null)
             {
                 return true;
             }
@@ -247,7 +247,7 @@ namespace System.Management.Automation
                 var exists = false;
                 try
                 {
-                    exists = containerProvider.ItemExists(p, runtime);
+                    exists = itemProvider.ItemExists(p, runtime);
                 }
                 catch (Exception e)
                 {
@@ -471,27 +471,6 @@ namespace System.Management.Automation
         #endregion
 
         #region private helpers
-
-        private bool VerifyItemExists(ItemCmdletProvider provider, string path, ProviderRuntime runtime)
-        {
-            var exists = false;
-            try
-            {
-                exists = provider.ItemExists(path, runtime);
-            }
-            catch (Exception e)
-            {
-                HandleCmdletProviderInvocationException(e);
-            }
-
-            if (exists)
-            {
-                return true;
-            }
-            var msg = String.Format("An item with path {0} doesn't exist", path);
-            runtime.WriteError(new ItemNotFoundException(msg).ErrorRecord);
-            return false;
-        }
 
         void CopyContainerToContainer(ContainerCmdletProvider provider, string srcPath, string destPath, bool recurse,
                                       CopyContainers copyContainers, ProviderRuntime runtime)
