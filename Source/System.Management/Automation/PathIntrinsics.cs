@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using Pash.Implementation;
 using System.Management.Automation.Runspaces;
 using System.Management.Automation.Provider;
+using Microsoft.PowerShell.Commands;
 
 namespace System.Management.Automation
 {
@@ -25,14 +26,33 @@ namespace System.Management.Automation
             }
         }
 
+        public PathInfo CurrentFileSystemLocation
+        {
+            get
+            {
+                var fsProvider = _sessionState.Provider.GetOne(FileSystemProvider.ProviderName);
+                if (fsProvider == null)
+                {
+                    return null;
+                }
+                var curDrive = fsProvider.CurrentDrive;
+                return new PathInfo(curDrive, curDrive.CurrentLocation, _sessionState);
+            }
+        }
+
+        public PathInfo CurrentLocation
+        {
+            get
+            {
+                return _sessionStateGlobal.CurrentLocation;
+            }
+        }
+
         internal PathIntrinsics(SessionState sessionState)
         {
             _sessionState = sessionState;
             _sessionStateGlobal = sessionState.SessionStateGlobal;
         }
-
-        public PathInfo CurrentFileSystemLocation { get; private set; }
-        public PathInfo CurrentLocation { get { return _sessionStateGlobal.CurrentLocation; } }
 
         public string Combine(string parent, string child)
         {
@@ -132,7 +152,10 @@ namespace System.Management.Automation
 
         public PathInfo SetLocation(string path)
         {
-            return _sessionStateGlobal.SetLocation(path);
+            var runtime = new ProviderRuntime(_sessionState);
+            var res = SetLocation(path, runtime);
+            runtime.ThrowFirstErrorOrContinue();
+            return res;
         }
 
         // internals
@@ -224,11 +247,37 @@ namespace System.Management.Automation
         }
 
         //internal string ParseParent(string path, string root, ProviderRuntime runtime);
-        //internal PathInfo SetLocation(string path, ProviderRuntime runtime);
 
-        internal PathInfo SetLocation(string path, ProviderRuntime providerRuntime)
+        internal PathInfo SetLocation(string path, ProviderRuntime runtime)
         {
-            return _sessionStateGlobal.SetLocation(path, providerRuntime);
+            if (path == null)
+            {
+                throw new PSArgumentException("Path is null", "SetLocationPathNull", ErrorCategory.InvalidArgument);
+            }
+
+            ProviderInfo pinfo;
+            path = Globber.GetProviderSpecificPath(path, runtime, out pinfo);
+            var provider = _sessionState.Provider.GetInstance(pinfo);
+            var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
+            var itemIntrinsics = new ItemCmdletProviderIntrinsics(_sessionState);
+
+            if (!itemIntrinsics.Exists(path, runtime) ||
+                !itemIntrinsics.IsContainer(containerProvider, path, runtime))
+            {
+                throw new PSArgumentException("The path does not exist or is not a container",
+                    "SetLocationInvalidPath", ErrorCategory.InvalidArgument);
+            }
+
+            if (provider is FileSystemProvider)
+            {
+                // TODO: really? I think PS doesn't do this
+                System.Environment.CurrentDirectory = path;
+            }
+
+            var curDrive = runtime.PSDriveInfo;
+            curDrive.CurrentLocation = path;
+            _sessionStateGlobal.CurrentDrive = curDrive;
+            return new PathInfo(curDrive, path, _sessionState);
         }
 
         #region Path Operations

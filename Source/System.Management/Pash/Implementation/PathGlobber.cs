@@ -11,7 +11,6 @@ namespace Pash.Implementation
 {
     public class PathGlobber
     {
-        private const string _homePlaceholder = "~";
         private static readonly Regex _homePathRegex = new Regex(@"^~[/\\]?");
 
         private PathIntrinsics Path { get; set; }
@@ -84,16 +83,18 @@ namespace Pash.Implementation
             // differentiate between drive-qualified, provider-qualified, provider-internal, and provider-direct paths
             // then strip provider prefix, set provider, set drive is possible or get from Drive.Current
             PSDriveInfo drive;
+            string resolvedPath = null;
             if (IsProviderQualifiedPath(path))
             {
-                path = GetProviderPathFromProviderQualifiedPath(path, out providerInfo);
+                resolvedPath = GetProviderPathFromProviderQualifiedPath(path, out providerInfo);
                 // in case there is no CurrentDrive, set a dummy drive to keep track of the used provider
-                drive = providerInfo.CurrentDrive ?? new PSDriveInfo(providerInfo.Name, providerInfo, "", "", null);
+                drive = providerInfo.CurrentDrive ?? providerInfo.DummyDrive;
             }
             else if (IsDriveQualifiedPath(path))
             {
-                path = GetProviderPathFromDriveQualifiedPath(path, runtime, out providerInfo, out drive);
+                resolvedPath = GetProviderPathFromDriveQualifiedPath(path, runtime, out providerInfo, out drive);
             }
+            // otherwise we first need to know about the provider/drive in use to properly resolve the path
             else if (runtime.PSDriveInfo != null)
             {
                 drive = runtime.PSDriveInfo;
@@ -104,10 +105,19 @@ namespace Pash.Implementation
                 drive = _sessionState.Path.CurrentLocation.Drive;
                 providerInfo = _sessionState.Path.CurrentLocation.Provider;
             }
+            // TODO: check for provider internal path beginning with \\ or //
+            //       make sure to set the drive to a dummy drive then
+
             runtime.PSDriveInfo = drive;
-            path = ResolveHomePath(path, providerInfo);
-            // TODO: resolve relative paths
-            return path;
+
+            // if we had no success, yet, we deal with some kind of provider specific (maybe relative) path
+            if (resolvedPath == null)
+            {
+                resolvedPath = ResolveHomePath(path, runtime, providerInfo);
+                resolvedPath = ResolveRelativePath(resolvedPath, runtime);
+            }
+
+            return resolvedPath;
         }
 
         internal string GetDriveQualifiedPath(string providerPath, PSDriveInfo drive)
@@ -167,15 +177,21 @@ namespace Pash.Implementation
             return idx > 0 && (idx + 1 == path.Length || path[idx + 1] != ':');
         }
 
-        private string ResolveHomePath(string path, ProviderInfo providerInfo)
+        private string ResolveHomePath(string path, ProviderRuntime runtime, ProviderInfo providerInfo)
         {
-            if (IsHomePath(path))
+            if (!IsHomePath(path) || providerInfo.Home == null)
             {
-                // TODO: substring it and use MakePath if supported
-                // path = _homePlaceholder.Replace(path, providerInfo.Home, 1);
-                throw new NotImplementedException();
+                return path;
             }
-            return path;
+            var provider = _sessionState.Provider.GetInstance(providerInfo);
+            return Path.Combine(provider, providerInfo.Home, path.Substring(1), runtime);
+        }
+
+        private string ResolveRelativePath(string path, ProviderRuntime runtime)
+        {
+            // FIXME: use a better, provider specific implementation
+            var curPath = runtime.PSDriveInfo.CurrentLocation;
+            return PathNavigation.CalculateFullPath(curPath, path);
         }
 
         private static bool IsHomePath(string path)

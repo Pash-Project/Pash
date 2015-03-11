@@ -23,6 +23,15 @@ namespace System.Management.Automation
                 return Module == null ? null : Module.Name;
             }
         }
+        internal PSDriveInfo DummyDrive
+        {
+            get
+            {
+                var drive = new PSDriveInfo("", this, "", "", null);
+                drive.Hidden = true;
+                return drive;
+            }
+        }
 
         public Collection<PSDriveInfo> Drives
         {

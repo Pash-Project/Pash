@@ -351,18 +351,33 @@ namespace Microsoft.PowerShell.Commands
 
         protected override ProviderInfo Start(ProviderInfo providerInfo)
         {
-            if ((providerInfo != null) && string.IsNullOrEmpty(providerInfo.Home))
+            if (providerInfo == null || !string.IsNullOrEmpty(providerInfo.Home))
             {
-                Path homeDrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
-                Path homePath = Environment.GetEnvironmentVariable("HOMEPATH");
-                if (!string.IsNullOrEmpty(homeDrive) && !string.IsNullOrEmpty(homePath))
+                return providerInfo;
+            }
+
+            string path = null;
+            Path homeDrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+            Path homePath = Environment.GetEnvironmentVariable("HOMEPATH");
+            if (!string.IsNullOrEmpty(homeDrive) && !string.IsNullOrEmpty(homePath))
+            {
+                path = MakePath(homeDrive, homePath);
+            }
+            else
+            {
+                // FIXME: taken from Path.ResolveTilde(). Make sure to clean all that mess up...
+                path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+                // HACK: Use $Env:HOME until Mono 2.10 dies out.
+                if (path == "")
                 {
-                    Path path = MakePath(homeDrive, homePath);
-                    if (System.IO.Directory.Exists(path))
-                    {
-                        providerInfo.Home = path;
-                    }
+                    path = Environment.GetEnvironmentVariable("HOME");
                 }
+            }
+
+            if (System.IO.Directory.Exists(path))
+            {
+                providerInfo.Home = path;
             }
             return providerInfo;
         }
