@@ -244,6 +244,22 @@ namespace ReferenceTests.Providers
             ));
         }
 
+        [Test]
+        public void NavigationProviderSupportsGetChildItemWithoutArg()
+        {
+            var cmd = "Set-Location " + _defDrive + "foo; Get-ChildItem";
+            ReferenceHost.Execute(cmd);
+            var rootWithoutSlash = _defRoot.Substring(0, _defRoot.Length - 1);
+            Assert.That(ExecutionMessages, AreMatchedBy(
+                "ItemExists " + _defRoot + "foo",
+                "NormalizeRelativePath " + _defRoot + "foo " + rootWithoutSlash,
+                "IsItemContainer " + _defRoot + "foo",
+                "ItemExists " + _defRoot + "foo",
+                "IsItemContainer " + _defRoot + "foo",
+                "GetChildItems " + _defRoot + "foo False"
+            ));
+        }
+
 
         [Test]
         public void NavigationProviderSupportsGetChildItemFromLeaf()
@@ -533,7 +549,7 @@ namespace ReferenceTests.Providers
             ));
         }
 
-        [Test, Ignore("We need to wait for location support to enable this")]
+        [Test]
         public void NavigationProviderSupportsResolvePathRelative()
         {
             var cmd = NewlineJoin(
@@ -553,12 +569,14 @@ namespace ReferenceTests.Providers
             ));
         }
 
-        [Test, Ignore("We need to wait for location support to enable this")]
-        public void NavigationProviderSupportsGetItemWithRelativePath()
+        [TestCase("../bar.doc")]
+        [TestCase("../foo/../bar.doc")]
+        [TestCase("./../bar.doc")]
+        public void NavigationProviderSupportsGetItemWithRelativePath(string relpath)
         {
             var cmd = NewlineJoin(
                 "Set-Location " + _defDrive + "foo",
-                "Get-Item ../bar.doc"
+                "Get-Item " + relpath
             );
             ReferenceHost.Execute(cmd);
             var rootWithoutSlash = _defRoot.Substring(0, _defRoot.Length - 1);
