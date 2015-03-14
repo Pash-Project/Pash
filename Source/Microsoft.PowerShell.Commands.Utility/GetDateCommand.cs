@@ -16,6 +16,7 @@ namespace Microsoft.PowerShell.Commands
     ///   date 
     /// </summary>
     [Cmdlet("Get", "Date", DefaultParameterSetName = "net")]
+    [OutputType(typeof(string), typeof(DateTime))]
     public sealed class GetDateCommand : Cmdlet
     {
         DateTime date;

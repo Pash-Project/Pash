@@ -1,10 +1,12 @@
-﻿using System;
+﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using System;
 using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Test", "Path", DefaultParameterSetName="Path" /*, SupportsTransactions=true
             , HelpUri="http://go.microsoft.com/fwlink/?LinkID=113418" */)]
+    [OutputType(typeof(bool))]
     public class TestPathCommand : CoreCommandWithFilteredPathsBase
     {
         protected override bool ProviderSupportsShouldProcess {

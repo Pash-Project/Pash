@@ -5,6 +5,7 @@ using System.Management.Automation;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Set", "Location", DefaultParameterSetName = "Path")]
+    [OutputType(typeof(PathInfo), typeof(PathInfoStack))]
     public class SetLocationCommand : CoreCommandBase
     {
         [Alias(new string[] { "PSPath" }), Parameter(Position = 0, ParameterSetName = "LiteralPath", Mandatory = true, ValueFromPipeline = false, ValueFromPipelineByPropertyName = true)]

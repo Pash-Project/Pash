@@ -6,6 +6,7 @@ using System.Management;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Get", "Location", DefaultParameterSetName = "Location")]
+    [OutputType(typeof(PathInfo), typeof(PathInfoStack))]
     public class GetLocationCommand : DriveMatchingCoreCommandBase
     {
         [Parameter(ParameterSetName = "Location", ValueFromPipelineByPropertyName = true)]

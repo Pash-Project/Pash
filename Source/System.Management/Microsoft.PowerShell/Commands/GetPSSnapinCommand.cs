@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet(VerbsCommon.Get, "PSSnapin")]
+    [OutputType(typeof(PSSnapInInfo))]
     public sealed class GetPSSnapinCommand : PSSnapInCommandBase
     {
         [Parameter(Position = 0, Mandatory = false)]

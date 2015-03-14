@@ -1,12 +1,14 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 
 using System;
+using System.IO;
 using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("New", "Item", DefaultParameterSetName = "pathSet"
-        /*, SupportsTransactions=true, HelpUri="http://go.microsoft.com/fwlink/?LinkID=113353" */)] 
+        /*, SupportsTransactions=true, HelpUri="http://go.microsoft.com/fwlink/?LinkID=113353" */)]
+    [OutputType(typeof(string), typeof(FileInfo))]
     public class NewItemCommand : CoreCommandWithCredentialsBase
     {
         /// <summary>

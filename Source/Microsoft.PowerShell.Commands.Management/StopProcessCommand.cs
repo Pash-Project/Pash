@@ -20,6 +20,7 @@ namespace Microsoft.PowerShell.Commands
     ///   killall
     /// </summary>
     [Cmdlet("Stop", "Process", DefaultParameterSetName = "Id", SupportsShouldProcess = true)]
+    [OutputType(typeof(Process))]
     public sealed class StopProcessCommand : Cmdlet
     {
         protected override void ProcessRecord()

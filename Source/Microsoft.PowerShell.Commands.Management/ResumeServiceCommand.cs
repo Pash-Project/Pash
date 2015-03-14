@@ -7,6 +7,7 @@ using System.ServiceProcess;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Resume", "Service", DefaultParameterSetName = "Default", SupportsShouldProcess = true)]
+    [OutputType(typeof(ServiceController))]
     public sealed class ResumeServiceCommand : Cmdlet
     {
         protected override void ProcessRecord()

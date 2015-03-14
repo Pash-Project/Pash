@@ -19,6 +19,7 @@ namespace Microsoft.PowerShell.Commands
     ///   ps 
     /// </summary>
     [Cmdlet(VerbsCommon.Get, "Process", DefaultParameterSetName = "Name")]
+    [OutputType(typeof(ProcessModule), typeof(FileVersionInfo), typeof(Process))]
     public sealed class GetProcessCommand : Cmdlet
     {
 

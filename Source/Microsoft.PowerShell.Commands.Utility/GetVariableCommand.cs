@@ -4,6 +4,7 @@ using System.Management.Automation;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Get", "Variable")]
+    [OutputType(typeof(PSVariable))]
     public class GetVariableCommand : PSCmdlet
     {
         [Parameter]

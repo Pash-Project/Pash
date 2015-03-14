@@ -6,6 +6,7 @@ using System.Management.Automation;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Set", "Variable", SupportsShouldProcess = true)]
+    [OutputType(typeof(PSVariable))]
     public sealed class SetVariableCommand : PSCmdlet
     {
         [Parameter]
