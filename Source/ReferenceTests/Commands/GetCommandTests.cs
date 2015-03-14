@@ -48,7 +48,7 @@ namespace ReferenceTests.Commands
         //[TestCase("Get-Command", new[] { typeof(AliasInfo), typeof(ApplicationInfo), typeof(FunctionInfo), typeof(CmdletInfo), typeof(ExternalScriptInfo), typeof(FilterInfo), typeof(WorkflowInfo), typeof(String) })]
         [TestCase("Get-Content", new[] { typeof(byte), typeof(string) })]
         [TestCase("Get-Date", new[] { typeof(string), typeof(DateTime) })]
-        //[TestCase("Get-History", new[] { typeof(HistoryInfo) })]
+        [TestCase("Get-History", new[] { typeof(HistoryInfo) })]
         [TestCase("Get-Host", new[] { typeof(PSHost) })]
         [TestCase("Get-Item", new[] { typeof(Boolean), typeof(String), typeof(FileInfo), typeof(DirectoryInfo), typeof(FileInfo) })]
         [TestCase("Get-Location", new[] { typeof(PathInfo), typeof(PathInfoStack) })]

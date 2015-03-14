@@ -5,6 +5,7 @@ using System.Management.Automation;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Get", "History")]
+    [OutputType(typeof(HistoryInfo))]
     public class GetHistoryCommand : PSCmdlet
     {
         [ValidateRange(0, 0x7fff), Parameter(Position = 1)]

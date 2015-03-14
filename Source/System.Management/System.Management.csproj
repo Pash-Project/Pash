@@ -417,6 +417,7 @@
     <Compile Include="Microsoft.PowerShell\Commands\GetHelpCommand.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\GetHistoryCommand.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\GetPSSnapinCommand.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\HistoryInfo.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\Internal\Format\FrontEndCommandBase.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\RemovePSSnapinCommand.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\SessionStateProviderBase.cs" />
