@@ -397,6 +397,7 @@
     <Compile Include="Automation\WildcardOptions.cs" />
     <Compile Include="Automation\WildcardPattern.cs" />
     <Compile Include="Automation\WildcardPatternException.cs" />
+    <Compile Include="Automation\WorkflowInfo.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\Irony\ValidateTokenEventArgsExtensions.cs" />
     <Compile Include="Extensions\JoinStringExtensions.cs" />

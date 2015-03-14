@@ -7,6 +7,7 @@ using Pash.Implementation;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet(VerbsCommon.Get, "Command", DefaultParameterSetName = "CmdletSet")]
+    [OutputType(typeof(AliasInfo), typeof(ApplicationInfo), typeof(FunctionInfo), typeof(CmdletInfo), typeof(ExternalScriptInfo), typeof(FilterInfo), typeof(WorkflowInfo), typeof(String))]
     public sealed class GetCommandCommand : PSCmdlet
     {
         [AllowEmptyCollection]

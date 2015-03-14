@@ -45,7 +45,7 @@ namespace ReferenceTests.Commands
         [TestCase("Convert-Path", new[] { typeof(string) })]
         [TestCase("ConvertTo-Csv", new[] { typeof(string) })]
         [TestCase("Get-ChildItem", new[] { typeof(FileInfo), typeof(DirectoryInfo) })]
-        //[TestCase("Get-Command", new[] { typeof(AliasInfo), typeof(ApplicationInfo), typeof(FunctionInfo), typeof(CmdletInfo), typeof(ExternalScriptInfo), typeof(FilterInfo), typeof(WorkflowInfo), typeof(String) })]
+        [TestCase("Get-Command", new[] { typeof(AliasInfo), typeof(ApplicationInfo), typeof(FunctionInfo), typeof(CmdletInfo), typeof(ExternalScriptInfo), typeof(FilterInfo), typeof(WorkflowInfo), typeof(String) })]
         [TestCase("Get-Content", new[] { typeof(byte), typeof(string) })]
         [TestCase("Get-Date", new[] { typeof(string), typeof(DateTime) })]
         [TestCase("Get-History", new[] { typeof(HistoryInfo) })]
