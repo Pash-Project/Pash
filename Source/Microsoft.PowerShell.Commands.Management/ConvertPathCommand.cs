@@ -9,6 +9,7 @@ using System.Management.Automation;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Convert", "Path", DefaultParameterSetName = "Path")]
+    [OutputType(typeof(string))]
     public class ConvertPathCommand : CoreCommandBase
     {
         protected override void ProcessRecord()

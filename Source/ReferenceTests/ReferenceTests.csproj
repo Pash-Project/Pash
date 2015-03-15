@@ -34,6 +34,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -48,6 +49,7 @@
     <Compile Include="Commands\AddMemberTests.cs" />
     <Compile Include="Commands\AddTypeTests.cs" />
     <Compile Include="Commands\ClearContentTests.cs" />
+    <Compile Include="Commands\GetCommandTests.cs" />
     <Compile Include="Commands\GetContentTests.cs" />
     <Compile Include="Commands\ImportModuleTests.cs" />
     <Compile Include="Commands\RemoveModuleTests.cs" />

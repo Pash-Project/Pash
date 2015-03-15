@@ -16,6 +16,7 @@ namespace Microsoft.PowerShell.Commands
     ///   /dev/random 
     /// </summary>
     [Cmdlet("Get", "Random")]
+    [OutputType(typeof(int), typeof(long), typeof(double))]
     public sealed class GetRandomCommand : Cmdlet
     {
         int seed;

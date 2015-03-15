@@ -4,11 +4,13 @@ using System.Management.Automation;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Collections;
+using System.IO;
 
 namespace Microsoft.PowerShell.Commands
 {
     [CmdletAttribute("Get", "ChildItem", DefaultParameterSetName="Items"
         /*, SupportsTransactions=true, HelpUri="http://go.microsoft.com/fwlink/?LinkID=113308"*/)]
+    [OutputType(typeof(FileInfo), typeof(DirectoryInfo))]
     public class GetChildItemCommand : CoreCommandWithFiltersBase
     {
         /* While CoreCommandWithFiltersBase provides the Path/LiteralPath parameters with their internal behavior,

@@ -7,6 +7,7 @@ using System.ServiceProcess;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Suspend", "Service", DefaultParameterSetName = "Default", SupportsShouldProcess = true)]
+    [OutputType(typeof(ServiceController))]
     public sealed class SuspendServiceCommand : Cmdlet
     {
         protected override void ProcessRecord()

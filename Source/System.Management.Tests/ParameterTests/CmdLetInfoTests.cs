@@ -129,5 +129,17 @@ namespace System.Management.Tests.ParameterTests
             Assert.AreEqual(ParameterAttribute.AllParameterSets, info.ParameterSets[0].Name);
             Assert.IsTrue(info.ParameterSets[0].Parameters.Any(p => p.Name == "Filter"));
         }
+
+        [Test]
+        public void ClearVariableOutputTypeDefinedInCmdletInfo()
+        {
+            var info = new CmdletInfo("Clear-Variable", typeof(TestOutputTypeCommand), null);
+
+            Assert.AreEqual(2, info.OutputType.Count);
+            PSTypeName stringType = info.OutputType.Single(type => type.Type == typeof(string));
+            PSTypeName boolType = info.OutputType.Single(type => type.Type == typeof(bool));
+            Assert.AreEqual("System.String", stringType.Name);
+            Assert.AreEqual("System.Boolean", boolType.Name);
+        }
     }
 }

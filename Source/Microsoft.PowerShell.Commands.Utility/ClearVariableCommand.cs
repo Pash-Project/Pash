@@ -6,6 +6,7 @@ using System.Management.Automation;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Clear", "Variable", SupportsShouldProcess = true)]
+    [OutputType(typeof(PSVariable))]
     public sealed class ClearVariableCommand : PSCmdlet
     {
         [Parameter]

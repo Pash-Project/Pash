@@ -15,7 +15,8 @@ namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet(VerbsCommon.Add, "Type", DefaultParameterSetName = "FromSource"
         /*HelpUri="http://technet.microsoft.com/en-us/library/hh849914.aspx",
-                 RemotingCapability=RemotingCapability.None*/)] 
+                 RemotingCapability=RemotingCapability.None*/)]
+    [OutputType(typeof(Type))]
     public class AddTypeCommand : PSCmdlet
     {
         [Parameter(

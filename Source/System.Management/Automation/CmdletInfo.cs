@@ -22,9 +22,14 @@ namespace System.Management.Automation
         public string Verb { get; private set; }
         public ReadOnlyCollection<CommandParameterSetInfo> ParameterSets { get; private set; }
 
+        public override ReadOnlyCollection<PSTypeName> OutputType {
+            get { return outputType; }
+        }
+
         internal Dictionary<string, CommandParameterInfo> ParameterInfoLookupTable { get; private set; }
 
         private Exception _validationException;
+        private ReadOnlyCollection<PSTypeName> outputType;
 
         internal CmdletInfo(string name, Type implementingType, string helpFile)
             : this(name, implementingType, helpFile, null, null)
@@ -59,6 +64,7 @@ namespace System.Management.Automation
             PSSnapIn = snapin;
             Module = module;
             GetParameterSetInfo(implementingType);
+            GetOutputTypes(implementingType);
         }
 
         public override string Definition
@@ -320,6 +326,16 @@ namespace System.Management.Automation
             {
                 RegisterParameter(parameterInfo);
             }
+        }
+
+        private void GetOutputTypes(Type cmdletType)
+        {
+            var types = new List<PSTypeName>();
+            foreach (OutputTypeAttribute attribute in cmdletType.GetCustomAttributes(typeof(OutputTypeAttribute), false))
+            {
+                types.AddRange(attribute.Type);
+            }
+            outputType = new ReadOnlyCollection<PSTypeName>(types);
         }
 
         #region IScopedItem Members
