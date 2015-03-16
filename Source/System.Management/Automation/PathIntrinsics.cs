@@ -132,7 +132,10 @@ namespace System.Management.Automation
 
         public string ParseParent(string path, string root)
         {
-            throw new NotImplementedException();
+            var runtime = new ProviderRuntime(_sessionState);
+            var res = ParseParent(path, root, runtime);
+            runtime.ThrowFirstErrorOrContinue();
+            return res;
         }
 
         public PathInfo PopLocation(string stackName)
@@ -216,6 +219,7 @@ namespace System.Management.Automation
         {
             // path shouldn't contain wildcards. They are *not* resolved
             ProviderInfo info;
+            basePath = Globber.GetProviderSpecificPath(basePath, runtime, out info);
             path = Globber.GetProviderSpecificPath(path, runtime, out info);
             var provider = _sessionState.Provider.GetInstance(info);
             CmdletProvider.VerifyType<ContainerCmdletProvider>(provider);
@@ -246,7 +250,23 @@ namespace System.Management.Automation
             return navProvider.GetChildName(path, runtime);
         }
 
-        //internal string ParseParent(string path, string root, ProviderRuntime runtime);
+        internal string ParseParent(string path, string root, ProviderRuntime runtime)
+        {
+            ProviderInfo info;
+            path = Globber.GetProviderSpecificPath(path, runtime, out info);
+            var provider = _sessionState.Provider.GetInstance(info);
+            return ParseParent(provider, path, root, runtime);
+        }
+
+        internal string ParseParent(CmdletProvider provider, string path, string root, ProviderRuntime runtime)
+        {
+            var navProvider = provider as NavigationCmdletProvider;
+            if (navProvider == null)
+            {
+                return "";
+            }
+            return navProvider.GetParentPath(path, root, runtime);
+        }
 
         internal PathInfo SetLocation(string path, ProviderRuntime runtime)
         {

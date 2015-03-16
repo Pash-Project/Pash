@@ -17,6 +17,8 @@ namespace TestPSSnapIn
         public const string SecondDriveName = "TestNavigationAlternative";
         public const string SecondDriveRoot = "%alt";
         public const string SecondDrivePath = SecondDriveName + ":/";
+        public const string HomePath = "%def/foo";
+
 
         private const string _pathSeparator = "/";
 
@@ -188,6 +190,16 @@ namespace TestPSSnapIn
                 "Alternative drive for testing navigation items", null);
             defDrives.Add(drive);
             return defDrives;
+        }
+
+        #endregion
+
+        #region basics
+
+        protected override ProviderInfo Start(ProviderInfo providerInfo)
+        {
+            providerInfo.Home = HomePath;
+            return providerInfo;
         }
 
         #endregion

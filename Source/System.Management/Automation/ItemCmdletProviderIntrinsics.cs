@@ -185,10 +185,11 @@ namespace System.Management.Automation
         internal void Copy(string[] path, string destinationPath, bool recurse, CopyContainers copyContainers, ProviderRuntime runtime)
         {
             ProviderInfo destinationProvider;
-            var destination = Globber.GetProviderSpecificPath(destinationPath, runtime, out destinationProvider);
+            var destRuntime = new ProviderRuntime(runtime);
+            var destination = Globber.GetProviderSpecificPath(destinationPath, destRuntime, out destinationProvider);
             // make sure we don't use the version of IsContainer that globs, or we will have unnecessary provider callbacks
             var destProvider = destinationProvider.CreateInstance() as ContainerCmdletProvider; // it's okay to be null
-            var destIsContainer = IsContainer(destProvider, destination, runtime);
+            var destIsContainer = IsContainer(destProvider, destination, destRuntime);
             GlobAndInvoke<ContainerCmdletProvider>(path, runtime,
                 (curPath, provider) => {
                     if (!runtime.PSDriveInfo.Provider.Equals(destinationProvider))
@@ -211,7 +212,7 @@ namespace System.Management.Automation
                             return;
                         }
                         // otherwise the destination doesn't exist or is a leaf. Copying a container to a leaf doesn't work
-                        if (Exists(destination, runtime))
+                        if (Exists(destination, destRuntime))
                         {
                             var error = new PSArgumentException("Cannot copy container to existing leaf", 
                                 "CopyContainerItemToLeafError", ErrorCategory.InvalidArgument).ErrorRecord;

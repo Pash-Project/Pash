@@ -12,6 +12,7 @@ namespace Pash.Implementation
     public class PathGlobber
     {
         private static readonly Regex _homePathRegex = new Regex(@"^~[/\\]?");
+        private static readonly Regex _commonRootPathRegex = new Regex(@"^[/\\]");
 
         private PathIntrinsics Path { get; set; }
         private SessionState _sessionState;
@@ -114,7 +115,7 @@ namespace Pash.Implementation
             if (resolvedPath == null)
             {
                 resolvedPath = ResolveHomePath(path, runtime, providerInfo);
-                resolvedPath = ResolveRelativePath(resolvedPath, runtime);
+                resolvedPath = ResolveRelativePath(resolvedPath, runtime, providerInfo);
             }
 
             return resolvedPath;
@@ -184,14 +185,69 @@ namespace Pash.Implementation
                 return path;
             }
             var provider = _sessionState.Provider.GetInstance(providerInfo);
-            return Path.Combine(provider, providerInfo.Home, path.Substring(1), runtime);
+            var restPath = path.Substring(1);
+            var homePath = providerInfo.Home;
+            // if the path is only something like '~/', PS will return only the Home, without trailing separator
+            // But if it's '~/foo/', the trailing separator stays
+            if (restPath.Length == 0 || restPath.Equals("/") || restPath.Equals("\\"))
+            {
+                return homePath;
+            }
+            return Path.Combine(provider, homePath, restPath, runtime);
         }
 
-        private string ResolveRelativePath(string path, ProviderRuntime runtime)
+
+        private string ResolveRelativePath(string path, ProviderRuntime runtime, ProviderInfo providerInfo)
         {
-            // FIXME: use a better, provider specific implementation
+            var provider = _sessionState.Provider.GetInstance(providerInfo) as NavigationCmdletProvider;
+            // TODO: I think PS default relative path resolving can only work with
+            // paths that have slash/backslash as spearator. Verify this.
+            // skip resolving if the path is absolute or we don't have a navigation provider
+            if (provider == null || IsCommonRootPath(path) ||
+                path.StartsWith(runtime.PSDriveInfo.Root) || String.IsNullOrEmpty(path))
+            {
+                return path;
+            }
+
             var curPath = runtime.PSDriveInfo.CurrentLocation;
-            return PathNavigation.CalculateFullPath(curPath, path);
+            var curRoot = runtime.PSDriveInfo.Root;
+
+            // we must stay in the same drive. to avoid to resolve to directories outside the drive, we first need to
+            // get the path relative to the current drive's root
+            // Example: the current drive's root is "/foo", the current location is "/foo/bar". If we resolve "../.."
+            //          we need to end up with "/foo", not "/", because "/" is outside the current drive
+
+            // I hope this is just fine... at least PS doesn't call the provider NormalizeRelativePath method
+            // for it. If we are in the current location, the path should also start with the drive's root, or
+            // we are in some inconsistent state
+            if (curPath.StartsWith(curRoot))
+            {
+                curPath = curPath.Substring(curRoot.Length);
+            }
+
+            var relStack = PathToStack(provider, path, runtime);
+            while (relStack.Count > 0)
+            {
+                var comp = relStack.Pop();
+                if (comp.Equals("."))
+                {
+                    continue;
+                }
+                else if (comp.Equals(".."))
+                {
+                    curPath = provider.GetParentPath(curPath, curRoot, runtime);
+                    continue;
+                }
+                // otherwise it's a child component to append
+                curPath = provider.MakePath(curPath, comp, runtime);
+            }
+            // don't forget to append the root again
+            return provider.MakePath(curRoot, curPath, runtime);
+        }
+
+        private static bool IsCommonRootPath(string path)
+        {
+            return _commonRootPathRegex.IsMatch(path);
         }
 
         private static bool IsHomePath(string path)
@@ -202,25 +258,10 @@ namespace Pash.Implementation
         Collection<string> BuiltInGlobbing(CmdletProvider provider, string path, ProviderRuntime runtime)
         {
             var containerProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
-            var navigationProvider = provider as NavigationCmdletProvider; // optional, so normal cast
             var ciIntrinsics = new ChildItemCmdletProviderIntrinsics(_sessionState);
-            var pathIntrinsics = new PathIntrinsics(_sessionState);
-            var componentStack = new Stack<string>();
             // first we split the path into globbable components and put them on a stack to work with
-            var drive = runtime.PSDriveInfo;
+            var componentStack = PathToStack(containerProvider, path, runtime);
 
-            while (!String.IsNullOrEmpty(path))
-            {
-                var child = pathIntrinsics.ParseChildName(containerProvider, path, runtime);
-                componentStack.Push(child);
-                var parentPath = navigationProvider == null ? "" : navigationProvider.GetParentPath(path, drive.Root, runtime);
-                if (parentPath.Equals(path))
-                {
-                    throw new PSInvalidOperationException("Provider's implementation of GetParentPath is inconsistent",
-                        "ParentOfPathIsPath", ErrorCategory.InvalidResult);
-                }
-                path = parentPath;
-            }
 
             // we create a working list with partially globbed paths. each iteration will take all items from the
             // list and add the newly globbed part
@@ -234,7 +275,7 @@ namespace Pash.Implementation
                 // and add to workingPaths
                 if (!WildcardPattern.ContainsWildcardCharacters(globComp))
                 {
-                    workingPaths.AddRange(from p in partialPaths select pathIntrinsics.Combine(containerProvider, p, globComp, runtime));
+                    workingPaths.AddRange(from p in partialPaths select Path.Combine(containerProvider, p, globComp, runtime));
                     continue;
                 }
 
@@ -257,13 +298,32 @@ namespace Pash.Implementation
                     // add all combined path to the workingPaths for the next stack globbing iteration
                     workingPaths.AddRange(from c in childNames
                                           where globWC.IsMatch(c)
-                                          select pathIntrinsics.Combine(partPath, c, runtime));
+                                          select Path.Combine(containerProvider, partPath, c, runtime));
                 }
             }
             // now filter the working paths by include/exlude. last flag is false or we wouldn't be globbing
             var filter = new IncludeExcludeFilter(runtime.Include, runtime.Exclude, false);
             var globbedPaths = from p in workingPaths where filter.Accepts(p) select p;
             return new Collection<string>(globbedPaths.ToList());
+        }
+
+        private Stack<string> PathToStack(ContainerCmdletProvider provider, string path, ProviderRuntime runtime)
+        {
+            var drive = runtime.PSDriveInfo;
+            var componentStack = new Stack<string>();
+            while (!String.IsNullOrEmpty(path))
+            {
+                var child = Path.ParseChildName(provider, path, runtime);
+                componentStack.Push(child);
+                var parentPath = Path.ParseParent(provider, path, drive.Root, runtime);
+                if (parentPath.Equals(path))
+                {
+                    throw new PSInvalidOperationException("Provider's implementation of GetParentPath is inconsistent",
+                        "ParentOfPathIsPath", ErrorCategory.InvalidResult);
+                }
+                path = parentPath;
+            }
+            return componentStack;
         }
     }
 }

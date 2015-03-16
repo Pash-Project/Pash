@@ -20,7 +20,7 @@ namespace Microsoft.PowerShell.Commands.Management
                 return;
             }
             var currentLocation = SessionState.Path.CurrentLocation.Path;
-            var relatives = from r in resolved select SessionState.Path.NormalizeRelativePath(r.Path, currentLocation);
+            var relatives = from r in resolved select SessionState.Path.NormalizeRelativePath(r.Path, currentLocation, ProviderRuntime);
             WriteObject(relatives, true);
         }
     }

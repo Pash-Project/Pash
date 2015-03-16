@@ -33,6 +33,21 @@ namespace Microsoft.PowerShell.Commands
         {
         }
 
+        protected override string NormalizeRelativePath(string path, string basePath)
+        {
+            var normPath = new Path(path).NormalizeSlashes();
+            var normBase = new Path(basePath).NormalizeSlashes();
+            if (!normPath.StartsWith(normBase))
+            {
+                var ex = new PSArgumentException("Path is outside of base path!", "PathOutsideBasePath",
+                    ErrorCategory.InvalidArgument);
+                WriteError(ex.ErrorRecord);
+                return null;
+            }
+
+            return new Path(path.Substring(basePath.Length)).TrimStartSlash().ToString();
+        }
+
         protected override void CopyItem(string path, string destinationPath, bool recurse)
         {
             throw new NotImplementedException();

@@ -15,11 +15,12 @@ namespace System.Management.Automation
         public string Path { get; private set; }
 
         public ProviderInfo Provider { get; private set; }
+        // this is the provider specific path, not the provider qualified path!
         public string ProviderPath
         {
             get
             {
-                return _providerQualified;
+                return _path;
             }
         }
 

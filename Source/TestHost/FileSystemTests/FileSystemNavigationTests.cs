@@ -65,8 +65,7 @@ namespace TestHost.FileSystemTests
             var currentLocation = "(Get-Location).Path".Exec();
 
             var result = TestHost.ExecuteWithZeroErrors("set-location thisFolderReallyShouldNotExistNoReallyItShouldNotBeAnywhereOnAnyDiskAnywherePERIOD");
-            result.ShouldContain("Cannot find path");
-            result.ShouldContain("because it does not exist.");
+            result.ShouldContain("The path does not exist");
 
             var currentLocationAfterBadCD = "(Get-Location).Path".Exec();
 
