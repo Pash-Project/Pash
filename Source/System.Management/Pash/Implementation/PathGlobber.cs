@@ -199,19 +199,19 @@ namespace Pash.Implementation
 
         private string ResolveRelativePath(string path, ProviderRuntime runtime, ProviderInfo providerInfo)
         {
-            var provider = _sessionState.Provider.GetInstance(providerInfo) as NavigationCmdletProvider;
+            var provider = _sessionState.Provider.GetInstance(providerInfo) as ContainerCmdletProvider;
             // TODO: I think PS default relative path resolving can only work with
             // paths that have slash/backslash as spearator. Verify this.
             // skip resolving if the path is absolute or we don't have a navigation provider
-            if (provider == null || path.StartsWith(runtime.PSDriveInfo.Root))
+            var curRoot = runtime.PSDriveInfo.Root;
+            if (provider == null || (curRoot.Length > 0 && path.StartsWith(curRoot)))
             {
                 return path;
             }
 
-            var curRoot = runtime.PSDriveInfo.Root;
             if (IsCommonRootPath(path))
             {
-                return provider.MakePath(curRoot, path, runtime);
+                return Path.Combine(provider, curRoot, path, runtime);
             }
 
             var curPath = runtime.PSDriveInfo.CurrentLocation;
@@ -239,14 +239,14 @@ namespace Pash.Implementation
                 }
                 else if (comp.Equals(".."))
                 {
-                    curPath = provider.GetParentPath(curPath, "", runtime);
+                    curPath = Path.ParseParent(provider, curPath, "", runtime);
                     continue;
                 }
                 // otherwise it's a child component to append
-                curPath = provider.MakePath(curPath, comp, runtime);
+                curPath = Path.Combine(provider, curPath, comp, runtime);
             }
             // don't forget to append the root again
-            return provider.MakePath(curRoot, curPath, runtime);
+            return Path.Combine(provider, curRoot, curPath, runtime);
         }
 
         private static bool IsCommonRootPath(string path)

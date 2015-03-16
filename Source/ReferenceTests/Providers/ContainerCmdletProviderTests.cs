@@ -303,7 +303,7 @@ namespace ReferenceTests.Providers
             ExecuteAndCompareTypedResult(cmd, "asterisk");
         }
 
-        [Test, Ignore] // support for this will follow, I don't want to throw these tests away
+        [Test]
         public void ContainerProviderSupportsSetGetLocation()
         {
             // container providers usually don't support hierarchy, so we cannt set-location to a node
@@ -314,6 +314,17 @@ namespace ReferenceTests.Providers
             );
             var adjustedDrivePath = AdjustSlashes(TestContainerProvider.DefaultDrivePath);
             ExecuteAndCompareTypedResult(cmd, adjustedDrivePath, TestContainerProvider.DefaultItemValue);
+        }
+
+        [Test]
+        public void ContainerProviderSupportsGCIFromSetLocation()
+        {
+            // container providers usually don't support hierarchy, so we cannt set-location to a node
+            var cmd = NewlineJoin(
+                "Set-Location " + TestContainerProvider.DefaultDrivePath,
+                "Get-ChildItem"
+            );
+            ExecuteAndCompareTypedResult(cmd, TestContainerProvider.DefaultItemValue);
         }
 
         [Test, Ignore] // support for this will follow, I don't want to throw these tests away
