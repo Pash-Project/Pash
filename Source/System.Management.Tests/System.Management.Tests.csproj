@@ -69,6 +69,7 @@
     <Compile Include="HostTests\SessionStateVariableEntryTests.cs" />
     <Compile Include="HostTests\SizeTests.cs" />
     <Compile Include="ParameterTests\TestDefaultParameterSetIsAllParameterSetsCommand.cs" />
+    <Compile Include="ParameterTests\TestOutputTypeCommand.cs" />
     <Compile Include="Pash\ParserIntrinsics\CaseInsensitiveGrammarTests.cs" />
     <Compile Include="ExtensionsTests.cs" />
     <Compile Include="Pash\ParserIntrinsics\ParserTests.cs" />

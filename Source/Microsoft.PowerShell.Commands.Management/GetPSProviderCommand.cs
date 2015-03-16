@@ -6,6 +6,7 @@ using System.Management.Automation;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Get", "PSProvider")]
+    [OutputType(typeof(ProviderInfo))]
     public class GetPSProviderCommand : PSCmdlet
     {
         [Parameter(Position = 0, ValueFromPipelineByPropertyName = true)]

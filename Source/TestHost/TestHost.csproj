@@ -74,7 +74,6 @@
     <Compile Include="Cmdlets\AddTypeCommandTests.cs" />
     <Compile Include="Cmdlets\JoinPathTests.cs" />
     <Compile Include="Cmdlets\SortObjectTests.cs" />
-    <Compile Include="Cmdlets\GetCommandTests.cs" />
     <Compile Include="Cmdlets\NewObjectCommandTests.cs" />
     <Compile Include="7.1.7 - ArraySubexpressionOperator.cs" />
     <Compile Include="Cmdlets\VerboseCommonParameterTests.cs" />

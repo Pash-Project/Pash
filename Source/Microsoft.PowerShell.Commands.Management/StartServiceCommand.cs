@@ -7,6 +7,7 @@ using System.ServiceProcess;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Start", "Service", DefaultParameterSetName = "Default", SupportsShouldProcess = true)]
+    [OutputType(typeof(ServiceController))]
     public sealed class StartServiceCommand : Cmdlet
     {
         protected override void ProcessRecord()

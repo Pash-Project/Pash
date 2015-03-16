@@ -10,7 +10,8 @@ using System.Management.Pash.Implementation;
 
 namespace Microsoft.PowerShell.Commands
 {
-    [CmdletAttribute(VerbsCommon.Get, "Content", DefaultParameterSetName="Path" /*HelpUri="http://go.microsoft.com/fwlink/?LinkID=113310"*/)] 
+    [CmdletAttribute(VerbsCommon.Get, "Content", DefaultParameterSetName="Path" /*HelpUri="http://go.microsoft.com/fwlink/?LinkID=113310"*/)]
+    [OutputType(typeof(byte), typeof(string))]
     public class GetContentCommand : ContentCommandBase
     {
         [ParameterAttribute(ValueFromPipelineByPropertyName = true)]

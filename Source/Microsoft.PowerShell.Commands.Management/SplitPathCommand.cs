@@ -11,6 +11,7 @@ using System.Management.Automation.Provider;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet(VerbsCommon.Split, "Path", DefaultParameterSetName = "ParentSet")]
+    [OutputType(typeof(string), typeof(bool))]
     public class SplitPathCommand : CoreCommandWithCredentialsBase
     {
         [Parameter(

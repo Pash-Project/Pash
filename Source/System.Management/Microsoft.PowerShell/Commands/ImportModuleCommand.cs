@@ -1,3 +1,4 @@
+// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,7 +7,8 @@ using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands
 {
-    [CmdletAttribute(VerbsData.Import, "Module", DefaultParameterSetName="Name")] 
+    [CmdletAttribute(VerbsData.Import, "Module", DefaultParameterSetName="Name")]
+    [OutputType(typeof(PSModuleInfo))]
     public sealed class ImportModuleCommand : ModuleCmdletBase
     {
         [ParameterAttribute(ParameterSetName="Name", Mandatory=true, ValueFromPipeline=true, Position=0)] 
