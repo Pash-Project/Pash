@@ -62,12 +62,15 @@ namespace System.Management.Automation
 
         public bool HasChild(string path)
         {
-            throw new NotImplementedException();
+            return HasChild(path, false, false);
         }
 
         public bool HasChild(string path, bool force, bool literalPath)
         {
-            throw new NotImplementedException();
+            var runtime = new ProviderRuntime(SessionState, force, literalPath);
+            var res = HasChild(path, runtime);
+            runtime.ThrowFirstErrorOrContinue();
+            return res;
         }
 
         #endregion
@@ -89,7 +92,7 @@ namespace System.Management.Automation
 
                 // the Path might be a mixture of a path and an include filter
                 bool clearIncludeFilter;
-                path = SplitFilterFromPath(path, runtime, out clearIncludeFilter);
+                path = SplitFilterFromPath(path, recurse, runtime, out clearIncludeFilter);
 
                 // now perform the actual globbing
                 CmdletProvider provider;
@@ -136,17 +139,33 @@ namespace System.Management.Automation
             // compile here, not in every recursive iteration
             var filter = new IncludeExcludeFilter(runtime.Include, runtime.Exclude, false);
 
-            GlobAndInvoke<ContainerCmdletProvider>(path, runtime,
-                (curPath, Provider) => ManuallyGetChildNames(Provider, curPath, returnContainers, recurse, filter, runtime)
-            );
-        }
-
-        internal string GetChildName(string path, ProviderRuntime runtime)
-        {
-            ProviderInfo info;
-            path = Globber.GetProviderSpecificPath(path, runtime, out info);
-            var provider = SessionState.Provider.GetInstance(info) as NavigationCmdletProvider;
-            return provider == null ? path : provider.GetChildName(path, runtime);
+            // do the globbing manually, because the behavior depends on it...
+            foreach (var p in path)
+            {
+                CmdletProvider provider;
+                var doGlob = Globber.ShouldGlob(p, runtime);
+                // even if we don't actually glob, the next method will return the resolved path & provider
+                var resolved = Globber.GetGlobbedProviderPaths(p, runtime, out provider);
+                var contProvider = CmdletProvider.As<ContainerCmdletProvider>(provider);
+                foreach (var curPath in resolved)
+                {
+                    if (!doGlob && filter.CanBeIgnored && !recurse)
+                    {
+                        contProvider.GetChildNames(curPath, returnContainers, runtime);
+                        continue;
+                    }
+                    if ((recurse || !doGlob) && Item.IsContainer(contProvider, curPath, runtime))
+                    {
+                        ManuallyGetChildNames(contProvider, curPath, "", returnContainers, recurse, filter, runtime);
+                        continue;
+                    }
+                    var cn = Path.ParseChildName(contProvider, curPath, runtime);
+                    if (filter.Accepts(cn))
+                    {
+                        runtime.WriteObject(cn);
+                    }
+                }
+            }
         }
 
         internal List<string> GetValidChildNames(ContainerCmdletProvider provider, string providerPath, ReturnContainers returnContainers, ProviderRuntime runtime)
@@ -160,11 +179,22 @@ namespace System.Management.Automation
                 select ((string)c.BaseObject)).ToList();
         }
 
+        internal bool HasChild(string path, ProviderRuntime runtime)
+        {
+            var hasChild = false;
+            GlobAndInvoke<ContainerCmdletProvider>(new [] { path }, runtime,
+                (curPath, provider) => {
+                    hasChild = hasChild || provider.HasChildItems(curPath, runtime);
+                }
+            );
+            return hasChild;
+        }
+
         #endregion
 
         #region private helpers
 
-        string SplitFilterFromPath(string curPath, ProviderRuntime runtime, out bool clearIncludeFilter)
+        string SplitFilterFromPath(string curPath, bool recurse, ProviderRuntime runtime, out bool clearIncludeFilter)
         {
             // When using Get-ChildItems, one could specify something like
             // "Get-ChildItem .\Source\*.cs -recurse" which should get all *.cs files recursively from .\Source.
@@ -172,14 +202,16 @@ namespace System.Management.Automation
             // "Get-ChildItem .\Source -recurse -include *.cs", but of course the first is easier to write :)
             clearIncludeFilter = false;
             // first check if we deal with a LiteralPath, a container, or include is set. If so, this won't work
-            if (!Globber.ShouldGlob(curPath, runtime) ||
+            // also if we don't need to recurse, the globber can simply do the work
+            if (!recurse ||
+                !Globber.ShouldGlob(curPath, runtime) ||
                 (runtime.Include != null && runtime.Include.Count > 0) ||
                 Item.IsContainer(curPath, runtime))
             {
                 return curPath;
             }
             clearIncludeFilter = true;
-            var childName = GetChildName(curPath, runtime);
+            var childName = Path.ParseChildName(curPath, runtime);
             runtime.Include.Add(childName);
             return curPath.Substring(0, curPath.Length - childName.Length);
         }
@@ -187,7 +219,7 @@ namespace System.Management.Automation
         private void GetItemOrChildItems(ContainerCmdletProvider provider, string path, bool recurse, ProviderRuntime runtime)
         {
             // If path identifies a container it gets all child items (recursively or not). Otherwise it returns the leaf
-            if (Item.IsContainer(path, runtime))
+            if (Item.IsContainer(provider, path, runtime))
             {
                 provider.GetChildItems(path, recurse, runtime);
                 return;
@@ -204,7 +236,7 @@ namespace System.Management.Automation
                 ManuallyGetChildItemsFromContainer(provider, path, recurse, filter, runtime);
                 return;
             }
-            var childName = GetChildName(path, runtime);
+            var childName = Path.ParseChildName(provider, path, runtime);
             if (filter.Accepts(childName))
             {
                 provider.GetItem(path, runtime);
@@ -215,53 +247,41 @@ namespace System.Management.Automation
                                                         IncludeExcludeFilter filter, ProviderRuntime runtime)
         {
             // we deal with a container: get all child items (all containers if we recurse)
-            var childNames = GetValidChildNames(provider, path, ReturnContainers.ReturnMatchingContainers, runtime);
-            foreach (var childName in childNames)
+            Dictionary<string, bool> matches = null;
+            // When a provider specific filter is set, and we need to recurse, we need to check recurse into all
+            // containers, but just get those that match the internal filter. Therefore we construct a lookup dict.
+            // Looking up in a dictionary whether or not the itemis a match should be faster than using a list
+            // If there is no filter, then ReturnAllContainers and ReturnMatchingContainers don't differ
+            if (!String.IsNullOrEmpty(runtime.Filter))
             {
-                // if the filter accepts the child (leaf or container), get it
-                if (filter.Accepts(childName))
-                {
-                    var childPath = Path.Combine(provider, path, childName, runtime);
-                    provider.GetItem(childPath, runtime);
-                }
+                matches = GetValidChildNames(provider, path, ReturnContainers.ReturnMatchingContainers,
+                                             runtime).ToDictionary(c => c, c => true);
             }
-            // check for recursion
-            if (!recurse)
-            {
-                return;
-            }
-            // we are in recursion: dive into child containers
-            childNames = GetValidChildNames(provider, path, ReturnContainers.ReturnAllContainers, runtime);
+            var childNames = GetValidChildNames(provider, path, ReturnContainers.ReturnAllContainers, runtime);
             foreach (var childName in childNames)
             {
                 var childPath = Path.Combine(provider, path, childName, runtime);
-                if (Item.IsContainer(childPath, runtime))
+                // if the filter accepts the child (leaf or container) and it's potentially a filter match, get it
+                if (filter.Accepts(childName) && (matches == null || matches.ContainsKey(childName)))
+                {
+                    provider.GetItem(childPath, runtime);
+                }
+                // if we need to recurse and deal with a container, dive into it
+                if (recurse && Item.IsContainer(childPath, runtime))
                 {
                     ManuallyGetChildItemsFromContainer(provider, childPath, true, filter, runtime);
                 }
             }
         }
 
-        private void ManuallyGetChildNames(ContainerCmdletProvider provider, string providerPath,
+        private void ManuallyGetChildNames(ContainerCmdletProvider provider, string providerPath, string relativePath,
             ReturnContainers returnContainers, bool recurse, IncludeExcludeFilter filter, ProviderRuntime runtime)
         {
-            // this function doesn't use a globber, it expects a finished provider path. But it can invoke recursion
-            if (Item.IsContainer(providerPath, runtime))
-            {
-                ManuallyGetChildNamesFromContainer(provider, providerPath, "", returnContainers, recurse, filter, runtime);
-                return;
-            }
-            var childName = GetChildName(providerPath, runtime);
-            if (filter.Accepts(childName))
-            {
-                runtime.WriteObject(childName);
-            }
-        }
-
-        private void ManuallyGetChildNamesFromContainer(ContainerCmdletProvider provider, string providerPath, string relativePath,
-            ReturnContainers returnContainers, bool recurse, IncludeExcludeFilter filter, ProviderRuntime runtime)
-        {
-            // we deal with a container
+            // Affected by #trailingSeparatorAmbiguity
+            // Sometimes, PS removes or appends a trailing slash to the providerPath
+            // E.g. when the recurse == true, there is a trailing slash, but not when recurse == false.
+            // As it calls the method with the slash being appended and not appended, PS doesn't seem to make
+            // promises to the provider implementation whether or not the path has a trailing slash
             var childNames = GetValidChildNames(provider, providerPath, returnContainers, runtime);
             foreach (var childName in childNames)
             {
@@ -287,7 +307,7 @@ namespace System.Management.Automation
                 {
                     // recursive call wirth child's provider path and relative path
                     var relativeChildPath = Path.Combine(provider, relativePath, childName, runtime);
-                    ManuallyGetChildNamesFromContainer(provider, providerChildPath, relativeChildPath, returnContainers,
+                    ManuallyGetChildNames(provider, providerChildPath, relativeChildPath, returnContainers,
                         true, filter, runtime);
                 }
             }

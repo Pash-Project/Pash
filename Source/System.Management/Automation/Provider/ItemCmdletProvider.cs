@@ -89,7 +89,14 @@ namespace System.Management.Automation.Provider
         internal bool ItemExists(string path, ProviderRuntime runtime)
         {
             ProviderRuntime = runtime;
-            return ItemExists(path);
+            try
+            {
+                return ItemExists(path);
+            }
+            catch (ItemNotFoundException)
+            {
+                return false;
+            }
         }
 
         internal object ItemExistsDynamicParameters(string path, ProviderRuntime runtime)

@@ -148,9 +148,11 @@ namespace Microsoft.PowerShell.Commands
             string drive = null;
             if (path.TryGetDriveName(out drive))
             {
-                if (System.IO.Path.DirectorySeparatorChar == '\\')
+                // TODO: workaround to be removed when we completeley remove the Path class and
+                // use PathIntrinsics instead
+                if (System.IO.Path.DirectorySeparatorChar == '\\' && path.StartsWithSlash())
                 {
-                    return drive != @"\";
+                    return false;
                 }
                 return true;
             }

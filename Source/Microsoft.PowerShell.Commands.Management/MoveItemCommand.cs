@@ -26,12 +26,9 @@ namespace Microsoft.PowerShell.Commands
     {
         protected override void ProcessRecord()
         {
-            foreach (String _path in InternalPaths)
-            {
-                InvokeProvider.Item.Move(_path, Destination);
-
-                if (PassThru.ToBool()) WriteObject(Path);
-            }
+            var runtime = ProviderRuntime;
+            runtime.PassThru = PassThru.IsPresent;
+            InvokeProvider.Item.Move(InternalPaths, Destination, runtime);
         }
 
         [Parameter(Position = 1, ValueFromPipelineByPropertyName = true)]

@@ -63,6 +63,7 @@ namespace System.Management.Automation.Provider
         {
             get
             {
+                // somehow we must return null if the drive is just a dummy drive...
                 return ProviderRuntime.PSDriveInfo;
             }
         }

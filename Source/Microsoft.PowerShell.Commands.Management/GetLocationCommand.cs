@@ -41,7 +41,7 @@ namespace Microsoft.PowerShell.Commands
                     List<PSDriveInfo> list = GetDrives(PSDrive, null, PSProvider, "local");
                     foreach (PSDriveInfo pdi in list)
                     {
-                        WriteObject(new PathInfo(pdi, pdi.Provider, new Path(pdi.CurrentLocation).MakePath(pdi.Name), SessionState));
+                        WriteObject(new PathInfo(pdi, new Path(pdi.CurrentLocation).MakePath(pdi.Name), SessionState));
                     }
                 }
                 else if ((PSProvider != null) && (PSProvider.Length > 0))

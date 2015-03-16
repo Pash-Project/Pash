@@ -31,7 +31,7 @@ namespace Pash.Implementation
         internal SessionState RootSessionState  { get { return _globalExecutionContext.SessionState; } }
         internal CmdletProviderManagementIntrinsics Provider { get; private set; }
 
-        public PSDriveInfo CurrentDrive { get; private set; }
+        public PSDriveInfo CurrentDrive { get; internal set; }
 
         internal SessionStateGlobal(ExecutionContext executionContext)
         {
@@ -192,7 +192,7 @@ namespace Pash.Implementation
                     throw new NullReferenceException("CurrentDrive is null.");
                 }
                 PSDriveInfo driveInfo = CurrentDrive;
-                return new PathInfo(driveInfo, driveInfo.Provider, driveInfo.CurrentLocation, _globalExecutionContext.SessionState);
+                return new PathInfo(driveInfo, driveInfo.CurrentLocation, _globalExecutionContext.SessionState);
             }
         }
 
@@ -232,21 +232,6 @@ namespace Pash.Implementation
             throw new NotImplementedException();
         }
 
-        internal string NormalizeRelativePath(string path, string basePath)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal string GetPathChildName(string path)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal string GetParentPath(string path, string root)
-        {
-            throw new NotImplementedException();
-        }
-
         internal PathInfo PopLocation(string stackName)
         {
             throw new NotImplementedException();
@@ -261,63 +246,6 @@ namespace Pash.Implementation
         {
             throw new NotImplementedException();
         }
-
-        internal PathInfo SetLocation(string path)
-        {
-            return SetLocation(path, new ProviderRuntime(_globalExecutionContext.SessionState));
-        }
         #endregion
-
-        internal PathInfo SetLocation(Path path, ProviderRuntime providerRuntime)
-        {
-            // TODO: deal with paths starting with ".\"
-
-            if (path == null)
-            {
-                throw new NullReferenceException("Path can't be null");
-            }
-
-            PSDriveInfo nextDrive = CurrentDrive;
-
-            // use the same provider-specific logic as resolve-path would use here
-            path = path.NormalizeSlashes().ResolveTilde();
-
-            string driveName = null;
-            if (path.TryGetDriveName(out driveName))
-            {
-                try
-                {
-                    nextDrive = _globalExecutionContext.SessionState.Drive.Get(driveName);
-                }
-                catch (MethodInvocationException) //didn't find a drive (maybe it's "\" on Windows)
-                {
-                    nextDrive = CurrentDrive;
-                }
-            }
-
-            Path newLocation = PathNavigation.CalculateFullPath(nextDrive.CurrentLocation, path);
-
-            var provider = RootSessionState.Provider.GetInstance(nextDrive.Provider);
-            if (!(provider is ItemCmdletProvider))
-            {
-                throw new PSInvalidOperationException("Cannot set location for this type of provider.");
-            }
-            var itemProvider = (ItemCmdletProvider)provider;
-
-            if (!itemProvider.ItemExists(newLocation, providerRuntime))
-            {
-                throw new PSInvalidOperationException(string.Format("Cannot find path '{0}' because it does not exist.", newLocation));
-            }
-
-            if (provider is FileSystemProvider)
-            {
-                System.Environment.CurrentDirectory = newLocation;
-            }
-
-            nextDrive.CurrentLocation = newLocation;
-
-            CurrentDrive = nextDrive;
-            return CurrentLocation;
-        }
     }
 }

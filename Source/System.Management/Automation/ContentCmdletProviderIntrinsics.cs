@@ -73,7 +73,7 @@ namespace System.Management.Automation
             foreach (var curPath in path)
             {
                 CmdletProvider provider;
-                var globbedPaths = Globber.GetGlobbedProviderPaths(curPath, runtime, out provider);
+                var globbedPaths = Globber.GetGlobbedProviderPaths(curPath, runtime, false, out provider);
                 var contentProvider = CmdletProvider.As<IContentCmdletProvider>(provider);
                 provider.ProviderRuntime = runtime; // make sure the runtime is set!
                 foreach (var p in globbedPaths)
@@ -118,7 +118,7 @@ namespace System.Management.Automation
             foreach (var curPath in paths)
             {
                 CmdletProvider provider;
-                var globbedPaths = Globber.GetGlobbedProviderPaths(curPath, runtime, out provider);
+                var globbedPaths = Globber.GetGlobbedProviderPaths(curPath, runtime, false, out provider);
                 var contentProvider = CmdletProvider.As<IContentCmdletProvider>(provider);
                 provider.ProviderRuntime = runtime; // make sure the runtime is set
                 foreach (var p in globbedPaths)

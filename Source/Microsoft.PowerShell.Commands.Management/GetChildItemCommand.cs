@@ -11,7 +11,7 @@ namespace Microsoft.PowerShell.Commands
     [CmdletAttribute("Get", "ChildItem", DefaultParameterSetName="Items"
         /*, SupportsTransactions=true, HelpUri="http://go.microsoft.com/fwlink/?LinkID=113308"*/)]
     [OutputType(typeof(FileInfo), typeof(DirectoryInfo))]
-    public class GetChildItemCommand : CoreCommandWithFiltersBase
+    public class GetChildItemCommand : CoreCommandWithCredentialsBase
     {
         /* While CoreCommandWithFiltersBase provides the Path/LiteralPath parameters with their internal behavior,
          * we cannot use this class. Because some PS developer decided that the ParameterSets in this cmdlet
@@ -31,7 +31,7 @@ namespace Microsoft.PowerShell.Commands
             set { InternalPaths = value; }
         }
 
-        [Parameter(ParameterSetName="LiteralPath",
+        [Parameter(ParameterSetName="LiteralItems",
             Mandatory=true,
             ValueFromPipeline=false,
             ValueFromPipelineByPropertyName=true)]
@@ -45,6 +45,15 @@ namespace Microsoft.PowerShell.Commands
                 InternalPaths = value;
             }
         }
+
+        [Parameter]
+        public override string[] Exclude { get; set; }
+
+        [Parameter]
+        public override string Filter { get; set; }
+
+        [Parameter]
+        public override string[] Include { get; set; }
 
         [Parameter]
         public override SwitchParameter Force { get; set; }

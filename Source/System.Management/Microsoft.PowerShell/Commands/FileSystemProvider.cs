@@ -1,5 +1,6 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
@@ -19,6 +20,7 @@ namespace Microsoft.PowerShell.Commands
         IPropertyCmdletProvider,
         ISecurityDescriptorCmdletProvider
     {
+        internal const string FallbackDriveName = "File";
         private enum ItemType {
             Unknown,
             Directory,
@@ -31,9 +33,29 @@ namespace Microsoft.PowerShell.Commands
         {
         }
 
+        protected override string NormalizeRelativePath(string path, string basePath)
+        {
+            var normPath = new Path(path).NormalizeSlashes();
+            var normBase = new Path(basePath).NormalizeSlashes();
+            if (!normPath.StartsWith(normBase))
+            {
+                var ex = new PSArgumentException("Path is outside of base path!", "PathOutsideBasePath",
+                    ErrorCategory.InvalidArgument);
+                WriteError(ex.ErrorRecord);
+                return null;
+            }
+
+            return new Path(path.Substring(basePath.Length)).TrimStartSlash().ToString();
+        }
+
         protected override void CopyItem(string path, string destinationPath, bool recurse)
         {
             throw new NotImplementedException();
+        }
+
+        protected override string MakePath(string parent, string child)
+        {
+            return new Path(parent).Combine(child).ToString();
         }
 
         protected override void GetChildItems(string path, bool recurse)
@@ -138,20 +160,10 @@ namespace Microsoft.PowerShell.Commands
                 path = ".";
             }
 
-            GetChildItems(path, false);
-
-            foreach (PSObject item in ProviderRuntime.ThrowFirstErrorOrReturnResults())
+            var names = GetChildNamesPrivate(path);
+            foreach (var name in names)
             {
-                var fileInfo = item.BaseObject as System.IO.FileInfo;
-                var directoryInfo = item.BaseObject as System.IO.DirectoryInfo;
-                if (fileInfo != null)
-                {
-                    ProviderRuntime.WriteObject(fileInfo.Name);
-                }
-                else if (directoryInfo != null)
-                {
-                    ProviderRuntime.WriteObject(directoryInfo.Name);
-                }
+                ProviderRuntime.WriteObject(name);
             }
         }
 
@@ -164,7 +176,7 @@ namespace Microsoft.PowerShell.Commands
 
         protected override string GetParentPath(string path, string root)
         {
-            Path parentPath = base.GetParentPath(path, root);
+            Path parentPath = new Path(path).GetParentPath(root);
 
             // TODO: deal with UNC
             if (!path.StartsWith("\\\\")) // UNC?
@@ -185,67 +197,69 @@ namespace Microsoft.PowerShell.Commands
             return path;
         }
 
-        protected override bool HasChildItems(string path) { throw new NotImplementedException(); }
+        protected override bool HasChildItems(string path)
+        {
+            return GetChildNamesPrivate(path).Count > 0;
+        }
 
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
-            Collection<PSDriveInfo> collection = new Collection<PSDriveInfo>();
-
-            // TODO: Console.WriteLine("Mono: Before GetDrives");
-            var drives = System.IO.DriveInfo.GetDrives();
-            // TODO: Console.WriteLine("Mono: After GetDrives");
-
-            System.Diagnostics.Debug.WriteLine("Number of drives: " + ((drives == null) ? "Null drives" : drives.Length.ToString()));
-
-            // TODO: Resolve hack to get around Mono bug where System.IO.DriveInfo.GetDrives() returns a single blank drive.
-            if (MonoHasBug11923())
+            /*
+             * The concept of drives in Powershell is obviously inspired by the
+             * Windows file system. However, in combination with providers, this concept
+             * has much more power as it allows access to arbitrary data stores.
+             * Handling paths is therefore a little bit more complicated, because we don't
+             * just deal with the FS. As a consequence, we need to make sure that
+             * drive qualified path can be identified with the colon and that drives have valid
+             * names.
+             * On non-Windows machines, mono would return "drives" like '/', '/proc', etc, because
+             * that's what's closest to Windows-drives. However, we can't adopt these drives,
+             * because their names are invalid and wouldn't be native on *nix systems with a colon.
+             * So instead, if we have a platform with mono drives that don't include a colon itself,
+             * and therefore aren't compatible to the PS/Pash drive concept, we will use a single
+             * default drive called "File" (see FallbackDriveName) instead to uniquely access the
+             * root of the file system.
+             * This drive get's a hidden flag, so it will be ignored in various places when Pash
+             * would for example display the path. Doing this should result in a feeling that is native
+             * for the platform.
+             */
+            var fsDrives = System.IO.DriveInfo.GetDrives();
+            var drives = (from fd in fsDrives
+                          where fd.Name.Contains(":")
+                          select NewDrive(fd)).ToList();
+            if (drives.Count == 0)
             {
-                PSDriveInfo info = new PSDriveInfo("/", base.ProviderInfo, "/", "Root", null);
-                info.RemovableDrive = false;
-
-                collection.Add(info);
-                return collection;
+                var root = System.IO.Path.GetPathRoot(Environment.CurrentDirectory);
+                var defaultDrive = new PSDriveInfo(FallbackDriveName, ProviderInfo, root, "Root", null);
+                defaultDrive.Hidden = true;
+                drives.Add(defaultDrive);
             }
-
-            if (drives != null)
-            {
-                foreach (System.IO.DriveInfo driveInfo in drives)
-                {
-                    System.Diagnostics.Debug.WriteLine(string.Format("drive '{0}' type '{1}' root '{2}'", driveInfo.Name, driveInfo.DriveType.ToString(), driveInfo.RootDirectory));
-
-                    // Support for Mono names - there are no ':' (colon) in the name
-                    Path name = driveInfo.Name;
-                    if (driveInfo.Name.IndexOf(':') > 0)
-                        name = driveInfo.Name.Substring(0, 1);
-
-                    Path description = string.Empty;
-                    Path root = driveInfo.Name;
-                    if (driveInfo.DriveType == System.IO.DriveType.Fixed)
-                    {
-                        try
-                        {
-                            description = driveInfo.VolumeLabel;
-                            root = driveInfo.RootDirectory.FullName;
-                        }
-                        catch
-                        {
-                        }
-                    }
-                    PSDriveInfo info = new PSDriveInfo(name, base.ProviderInfo, root, description, null);
-                    info.RemovableDrive = driveInfo.DriveType != System.IO.DriveType.Fixed;
-
-                    collection.Add(info);
-                }
-            }
-
-            return collection;
+            return new Collection<PSDriveInfo>(drives);
         }
 
-        // See: https://bugzilla.xamarin.com/show_bug.cgi?id=11923
-        static bool MonoHasBug11923()
+        private PSDriveInfo NewDrive(System.IO.DriveInfo fsDrive)
         {
-            var drives = System.IO.DriveInfo.GetDrives();
-            return drives.Length == 1 && drives[0].Name.Length == 0;
+            Path name = fsDrive.Name;
+            var iColon = fsDrive.Name.IndexOf(":");
+            if (iColon > 0)
+                name = fsDrive.Name.Substring(0, iColon);
+
+            Path description = string.Empty;
+            Path root = fsDrive.Name;
+            if (fsDrive.DriveType == System.IO.DriveType.Fixed)
+            {
+                try
+                {
+                    description = fsDrive.VolumeLabel;
+                    root = fsDrive.RootDirectory.FullName;
+                }
+                catch
+                {
+                }
+            }
+            PSDriveInfo info = new PSDriveInfo(name, base.ProviderInfo, root, description, null);
+            info.RemovableDrive = fsDrive.DriveType != System.IO.DriveType.Fixed;
+            return info;
         }
 
         protected override void InvokeDefaultAction(string path) { throw new NotImplementedException(); }
@@ -298,6 +312,7 @@ namespace Microsoft.PowerShell.Commands
 
         protected override bool IsItemContainer(string path)
         {
+            path = path == "" ? "." : path; // Workaround until our globber handles relative paths
             path = NormalizePath(path);
 
             return (new System.IO.DirectoryInfo(path)).Exists;
@@ -307,6 +322,7 @@ namespace Microsoft.PowerShell.Commands
 
         protected override bool ItemExists(string path)
         {
+            path = path == "" ? "." : path; // Workaround until our globber handles relative paths
             path = NormalizePath(path);
             try
             {
@@ -350,18 +366,33 @@ namespace Microsoft.PowerShell.Commands
 
         protected override ProviderInfo Start(ProviderInfo providerInfo)
         {
-            if ((providerInfo != null) && string.IsNullOrEmpty(providerInfo.Home))
+            if (providerInfo == null || !string.IsNullOrEmpty(providerInfo.Home))
             {
-                Path homeDrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
-                Path homePath = Environment.GetEnvironmentVariable("HOMEPATH");
-                if (!string.IsNullOrEmpty(homeDrive) && !string.IsNullOrEmpty(homePath))
+                return providerInfo;
+            }
+
+            string path = null;
+            Path homeDrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+            Path homePath = Environment.GetEnvironmentVariable("HOMEPATH");
+            if (!string.IsNullOrEmpty(homeDrive) && !string.IsNullOrEmpty(homePath))
+            {
+                path = MakePath(homeDrive, homePath);
+            }
+            else
+            {
+                // FIXME: taken from Path.ResolveTilde(). Make sure to clean all that mess up...
+                path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+                // HACK: Use $Env:HOME until Mono 2.10 dies out.
+                if (path == "")
                 {
-                    Path path = MakePath(homeDrive, homePath);
-                    if (System.IO.Directory.Exists(path))
-                    {
-                        providerInfo.Home = path;
-                    }
+                    path = Environment.GetEnvironmentVariable("HOME");
                 }
+            }
+
+            if (System.IO.Directory.Exists(path))
+            {
+                providerInfo.Home = path;
             }
             return providerInfo;
         }
@@ -484,20 +515,22 @@ namespace Microsoft.PowerShell.Commands
 
         #endregion
 
-        internal override string NormalizePath(string path)
+        internal string NormalizePath(string path)
         {
-            // FIXME: this is more a workaround until we properly reimplement this provider or check how PathGloberr
-            // needs to behave in detail
-            // Currently PathGlobber strips the drive in front (as it's provided through PSDriveInfo). However,
-            // simply appending the PSDriveInfo.Root for all paths right in the globber would break other functionality
-            // As currently the only provider affected by this is our FileSystemProvider, we will do this workaround
-            // until it's evaluated what's the correct behavior
-            var p = new Path(path);
-            if (PSDriveInfo != null && !p.HasDrive() && !p.StartsWith(".")) // only append drive root if not relative
+            var p = new Path(path).NormalizeSlashes();
+            return p.ToString();
+        }
+
+        private List<string> GetChildNamesPrivate(string path)
+        {
+            path = path == "" ? "." : path; // Workaround until our globber handles relative paths
+            path = NormalizePath(path);
+            System.IO.DirectoryInfo directory = new System.IO.DirectoryInfo(path);
+            if (!directory.Exists)
             {
-                path = new Path(PSDriveInfo.Root).Combine(path);
+                return new List<string> { new System.IO.FileInfo(path).Name };
             }
-            return base.NormalizePath(path);
+            return (from fs in directory.GetFileSystemInfos() select fs.Name).ToList();
         }
 
         private ItemType GetItemType(string type)

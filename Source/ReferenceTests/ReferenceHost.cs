@@ -13,9 +13,14 @@ namespace ReferenceTests
     {
         public ErrorRecord[] Errors { get; set; }
 
-        public ExecutionWithErrorsException (ErrorRecord[] records)
+        public ExecutionWithErrorsException(ErrorRecord[] records)
+            : base (records.Length == 0 ? "No errors" : "First error: " + records[0].Exception.Message + " (and maybe more errors)")
         {
             Errors = records;
+            if (records.Length == 0)
+            {
+                return;
+            }            
         }
     }
 
