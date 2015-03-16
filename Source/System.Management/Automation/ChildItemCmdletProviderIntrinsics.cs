@@ -92,7 +92,7 @@ namespace System.Management.Automation
 
                 // the Path might be a mixture of a path and an include filter
                 bool clearIncludeFilter;
-                path = SplitFilterFromPath(path, runtime, out clearIncludeFilter);
+                path = SplitFilterFromPath(path, recurse, runtime, out clearIncludeFilter);
 
                 // now perform the actual globbing
                 CmdletProvider provider;
@@ -107,9 +107,7 @@ namespace System.Management.Automation
                         // if we need to actively filter that stuff, we have to handle the recursion manually
                         if (!filter.CanBeIgnored)
                         {
-                            // clearIncludeFilter is passed, because we want to recurse one level if we did split the filter
-                            // from the path before
-                            ManuallyGetChildItems(containerProvider, globPath, recurse, clearIncludeFilter, filter, runtime);
+                            ManuallyGetChildItems(containerProvider, globPath, recurse, filter, runtime);
                             return;
                         }
                         // otherwise just get the child items / the item directly
@@ -196,7 +194,7 @@ namespace System.Management.Automation
 
         #region private helpers
 
-        string SplitFilterFromPath(string curPath, ProviderRuntime runtime, out bool clearIncludeFilter)
+        string SplitFilterFromPath(string curPath, bool recurse, ProviderRuntime runtime, out bool clearIncludeFilter)
         {
             // When using Get-ChildItems, one could specify something like
             // "Get-ChildItem .\Source\*.cs -recurse" which should get all *.cs files recursively from .\Source.
@@ -204,7 +202,9 @@ namespace System.Management.Automation
             // "Get-ChildItem .\Source -recurse -include *.cs", but of course the first is easier to write :)
             clearIncludeFilter = false;
             // first check if we deal with a LiteralPath, a container, or include is set. If so, this won't work
-            if (!Globber.ShouldGlob(curPath, runtime) ||
+            // also if we don't need to recurse, the globber can simply do the work
+            if (!recurse ||
+                !Globber.ShouldGlob(curPath, runtime) ||
                 (runtime.Include != null && runtime.Include.Count > 0) ||
                 Item.IsContainer(curPath, runtime))
             {
@@ -228,10 +228,10 @@ namespace System.Management.Automation
         }
 
         private void ManuallyGetChildItems(ContainerCmdletProvider provider, string path, bool recurse, 
-                                           bool recurseFirst, IncludeExcludeFilter filter, ProviderRuntime runtime)
+                                           IncludeExcludeFilter filter, ProviderRuntime runtime)
         {
             // recursively get child names of containers or just the current child if the filter accepts it
-            if ((recurseFirst || recurse) && Item.IsContainer(path, runtime))
+            if (recurse && Item.IsContainer(path, runtime))
             {
                 ManuallyGetChildItemsFromContainer(provider, path, recurse, filter, runtime);
                 return;

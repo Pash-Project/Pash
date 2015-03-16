@@ -339,12 +339,10 @@ namespace ReferenceTests.Providers
             ReferenceHost.Execute(cmd);
             var secRootWithoutSlash = _secRoot.Substring(0, _secRoot.Length - 1);
             Assert.That(ExecutionMessages, AreMatchedBy(
-                // next 3 with or without last slash because of the #trailingSeparatorAmbiguity
-                "ItemExists " + _secRoot +
-                " __OR__ ItemExists " + secRootWithoutSlash,
+                "ItemExists " + _secRoot,
                 "? NormalizeRelativePath " + _secRoot + " " + secRootWithoutSlash,
-                "IsItemContainer " + _secRoot +
-                " __OR__ IsItemContainer " + secRootWithoutSlash,
+                "IsItemContainer " + _secRoot,
+                // next 3 with or without last slash because of the #trailingSeparatorAmbiguity
                 "ItemExists " + _secRoot +
                 " __OR__ ItemExists " + secRootWithoutSlash,
                 "HasChildItems " + _secRoot +
