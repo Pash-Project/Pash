@@ -310,11 +310,11 @@ namespace ReferenceTests.Providers
             Assert.That(ExecutionMessages, AreMatchedBy(
                 // next 3 with or without last slash because of the #trailingSeparatorAmbiguity
                 "ItemExists " + _secRoot +
-                    " __OR__ ItemExists " + secRootWithoutSlash,
+                " __OR__ ItemExists " + secRootWithoutSlash,
                 "HasChildItems " + _secRoot +
-                    " __OR__ HasChildItems " + secRootWithoutSlash,
+                " __OR__ HasChildItems " + secRootWithoutSlash,
                 "GetChildNames " + _secRoot + " ReturnMatchingContainers" +
-                    " __OR__ GetChildNames " + secRootWithoutSlash + " ReturnMatchingContainers",
+                " __OR__ GetChildNames " + secRootWithoutSlash + " ReturnMatchingContainers",
                 "IsItemContainer " + _secRoot + "bar.txt",
                 "ItemExists " + _secRoot,
                 "IsItemContainer " + _secRoot,
@@ -326,6 +326,35 @@ namespace ReferenceTests.Providers
                 "IsItemContainer " + _secRoot + "foo/bar.txt",
                 "GetItem " + _secRoot + "bar.txt",
                 "IsItemContainer " + _secRoot + "bar.txt"
+            ));
+        }
+
+        [Test]
+        public void NavigationProviderSupportsGetChildItemWithFilterInPathWithoutRecursion()
+        {
+            var cmd = NewlineJoin(
+                "Set-Location " + _secDrive,
+                "Get-ChildItem ./*.txt"
+            );
+            ReferenceHost.Execute(cmd);
+            var secRootWithoutSlash = _secRoot.Substring(0, _secRoot.Length - 1);
+            Assert.That(ExecutionMessages, AreMatchedBy(
+                // next 3 with or without last slash because of the #trailingSeparatorAmbiguity
+                "ItemExists " + _secRoot +
+                " __OR__ ItemExists " + secRootWithoutSlash,
+                "IsItemContainer " + _secRoot +
+                " __OR__ ItemExists " + secRootWithoutSlash,
+                "ItemExists " + _secRoot +
+                " __OR__ ItemExists " + secRootWithoutSlash,
+                "HasChildItems " + _secRoot +
+                " __OR__ HasChildItems " + secRootWithoutSlash,
+                "GetChildNames " + _secRoot + " ReturnMatchingContainers" +
+                " __OR__ GetChildNames " + secRootWithoutSlash + " ReturnMatchingContainers",
+                "IsItemContainer " + _secRoot + "bar.txt",
+                "ItemExists " + _secRoot,
+                "IsItemContainer " + _secRoot,
+                "GetChildNames " + _secRoot + " ReturnAllContainers",
+                "GetItem " + _secRoot + "bar.txt"
             ));
         }
 

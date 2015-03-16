@@ -107,7 +107,9 @@ namespace System.Management.Automation
                         // if we need to actively filter that stuff, we have to handle the recursion manually
                         if (!filter.CanBeIgnored)
                         {
-                            ManuallyGetChildItems(containerProvider, globPath, recurse, filter, runtime);
+                            // clearIncludeFilter is passed, because we want to recurse one level if we did split the filter
+                            // from the path before
+                            ManuallyGetChildItems(containerProvider, globPath, recurse, clearIncludeFilter, filter, runtime);
                             return;
                         }
                         // otherwise just get the child items / the item directly
@@ -226,10 +228,10 @@ namespace System.Management.Automation
         }
 
         private void ManuallyGetChildItems(ContainerCmdletProvider provider, string path, bool recurse, 
-                                           IncludeExcludeFilter filter, ProviderRuntime runtime)
+                                           bool recurseFirst, IncludeExcludeFilter filter, ProviderRuntime runtime)
         {
             // recursively get child names of containers or just the current child if the filter accepts it
-            if (recurse && Item.IsContainer(path, runtime))
+            if ((recurseFirst || recurse) && Item.IsContainer(path, runtime))
             {
                 ManuallyGetChildItemsFromContainer(provider, path, recurse, filter, runtime);
                 return;

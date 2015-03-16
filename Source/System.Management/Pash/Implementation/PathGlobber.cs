@@ -203,8 +203,7 @@ namespace Pash.Implementation
             // TODO: I think PS default relative path resolving can only work with
             // paths that have slash/backslash as spearator. Verify this.
             // skip resolving if the path is absolute or we don't have a navigation provider
-            if (provider == null || IsCommonRootPath(path) ||
-                path.StartsWith(runtime.PSDriveInfo.Root) || String.IsNullOrEmpty(path))
+            if (provider == null || IsCommonRootPath(path) || path.StartsWith(runtime.PSDriveInfo.Root))
             {
                 return path;
             }
