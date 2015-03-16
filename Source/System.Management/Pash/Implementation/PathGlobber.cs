@@ -203,13 +203,18 @@ namespace Pash.Implementation
             // TODO: I think PS default relative path resolving can only work with
             // paths that have slash/backslash as spearator. Verify this.
             // skip resolving if the path is absolute or we don't have a navigation provider
-            if (provider == null || IsCommonRootPath(path) || path.StartsWith(runtime.PSDriveInfo.Root))
+            if (provider == null || path.StartsWith(runtime.PSDriveInfo.Root))
             {
                 return path;
             }
 
-            var curPath = runtime.PSDriveInfo.CurrentLocation;
             var curRoot = runtime.PSDriveInfo.Root;
+            if (IsCommonRootPath(path))
+            {
+                return provider.MakePath(curRoot, path, runtime);
+            }
+
+            var curPath = runtime.PSDriveInfo.CurrentLocation;
 
             // we must stay in the same drive. to avoid to resolve to directories outside the drive, we first need to
             // get the path relative to the current drive's root
@@ -234,7 +239,7 @@ namespace Pash.Implementation
                 }
                 else if (comp.Equals(".."))
                 {
-                    curPath = provider.GetParentPath(curPath, curRoot, runtime);
+                    curPath = provider.GetParentPath(curPath, "", runtime);
                     continue;
                 }
                 // otherwise it's a child component to append
@@ -308,13 +313,12 @@ namespace Pash.Implementation
 
         private Stack<string> PathToStack(ContainerCmdletProvider provider, string path, ProviderRuntime runtime)
         {
-            var drive = runtime.PSDriveInfo;
             var componentStack = new Stack<string>();
             while (!String.IsNullOrEmpty(path))
             {
                 var child = Path.ParseChildName(provider, path, runtime);
                 componentStack.Push(child);
-                var parentPath = Path.ParseParent(provider, path, drive.Root, runtime);
+                var parentPath = Path.ParseParent(provider, path, "", runtime);
                 if (parentPath.Equals(path))
                 {
                     throw new PSInvalidOperationException("Provider's implementation of GetParentPath is inconsistent",
