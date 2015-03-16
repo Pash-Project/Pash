@@ -342,18 +342,15 @@ namespace ReferenceTests.Providers
                 // next 3 with or without last slash because of the #trailingSeparatorAmbiguity
                 "ItemExists " + _secRoot +
                 " __OR__ ItemExists " + secRootWithoutSlash,
+                "? NormalizeRelativePath " + _secRoot + " " + secRootWithoutSlash,
                 "IsItemContainer " + _secRoot +
-                " __OR__ ItemExists " + secRootWithoutSlash,
+                " __OR__ IsItemContainer " + secRootWithoutSlash,
                 "ItemExists " + _secRoot +
                 " __OR__ ItemExists " + secRootWithoutSlash,
                 "HasChildItems " + _secRoot +
                 " __OR__ HasChildItems " + secRootWithoutSlash,
                 "GetChildNames " + _secRoot + " ReturnMatchingContainers" +
                 " __OR__ GetChildNames " + secRootWithoutSlash + " ReturnMatchingContainers",
-                "IsItemContainer " + _secRoot + "bar.txt",
-                "ItemExists " + _secRoot,
-                "IsItemContainer " + _secRoot,
-                "GetChildNames " + _secRoot + " ReturnAllContainers",
                 "GetItem " + _secRoot + "bar.txt"
             ));
         }
