@@ -76,6 +76,7 @@ namespace ReferenceTests.Commands
         [TestCase("Stop-Service", new[] { typeof(ServiceController) })]
         [TestCase("Suspend-Service", new[] { typeof(ServiceController) })]
         [TestCase("Test-Path", new[] { typeof(bool) })]
+        [TestCase("Select-String", new[] { typeof(MatchInfo), typeof(bool) })]
         public void OutputTypesForCommand(string commandName, Type[] expectedOutputTypes)
         {
             string command = string.Format("(Get-Command {0}).OutputType", commandName);

@@ -389,6 +389,7 @@ namespace System.Management.Automation.Runspaces
             initialSessionState.Commands.Add(new SessionStateAliasEntry("set", "Set-Variable", "", ScopedItemOptions.AllScope));
             initialSessionState.Commands.Add(new SessionStateAliasEntry("si", "Set-Item", "", ScopedItemOptions.ReadOnly | ScopedItemOptions.AllScope));
             initialSessionState.Commands.Add(new SessionStateAliasEntry("sl", "Set-Location", "", ScopedItemOptions.ReadOnly | ScopedItemOptions.AllScope));
+            initialSessionState.Commands.Add(new SessionStateAliasEntry("sls", "Select-String", "", ScopedItemOptions.ReadOnly | ScopedItemOptions.AllScope));
             initialSessionState.Commands.Add(new SessionStateAliasEntry("swmi", "Set-WMIInstance", "", ScopedItemOptions.ReadOnly | ScopedItemOptions.AllScope));
             initialSessionState.Commands.Add(new SessionStateAliasEntry("sleep", "Start-Sleep", "", ScopedItemOptions.ReadOnly | ScopedItemOptions.AllScope));
             initialSessionState.Commands.Add(new SessionStateAliasEntry("sort", "Sort-Object", "", ScopedItemOptions.ReadOnly | ScopedItemOptions.AllScope));
