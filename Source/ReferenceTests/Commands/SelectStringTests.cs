@@ -59,7 +59,6 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
-        [Ignore("Get a ParameterBindingException : Parameter 'Pattern' has already been bound!")]
         public void SimpleMatchWhenPathFirstParameterAndPatternSecondAsNamedParameter()
         {
             string fileName = CreateFile("first line", ".txt");

@@ -284,16 +284,24 @@ namespace System.Management.Automation
             int i = 0;
             foreach (var curParam in parametersWithoutName)
             {
-                if (i < positionals.Count)
+                bool bound = false;
+                while (!bound)
                 {
-                    var affectedParam = positionals[i];
-                    BindParameter(affectedParam, curParam.Value, true);
-                    i++;
-                }
-                else
-                {
-                    var msg = String.Format("Positional parameter not found for provided argument '{0}'", curParam.Value);
-                    throw new ParameterBindingException(msg, "PositionalParameterNotFound");
+                    if (i < positionals.Count)
+                    {
+                        var affectedParam = positionals[i];
+                        if (!_boundParameters.Contains(affectedParam.MemberInfo))
+                        {
+                            BindParameter(affectedParam, curParam.Value, true);
+                            bound = true;
+                        }
+                        i++;
+                    }
+                    else
+                    {
+                        var msg = String.Format("Positional parameter not found for provided argument '{0}'", curParam.Value);
+                        throw new ParameterBindingException(msg, "PositionalParameterNotFound");
+                    }
                 }
             }
         }
