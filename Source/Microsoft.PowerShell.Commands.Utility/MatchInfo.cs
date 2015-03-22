@@ -17,6 +17,10 @@ namespace Microsoft.PowerShell.Commands
 
         public override string ToString()
         {
+            if (Filename == "InputStream")
+            {
+                return Line;
+            }
             return String.Format("{0}:{1}:{2}", Path, LineNumber, Line);
         }
 

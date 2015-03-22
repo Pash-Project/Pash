@@ -1,5 +1,6 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
@@ -85,16 +86,53 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            foreach (string path in Path)
+            if (Path != null)
             {
-                MatchInFile(path);
+                MatchInFiles();
+            }
+            else if (InputObject != null)
+            {
+                MatchInputObject();
             }
         }
 
-        private void MatchInFile(string path)
+        private void MatchInFiles()
+        {
+            foreach (string path in Path)
+            {
+                MatchInLines(path, File.ReadLines(path));
+            }
+        }
+
+        /// <summary>
+        /// When passing an array of strings using InputObject the array is turned into a single string
+        /// with a space between each item of the array.
+        /// 
+        /// When an array of strings is passed down the pipeline each item of the array is searched
+        /// individually.
+        /// 
+        /// TODO: How to determine whether InputObject is used or the pipeline is used?
+        /// https://technet.microsoft.com/en-us/library/hh849903.aspx
+        /// </summary>
+        private void MatchInputObject()
+        {
+            MatchInLines("InputStream", GetLines(InputObject));
+        }
+
+        private IEnumerable<string> GetLines(PSObject psObject)
+        {
+            var array = psObject.BaseObject as Array;
+            if (array != null)
+            {
+                yield return String.Join(" ", array.OfType<object>().Select(item => item.ToString()));
+            }
+            yield return psObject.BaseObject.ToString();
+        }
+
+        private void MatchInLines(string path, IEnumerable<string> lines)
         {
             int lineNumber = 1;
-            foreach (string line in File.ReadLines(path))
+            foreach (string line in lines)
             {
                 foreach (string pattern in Pattern)
                 {

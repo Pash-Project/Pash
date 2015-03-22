@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace ReferenceTests.Commands
 {
-    [TestFixture]
+     [TestFixture]
     public class SelectStringTests : ReferenceTestBase
     {
         [Test]
@@ -154,6 +154,78 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual(fileName1, firstMatch.Path);
             Assert.AreEqual(fileName2, secondMatch.Path);
+        }
+
+        [Test]
+        public void MatchUsingStringFromPipeline()
+        {
+            MatchInfo match = ReferenceHost.RawExecute("\"-HELLO-\" | select-string -pattern \"HELLO\"")
+                 .Select(psObject => (MatchInfo)psObject.ImmediateBaseObject)
+                 .Single();
+            Match regexMatch = match.Matches.Single();
+
+            Assert.AreEqual("InputStream", match.Filename);
+            Assert.AreEqual("InputStream", match.Path);
+            Assert.AreEqual("-HELLO-", match.Line);
+            Assert.AreEqual(1, match.LineNumber);
+            Assert.AreEqual("HELLO", match.Pattern);
+            Assert.AreEqual(1, regexMatch.Index);
+            Assert.AreEqual(5, regexMatch.Length);
+            Assert.AreEqual("HELLO", regexMatch.Value);
+            Assert.AreEqual("-HELLO-", match.ToString());
+        }
+
+        [Test, Explicit("Array values passed one at a time to select-string and not as an array")]
+        public void MatchUsingStringArrayFromPipeline()
+        {
+            MatchInfo match = ReferenceHost.RawExecute("\"-12345-\",\"-HELLO-\" | select-string -pattern \"HELLO\"")
+                 .Select(psObject => (MatchInfo)psObject.ImmediateBaseObject)
+                 .Single();
+            Match regexMatch = match.Matches.Single();
+
+            Assert.AreEqual("InputStream", match.Filename);
+            Assert.AreEqual("InputStream", match.Path);
+            Assert.AreEqual("-HELLO-", match.Line);
+            Assert.AreEqual(2, match.LineNumber);
+            Assert.AreEqual("HELLO", match.Pattern);
+            Assert.AreEqual(1, regexMatch.Index);
+            Assert.AreEqual(5, regexMatch.Length);
+            Assert.AreEqual("HELLO", regexMatch.Value);
+            Assert.AreEqual("-HELLO-", match.ToString());
+        }
+
+        /// <summary>
+        /// When passing an array of strings using InputObject the array is turned into a single string
+        /// with a space between each item of the array.
+        /// https://technet.microsoft.com/en-us/library/hh849903.aspx
+        /// </summary>
+        [Test]
+        public void MatchUsingInputObjectStringArray()
+        {
+            string command = "select-string -inputobject \"-12345-\",\"-HELLO-\" -pattern \"HELLO\"";
+            MatchInfo match = ReferenceHost.RawExecute(command)
+                 .Select(psObject => (MatchInfo)psObject.ImmediateBaseObject)
+                 .Single();
+            Match regexMatch = match.Matches.Single();
+
+            Assert.AreEqual("InputStream", match.Filename);
+            Assert.AreEqual("InputStream", match.Path);
+            Assert.AreEqual("-12345- -HELLO-", match.Line);
+            Assert.AreEqual(1, match.LineNumber);
+            Assert.AreEqual("HELLO", match.Pattern);
+            Assert.AreEqual(9, regexMatch.Index);
+            Assert.AreEqual(5, regexMatch.Length);
+            Assert.AreEqual("HELLO", regexMatch.Value);
+            Assert.AreEqual("-12345- -HELLO-", match.ToString());
+        }
+
+        [Test]
+        public void NoMatchUsingInputObjectStringArray()
+        {
+            string command = "select-string -inputobject \"-12345-\",\"-HELLO-\" -pattern \"5HELLO\"";
+            string result = ReferenceHost.Execute(command);
+
+            Assert.AreEqual(string.Empty, result);
         }
     }
 }
