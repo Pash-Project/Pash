@@ -84,6 +84,9 @@ namespace Microsoft.PowerShell.Commands
         [Parameter]
         public SwitchParameter SimpleMatch { get; set; }
 
+        int _lineNumber = 1;
+        List<MatchInfo> _savedMatches = new List<MatchInfo>();
+
         protected override void ProcessRecord()
         {
             if (Path != null)
@@ -111,12 +114,19 @@ namespace Microsoft.PowerShell.Commands
         /// When an array of strings is passed down the pipeline each item of the array is searched
         /// individually.
         /// 
-        /// TODO: How to determine whether InputObject is used or the pipeline is used?
         /// https://technet.microsoft.com/en-us/library/hh849903.aspx
         /// </summary>
         private void MatchInputObject()
         {
             MatchInLines("InputStream", GetLines(InputObject));
+        }
+
+        protected override void EndProcessing()
+        {
+            foreach (MatchInfo match in _savedMatches)
+            {
+                WriteObject(match);
+            }
         }
 
         private IEnumerable<string> GetLines(PSObject psObject)
@@ -131,20 +141,19 @@ namespace Microsoft.PowerShell.Commands
 
         private void MatchInLines(string path, IEnumerable<string> lines)
         {
-            int lineNumber = 1;
             foreach (string line in lines)
             {
                 foreach (string pattern in Pattern)
                 {
-                    Match match = Regex.Match(line, pattern);
+                    Match match = Regex.Match(line, pattern, RegexOptions.IgnoreCase);
                     if (match.Success)
                     {
-                        var matchInfo = new MatchInfo(path, pattern, match, line, lineNumber);
+                        var matchInfo = new MatchInfo(path, pattern, match, line, _lineNumber);
                         WriteObject(matchInfo);
                         break;
                     }
                 }
-                lineNumber++;
+                _lineNumber++;
             }
         }
     }

@@ -175,7 +175,7 @@ namespace ReferenceTests.Commands
             Assert.AreEqual("-HELLO-", match.ToString());
         }
 
-        [Test, Explicit("Array values passed one at a time to select-string and not as an array")]
+        [Test]
         public void MatchUsingStringArrayFromPipeline()
         {
             MatchInfo match = ReferenceHost.RawExecute("\"-12345-\",\"-HELLO-\" | select-string -pattern \"HELLO\"")
@@ -226,6 +226,35 @@ namespace ReferenceTests.Commands
             string result = ReferenceHost.Execute(command);
 
             Assert.AreEqual(string.Empty, result);
+        }
+
+        [Test]
+        public void MultipleMatchesUsingStringArrayFromPipeline()
+        {
+            MatchInfo[] matches = ReferenceHost.RawExecute("\"-12345-\",\"-HELLO-\",\"hello\" | select-string -pattern \"HELLO\"")
+                 .Select(psObject => (MatchInfo)psObject.ImmediateBaseObject)
+                 .ToArray();
+            MatchInfo firstMatch = matches[0];
+            MatchInfo secondMatch = matches[1];
+
+            Assert.AreEqual("InputStream", firstMatch.Filename);
+            Assert.AreEqual("InputStream", secondMatch.Filename);
+            Assert.AreEqual("InputStream", firstMatch.Path);
+            Assert.AreEqual("InputStream", secondMatch.Path);
+            Assert.AreEqual("-HELLO-", firstMatch.Line);
+            Assert.AreEqual("hello", secondMatch.Line);
+            Assert.AreEqual(2, firstMatch.LineNumber);
+            Assert.AreEqual(3, secondMatch.LineNumber);
+            Assert.AreEqual("HELLO", firstMatch.Pattern);
+            Assert.AreEqual("HELLO", secondMatch.Pattern);
+            Assert.AreEqual(1, firstMatch.Matches.Single().Index);
+            Assert.AreEqual(5, firstMatch.Matches.Single().Length);
+            Assert.AreEqual(0, secondMatch.Matches.Single().Index);
+            Assert.AreEqual(5, secondMatch.Matches.Single().Length);
+            Assert.AreEqual("HELLO", firstMatch.Matches.Single().Value);
+            Assert.AreEqual("hello", secondMatch.Matches.Single().Value);
+            Assert.AreEqual("-HELLO-", firstMatch.ToString());
+            Assert.AreEqual("hello", secondMatch.ToString());
         }
     }
 }
