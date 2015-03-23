@@ -8,18 +8,30 @@ using System.Text.RegularExpressions;
 
 namespace ReferenceTests.Commands
 {
-     [TestFixture]
+    [TestFixture]
     public class SelectStringTests : ReferenceTestBase
     {
+        MatchInfo RawExecuteSingleMatch(string command)
+        {
+            return ReferenceHost.RawExecute(command)
+                .Select(psObject => (MatchInfo)psObject.ImmediateBaseObject)
+                .Single();
+        }
+
+        private MatchInfo[] RawExecuteMultipleMatches(string command)
+        {
+            return ReferenceHost.RawExecute(command)
+                .Select(psObject => (MatchInfo)psObject.ImmediateBaseObject)
+                .ToArray();
+        }
+
         [Test]
         public void FileWithSingleLineAndPatternMatchesTextInLine()
         {
             string fileName = CreateFile("first line", ".txt");
 
             string command = string.Format("Select-String -Path '{0}' -Pattern 'first'", fileName);
-            MatchInfo match = ReferenceHost.RawExecute(command)
-                .Select(psObject => (MatchInfo)psObject.ImmediateBaseObject)
-                .Single();
+            MatchInfo match = RawExecuteSingleMatch(command);
             Match regexMatch = match.Matches.FirstOrDefault();
 
             Assert.IsNull(match.Context);
@@ -75,9 +87,7 @@ namespace ReferenceTests.Commands
             string fileName = CreateFile(NewlineJoin("first line", "second line"), ".txt");
 
             string command = string.Format("Select-String 'line' '{0}'", fileName);
-            MatchInfo[] matches = ReferenceHost.RawExecute(command)
-                .Select(psObject => (MatchInfo)psObject.ImmediateBaseObject)
-                .ToArray();
+            MatchInfo[] matches = RawExecuteMultipleMatches(command);
             MatchInfo firstMatch = matches[0];
             MatchInfo secondMatch = matches[1];
 
@@ -101,9 +111,7 @@ namespace ReferenceTests.Commands
             string fileName = CreateFile(NewlineJoin("first line", "second line"), ".txt");
 
             string command = string.Format("Select-String -Path '{0}' -Pattern 'first','line'", fileName);
-            MatchInfo[] matches = ReferenceHost.RawExecute(command)
-                .Select(psObject => (MatchInfo)psObject.ImmediateBaseObject)
-                .ToArray();
+            MatchInfo[] matches = RawExecuteMultipleMatches(command);
             MatchInfo firstMatch = matches[0];
             MatchInfo secondMatch = matches[1];
 
@@ -126,9 +134,7 @@ namespace ReferenceTests.Commands
             string fileName = CreateFile("first line", ".txt");
 
             string command = string.Format("Select-String -Path '{0}' -Pattern 'nomatch','line'", fileName);
-            MatchInfo match = ReferenceHost.RawExecute(command)
-                 .Select(psObject => (MatchInfo)psObject.ImmediateBaseObject)
-                 .Single();
+            MatchInfo match = RawExecuteSingleMatch(command);
             Match regexMatch = match.Matches.Single();
 
             Assert.AreEqual(1, match.LineNumber);
@@ -146,9 +152,7 @@ namespace ReferenceTests.Commands
             string fileName2 = CreateFile("first line", ".txt");
 
             string command = string.Format("Select-String -Path '{0}','{1}' -Pattern 'first'", fileName1, fileName2);
-            MatchInfo[] matches = ReferenceHost.RawExecute(command)
-                .Select(psObject => (MatchInfo)psObject.ImmediateBaseObject)
-                .ToArray();
+            MatchInfo[] matches = RawExecuteMultipleMatches(command);
             MatchInfo firstMatch = matches[0];
             MatchInfo secondMatch = matches[1];
 
@@ -159,9 +163,7 @@ namespace ReferenceTests.Commands
         [Test]
         public void MatchUsingStringFromPipeline()
         {
-            MatchInfo match = ReferenceHost.RawExecute("\"-HELLO-\" | select-string -pattern \"HELLO\"")
-                 .Select(psObject => (MatchInfo)psObject.ImmediateBaseObject)
-                 .Single();
+            MatchInfo match = RawExecuteSingleMatch("\"-HELLO-\" | select-string -pattern \"HELLO\"");
             Match regexMatch = match.Matches.Single();
 
             Assert.AreEqual("InputStream", match.Filename);
@@ -178,9 +180,7 @@ namespace ReferenceTests.Commands
         [Test]
         public void MatchUsingStringArrayFromPipeline()
         {
-            MatchInfo match = ReferenceHost.RawExecute("\"-12345-\",\"-HELLO-\" | select-string -pattern \"HELLO\"")
-                 .Select(psObject => (MatchInfo)psObject.ImmediateBaseObject)
-                 .Single();
+            MatchInfo match = RawExecuteSingleMatch("\"-12345-\",\"-HELLO-\" | select-string -pattern \"HELLO\"");
             Match regexMatch = match.Matches.Single();
 
             Assert.AreEqual("InputStream", match.Filename);
@@ -203,9 +203,7 @@ namespace ReferenceTests.Commands
         public void MatchUsingInputObjectStringArray()
         {
             string command = "select-string -inputobject \"-12345-\",\"-HELLO-\" -pattern \"HELLO\"";
-            MatchInfo match = ReferenceHost.RawExecute(command)
-                 .Select(psObject => (MatchInfo)psObject.ImmediateBaseObject)
-                 .Single();
+            MatchInfo match = RawExecuteSingleMatch(command);
             Match regexMatch = match.Matches.Single();
 
             Assert.AreEqual("InputStream", match.Filename);
@@ -231,9 +229,7 @@ namespace ReferenceTests.Commands
         [Test]
         public void MultipleMatchesUsingStringArrayFromPipeline()
         {
-            MatchInfo[] matches = ReferenceHost.RawExecute("\"-12345-\",\"-HELLO-\",\"hello\" | select-string -pattern \"HELLO\"")
-                 .Select(psObject => (MatchInfo)psObject.ImmediateBaseObject)
-                 .ToArray();
+            MatchInfo[] matches = RawExecuteMultipleMatches("\"-12345-\",\"-HELLO-\",\"hello\" | select-string -pattern \"HELLO\"");
             MatchInfo firstMatch = matches[0];
             MatchInfo secondMatch = matches[1];
 
