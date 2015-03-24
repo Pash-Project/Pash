@@ -247,6 +247,20 @@ namespace ReferenceTests.API
             var result = LanguagePrimitives.ConvertTo(input, typeof(Version));
             Assert.That(result, Is.EqualTo(new Version(input)));
         }
+
+        [Test]
+        public void ConvertToVoidReturnsAutomationNull()
+        {
+            var result = LanguagePrimitives.ConvertTo("foo", typeof(void));
+            Assert.That(result, Is.SameAs(System.Management.Automation.Internal.AutomationNull.Value));
+        }
+
+        [Test]
+        public void ConvertNullToPSObjectReturnsNull()
+        {
+            var result = LanguagePrimitives.ConvertTo(null, typeof(PSObject));
+            Assert.That(result, Is.Null);
+        }
     }
 }
 
