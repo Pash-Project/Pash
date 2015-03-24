@@ -1,11 +1,14 @@
-language: c
+language: csharp
+
+sudo: false   # use the new container-based Travis infrastructure
+
+mono:
+  - latest
+  - 3.2.8
+  - 2.10.8
 
 notifications:
   email:
     on_success: always
-
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq mono-devel mono-utils gtk-sharp2
 
 script: "xbuild /target:test"
