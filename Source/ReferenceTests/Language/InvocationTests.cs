@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using System.Management.Automation;
 
 namespace ReferenceTests.Language
 {
@@ -19,6 +20,14 @@ $type.GetMethods(20) | Foreach-Object { $_.name }"
 );
 
             StringAssert.Contains("GetHashCode" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void ErrorInInvocationIsMethodInvocationException()
+        {
+            Assert.Throws<MethodInvocationException>(delegate {
+                ReferenceHost.Execute("[System.Management.Automation.LanguagePrimitives]::ConvertTo('a', [DateTime])");
+            });
         }
     }
 }
