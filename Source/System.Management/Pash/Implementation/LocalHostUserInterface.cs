@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using Mono.Terminal;
 using System.IO;
 using Extensions.Reflection;
+using System.Security;
 
 namespace Pash.Implementation
 {
@@ -153,8 +154,8 @@ namespace Pash.Implementation
         {
             var user = PromptValue(label + " (UserName)", typeof(string), new Collection<Attribute>(),
                                    helpMessage) as string;
-            var pw = PromptValue(label + " (UserName)", typeof(System.Security.SecureString),
-                                 new Collection<Attribute>(), helpMessage) as System.Security.SecureString;
+            var pw = PromptValue(label + " (Password)", typeof(SecureString),
+                                 new Collection<Attribute>(), helpMessage) as SecureString;
             if (user == null || pw == null)
             {
                 return null;
@@ -273,9 +274,14 @@ namespace Pash.Implementation
             return ReadLine(true);
         }
 
-        public override System.Security.SecureString ReadLineAsSecureString()
+        public override SecureString ReadLineAsSecureString()
         {
-            throw new NotImplementedException();
+            if (!InteractiveIO)
+            {
+                ThrowNotInteractiveException();
+            }
+            var ssReader = new SecureStringReader();
+            return ssReader.ReadLine();
         }
         #endregion
 

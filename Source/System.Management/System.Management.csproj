@@ -527,6 +527,7 @@
     <Compile Include="Pash\Implementation\PathGlobber.cs" />
     <Compile Include="Automation\CmdletProviderIntrinsicsBase.cs" />
     <Compile Include="Pash\Implementation\IncludeExcludeFilter.cs" />
+    <Compile Include="Pash\Implementation\SecureStringReader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
