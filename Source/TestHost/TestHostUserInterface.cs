@@ -40,7 +40,7 @@ namespace TestHost
             get { return _rawUI; }
         }
 
-        protected override string ReadLine(bool addToHistory)
+        internal override string ReadLine(bool addToHistory)
         {
             return ReadLine();
         }

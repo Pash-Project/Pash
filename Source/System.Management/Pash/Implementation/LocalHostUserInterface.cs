@@ -164,7 +164,7 @@ namespace Pash.Implementation
         }
 
         // workaround as long as getline.cs might care about history on unix
-        protected virtual string ReadLine(bool addToHistory)
+        internal virtual string ReadLine(bool addToHistory)
         {
             if (!InteractiveIO)
             {
@@ -219,7 +219,7 @@ namespace Pash.Implementation
                 Write(cd.Label.Replace("&", "") + "  ");
             }
             Write(String.Format("[?] Help (default is \"{0}\"): ", chs[defaultChoice]));
-            string str = ReadLine(false).ToUpper();
+            string str = ReadLine().ToUpper();
             if (str == "?")
             {
                 // TODO: implement help
@@ -271,7 +271,7 @@ namespace Pash.Implementation
         #region ReadXXX methods
         public override string ReadLine()
         {
-            return ReadLine(true);
+            return ReadLine(false);
         }
 
         public override SecureString ReadLineAsSecureString()

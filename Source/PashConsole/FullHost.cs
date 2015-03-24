@@ -242,7 +242,10 @@ namespace Pash
 
         private string ReadInput()
         {
-            return LocalHost.UI.ReadLine();
+            // our local user interface has a ReadLine(bool) method that controls whether or not the line should
+            // be appended to history. The default is false, so we look for the explicit function first
+            var localUI = LocalHost.UI as LocalHostUserInterface;
+            return localUI == null ? LocalHost.UI.ReadLine() : localUI.ReadLine(true);
         }
 
         private void ShowPrompt(bool firstRun, string lastCtrlStmtKeyword)
