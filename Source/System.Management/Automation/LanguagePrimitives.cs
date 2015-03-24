@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Management.Automation.Language;
 using System.Xml;
+using System.Management.Automation.Internal;
 
 namespace System.Management.Automation
 {
@@ -181,6 +182,12 @@ namespace System.Management.Automation
             if (resultType == null)
             {
                 throw new ArgumentException("Result type can not be null.");
+            }
+
+            // if it's a cast to void, we want to "mute" the output. That's done by converting to null
+            if (resultType == typeof(void))
+            {
+                return AutomationNull.Value;
             }
 
             // result is no PSObject, so unpack the value if we deal with one

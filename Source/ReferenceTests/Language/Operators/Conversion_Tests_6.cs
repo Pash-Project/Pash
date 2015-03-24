@@ -519,15 +519,6 @@ namespace ReferenceTests.Language.Operators
         {
             ExecuteAndCompareTypedResult("[version]'1.0'", new Version("1.0"));
         }
-
-        [TestCase("[void]'a'")]
-        [TestCase("[void]1")]
-        [TestCase("[void][version]'1.0'")]
-        [TestCase("[void][version]$null")]
-        public void ConvertToVoid(string cmd)
-        {
-            ExecuteAndCompareTypedResult(cmd, new object[0]);
-        }
     }
 }
 

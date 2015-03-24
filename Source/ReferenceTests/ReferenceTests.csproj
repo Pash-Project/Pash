@@ -122,6 +122,7 @@
     <Compile Include="Providers\ProviderLoadingTests.cs" />
     <Compile Include="Providers\DriveCmdletProviderTests.cs" />
     <Compile Include="Providers\NavigationCmdletProviderTests.cs" />
+    <Compile Include="Language\ExpressionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
