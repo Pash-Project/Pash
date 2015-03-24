@@ -8,10 +8,10 @@ namespace Microsoft.Commands.Management
     [CmdletAttribute(VerbsCommon.Set, "Content", DefaultParameterSetName = "Path" /* HelpUri = "http://go.microsoft.com/fwlink/?LinkID=113392"*/)]
     public class SetContentCommand : WriteContentCommandBase
     {
-        protected override void ProcessRecord()
+        protected override void BeginProcessing()
         {
             InvokeProvider.Content.Clear(InternalPaths, ProviderRuntime);
-            WriteValues(InternalPaths);
+            Writers = InvokeProvider.Content.GetWriter(InternalPaths, ProviderRuntime);
         }
     }
 }
