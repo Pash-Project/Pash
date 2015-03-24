@@ -56,7 +56,7 @@ namespace TestHost
             var ui = new TestHostUserInterface();
             string val = "foobar" + Environment.NewLine;
             ui.SetInput(val);
-            var res = TestHost.Execute(true, null, ui, "Read-Host 'test'");
+            var res = TestHost.Execute(true, null, ui, "$x = Read-Host 'test' -AsSecureString; secureStr2Str($x)");
             // first nl is after reading the input
             Assert.That(res, Is.EqualTo("test: " + Environment.NewLine + val));
         }

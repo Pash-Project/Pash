@@ -164,13 +164,13 @@ namespace Pash.Implementation
         }
 
         // workaround as long as getline.cs might care about history on unix
-        internal virtual string ReadLine(bool addToHistory)
+        internal virtual string ReadLine(bool addToHistory, string intialValue = "")
         {
             if (!InteractiveIO)
             {
                 ThrowNotInteractiveException();
             }
-            return UseUnixLikeInput ? _getlineEditor.Edit("", "", addToHistory) : Console.ReadLine();
+            return UseUnixLikeInput ? _getlineEditor.Edit("", intialValue, addToHistory) : Console.ReadLine();
         }
         #endregion
 
@@ -239,20 +239,28 @@ namespace Pash.Implementation
 
         public override PSCredential PromptForCredential(string caption, string message, string userName, string targetName)
         {
-            if (!InteractiveIO)
-            {
-                ThrowNotInteractiveException();
-            }
-            throw new NotImplementedException();
+            return PromptForCredential(caption, message, userName, targetName,
+                PSCredentialTypes.Default, PSCredentialUIOptions.Default);
         }
 
-        public override PSCredential PromptForCredential(string caption, string message, string userName, string targetName, PSCredentialTypes allowedCredentialTypes, PSCredentialUIOptions options)
+        public override PSCredential PromptForCredential(string caption, string message, string userName, string targetName,
+            PSCredentialTypes allowedCredentialTypes, PSCredentialUIOptions options)
         {
             if (!InteractiveIO)
             {
                 ThrowNotInteractiveException();
             }
-            throw new NotImplementedException();
+            // TODO: add support for allowedCredentialTypes and options
+            // TODO: what does targetName mean? is it a default password, like userName? If so, implement a default value
+            //       in SecureStringReader and use it like that
+            WriteLine();
+            WriteLine(caption);
+            WriteLine(message);
+            Write("UserName: ");
+            var user = ReadLine(false, userName);
+            Write("Password: ");
+            var pw = ReadLineAsSecureString();
+            return new PSCredential(user, pw);
         }
         #endregion
 

@@ -527,7 +527,7 @@ namespace TestPSSnapIn
     [Cmdlet(VerbsDiagnostic.Test, "PrintCredentials")]
     public class TestPrintCredentialsCommand : PSCmdlet
     {
-        [Parameter(Mandatory = true)]
+        [Credential, Parameter(Mandatory = true, Position=0)]
         public PSCredential Credential { get; set; }
 
         protected override void ProcessRecord()

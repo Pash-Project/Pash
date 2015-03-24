@@ -40,9 +40,9 @@ namespace TestHost
             get { return _rawUI; }
         }
 
-        internal override string ReadLine(bool addToHistory)
+        internal override string ReadLine(bool addToHistory, string intialValue = "")
         {
-            return ReadLine();
+            return intialValue + ReadLine();
         }
 
         public override string ReadLine()

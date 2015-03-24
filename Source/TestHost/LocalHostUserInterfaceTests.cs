@@ -5,6 +5,8 @@ using System.Text;
 using NUnit.Framework;
 using System.IO;
 using Pash.Implementation;
+using System.Runtime.InteropServices;
+using System.Security;
 
 namespace TestHost
 {
@@ -59,6 +61,5 @@ namespace TestHost
             ui.WriteLine(str);
             Assert.AreEqual(str + Environment.NewLine, GetOutput());
         }
-
     }
 }
