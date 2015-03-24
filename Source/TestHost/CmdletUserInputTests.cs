@@ -67,6 +67,17 @@ namespace TestHost
             var lines = res.Split(new [] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             Assert.AreEqual(TestIntegerArraySumCommand.Transform(intArray), lines[lines.Length - 1]);
         }
+
+        [Test]
+        public void ValueGatheringForPSCredential()
+        {
+            var ui = new TestHostUserInterface();
+            ui.SetInput("TheUser" + Environment.NewLine + "SecretPassword" + Environment.NewLine);
+            var res = TestHost.Execute(true, null, ui, CmdletName(typeof(TestPrintCredentialsCommand)));
+            var lines = res.Split(new [] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            Assert.That(lines[lines.Length - 2], Is.EqualTo("User: TheUser"));
+            Assert.That(lines[lines.Length - 1], Is.EqualTo("Password: SecretPassword"));
+        }
     }
 }
 

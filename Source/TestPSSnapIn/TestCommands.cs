@@ -7,6 +7,7 @@ using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Provider;
 using Microsoft.PowerShell.Commands;
+using System.Runtime.InteropServices;
 
 namespace TestPSSnapIn
 {
@@ -520,6 +521,29 @@ namespace TestPSSnapIn
         protected override void ProcessRecord()
         {
             WriteObject(Message);
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "PrintCredentials")]
+    public class TestPrintCredentialsCommand : PSCmdlet
+    {
+        [Parameter(Mandatory = true)]
+        public PSCredential Credential { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject("User: " + Credential.UserName);
+            IntPtr unmanagedString = IntPtr.Zero;
+            try
+            {
+                unmanagedString = Marshal.SecureStringToGlobalAllocUnicode(Credential.Password);
+                WriteObject("Password: " + Marshal.PtrToStringUni(unmanagedString));
+            }
+            finally
+            {
+                Marshal.ZeroFreeGlobalAllocUnicode(unmanagedString);
+            }
+
         }
     }
 
