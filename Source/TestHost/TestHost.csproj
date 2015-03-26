@@ -114,6 +114,8 @@
     <Compile Include="TabExpanderTest.cs" />
     <Compile Include="TabExpansionProviderTests.cs" />
     <Compile Include="Cmdlets\ReadHostTests.cs" />
+    <Compile Include="Cmdlets\GetCredentialTests.cs" />
+    <Compile Include="TestUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.PowerShell.Commands.Management\Microsoft.Commands.Management.csproj">
@@ -135,6 +137,10 @@
     <ProjectReference Include="..\TestPSSnapIn\TestPSSnapIn.csproj">
       <Project>{DC9303A4-3F38-4591-9BD4-67F223F7D204}</Project>
       <Name>TestPSSnapIn</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.PowerShell.Security\Microsoft.PowerShell.Security.csproj">
+      <Project>{DF4B0778-BBB9-4A69-AADE-FD4361675644}</Project>
+      <Name>Microsoft.PowerShell.Security</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
