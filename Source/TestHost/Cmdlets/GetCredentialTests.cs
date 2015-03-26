@@ -1,6 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using System.Management.Automation;
+using ReferenceTests;
 
 namespace TestHost.Cmdlets
 {

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Security;
+using System.Runtime.InteropServices;
 
-namespace TestHost
+namespace ReferenceTests
 {
     public static class TestUtil
     {
@@ -32,6 +34,20 @@ namespace TestHost
             }
             "
         );
+
+        public static string DecodeSecureString(SecureString secureStr)
+        { 
+            IntPtr unmanagedString = IntPtr.Zero;
+            try
+            {
+                unmanagedString = Marshal.SecureStringToGlobalAllocUnicode(secureStr);
+                return Marshal.PtrToStringUni(unmanagedString);
+            }
+            finally
+            {
+                Marshal.ZeroFreeGlobalAllocUnicode(unmanagedString);
+            }
+        }
     }
 }
 

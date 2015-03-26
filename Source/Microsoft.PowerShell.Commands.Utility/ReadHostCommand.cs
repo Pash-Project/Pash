@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Management.Automation;
 using Pash.Implementation;
+using System.Security;
 
 namespace Microsoft.PowerShell.Commands
 {
+    [OutputType(typeof(string), typeof(SecureString))]
     [Cmdlet(VerbsCommunications.Read, "Host"
             /*, HelpUri="http://go.microsoft.com/fwlink/?LinkID=113371" */)]
     public class ReadHostCommand : PSCmdlet

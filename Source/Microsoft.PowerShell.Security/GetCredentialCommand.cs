@@ -3,6 +3,7 @@ using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands
 {
+    [OutputType(typeof(PSCredential))]
     [Cmdlet(VerbsCommon.Get, "Credential", DefaultParameterSetName="CredentialSet"
         /*, HelpUri="http://go.microsoft.com/fwlink/?LinkID=113311"*/)]
     public class GetCredentialCommand : PSCmdlet

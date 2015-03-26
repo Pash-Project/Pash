@@ -42,7 +42,8 @@ namespace TestHost
 
         internal override string ReadLine(bool addToHistory, string intialValue = "")
         {
-            return intialValue + ReadLine();
+            var val = ReadLine();
+            return val == null ? null : intialValue + val;
         }
 
         public override string ReadLine()

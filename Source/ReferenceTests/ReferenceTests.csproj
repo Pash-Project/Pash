@@ -122,15 +122,13 @@
     <Compile Include="Providers\ProviderLoadingTests.cs" />
     <Compile Include="Providers\DriveCmdletProviderTests.cs" />
     <Compile Include="Providers\NavigationCmdletProviderTests.cs" />
+    <Compile Include="TestUtil.cs" />
+    <Compile Include="Commands\ConvertToSecureStringTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
       <Project>{C5E303EC-5684-4C95-B0EC-2593E6662403}</Project>
       <Name>System.Management</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TestHost\TestHost.csproj">
-      <Project>{A5550FB3-553B-441E-8386-AD1EF5C31FAE}</Project>
-      <Name>TestHost</Name>
     </ProjectReference>
     <ProjectReference Include="..\TestPSSnapIn\TestPSSnapIn.csproj">
       <Project>{DC9303A4-3F38-4591-9BD4-67F223F7D204}</Project>
