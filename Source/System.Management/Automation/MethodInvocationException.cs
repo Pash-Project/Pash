@@ -11,19 +11,36 @@ namespace System.Management.Automation
     [Serializable]
     public class MethodInvocationException : MethodException
     {
+        public override ErrorRecord ErrorRecord { get; set; }
+
         public MethodInvocationException()
-            : base(typeof(MethodInvocationException).FullName)
+            : this(typeof(MethodInvocationException).FullName)
         {
         }
 
         public MethodInvocationException(string message)
-            : base(message)
+            : this(message, null)
         {
         }
 
         public MethodInvocationException(string message, Exception innerException)
+            : this(message, innerException, null, ErrorCategory.NotSpecified)
+        {
+        }
+
+        public MethodInvocationException(string message, Exception innerException, string errorId, ErrorCategory errorCategory)
             : base(message, innerException)
         {
+            var runtimeException = innerException as IContainsErrorRecord;
+            if (errorId == null)
+            {
+                errorId = runtimeException == null ? "MethodInvocation" : runtimeException.ErrorRecord.ErrorId;
+            }
+            if (errorCategory == ErrorCategory.NotSpecified && runtimeException != null)
+            {
+                errorCategory = runtimeException.ErrorRecord.CategoryInfo.Category;
+            }
+            ErrorRecord = new ErrorRecord(this, errorId, errorCategory, null);
         }
 
         protected MethodInvocationException(SerializationInfo info, StreamingContext context)

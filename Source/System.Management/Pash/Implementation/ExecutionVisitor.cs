@@ -875,7 +875,7 @@ namespace System.Management.Pash.Implementation
             Type type = convertExpressionAst.Type.TypeName.GetReflectionType();
 
             var value = EvaluateAst(convertExpressionAst.Child);
-
+            var converted = LanguagePrimitives.ConvertTo(value, type);
             _pipelineCommandRuntime.WriteObject(LanguagePrimitives.ConvertTo(value, type));
             return AstVisitAction.SkipChildren;
         }

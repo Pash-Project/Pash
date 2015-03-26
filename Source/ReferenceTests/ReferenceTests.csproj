@@ -124,6 +124,7 @@
     <Compile Include="Providers\NavigationCmdletProviderTests.cs" />
     <Compile Include="TestUtil.cs" />
     <Compile Include="Commands\ConvertToSecureStringTests.cs" />
+    <Compile Include="Language\ExpressionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
