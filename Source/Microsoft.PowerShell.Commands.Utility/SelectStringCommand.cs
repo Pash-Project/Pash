@@ -145,16 +145,43 @@ namespace Microsoft.PowerShell.Commands
             {
                 foreach (string pattern in Pattern)
                 {
-                    Match match = Regex.Match(line, pattern, GetRegexOptions());
-                    if (match.Success)
+                    MatchInfo matchInfo = FindMatch(line, pattern, path);
+                    if (matchInfo != null)
                     {
-                        var matchInfo = new MatchInfo(path, pattern, match, line, _lineNumber, !CaseSensitive);
                         WriteObject(matchInfo);
                         break;
                     }
                 }
                 _lineNumber++;
             }
+        }
+
+        MatchInfo FindMatch(string line, string pattern, string path)
+        {
+            if (SimpleMatch)
+            {
+                return FindSimpleMatch(line, pattern, path);
+            }
+            return FindRegexMatch(line, pattern, path);
+        }
+
+        private MatchInfo FindRegexMatch(string line, string pattern, string path)
+        {
+            Match match = Regex.Match(line, pattern, GetRegexOptions());
+            if (match.Success)
+            {
+                return new MatchInfo(path, pattern, match, line, _lineNumber, !CaseSensitive);
+            }
+            return null;
+        }
+
+        private MatchInfo FindSimpleMatch(string line, string pattern, string path)
+        {
+            if (line.IndexOf(pattern, GetStringComparison()) >= 0)
+            {
+                return new MatchInfo(path, pattern, line, _lineNumber, !CaseSensitive);
+            }
+            return null;
         }
 
         private RegexOptions GetRegexOptions()
@@ -164,6 +191,15 @@ namespace Microsoft.PowerShell.Commands
                 return RegexOptions.None;
             }
             return RegexOptions.IgnoreCase;
+        }
+
+        private StringComparison GetStringComparison()
+        {
+            if (CaseSensitive)
+            {
+                return StringComparison.CurrentCulture;
+            }
+            return StringComparison.CurrentCultureIgnoreCase;
         }
     }
 }

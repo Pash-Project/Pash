@@ -71,7 +71,7 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
-        public void SimpleMatchWhenPathFirstParameterAndPatternSecondAsNamedParameter()
+        public void MatchWhenPathFirstParameterAndPatternSecondAsNamedParameter()
         {
             string fileName = CreateFile("first line", ".txt");
 
@@ -268,6 +268,57 @@ namespace ReferenceTests.Commands
             Assert.AreEqual(0, regexMatch.Index);
             Assert.AreEqual(5, regexMatch.Length);
             Assert.AreEqual("HELLO", regexMatch.Value);
+        }
+
+        [Test]
+        public void RegularExpressionPattern()
+        {
+            MatchInfo[] matches = RawExecuteMultipleMatches("\"app\",\"app..\",\"apple\" | select-string -pattern \"app..\"");
+
+            Assert.AreEqual(2, matches.Length);
+            Assert.AreEqual("app..", matches[0].Line);
+            Assert.AreEqual("apple", matches[1].Line);
+        }
+
+        [Test]
+        public void SimpleMatch()
+        {
+            MatchInfo match = RawExecuteSingleMatch("\"app\",\"app..\",\"apple\" | select-string -SimpleMatch \"app..\"");
+
+            Assert.AreEqual("InputStream", match.Filename);
+            Assert.AreEqual("InputStream", match.Path);
+            Assert.AreEqual("app..", match.Line);
+            Assert.AreEqual(2, match.LineNumber);
+            Assert.IsTrue(match.IgnoreCase);
+            Assert.AreEqual("app..", match.Pattern);
+            Assert.AreEqual(0, match.Matches.Length);
+            Assert.AreEqual("app..", match.ToString());
+        }
+
+        [Test]
+        public void SimpleMatchInDifferentPartsOfText()
+        {
+            MatchInfo[] matches = RawExecuteMultipleMatches("\"app.a\",\"aapp..\",\"dapp.\",\"appp\" | select-string -SimpleMatch \"app.\"");
+
+            Assert.AreEqual(3, matches.Length);
+        }
+
+        [Test]
+        public void SimpleMatchIsCaseInsensitiveByDefault()
+        {
+            MatchInfo[] matches = RawExecuteMultipleMatches("\"App.\",\"aPp.\",\"APP.\",\"appp\" | select-string -SimpleMatch \"app.\"");
+
+            Assert.AreEqual(3, matches.Length);
+        }
+
+        [Test]
+        public void CaseSensitiveSimpleMatch()
+        {
+            MatchInfo[] matches = RawExecuteMultipleMatches("\"App.a\",\"app.\",\"dApp.\",\"appp\" | select-string -CaseSensitive -SimpleMatch \"app.\"");
+
+            Assert.AreEqual(1, matches.Length);
+            Assert.AreEqual("app.", matches[0].Line);
+            Assert.IsFalse(matches[0].IgnoreCase);
         }
     }
 }

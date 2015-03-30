@@ -6,6 +6,8 @@ namespace Microsoft.PowerShell.Commands
 {
     public class MatchInfo
     {
+        private int _lineNumber;
+
         public MatchInfoContext Context { get; set; }
         public string Filename { get; internal set; }
         public bool IgnoreCase { get; set; }
@@ -35,6 +37,17 @@ namespace Microsoft.PowerShell.Commands
             LineNumber = lineNumber;
             Filename = System.IO.Path.GetFileName(path);
             Matches = new[] { match };
+            Path = path;
+            Pattern = pattern;
+        }
+
+        internal MatchInfo(string path, string pattern, string line, int lineNumber, bool ignoreCase)
+        {
+            Filename = System.IO.Path.GetFileName(path);
+            IgnoreCase = ignoreCase;
+            Line = line;
+            LineNumber = lineNumber;
+            Matches = new Match[0];
             Path = path;
             Pattern = pattern;
         }
