@@ -28,9 +28,9 @@ namespace Microsoft.PowerShell.Commands
         {
         }
 
-        internal MatchInfo(string path, string pattern, Match match, string line, int lineNumber)
+        internal MatchInfo(string path, string pattern, Match match, string line, int lineNumber, bool ignoreCase)
         {
-            IgnoreCase = true;
+            IgnoreCase = ignoreCase;
             Line = line;
             LineNumber = lineNumber;
             Filename = System.IO.Path.GetFileName(path);

@@ -252,5 +252,22 @@ namespace ReferenceTests.Commands
             Assert.AreEqual("-HELLO-", firstMatch.ToString());
             Assert.AreEqual("hello", secondMatch.ToString());
         }
+
+        [Test]
+        public void CaseSensitiveMatch()
+        {
+            MatchInfo match = RawExecuteSingleMatch("\"Hello\",\"HELLO\" | select-string -pattern \"HELLO\" -casesensitive");
+            Match regexMatch = match.Matches.Single();
+
+            Assert.AreEqual("InputStream", match.Filename);
+            Assert.AreEqual("InputStream", match.Path);
+            Assert.AreEqual("HELLO", match.Line);
+            Assert.AreEqual(2, match.LineNumber);
+            Assert.IsFalse(match.IgnoreCase);
+            Assert.AreEqual("HELLO", match.Pattern);
+            Assert.AreEqual(0, regexMatch.Index);
+            Assert.AreEqual(5, regexMatch.Length);
+            Assert.AreEqual("HELLO", regexMatch.Value);
+        }
     }
 }

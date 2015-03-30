@@ -145,16 +145,25 @@ namespace Microsoft.PowerShell.Commands
             {
                 foreach (string pattern in Pattern)
                 {
-                    Match match = Regex.Match(line, pattern, RegexOptions.IgnoreCase);
+                    Match match = Regex.Match(line, pattern, GetRegexOptions());
                     if (match.Success)
                     {
-                        var matchInfo = new MatchInfo(path, pattern, match, line, _lineNumber);
+                        var matchInfo = new MatchInfo(path, pattern, match, line, _lineNumber, !CaseSensitive);
                         WriteObject(matchInfo);
                         break;
                     }
                 }
                 _lineNumber++;
             }
+        }
+
+        private RegexOptions GetRegexOptions()
+        {
+            if (CaseSensitive)
+            {
+                return RegexOptions.None;
+            }
+            return RegexOptions.IgnoreCase;
         }
     }
 }
