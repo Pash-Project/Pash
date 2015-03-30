@@ -81,6 +81,10 @@
       <Project>{C5E303EC-5684-4C95-B0EC-2593E6662403}</Project>
       <Name>System.Management</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Microsoft.PowerShell.Security\Microsoft.PowerShell.Security.csproj">
+      <Project>{DF4B0778-BBB9-4A69-AADE-FD4361675644}</Project>
+      <Name>Microsoft.PowerShell.Security</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

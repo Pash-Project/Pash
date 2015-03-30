@@ -20,10 +20,12 @@ namespace Pash.Implementation
     internal class SessionStateGlobal
     {
         //TODO: This and related stuff should be moved to InitialSessionState.CreateDefault
-        private string[] _defaultSnapins = new string[] {
-            "Microsoft.PowerShell.PSCorePSSnapIn, System.Management.Automation",
-            "Microsoft.PowerShell.PSUtilityPSSnapIn, Microsoft.PowerShell.Commands.Utility",
-            "Microsoft.Commands.Management.PSManagementPSSnapIn, Microsoft.PowerShell.Commands.Management",
+        // Key is assembly qualified pssnapin name, value is "required" (true) or optional (false)
+        private Dictionary<string, bool> _defaultSnapins = new Dictionary<string, bool> {
+            { "Microsoft.PowerShell.PSCorePSSnapIn, System.Management.Automation", true },
+            { "Microsoft.PowerShell.PSUtilityPSSnapIn, Microsoft.PowerShell.Commands.Utility", false },
+            { "Microsoft.Commands.Management.PSManagementPSSnapIn, Microsoft.PowerShell.Commands.Management", false },
+            { "Microsoft.PowerShell.PSSecurityPSSnapin, Microsoft.PowerShell.Security", false }
         };
         private Dictionary<string, PSSnapInInfo> _snapins;
         private readonly ExecutionContext _globalExecutionContext;
@@ -44,9 +46,19 @@ namespace Pash.Implementation
         #region PSSnapIn specific stuff
         internal void LoadDefaultPSSnapIns()
         {
-            foreach (var defaultSnapin in _defaultSnapins)
+            foreach (var snapinPair in _defaultSnapins)
             {
-                Type snapinType = Type.GetType(defaultSnapin, true);
+                var defaultSnapin = snapinPair.Key;
+                var required = snapinPair.Value;
+                Type snapinType = Type.GetType(defaultSnapin, false);
+                if (snapinType == null)
+                {
+                    if (!required)
+                    {
+                        continue;
+                    }
+                    throw new TypeLoadException("Couldn't load type for required default snapin '" + defaultSnapin + "'");
+                }
                 PSSnapIn snapin = Activator.CreateInstance(snapinType) as PSSnapIn;
                 Assembly snapinAssembly = snapinType.Assembly;
                 LoadPSSnapIn(new PSSnapInInfo(snapin, snapinAssembly, true), snapinAssembly, _globalExecutionContext);

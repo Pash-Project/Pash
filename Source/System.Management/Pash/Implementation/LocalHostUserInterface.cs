@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using Mono.Terminal;
 using System.IO;
 using Extensions.Reflection;
+using System.Security;
 
 namespace Pash.Implementation
 {
@@ -153,8 +154,8 @@ namespace Pash.Implementation
         {
             var user = PromptValue(label + " (UserName)", typeof(string), new Collection<Attribute>(),
                                    helpMessage) as string;
-            var pw = PromptValue(label + " (UserName)", typeof(System.Security.SecureString),
-                                 new Collection<Attribute>(), helpMessage) as System.Security.SecureString;
+            var pw = PromptValue(label + " (Password)", typeof(SecureString),
+                                 new Collection<Attribute>(), helpMessage) as SecureString;
             if (user == null || pw == null)
             {
                 return null;
@@ -163,13 +164,13 @@ namespace Pash.Implementation
         }
 
         // workaround as long as getline.cs might care about history on unix
-        protected virtual string ReadLine(bool addToHistory)
+        internal virtual string ReadLine(bool addToHistory, string intialValue = "")
         {
             if (!InteractiveIO)
             {
                 ThrowNotInteractiveException();
             }
-            return UseUnixLikeInput ? _getlineEditor.Edit("", "", addToHistory) : Console.ReadLine();
+            return UseUnixLikeInput ? _getlineEditor.Edit("", intialValue, addToHistory) : Console.ReadLine();
         }
         #endregion
 
@@ -218,7 +219,7 @@ namespace Pash.Implementation
                 Write(cd.Label.Replace("&", "") + "  ");
             }
             Write(String.Format("[?] Help (default is \"{0}\"): ", chs[defaultChoice]));
-            string str = ReadLine(false).ToUpper();
+            string str = ReadLine().ToUpper();
             if (str == "?")
             {
                 // TODO: implement help
@@ -238,20 +239,28 @@ namespace Pash.Implementation
 
         public override PSCredential PromptForCredential(string caption, string message, string userName, string targetName)
         {
-            if (!InteractiveIO)
-            {
-                ThrowNotInteractiveException();
-            }
-            throw new NotImplementedException();
+            return PromptForCredential(caption, message, userName, targetName,
+                PSCredentialTypes.Default, PSCredentialUIOptions.Default);
         }
 
-        public override PSCredential PromptForCredential(string caption, string message, string userName, string targetName, PSCredentialTypes allowedCredentialTypes, PSCredentialUIOptions options)
+        public override PSCredential PromptForCredential(string caption, string message, string userName, string targetName,
+            PSCredentialTypes allowedCredentialTypes, PSCredentialUIOptions options)
         {
             if (!InteractiveIO)
             {
                 ThrowNotInteractiveException();
             }
-            throw new NotImplementedException();
+            // TODO: add support for allowedCredentialTypes and options
+            // TODO: what does targetName mean? is it a default password, like userName? If so, implement a default value
+            //       in SecureStringReader and use it like that
+            WriteLine();
+            WriteLine(caption);
+            WriteLine(message);
+            Write("UserName: ");
+            var user = ReadLine(false, userName);
+            Write("Password: ");
+            var pw = ReadLineAsSecureString();
+            return new PSCredential(user, pw);
         }
         #endregion
 
@@ -270,12 +279,17 @@ namespace Pash.Implementation
         #region ReadXXX methods
         public override string ReadLine()
         {
-            return ReadLine(true);
+            return ReadLine(false);
         }
 
-        public override System.Security.SecureString ReadLineAsSecureString()
+        public override SecureString ReadLineAsSecureString()
         {
-            throw new NotImplementedException();
+            if (!InteractiveIO)
+            {
+                ThrowNotInteractiveException();
+            }
+            var ssReader = new SecureStringReader();
+            return ssReader.ReadLine();
         }
         #endregion
 

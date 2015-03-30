@@ -23,6 +23,7 @@ namespace System.Management.Automation
         private CommandParameterSetInfo _defaultSet;
         private bool _hasDefaultSet;
         private List<CommandParameterSetInfo> _candidateParameterSets;
+        private EngineIntrinsics _engineIntrinsics;
 
         private CommandParameterSetInfo ActiveOrDefaultParameterSet
         {
@@ -58,6 +59,7 @@ namespace System.Management.Automation
             _hasDefaultSet = true;
             _commonParameters = (from parameter in CommonCmdletParameters.CommonParameterSetInfo.Parameters
                                  select parameter.MemberInfo).ToList();
+            _engineIntrinsics = new EngineIntrinsics(_cmdlet.ExecutionContext);
         }
 
         /// <summary>
@@ -557,6 +559,11 @@ namespace System.Management.Automation
             {
                 var msg = String.Format("Parameter '{0}' has already been bound!", info.Name);
                 throw new ParameterBindingException(msg);
+            }
+
+            foreach (var attr in info.TransformationAttributes)
+            {
+                value = attr.Transform(_engineIntrinsics, value);
             }
 
             // ConvertTo throws an exception if conversion isn't possible. That's just fine.
