@@ -320,5 +320,60 @@ namespace ReferenceTests.Commands
             Assert.AreEqual("app.", matches[0].Line);
             Assert.IsFalse(matches[0].IgnoreCase);
         }
+
+        /// <summary>
+        /// Using -Quiet with values from the pipeline and -InputObject does not output $false
+        /// when there is no match. This is not the case when using a file with Select-String.
+        /// </summary>
+        [Test]
+        [TestCase("\"a\",\"b\" | select-string -quiet -pattern \"a\"", "True")]
+        [TestCase("\"a\",\"b\" | select-string -quiet -pattern \"c\"", "")]
+        [TestCase("\"a\",\"b\" | select-string -quiet -pattern \"A\"", "True")]
+        [TestCase("\"a\",\"b\" | select-string -quiet -pattern \"A\" -casesensitive", "")]
+        [TestCase("\"a\",\"aa\" | select-string -quiet -pattern \"a\"", "True")]
+        [TestCase("\"aa\",\"ba\" | select-string -quiet -pattern \"b.\"", "True")]
+        [TestCase("\"aa\",\"ba\" | select-string -quiet -simplematch \"b.\"", "")]
+        [TestCase("\"aa\",\"b.\" | select-string -quiet -simplematch \"b.\"", "True")]
+        [TestCase("\"aa\",\"b.\" | select-string -quiet -simplematch \"B.\"", "True")]
+        [TestCase("\"aa\",\"b.\" | select-string -quiet -simplematch \"B.\" -casesensitive", "")]
+        [TestCase("\"b\",\"b\" | select-string -quiet -simplematch \"b\"", "True")]
+        [TestCase("select-string -quiet -inputobject \"a\",\"b\" -pattern \"a\"", "True")]
+        [TestCase("select-string -quiet -inputobject \"a\",\"b\" -pattern \"c\"", "")]
+        [TestCase("select-string -quiet -inputobject \"a\",\"b\" -pattern \"A\"", "True")]
+        [TestCase("select-string -quiet -inputobject \"a\",\"b\" -pattern \"A\" -casesensitive", "")]
+        [TestCase("select-string -quiet -inputobject \"aa\",\"ba\" -pattern \"b.\"", "True")]
+        [TestCase("select-string -quiet -inputobject \"aa\",\"ba\" -simplematch \"b.\"", "")]
+        [TestCase("select-string -quiet -inputobject \"aa\",\"b.\" -simplematch \"b.\"", "True")]
+        [TestCase("select-string -quiet -inputobject \"aa\",\"b.\" -simplematch \"B.\"", "True")]
+        [TestCase("select-string -quiet -inputobject \"aa\",\"b.\" -simplematch \"B.\" -casesensitive", "")]
+        [TestCase("select-string -quiet -inputobject \"a\",\"a\" -simplematch \"a\"", "True")]
+        public void QuietMatches(string command, string expectedResult)
+        {
+            string result = ReferenceHost.Execute(command);
+
+            Assert.AreEqual(expectedResult, result.TrimEnd());
+        }
+
+        [Test]
+        [TestCase("a,b", "select-string -quiet -pattern \"a\"", "True")]
+        [TestCase("a,b", "select-string -quiet -pattern \"c\"", "False")]
+        [TestCase("a,b", "select-string -quiet -pattern \"A\"", "True")]
+        [TestCase("a,b", "select-string -quiet -pattern \"A\" -casesensitive", "False")]
+        [TestCase("a,a", "select-string -quiet -pattern \"A\"", "True")]
+        [TestCase("aa,ba", "select-string -quiet -pattern \"b.\"", "True")]
+        [TestCase("aa,ba", "select-string -quiet -simplematch \"b.\"", "False")]
+        [TestCase("aa,b.", "select-string -quiet -simplematch \"b.\"", "True")]
+        [TestCase("aa,b.", "select-string -quiet -simplematch \"B.\"", "True")]
+        [TestCase("aa,b.", "select-string -quiet -simplematch \"B.\" -casesensitive", "False")]
+        [TestCase("b,b", "select-string -quiet -simplematch \"B\"", "True")]
+        public void QuietMatchesInFile(string fileContent, string command, string expectedResult)
+        {
+            string[] lines = fileContent.Split(',');
+            string fileName = CreateFile(NewlineJoin(lines), ".txt");
+            string fullCommand = string.Format("{0} -Path '{1}'", command, fileName);
+            string result = ReferenceHost.Execute(fullCommand);
+
+            Assert.AreEqual(expectedResult + Environment.NewLine, result);
+        }
     }
 }

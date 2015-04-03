@@ -85,10 +85,15 @@ namespace Microsoft.PowerShell.Commands
         public SwitchParameter SimpleMatch { get; set; }
 
         int _lineNumber = 1;
-        List<MatchInfo> _savedMatches = new List<MatchInfo>();
+        bool _matchedAtLeastOneItem;
 
         protected override void ProcessRecord()
         {
+            if (!ContinueProcessing())
+            {
+                return;
+            }
+
             if (Path != null)
             {
                 MatchInFiles();
@@ -97,6 +102,15 @@ namespace Microsoft.PowerShell.Commands
             {
                 MatchInputObject();
             }
+        }
+
+        private bool ContinueProcessing()
+        {
+            if (Quiet.IsPresent)
+            {
+                return !_matchedAtLeastOneItem;
+            }
+            return true;
         }
 
         private void MatchInFiles()
@@ -121,14 +135,6 @@ namespace Microsoft.PowerShell.Commands
             MatchInLines("InputStream", GetLines(InputObject));
         }
 
-        protected override void EndProcessing()
-        {
-            foreach (MatchInfo match in _savedMatches)
-            {
-                WriteObject(match);
-            }
-        }
-
         private IEnumerable<string> GetLines(PSObject psObject)
         {
             var array = psObject.BaseObject as Array;
@@ -136,7 +142,10 @@ namespace Microsoft.PowerShell.Commands
             {
                 yield return String.Join(" ", array.OfType<object>().Select(item => item.ToString()));
             }
-            yield return psObject.BaseObject.ToString();
+            else
+            {
+                yield return psObject.BaseObject.ToString();
+            }
         }
 
         private void MatchInLines(string path, IEnumerable<string> lines)
@@ -148,11 +157,16 @@ namespace Microsoft.PowerShell.Commands
                     MatchInfo matchInfo = FindMatch(line, pattern, path);
                     if (matchInfo != null)
                     {
-                        WriteObject(matchInfo);
+                        WriteMatch(matchInfo);
                         break;
                     }
                 }
                 _lineNumber++;
+
+                if (!ContinueProcessing())
+                {
+                    return;
+                }
             }
         }
 
@@ -200,6 +214,35 @@ namespace Microsoft.PowerShell.Commands
                 return StringComparison.CurrentCulture;
             }
             return StringComparison.CurrentCultureIgnoreCase;
+        }
+
+        private void WriteMatch(MatchInfo match)
+        {
+            _matchedAtLeastOneItem = true;
+
+            if (Quiet.IsPresent)
+            {
+                WriteObject(true);
+            }
+            else
+            {
+                WriteObject(match);
+            }
+        }
+
+        /// <summary>
+        /// Using -Quiet has different behaviour for files compared with items passed on the pipeline
+        /// or via InputObject. Using files will result in $false being output if there are no matches.
+        /// Using the pipeline or InputObject will result in nothing being output if there are no matches.
+        /// 
+        /// https://connect.microsoft.com/PowerShell/feedback/details/684218/select-strings-quiet-never-returns-false
+        /// </summary>
+        protected override void EndProcessing()
+        {
+            if (Path != null && Quiet.IsPresent && !_matchedAtLeastOneItem)
+            {
+                WriteObject(false);
+            }
         }
     }
 }
