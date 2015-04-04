@@ -11,6 +11,22 @@ namespace ReferenceTests.Commands
     [TestFixture]
     public class SelectStringTests : ReferenceTestBase
     {
+        string _originalDirectory;
+
+        [SetUp]
+        public override void SetUp()
+        {
+            _originalDirectory = Directory.GetCurrentDirectory();
+            base.SetUp();
+        }
+
+        [TearDown]
+        public override void TearDown()
+        {
+            Directory.SetCurrentDirectory(_originalDirectory);
+            base.TearDown();
+        }
+
         MatchInfo RawExecuteSingleMatch(string command)
         {
             return ReferenceHost.RawExecute(command)
@@ -20,9 +36,25 @@ namespace ReferenceTests.Commands
 
         private MatchInfo[] RawExecuteMultipleMatches(string command)
         {
-            return ReferenceHost.RawExecute(command)
+            return RawExecuteMultipleMatches(new[] { command });
+        }
+
+        private MatchInfo[] RawExecuteMultipleMatches(string[] commands)
+        {
+            return ReferenceHost.RawExecute(commands)
                 .Select(psObject => (MatchInfo)psObject.ImmediateBaseObject)
                 .ToArray();
+        }
+
+        private string CreateTextFile(string content, string fileName)
+        {
+            string temp = Path.GetTempPath();
+            string directory = Path.Combine(temp, "SelectStringTests");
+            Directory.CreateDirectory(directory);
+            string filePath = Path.Combine(directory, fileName);
+            File.WriteAllText(filePath, content);
+            AddCleanupFile(filePath);
+            return filePath;
         }
 
         [Test]
@@ -374,6 +406,74 @@ namespace ReferenceTests.Commands
             string result = ReferenceHost.Execute(fullCommand);
 
             Assert.AreEqual(expectedResult + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void FileWildcardMatch()
+        {
+            string fileName = CreateTextFile("a", "foo1.txt");
+            string directory = Path.GetDirectoryName(fileName);
+            AddCleanupDir(directory);
+            CreateTextFile("ba", "foo2.txt");
+            CreateTextFile("aa", "bar1.txt");
+            CreateTextFile("baa", "bar2.txt");
+
+            MatchInfo[] matches = RawExecuteMultipleMatches(new [] {
+                string.Format("cd '{0}'", directory),
+                "select-string -Pattern a -Path foo?.txt,bar?.txt"
+            });
+
+            Assert.AreEqual(4, matches.Length);
+            Assert.AreEqual("foo1.txt", matches[0].Filename);
+            Assert.AreEqual("foo2.txt", matches[1].Filename);
+            Assert.AreEqual("bar1.txt", matches[2].Filename);
+            Assert.AreEqual("bar2.txt", matches[3].Filename);
+            Assert.AreEqual("a", matches[0].Line);
+            Assert.AreEqual("ba", matches[1].Line);
+            Assert.AreEqual("aa", matches[2].Line);
+            Assert.AreEqual("baa", matches[3].Line);
+        }
+
+        [Test]
+        public void FileWildcardWithInclude()
+        {
+            string fileName = CreateTextFile("a", "foo1.txt");
+            string directory = Path.GetDirectoryName(fileName);
+            AddCleanupDir(directory);
+            CreateTextFile("ba", "foo2.txt");
+            CreateTextFile("aa", "bar1.txt");
+            CreateTextFile("baa", "bar2.txt");
+
+            MatchInfo[] matches = RawExecuteMultipleMatches(new[] {
+                string.Format("cd '{0}'", directory),
+                "select-string -Pattern a -Path *.txt -include *foo1.txt"
+            });
+
+            Assert.AreEqual(1, matches.Length);
+            Assert.AreEqual("foo1.txt", matches[0].Filename);
+            Assert.AreEqual("a", matches[0].Line);
+        }
+
+        [Test]
+        public void FileWildcardWithExclude()
+        {
+            string fileName = CreateTextFile("a", "foo1.txt");
+            string directory = Path.GetDirectoryName(fileName);
+            AddCleanupDir(directory);
+            CreateTextFile("ba", "foo2.txt");
+            CreateTextFile("aa", "bar1.txt");
+            CreateTextFile("baa", "bar2.txt");
+
+            MatchInfo[] matches = RawExecuteMultipleMatches(new[] {
+                string.Format("cd '{0}'", directory),
+                "select-string -Pattern a -Path *.txt -exclude *foo?.txt"
+            });
+
+            Assert.AreEqual(2, matches.Length);
+            Assert.AreEqual("bar1.txt", matches[0].Filename);
+            Assert.AreEqual("aa", matches[0].Line);
+            Assert.AreEqual("bar2.txt", matches[1].Filename);
+            Assert.AreEqual("baa", matches[1].Line);
         }
     }
 }

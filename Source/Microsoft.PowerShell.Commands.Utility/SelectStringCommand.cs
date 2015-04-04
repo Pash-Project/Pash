@@ -1,10 +1,13 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
+using System.Management.Automation.Provider;
 using System.Text.RegularExpressions;
+using Pash.Implementation;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -115,10 +118,32 @@ namespace Microsoft.PowerShell.Commands
 
         private void MatchInFiles()
         {
-            foreach (string path in Path)
+            foreach (string path in ResolvePaths())
             {
                 MatchInLines(path, File.ReadLines(path));
             }
+        }
+
+        private IEnumerable<string> ResolvePaths()
+        {
+            foreach (string path in Path)
+            {
+                CmdletProvider provider;
+                ProviderRuntime runtime = CreateProviderRuntime();
+                foreach (string resolvedPath in InvokeProvider.ChildItem.Globber.GetGlobbedProviderPaths(path, runtime, out provider))
+                {
+                    yield return resolvedPath;
+                }
+            }
+        }
+
+        private ProviderRuntime CreateProviderRuntime()
+        {
+            var runtime = new ProviderRuntime(this);
+            runtime.Include = Include == null ? new Collection<string>() : new Collection<string>(Include.ToList());
+            runtime.Exclude = Exclude == null ? new Collection<string>() : new Collection<string>(Exclude.ToList());
+            //runtime.AvoidGlobbing = AvoidWildcardExpansion;
+            return runtime;
         }
 
         /// <summary>
