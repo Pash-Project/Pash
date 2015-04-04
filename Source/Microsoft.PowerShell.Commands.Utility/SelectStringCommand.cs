@@ -218,10 +218,23 @@ namespace Microsoft.PowerShell.Commands
 
         private MatchInfo FindRegexMatch(string line, string pattern, string path)
         {
-            Match match = Regex.Match(line, pattern, GetRegexOptions());
-            if (match.Success)
+            var matches = new List<Match>();
+            if (AllMatches.IsPresent)
             {
-                return new MatchInfo(path, pattern, match, line, _lineNumber, !CaseSensitive);
+                matches = Regex.Matches(line, pattern, GetRegexOptions()).OfType<Match>().ToList();
+            }
+            else
+            {
+                Match match = Regex.Match(line, pattern, GetRegexOptions());
+                if (match.Success)
+                {
+                    matches.Add(match);
+                }
+            }
+
+            if (matches.Count > 0)
+            {
+                return new MatchInfo(path, pattern, matches, line, _lineNumber, !CaseSensitive);
             }
             return null;
         }

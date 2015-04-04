@@ -1,5 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.PowerShell.Commands
@@ -30,13 +32,13 @@ namespace Microsoft.PowerShell.Commands
         {
         }
 
-        internal MatchInfo(string path, string pattern, Match match, string line, int lineNumber, bool ignoreCase)
+        internal MatchInfo(string path, string pattern, IEnumerable<Match> matches, string line, int lineNumber, bool ignoreCase)
         {
             IgnoreCase = ignoreCase;
             Line = line;
             LineNumber = lineNumber;
             Filename = System.IO.Path.GetFileName(path);
-            Matches = new[] { match };
+            Matches = matches.ToArray();
             Path = path;
             Pattern = pattern;
         }

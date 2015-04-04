@@ -552,5 +552,34 @@ namespace ReferenceTests.Commands
             Assert.AreEqual("a", matches[0].Line);
             Assert.AreEqual("aa", matches[1].Line);
         }
+
+        [Test]
+        public void AllMatchesFromPipeline()
+        {
+            MatchInfo[] matches = RawExecuteMultipleMatches("'aa','aaa' | select-string -pattern a -AllMatches");
+            MatchInfo firstMatch = matches[0];
+            MatchInfo secondMatch = matches[1];
+
+            Assert.AreEqual(2, matches.Length);
+            Assert.AreEqual("aa", firstMatch.Line);
+            Assert.AreEqual(2, firstMatch.Matches.Length);
+            Assert.AreEqual(0, firstMatch.Matches[0].Index);
+            Assert.AreEqual("a", firstMatch.Matches[0].Value);
+            Assert.AreEqual(1, firstMatch.Matches[0].Length);
+            Assert.AreEqual(1, firstMatch.Matches[1].Index);
+            Assert.AreEqual("a", firstMatch.Matches[1].Value);
+            Assert.AreEqual(1, firstMatch.Matches[1].Length);
+            Assert.AreEqual("aaa", secondMatch.Line);
+            Assert.AreEqual(3, secondMatch.Matches.Length);
+            Assert.AreEqual(0, secondMatch.Matches[0].Index);
+            Assert.AreEqual("a", secondMatch.Matches[0].Value);
+            Assert.AreEqual(1, secondMatch.Matches[0].Length);
+            Assert.AreEqual(1, secondMatch.Matches[1].Index);
+            Assert.AreEqual("a", secondMatch.Matches[1].Value);
+            Assert.AreEqual(1, secondMatch.Matches[1].Length);
+            Assert.AreEqual(2, secondMatch.Matches[2].Index);
+            Assert.AreEqual("a", secondMatch.Matches[2].Value);
+            Assert.AreEqual(1, secondMatch.Matches[2].Length);
+        }
     }
 }
