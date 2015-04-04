@@ -196,15 +196,14 @@ namespace Microsoft.PowerShell.Commands
                     if (matchInfo != null)
                     {
                         WriteMatch(matchInfo);
+                        if (Quiet.IsPresent || List.IsPresent)
+                        {
+                            return;
+                        }
                         break;
                     }
                 }
                 _lineNumber++;
-
-                if (!ContinueProcessing())
-                {
-                    return;
-                }
             }
         }
 

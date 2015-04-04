@@ -508,5 +508,49 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual(expectedResult + Environment.NewLine, result);
         }
+
+        [Test]
+        [TestCase("a,a", "select-string -List -SimpleMatch \"a\"")]
+        [TestCase("a,a", "select-string -List -Pattern \"a\"")]
+        public void ListArgumentMatchesOnlyOneItem(string fileContent, string command)
+        {
+            string[] lines = fileContent.Split(',');
+            string fileName = CreateFile(NewlineJoin(lines), ".txt");
+            string fullCommand = string.Format("{0} -Path '{1}'", command, fileName);
+            MatchInfo[] matches = RawExecuteMultipleMatches(fullCommand);
+
+            Assert.AreEqual(1, matches.Length);
+            Assert.AreEqual("a", matches[0].Line);
+        }
+
+        [Test]
+        public void ListArgumentMatchesOnlyOneItemInEachFile()
+        {
+            string fileName = CreateTextFile(NewlineJoin("a","ab"), "foo1.txt");
+            string directory = Path.GetDirectoryName(fileName);
+            AddCleanupDir(directory);
+            CreateTextFile(NewlineJoin("aa", "ab"), "foo2.txt");
+
+            MatchInfo[] matches = RawExecuteMultipleMatches(new[] {
+                string.Format("cd '{0}'", directory),
+                "select-string -Pattern a -Path foo?.txt -List"
+            });
+
+            Assert.AreEqual(2, matches.Length);
+            Assert.AreEqual("a", matches[0].Line);
+            Assert.AreEqual("foo1.txt", matches[0].Filename);
+            Assert.AreEqual("aa", matches[1].Line);
+            Assert.AreEqual("foo2.txt", matches[1].Filename);
+        }
+
+        [Test]
+        public void ListArgumentWhenItemsPassedOnPipeline()
+        {
+            MatchInfo[] matches = RawExecuteMultipleMatches("'a','aa' | Select-String -Pattern a -List");
+
+            Assert.AreEqual(2, matches.Length);
+            Assert.AreEqual("a", matches[0].Line);
+            Assert.AreEqual("aa", matches[1].Line);
+        }
     }
 }
