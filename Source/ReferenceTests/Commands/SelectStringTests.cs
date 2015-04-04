@@ -475,5 +475,38 @@ namespace ReferenceTests.Commands
             Assert.AreEqual("bar2.txt", matches[1].Filename);
             Assert.AreEqual("baa", matches[1].Line);
         }
+
+        [Test]
+        public void LiteralPaths()
+        {
+            string fileName = CreateTextFile("a", "File[1].txt");
+            string directory = Path.GetDirectoryName(fileName);
+            CreateTextFile("ba", "File[2].txt");
+            AddCleanupDir(directory);
+
+            MatchInfo[] matches = RawExecuteMultipleMatches(new[] {
+                string.Format("cd '{0}'", directory),
+                "select-string -Pattern a -LiteralPath File[1].txt,File[2].txt"
+            });
+
+            Assert.AreEqual(2, matches.Length);
+            Assert.AreEqual("File[1].txt", matches[0].Filename);
+            Assert.AreEqual("File[2].txt", matches[1].Filename);
+            Assert.AreEqual("a", matches[0].Line);
+            Assert.AreEqual("ba", matches[1].Line);
+        }
+
+        [Test]
+        [TestCase("a,b", "select-string -quiet -pattern \"a\"", "True")]
+        [TestCase("b,b", "select-string -quiet -simplematch \"B\"", "True")]
+        public void QuietMatchesInLiteralFilePath(string fileContent, string command, string expectedResult)
+        {
+            string[] lines = fileContent.Split(',');
+            string fileName = CreateFile(NewlineJoin(lines), ".txt");
+            string fullCommand = string.Format("{0} -LiteralPath '{1}'", command, fileName);
+            string result = ReferenceHost.Execute(fullCommand);
+
+            Assert.AreEqual(expectedResult + Environment.NewLine, result);
+        }
     }
 }

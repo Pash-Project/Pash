@@ -64,7 +64,17 @@ namespace Microsoft.PowerShell.Commands
             ValueFromPipelineByPropertyName = true,
             ParameterSetName = "LiteralFile")]
         [Alias("PSPath")]
-        public string[] LiteralPath { get; set; }
+        public string[] LiteralPath {
+            get { return InternalPaths; }
+            set
+            {
+                AvoidWildcardExpansion = true;
+                InternalPaths = value;
+            }
+        }
+
+        bool AvoidWildcardExpansion;
+        string[] InternalPaths { get; set; }
 
         [Parameter]
         public SwitchParameter NotMatch { get; set; }
@@ -74,7 +84,10 @@ namespace Microsoft.PowerShell.Commands
             Mandatory = true,
             ValueFromPipelineByPropertyName = true,
             ParameterSetName = "File")]
-        public string[] Path { get; set; }
+        public string[] Path {
+            get { return InternalPaths; }
+            set { InternalPaths = value; }
+        }
 
         [Parameter(
             Mandatory = true,
@@ -126,7 +139,7 @@ namespace Microsoft.PowerShell.Commands
 
         private IEnumerable<string> ResolvePaths()
         {
-            foreach (string path in Path)
+            foreach (string path in InternalPaths)
             {
                 CmdletProvider provider;
                 ProviderRuntime runtime = CreateProviderRuntime();
@@ -142,7 +155,7 @@ namespace Microsoft.PowerShell.Commands
             var runtime = new ProviderRuntime(this);
             runtime.Include = Include == null ? new Collection<string>() : new Collection<string>(Include.ToList());
             runtime.Exclude = Exclude == null ? new Collection<string>() : new Collection<string>(Exclude.ToList());
-            //runtime.AvoidGlobbing = AvoidWildcardExpansion;
+            runtime.AvoidGlobbing = AvoidWildcardExpansion;
             return runtime;
         }
 
@@ -264,7 +277,7 @@ namespace Microsoft.PowerShell.Commands
         /// </summary>
         protected override void EndProcessing()
         {
-            if (Path != null && Quiet.IsPresent && !_matchedAtLeastOneItem)
+            if (InternalPaths != null && Quiet.IsPresent && !_matchedAtLeastOneItem)
             {
                 WriteObject(false);
             }
