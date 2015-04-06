@@ -105,7 +105,7 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            if (!ContinueProcessing())
+            if (Quiet.IsPresent && _matchedAtLeastOneItem)
             {
                 return;
             }
@@ -118,15 +118,6 @@ namespace Microsoft.PowerShell.Commands
             {
                 MatchInputObject();
             }
-        }
-
-        private bool ContinueProcessing()
-        {
-            if (Quiet.IsPresent)
-            {
-                return !_matchedAtLeastOneItem;
-            }
-            return true;
         }
 
         private void MatchInFiles()
@@ -193,10 +184,19 @@ namespace Microsoft.PowerShell.Commands
                 foreach (string pattern in Pattern)
                 {
                     MatchInfo matchInfo = FindMatch(line, pattern, path);
-                    if (matchInfo != null)
+                    if (matchInfo != null && !NotMatch.IsPresent)
                     {
                         WriteMatch(matchInfo);
-                        if (Quiet.IsPresent || List.IsPresent)
+                        if (ShouldStopProcessingAfterMatchFound())
+                        {
+                            return;
+                        }
+                        break;
+                    }
+                    else if (matchInfo == null && NotMatch.IsPresent)
+                    {
+                        WriteNotMatch(line, pattern, path);
+                        if (ShouldStopProcessingAfterMatchFound())
                         {
                             return;
                         }
@@ -266,6 +266,11 @@ namespace Microsoft.PowerShell.Commands
             return StringComparison.CurrentCultureIgnoreCase;
         }
 
+        private bool ShouldStopProcessingAfterMatchFound()
+        {
+            return Quiet.IsPresent || List.IsPresent;
+        }
+
         private void WriteMatch(MatchInfo match)
         {
             _matchedAtLeastOneItem = true;
@@ -278,6 +283,12 @@ namespace Microsoft.PowerShell.Commands
             {
                 WriteObject(match);
             }
+        }
+
+        private void WriteNotMatch(string line, string pattern, string path)
+        {
+            var match = new MatchInfo(path, pattern, line, _lineNumber, !CaseSensitive);
+            WriteMatch(match);
         }
 
         /// <summary>

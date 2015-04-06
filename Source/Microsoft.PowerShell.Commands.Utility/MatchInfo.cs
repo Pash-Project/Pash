@@ -8,8 +8,6 @@ namespace Microsoft.PowerShell.Commands
 {
     public class MatchInfo
     {
-        private int _lineNumber;
-
         public MatchInfoContext Context { get; set; }
         public string Filename { get; internal set; }
         public bool IgnoreCase { get; set; }

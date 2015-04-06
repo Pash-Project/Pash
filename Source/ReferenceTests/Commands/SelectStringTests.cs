@@ -161,7 +161,7 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
-        public void TwoPatternsPassedSecondPattermMatchesFirstLine()
+        public void TwoPatternsPassedSecondPatternMatchesFirstLine()
         {
             string fileName = CreateFile("first line", ".txt");
 
@@ -362,23 +362,29 @@ namespace ReferenceTests.Commands
         [TestCase("\"a\",\"b\" | select-string -quiet -pattern \"c\"", "")]
         [TestCase("\"a\",\"b\" | select-string -quiet -pattern \"A\"", "True")]
         [TestCase("\"a\",\"b\" | select-string -quiet -pattern \"A\" -casesensitive", "")]
+        [TestCase("\"A\",\"a\" | select-string -quiet -pattern \"A\" -casesensitive -notmatch", "True")]
         [TestCase("\"a\",\"aa\" | select-string -quiet -pattern \"a\"", "True")]
+        [TestCase("\"a\",\"a\" | select-string -quiet -pattern \"a\" -notmatch", "")]
         [TestCase("\"aa\",\"ba\" | select-string -quiet -pattern \"b.\"", "True")]
         [TestCase("\"aa\",\"ba\" | select-string -quiet -simplematch \"b.\"", "")]
+        [TestCase("\"b.\",\"ba\" | select-string -quiet -simplematch \"b.\"", "True")]
         [TestCase("\"aa\",\"b.\" | select-string -quiet -simplematch \"b.\"", "True")]
         [TestCase("\"aa\",\"b.\" | select-string -quiet -simplematch \"B.\"", "True")]
         [TestCase("\"aa\",\"b.\" | select-string -quiet -simplematch \"B.\" -casesensitive", "")]
         [TestCase("\"b\",\"b\" | select-string -quiet -simplematch \"b\"", "True")]
+        [TestCase("\"b\",\"b\" | select-string -quiet -simplematch \"b\" -notmatch", "")]
         [TestCase("select-string -quiet -inputobject \"a\",\"b\" -pattern \"a\"", "True")]
         [TestCase("select-string -quiet -inputobject \"a\",\"b\" -pattern \"c\"", "")]
         [TestCase("select-string -quiet -inputobject \"a\",\"b\" -pattern \"A\"", "True")]
         [TestCase("select-string -quiet -inputobject \"a\",\"b\" -pattern \"A\" -casesensitive", "")]
         [TestCase("select-string -quiet -inputobject \"aa\",\"ba\" -pattern \"b.\"", "True")]
         [TestCase("select-string -quiet -inputobject \"aa\",\"ba\" -simplematch \"b.\"", "")]
+        [TestCase("select-string -quiet -inputobject \"aa\",\"ba\" -simplematch \"b.\" -notmatch", "True")]
         [TestCase("select-string -quiet -inputobject \"aa\",\"b.\" -simplematch \"b.\"", "True")]
         [TestCase("select-string -quiet -inputobject \"aa\",\"b.\" -simplematch \"B.\"", "True")]
         [TestCase("select-string -quiet -inputobject \"aa\",\"b.\" -simplematch \"B.\" -casesensitive", "")]
         [TestCase("select-string -quiet -inputobject \"a\",\"a\" -simplematch \"a\"", "True")]
+        [TestCase("select-string -quiet -inputobject \"a\",\"a\" -notmatch \"a\"", "")]
         public void QuietMatches(string command, string expectedResult)
         {
             string result = ReferenceHost.Execute(command);
@@ -389,14 +395,20 @@ namespace ReferenceTests.Commands
         [Test]
         [TestCase("a,b", "select-string -quiet -pattern \"a\"", "True")]
         [TestCase("a,b", "select-string -quiet -pattern \"c\"", "False")]
+        [ TestCase("a,b", "select-string -quiet -pattern \"c\" -notmatch", "True")]
         [TestCase("a,b", "select-string -quiet -pattern \"A\"", "True")]
         [TestCase("a,b", "select-string -quiet -pattern \"A\" -casesensitive", "False")]
+        [TestCase("A,a", "select-string -quiet -pattern \"A\" -casesensitive -notmatch", "True")]
         [TestCase("a,a", "select-string -quiet -pattern \"A\"", "True")]
+        [TestCase("A,A", "select-string -quiet -pattern \"A\" -notmatch", "False")]
         [TestCase("aa,ba", "select-string -quiet -pattern \"b.\"", "True")]
         [TestCase("aa,ba", "select-string -quiet -simplematch \"b.\"", "False")]
+        [TestCase("aa,ba", "select-string -quiet -simplematch \"b.\" -notmatch", "True")]
         [TestCase("aa,b.", "select-string -quiet -simplematch \"b.\"", "True")]
+        [TestCase("b.,b.", "select-string -quiet -simplematch \"b.\" -notmatch", "False")]
         [TestCase("aa,b.", "select-string -quiet -simplematch \"B.\"", "True")]
         [TestCase("aa,b.", "select-string -quiet -simplematch \"B.\" -casesensitive", "False")]
+        [TestCase("b.,b.", "select-string -quiet -simplematch \"B.\" -casesensitive -notmatch", "True")]
         [TestCase("b,b", "select-string -quiet -simplematch \"B\"", "True")]
         public void QuietMatchesInFile(string fileContent, string command, string expectedResult)
         {
@@ -512,6 +524,8 @@ namespace ReferenceTests.Commands
         [Test]
         [TestCase("a,a", "select-string -List -SimpleMatch \"a\"")]
         [TestCase("a,a", "select-string -List -Pattern \"a\"")]
+        [TestCase("a,a", "select-string -List -SimpleMatch \"b\" -NotMatch")]
+        [TestCase("a,a", "select-string -List -Pattern \"b\" -NotMatch")]
         public void ListArgumentMatchesOnlyOneItem(string fileContent, string command)
         {
             string[] lines = fileContent.Split(',');
@@ -544,9 +558,11 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
-        public void ListArgumentWhenItemsPassedOnPipeline()
+        [TestCase("'a','aa' | Select-String -Pattern a -List")]
+        [TestCase("'a','aa' | Select-String -Pattern b -List -NotMatch")]
+        public void ListArgumentWhenItemsPassedOnPipeline(string command)
         {
-            MatchInfo[] matches = RawExecuteMultipleMatches("'a','aa' | Select-String -Pattern a -List");
+            MatchInfo[] matches = RawExecuteMultipleMatches(command);
 
             Assert.AreEqual(2, matches.Length);
             Assert.AreEqual("a", matches[0].Line);
@@ -580,6 +596,57 @@ namespace ReferenceTests.Commands
             Assert.AreEqual(2, secondMatch.Matches[2].Index);
             Assert.AreEqual("a", secondMatch.Matches[2].Value);
             Assert.AreEqual(1, secondMatch.Matches[2].Length);
+        }
+
+        [Test]
+        public void NotMatchFromPipeline()
+        {
+            MatchInfo match = RawExecuteSingleMatch("'a','b' | select-string -pattern a -NotMatch");
+
+            Assert.AreEqual("b", match.Line);
+            Assert.AreEqual("InputStream", match.Path);
+            Assert.AreEqual("InputStream", match.Filename);
+            Assert.AreEqual(2, match.LineNumber);
+            Assert.AreEqual(0, match.Matches.Length);
+            Assert.IsTrue(match.IgnoreCase);
+        }
+
+        [Test]
+        public void NotMatchFromFile()
+        {
+            string fileName = CreateFile(NewlineJoin("a", "b"), ".txt");
+            string command = string.Format("Select-String -Path '{0}' -Pattern a -NotMatch", fileName);
+            MatchInfo match = RawExecuteSingleMatch(command);
+
+            Assert.AreEqual("b", match.Line);
+            Assert.AreEqual(2, match.LineNumber);
+            Assert.AreEqual(0, match.Matches.Length);
+            Assert.AreEqual(fileName, match.Path);
+            Assert.AreEqual(Path.GetFileName(fileName), match.Filename);
+        }
+
+        [Test]
+        public void CaseSensitiveNotMatchFromPipeline()
+        {
+            MatchInfo match = RawExecuteSingleMatch("'b','B' | select-string -pattern b -NotMatch -CaseSensitive");
+
+            Assert.AreEqual("B", match.Line);
+            Assert.AreEqual(2, match.LineNumber);
+            Assert.AreEqual(0, match.Matches.Length);
+            Assert.IsFalse(match.IgnoreCase);
+        }
+
+        [Test]
+        public void NotMatchMultiplePatternsFromPipelineReturnsOneNotMatchOnlyEvenIfAllPatternsAreNotMatch()
+        {
+            MatchInfo match = RawExecuteSingleMatch("'a' | select-string -pattern b,b -NotMatch");
+
+            Assert.AreEqual("a", match.Line);
+            Assert.AreEqual("InputStream", match.Path);
+            Assert.AreEqual("InputStream", match.Filename);
+            Assert.AreEqual(1, match.LineNumber);
+            Assert.AreEqual(0, match.Matches.Length);
+            Assert.IsTrue(match.IgnoreCase);
         }
     }
 }
