@@ -1,10 +1,12 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using NUnit.Framework;
-using Microsoft.PowerShell.Commands;
+using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.PowerShell.Commands;
+using NUnit.Framework;
 
 namespace ReferenceTests.Commands
 {
@@ -55,6 +57,40 @@ namespace ReferenceTests.Commands
             File.WriteAllText(filePath, content);
             AddCleanupFile(filePath);
             return filePath;
+        }
+
+        private string CreateFile(string text, Encoding encoding)
+        {
+            string fileName = Path.GetTempFileName();
+            AddCleanupFile(fileName);
+            File.WriteAllText(fileName, text, encoding);
+
+            return fileName;
+        }
+
+        private Encoding GetEncoding(string encoding)
+        {
+            switch (encoding)
+            {
+                case "unicode":
+                    return Encoding.Unicode;
+                case "utf7":
+                    return Encoding.UTF7;
+                case "utf8":
+                    return Encoding.UTF8;
+                case "utf32":
+                    return Encoding.UTF32;
+                case "ascii":
+                    return Encoding.ASCII;
+                case "bigendianunicode":
+                    return Encoding.BigEndianUnicode;
+                case "default":
+                    return Encoding.Default;
+                case "oem":
+                    return Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage);
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         [Test]
@@ -647,6 +683,37 @@ namespace ReferenceTests.Commands
             Assert.AreEqual(1, match.LineNumber);
             Assert.AreEqual(0, match.Matches.Length);
             Assert.IsTrue(match.IgnoreCase);
+        }
+
+        [TestCase("ä", "default")]
+        [TestCase("ä", "utf8")]
+        [TestCase("ä", "unicode")]
+        [TestCase("ä", "utf7")]
+        [TestCase("ä", "utf32")]
+        [TestCase("a", "ascii")]
+        [TestCase("ä", "bigendianunicode")]
+        [TestCase("ä", "oem")]
+        public void EncodingParameter(string text, string encoding)
+        {
+            Encoding fileEncoding = GetEncoding(encoding);
+            string fileName = CreateFile(text, fileEncoding);
+            string command = string.Format("select-string -encoding {0} -pattern '{1}' -Path '{2}'", encoding, text, fileName);
+
+            MatchInfo match = RawExecuteSingleMatch(command);
+
+            Assert.AreEqual(text, match.Line);
+        }
+
+        [Test]
+        [TestCase("ä")]
+        public void OemEncoding(string text)
+        {
+            string fileName = CreateFile(text, Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage));
+            string command = string.Format("select-string -encoding oem -pattern '{0}' -Path '{1}'", text, fileName);
+
+            MatchInfo match = RawExecuteSingleMatch(command);
+
+            Assert.AreEqual(text, match.Line);
         }
     }
 }

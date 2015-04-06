@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Provider;
+using System.Management.Pash.Implementation;
 using System.Text.RegularExpressions;
 using Pash.Implementation;
 
@@ -124,8 +125,13 @@ namespace Microsoft.PowerShell.Commands
         {
             foreach (string path in ResolvePaths())
             {
-                MatchInLines(path, File.ReadLines(path));
+                MatchInLines(path, ReadLines(path));
             }
+        }
+
+        private IEnumerable<string> ReadLines(string path)
+        {
+            return File.ReadAllLines(path, EncodingMapping.GetEncoding(Encoding));
         }
 
         private IEnumerable<string> ResolvePaths()
