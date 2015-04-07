@@ -8,9 +8,9 @@ namespace System.Management.Pash.Implementation
 {
     public class SettableMemberExpression : SettableExpression
     {
-        private readonly HashSet<string> _hashtableAccessibleMembers = 
-            new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) {
-                "Count", "Keys", "Values", "Remove"
+        private readonly Dictionary<Type, BaseTypeSettable> _settableTypes = new Dictionary<Type, BaseTypeSettable>()
+        {
+            {typeof(Hashtable), new HashTableTypeSettable()},
         };
 
         private MemberExpressionAst _expressionAst;
@@ -46,14 +46,17 @@ namespace System.Management.Pash.Implementation
         {
             var psobj = PSObject.AsPSObject(EvaluatedBase);
             var unwraped = PSObject.Unwrap(psobj);
+            var unwrappedType = (unwraped == null) ? null : unwraped.GetType();
             var memberNameObj = EvaluatedMember;
-            // check for Hashtable first
-            if (unwraped is Hashtable && memberNameObj != null &&
-                !_hashtableAccessibleMembers.Contains(memberNameObj.ToString()))
-            { 
-                ((Hashtable) unwraped)[memberNameObj] = value;
+
+            var settableType = GetSettableType(unwrappedType, memberNameObj);
+            if (settableType != null && settableType.CanResolve(memberNameObj))
+            {
+                settableType.SetValue(unwraped, memberNameObj, value);
                 return;
             }
+
+
             // else it's a PSObject
             var member = PSObject.GetMemberInfoSafe(psobj, memberNameObj, _expressionAst.Static);
             if (member == null)
@@ -63,23 +66,77 @@ namespace System.Management.Pash.Implementation
             }
 
             member.Value = PSObject.Unwrap(value);
+       }
+
+        private BaseTypeSettable GetSettableType(Type unwrappedType, object memberNameObj)
+        {
+            if (unwrappedType != null && _settableTypes.ContainsKey(unwrappedType))
+            {
+                var settableType = _settableTypes[unwrappedType];
+                if(settableType.CanResolve(memberNameObj))
+                {
+                    return settableType;
+                }
+            }
+            return null;
         }
 
        public override object GetValue()
        {
             var psobj = PSObject.WrapOrNull(EvaluatedBase);
             var unwraped = PSObject.Unwrap(psobj);
+            var unwrappedType = (unwraped == null) ? null : unwraped.GetType();
             var memberNameObj = EvaluatedMember;
-            // check for Hastable first
-            if (unwraped is Hashtable && memberNameObj != null &&
-                !_hashtableAccessibleMembers.Contains(memberNameObj.ToString()))
+
+            var settableType = GetSettableType(unwrappedType, memberNameObj);
+            if (settableType != null && settableType.CanResolve(memberNameObj))
             {
-                return ((Hashtable)unwraped)[memberNameObj];
+                return _settableTypes[unwrappedType].GetValue(unwraped, memberNameObj);
             }
+
             // otherwise a PSObject
             var member = PSObject.GetMemberInfoSafe(psobj, memberNameObj, _expressionAst.Static);
             return (member == null) ? null : PSObject.WrapOrNull(member.Value);
         }
+
+
+        abstract class BaseTypeSettable
+        {
+            public abstract bool CanResolve(object memberNameObj);
+            public abstract object GetValue(object unwrapped, object memberNameObj);
+            public abstract void SetValue(object unwrapped, object memberNameObj, object value);
+        }
+
+        class HashTableTypeSettable : BaseTypeSettable
+        {
+
+            private readonly HashSet<string> _hashtableAccessibleMembers = 
+                new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) {
+                "Count", "Keys", "Values", "Remove"
+            };
+
+
+            public override bool CanResolve(object memberNameObj)
+            {
+                if (memberNameObj == null)
+                {
+                    return false;
+                }
+                return !_hashtableAccessibleMembers.Contains(memberNameObj.ToString());
+            }
+
+            public override object GetValue(object unwrapped, object memberNameObj)
+            {
+                return ((Hashtable) unwrapped)[memberNameObj];
+            }
+
+            public override void SetValue(object unwrapped, object memberNameObj, object value)
+            {
+                ((Hashtable) unwrapped)[memberNameObj] = value;
+            }
+
+        }
+
     }
 }
 
