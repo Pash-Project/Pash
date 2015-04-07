@@ -3,6 +3,7 @@ using System.Management.Automation.Language;
 using System.Management.Automation;
 using System.Collections.Generic;
 using System.Collections;
+using System.Linq;
 
 namespace System.Management.Pash.Implementation
 {
@@ -11,6 +12,7 @@ namespace System.Management.Pash.Implementation
         private readonly Dictionary<Type, BaseTypeSettable> _settableTypes = new Dictionary<Type, BaseTypeSettable>()
         {
             {typeof(Hashtable), new HashTableTypeSettable()},
+            {typeof(System.Xml.XmlNode), new XmlTypeSettable()},
         };
 
         private MemberExpressionAst _expressionAst;
@@ -48,9 +50,9 @@ namespace System.Management.Pash.Implementation
             var unwraped = PSObject.Unwrap(psobj);
             var unwrappedType = (unwraped == null) ? null : unwraped.GetType();
             var memberNameObj = EvaluatedMember;
-
+            
             var settableType = GetSettableType(unwrappedType, memberNameObj);
-            if (settableType != null && settableType.CanResolve(memberNameObj))
+            if (settableType != null)
             {
                 settableType.SetValue(unwraped, memberNameObj, value);
                 return;
@@ -70,12 +72,20 @@ namespace System.Management.Pash.Implementation
 
         private BaseTypeSettable GetSettableType(Type unwrappedType, object memberNameObj)
         {
-            if (unwrappedType != null && _settableTypes.ContainsKey(unwrappedType))
+            if (unwrappedType != null)
             {
-                var settableType = _settableTypes[unwrappedType];
-                if(settableType.CanResolve(memberNameObj))
+                var itemType = unwrappedType;
+                while(itemType != null && !_settableTypes.ContainsKey(itemType))
                 {
-                    return settableType;
+                    itemType = itemType.BaseType;
+                }
+                if (itemType != null)
+                {
+                    var settableType = _settableTypes[itemType];
+                    if(settableType.CanResolve(memberNameObj))
+                    {
+                        return settableType;
+                    }
                 }
             }
             return null;
@@ -89,9 +99,9 @@ namespace System.Management.Pash.Implementation
             var memberNameObj = EvaluatedMember;
 
             var settableType = GetSettableType(unwrappedType, memberNameObj);
-            if (settableType != null && settableType.CanResolve(memberNameObj))
+            if (settableType != null)
             {
-                return _settableTypes[unwrappedType].GetValue(unwraped, memberNameObj);
+                return settableType.GetValue(unwraped, memberNameObj);
             }
 
             // otherwise a PSObject
@@ -134,9 +144,70 @@ namespace System.Management.Pash.Implementation
             {
                 ((Hashtable) unwrapped)[memberNameObj] = value;
             }
-
         }
 
+
+        class XmlTypeSettable : BaseTypeSettable
+        {
+            public override bool CanResolve(object memberNameObj)
+            {
+                if (memberNameObj == null)
+                {
+                    return false;
+                }
+                return true;
+            }
+
+            public override object GetValue(object unwrapped, object memberNameObj)
+            {
+                var memberNameString = (string)memberNameObj;
+
+                var childNodes = ((System.Xml.XmlNode)unwrapped).SelectNodes("//" + memberNameString);
+
+                if (childNodes.Count == 1)
+                {
+                    var value = childNodes[0];
+
+                    if (value.ChildNodes.Count == 1)
+                    {
+                        if (value.ChildNodes[0].NodeType == System.Xml.XmlNodeType.Text)
+                        {
+                            return value.ChildNodes[0].InnerText;
+                        }
+                    }
+                    return value;
+                }
+
+                if (childNodes.Count > 1)
+                {
+                    bool usedAChildNode = false;
+                    var result = new List<string>();
+                    foreach (System.Xml.XmlNode node in childNodes)
+                    {
+                        if (node.ChildNodes.Count == 1)
+                        {
+                            if (node.ChildNodes[0].NodeType == System.Xml.XmlNodeType.Text)
+                            {
+                                result.Add(node.InnerText);
+                                usedAChildNode = true;
+                            }
+                        }
+                    }
+
+                    if (usedAChildNode)
+                    {
+                        return result.ToArray();
+                    }
+                }
+
+                return childNodes;
+            }
+
+            public override void SetValue(object unwrapped, object memberNameObj, object value)
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }
 
