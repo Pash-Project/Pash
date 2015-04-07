@@ -73,7 +73,7 @@ namespace ReferenceTests.Commands
             Assert.AreEqual("abc" + Environment.NewLine, input2Text);
         }
 
-        [Test, Explicit("Array values passed one at a time to Set-Content and not as an array")]
+        [Test]
         public void ValueArrayTakenFromPipeline()
         {
             string fileName = GenerateTempFile("test");

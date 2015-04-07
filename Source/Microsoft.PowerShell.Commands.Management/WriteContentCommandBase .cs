@@ -1,4 +1,5 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
@@ -13,26 +14,31 @@ namespace Microsoft.PowerShell.Commands
         [AllowEmptyCollection]
         public object[] Value { get; set; }
 
-        internal void WriteValues(string[] path, bool seekEnd = false)
+        internal Collection<IContentWriter> Writers { get; set; }
+
+        protected override void ProcessRecord()
         {
-            var writers = InvokeProvider.Content.GetWriter(path, ProviderRuntime);
+            WriteValues();
+        }
 
-            foreach (var writer in writers)
+        internal void WriteValues()
+        {
+            foreach (IContentWriter writer in Writers)
             {
-                try
-                {
-                    if (seekEnd)
-                    {
-                        writer.Seek(0, SeekOrigin.End);
-                    }
-                    writer.Write(Value);
+                writer.Write(Value);
 
-                    if (PassThru.IsPresent)
-                    {
-                        WriteObject(Value, true);
-                    }
+                if (PassThru.IsPresent)
+                {
+                    WriteObject(Value, true);
                 }
-                finally
+            }
+        }
+
+        protected override void EndProcessing()
+        {
+            if (Writers != null)
+            {
+                foreach (IContentWriter writer in Writers)
                 {
                     writer.Close();
                 }

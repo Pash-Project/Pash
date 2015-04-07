@@ -658,4 +658,33 @@ namespace TestPSSnapIn
             }
         }
     }
+
+    [Cmdlet(VerbsDiagnostic.Test, "ParametersByPositionWhenOneBoundByName")]
+    public class TestParametersByPositionWhenOneBoundByName : PSCmdlet
+    {
+        [Parameter(
+            Mandatory = true,
+            Position = 0)]
+        public string First { get; set; }
+
+        [Parameter(
+            Position = 1,
+            Mandatory = true)]
+        public string Second { get; set; }
+
+        [Parameter(
+            Position = 2,
+            Mandatory = true)]
+        public string Third { get; set; }
+
+        [Parameter(
+            Position = 3,
+            Mandatory = true)]
+        public string Fourth { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(string.Format("'{0}', '{1}', '{2}', '{3}'", First, Second, Third, Fourth));
+        }
+    }
 }

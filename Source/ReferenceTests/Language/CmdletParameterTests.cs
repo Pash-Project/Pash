@@ -391,6 +391,22 @@ namespace ReferenceTests.Language
             Assert.IsNotNull(verboseParameter);
             Assert.IsTrue(verboseParameter.Aliases.Contains("vb"));
         }
+
+        [Test]
+        [TestCase("'B' -First 'A' -Third 'C' -Fourth 'D'")]
+        [TestCase("'B' 'C' -First 'A' -Fourth 'D'")]
+        [TestCase("'B' 'C' 'D' -First 'A'")]
+        [TestCase("'A' 'C' 'D' -Second 'B'")]
+        [TestCase("'A' 'D' -Second 'B' -Third 'C'")]
+        public void CmdletParameterBoundInPositionTwoWhenFirstPositionalParameterBoundByName(string parameters)
+        {
+            string cmdletName = CmdletName(typeof(TestParametersByPositionWhenOneBoundByName));
+            string cmd = cmdletName + " " + parameters;
+
+            string result = ReferenceHost.Execute(cmd);
+
+            Assert.AreEqual("'A', 'B', 'C', 'D'" + Environment.NewLine, result);
+        }
     }
 }
 
