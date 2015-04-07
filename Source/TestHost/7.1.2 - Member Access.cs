@@ -242,48 +242,5 @@ $path.GetType().FullName
             Assert.AreEqual(typeof(System.Environment).GetType().FullName + Environment.NewLine, result);
         }
 
-        public class XmlMemberAccess
-        {
-            [Test]
-            public void CanGetValueFromRootXmlElement()
-            {
-                var result = TestHost.Execute(true, @"
-$path = [xml]""<a>hello a</a>""
-$path.a
-");
-                Assert.AreEqual("hello a" + Environment.NewLine, result);
-            }
-
-            [Test]
-            public void CanGetValueFromChildXmlElement()
-            {
-                var result = TestHost.Execute(true, @"
-$path = [xml]""<a><b>hello a</b></a>""
-$path.a.b
-");
-                Assert.AreEqual("hello a" + Environment.NewLine, result);
-            }
-
-            [Test]
-            public void ArrayOfTextNodeElement()
-            {
-                var result = TestHost.Execute(true, @"
-$path = [xml]""<a><b>hello a</b><b>hello a</b></a>""
-$path.a.b
-");
-                Assert.AreEqual("hello a" + Environment.NewLine + "hello a" + Environment.NewLine, result);
-            }
-
-            [Test]
-            public void MissingXmlProperty()
-            {
-                var result = TestHost.Execute(true, @"
-$path = [xml]""<a>hello a</a>""
-$path.z
-");
-                Assert.AreEqual(String.Empty, result);
-            }
-
-        }
     }
 }
