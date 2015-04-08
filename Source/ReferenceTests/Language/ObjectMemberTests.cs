@@ -168,6 +168,61 @@ namespace ReferenceTests.Language
             ));
             Assert.AreEqual(NewlineJoin("c", "c", "d", "d"), result);
         }
+
+
+
+        public class XmlTests
+        {
+            [Test]
+            public void CanGetValueFromRootXmlElement()
+            {
+                var result = ReferenceHost.Execute(NewlineJoin(
+                    "$path = [xml]\"<a>hello a</a>\"",
+                    "$path.a"
+                ));
+                Assert.AreEqual(NewlineJoin("hello a"), result);
+            }
+
+            [Test]
+            public void CanGetValueFromChildXmlElement()
+            {
+                var result = ReferenceHost.Execute(NewlineJoin(
+                    "$path = [xml]\"<a><b>hello a</b></a>\"",
+                    "$path.a.b"
+                ));
+                Assert.AreEqual(NewlineJoin("hello a"), result);
+            }
+
+            [Test]
+            public void ArrayOfTextNodeElement()
+            {
+                var result = ReferenceHost.Execute(NewlineJoin(
+                    "$path = [xml]\"<a><b>hello a</b><b>hello a</b></a>\"",
+                    "$path.a.b"
+                ));
+                Assert.AreEqual(NewlineJoin("hello a", "hello a"), result);
+            }
+
+            [Test]
+            public void ArrayOfTextNodeSubElement()
+            {
+                var result = ReferenceHost.Execute(NewlineJoin(
+                    "$path = [xml]\"<a><b><c>CCC1</c><d>DDD1</d></b><b><c>CCC2</c><d>DDD1</d></b></a>\"",
+                    "$path.a.b.c"
+                ));
+                Assert.AreEqual(NewlineJoin("CCC1", "CCC2"), result);
+            }
+
+            [Test]
+            public void MissingXmlProperty()
+            {
+                var result = ReferenceHost.Execute(NewlineJoin(
+                    "$path = [xml]\"<a>hello a</a>\"",
+                    "$path.z"
+                ));
+                Assert.AreEqual(NewlineJoin(), result);
+            }
+        }
     }
 }
 

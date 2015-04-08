@@ -241,5 +241,6 @@ $path.GetType().FullName
 ");
             Assert.AreEqual(typeof(System.Environment).GetType().FullName + Environment.NewLine, result);
         }
+
     }
 }
