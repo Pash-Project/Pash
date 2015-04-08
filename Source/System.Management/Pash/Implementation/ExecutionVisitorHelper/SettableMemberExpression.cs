@@ -11,8 +11,9 @@ namespace System.Management.Pash.Implementation
     {
         private readonly Dictionary<Type, BaseTypeSettable> _settableTypes = new Dictionary<Type, BaseTypeSettable>()
         {
-            {typeof(Hashtable), new HashTableTypeSettable()},
-            {typeof(System.Xml.XmlNode), new XmlTypeSettable()},
+            {typeof(Hashtable), new HashtableTypeSettable()},
+            {typeof(System.Xml.XmlNode), new XmlNodeTypeSettable()},
+            {typeof(object[]), new XmlObjectArrayTypeSettable()},
         };
 
         private MemberExpressionAst _expressionAst;
@@ -112,12 +113,19 @@ namespace System.Management.Pash.Implementation
 
         abstract class BaseTypeSettable
         {
-            public abstract bool CanResolve(object memberNameObj);
+            public virtual bool CanResolve(object memberNameObj)
+            {
+                if (memberNameObj == null)
+                {
+                    return false;
+                }
+                return true;
+            }
             public abstract object GetValue(object unwrapped, object memberNameObj);
             public abstract void SetValue(object unwrapped, object memberNameObj, object value);
         }
 
-        class HashTableTypeSettable : BaseTypeSettable
+        class HashtableTypeSettable : BaseTypeSettable
         {
 
             private readonly HashSet<string> _hashtableAccessibleMembers = 
@@ -147,16 +155,24 @@ namespace System.Management.Pash.Implementation
         }
 
 
-        class XmlTypeSettable : BaseTypeSettable
+
+        private static bool TryGetTextNode(System.Xml.XmlNode node, out string value)
         {
-            public override bool CanResolve(object memberNameObj)
+            if (node.ChildNodes.Count == 1)
             {
-                if (memberNameObj == null)
+                if (node.ChildNodes[0].NodeType == System.Xml.XmlNodeType.Text)
                 {
-                    return false;
+                    value = node.ChildNodes[0].InnerText;
+                    return true;
                 }
-                return true;
             }
+            value = null;
+            return false;
+        }
+
+        class XmlNodeTypeSettable : BaseTypeSettable
+        {
+            
 
             public override object GetValue(object unwrapped, object memberNameObj)
             {
@@ -166,38 +182,33 @@ namespace System.Management.Pash.Implementation
 
                 if (childNodes.Count == 1)
                 {
-                    var value = childNodes[0];
-
-                    if (value.ChildNodes.Count == 1)
+                    var childNode = childNodes[0];
+                    string stringResult = null;
+                    if(TryGetTextNode(childNode, out stringResult))
                     {
-                        if (value.ChildNodes[0].NodeType == System.Xml.XmlNodeType.Text)
-                        {
-                            return value.ChildNodes[0].InnerText;
-                        }
+                        return stringResult;
                     }
-                    return value;
+        
+                    return childNode;
                 }
 
                 if (childNodes.Count > 1)
                 {
-                    bool usedAChildNode = false;
-                    var result = new List<string>();
+
+                    var resultNodes = new List<object>();
                     foreach (System.Xml.XmlNode node in childNodes)
                     {
-                        if (node.ChildNodes.Count == 1)
+                        string stringResult = null;
+                        if (TryGetTextNode(node, out stringResult))
                         {
-                            if (node.ChildNodes[0].NodeType == System.Xml.XmlNodeType.Text)
-                            {
-                                result.Add(node.InnerText);
-                                usedAChildNode = true;
-                            }
+                            resultNodes.Add(stringResult);
+                        }
+                        else
+                        {
+                            resultNodes.Add(node);
                         }
                     }
-
-                    if (usedAChildNode)
-                    {
-                        return result.ToArray();
-                    }
+                    return resultNodes.ToArray();
                 }
 
                 return childNodes;
@@ -208,6 +219,42 @@ namespace System.Management.Pash.Implementation
                 throw new NotImplementedException();
             }
         }
+
+        class XmlObjectArrayTypeSettable : BaseTypeSettable
+        {
+            
+            public override object GetValue(object unwrapped, object memberNameObj)
+            {
+                var memberNameString = (string)memberNameObj;
+
+                var resultingItems = new List<object>();
+                foreach (var item in (object[])unwrapped)
+                {
+                    if (typeof(System.Xml.XmlNode).IsInstanceOfType(item))
+                    {
+                        var xmlNode = (System.Xml.XmlNode)item;
+                        var value = xmlNode[memberNameString];
+                        string stringResult = null;
+                        if (TryGetTextNode(value, out stringResult))
+                        {
+                            resultingItems.Add(stringResult);
+                        }
+                        else
+                        {
+                            resultingItems.Add(value);
+                        }
+
+                    }
+                }
+                return resultingItems.ToArray();
+            }
+
+            public override void SetValue(object unwrapped, object memberNameObj, object value)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
     }
 }
 

@@ -204,6 +204,16 @@ namespace ReferenceTests.Language
             }
 
             [Test]
+            public void ArrayOfTextNodeSubElement()
+            {
+                var result = ReferenceHost.Execute(NewlineJoin(
+                    "$path = [xml]\"<a><b><c>CCC1</c><d>DDD1</d></b><b><c>CCC2</c><d>DDD1</d></b></a>\"",
+                    "$path.a.b.c"
+                ));
+                Assert.AreEqual(NewlineJoin("CCC1", "CCC2"), result);
+            }
+
+            [Test]
             public void MissingXmlProperty()
             {
                 var result = ReferenceHost.Execute(NewlineJoin(
