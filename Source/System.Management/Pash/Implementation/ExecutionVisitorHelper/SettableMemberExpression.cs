@@ -69,27 +69,6 @@ namespace System.Management.Pash.Implementation
             member.Value = PSObject.Unwrap(value);
        }
 
-        private BaseTypeSettable GetSettableType(Type unwrappedType, object memberNameObj)
-        {
-            if (unwrappedType != null)
-            {
-                var itemType = unwrappedType;
-                while(itemType != null && !_settableTypes.ContainsKey(itemType))
-                {
-                    itemType = itemType.BaseType;
-                }
-                if (itemType != null)
-                {
-                    var settableType = _settableTypes[itemType];
-                    if(settableType.CanResolve(memberNameObj))
-                    {
-                        return settableType;
-                    }
-                }
-            }
-            return null;
-        }
-
        public override object GetValue()
        {
             var psobj = PSObject.WrapOrNull(EvaluatedBase);
@@ -113,6 +92,28 @@ namespace System.Management.Pash.Implementation
             return (member == null) ? null : PSObject.WrapOrNull(member.Value);
         }
 
+        private BaseTypeSettable GetSettableType(Type unwrappedType, object memberNameObj)
+        {
+            var itemType = unwrappedType;
+
+            // walk up the type inheritance to see if we have one 
+            // in the dictionary (ex: XmlElement -> ***XmlNode***
+            while(itemType != null && !_settableTypes.ContainsKey(itemType))
+            {
+                itemType = itemType.BaseType;
+            }
+
+            if (itemType != null)
+            {
+                var settableType = _settableTypes[itemType];
+                if(settableType.CanResolve(memberNameObj))
+                {
+                    return settableType;
+                }
+            }
+
+            return null;
+        }
 
         abstract class BaseTypeSettable
         {
@@ -130,12 +131,10 @@ namespace System.Management.Pash.Implementation
 
         class HashtableTypeSettable : BaseTypeSettable
         {
-
             private readonly HashSet<string> _hashtableAccessibleMembers = 
                 new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) {
                 "Count", "Keys", "Values", "Remove"
             };
-
 
             public override bool CanResolve(object memberNameObj)
             {
@@ -159,8 +158,6 @@ namespace System.Management.Pash.Implementation
             }
         }
 
-
-
         private static bool TryGetTextNode(System.Xml.XmlNode node, out string value)
         {
             if (node.ChildNodes.Count == 1)
@@ -177,7 +174,6 @@ namespace System.Management.Pash.Implementation
 
         class XmlNodeTypeSettable : BaseTypeSettable
         {
-            
             public override bool TryGetValue(object unwrapped, object memberNameObj, out object result)
             {
                 var memberNameString = (string)memberNameObj;
@@ -230,7 +226,6 @@ namespace System.Management.Pash.Implementation
 
         class XmlObjectArrayTypeSettable : BaseTypeSettable
         {
-           
             public override bool TryGetValue(object unwrapped, object memberNameObj, out object result)
             {
                 var memberNameString = (string)memberNameObj;
