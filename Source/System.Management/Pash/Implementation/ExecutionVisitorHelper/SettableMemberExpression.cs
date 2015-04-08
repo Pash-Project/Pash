@@ -53,12 +53,10 @@ namespace System.Management.Pash.Implementation
             var memberNameObj = EvaluatedMember;
             
             var settableType = GetSettableType(unwrappedType, memberNameObj);
-            if (settableType != null)
+            if (settableType != null && settableType.TrySetValue(unwraped, memberNameObj, value))
             {
-                settableType.SetValue(unwraped, memberNameObj, value);
                 return;
             }
-
 
             // else it's a PSObject
             var member = PSObject.GetMemberInfoSafe(psobj, memberNameObj, _expressionAst.Static);
@@ -102,7 +100,12 @@ namespace System.Management.Pash.Implementation
             var settableType = GetSettableType(unwrappedType, memberNameObj);
             if (settableType != null)
             {
-                return settableType.GetValue(unwraped, memberNameObj);
+                object result = null;
+                if (settableType.TryGetValue(unwraped, memberNameObj, out result))
+                {
+                    return result;
+                }
+
             }
 
             // otherwise a PSObject
@@ -121,8 +124,8 @@ namespace System.Management.Pash.Implementation
                 }
                 return true;
             }
-            public abstract object GetValue(object unwrapped, object memberNameObj);
-            public abstract void SetValue(object unwrapped, object memberNameObj, object value);
+            public abstract bool TryGetValue(object unwrapped, object memberNameObj, out object result);
+            public abstract bool TrySetValue(object unwrapped, object memberNameObj, object value);
         }
 
         class HashtableTypeSettable : BaseTypeSettable
@@ -143,14 +146,16 @@ namespace System.Management.Pash.Implementation
                 return !_hashtableAccessibleMembers.Contains(memberNameObj.ToString());
             }
 
-            public override object GetValue(object unwrapped, object memberNameObj)
+            public override bool TryGetValue(object unwrapped, object memberNameObj, out object result)
             {
-                return ((Hashtable) unwrapped)[memberNameObj];
+                result = ((Hashtable) unwrapped)[memberNameObj];
+                return true;
             }
 
-            public override void SetValue(object unwrapped, object memberNameObj, object value)
+            public override bool TrySetValue(object unwrapped, object memberNameObj, object value)
             {
                 ((Hashtable) unwrapped)[memberNameObj] = value;
+                return true;
             }
         }
 
@@ -173,8 +178,7 @@ namespace System.Management.Pash.Implementation
         class XmlNodeTypeSettable : BaseTypeSettable
         {
             
-
-            public override object GetValue(object unwrapped, object memberNameObj)
+            public override bool TryGetValue(object unwrapped, object memberNameObj, out object result)
             {
                 var memberNameString = (string)memberNameObj;
 
@@ -186,10 +190,12 @@ namespace System.Management.Pash.Implementation
                     string stringResult = null;
                     if(TryGetTextNode(childNode, out stringResult))
                     {
-                        return stringResult;
+                        result = stringResult;
+                        return true;
                     }
         
-                    return childNode;
+                    result = childNode;
+                    return true;
                 }
 
                 if (childNodes.Count > 1)
@@ -208,13 +214,15 @@ namespace System.Management.Pash.Implementation
                             resultNodes.Add(node);
                         }
                     }
-                    return resultNodes.ToArray();
+                    result = resultNodes.ToArray();
+                    return true;
                 }
 
-                return childNodes;
+                result = childNodes;
+                return true;
             }
 
-            public override void SetValue(object unwrapped, object memberNameObj, object value)
+            public override bool TrySetValue(object unwrapped, object memberNameObj, object value)
             {
                 throw new NotImplementedException();
             }
@@ -222,10 +230,14 @@ namespace System.Management.Pash.Implementation
 
         class XmlObjectArrayTypeSettable : BaseTypeSettable
         {
-            
-            public override object GetValue(object unwrapped, object memberNameObj)
+           
+            public override bool TryGetValue(object unwrapped, object memberNameObj, out object result)
             {
                 var memberNameString = (string)memberNameObj;
+
+                // NOTE: we need to be careful to only work on arrays of XmlNode objects
+                // if we detect that an item in the array is not an XmlNode, we short circut
+                // and leave the loop returning false.
 
                 var resultingItems = new List<object>();
                 foreach (var item in (object[])unwrapped)
@@ -243,13 +255,24 @@ namespace System.Management.Pash.Implementation
                         {
                             resultingItems.Add(value);
                         }
-
+                    }
+                    else
+                    {
+                        result = unwrapped;
+                        return false;
                     }
                 }
-                return resultingItems.ToArray();
+
+                if (resultingItems.Count > 0)
+                {
+                    result = resultingItems.ToArray();
+                    return true;
+                }
+                result = unwrapped;
+                return false;
             }
 
-            public override void SetValue(object unwrapped, object memberNameObj, object value)
+            public override bool TrySetValue(object unwrapped, object memberNameObj, object value)
             {
                 throw new NotImplementedException();
             }
