@@ -214,7 +214,7 @@ namespace System.Management.Pash.Implementation
                     return true;
                 }
 
-                result = childNodes;
+                result = null;
                 return true;
             }
 

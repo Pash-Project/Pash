@@ -220,9 +220,8 @@ namespace ReferenceTests.Language
                     "$path = [xml]\"<a>hello a</a>\"",
                     "$path.z"
                 ));
-                Assert.AreEqual(string.Empty, result);
+                Assert.AreEqual(NewlineJoin(), result);
             }
-
         }
     }
 }
