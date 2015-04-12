@@ -68,6 +68,7 @@
     <Compile Include="Language\FunctionTests.cs" />
     <Compile Include="Language\InvocationTests.cs" />
     <Compile Include="Language\Operators\LogicalOperators_7_10.cs" />
+    <Compile Include="Language\Operators\RelationshipOperators_7_9.cs" />
     <Compile Include="Language\Operators\RangeOperatorTests_7_4.cs" />
     <Compile Include="Language\ScopeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

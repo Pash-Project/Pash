@@ -67,9 +67,6 @@ namespace System.Management.Pash.Implementation
             if (leftOperand is PSObject) leftOperand = ((PSObject)leftOperand).BaseObject;
             if (rightOperand is PSObject) rightOperand = ((PSObject)rightOperand).BaseObject;
 
-            int? leftOperandInt = leftOperand is int ? ((int?)leftOperand) : null;
-            int? rightOperandInt = rightOperand is int ? ((int?)rightOperand) : null;
-
             switch (binaryExpressionAst.Operator)
             {
                 case TokenKind.DotDot:
@@ -107,12 +104,18 @@ namespace System.Management.Pash.Implementation
                     return !Object.Equals(leftOperand, rightOperand);
 
                 case TokenKind.Igt:
-                    if (leftOperandInt.HasValue) return leftOperandInt > rightOperandInt;
-                    throw new NotImplementedException(binaryExpressionAst.ToString());
+                case TokenKind.Cgt:
+                    return ComparisonOperations.GreaterThan(
+                            leftOperand,
+                            rightOperand,
+                            (TokenKind.Cgt != binaryExpressionAst.Operator));
 
                 case TokenKind.Ige:
-                    if (leftOperandInt.HasValue) return leftOperandInt >= rightOperandInt;
-                    throw new NotImplementedException(binaryExpressionAst.ToString());
+                case TokenKind.Cge:
+                    return ComparisonOperations.GreaterThanEquals(
+                            leftOperand,
+                            rightOperand,
+                            (TokenKind.Cge != binaryExpressionAst.Operator));
 
                 case TokenKind.Or:
                     return LanguagePrimitives.ConvertTo<bool>(leftOperand) || LanguagePrimitives.ConvertTo<bool>(rightOperand);
@@ -124,12 +127,18 @@ namespace System.Management.Pash.Implementation
                     return LanguagePrimitives.ConvertTo<bool>(leftOperand) && LanguagePrimitives.ConvertTo<bool>(rightOperand);
 
                 case TokenKind.Ilt:
-                    if (leftOperandInt.HasValue) return leftOperandInt < rightOperandInt;
-                    throw new NotImplementedException(binaryExpressionAst.ToString());
+                case TokenKind.Clt:
+                    return ComparisonOperations.LessThan(
+                            leftOperand,
+                            rightOperand,
+                            (TokenKind.Clt != binaryExpressionAst.Operator));
 
                 case TokenKind.Ile:
-                    if (leftOperandInt.HasValue) return leftOperandInt <= rightOperandInt;
-                    throw new NotImplementedException(binaryExpressionAst.ToString());
+                case TokenKind.Cle:
+                    return ComparisonOperations.LessThanEquals(
+                            leftOperand,
+                            rightOperand,
+                            (TokenKind.Clt != binaryExpressionAst.Operator));
 
                 case TokenKind.Band:
                     return BitwiseOperation.And(leftOperand, rightOperand);
@@ -183,10 +192,6 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Iin:
                 case TokenKind.Inotin:
                 case TokenKind.Isplit:
-                case TokenKind.Cge:
-                case TokenKind.Cgt:
-                case TokenKind.Clt:
-                case TokenKind.Cle:
                 case TokenKind.Clike:
                 case TokenKind.Cnotlike:
                 case TokenKind.Creplace:

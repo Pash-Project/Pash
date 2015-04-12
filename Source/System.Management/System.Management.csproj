@@ -501,6 +501,7 @@
     <Compile Include="Pash\Implementation\TabExpansionProvider.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Pash\Implementation\ArithmeticOperations.cs" />
+    <Compile Include="Pash\Implementation\ComparisonOperations.cs" />
     <Compile Include="Automation\FlowControlException.cs" />
     <Compile Include="Automation\ExitException.cs" />
     <Compile Include="Automation\LoopFlowException.cs" />
