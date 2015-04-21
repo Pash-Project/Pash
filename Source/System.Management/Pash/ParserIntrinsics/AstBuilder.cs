@@ -1872,9 +1872,19 @@ namespace Pash.ParserIntrinsics
                 return BuildExpandableStringLiteralAst(parseTreeNode.ChildNodes.Single());
             }
 
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar.expandable_here_string_literal)
+            {
+                return BuildExpandableHereStringLiteralAst(parseTreeNode.ChildNodes.Single());
+            }
+
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.verbatim_string_literal)
             {
                 return BuildVerbatimStringLiteralAst(parseTreeNode.ChildNodes.Single());
+            }
+
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar.verbatim_here_string_literal)
+            {
+                return BuildVerbatimHereStringLiteralAst(parseTreeNode.ChildNodes.Single());
             }
 
             throw new NotImplementedException(parseTreeNode.ChildNodes[0].Term.Name);
@@ -1895,6 +1905,20 @@ namespace Pash.ParserIntrinsics
             return new StringConstantExpressionAst(new ScriptExtent(parseTreeNode), value, StringConstantType.DoubleQuoted);
         }
 
+        ExpressionAst BuildExpandableHereStringLiteralAst(ParseTreeNode parseTreeNode)
+        {
+            var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), this._grammar.expandable_here_string_literal.Pattern, RegexOptions.IgnoreCase);
+            string value = matches.Groups[this._grammar.expandable_here_string_characters.Name].Value
+                ;
+
+            var ast = new ExpandableStringExpressionAst(new ScriptExtent(parseTreeNode), value, StringConstantType.DoubleQuoted);
+            if (ast.NestedExpressions.Any())
+            {
+                return ast;
+            }
+            return new StringConstantExpressionAst(new ScriptExtent(parseTreeNode), value, StringConstantType.DoubleQuoted);
+        }
+
         StringConstantExpressionAst BuildVerbatimStringLiteralAst(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.verbatim_string_literal);
@@ -1903,6 +1927,15 @@ namespace Pash.ParserIntrinsics
             string value = matches.Groups[this._grammar.verbatim_string_characters.Name].Value;
 
             return new StringConstantExpressionAst(new ScriptExtent(parseTreeNode), value, StringConstantType.SingleQuoted);
+        }
+
+        ExpressionAst BuildVerbatimHereStringLiteralAst(ParseTreeNode parseTreeNode)
+        {
+            var matches = Regex.Match(parseTreeNode.FindTokenAndGetText(), this._grammar.verbatim_here_string_literal.Pattern, RegexOptions.IgnoreCase);
+            string value = matches.Groups[this._grammar.verbatim_here_string_characters.Name].Value
+                ;
+
+            return new StringConstantExpressionAst(new ScriptExtent(parseTreeNode), value, StringConstantType.DoubleQuoted);
         }
 
         ConstantExpressionAst BuildRealLiteralAst(ParseTreeNode parseTreeNode)

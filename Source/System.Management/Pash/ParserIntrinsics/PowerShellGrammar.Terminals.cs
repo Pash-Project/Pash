@@ -544,21 +544,59 @@ namespace Pash.ParserIntrinsics
         ////        expandable_here_string_literal:
         ////            @   double_quote_character   whitespace_opt   new_line_character
         ////                    expandable_here_string_characters_opt   new_line_character   double_quote_character   @
+        public readonly RegexBasedTerminal expandable_here_string_literal = null; // Initialized by reflection.
+        const string expandable_here_string_literal_pattern = "(?<expandable_here_string_literal>" + "@" + double_quote_character_pattern + whitespace_pattern + "*?" + new_line_character_pattern + expandable_here_string_characters_pattern + "?" + new_line_character_pattern + double_quote_character_pattern + "@" + ")";
+
         ////        expandable_here_string_characters:
         ////            expandable_here_string_part
         ////            expandable_here_string_characters   expandable_here_string_part
+        public readonly RegexBasedTerminal expandable_here_string_characters = null; // Initialized by reflection.
+        const string expandable_here_string_characters_pattern = "(?<expandable_here_string_characters>" + expandable_here_string_part_pattern + "+" + ")";
+
         ////        expandable_here_string_part:
+        public readonly RegexBasedTerminal expandable_here_string_part = null; // Initialized by reflection.
+        const string expandable_here_string_part_pattern = "(?<expandable_here_string_part>" +
+            _expandable_here_string_part_plain_pattern + "|" +
+            _expandable_here_string_part_braced_variable_pattern + "|" +
+            _expandable_here_string_part_expansion_one_pattern + "|" +
+            _expandable_here_string_part_expansion_two_pattern + "|" +
+            _expandable_here_string_part_expansion_three_pattern + "|" +
+            _expandable_here_string_part_expansion_four_pattern + "|" +
+            _expandable_here_string_part_expansion_five_pattern +
+            ")";
+
         ////            Any Unicode character except
         ////                    $
         ////                    new_line_character
+        public readonly RegexBasedTerminal _expandable_here_string_part_plain = null; // Initialized by reflection
+        const string _expandable_here_string_part_plain_pattern = "(?<_expandable_here_string_part_plain>" + @"[^\$" + new_line_character_ + "]" + ")";
+
         ////            braced_variable
+        public readonly RegexBasedTerminal _expandable_here_string_part_braced_variable = null; // Initialized by reflection
+        const string _expandable_here_string_part_braced_variable_pattern = "(?<_expandable_here_string_part_braced_variable>" + braced_variable_pattern + ")";
+
         ////            $   Any Unicode character except
         ////                    (
         ////                    new_line_character
+        public readonly RegexBasedTerminal _expandable_here_string_part_expansion_one = null; // Initialized by reflection
+        const string _expandable_here_string_part_expansion_one_pattern = "(?<_expandable_here_string_part_expansion_one>" + @"\$[^\(" + new_line_character_pattern + "]" + ")";
+
         ////            $   new_line_character   Any Unicode character except double_quote_char
+        public readonly RegexBasedTerminal _expandable_here_string_part_expansion_two = null; // Initialized by reflection
+        const string _expandable_here_string_part_expansion_two_pattern = "(?<_expandable_here_string_part_expansion_two>" + @"\$" + new_line_character_pattern + @"[^" + double_quote_character_ + "]" + ")";
+
         ////            $   new_line_character   double_quote_char   Any Unicode character except @
+        public readonly RegexBasedTerminal _expandable_here_string_part_expansion_three = null; // Initialized by reflection
+        const string _expandable_here_string_part_expansion_three_pattern = "(?<_expandable_here_string_part_expansion_three>" + @"\$" + new_line_character_pattern + double_quote_character_pattern + @"[^@]" + ")";
+
         ////            new_line_character   Any Unicode character except double_quote_char
+        public readonly RegexBasedTerminal _expandable_here_string_part_expansion_four = null; // Initialized by reflection
+        const string _expandable_here_string_part_expansion_four_pattern = "(?<_expandable_here_string_part_expansion_four>" + new_line_character_pattern + @"[^" + double_quote_character_ + "]" + ")";
+
         ////            new_line_character   double_quote_char   Any Unicode character except @
+        public readonly RegexBasedTerminal _expandable_here_string_part_expansion_five = null; // Initialized by reflection
+        const string _expandable_here_string_part_expansion_five_pattern = "(?<_expandable_here_string_part_expansion_five>" + new_line_character_pattern + @"[^@]" + ")";
+
 
         ////        expandable_string_with_subexpr_start:
         ////            double_quote_character   expandable_string_chars_opt [sic]   $(
@@ -607,13 +645,34 @@ namespace Pash.ParserIntrinsics
         ////        verbatim_here_string_literal:
         ////            @   single_quote_character   whitespace_opt   new_line_character
         ////                    verbatim_here_string_characters_opt   new_line_character   single_quote_character   @
+        public readonly RegexBasedTerminal verbatim_here_string_literal = null; // Initialized by reflection.
+        const string verbatim_here_string_literal_pattern = "(?<verbatim_here_string_literal>" + "@" + single_quote_character_pattern + whitespace_pattern + "*?" + new_line_character_pattern + verbatim_here_string_characters_pattern + "?" + new_line_character_pattern + single_quote_character_pattern + "@" + ")";
+
         ////        verbatim_here_string_characters:
         ////            verbatim_here_string_part
         ////            verbatim_here_string_characters   verbatim_here_string_part
+        public readonly RegexBasedTerminal verbatim_here_string_characters = null; // Initialized by reflection.
+        const string verbatim_here_string_characters_pattern = "(?<verbatim_here_string_characters>" + verbatim_here_string_part_pattern + "+" + ")";
         ////        verbatim_here_string_part:
+        public readonly RegexBasedTerminal verbatim_here_string_part = null; // Initialized by reflection.
+        const string verbatim_here_string_part_pattern = "(?<verbatim_here_string_part>" +
+            _verbatim_here_string_part_plain_pattern + "|" +
+            _verbatim_here_string_part_expansion_one_pattern + "|" +
+            _verbatim_here_string_part_expansion_two_pattern +
+            ")";
+
         ////            Any Unicode character except new_line_character
+        public readonly RegexBasedTerminal _verbatim_here_string_part_plain = null; // Initialized by reflection
+        const string _verbatim_here_string_part_plain_pattern = "(?<_verbatim_here_string_part_plain>" + @"[^" + new_line_character_ + "]" + ")";
+
         ////            new_line_character   Any Unicode character except single_quote_character
+        public readonly RegexBasedTerminal _verbatim_here_string_part_expansion_one = null; // Initialized by reflection
+        const string _verbatim_here_string_part_expansion_one_pattern = "(?<_verbatim_here_string_part_expansion_one>" + new_line_character_pattern + @"[^" + single_quote_character_ + "]" + ")";
+
         ////            new_line_character   single_quote_character   Any Unicode character except @
+        public readonly RegexBasedTerminal _verbatim_here_string_part_expansion_two = null; // Initialized by reflection
+        const string _verbatim_here_string_part_expansion_two_pattern = "(?<_verbatim_here_string_part_expansion_two>" + new_line_character_pattern + single_quote_character_pattern + @"[^@]" + ")";
+
         #endregion
         #endregion
 
