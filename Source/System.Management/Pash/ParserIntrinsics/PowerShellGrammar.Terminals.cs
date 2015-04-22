@@ -73,7 +73,7 @@ namespace Pash.ParserIntrinsics
         ////            Line feed character (U+000A)
         ////            Carriage return character (U+000D) followed by line feed character (U+000A)
         public readonly RegexBasedTerminal new_line_character = null; // Initialized by reflection.
-        const string new_line_character_pattern = "(?<new_line_character>" + @"\u000D|\u000A|\u000D\u000A" + ")";
+        const string new_line_character_pattern = "(?<new_line_character>" + @"\u000D\u000A|\u000D|\u000A" + ")";
         const string new_line_character_ = @"\u000D\u000A";
 
         #endregion
