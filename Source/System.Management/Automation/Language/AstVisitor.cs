@@ -27,6 +27,7 @@ namespace System.Management.Automation.Language
         // TODO: public virtual AstVisitAction VisitErrorStatement(ErrorStatementAst errorStatementAst){return  AstVisitAction.Continue; }
         public virtual AstVisitAction VisitExitStatement(ExitStatementAst exitStatementAst) { return AstVisitAction.Continue; }
         public virtual AstVisitAction VisitExpandableStringExpression(ExpandableStringExpressionAst expandableStringExpressionAst) { return AstVisitAction.Continue; }
+        public virtual AstVisitAction VisitExpandableStringWithSubexpressionExpression(ExpandableStringWithSubexpressionExpressionAst expandableStringWitSubexpressionExpressionAst) { return AstVisitAction.Continue; }
         public virtual AstVisitAction VisitFileRedirection(FileRedirectionAst redirectionAst) { return AstVisitAction.Continue; }
         public virtual AstVisitAction VisitForEachStatement(ForEachStatementAst forEachStatementAst) { return AstVisitAction.Continue; }
         public virtual AstVisitAction VisitForStatement(ForStatementAst forStatementAst) { return AstVisitAction.Continue; }

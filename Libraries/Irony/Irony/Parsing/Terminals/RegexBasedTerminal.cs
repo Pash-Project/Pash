@@ -69,7 +69,9 @@ namespace Irony.Parsing {
       if (!m.Success || m.Index != source.PreviewPosition) 
         return null;
       source.PreviewPosition += m.Length;
-      return source.CreateToken(this.OutputTerminal); 
+      Token token = source.CreateToken(this.OutputTerminal);
+      token.Details = source.Text;
+      return token;
     }
 
   }//class

@@ -84,6 +84,7 @@
     <Compile Include="Automation\ArgumentTransformationMetadataException.cs" />
     <Compile Include="Automation\AuthorizationManager.cs" />
     <Compile Include="Automation\ForEachObjectCommand.cs" />
+    <Compile Include="Automation\Language\ExpandableStringWithSubexpressionExpressionAst.cs" />
     <Compile Include="Automation\OutputTypeAttribute.cs" />
     <Compile Include="Automation\PSTypeName.cs" />
     <Compile Include="Automation\Runspaces\AssemblyConfigurationEntry.cs" />

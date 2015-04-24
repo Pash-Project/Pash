@@ -1508,9 +1508,69 @@ namespace Pash.ParserIntrinsics
             throw new InvalidOperationException(parseTreeNode.ToString());
         }
 
-        CommandElementAst BuildStringLiteralWithSubexpressionAst(ParseTreeNode parseTreeNode)
+        ExpressionAst BuildStringLiteralWithSubexpressionAst(ParseTreeNode parseTreeNode)
         {
-            throw new NotImplementedException(parseTreeNode.ToString());
+            VerifyTerm(parseTreeNode, this._grammar.string_literal_with_subexpression);
+
+            parseTreeNode = parseTreeNode.ChildNodes.Single();
+
+            if (parseTreeNode.Term == this._grammar.expandable_string_literal_with_subexpr)
+            {
+                return BuildExpandableStringLiteralWithSubexpressionAst(parseTreeNode);
+            }
+
+            throw new InvalidOperationException(parseTreeNode.ToString());
+        }
+
+        ExpressionAst BuildExpandableStringLiteralWithSubexpressionAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.expandable_string_literal_with_subexpr);
+
+
+            List<Ast> toResolve = new List<Ast>();
+
+            toResolve.Add(BuildStatementListAst(parseTreeNode.ChildNodes[1]));
+
+            for (int i = 3; i < parseTreeNode.ChildNodes.Count - 1; i++)
+            {
+                var item = parseTreeNode.ChildNodes[i];
+
+                if (item.Term == this._grammar.expandable_string_with_subexpr_characters)
+                {
+                    foreach (var item2 in item.ChildNodes)
+                    {
+                        //sub_expression
+                        //expandable_string_part
+                        if (item2.Term == this._grammar.expandable_string_with_subexpr_part)
+                        {
+                            foreach (var item3 in item2.ChildNodes)
+                            {
+                                if (item3.Term == this._grammar.expandable_string_characters)
+                                {
+                                    var matches = Regex.Match(item3.FindTokenAndGetText(), this._grammar.expandable_string_characters.Pattern, RegexOptions.IgnoreCase);
+                                    string value = matches.Groups[this._grammar.expandable_string_characters.Name].Value;
+
+                                    var ast = new ExpandableStringExpressionAst(new ScriptExtent(item3), value, StringConstantType.DoubleQuoted);
+                                    if (ast.NestedExpressions.Any())
+                                    {
+                                        toResolve.Add(ast);
+                                    }
+                                }
+
+                                if (item3.Term == this._grammar.sub_expression)
+                                {
+                                    toResolve.Add(BuildSubExpression(item3).SubExpression);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return new ExpandableStringWithSubexpressionExpressionAst(
+                new ScriptExtent(parseTreeNode), toResolve,
+                (string)parseTreeNode.ChildNodes.First().Token.Details,
+                StringConstantType.DoubleQuoted);
         }
 
         ExpressionAst BuildValueAst(ParseTreeNode parseTreeNode)
@@ -1562,7 +1622,7 @@ namespace Pash.ParserIntrinsics
             throw new InvalidOperationException(childNode.Term.Name);
         }
 
-        ExpressionAst BuildSubExpression(ParseTreeNode parseTreeNode)
+        SubExpressionAst BuildSubExpression(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.sub_expression);
 
@@ -1737,6 +1797,11 @@ namespace Pash.ParserIntrinsics
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.string_literal)
             {
                 return BuildStringLiteralAst(parseTreeNode.ChildNodes.Single());
+            }
+
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar.string_literal_with_subexpression)
+            {
+                return BuildStringLiteralWithSubexpressionAst(parseTreeNode.ChildNodes.Single());
             }
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.real_literal)
