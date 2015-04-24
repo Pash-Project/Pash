@@ -80,6 +80,13 @@ namespace ReferenceTests.Language
             ExecuteAndCompareTypedResult(funStart + "$a; $b; $args; }; f -b 1 '-a' -d -e", "-a", 1, "-d", "-e");
         }
 
+        [TestCase("function f($a, $b=3, $c=4) { ")]
+        [TestCase("function f { param($a, $b=3, $c=4); ")]
+        public void FunctionCanHaveMultipleDefautValues(string funStart)
+        {
+            ExecuteAndCompareTypedResult(funStart + "$a + $b + $c }; f 1 -c 1", 5);
+        }
+
         [TestCase("function f($a, $b) { ")]
         [TestCase("function f { param($a, $b); ")]
         public void FunctionsUndefinedNamedArgsAreInArgsVar(string funStart)
@@ -99,7 +106,16 @@ namespace ReferenceTests.Language
         public void FunctionsNamedUnsetParameterThrows(string funStart)
         {
             Assert.Throws<ParameterBindingException>(delegate {
-               ReferenceHost.Execute(funStart + "}; f -a");
+                ReferenceHost.Execute(funStart + "}; f -a");
+            });
+        }
+
+        [TestCase("function f($a=1,2) { ")]
+        [TestCase("function f { param($a=1,2); ")]
+        public void FunctionWithLiteralArrayAsDefaultParameterThrows(string funStart)
+        {
+            Assert.Throws<ParseException>(delegate {
+                ReferenceHost.Execute(funStart + "};");
             });
         }
 
