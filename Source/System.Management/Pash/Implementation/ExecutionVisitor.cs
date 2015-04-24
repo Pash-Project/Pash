@@ -951,6 +951,13 @@ namespace System.Management.Pash.Implementation
         public override AstVisitAction VisitForEachStatement(ForEachStatementAst forEachStatementAst)
         {
             object enumerable = EvaluateAst(forEachStatementAst.Condition);
+
+            // if the enumerable object is null, the loop is not executed at all
+            if (enumerable == null)
+            {
+                return AstVisitAction.SkipChildren;
+            }
+
             IEnumerator enumerator = LanguagePrimitives.GetEnumerator(enumerable);
 
             if (enumerator == null)
@@ -961,7 +968,7 @@ namespace System.Management.Pash.Implementation
             while (enumerator.MoveNext())
             {
                 this.ExecutionContext.SessionState.PSVariable.Set(forEachStatementAst.Variable.VariablePath.UserPath,
-                                                          enumerator.Current);
+                                                                  enumerator.Current);
                 // TODO: pass the loop label
                 if (!EvaluateLoopBodyAst(forEachStatementAst.Body, null))
                 {
