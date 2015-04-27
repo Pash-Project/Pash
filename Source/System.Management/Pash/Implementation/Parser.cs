@@ -85,7 +85,8 @@ namespace Pash.Implementation
             if (parseTree.HasErrors()) // ParseTreeStatus is Error
             {
                 var logMessage = parseTree.ParserMessages.First();
-                throw new ParseException(logMessage.Message, logMessage.Location.Line, logMessage.Location.Column);
+                throw new ParseException(logMessage.Message, logMessage.Location.Line, logMessage.Location.Column,
+                                         parseTree.SourceText);
             }
             return parseTree;
         }

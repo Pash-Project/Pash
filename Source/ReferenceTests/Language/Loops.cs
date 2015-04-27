@@ -90,6 +90,20 @@ namespace ReferenceTests.Language
         }
 
         [Test]
+        public void ForEachWithOneElementWorks()
+        {
+            var cmd = "foreach ($num in 1) { $num }";
+            ExecuteAndCompareTypedResult(cmd, 1);
+        }
+
+        [Test]
+        public void ForEachWithNullDoesntExecute()
+        {
+            var cmd = "foreach ($i in $null) { 1 }";
+            ExecuteAndCompareTypedResult(cmd, new object[0]);
+        }
+
+        [Test]
         public void ForEachCharacterInStringIsString()
         {
             var cmd = "foreach ($char in 'abc') { $char }";

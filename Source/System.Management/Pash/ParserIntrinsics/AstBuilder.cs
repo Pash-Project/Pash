@@ -70,7 +70,8 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.param_block);
 
-            IEnumerable<ParameterAst> parameters = BuildParameterListAst(parseTreeNode.ChildNodes[2]);
+            // second child, because the rule is "param + _marked_parameter_list"
+            IEnumerable<ParameterAst> parameters = BuildParameterListAst(parseTreeNode.ChildNodes[1]);
 
             return new ParamBlockAst(
                 new ScriptExtent(parseTreeNode),
@@ -83,6 +84,8 @@ namespace Pash.ParserIntrinsics
             // ISSUE: https://github.com/Pash-Project/Pash/issues/203
             // Since parameter_list was changed to parameter_list_opt we need
             // to anticipate a closing parenthesis here too.
+            VerifyTerm(parseTreeNode, this._grammar._marked_parameter_list);
+            parseTreeNode = parseTreeNode.ChildNodes[2]; // skips "(" and beginParamList tokens
             VerifyTerm(parseTreeNode, this._grammar.parameter_list, this._grammar.ToTerm(")"));
 
             var parameters = new List<ParameterAst>();
@@ -276,7 +279,7 @@ namespace Pash.ParserIntrinsics
 
             if (parseTreeNode.ChildNodes.Count == 6)
             {
-                parameters = BuildParameterListAst(parseTreeNode.ChildNodes[2].ChildNodes[1]);
+                parameters = BuildParameterListAst(parseTreeNode.ChildNodes[2].ChildNodes[0]);
                 scriptBlock = BuildScriptBlockAst(parseTreeNode.ChildNodes[4]);
             }
             else
