@@ -141,7 +141,7 @@ namespace TestHost
             HostUI.SetInput("$" + Environment.NewLine); // simple parse error
             FullHost.Run();
             var outlines = HostUI.GetOutput().Split(new string[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
-            Assert.AreEqual(6, outlines.Length); // Banner + prompt + 3 error lines + prompt
+            Assert.AreEqual(8, outlines.Length); // Banner + prompt + 5 error lines + prompt
             Assert.That(outlines[2], Is.StringStarting("Parse error"));
         }
     }

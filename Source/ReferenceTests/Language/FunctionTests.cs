@@ -29,8 +29,8 @@ namespace ReferenceTests.Language
             Assert.AreEqual(NewlineJoin(Environment.CurrentDirectory), result);
         }
 
-        [TestCase("function f { param($test=3+4 -eq 7")]
-        [TestCase("function f ($test=2*3.5 -eq 7h) {")]
+        [TestCase("function f { param($test=3+4 -eq 7); ")]
+        [TestCase("function f ($test=2*3 -eq 6) {")]
         public void FunctionParamsDefaultValueCanBeLogicalExpressionWithoutParens(string funStart)
         {
             var cmd = funStart + " $test }; f";
