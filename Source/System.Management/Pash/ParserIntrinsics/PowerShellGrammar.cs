@@ -395,7 +395,11 @@ namespace Pash.ParserIntrinsics
             string_literal.Rule =
                 expandable_string_literal
                 |
+                expandable_here_string_literal
+                |
                 verbatim_string_literal
+                |
+                verbatim_here_string_literal
                 ;
             #endregion
 
