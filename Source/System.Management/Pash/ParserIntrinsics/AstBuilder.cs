@@ -1484,17 +1484,6 @@ namespace Pash.ParserIntrinsics
                 return BuildSimpleNameAst(parseTreeNode);
             }
 
-            if (parseTreeNode.Term == this._grammar.string_literal)
-            {
-                return BuildStringLiteralAst(parseTreeNode);
-            }
-
-
-            if (parseTreeNode.Term == this._grammar.string_literal_with_subexpression)
-            {
-                return BuildStringLiteralWithSubexpressionAst(parseTreeNode);
-            }
-
             if (parseTreeNode.Term == this._grammar.expression_with_unary_operator)
             {
                 return BuildExpressionWithUnaryOperatorAst(parseTreeNode);
@@ -1526,10 +1515,15 @@ namespace Pash.ParserIntrinsics
         {
             VerifyTerm(parseTreeNode, this._grammar.expandable_string_literal_with_subexpr);
 
+            var toResolve = new List<ExpressionAst>();
 
-            List<Ast> toResolve = new List<Ast>();
-
-            toResolve.Add(BuildStatementListAst(parseTreeNode.ChildNodes[1]));
+            var stmtTreeNode = parseTreeNode.ChildNodes[1];
+            var stmtAst = BuildStatementListAst(stmtTreeNode);
+            // the child node only covers the stamentent list, but not $( and ), which are part of other child nodes
+            // therefore we artifically expand the extent by -2 and 1 to cover the markup.
+            // this is important so the replacements work correctly
+            var subExpExtent = new ScriptExtent(stmtTreeNode.Span, -2, 1);
+            toResolve.Add(new SubExpressionAst(subExpExtent, stmtAst));
 
             for (int i = 3; i < parseTreeNode.ChildNodes.Count - 1; i++)
             {
@@ -1559,7 +1553,7 @@ namespace Pash.ParserIntrinsics
 
                                 if (item3.Term == this._grammar.sub_expression)
                                 {
-                                    toResolve.Add(BuildSubExpression(item3).SubExpression);
+                                    toResolve.Add(BuildSubExpression(item3));
                                 }
                             }
                         }
@@ -1567,9 +1561,12 @@ namespace Pash.ParserIntrinsics
                 }
             }
 
-            return new ExpandableStringWithSubexpressionExpressionAst(
-                new ScriptExtent(parseTreeNode), toResolve,
-                (string)parseTreeNode.ChildNodes.First().Token.Details,
+            var extent = (IScriptExtent) new ScriptExtent(parseTreeNode);
+            var completeText = parseTreeNode.ChildNodes.First().Token.Details.ToString();
+            // now strip the real text value. +1 and -2 are used to strip the quotes
+            var textValue = completeText.Substring(extent.StartOffset + 1, extent.EndOffset - extent.StartOffset - 2);
+            return new ExpandableStringExpressionAst(
+                extent, toResolve, textValue,
                 StringConstantType.DoubleQuoted);
         }
 
