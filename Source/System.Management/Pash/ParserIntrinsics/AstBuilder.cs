@@ -1484,17 +1484,6 @@ namespace Pash.ParserIntrinsics
                 return BuildSimpleNameAst(parseTreeNode);
             }
 
-            if (parseTreeNode.Term == this._grammar.string_literal)
-            {
-                return BuildStringLiteralAst(parseTreeNode);
-            }
-
-
-            if (parseTreeNode.Term == this._grammar.string_literal_with_subexpression)
-            {
-                return BuildStringLiteralWithSubexpressionAst(parseTreeNode);
-            }
-
             if (parseTreeNode.Term == this._grammar.expression_with_unary_operator)
             {
                 return BuildExpressionWithUnaryOperatorAst(parseTreeNode);

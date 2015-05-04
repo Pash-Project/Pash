@@ -1451,17 +1451,19 @@ namespace Pash.ParserIntrinsics
             ////            string_literal_with_subexpression
             ////            expression_with_unary_operator
             ////            value
+            // NOTE: here is another error in the PS grammar:
+            // It doesn't make sense to use a value or string_literal or string_literal_with_subexpression
+            // since "value" contains "literal" which contains both forms of string_literal.
+            // Stating them here explicitly (again) yields to a reduce/reduce conflicht since the string_literal
+            // could be reduced to literal->value->member_name or directly.
+            // So we leave them out and only regard them as a value
             member_name.Rule =
                 simple_name
                 |
-                // value can be a string_literal
-                //string_literal
-                //|
-                string_literal_with_subexpression
                 // TODO: 
                 // |
                 // expression_with_unary_operator
-                |
+                // |
                 value
                 ;
 
