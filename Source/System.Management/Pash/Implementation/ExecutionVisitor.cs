@@ -943,16 +943,6 @@ namespace System.Management.Pash.Implementation
             return AstVisitAction.SkipChildren;
         }
 
-        public override AstVisitAction VisitExpandableStringWithSubexpressionExpression(ExpandableStringWithSubexpressionExpressionAst expandableStringWitSubexpressionExpressionAst)
-        {
-            var evaluatedExpressions = from expressionAst in expandableStringWitSubexpressionExpressionAst.Expressions
-                                       select EvaluateAst(expressionAst, false);
-
-            string expandedString = expandableStringWitSubexpressionExpressionAst.ExpandString(evaluatedExpressions);
-            this._pipelineCommandRuntime.OutputStream.Write(expandedString);
-            return AstVisitAction.SkipChildren;
-        }
-
         public override AstVisitAction VisitFileRedirection(FileRedirectionAst redirectionAst)
         {
             return new FileRedirectionVisitor(this, _pipelineCommandRuntime).Visit(redirectionAst);
