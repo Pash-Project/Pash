@@ -20,10 +20,12 @@ namespace Pash.ParserIntrinsics
     class AstBuilder
     {
         readonly PowerShellGrammar _grammar;
+        readonly ParseTree _parseTree;
 
-        public AstBuilder(PowerShellGrammar grammar)
+        public AstBuilder(PowerShellGrammar grammar, ParseTree parseTree)
         {
-            this._grammar = grammar;
+            _grammar = grammar;
+            _parseTree = parseTree;
         }
 
         [Conditional("DEBUG")]
@@ -1562,9 +1564,8 @@ namespace Pash.ParserIntrinsics
             }
 
             var extent = (IScriptExtent) new ScriptExtent(parseTreeNode);
-            var completeText = parseTreeNode.ChildNodes.First().Token.Details.ToString();
             // now strip the real text value. +1 and -2 are used to strip the quotes
-            var textValue = completeText.Substring(extent.StartOffset + 1, extent.EndOffset - extent.StartOffset - 2);
+            var textValue = _parseTree.SourceText.Substring(extent.StartOffset + 1, extent.EndOffset - extent.StartOffset - 2);
             return new ExpandableStringExpressionAst(
                 extent, toResolve, textValue,
                 StringConstantType.DoubleQuoted);
