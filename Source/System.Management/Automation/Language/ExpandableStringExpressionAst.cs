@@ -11,25 +11,26 @@ namespace System.Management.Automation.Language
 {
     public class ExpandableStringExpressionAst : ExpressionAst
     {
-        public ExpandableStringExpressionAst(IScriptExtent extent, string value, StringConstantType stringConstantType)
+        internal ExpandableStringExpressionAst(IScriptExtent extent, IList<ExpressionAst> expressions,
+                                               string value, StringConstantType stringConstantType)
             : base(extent)
         {
             this.StringConstantType = stringConstantType;
-            ParseExpandableString(value);
+            NestedExpressions = new ReadOnlyCollection<ExpressionAst>(expressions);
+            Value = value;
+        }
+
+
+        public ExpandableStringExpressionAst(IScriptExtent extent, string value, StringConstantType stringConstantType)
+            : this(extent, ParseExpandableString(extent, value), value, stringConstantType)
+        {
         }
 
         public ReadOnlyCollection<ExpressionAst> NestedExpressions { get; private set; }
         public override Type StaticType { get { return typeof(string); } }
         public StringConstantType StringConstantType { get; private set; }
 
-        private List<object> _stringParts = new List<object>();
-        public string Value
-        {
-            get
-            {
-                return String.Join("", _stringParts);
-            }
-        }
+        public string Value { get; private set; }
 
         internal override IEnumerable<Ast> Children
         {
@@ -46,7 +47,7 @@ namespace System.Management.Automation.Language
 
         public override string ToString()
         {
-            switch (this.StringConstantType)
+            switch (StringConstantType)
             {
                 case StringConstantType.DoubleQuoted:
                     return string.Format("\"{0}\"", this.Value);
@@ -59,58 +60,50 @@ namespace System.Management.Automation.Language
             }
         }
 
-        private void ParseExpandableString(string value)
-        {
-            var parser = new ExpandableStringParser(Extent, value);
-            parser.Parse();
-            this.NestedExpressions = parser.NestedExpressions;
-
-            int currentIndex = 0;
-            foreach (var nestedEx in NestedExpressions)
-            {
-                int nestedExpressionStartIndex = GetRelativeStartIndex(nestedEx);
-                var strval = value.Substring(currentIndex, nestedExpressionStartIndex - currentIndex);
-                if (strval.Length > 0)
-                {
-                    _stringParts.Add(StringExpressionHelper.ResolveEscapeCharacters(strval, StringConstantType));
-                }
-                _stringParts.Add(nestedEx);
-                currentIndex = GetRelativeEndIndex(nestedEx);
-            }
-            if (currentIndex < value.Length)
-            {
-                _stringParts.Add(StringExpressionHelper.ResolveEscapeCharacters(value.Substring(currentIndex),
-                                                                                StringConstantType));
-            }
-        }
-
         internal string ExpandString(IEnumerable<object> expandedValues)
         {
-            var expandedString = new StringBuilder();
+            expandedValues = expandedValues.Reverse();
             var exValEnumerator = expandedValues.GetEnumerator();
 
-            foreach (var strPart in _stringParts)
+            var resultStr = new StringBuilder();
+            string rest = Value;
+
+            // we expand this string in reversed order so we don't need to adjust start indexes
+            foreach (var item in NestedExpressions.Reverse())
             {
-                if (strPart is ExpressionAst && exValEnumerator.MoveNext())
+                if (!exValEnumerator.MoveNext())
                 {
-                    expandedString.Append(LanguagePrimitives.ConvertTo<string>(exValEnumerator.Current));
+                    break;
                 }
-                else
-                {
-                    expandedString.Append(strPart);
-                }
+                // first find the relative position of the expandable part inside our string
+                string value = LanguagePrimitives.ConvertTo<string>(exValEnumerator.Current);
+                var relStart = item.Extent.StartOffset - Extent.StartOffset - 1;
+                var relEnd = item.Extent.EndOffset - Extent.StartOffset - 1;
+                // the end are constant words between this expression and the last resolved expression
+                // we need to resolve escape constants before adding it
+                var resolvedEnd = StringExpressionHelper.ResolveEscapeCharacters(rest.Substring(relEnd), StringConstantType);
+                // as we do it in reverse order: insert at the beginning, in reverse order
+                resultStr.Insert(0, resolvedEnd).Insert(0, value);
+                // finally strip the rest which needs to be expanded
+                rest = rest.Substring(0, relStart);
             }
-            return expandedString.ToString();
+            // now insert the rest at the beginning (other constant string)
+            resultStr.Insert(0, StringExpressionHelper.ResolveEscapeCharacters(rest, StringConstantType));
+            return resultStr.ToString();
         }
 
-        private int GetRelativeStartIndex(Ast ast)
+        private static IList<ExpressionAst> ParseExpandableString(IScriptExtent extent, string value)
         {
-            return ast.Extent.StartOffset - Extent.StartOffset - 1;
+            var parser = new ExpandableStringParser(extent, value);
+            parser.Parse();
+            return parser.NestedExpressions;
         }
 
-        private int GetRelativeEndIndex(Ast ast)
+        private string ReplaceExpandableValue(string expStr, ExpressionAst ast, string value)
         {
-            return ast.Extent.EndOffset - Extent.StartOffset - 1;
+            var relStart = ast.Extent.StartOffset - Extent.StartOffset - 1;
+            var relEnd = ast.Extent.EndOffset - Extent.StartOffset - 1;
+            return expStr.Substring(0, relStart) + value + expStr.Substring(relEnd);
         }
     }
 }

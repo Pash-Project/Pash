@@ -20,10 +20,12 @@ namespace Pash.ParserIntrinsics
     class AstBuilder
     {
         readonly PowerShellGrammar _grammar;
+        readonly ParseTree _parseTree;
 
-        public AstBuilder(PowerShellGrammar grammar)
+        public AstBuilder(PowerShellGrammar grammar, ParseTree parseTree)
         {
-            this._grammar = grammar;
+            _grammar = grammar;
+            _parseTree = parseTree;
         }
 
         [Conditional("DEBUG")]
@@ -1484,17 +1486,6 @@ namespace Pash.ParserIntrinsics
                 return BuildSimpleNameAst(parseTreeNode);
             }
 
-            if (parseTreeNode.Term == this._grammar.string_literal)
-            {
-                return BuildStringLiteralAst(parseTreeNode);
-            }
-
-
-            if (parseTreeNode.Term == this._grammar.string_literal_with_subexpression)
-            {
-                return BuildStringLiteralWithSubexpressionAst(parseTreeNode);
-            }
-
             if (parseTreeNode.Term == this._grammar.expression_with_unary_operator)
             {
                 return BuildExpressionWithUnaryOperatorAst(parseTreeNode);
@@ -1508,9 +1499,76 @@ namespace Pash.ParserIntrinsics
             throw new InvalidOperationException(parseTreeNode.ToString());
         }
 
-        CommandElementAst BuildStringLiteralWithSubexpressionAst(ParseTreeNode parseTreeNode)
+        ExpressionAst BuildStringLiteralWithSubexpressionAst(ParseTreeNode parseTreeNode)
         {
-            throw new NotImplementedException(parseTreeNode.ToString());
+            VerifyTerm(parseTreeNode, this._grammar.string_literal_with_subexpression);
+
+            parseTreeNode = parseTreeNode.ChildNodes.Single();
+
+            if (parseTreeNode.Term == this._grammar.expandable_string_literal_with_subexpr)
+            {
+                return BuildExpandableStringLiteralWithSubexpressionAst(parseTreeNode);
+            }
+
+            throw new InvalidOperationException(parseTreeNode.ToString());
+        }
+
+        ExpressionAst BuildExpandableStringLiteralWithSubexpressionAst(ParseTreeNode parseTreeNode)
+        {
+            VerifyTerm(parseTreeNode, this._grammar.expandable_string_literal_with_subexpr);
+
+            var toResolve = new List<ExpressionAst>();
+
+            var stmtTreeNode = parseTreeNode.ChildNodes[1];
+            var stmtAst = BuildStatementListAst(stmtTreeNode);
+            // the child node only covers the stamentent list, but not $( and ), which are part of other child nodes
+            // therefore we artifically expand the extent by -2 and 1 to cover the markup.
+            // this is important so the replacements work correctly
+            var subExpExtent = new ScriptExtent(stmtTreeNode.Span, -2, 1);
+            toResolve.Add(new SubExpressionAst(subExpExtent, stmtAst));
+
+            for (int i = 3; i < parseTreeNode.ChildNodes.Count - 1; i++)
+            {
+                var item = parseTreeNode.ChildNodes[i];
+
+                if (item.Term == this._grammar.expandable_string_with_subexpr_characters)
+                {
+                    foreach (var item2 in item.ChildNodes)
+                    {
+                        //sub_expression
+                        //expandable_string_part
+                        if (item2.Term == this._grammar.expandable_string_with_subexpr_part)
+                        {
+                            foreach (var item3 in item2.ChildNodes)
+                            {
+                                if (item3.Term == this._grammar.expandable_string_characters)
+                                {
+                                    var matches = Regex.Match(item3.FindTokenAndGetText(), this._grammar.expandable_string_characters.Pattern, RegexOptions.IgnoreCase);
+                                    string value = matches.Groups[this._grammar.expandable_string_characters.Name].Value;
+
+                                    var ast = new ExpandableStringExpressionAst(new ScriptExtent(item3), value, StringConstantType.DoubleQuoted);
+                                    if (ast.NestedExpressions.Any())
+                                    {
+                                        toResolve.Add(ast);
+                                    }
+                                }
+
+                                if (item3.Term == this._grammar.sub_expression)
+                                {
+                                    toResolve.Add(BuildSubExpression(item3));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            var extent = (IScriptExtent) new ScriptExtent(parseTreeNode);
+            // now strip the real text value. +1 and -2 are used to strip the quotes
+            var textValue = _parseTree.SourceText.Substring(extent.StartOffset + 1, extent.EndOffset - extent.StartOffset - 2);
+            return new ExpandableStringExpressionAst(
+                extent, toResolve, textValue,
+                StringConstantType.DoubleQuoted);
         }
 
         ExpressionAst BuildValueAst(ParseTreeNode parseTreeNode)
@@ -1562,7 +1620,7 @@ namespace Pash.ParserIntrinsics
             throw new InvalidOperationException(childNode.Term.Name);
         }
 
-        ExpressionAst BuildSubExpression(ParseTreeNode parseTreeNode)
+        SubExpressionAst BuildSubExpression(ParseTreeNode parseTreeNode)
         {
             VerifyTerm(parseTreeNode, this._grammar.sub_expression);
 
@@ -1737,6 +1795,11 @@ namespace Pash.ParserIntrinsics
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.string_literal)
             {
                 return BuildStringLiteralAst(parseTreeNode.ChildNodes.Single());
+            }
+
+            if (parseTreeNode.ChildNodes[0].Term == this._grammar.string_literal_with_subexpression)
+            {
+                return BuildStringLiteralWithSubexpressionAst(parseTreeNode.ChildNodes.Single());
             }
 
             if (parseTreeNode.ChildNodes[0].Term == this._grammar.real_literal)

@@ -11,8 +11,24 @@ namespace Pash.ParserIntrinsics
     class ScriptExtent : IScriptExtent
     {
         readonly ParseTreeNode _parseTreeNode;
+        readonly SourceSpan _span;
 
-        public ScriptExtent(ParseTreeNode parseTreeNode)
+        public ScriptExtent(SourceSpan origSpan, int startOffset, int endOffset)
+        {
+            if (startOffset == 0 && endOffset == 0)
+            {
+                _span = origSpan;
+                return;
+            }
+            // create a new span with offsets
+            var location = origSpan.Location;
+            // we don't adjust line and column for artifical offsets. This is hopefully okay.
+            var newLocation = new SourceLocation(location.Position + startOffset, location.Line, location.Column);
+            // don't forget to subtract the start offset here
+            _span = new SourceSpan(newLocation, origSpan.Length + endOffset - startOffset);
+        }
+
+        public ScriptExtent(ParseTreeNode parseTreeNode) : this(parseTreeNode.Span, 0, 0)
         {
             this._parseTreeNode = parseTreeNode;
         }
@@ -64,7 +80,14 @@ namespace Pash.ParserIntrinsics
 
         string IScriptExtent.Text
         {
-            get { return this._parseTreeNode.FindTokenAndGetText() ?? string.Empty; }
+            get
+            {
+                if (_parseTreeNode == null)
+                {
+                    return string.Empty;
+                }
+                return this._parseTreeNode.FindTokenAndGetText() ?? string.Empty;
+            }
         }
 
         private SourceLocation Location
@@ -74,7 +97,7 @@ namespace Pash.ParserIntrinsics
 
         private SourceSpan Span
         {
-            get { return _parseTreeNode.Span; }
+            get { return _span; }
         }
     }
 }
