@@ -85,6 +85,7 @@ namespace ReferenceTests.Language.Operators
         [TestCase("\"t\" -lt $true                                      ", "True")]
         [TestCase("\"a\" -ilt \"A\"                                     ", "False")]
         [TestCase("\"a\" -clt \"A\"                                     ", "True")]
+        [TestCase("\"[\" -clt \"{\"                                     ", "True")]
         [TestCase("$d = Get-Date \"01/01/2015\"; \"01/01/2015\" -lt $d; ", "True")]
         [TestCase("\"1.2345\" -lt 1.2345                                ", "False")]
         [TestCase("\"1.2345\" -lt [float] 1.2345                        ", "False")]

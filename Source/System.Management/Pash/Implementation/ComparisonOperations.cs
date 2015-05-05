@@ -138,8 +138,14 @@ namespace System.Management.Pash.Implementation
                   (rhs is bool))) ||
                 (lhs is string))
             {
+                var lhsInverted = lhs;
+                var rhsInverted = rhs;
+
+                if (lhs is string) lhsInverted = StringExtensions.InvertCase(lhs as string);
+                if (rhs is string) rhsInverted = StringExtensions.InvertCase(rhs as string);
+
                 Func<IComparer<string>, string, string, object> checkedOp = GetComparerOp<string>(op);
-                return Compare<string>(getStringComparer(ignoreCase), lhs, rhs, op, checkedOp);
+                return Compare<string>(getStringComparer(ignoreCase), lhsInverted, rhsInverted, op, checkedOp);
             }
 
             if (((lhs == null) && (rhs is DateTime)) ||
