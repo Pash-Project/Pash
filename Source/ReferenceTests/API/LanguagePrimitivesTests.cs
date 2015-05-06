@@ -4,6 +4,9 @@ using System.Management.Automation;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.Collections.Generic;
+using System.Collections;
+using System.Xml;
 
 namespace ReferenceTests.API
 {
@@ -260,6 +263,34 @@ namespace ReferenceTests.API
         {
             var result = LanguagePrimitives.ConvertTo(null, typeof(PSObject));
             Assert.That(result, Is.Null);
+        }
+
+        [Test]
+        public void StringsAreNotEnumerated()
+        {
+            Assert.That(LanguagePrimitives.GetEnumerator("foo"), Is.Null);
+        }
+
+        [Test]
+        public void DictionariesAreNotEnumerated()
+        {
+            var testDict = new Dictionary<string, object> { { "foo", 123 } };
+            Assert.That(LanguagePrimitives.GetEnumerator(testDict), Is.Null);
+        }
+
+        [Test]
+        public void HashtablesAreNotEnumerated()
+        {
+            var testTable = new Hashtable { { "foo", 123 } };
+            Assert.That(LanguagePrimitives.GetEnumerator(testTable), Is.Null);
+        }
+
+        [Test]
+        public void XmlNodesAreNotEnumerated()
+        {
+            var xml = new XmlDocument();
+            xml.LoadXml("<a><b>foo</b><b>bar</b></a>");
+            Assert.That(LanguagePrimitives.GetEnumerator(xml), Is.Null);
         }
     }
 }
