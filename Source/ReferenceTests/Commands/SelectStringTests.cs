@@ -715,5 +715,31 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual(text, match.Line);
         }
+
+        [Test]
+        public void LineNumbersAreResetWithMatchesInMultipleFiles()
+        {
+            string fileName = CreateTextFile(NewlineJoin("z", "a"), "foo1.txt");
+            string directory = Path.GetDirectoryName(fileName);
+            AddCleanupDir(directory);
+            CreateTextFile("ba", "foo2.txt");
+            CreateTextFile(NewlineJoin("z", "z", "z", "ca"), "foo3.txt");
+            CreateTextFile("a", "foo4.txt");
+
+            MatchInfo[] matches = RawExecuteMultipleMatches(new[] {
+                string.Format("cd '{0}'", directory),
+                "select-string -Pattern a -Path foo*.txt "
+            });
+
+            Assert.AreEqual(4, matches.Length);
+            Assert.AreEqual("foo1.txt", matches[0].Filename);
+            Assert.AreEqual(2, matches[0].LineNumber);
+            Assert.AreEqual("foo2.txt", matches[1].Filename);
+            Assert.AreEqual(1, matches[1].LineNumber);
+            Assert.AreEqual("foo3.txt", matches[2].Filename);
+            Assert.AreEqual(4, matches[2].LineNumber);
+            Assert.AreEqual("foo4.txt", matches[3].Filename);
+            Assert.AreEqual(1, matches[3].LineNumber);
+        }
     }
 }
