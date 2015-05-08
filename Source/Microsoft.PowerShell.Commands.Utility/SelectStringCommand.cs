@@ -125,6 +125,7 @@ namespace Microsoft.PowerShell.Commands
         {
             foreach (string path in ResolvePaths())
             {
+                _lineNumber = 1;
                 MatchInLines(path, ReadLines(path));
             }
         }
