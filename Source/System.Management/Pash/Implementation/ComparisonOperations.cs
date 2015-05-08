@@ -7,7 +7,6 @@ using System.Management.Automation;
 namespace System.Management.Pash.Implementation
 {
     ///
-    /// ComparisonOperations:
     ///     - class implementing comparison operations in the language
     ///     - uses IComparer<T> interface and default implementations to perform comparisons
     ///     - handles type mapping for objects to specific comparers based on LHS type
@@ -42,7 +41,6 @@ namespace System.Management.Pash.Implementation
 
 
         ///
-        /// GreaterThan:
         ///     - method for handling -gt, -igt, -cgt operations
         ///     - called with unpacked lhs/rhs operands and whether to respect case
         ///
@@ -53,7 +51,6 @@ namespace System.Management.Pash.Implementation
 
 
         ///
-        /// GreaterThanEquals:
         ///     - method for handling -ge, -ige, -cge operations
         ///     - called with unpacked lhs/rhs operands and whether to respect case
         ///
@@ -64,7 +61,6 @@ namespace System.Management.Pash.Implementation
 
 
         ///
-        /// LessThan:
         ///     - method for handling -lt, -ilt, -clt operations
         ///     - called with unpacked lhs/rhs operands and whether to respect case
         ///
@@ -75,7 +71,6 @@ namespace System.Management.Pash.Implementation
 
 
         ///
-        /// LessThanEquals:
         ///     - method for handling -le, -ile, -cle operations
         ///     - called with unpacked lhs/rhs operands and whether to respect case
         ///
@@ -86,7 +81,6 @@ namespace System.Management.Pash.Implementation
 
 
         ///
-        /// ComparisonOperation:
         ///     - implements type mapping and ordering (primitive overload resolution)
         ///
         ///     7.9 Relational and type-testing Operators
@@ -172,7 +166,6 @@ namespace System.Management.Pash.Implementation
 
 
         ///
-        /// getStringComparer:
         ///     returns an IComparer<T> for StringComparer based on the case sensititivity flag
         ///     used in the -i*, -c* relationship comparison operators
         ///
@@ -183,7 +176,6 @@ namespace System.Management.Pash.Implementation
 
 
         ///
-        /// Compare<T>:
         ///     - generic case Comparison
         ///
         private static object Compare<T>(object lhs, object rhs, string op)
@@ -194,7 +186,6 @@ namespace System.Management.Pash.Implementation
 
 
         ///
-        /// Compare<T>:
         ///     - generic comparison function
         ///     - callers provide the type specific comparer
         ///     - depends on LanguagePrimitives.ConvertTo for type conversion
