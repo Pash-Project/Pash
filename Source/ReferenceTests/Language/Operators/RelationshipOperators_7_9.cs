@@ -6,13 +6,11 @@ using NUnit.Framework;
 namespace ReferenceTests.Language.Operators
 {
     ///
-    /// RelationshipOperators:
+    /// Handles the following relationship operators:
     ///     - GreaterThan
     ///     - GreaterThanEquals
     ///     - LessThan
     ///     - LessThanEquals
-    ///     - Equals
-    ///     - NotEquals
     ///
     /// Organize Tests based on LHS Operand Types
     /// Test Cases are reused for each Relationship Operation
@@ -184,7 +182,7 @@ namespace ReferenceTests.Language.Operators
 
 
         ///
-        /// RelationshipOperatorsWithNumericTypes:
+        ///     - handles LHS numeric types case
         ///     - $null, string, datetime are selected based on the LHS operand
         ///     - conversion operations that are invalid result in Exceptions
         ///     - precedence:  double > float > long > int > char > byte > bool
