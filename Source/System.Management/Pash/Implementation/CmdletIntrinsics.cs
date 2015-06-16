@@ -14,6 +14,12 @@ namespace Pash.Implementation
 
         public void Set(CmdletInfo cmdlet)
         {
+            // manually remove the cmdlet if already imported, because the normale "overwrite" flag doesn't work,
+            // as the CmdletInfo doesn't support ItemOptions
+            if (Scope.HasLocal(cmdlet))
+            {
+                Scope.RemoveLocal(cmdlet.ItemName);
+            }
             Scope.SetLocal(cmdlet, false);
         }
 
