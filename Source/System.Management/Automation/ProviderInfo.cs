@@ -7,7 +7,6 @@ namespace System.Management.Automation
     public class ProviderInfo : IComparable
     {
         internal PSDriveInfo CurrentDrive { get; set; }
-
         public PSSnapInInfo PSSnapIn { get; private set; }
         public string Name { get; private set; }
         public string Description { get; set; }
@@ -22,6 +21,15 @@ namespace System.Management.Automation
             get
             {
                 return Module == null ? null : Module.Name;
+            }
+        }
+        internal PSDriveInfo DummyDrive
+        {
+            get
+            {
+                var drive = new PSDriveInfo("", this, "", "", null);
+                drive.Hidden = true;
+                return drive;
             }
         }
 
@@ -174,7 +182,6 @@ namespace System.Management.Automation
 
         public override bool Equals(object obj)
         {
-
             return CompareTo(obj) == 0;
         }
 
@@ -190,7 +197,7 @@ namespace System.Management.Automation
         {
             if (!IsNameMatch(provider.FullName))
             {
-                return provider.FullName.CompareTo(provider.FullName); //cannot be 0, otherwise it was a name match
+                return FullName.CompareTo(provider.FullName); //cannot be 0, otherwise it was a name match
             }
             return 0;
         }

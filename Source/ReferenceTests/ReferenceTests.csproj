@@ -34,6 +34,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -48,13 +49,17 @@
     <Compile Include="Commands\AddMemberTests.cs" />
     <Compile Include="Commands\AddTypeTests.cs" />
     <Compile Include="Commands\ClearContentTests.cs" />
+    <Compile Include="Commands\GetCommandTests.cs" />
     <Compile Include="Commands\GetContentTests.cs" />
     <Compile Include="Commands\ImportModuleTests.cs" />
     <Compile Include="Commands\RemoveModuleTests.cs" />
+    <Compile Include="Commands\SelectStringTests.cs" />
     <Compile Include="Commands\SetContentTests.cs" />
+    <Compile Include="Commands\SplitPathTests.cs" />
     <Compile Include="Commands\WhereObjectTests.cs" />
     <Compile Include="Integration\RosettaCode.cs" />
     <Compile Include="Language\FileRedirectionTests.cs" />
+    <Compile Include="Language\HereStringTests.cs" />
     <Compile Include="Language\ObjectMemberTests.cs" />
     <Compile Include="Language\Operators\FormatOperatorTests_7_5.cs" />
     <Compile Include="Language\Operators\BitwiseTests.cs" />
@@ -63,6 +68,7 @@
     <Compile Include="Language\FunctionTests.cs" />
     <Compile Include="Language\InvocationTests.cs" />
     <Compile Include="Language\Operators\LogicalOperators_7_10.cs" />
+    <Compile Include="Language\Operators\RelationshipOperators_7_9.cs" />
     <Compile Include="Language\Operators\RangeOperatorTests_7_4.cs" />
     <Compile Include="Language\ScopeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -119,15 +125,14 @@
     <Compile Include="Providers\ProviderLoadingTests.cs" />
     <Compile Include="Providers\DriveCmdletProviderTests.cs" />
     <Compile Include="Providers\NavigationCmdletProviderTests.cs" />
+    <Compile Include="TestUtil.cs" />
+    <Compile Include="Commands\ConvertToSecureStringTests.cs" />
+    <Compile Include="Language\ExpressionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
       <Project>{C5E303EC-5684-4C95-B0EC-2593E6662403}</Project>
       <Name>System.Management</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TestHost\TestHost.csproj">
-      <Project>{A5550FB3-553B-441E-8386-AD1EF5C31FAE}</Project>
-      <Name>TestHost</Name>
     </ProjectReference>
     <ProjectReference Include="..\TestPSSnapIn\TestPSSnapIn.csproj">
       <Project>{DC9303A4-3F38-4591-9BD4-67F223F7D204}</Project>
@@ -144,6 +149,10 @@
     <ProjectReference Include="..\PashConsole\PashConsole.csproj">
       <Project>{BB348EAD-1713-4760-9953-BC721A203885}</Project>
       <Name>PashConsole</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.PowerShell.Security\Microsoft.PowerShell.Security.csproj">
+      <Project>{DF4B0778-BBB9-4A69-AADE-FD4361675644}</Project>
+      <Name>Microsoft.PowerShell.Security</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

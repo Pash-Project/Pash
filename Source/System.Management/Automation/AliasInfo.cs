@@ -1,6 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 using Pash.Implementation;
 using System.Management.Automation;
@@ -17,6 +18,11 @@ namespace System.Management.Automation
         public override string Definition { get { return _definition; } }
         public string Description { get; set; }
         public ScopedItemOptions Options { get; set; }
+
+        public override ReadOnlyCollection<PSTypeName> OutputType
+        {
+            get { throw new NotImplementedException(); }
+        }
 
         // TODO: what is the difference?
         private CommandInfo _referencedCommand;

@@ -10,10 +10,10 @@ namespace Microsoft.PowerShell.Commands
 {
     // http://msdn.microsoft.com/en-us/library/microsoft.powershell.commands.setaliascommand.aspx
     [Cmdlet("New", "Alias", SupportsShouldProcess = true/*, HelpUri="http://go.microsoft.com/fwlink/?LinkID=113390"*/)]
-    //[OutputTypeAttribute(System.Compiler.TypeNode[])] 
     // New-Alias [-Name] <string> [-Value] <string> [-Description <string>] [-Force] [-Option {None |
     // ReadOnly | Constant | Private | AllScope}] [-PassThru] [-Scope <string>] [-Confirm] [-WhatIf] [
     // <CommonParameters>]
+    [OutputType(typeof(AliasInfo))]
     public sealed class NewAliasCommand : /*WriteAliasCommandBase*/PSCmdlet
     {
         [Parameter(Position = 0, ValueFromPipelineByPropertyName = true, Mandatory = true)]

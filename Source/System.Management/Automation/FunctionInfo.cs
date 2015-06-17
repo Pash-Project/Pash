@@ -18,6 +18,11 @@ namespace System.Management.Automation
         public string Verb { get; private set; }
         public string Description { get; set; }
 
+        public override ReadOnlyCollection<PSTypeName> OutputType
+        {
+            get { throw new NotImplementedException(); }
+        }
+
         internal FunctionInfo(string name, ScriptBlock function, IEnumerable<ParameterAst> explicitParams)
         : this(name, function, explicitParams, ScopedItemOptions.None) { }
 

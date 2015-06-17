@@ -8,6 +8,7 @@ using System;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Get", "PSDrive", DefaultParameterSetName = "Name")]
+    [OutputType(typeof(PSDriveInfo))]
     public class GetPSDriveCommand : DriveMatchingCoreCommandBase
     {
         [Parameter(Position = 0, ParameterSetName = "LiteralName", Mandatory = true, ValueFromPipeline = false, ValueFromPipelineByPropertyName = true)]

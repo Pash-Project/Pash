@@ -7,6 +7,7 @@ using System.Management.Automation.Host;
 using NUnit.Framework;
 using System.IO;
 using Pash.Implementation;
+using System.Security;
 
 namespace TestHost
 {
@@ -39,9 +40,10 @@ namespace TestHost
             get { return _rawUI; }
         }
 
-        protected override string ReadLine(bool addToHistory)
+        internal override string ReadLine(bool addToHistory, string intialValue = "")
         {
-            return ReadLine();
+            var val = ReadLine();
+            return val == null ? null : intialValue + val;
         }
 
         public override string ReadLine()
@@ -54,9 +56,19 @@ namespace TestHost
             return InputStream.ReadLine();
         }
 
-        public override System.Security.SecureString ReadLineAsSecureString()
+        public override SecureString ReadLineAsSecureString()
         {
-            throw new NotImplementedException();
+            var val = ReadLine();
+            if (val == null)
+            {
+                return null;
+            }
+            var secStr = new SecureString();
+            foreach (var c in val)
+            {
+                secStr.AppendChar(c);
+            }
+            return secStr;
         }
 
         public override void Write(string value)

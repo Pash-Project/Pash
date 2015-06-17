@@ -84,6 +84,8 @@
     <Compile Include="Automation\ArgumentTransformationMetadataException.cs" />
     <Compile Include="Automation\AuthorizationManager.cs" />
     <Compile Include="Automation\ForEachObjectCommand.cs" />
+    <Compile Include="Automation\OutputTypeAttribute.cs" />
+    <Compile Include="Automation\PSTypeName.cs" />
     <Compile Include="Automation\Runspaces\AssemblyConfigurationEntry.cs" />
     <Compile Include="Automation\Runspaces\FormatConfigurationEntry.cs" />
     <Compile Include="Automation\Runspaces\TypeConfigurationEntry.cs" />
@@ -395,6 +397,7 @@
     <Compile Include="Automation\WildcardOptions.cs" />
     <Compile Include="Automation\WildcardPattern.cs" />
     <Compile Include="Automation\WildcardPatternException.cs" />
+    <Compile Include="Automation\WorkflowInfo.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\Irony\ValidateTokenEventArgsExtensions.cs" />
     <Compile Include="Extensions\JoinStringExtensions.cs" />
@@ -415,6 +418,7 @@
     <Compile Include="Microsoft.PowerShell\Commands\GetHelpCommand.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\GetHistoryCommand.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\GetPSSnapinCommand.cs" />
+    <Compile Include="Microsoft.PowerShell\Commands\HistoryInfo.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\Internal\Format\FrontEndCommandBase.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\RemovePSSnapinCommand.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\SessionStateProviderBase.cs" />
@@ -425,6 +429,7 @@
     </Compile>
     <Compile Include="Microsoft.PowerShell\PSCorePSSnapIn.cs" />
     <Compile Include="Pash\BitwiseOperation.cs" />
+    <Compile Include="Pash\Implementation\Commands\EncodingMapping.cs" />
     <Compile Include="Pash\Implementation\Commands\FileContentReader.cs" />
     <Compile Include="Pash\Implementation\Commands\FileContentWriter.cs" />
     <Compile Include="Pash\Implementation\Commands\SessionStateContentReader.cs" />
@@ -496,6 +501,7 @@
     <Compile Include="Pash\Implementation\TabExpansionProvider.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Pash\Implementation\ArithmeticOperations.cs" />
+    <Compile Include="Pash\Implementation\ComparisonOperations.cs" />
     <Compile Include="Automation\FlowControlException.cs" />
     <Compile Include="Automation\ExitException.cs" />
     <Compile Include="Automation\LoopFlowException.cs" />
@@ -523,6 +529,9 @@
     <Compile Include="Pash\Implementation\PathGlobber.cs" />
     <Compile Include="Automation\CmdletProviderIntrinsicsBase.cs" />
     <Compile Include="Pash\Implementation\IncludeExcludeFilter.cs" />
+    <Compile Include="Pash\Implementation\SecureStringReader.cs" />
+    <Compile Include="Pash\Implementation\CredentialMessages.cs" />
+    <Compile Include="Pash\Implementation\StringExtensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

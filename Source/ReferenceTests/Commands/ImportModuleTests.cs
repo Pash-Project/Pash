@@ -30,6 +30,17 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
+        public void ImportingAssemblyModuleTwiceDoesntThrow()
+        {
+            var cmd = NewlineJoin(
+                "$m1 = Import-Module '" + BinaryTestModule + "' -PassThru",
+                "$m2 = Import-Module '" + BinaryTestModule + "' -PassThru",
+                "[object]::ReferenceEquals($m1, $m2)"
+            );
+            ExecuteAndCompareTypedResult(cmd, true);
+        }
+
+        [Test]
         public void CanImportManifestModule()
         {
             var module = CreateFile(CreateManifest(null, "Me", "FooComp", "1.0"), "psd1");

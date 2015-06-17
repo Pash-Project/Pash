@@ -7,6 +7,9 @@ obj/
 *.suo
 *.userprefs
 
+# Vim Specific Files
+*.swp
+
 #Resource Caches
 _ReSharper.*
 *.sln.cache

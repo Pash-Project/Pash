@@ -6,6 +6,7 @@ using System.Management;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Get", "Location", DefaultParameterSetName = "Location")]
+    [OutputType(typeof(PathInfo), typeof(PathInfoStack))]
     public class GetLocationCommand : DriveMatchingCoreCommandBase
     {
         [Parameter(ParameterSetName = "Location", ValueFromPipelineByPropertyName = true)]
@@ -40,7 +41,7 @@ namespace Microsoft.PowerShell.Commands
                     List<PSDriveInfo> list = GetDrives(PSDrive, null, PSProvider, "local");
                     foreach (PSDriveInfo pdi in list)
                     {
-                        WriteObject(new PathInfo(pdi, pdi.Provider, new Path(pdi.CurrentLocation).MakePath(pdi.Name), SessionState));
+                        WriteObject(new PathInfo(pdi, new Path(pdi.CurrentLocation).MakePath(pdi.Name), SessionState));
                     }
                 }
                 else if ((PSProvider != null) && (PSProvider.Length > 0))

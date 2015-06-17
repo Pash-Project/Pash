@@ -8,6 +8,7 @@ namespace System.Management
     {
         public static string CalculateFullPath(Path curLocation, Path changeCommandStr)
         {
+            // TODO: sburnicki rewrite that stuff with pathintrinsics
             var changeCommand = (changeCommandStr ?? string.Empty).NormalizeSlashes();
             var currentLocation = curLocation.NormalizeSlashes();
 

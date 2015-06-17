@@ -20,10 +20,12 @@ namespace Pash.Implementation
     internal class SessionStateGlobal
     {
         //TODO: This and related stuff should be moved to InitialSessionState.CreateDefault
-        private string[] _defaultSnapins = new string[] {
-            "Microsoft.PowerShell.PSCorePSSnapIn, System.Management.Automation",
-            "Microsoft.PowerShell.PSUtilityPSSnapIn, Microsoft.PowerShell.Commands.Utility",
-            "Microsoft.Commands.Management.PSManagementPSSnapIn, Microsoft.PowerShell.Commands.Management",
+        // Key is assembly qualified pssnapin name, value is "required" (true) or optional (false)
+        private Dictionary<string, bool> _defaultSnapins = new Dictionary<string, bool> {
+            { "Microsoft.PowerShell.PSCorePSSnapIn, System.Management.Automation", true },
+            { "Microsoft.PowerShell.PSUtilityPSSnapIn, Microsoft.PowerShell.Commands.Utility", false },
+            { "Microsoft.Commands.Management.PSManagementPSSnapIn, Microsoft.PowerShell.Commands.Management", false },
+            { "Microsoft.PowerShell.PSSecurityPSSnapin, Microsoft.PowerShell.Security", false }
         };
         private Dictionary<string, PSSnapInInfo> _snapins;
         private readonly ExecutionContext _globalExecutionContext;
@@ -31,7 +33,7 @@ namespace Pash.Implementation
         internal SessionState RootSessionState  { get { return _globalExecutionContext.SessionState; } }
         internal CmdletProviderManagementIntrinsics Provider { get; private set; }
 
-        public PSDriveInfo CurrentDrive { get; private set; }
+        public PSDriveInfo CurrentDrive { get; internal set; }
 
         internal SessionStateGlobal(ExecutionContext executionContext)
         {
@@ -44,9 +46,19 @@ namespace Pash.Implementation
         #region PSSnapIn specific stuff
         internal void LoadDefaultPSSnapIns()
         {
-            foreach (var defaultSnapin in _defaultSnapins)
+            foreach (var snapinPair in _defaultSnapins)
             {
-                Type snapinType = Type.GetType(defaultSnapin, true);
+                var defaultSnapin = snapinPair.Key;
+                var required = snapinPair.Value;
+                Type snapinType = Type.GetType(defaultSnapin, false);
+                if (snapinType == null)
+                {
+                    if (!required)
+                    {
+                        continue;
+                    }
+                    throw new TypeLoadException("Couldn't load type for required default snapin '" + defaultSnapin + "'");
+                }
                 PSSnapIn snapin = Activator.CreateInstance(snapinType) as PSSnapIn;
                 Assembly snapinAssembly = snapinType.Assembly;
                 LoadPSSnapIn(new PSSnapInInfo(snapin, snapinAssembly, true), snapinAssembly, _globalExecutionContext);
@@ -192,7 +204,7 @@ namespace Pash.Implementation
                     throw new NullReferenceException("CurrentDrive is null.");
                 }
                 PSDriveInfo driveInfo = CurrentDrive;
-                return new PathInfo(driveInfo, driveInfo.Provider, driveInfo.CurrentLocation, _globalExecutionContext.SessionState);
+                return new PathInfo(driveInfo, driveInfo.CurrentLocation, _globalExecutionContext.SessionState);
             }
         }
 
@@ -232,21 +244,6 @@ namespace Pash.Implementation
             throw new NotImplementedException();
         }
 
-        internal string NormalizeRelativePath(string path, string basePath)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal string GetPathChildName(string path)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal string GetParentPath(string path, string root)
-        {
-            throw new NotImplementedException();
-        }
-
         internal PathInfo PopLocation(string stackName)
         {
             throw new NotImplementedException();
@@ -261,63 +258,6 @@ namespace Pash.Implementation
         {
             throw new NotImplementedException();
         }
-
-        internal PathInfo SetLocation(string path)
-        {
-            return SetLocation(path, new ProviderRuntime(_globalExecutionContext.SessionState));
-        }
         #endregion
-
-        internal PathInfo SetLocation(Path path, ProviderRuntime providerRuntime)
-        {
-            // TODO: deal with paths starting with ".\"
-
-            if (path == null)
-            {
-                throw new NullReferenceException("Path can't be null");
-            }
-
-            PSDriveInfo nextDrive = CurrentDrive;
-
-            // use the same provider-specific logic as resolve-path would use here
-            path = path.NormalizeSlashes().ResolveTilde();
-
-            string driveName = null;
-            if (path.TryGetDriveName(out driveName))
-            {
-                try
-                {
-                    nextDrive = _globalExecutionContext.SessionState.Drive.Get(driveName);
-                }
-                catch (MethodInvocationException) //didn't find a drive (maybe it's "\" on Windows)
-                {
-                    nextDrive = CurrentDrive;
-                }
-            }
-
-            Path newLocation = PathNavigation.CalculateFullPath(nextDrive.CurrentLocation, path);
-
-            var provider = RootSessionState.Provider.GetInstance(nextDrive.Provider);
-            if (!(provider is ItemCmdletProvider))
-            {
-                throw new PSInvalidOperationException("Cannot set location for this type of provider.");
-            }
-            var itemProvider = (ItemCmdletProvider)provider;
-
-            if (!itemProvider.ItemExists(newLocation, providerRuntime))
-            {
-                throw new PSInvalidOperationException(string.Format("Cannot find path '{0}' because it does not exist.", newLocation));
-            }
-
-            if (provider is FileSystemProvider)
-            {
-                System.Environment.CurrentDirectory = newLocation;
-            }
-
-            nextDrive.CurrentLocation = newLocation;
-
-            CurrentDrive = nextDrive;
-            return CurrentLocation;
-        }
     }
 }

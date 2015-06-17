@@ -20,6 +20,7 @@ namespace Microsoft.PowerShell.Commands
     ///   Resume-Service
     /// </summary>
     [Cmdlet("Get", "Service", DefaultParameterSetName = "Default")]
+    [OutputType(typeof(ServiceController))]
     public sealed class GetServiceCommand : Cmdlet
     {
         protected override void ProcessRecord()

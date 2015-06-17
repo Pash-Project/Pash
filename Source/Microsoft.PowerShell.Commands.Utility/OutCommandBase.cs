@@ -36,6 +36,11 @@ namespace Microsoft.PowerShell.Commands
                 }
                 data = _formatManager.Process(InputObject);
             }
+            // make sure we have data to process
+            if (data.Count == 0)
+            {
+                return;
+            }
             // although we might have multiple FormatData objects, they are all derived from a single data object
             // so all should be formatted in the same shape
             var processor = FormatProcessor.Get(OutputWriter, data[0].Shape);

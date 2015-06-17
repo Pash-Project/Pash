@@ -55,8 +55,10 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal script_block = null; // Initialized by reflection.
         public readonly NonTerminal param_block = null; // Initialized by reflection.
         public readonly NonTerminal param_block_opt = null; // Initialized by reflection.
+
         public readonly NonTerminal parameter_list = null; // Initialized by reflection.
         public readonly NonTerminal parameter_list_opt = null; // Initialized by reflection.
+        public readonly NonTerminal _marked_parameter_list = null; // Initialized by reflection.
         public readonly NonTerminal script_parameter = null; // Initialized by reflection.
         public readonly NonTerminal script_parameter_default = null; // Initialized by reflection.
         public readonly NonTerminal script_parameter_default_opt = null; // Initialized by reflection.
@@ -232,6 +234,7 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal string_literal_with_subexpression = null; // Initialized by reflection.
         public readonly NonTerminal expandable_string_literal_with_subexpr = null; // Initialized by reflection.
         public readonly NonTerminal expandable_string_with_subexpr_characters = null; // Initialized by reflection.
+        public readonly NonTerminal expandable_string_with_subexpr_characters_opt = null; // Initialized by reflection.
         public readonly NonTerminal expandable_string_with_subexpr_part = null; // Initialized by reflection.
         public readonly NonTerminal expandable_here_string_with_subexpr_characters = null; // Initialized by reflection.
         public readonly NonTerminal expandable_here_string_with_subexpr_part = null; // Initialized by reflection.
@@ -252,6 +255,13 @@ namespace Pash.ParserIntrinsics
         public readonly NonTerminal attribute_arguments = null; // Initialized by reflection.
         public readonly NonTerminal attribute_argument = null; // Initialized by reflection.
         #endregion
+
+        #endregion
+
+        #region Workaround related
+
+        public readonly ImpliedSymbolTerminal _begin_paramlist_marker = new ImpliedSymbolTerminal("beginParamList");
+        public readonly ImpliedSymbolTerminal _end_paramlist_marker = new ImpliedSymbolTerminal("endParamList");
 
         #endregion
 
@@ -352,6 +362,8 @@ namespace Pash.ParserIntrinsics
                 real_literal
                 |
                 string_literal
+                |
+                string_literal_with_subexpression
                 ;
 
             ////        integer_literal:
@@ -386,7 +398,11 @@ namespace Pash.ParserIntrinsics
             string_literal.Rule =
                 expandable_string_literal
                 |
+                expandable_here_string_literal
+                |
                 verbatim_string_literal
+                |
+                verbatim_here_string_literal
                 ;
             #endregion
 
@@ -458,15 +474,24 @@ namespace Pash.ParserIntrinsics
             ////        param_block:
             ////            new_lines_opt   attribute_list_opt   new_lines_opt   param   new_lines_opt
             ////                    (   parameter_list_opt   new_lines_opt   )
+            // NOTE: use _marked_parameter_list here, a parameter_list_opt with implicit marker symbols
             param_block.Rule =
                 /*  TODO: https://github.com/Pash-Project/Pash/issues/11 attribute_list_opt +  */ @param
-                        + "(" + parameter_list_opt + ")";
+                + _marked_parameter_list;
+
+            // ISSUE: https://github.com/Pash-Project/Pash/issues/367
+            // multiple parameters with default values were not possible, because they were mistaken for a 
+            // literal array. They aren't allowed anymore without brakets inside a parameter list. To parse this
+            // in a context sensitive manner, implicit marker symbols and a custom action in array_literal_expression
+            // are used
+            _marked_parameter_list.Rule = "(" + _begin_paramlist_marker + parameter_list_opt + ")" + _end_paramlist_marker;
 
             ////        parameter_list:
             ////            script_parameter
             ////            parameter_list   new_lines_opt   ,   script_parameter
-            parameter_list.Rule =
-                MakePlusRule(parameter_list, ToTerm(","), script_parameter);
+            parameter_list.Rule = 
+                MakePlusRule(parameter_list, ToTerm(","), script_parameter)
+                ;
 
             ////        script_parameter:
             ////            new_lines_opt   attribute_list_opt   new_lines_opt   variable   script_parameter_default_opt
@@ -790,11 +815,11 @@ namespace Pash.ParserIntrinsics
             ////        function_parameter_declaration:
             ////            new_lines_opt   (   parameter_list   new_lines_opt   )
             // ISSUE: https://github.com/Pash-Project/Pash/issues/203
-            // parameter_list was changed to parameter_list_opt here, which
-            // is not in accordance with the published grammar, but otherwise
+            // parameter_list was changed to _marked_parameter_list here, which includes parameter_list_opt
+            // it is not in accordance with the published grammar, but otherwise
             // an empty parameter list wouldn't be allowed.
             function_parameter_declaration.Rule =
-                 "(" + parameter_list_opt + ")";
+                 _marked_parameter_list;
 
             ////        flow_control_statement:
             ////            break   label_expression_opt
@@ -1091,10 +1116,12 @@ namespace Pash.ParserIntrinsics
             ////        array_literal_expression:
             ////            unary_expression
             ////            unary_expression   ,    new_lines_opt   array_literal_expression
-            array_literal_expression.Rule =
+            // ISSUE 367 https://github.com/Pash-Project/Pash/issues/367
+            // A custom action is used to not allow literal arrays in a parameter list default value
+            array_literal_expression.Rule = 
                 unary_expression
                 |
-                (unary_expression + PreferShiftHere() + "," + array_literal_expression)
+                (unary_expression + CustomActionHere(ResolveLiteralArrayConflict) + "," + array_literal_expression)
                 ;
 
             ////        unary_expression:
@@ -1424,17 +1451,19 @@ namespace Pash.ParserIntrinsics
             ////            string_literal_with_subexpression
             ////            expression_with_unary_operator
             ////            value
+            // NOTE: here is another error in the PS grammar:
+            // It doesn't make sense to use a value or string_literal or string_literal_with_subexpression
+            // since "value" contains "literal" which contains both forms of string_literal.
+            // Stating them here explicitly (again) yields to a reduce/reduce conflicht since the string_literal
+            // could be reduced to literal->value->member_name or directly.
+            // So we leave them out and only regard them as a value
             member_name.Rule =
                 simple_name
                 |
-                // value can be a string_literal
-                //string_literal
-                //|
-                string_literal_with_subexpression
                 // TODO: 
                 // |
                 // expression_with_unary_operator
-                |
+                // |
                 value
                 ;
 
@@ -1454,7 +1483,7 @@ namespace Pash.ParserIntrinsics
             // TODO: expandable_here_string_with_subexpr_start
             expandable_string_literal_with_subexpr.Rule =
                 expandable_string_with_subexpr_start + statement_list_opt + ")" +
-                    expandable_string_with_subexpr_characters + expandable_string_with_subexpr_end;
+                    expandable_string_with_subexpr_characters_opt + expandable_string_with_subexpr_end;
 
             ////        expandable_string_with_subexpr_characters:
             ////            expandable_string_with_subexpr_part
@@ -1468,7 +1497,8 @@ namespace Pash.ParserIntrinsics
             expandable_string_with_subexpr_part.Rule =
                 sub_expression
                 |
-                expandable_string_part
+                //expandable_string_part        // single character
+                expandable_string_characters    // n character
                 ;
 
             ////        expandable_here_string_with_subexpr_characters:
@@ -1548,6 +1578,56 @@ namespace Pash.ParserIntrinsics
             #endregion
             #endregion
         }
+
+        #region Context-sensitive resolving of shift/reduce conflict with parameter lists and literal arrays
+
+        // Only parse a literal array if we're not inside a pameter list. We check the context sensitivity by
+        // using implict beginParamList and endParamList symbols
+        void ResolveLiteralArrayConflict(ParsingContext context, CustomParserAction customAction)
+        {
+            // First check for a comma term. Any other is not a list, so it must be a reduction to unary_expression
+            if (context.CurrentParserInput.Term.Name != ",")
+            {
+                customAction.ReduceActions.First().Execute(context);
+                return;
+            }
+            // if there is no possibility to reduce, just do a shift
+            var firstCorrectShiftAction = customAction.ShiftActions.First(a => a.Term.Name == ",");
+            if (customAction.ReduceActions.Count < 1)
+            {
+                firstCorrectShiftAction.Execute(context);
+                return;
+            }
+            // so we can shift or reduce. Let's look if we're in a paramBlock
+            // we do this be iterating over the read tokens backwards and checking for a marker token which marks
+            // the beginning and end of a parameter list
+            var tokens = context.CurrentParseTree.Tokens;
+            var isParamList = false;
+            for (int i = tokens.Count - 1; i >= 0; i--)
+            {
+                var tk = tokens[i];
+                if (tk.Terminal == _begin_paramlist_marker)
+                {
+                    isParamList = true; // yes, inside a param block
+                    break;
+                }
+                else if (tk.Terminal == _end_paramlist_marker)
+                {
+                    break; // we're outside a param block
+                }
+            }
+
+            // if we're inside a parameter list, reduce (so not array literal is parsed)
+            if (isParamList)
+            {
+                customAction.ReduceActions.First().Execute(context);
+                return;
+            }
+            // otherwise just shift to parse the array literal
+            firstCorrectShiftAction.Execute(context);
+        }
+
+        #endregion
 
         bool AreTerminalsContiguous(ParseTreeNode parseTreeNode1, ParseTreeNode parseTreeNode2)
         {

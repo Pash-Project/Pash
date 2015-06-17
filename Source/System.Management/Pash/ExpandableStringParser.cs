@@ -14,16 +14,16 @@ namespace Pash
 
         private string _input;
         private IScriptExtent _extent;
-        private List<ExpressionAst> _nestedExpressions = new List<ExpressionAst>();
         private int _currentIndex = -1;
 
         public ExpandableStringParser(IScriptExtent extent, string input)
         {
+            NestedExpressions = new List<ExpressionAst>();
             _extent = extent;
             _input = input;
         }
 
-        public ReadOnlyCollection<ExpressionAst> NestedExpressions { get { return _nestedExpressions.AsReadOnly(); } }
+        public IList<ExpressionAst> NestedExpressions { get; private set; }
 
         public void Parse()
         {
@@ -97,7 +97,7 @@ namespace Pash
             string variableName = GetText(startIndex + 1, endIndex);
             IScriptExtent variableExtent = GetScriptExtent(startIndex, endIndex);
             var variableAst = new VariableExpressionAst(variableExtent, variableName, false);
-            _nestedExpressions.Add(variableAst);
+            NestedExpressions.Add(variableAst);
         }
 
         private string GetText(int startIndex, int endIndex)

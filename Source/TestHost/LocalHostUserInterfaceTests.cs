@@ -5,6 +5,8 @@ using System.Text;
 using NUnit.Framework;
 using System.IO;
 using Pash.Implementation;
+using System.Runtime.InteropServices;
+using System.Security;
 
 namespace TestHost
 {
@@ -42,7 +44,7 @@ namespace TestHost
             Console.SetOut(originalOut);
         }
 
-        [Test,Explicit("Currently Nunit ignores the redirection of stdin when running from commandline, so the testing doesn't work")]
+        [Test]
         public void TestReadLine()
         {
             SetInput("foobar" + Environment.NewLine);
@@ -59,6 +61,5 @@ namespace TestHost
             ui.WriteLine(str);
             Assert.AreEqual(str + Environment.NewLine, GetOutput());
         }
-
     }
 }

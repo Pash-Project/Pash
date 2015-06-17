@@ -50,7 +50,16 @@ namespace System.Management.Automation
         {
             object[] newArgs;
             var methodInfo = FindBestMethod(arguments, out newArgs);
-            return methodInfo.Invoke(_instance, newArgs);
+            try
+            {
+                return methodInfo.Invoke(_instance, newArgs);
+            }
+            catch (TargetInvocationException e)
+            {
+                var msg = e.InnerException == null ? "Error invoking method '" + methodInfo.ToString() + "'"
+                                                   : e.InnerException.Message;
+                throw new MethodInvocationException(msg, e.InnerException);
+            }
         }
 
         public override PSMemberInfo Copy()

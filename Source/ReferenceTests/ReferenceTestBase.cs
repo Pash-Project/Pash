@@ -146,7 +146,7 @@ namespace ReferenceTests
         public string CreateFile(string script, string extension)
         {
             var tempDir = Path.GetTempPath();
-            var fileName = String.Format("TempFile{0}.{1}", _createdFiles.Count, extension);
+            var fileName = String.Format("TempFile{0}.{1}", _createdFiles.Count, extension.TrimStart('.'));
             var filePath = Path.Combine(tempDir, fileName);
             File.WriteAllText(filePath, script);
             _createdFiles.Add(filePath);
@@ -219,7 +219,7 @@ namespace ReferenceTests
                     Assert.IsNull(results[i]);
                     continue;
                 }
-                Assert.NotNull(results[i], i + "th result is null, but should be" + expectedValues[i].ToString());
+                Assert.NotNull(results[i], i + "th result is null, but should be " + expectedValues[i].ToString());
                 var res = results[i].BaseObject;
                 var restype = res.GetType();
                 Assert.AreSame(expected.GetType(), restype);

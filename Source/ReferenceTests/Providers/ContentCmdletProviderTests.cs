@@ -45,6 +45,20 @@ namespace ReferenceTests.Providers
         }
 
         [Test]
+        public void SetContentFromPipeline()
+        {
+            ReferenceHost.Execute("'a','b','c' | Set-Content -path TestContentCmdletProvider::foo");
+
+            AssertMessagesAreEqual(
+                "ClearContent foo",
+                "GetContentWriter foo",
+                "ContentWriter.Write(a)",
+                "ContentWriter.Write(b)",
+                "ContentWriter.Write(c)",
+                "ContentWriter.Close()");
+        }
+
+        [Test]
         public void GetContent()
         {
             ReferenceHost.Execute("Get-Content -path TestContentCmdletProvider::foo");
@@ -84,6 +98,20 @@ namespace ReferenceTests.Providers
                 "GetContentWriter foo",
                 "ContentWriter.Seek(0, End)",
                 "ContentWriter.Write(1,2)",
+                "ContentWriter.Close()");
+        }
+
+        [Test]
+        public void AddContentFromPipeline()
+        {
+            ReferenceHost.Execute("'a','b','c' | Add-Content -path TestContentCmdletProvider::foo");
+
+            AssertMessagesAreEqual(
+                "GetContentWriter foo",
+                "ContentWriter.Seek(0, End)",
+                "ContentWriter.Write(a)",
+                "ContentWriter.Write(b)",
+                "ContentWriter.Write(c)",
                 "ContentWriter.Close()");
         }
     }

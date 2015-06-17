@@ -20,6 +20,7 @@ namespace Microsoft.PowerShell.Commands
     ///   Resume-Service
     /// </summary>
     [Cmdlet("Restart", "Service", DefaultParameterSetName = "Default", SupportsShouldProcess = true)]
+    [OutputType(typeof(ServiceController))]
     public sealed class RestartServiceCommand : Cmdlet
     {
         protected override void ProcessRecord()

@@ -15,6 +15,7 @@ namespace ReferenceTests.Language.Operators
         [TestCase("[bool]$null", false)]
         [TestCase("[float]$notExisting", 0.0f)]
         [TestCase("[float]$null", 0.0f)]
+        [TestCase("[PSObject]$null", null)]
         public void NullIsCorrectlyConverted(string cmd, object expected)
         {
             ExecuteAndCompareTypedResult(cmd, expected);
@@ -60,6 +61,14 @@ namespace ReferenceTests.Language.Operators
             ExecuteAndCompareTypedResult("([int[]]4.7).GetType()", typeof(int[]));
         }
 
+        [TestCase("[void]'a'")]
+        [TestCase("[void]1")]
+        [TestCase("[void][version]'1.0'")]
+        [TestCase("[void]$null")]
+        public void ConvertToVoidNotWrittenToPipeline(string cmd)
+        {
+            ExecuteAndCompareTypedResult(cmd, new object[0]);
+        }
     }
 }
 

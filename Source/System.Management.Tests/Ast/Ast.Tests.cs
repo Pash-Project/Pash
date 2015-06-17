@@ -1518,7 +1518,9 @@ ls
         [Test]
         public void ParamBlockWithOneParameterTest()
         {
-            ParamBlockAst result = ParseInput("param($path)")
+            // NOTE: the implementation cannot parse a param block with directly an EOD behind it. We need a ';' or
+            // a newline, which is also used in any practical situation (EOD after param block doesn't make sense)
+            ParamBlockAst result = ParseInput("param($path)\n")
                 .ParamBlock;
 
             ParameterAst parameter = result.Parameters.FirstOrDefault();
@@ -1529,7 +1531,9 @@ ls
         [Test]
         public void ParamBlockWithTwoParametersTest()
         {
-            ParamBlockAst result = ParseInput("param($first, $second)")
+            // NOTE: the implementation cannot parse a param block with directly an EOD behind it. We need a ';' or
+            // a newline, which is also used in any practical situation (EOD after param block doesn't make sense)
+            ParamBlockAst result = ParseInput("param($first, $second)\n")
                 .ParamBlock;
 
             ParameterAst firstParameter = result.Parameters.FirstOrDefault();
@@ -1542,7 +1546,9 @@ ls
         [Test]
         public void ParamBlockWithOneParameterWithDefaultIntegerValueTest()
         {
-            ParamBlockAst result = ParseInput("param($first = 2)")
+            // NOTE: the implementation cannot parse a param block with directly an EOD behind it. We need a ';' or
+            // a newline, which is also used in any practical situation (EOD after param block doesn't make sense)
+            ParamBlockAst result = ParseInput("param($first = 2)\n")
                 .ParamBlock;
 
             ParameterAst parameter = result.Parameters.FirstOrDefault();

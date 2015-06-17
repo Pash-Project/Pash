@@ -31,7 +31,7 @@ namespace Pash.Implementation
         public static ScriptBlockAst ParseInput(string input)
         {
             var parseTree = Parse(input, false);
-            return new AstBuilder(Grammar).BuildScriptBlockAst(parseTree.Root);;
+            return new AstBuilder(Grammar, parseTree).BuildScriptBlockAst(parseTree.Root);
         }
 
         public static bool TryParsePartialInput(string input, out ScriptBlockAst scriptBlock)
@@ -48,7 +48,7 @@ namespace Pash.Implementation
             var parseTree = Parse(input, true);
             if (parseTree.Status.Equals(ParseTreeStatus.Parsed))
             {
-                scriptBlock = new AstBuilder(Grammar).BuildScriptBlockAst(parseTree.Root);
+                scriptBlock = new AstBuilder(Grammar, parseTree).BuildScriptBlockAst(parseTree.Root);
                 return true;
             }
             // if we're here we only partially parsed, because Parse would have thrown on error
@@ -85,7 +85,8 @@ namespace Pash.Implementation
             if (parseTree.HasErrors()) // ParseTreeStatus is Error
             {
                 var logMessage = parseTree.ParserMessages.First();
-                throw new ParseException(logMessage.Message, logMessage.Location.Line, logMessage.Location.Column);
+                throw new ParseException(logMessage.Message, logMessage.Location.Line, logMessage.Location.Column,
+                                         parseTree.SourceText);
             }
             return parseTree;
         }

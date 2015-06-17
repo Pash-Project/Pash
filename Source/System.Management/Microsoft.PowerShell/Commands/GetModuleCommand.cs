@@ -1,3 +1,4 @@
+// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Linq;
 using System.Management.Automation;
@@ -5,7 +6,8 @@ using System.Management.Automation;
 namespace Microsoft.PowerShell.Commands
 {
     [CmdletAttribute("Get", "Module", DefaultParameterSetName="Loaded"
-                     /*, HelpUri="http://go.microsoft.com/fwlink/?LinkID=141552" */ )] 
+                     /*, HelpUri="http://go.microsoft.com/fwlink/?LinkID=141552" */ )]
+    [OutputType(typeof(PSModuleInfo))]
     public sealed class GetModuleCommand : ModuleCmdletBase
     {
         /*

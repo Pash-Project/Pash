@@ -40,6 +40,11 @@ namespace System.Management.Automation
             }
         }
 
+        public override ReadOnlyCollection<PSTypeName> OutputType
+        {
+            get { throw new NotImplementedException(); }
+        }
+
         internal ExternalScriptInfo(string path, ScopeUsages scopeUsage = ScopeUsages.NewScope)
             : base(path, CommandTypes.ExternalScript)
         {

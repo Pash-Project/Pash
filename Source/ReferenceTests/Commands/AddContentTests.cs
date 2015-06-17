@@ -55,6 +55,19 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
+        public void MultipleItemsTakenFromPipeline()
+        {
+            string fileName = GenerateTempFile("test" + Environment.NewLine);
+
+            string result = ReferenceHost.Execute(new string[] {
+                "'a','b','c' | Add-Content " + fileName,
+                "Get-Content " + fileName
+            });
+
+            Assert.AreEqual(NewlineJoin("test", "a", "b", "c"), result);
+        }
+
+        [Test]
         public void TwoFiles()
         {
             string fileName1 = GenerateTempFile("1" + Environment.NewLine);

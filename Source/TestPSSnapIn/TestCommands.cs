@@ -7,6 +7,7 @@ using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Provider;
 using Microsoft.PowerShell.Commands;
+using System.Runtime.InteropServices;
 
 namespace TestPSSnapIn
 {
@@ -523,6 +524,29 @@ namespace TestPSSnapIn
         }
     }
 
+    [Cmdlet(VerbsDiagnostic.Test, "PrintCredentials")]
+    public class TestPrintCredentialsCommand : PSCmdlet
+    {
+        [Credential, Parameter(Mandatory = true, Position=0)]
+        public PSCredential Credential { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject("User: " + Credential.UserName);
+            IntPtr unmanagedString = IntPtr.Zero;
+            try
+            {
+                unmanagedString = Marshal.SecureStringToGlobalAllocUnicode(Credential.Password);
+                WriteObject("Password: " + Marshal.PtrToStringUni(unmanagedString));
+            }
+            finally
+            {
+                Marshal.ZeroFreeGlobalAllocUnicode(unmanagedString);
+            }
+
+        }
+    }
+
     [Cmdlet(VerbsDiagnostic.Test, "OneMandatoryParamByPipelineSelection", DefaultParameterSetName = "Message")]
     public class TestOneMandatoryParamByPipelineSelectionCommand : PSCmdlet
     {
@@ -632,6 +656,35 @@ namespace TestPSSnapIn
                     }
                 }
             }
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "ParametersByPositionWhenOneBoundByName")]
+    public class TestParametersByPositionWhenOneBoundByName : PSCmdlet
+    {
+        [Parameter(
+            Mandatory = true,
+            Position = 0)]
+        public string First { get; set; }
+
+        [Parameter(
+            Position = 1,
+            Mandatory = true)]
+        public string Second { get; set; }
+
+        [Parameter(
+            Position = 2,
+            Mandatory = true)]
+        public string Third { get; set; }
+
+        [Parameter(
+            Position = 3,
+            Mandatory = true)]
+        public string Fourth { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(string.Format("'{0}', '{1}', '{2}', '{3}'", First, Second, Third, Fourth));
         }
     }
 }

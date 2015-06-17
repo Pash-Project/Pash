@@ -14,12 +14,16 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Management.Automation.Language;
 using System.Xml;
+using System.Management.Automation.Internal;
 
 namespace System.Management.Automation
 {
     public static class LanguagePrimitives
     {
         private static readonly Regex _signedHexRegex = new Regex(@"^\s*[\+-]?0[xX][0-9a-fA-F]+\s*$");
+        private static readonly Type[] _typesPreventEnumeration = {
+            typeof(string), typeof(IDictionary), typeof(XmlNode)
+        };
         private static readonly Type[] _numericConversionTypeOrder = new Type[] {
             typeof(int), typeof(long), typeof(decimal), typeof(double)
         };
@@ -181,6 +185,12 @@ namespace System.Management.Automation
             if (resultType == null)
             {
                 throw new ArgumentException("Result type can not be null.");
+            }
+
+            // if it's a cast to void, we want to "mute" the output. That's done by converting to null
+            if (resultType == typeof(void))
+            {
+                return AutomationNull.Value;
             }
 
             // result is no PSObject, so unpack the value if we deal with one
@@ -425,7 +435,7 @@ namespace System.Management.Automation
         {
             obj = PSObject.Unwrap(obj);
             // Powershell seems to exclude a few types from from being enumerables
-            if (obj is IDictionary || obj is string || obj is XmlDocument)
+            if (ShouldPreventEnumeration(obj))
             {
                 return null;
             }
@@ -441,8 +451,8 @@ namespace System.Management.Automation
         public static IEnumerator GetEnumerator(object obj)
         {
             obj = PSObject.Unwrap(obj);
-            // Powershell seems to exclude dictionaries and strings from being enumerables
-            if (obj is IDictionary || obj is string)
+            // Powershell seems to exclude a few types from from being enumerables
+            if (ShouldPreventEnumeration(obj))
             {
                 return null;
             }
@@ -995,6 +1005,11 @@ namespace System.Management.Automation
                     value.ToString(), type.ToString());
                 throw new PSInvalidCastException(msg, e);
             }
+        }
+
+        private static bool ShouldPreventEnumeration(object val)
+        {
+            return _typesPreventEnumeration.Any(x => x.IsInstanceOfType(val));
         }
 
         public static T Cast<T>(object obj)

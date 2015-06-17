@@ -23,6 +23,7 @@ namespace System.Management.Automation
         private CommandParameterSetInfo _defaultSet;
         private bool _hasDefaultSet;
         private List<CommandParameterSetInfo> _candidateParameterSets;
+        private EngineIntrinsics _engineIntrinsics;
 
         private CommandParameterSetInfo ActiveOrDefaultParameterSet
         {
@@ -58,6 +59,7 @@ namespace System.Management.Automation
             _hasDefaultSet = true;
             _commonParameters = (from parameter in CommonCmdletParameters.CommonParameterSetInfo.Parameters
                                  select parameter.MemberInfo).ToList();
+            _engineIntrinsics = new EngineIntrinsics(_cmdlet.ExecutionContext);
         }
 
         /// <summary>
@@ -284,16 +286,24 @@ namespace System.Management.Automation
             int i = 0;
             foreach (var curParam in parametersWithoutName)
             {
-                if (i < positionals.Count)
+                bool bound = false;
+                while (!bound)
                 {
-                    var affectedParam = positionals[i];
-                    BindParameter(affectedParam, curParam.Value, true);
-                    i++;
-                }
-                else
-                {
-                    var msg = String.Format("Positional parameter not found for provided argument '{0}'", curParam.Value);
-                    throw new ParameterBindingException(msg, "PositionalParameterNotFound");
+                    if (i < positionals.Count)
+                    {
+                        var affectedParam = positionals[i];
+                        if (!_boundParameters.Contains(affectedParam.MemberInfo))
+                        {
+                            BindParameter(affectedParam, curParam.Value, true);
+                            bound = true;
+                        }
+                        i++;
+                    }
+                    else
+                    {
+                        var msg = String.Format("Positional parameter not found for provided argument '{0}'", curParam.Value);
+                        throw new ParameterBindingException(msg, "PositionalParameterNotFound");
+                    }
                 }
             }
         }
@@ -557,6 +567,11 @@ namespace System.Management.Automation
             {
                 var msg = String.Format("Parameter '{0}' has already been bound!", info.Name);
                 throw new ParameterBindingException(msg);
+            }
+
+            foreach (var attr in info.TransformationAttributes)
+            {
+                value = attr.Transform(_engineIntrinsics, value);
             }
 
             // ConvertTo throws an exception if conversion isn't possible. That's just fine.

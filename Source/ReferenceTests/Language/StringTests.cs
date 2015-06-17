@@ -46,6 +46,29 @@ namespace ReferenceTests.Language
             var res = ReferenceHost.Execute("$x = 1; & { $x = 2; \"" + stringPrefix + varAccess + "\"; }");
             Assert.That(res, Is.EqualTo(NewlineJoin(stringPrefix + expected)));
         }
+
+        [Test]
+        [TestCase("\"$($foo)\"", "foo")]
+        [TestCase("\"start $($foo)\"", "start foo")]
+        [TestCase("\"$($foo) end\"", "foo end")]
+        [TestCase("\"start $($foo) end\"", "start foo end")] // had some spacing problems
+        [TestCase("\"double $($foo)$($foo)\"", "double foofoo")]
+        [TestCase("\"double $($foo) $($foo)\"", "double foo foo")]
+        [TestCase("\"double $($foo)$($foo) end\"", "double foofoo end")]
+        [TestCase("\"double $($foo) $($foo) end\"", "double foo foo end")]
+        [TestCase("\"$(\"$foo\")\"", "foo")]
+        [TestCase("\"$($i = 10)\"", "")]
+        [TestCase("\"$($i = 10)$i\"", "10")]
+        // subexpression in subexpression
+        [TestCase("\"$($($foo))\"", "foo")]
+        [TestCase("\"$(\"$($foo)\")\"", "foo")]
+        [TestCase("\"$(\"$(\"$foo\")\")\"", "foo")]
+        [TestCase("\"$($i=10 ; $(\"i is $i\"))\"", "i is 10")]
+        public void Section7_1_6_StringWithSubexpression(string psStr, string expected)
+        {
+            var res = ReferenceHost.Execute("$foo = \"foo\"; " + psStr);
+            Assert.AreEqual(NewlineJoin(expected), res);
+        }
     }
 }
 

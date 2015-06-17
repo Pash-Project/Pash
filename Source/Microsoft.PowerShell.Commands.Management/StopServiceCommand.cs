@@ -20,6 +20,7 @@ namespace Microsoft.PowerShell.Commands
     ///   Resume-Service
     /// </summary>
     [Cmdlet("Stop", "Service", DefaultParameterSetName = "Default", SupportsShouldProcess = true)]
+    [OutputType(typeof(ServiceController))]
     public sealed class StopServiceCommand : Cmdlet
     {
         protected override void ProcessRecord()

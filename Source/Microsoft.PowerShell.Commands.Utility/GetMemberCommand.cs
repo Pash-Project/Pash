@@ -8,6 +8,7 @@ using System.Management.Automation.Internal;
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Get", "Member")]
+    [OutputType(typeof(MemberDefinition))]
     public class GetMemberCommand : PSCmdlet
     {
         private HashSet<string> _displayedTypes;
