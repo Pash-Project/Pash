@@ -27,7 +27,7 @@ specific API while maintaining a unique way to handle scoped items.
 But it's not only good for scoped data, but also for global data. For
 example loaded Providers aren't scope specific, but always global in the
 context of a Pash session.  It's the same with Paths (and locations).
-So to avoid to implement all API in the `SessionStateGlobal` class, it's
+To avoid to implement all API in the `SessionStateGlobal` class, it's
 implemented in the `PathIntrinsics` and 
 `CmdletProviderManagementIntrinsics` while the data stays in the
 `SessionStateGlobal`.  So if you need comfortable path related
