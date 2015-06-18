@@ -690,13 +690,42 @@ namespace TestPSSnapIn
 
     public class TestDynamicParameters
     {
-        [Parameter(Mandatory=true)]
+        [Parameter(Mandatory=true, Position=0)]
         public string MessageOne { get; set; }
 
         [Parameter(ValueFromPipeline=true)]
         public string MessageTwo { get; set; }
+
+        public TestDynamicParameters()
+            : this(null, null)
+        {
+        }
+
+        public TestDynamicParameters(string msg1, string msg2)
+        {
+            MessageOne = msg1;
+            MessageTwo = msg2;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as TestDynamicParameters;
+            if (other == null)
+            {
+                return false;
+            }
+            return String.Equals(MessageOne, other.MessageOne) &&
+                   String.Equals(MessageTwo, other.MessageTwo);
+        }
+
+        public override int GetHashCode()
+        {
+            return (MessageOne == null ? 0 : MessageOne.GetHashCode()) +
+                   (MessageTwo == null ? 0 : MessageTwo.GetHashCode());
+        }
     }
 
+    [Cmdlet(VerbsDiagnostic.Test, "DynamicParametersConditionally")]
     public class TestDynamicParametersConditionally : PSCmdlet, IDynamicParameters
     {
         private TestDynamicParameters _params;
