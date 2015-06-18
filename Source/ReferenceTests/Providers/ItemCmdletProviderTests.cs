@@ -5,6 +5,7 @@ using System.Linq;
 using System.Management.Automation;
 using System.Text;
 using TestPSSnapIn;
+using System.Security;
 
 namespace ReferenceTests.Providers
 {   
@@ -38,6 +39,20 @@ namespace ReferenceTests.Providers
         {
             var cmd = "Get-Item -Path '" + _providerQualification + TestItemProvider.DefaultItemName + "'";
             ExecuteAndCompareTypedResult(cmd, TestItemProvider.DefaultItemValue);
+        }
+
+        [Test]
+        public void ItemProviderCanGetCredentialsIfPassedToCmdlet()
+        {
+            // This test is unfortunately a little tricky. We want to make sure that the provider can access
+            // the credential we passed to the cmdlet. In order to do so, we pass some credential and the providers
+            // get method will apped the username to the returned item
+            var path = _providerQualification + TestItemProvider.DefaultItemName;
+            var cmd = NewlineJoin(
+                "$cred = New-Object System.Management.Automation.PSCredential 'theusername',$null",
+                "Get-Item -Path '" + path + "' -Credential $cred"
+            );
+            ExecuteAndCompareTypedResult(cmd, TestItemProvider.DefaultItemValue + ", theusername");
         }
 
         [Test]
