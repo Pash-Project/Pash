@@ -687,4 +687,37 @@ namespace TestPSSnapIn
             WriteObject(string.Format("'{0}', '{1}', '{2}', '{3}'", First, Second, Third, Fourth));
         }
     }
+
+    public class TestDynamicParameters
+    {
+        [Parameter(Mandatory=true)]
+        public string MessageOne { get; set; }
+
+        [Parameter(ValueFromPipeline=true)]
+        public string MessageTwo { get; set; }
+    }
+
+    public class TestDynamicParametersConditionally : PSCmdlet, IDynamicParameters
+    {
+        private TestDynamicParameters _params;
+
+        [Parameter]
+        public SwitchParameter UseParameters;
+
+        public object GetDynamicParameters()
+        {
+            if (UseParameters.IsPresent)
+            {
+                _params = new TestDynamicParameters();
+                return _params;
+            }
+            return null;
+        }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(UseParameters.IsPresent);
+            WriteObject(_params);
+        }
+    }
 }
