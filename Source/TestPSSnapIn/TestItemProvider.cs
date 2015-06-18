@@ -62,7 +62,7 @@ namespace TestPSSnapIn
                 {
                     value += ", " + Credential.UserName;
                 }
-                WriteItemObject(_defaultDrive.Items[path], path, false);
+                WriteItemObject(value, path, false);
             }
         }
 

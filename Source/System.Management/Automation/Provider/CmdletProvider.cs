@@ -33,7 +33,13 @@ namespace System.Management.Automation.Provider
         {
         }
 
-        public PSCredential Credential { get; private set; }
+        public PSCredential Credential {
+            get
+            {
+                return ProviderRuntime.Credential;
+            }
+        }
+
         protected object DynamicParameters { get; private set; }
         public Collection<string> Exclude
         {
