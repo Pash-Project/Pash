@@ -42,23 +42,5 @@ namespace Pash.Implementation
             _instance = new CommonCmdletParameters();
             return _instance;
         }
-
-        internal ReadOnlyCollection<CommandParameterSetInfo> AddCommonParameters(ReadOnlyCollection<CommandParameterSetInfo> parameterSets)
-        {
-            var updatedParameterSets = new List<CommandParameterSetInfo>();
-
-            foreach (CommandParameterSetInfo parameterSet in parameterSets)
-            {
-                List<CommandParameterInfo> updatedParameters = parameterSet.Parameters.ToList();
-                updatedParameters.AddRange(CommonParameterSetInfo.Parameters);
-
-                updatedParameterSets.Add(new CommandParameterSetInfo(
-                    parameterSet.Name,
-                    parameterSet.IsDefault,
-                    new Collection<CommandParameterInfo>(updatedParameters)));
-            }
-
-            return new ReadOnlyCollection<CommandParameterSetInfo>(updatedParameterSets);
-        }
     }
 }

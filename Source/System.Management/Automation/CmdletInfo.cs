@@ -90,7 +90,7 @@ namespace System.Management.Automation
             }
         }
 
-        private void RegisterParameter(CommandParameterInfo parameterInfo)
+        private void RegisterParameterInLookupTable(CommandParameterInfo parameterInfo)
         {
             // also add it to lookuptable and check for unuque names/aliases
             var allNames = parameterInfo.Aliases.ToList();
@@ -224,7 +224,7 @@ namespace System.Management.Automation
                 }
                 if (last != null)
                 {
-                    RegisterParameter(last);
+                    RegisterParameterInLookupTable(last);
                 }
             }
 
@@ -265,7 +265,7 @@ namespace System.Management.Automation
                 }
                 if (last != null)
                 {
-                    RegisterParameter(last);
+                    RegisterParameterInLookupTable(last);
                 }
             }
 
@@ -329,10 +329,27 @@ namespace System.Management.Automation
             {
                 return;
             }
-            ParameterSets = commonParameters.AddCommonParameters(ParameterSets);
-            foreach (CommandParameterInfo parameterInfo in commonParameters.CommonParameterSetInfo.Parameters)
+            var newParameters = commonParameters.CommonParameterSetInfo.Parameters;
+
+            // add the parameters to all sets
+            var updatedParameterSets = new List<CommandParameterSetInfo>();
+            foreach (CommandParameterSetInfo parameterSet in ParameterSets)
             {
-                RegisterParameter(parameterInfo);
+                List<CommandParameterInfo> updatedParameters = parameterSet.Parameters.ToList();
+                updatedParameters.AddRange(newParameters);
+
+                updatedParameterSets.Add(new CommandParameterSetInfo(
+                    parameterSet.Name,
+                    parameterSet.IsDefault,
+                    new Collection<CommandParameterInfo>(updatedParameters)));
+            }
+
+            ParameterSets = new ReadOnlyCollection<CommandParameterSetInfo>(updatedParameterSets);
+
+            // register all parameters in the lookup table
+            foreach (CommandParameterInfo parameterInfo in newParameters)
+            {
+                RegisterParameterInLookupTable(parameterInfo);
             }
         }
 
