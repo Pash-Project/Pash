@@ -64,6 +64,7 @@ namespace System.Management.Automation
             PSSnapIn = snapin;
             Module = module;
             GetParameterSetInfo(implementingType);
+            AddCommonParameters();
             GetOutputTypes(implementingType);
         }
 
@@ -321,8 +322,15 @@ namespace System.Management.Automation
 
         internal void AddCommonParameters()
         {
-            ParameterSets = CommonCmdletParameters.AddCommonParameters(ParameterSets);
-            foreach (CommandParameterInfo parameterInfo in CommonCmdletParameters.CommonParameterSetInfo.Parameters)
+            var commonParameters = CommonCmdletParameters.instance();
+            // in case we are just creating a CmdletInfo for the common parameters fake cmdlet, the instance will be
+            // null, so we just return
+            if (commonParameters == null)
+            {
+                return;
+            }
+            ParameterSets = commonParameters.AddCommonParameters(ParameterSets);
+            foreach (CommandParameterInfo parameterInfo in commonParameters.CommonParameterSetInfo.Parameters)
             {
                 RegisterParameter(parameterInfo);
             }

@@ -42,12 +42,11 @@ namespace Pash.Implementation
         private void LoadCmdletsFromAssembly(Assembly assembly, PSSnapInInfo snapinInfo, PSModuleInfo moduleInfo)
         {
             var cmdlets = from Type type in assembly.GetTypes()
-                where type.IsSubclassOf(typeof(Cmdlet))
+                    where type.IsSubclassOf(typeof(Cmdlet))
                     from CmdletAttribute cmdletAttribute in type.GetCustomAttributes(typeof(CmdletAttribute), true)
                     select new CmdletInfo(cmdletAttribute.FullName, type, null, snapinInfo, moduleInfo);
             foreach (CmdletInfo curCmdlet in cmdlets)
             {
-                curCmdlet.AddCommonParameters();
                 Scope.SetLocal(curCmdlet, false);
             }
         }
