@@ -39,7 +39,7 @@ namespace System.Management.Automation
             ValueFromRemainingArguments = paramAttr.ValueFromRemainingArguments;
             IsMandatory = paramAttr.Mandatory;
             HelpMessage = paramAttr.HelpMessage;
-            ParameterSetName = paramAttr.ParameterSetName;
+            ParameterSetName = paramAttr.ParameterSetName ?? ParameterAttribute.AllParameterSets;
 
             List<Attribute> attributes = new List<Attribute>(1);
             attributes.Add(paramAttr);
