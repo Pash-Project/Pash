@@ -329,14 +329,15 @@ namespace System.Management.Automation
             {
                 return;
             }
-            var newParameters = commonParameters.CommonParameterSetInfo.Parameters;
+            var newParameters = commonParameters.CommonParameters;
 
             // add the parameters to all sets
             var updatedParameterSets = new List<CommandParameterSetInfo>();
             foreach (CommandParameterSetInfo parameterSet in ParameterSets)
             {
                 List<CommandParameterInfo> updatedParameters = parameterSet.Parameters.ToList();
-                updatedParameters.AddRange(newParameters);
+
+                updatedParameters.AddRange(newParameters.AllParameters);
 
                 updatedParameterSets.Add(new CommandParameterSetInfo(
                     parameterSet.Name,
@@ -346,10 +347,10 @@ namespace System.Management.Automation
 
             ParameterSets = new ReadOnlyCollection<CommandParameterSetInfo>(updatedParameterSets);
 
-            // register all parameters in the lookup table
-            foreach (CommandParameterInfo parameterInfo in newParameters)
+            // register all parameter names in the lookup table
+            foreach (var namedParameter in newParameters.NamedParameters.Values)
             {
-                RegisterParameterInLookupTable(parameterInfo);
+                RegisterParameterInLookupTable(namedParameter);
             }
         }
 

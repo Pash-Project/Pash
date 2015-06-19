@@ -24,6 +24,7 @@ namespace System.Management.Automation
         public bool ValueFromPipelineByPropertyName { get; private set; }
         public bool ValueFromRemainingArguments { get; private set; }
         internal ReadOnlyCollection<ArgumentTransformationAttribute> TransformationAttributes { get; private set; }
+        internal string ParameterSetName { get; private set; }
 
         internal MemberInfo MemberInfo { get; private set; }
 
@@ -38,6 +39,7 @@ namespace System.Management.Automation
             ValueFromRemainingArguments = paramAttr.ValueFromRemainingArguments;
             IsMandatory = paramAttr.Mandatory;
             HelpMessage = paramAttr.HelpMessage;
+            ParameterSetName = paramAttr.ParameterSetName;
 
             List<Attribute> attributes = new List<Attribute>(1);
             attributes.Add(paramAttr);

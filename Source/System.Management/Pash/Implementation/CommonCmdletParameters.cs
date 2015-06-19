@@ -11,14 +11,12 @@ namespace Pash.Implementation
         private static Boolean _initializing = false;
         private static CommonCmdletParameters _instance;
 
-        readonly CmdletInfo _commonCmdletInfo;
-        internal CommandParameterSetInfo CommonParameterSetInfo { get; private set; }
+        internal CmdletParameterDiscovery CommonParameters { get; private set; }
 
         private CommonCmdletParameters()
         {
             _initializing = true;
-            _commonCmdletInfo = new CmdletInfo("Common-Commands", typeof(CommonParametersCmdlet), null);
-            CommonParameterSetInfo = _commonCmdletInfo.GetDefaultParameterSet();
+            CommonParameters = new CmdletParameterDiscovery(typeof(CommonParametersCmdlet));
         }
 
         /// <summary>
