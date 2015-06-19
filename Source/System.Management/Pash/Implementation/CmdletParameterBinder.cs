@@ -57,7 +57,7 @@ namespace System.Management.Automation
             _activeSet = null;
             _defaultSet = null;
             _hasDefaultSet = true;
-            _commonParameters = (from parameter in CommonCmdletParameters.instance().CommonParameters.NamedParameters.Values
+            _commonParameters = (from parameter in CommonCmdletParameters.ParameterDiscovery.NamedParameters.Values
                                  select parameter.MemberInfo).ToList();
             _engineIntrinsics = new EngineIntrinsics(_cmdlet.ExecutionContext);
         }

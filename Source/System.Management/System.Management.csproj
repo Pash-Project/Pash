@@ -434,8 +434,6 @@
     <Compile Include="Pash\Implementation\Commands\FileContentWriter.cs" />
     <Compile Include="Pash\Implementation\Commands\SessionStateContentReader.cs" />
     <Compile Include="Pash\Implementation\Commands\SessionStateContentWriter.cs" />
-    <Compile Include="Pash\Implementation\CommonCmdlet.cs" />
-    <Compile Include="Pash\Implementation\CommonCmdletParameters.cs" />
     <Compile Include="Pash\Implementation\ExecutionVisitorHelper\FileRedirectionOperator.cs" />
     <Compile Include="Pash\Implementation\ExecutionVisitorHelper\FileRedirectionVisitor.cs" />
     <Compile Include="Pash\Implementation\ExecutionVisitorHelper\RedirectionVisitor.cs" />
@@ -532,7 +530,8 @@
     <Compile Include="Pash\Implementation\SecureStringReader.cs" />
     <Compile Include="Pash\Implementation\CredentialMessages.cs" />
     <Compile Include="Pash\Implementation\StringExtensions.cs" />
-    <Compile Include="Pash\Implementation\CmdletParameterDiscovery.cs" />
+    <Compile Include="Pash\Implementation\CommandParameterDiscovery.cs" />
+    <Compile Include="Pash\Implementation\CommonCmdletParameters.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

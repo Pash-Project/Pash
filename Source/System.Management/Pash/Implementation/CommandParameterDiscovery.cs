@@ -6,7 +6,7 @@ using System.Management.Automation;
 
 namespace Pash.Implementation
 {
-    public class CmdletParameterDiscovery
+    public class CommandParameterDiscovery
     {
         private readonly Type _type;
 
@@ -24,7 +24,7 @@ namespace Pash.Implementation
         /// <value>Dictionary with parameter member name and a representative ParameterInfo object.</value>
         public Dictionary<string, CommandParameterInfo> NamedParameters { get; private set; }
 
-        public CmdletParameterDiscovery(Type type)
+        public CommandParameterDiscovery(Type type)
         {
             _type = type;
             AllParameters = new List<CommandParameterInfo>();

@@ -322,14 +322,7 @@ namespace System.Management.Automation
 
         internal void AddCommonParameters()
         {
-            var commonParameters = CommonCmdletParameters.instance();
-            // in case we are just creating a CmdletInfo for the common parameters fake cmdlet, the instance will be
-            // null, so we just return
-            if (commonParameters == null)
-            {
-                return;
-            }
-            var newParameters = commonParameters.CommonParameters;
+            var newParameters = CommonCmdletParameters.ParameterDiscovery;
 
             // add the parameters to all sets
             var updatedParameterSets = new List<CommandParameterSetInfo>();
