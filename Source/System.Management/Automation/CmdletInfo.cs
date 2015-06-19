@@ -64,7 +64,6 @@ namespace System.Management.Automation
             PSSnapIn = snapin;
             Module = module;
             InitializeParameterSetInfo(implementingType);
-            AddCommonParameters();
             InitializeOutputTypes(implementingType);
         }
 
@@ -227,6 +226,9 @@ namespace System.Management.Automation
             }
 
             ParameterSets = new ReadOnlyCollection<CommandParameterSetInfo>(paramSetInfo);
+
+            // last, but not least, at all common parameters to all parameter sets
+            AddParametersToAllSets(CommonCmdletParameters.ParameterDiscovery);
         }
 
         internal CommandParameterSetInfo GetParameterSetByName(string strParamSetName)
@@ -257,17 +259,15 @@ namespace System.Management.Automation
             return new ReadOnlyCollection<CommandParameterSetInfo>(ParameterSets.Where(x => !x.IsDefault).ToList());
         }
 
-        internal void AddCommonParameters()
+        internal void AddParametersToAllSets(CommandParameterDiscovery discovery)
         {
-            var newParameters = CommonCmdletParameters.ParameterDiscovery;
-
             // add the parameters to all sets
             var updatedParameterSets = new List<CommandParameterSetInfo>();
             foreach (CommandParameterSetInfo parameterSet in ParameterSets)
             {
                 List<CommandParameterInfo> updatedParameters = parameterSet.Parameters.ToList();
 
-                updatedParameters.AddRange(newParameters.AllParameters);
+                updatedParameters.AddRange(discovery.AllParameters);
 
                 updatedParameterSets.Add(new CommandParameterSetInfo(
                     parameterSet.Name,
@@ -278,7 +278,7 @@ namespace System.Management.Automation
             ParameterSets = new ReadOnlyCollection<CommandParameterSetInfo>(updatedParameterSets);
 
             // register all parameter names in the lookup table
-            foreach (var namedParameter in newParameters.NamedParameters.Values)
+            foreach (var namedParameter in discovery.NamedParameters.Values)
             {
                 RegisterParameterInLookupTable(namedParameter);
             }

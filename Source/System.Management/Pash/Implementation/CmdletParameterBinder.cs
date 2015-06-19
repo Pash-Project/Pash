@@ -229,6 +229,7 @@ namespace System.Management.Automation
             // get the object with dynamic parameters
             var parameterObject = dynamicParamsCmdlet.GetDynamicParameters();
             // TODO: handle dynamic parameters from the object
+            // TODO: use _cmdletInfo.AddParametersToAllSets for this
         }
 
         private void SetCmdletParameterSetName(CommandParameterSetInfo chosenSet)
