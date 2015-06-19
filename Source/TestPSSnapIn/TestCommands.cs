@@ -733,6 +733,9 @@ namespace TestPSSnapIn
         [Parameter]
         public SwitchParameter UseParameters;
 
+        [Parameter(Position=5)]
+        public String DefaultMessage;
+
         public object GetDynamicParameters()
         {
             if (UseParameters.IsPresent)
@@ -746,6 +749,7 @@ namespace TestPSSnapIn
         protected override void ProcessRecord()
         {
             WriteObject(UseParameters.IsPresent);
+            WriteObject(DefaultMessage);
             WriteObject(_params);
         }
     }

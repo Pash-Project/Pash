@@ -14,7 +14,7 @@ namespace ReferenceTests.Language
         [Test]
         public void NoDynamicParametersIsNoProblem()
         {
-            ExecuteAndCompareTypedResult(_cmdletName, false, null);
+            ExecuteAndCompareTypedResult(_cmdletName, false, null, null);
         }
 
         [Test]
@@ -37,21 +37,31 @@ namespace ReferenceTests.Language
         public void DynamicParametersCanTakeOnlyMandatory()
         {
             var parameters = new TestDynamicParameters("foo", null);
-            ExecuteAndCompareTypedResult(_cmdletName + " -MessageOne foo -UseParameters", true, parameters);
+            ExecuteAndCompareTypedResult(_cmdletName + " -MessageOne foo -UseParameters", true, null, parameters);
         }
 
         [Test]
-        public void DynamicParametersCanUsePositionalParameters()
+        public void DynamicParametersCanUsePositionalOnlyAfterNormalParameters()
         {
             var parameters = new TestDynamicParameters("foo", null);
-            ExecuteAndCompareTypedResult(_cmdletName + " foo -UseParameters", true, parameters);
+            ExecuteAndCompareTypedResult(_cmdletName + " -DefaultMessage bar -UseParameters foo", true, "bar", parameters);
+        }
+        
+
+        [Test]
+        public void DynamicParametersPositionIsResolvedAfterNormalParameterPosition()
+        {
+            // although the normal parameter "DefaultMessage" has position 5, and the dynamic parameter has position 0,
+            // normal parameters by position are resolved and bound first
+            var parameters = new TestDynamicParameters("bar", null);
+            ExecuteAndCompareTypedResult(_cmdletName + " foo bar -UseParameters", true, "foo", parameters);
         }
 
         [Test]
         public void DynamicParametersCanTakeOptionalParameters()
         {
             var parameters = new TestDynamicParameters("foo", "bar");
-            ExecuteAndCompareTypedResult(_cmdletName + " foo -UseParameters -MessageTwo 'bar' ", true, parameters);
+            ExecuteAndCompareTypedResult(_cmdletName + " -MessageOne foo -UseParameters -MessageTwo 'bar' ", true, null, parameters);
         }
     }
 }
