@@ -29,6 +29,8 @@ namespace Microsoft.PowerShell.Commands
             Container = true; // Documentation states that this must explicitly disabled (yep, that's strange, but true)
         }
 
+        // TODO: #DynamicParameter support
+
         protected override void ProcessRecord()
         {
             var runtime = ProviderRuntime;

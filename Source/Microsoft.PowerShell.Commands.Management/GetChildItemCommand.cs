@@ -64,6 +64,7 @@ namespace Microsoft.PowerShell.Commands
         [Parameter]
         public SwitchParameter Recurse { get; set; }
 
+        // TODO: #DynamicParameter support
 
         protected override void ProcessRecord()
         {

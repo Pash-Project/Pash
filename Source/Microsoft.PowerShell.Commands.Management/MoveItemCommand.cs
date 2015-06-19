@@ -31,6 +31,8 @@ namespace Microsoft.PowerShell.Commands
             InvokeProvider.Item.Move(InternalPaths, Destination, runtime);
         }
 
+        // TODO: #DynamicParameter support
+
         [Parameter(Position = 1, ValueFromPipelineByPropertyName = true)]
         public string Destination { get; set; }
 

@@ -90,10 +90,11 @@ namespace System.Management.Automation
             //    Binding will also restrict the candidate set and check for ambiguity 
             BindPositionalParameters(parameters, ActiveOrDefaultParameterSet);
 
-            // 4. This would be the place for common parameters, support of ShouldProcess and dynamic parameters
-            // TODO: care about "common" parameters and #DynamicParameters
+            // 4. Bind dynamic parameters based on what's already bound
+            // TODO: this is also the place to support ShouldProcess
+            BindDynamicParameters();
 
-            // 6. There might be parameter sets with parameters that are still unbound but will be set by pipeline.
+            // 5. There might be parameter sets with parameters that are still unbound but will be set by pipeline.
             //    If not, and if we have an (active or default) parameter set that is still a candidate, then get the
             //    missing parameters.
             if (!HasParameterSetsWithUnboundMandatoryPipelineParameters() &&
@@ -102,13 +103,11 @@ namespace System.Management.Automation
                 HandleMissingMandatoryParameters(ActiveOrDefaultParameterSet, false, true);
             }
 
-
-
-            // 7. We finished binding parameters without pipeline. Therefore we can restrict the candidate set to those
+            // 6. We finished binding parameters without pipeline. Therefore we can restrict the candidate set to those
             //    sets that have all mandatory parameters set or are able to set them by pipeline
             RestrictCandidatesByBoundParameter(false);
 
-            // 8. Check if we have unbound parameters that can be set by pipeline. If not and we can already do
+            // 7. Check if we have unbound parameters that can be set by pipeline. If not and we can already do
             // our final choice (and throw an error on problems)
             if (!HasUnboundPipelineParameters())
             {
@@ -220,6 +219,18 @@ namespace System.Management.Automation
             return allParams;
         }
 
+        private void BindDynamicParameters()
+        {
+            var dynamicParamsCmdlet = _cmdlet as IDynamicParameters;
+            if (dynamicParamsCmdlet == null) // no support for dynamic parameters
+            {
+                return;
+            }
+            // get the object with dynamic parameters
+            var parameterObject = dynamicParamsCmdlet.GetDynamicParameters();
+            // TODO: handle dynamic parameters from the object
+        }
+
         private void SetCmdletParameterSetName(CommandParameterSetInfo chosenSet)
         {
             if (_cmdlet is PSCmdlet)
@@ -246,6 +257,7 @@ namespace System.Management.Automation
 
         private void BindNamedParameters(CommandParameterCollection parameters)
         {
+            // TODO: remember which parameters were bound and which not
             var namedParameters = from parameter in parameters
                                       where !String.IsNullOrEmpty(parameter.Name)
                                   select parameter;
@@ -268,8 +280,9 @@ namespace System.Management.Automation
 
         private void BindPositionalParameters(CommandParameterCollection parameters, CommandParameterSetInfo parameterSet)
         {
+            // TODO: remember which parameters were bound and which not
             var parametersWithoutName = from param in parameters
-                                            where String.IsNullOrEmpty(param.Name)
+                                        where String.IsNullOrEmpty(param.Name)
                                         select param;
             if (parameterSet == null)
             {
