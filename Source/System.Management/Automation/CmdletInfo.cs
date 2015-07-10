@@ -121,8 +121,7 @@ namespace System.Management.Automation
                               select key).ToList();
             if (candidates.Count < 1)
             {
-                var msg = String.Format("No parameter was found that matches the name or alias '{0}'.", name);
-                throw new ParameterBindingException(msg, "ParameterNotFound");
+                return null;
             }
             if (candidates.Count > 1)
             {

@@ -11,6 +11,14 @@ namespace System.Management.Automation.Runspaces
         {
         }
 
+        internal CommandParameterCollection(CommandParameterCollection parameters)
+        {
+            foreach (var param in parameters)
+            {
+                Add(param);
+            }
+        }
+
         public void Add(string name)
         {
             Add(new CommandParameter(name));
