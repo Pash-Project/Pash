@@ -52,7 +52,7 @@ namespace TestPSSnapIn
         protected override PSDriveInfo RemoveDrive(PSDriveInfo drive)
         {
             var testdrive = drive as TestDrive;
-            if (drive == null)
+            if (testdrive == null)
             {
                 throw new InvalidOperationException("Drive is not a TestDrive!");
             }

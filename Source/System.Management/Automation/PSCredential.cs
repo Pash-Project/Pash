@@ -48,7 +48,7 @@ namespace System.Management.Automation
         public PSCredential(PSCredential credential)
         {
             username = credential.username;
-            password = credential.Password.Copy();
+            password = credential.Password != null ? credential.Password.Copy() : null;
         }
 
 		public NetworkCredential GetNetworkCredential()

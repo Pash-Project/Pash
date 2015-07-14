@@ -27,7 +27,7 @@ namespace Microsoft.PowerShell.Commands
             throw new NotImplementedException();
         }
 
-        public object GetDynamicParameters()
+        public virtual object GetDynamicParameters()
         {
             // TODO: For #DynamicParameter support, throw exception and force subclasses to override. So it's not forgotten
             return null;

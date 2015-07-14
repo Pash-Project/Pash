@@ -40,7 +40,14 @@ namespace System.Management.Automation.Provider
             }
         }
 
-        protected object DynamicParameters { get; private set; }
+        protected object DynamicParameters
+        {
+            get
+            {
+                return ProviderRuntime.DynamicParameters;
+            }
+        }
+
         public Collection<string> Exclude
         {
             get
@@ -250,7 +257,7 @@ namespace System.Management.Automation.Provider
             {
                 throw new NotSupportedException("This provider doesn't support filters");
             }
-            if (runtime.Credential != PSCredential.Empty &&
+            if ((runtime.Credential.UserName != null || runtime.Credential.Password != null) &&
                 !ProviderInfo.Capabilities.HasFlag(ProviderCapabilities.Credentials))
             {
                 throw new NotSupportedException("This provider doesn't support credentials");

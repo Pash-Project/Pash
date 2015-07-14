@@ -229,8 +229,7 @@ namespace System.Management.Automation
                 try
                 {
                     // always to global scope
-                    // use NewSkipInit because the dafault drives are inited
-                    _sessionState.RootSessionState.Drive.NewSkipInit(driveInfo,
+                    _sessionState.RootSessionState.Drive.New(driveInfo,
                         SessionStateScope<PSDriveInfo>.ScopeSpecifiers.Global.ToString());
                 }
                 catch

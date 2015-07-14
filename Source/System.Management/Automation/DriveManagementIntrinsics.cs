@@ -104,6 +104,16 @@ namespace System.Management.Automation
             return info;
         }
 
+        internal Object NewDriveDynamicParameters(string providerName, ProviderRuntime runtime)
+        {
+            var driveProvider = _scope.SessionState.Provider.GetInstance(providerName) as DriveCmdletProvider;
+            if (driveProvider == null)
+            {
+                throw new ArgumentException("The provider is not a drive provider");
+            }
+            return driveProvider.NewDriveDynamicParameters(runtime);
+        }
+
         public PSDriveInfo New(PSDriveInfo drive, string scope)
         {
             var runtime = new ProviderRuntime(_scope.SessionState);
@@ -112,19 +122,13 @@ namespace System.Management.Automation
 
         internal PSDriveInfo New(PSDriveInfo drive, string scope, ProviderRuntime providerRuntime)
         {
-            // make sure the provider can intitalize this drive properly
-            drive = GetProvider(drive).NewDrive(drive, providerRuntime);
-            return NewSkipInit(drive, scope);
-        }
-
-        internal PSDriveInfo NewSkipInit(PSDriveInfo drive, string scope)
-        {
             /*
              * "Fun" Fact: Although "private" is a valid scope specifier, it does not really make the drive
              * private, i.e. it does not restricts child scopes froma accessing or removing it.
              * "Private" seems to be only effective for variables, functions and aliases, but not for drives.
              * Who knows why.
              */
+            drive = GetProvider(drive).NewDrive(drive, providerRuntime);
             _scope.SetAtScope(drive, scope, false);
             return drive;
         }

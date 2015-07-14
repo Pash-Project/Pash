@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Management.Automation;
+using System.Management.Automation.Provider;
+using Pash.Implementation;
 
 namespace Microsoft.PowerShell.Commands
 {
@@ -27,6 +29,24 @@ namespace Microsoft.PowerShell.Commands
         [Parameter(ValueFromPipelineByPropertyName=true)] 
         public SwitchParameter Persist { get; set; }
         */
+
+        internal override ProviderRuntime ProviderRuntime
+        {
+            get
+            {
+                var runtime = base.ProviderRuntime;
+                runtime.DynamicParameters = _dynamicParameters;
+                return runtime;
+            }
+        }
+
+        private object _dynamicParameters;
+
+        public override object GetDynamicParameters()
+        {
+            _dynamicParameters = SessionState.Drive.NewDriveDynamicParameters(PSProvider, ProviderRuntime);
+            return _dynamicParameters;
+        }
 
         protected override bool ProviderSupportsShouldProcess { get { return true; } }
 

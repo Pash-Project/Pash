@@ -25,7 +25,7 @@ namespace System.Management.Automation.Provider
 
         protected virtual object NewDriveDynamicParameters()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         protected virtual PSDriveInfo RemoveDrive(PSDriveInfo drive)
@@ -49,6 +49,12 @@ namespace System.Management.Automation.Provider
         {
             ProviderRuntime = runtime;
             return NewDrive(drive);
+        }
+
+        internal object NewDriveDynamicParameters(ProviderRuntime runtime)
+        {
+            ProviderRuntime = runtime;
+            return NewDriveDynamicParameters();
         }
     }
 }
