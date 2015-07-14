@@ -58,11 +58,11 @@ namespace TestPSSnapIn
             if (_defaultDrive.Items.ContainsKey(path))
             {
                 var value = _defaultDrive.Items[path];
+                WriteItemObject(value, path, false);
                 if (Credential != null)
                 {
-                    value += ", " + Credential.UserName;
+                    WriteItemObject(Credential, path, false);
                 }
-                WriteItemObject(value, path, false);
             }
         }
 

@@ -26,13 +26,18 @@ namespace System.Management.Automation
 			}
 		}
 
+        private static PSCredential _emptyCredential = new PSCredential();
 		public static PSCredential Empty
 		{
 			get
 			{
-				throw new NotImplementedException ();
+                return _emptyCredential;
 			}
 		}
+
+        private PSCredential()
+        {
+        }
 
 		public PSCredential(string userName, SecureString password)
 		{

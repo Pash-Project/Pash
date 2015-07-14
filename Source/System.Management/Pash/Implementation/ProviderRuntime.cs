@@ -47,6 +47,7 @@ namespace Pash.Implementation
             SessionState = sessionState;
             AvoidGlobbing = avoidWildcardExpansion;
             Force = force;
+            Credential = PSCredential.Empty;
         }
 
         public ProviderRuntime(ProviderRuntime runtime)
@@ -60,10 +61,7 @@ namespace Pash.Implementation
             Filter = runtime.Filter;
             AvoidGlobbing = runtime.AvoidGlobbing;
             IgnoreFiltersForGlobbing = runtime.IgnoreFiltersForGlobbing;
-            if (runtime.Credential != null)
-            {
-                Credential = new PSCredential(runtime.Credential);
-            }
+            Credential = new PSCredential(runtime.Credential);
         }
 
         internal Collection<PSObject> RetreiveAllProviderData()

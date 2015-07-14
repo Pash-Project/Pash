@@ -250,7 +250,7 @@ namespace System.Management.Automation.Provider
             {
                 throw new NotSupportedException("This provider doesn't support filters");
             }
-            if (runtime.Credential != null &&
+            if (runtime.Credential != PSCredential.Empty &&
                 !ProviderInfo.Capabilities.HasFlag(ProviderCapabilities.Credentials))
             {
                 throw new NotSupportedException("This provider doesn't support credentials");

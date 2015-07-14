@@ -19,7 +19,10 @@ namespace Microsoft.PowerShell.Commands
             get
             {
                 var runtime = base.ProviderRuntime;
-                runtime.Credential = Credential;
+                if (Credential != null)
+                {
+                    runtime.Credential = Credential;
+                }
                 return runtime;
             }
         }
