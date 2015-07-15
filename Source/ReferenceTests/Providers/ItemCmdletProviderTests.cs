@@ -5,6 +5,7 @@ using System.Linq;
 using System.Management.Automation;
 using System.Text;
 using TestPSSnapIn;
+using System.Security;
 
 namespace ReferenceTests.Providers
 {   
@@ -37,7 +38,36 @@ namespace ReferenceTests.Providers
         public void ItemProviderCanGetItem()
         {
             var cmd = "Get-Item -Path '" + _providerQualification + TestItemProvider.DefaultItemName + "'";
-            ExecuteAndCompareTypedResult(cmd, TestItemProvider.DefaultItemValue);
+            var results = ReferenceHost.RawExecute(cmd);
+            Assert.That(results.Count, Is.EqualTo(2));
+            Assert.That(results[0].BaseObject, Is.EqualTo(TestItemProvider.DefaultItemValue));
+            // check that credential object is not null and values are empty
+            var credential = results[1].BaseObject as PSCredential;
+            Assert.That(credential, Is.Not.Null);
+            Assert.That(credential.UserName, Is.Null);
+            Assert.That(credential.Password, Is.Null);
+        }
+
+        [Test]
+        public void ItemProviderCanGetCredentialsIfPassedToCmdlet()
+        {
+            // This test is unfortunately a little tricky. We want to make sure that the provider can access
+            // the credential we passed to the cmdlet. In order to do so, we pass some credential and the providers
+            // get method will apped the username to the returned item
+            var path = _providerQualification + TestItemProvider.DefaultItemName;
+            var cmd = NewlineJoin(
+                "$cred = New-Object System.Management.Automation.PSCredential 'theusername',(new-object System.Security.SecureString)",
+                "Get-Item -Path '" + path + "' -Credential $cred"
+            );
+            var results = ReferenceHost.RawExecute(cmd);
+            Assert.That(results.Count, Is.EqualTo(2));
+            Assert.That(results[0].BaseObject, Is.EqualTo(TestItemProvider.DefaultItemValue));
+            // check that credential object is not null and username is set
+            var credential = results[1].BaseObject as PSCredential;
+            Assert.That(credential, Is.Not.Null);
+            Assert.That(credential.UserName, Is.EqualTo("theusername"));
+            Assert.That(credential.Password, Is.Not.Null);
+            Assert.That(credential.Password.Length, Is.EqualTo(0));
         }
 
         [Test]
@@ -80,7 +110,12 @@ namespace ReferenceTests.Providers
                 _setFooItemCommand,
                 "Get-Item -Path '" + _providerQualification + "*'"
             );
-            ExecuteAndCompareTypedResult(cmd, TestItemProvider.DefaultItemValue, _fooItemValue);
+            var results = ReferenceHost.RawExecute(cmd);
+            Assert.That(results.Count, Is.EqualTo(4));
+            Assert.That(results[0].BaseObject, Is.EqualTo(TestItemProvider.DefaultItemValue));
+            Assert.That(results[1].BaseObject, Is.InstanceOf<PSCredential>());
+            Assert.That(results[2].BaseObject, Is.EqualTo(_fooItemValue));
+            Assert.That(results[3].BaseObject, Is.InstanceOf<PSCredential>());
         }
 
         [Test]
@@ -92,7 +127,16 @@ namespace ReferenceTests.Providers
                 "Set-Item -Path " + _providerQualification + "* -Value 'baz'", // set them
                 "Get-Item -Path '" + _providerQualification + "*'" // show the result
             );
-            ExecuteAndCompareTypedResult(cmd, TestItemProvider.DefaultItemValue, _fooItemValue, "baz", "baz");
+            var results = ReferenceHost.RawExecute(cmd);
+            Assert.That(results.Count, Is.EqualTo(8));
+            Assert.That(results[0].BaseObject, Is.EqualTo(TestItemProvider.DefaultItemValue));
+            Assert.That(results[1].BaseObject, Is.InstanceOf<PSCredential>());
+            Assert.That(results[2].BaseObject, Is.EqualTo(_fooItemValue));
+            Assert.That(results[3].BaseObject, Is.InstanceOf<PSCredential>());
+            Assert.That(results[4].BaseObject, Is.EqualTo("baz"));
+            Assert.That(results[5].BaseObject, Is.InstanceOf<PSCredential>());
+            Assert.That(results[6].BaseObject, Is.EqualTo("baz"));
+            Assert.That(results[7].BaseObject, Is.InstanceOf<PSCredential>());
         }
 
         [Test]
@@ -104,7 +148,13 @@ namespace ReferenceTests.Providers
                 "Clear-Item -Path '" + _providerQualification + "*'", // clear them
                 "Get-Item -Path '" + _providerQualification +"*'" // shouldn't output anything
             );
-            ExecuteAndCompareTypedResult(cmd, TestItemProvider.DefaultItemValue, _fooItemValue); // no output after clear
+            var results = ReferenceHost.RawExecute(cmd);
+            Assert.That(results.Count, Is.EqualTo(4));
+            Assert.That(results[0].BaseObject, Is.EqualTo(TestItemProvider.DefaultItemValue));
+            Assert.That(results[1].BaseObject, Is.InstanceOf<PSCredential>());
+            Assert.That(results[2].BaseObject, Is.EqualTo(_fooItemValue));
+            Assert.That(results[3].BaseObject, Is.InstanceOf<PSCredential>());
+            // no output after clear
         }
 
         [Test]
@@ -115,7 +165,14 @@ namespace ReferenceTests.Providers
                 "Get-Item -Path '" + _providerQualification + "*'", // assure we have the two desired items
                 "Invoke-Item -Path '" + _providerQualification + "*'" // invoke them
             );
-            ExecuteAndCompareTypedResult(cmd, TestItemProvider.DefaultItemValue, _fooItemValue, "invoked!", "invoked!");
+            var results = ReferenceHost.RawExecute(cmd);
+            Assert.That(results.Count, Is.EqualTo(6));
+            Assert.That(results[0].BaseObject, Is.EqualTo(TestItemProvider.DefaultItemValue));
+            Assert.That(results[1].BaseObject, Is.InstanceOf<PSCredential>());
+            Assert.That(results[2].BaseObject, Is.EqualTo(_fooItemValue));
+            Assert.That(results[3].BaseObject, Is.InstanceOf<PSCredential>());
+            Assert.That(results[4].BaseObject, Is.EqualTo("invoked!"));
+            Assert.That(results[5].BaseObject, Is.EqualTo("invoked!"));
         }
 
     }

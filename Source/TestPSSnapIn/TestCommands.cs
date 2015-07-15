@@ -687,4 +687,70 @@ namespace TestPSSnapIn
             WriteObject(string.Format("'{0}', '{1}', '{2}', '{3}'", First, Second, Third, Fourth));
         }
     }
+
+    public class TestDynamicParameters
+    {
+        [Parameter(Mandatory=true, Position=0)]
+        public string MessageOne { get; set; }
+
+        [Parameter(ValueFromPipeline=true)]
+        public string MessageTwo { get; set; }
+
+        public TestDynamicParameters()
+            : this(null, null)
+        {
+        }
+
+        public TestDynamicParameters(string msg1, string msg2)
+        {
+            MessageOne = msg1;
+            MessageTwo = msg2;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as TestDynamicParameters;
+            if (other == null)
+            {
+                return false;
+            }
+            return String.Equals(MessageOne, other.MessageOne) &&
+                   String.Equals(MessageTwo, other.MessageTwo);
+        }
+
+        public override int GetHashCode()
+        {
+            return (MessageOne == null ? 0 : MessageOne.GetHashCode()) +
+                   (MessageTwo == null ? 0 : MessageTwo.GetHashCode());
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "DynamicParametersConditionally")]
+    public class TestDynamicParametersConditionally : PSCmdlet, IDynamicParameters
+    {
+        private TestDynamicParameters _params;
+
+        [Parameter]
+        public SwitchParameter UseParameters;
+
+        [Parameter(Position=5)]
+        public String DefaultMessage;
+
+        public object GetDynamicParameters()
+        {
+            if (UseParameters.IsPresent)
+            {
+                _params = new TestDynamicParameters();
+                return _params;
+            }
+            return null;
+        }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject(UseParameters.IsPresent);
+            WriteObject(DefaultMessage);
+            WriteObject(_params);
+        }
+    }
 }

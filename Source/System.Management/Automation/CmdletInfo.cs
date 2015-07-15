@@ -63,8 +63,8 @@ namespace System.Management.Automation
             _validationException = null;
             PSSnapIn = snapin;
             Module = module;
-            GetParameterSetInfo(implementingType);
-            GetOutputTypes(implementingType);
+            InitializeParameterSetInfo(implementingType);
+            InitializeOutputTypes(implementingType);
         }
 
         public override string Definition
@@ -89,7 +89,7 @@ namespace System.Management.Automation
             }
         }
 
-        private void RegisterParameter(CommandParameterInfo parameterInfo)
+        private void RegisterParameterInLookupTable(CommandParameterInfo parameterInfo)
         {
             // also add it to lookuptable and check for unuque names/aliases
             var allNames = parameterInfo.Aliases.ToList();
@@ -121,8 +121,7 @@ namespace System.Management.Automation
                               select key).ToList();
             if (candidates.Count < 1)
             {
-                var msg = String.Format("No parameter was found that matches the name or alias '{0}'.", name);
-                throw new ParameterBindingException(msg, "ParameterNotFound");
+                return null;
             }
             if (candidates.Count > 1)
             {
@@ -134,29 +133,18 @@ namespace System.Management.Automation
             return ParameterInfoLookupTable[candidates[0]];
         }
 
-        // internals
-        //internal CmdletInfo CreateGetCommandCopy(CmdletInfo cmdletInfo, object[] arguments);
-        //internal object[] Arguments { set; get; }
-        //internal string FullName { get; }
-        //internal bool IsGetCommandCopy { set; get; }
-
-        private CommandParameterInfo AddParameterToParameterSet(Dictionary<string, Collection<CommandParameterInfo>> paramSets,
-                                                MemberInfo memberInfo, Type type, ParameterAttribute paramAttr)
+        private void AddParameterToParameterSet(Dictionary<string, Collection<CommandParameterInfo>> paramSets,
+                                                CommandParameterInfo paramInfo)
         {
-            CommandParameterInfo pi = new CommandParameterInfo(memberInfo, type, paramAttr);
-            var paramSetName = paramAttr.ParameterSetName;
-            // Determine if this parameter is uniquely defined for one set and rember it
-
-            paramSetName = paramSetName ?? ParameterAttribute.AllParameterSets;
-
+            var paramSetName = paramInfo.ParameterSetName;
+            // create the parameter set if it doesn't exist, yet
             if (!paramSets.ContainsKey(paramSetName))
             {
                 paramSets.Add(paramSetName, new Collection<CommandParameterInfo>());
             }
-
             Collection<CommandParameterInfo> paramSet = paramSets[paramSetName];
-            paramSet.Add(pi);
-            return pi;
+            // actually add parameter to the set
+            paramSet.Add(paramInfo);
         }
 
         /// <remarks>
@@ -175,7 +163,7 @@ namespace System.Management.Automation
         /// * In addition, only one parameter in a set should declare ValueFromPipeline = true. Multiple parameters may define ValueFromPipelineByPropertyName = true.
         /// 
         /// </remarks>
-        private void GetParameterSetInfo(Type cmdletType)
+        private void InitializeParameterSetInfo(Type cmdletType)
         {
             Dictionary<string, Collection<CommandParameterInfo>> paramSets = new Dictionary<string, Collection<CommandParameterInfo>>(StringComparer.CurrentCultureIgnoreCase);
 
@@ -205,90 +193,41 @@ namespace System.Management.Automation
                 paramSets.Add(ParameterAttribute.AllParameterSets, new Collection<CommandParameterInfo>());
             }
 
-            // Add fields with ParameterAttribute
-            foreach (FieldInfo fieldInfo in cmdletType.GetFields(BindingFlags.Public | BindingFlags.Instance))
+            var parameterDiscovery = new CommandParameterDiscovery(cmdletType);
+            // first add the parameters to the parameter sets
+            foreach (var parameter in parameterDiscovery.AllParameters)
             {
-                System.Diagnostics.Debug.WriteLine(fieldInfo.ToString());
-
-                object[] attributes = fieldInfo.GetCustomAttributes(false);
-                CommandParameterInfo last = null;
-
-                // Find all [Parameter] attributes on the property
-                foreach (object attr in attributes)
-                {
-                    if (attr is ParameterAttribute)
-                    {
-                        last = AddParameterToParameterSet(paramSets, fieldInfo, fieldInfo.FieldType, (ParameterAttribute) attr);
-                    }
-                }
-                if (last != null)
-                {
-                    RegisterParameter(last);
-                }
+                AddParameterToParameterSet(paramSets, parameter);
             }
 
-            // Add properties with ParameterAttribute
-            foreach (PropertyInfo propertyInfo in cmdletType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            // now add each parameter member to the lookup table
+            foreach (var namedParam in parameterDiscovery.NamedParameters.Values)
             {
-                System.Diagnostics.Debug.WriteLine(propertyInfo.ToString());
-
-                object[] attributes = propertyInfo.GetCustomAttributes(false);
-
-                // Get info for the setter and getter
-                MethodInfo getter = propertyInfo.GetAccessors().FirstOrDefault(i => i.IsSpecialName && i.Name.StartsWith("get_"));
-                MethodInfo setter = propertyInfo.GetSetMethod();
-
-                // Find all [Parameter] attributes on the property
-                CommandParameterInfo last = null;
-                ParameterAttribute paramAttr = null;
-                foreach (object attr in attributes)
-                {
-                    if (attr is ParameterAttribute)
-                    {
-                        paramAttr = (ParameterAttribute)attr;
-
-                        // if ValueFromPipeline or ValueFromPipelineByPropertyName is specified the property must have a public getter
-                        if ((paramAttr.ValueFromPipeline || paramAttr.ValueFromPipelineByPropertyName) && (getter == null || !getter.IsPublic))
-                        {
-                            break;
-                        }
-
-                        // The property must have a public setter
-                        if (setter == null || !setter.IsPublic)
-                        {
-                            break;
-                        }
-
-                        last = AddParameterToParameterSet(paramSets, propertyInfo, propertyInfo.PropertyType, paramAttr);
-                    }
-                }
-                if (last != null)
-                {
-                    RegisterParameter(last);
-                }
+                RegisterParameterInLookupTable(namedParam);
             }
 
-            // Create param-sets collection
+            // Create param-sets collection. Add the parameters from the AllParameterSets set to all other sets
             Collection<CommandParameterSetInfo> paramSetInfo = new Collection<CommandParameterSetInfo>();
-
             foreach (string paramSetName in paramSets.Keys)
             {
-                bool bIsDefaultParamSet = paramSetName.Equals(strDefaultParameterSetName);
-
-                paramSetInfo.Add(new CommandParameterSetInfo(paramSetName, bIsDefaultParamSet, paramSets[paramSetName]));
-
                 // If a parameter set is not specified for a parmeter, then the parameter belongs to all the parameter sets,
                 // therefore if this is not the AllParameterSets Set then add all parameters from the AllParameterSets Set to it...
-                if (string.Compare(paramSetName, ParameterAttribute.AllParameterSets) != 0 && paramSets.ContainsKey(ParameterAttribute.AllParameterSets))
+                if (!paramSetName.Equals(ParameterAttribute.AllParameterSets))
                 {
                     foreach (CommandParameterInfo cpi in paramSets[ParameterAttribute.AllParameterSets])
                     {
                         paramSets[paramSetName].Add(cpi);
                     }
                 }
+                // add the set to the setInfo collection
+                bool bIsDefaultParamSet = paramSetName.Equals(strDefaultParameterSetName);
+                paramSetInfo.Add(new CommandParameterSetInfo(paramSetName, bIsDefaultParamSet, paramSets[paramSetName]));
             }
 
             ParameterSets = new ReadOnlyCollection<CommandParameterSetInfo>(paramSetInfo);
+
+            // last, but not least, at all common parameters to all parameter sets
+            AddParametersToAllSets(CommonCmdletParameters.ParameterDiscovery);
         }
 
         internal CommandParameterSetInfo GetParameterSetByName(string strParamSetName)
@@ -319,16 +258,32 @@ namespace System.Management.Automation
             return new ReadOnlyCollection<CommandParameterSetInfo>(ParameterSets.Where(x => !x.IsDefault).ToList());
         }
 
-        internal void AddCommonParameters()
+        internal void AddParametersToAllSets(CommandParameterDiscovery discovery)
         {
-            ParameterSets = CommonCmdletParameters.AddCommonParameters(ParameterSets);
-            foreach (CommandParameterInfo parameterInfo in CommonCmdletParameters.CommonParameterSetInfo.Parameters)
+            // add the parameters to all sets
+            var updatedParameterSets = new List<CommandParameterSetInfo>();
+            foreach (CommandParameterSetInfo parameterSet in ParameterSets)
             {
-                RegisterParameter(parameterInfo);
+                List<CommandParameterInfo> updatedParameters = parameterSet.Parameters.ToList();
+
+                updatedParameters.AddRange(discovery.AllParameters);
+
+                updatedParameterSets.Add(new CommandParameterSetInfo(
+                    parameterSet.Name,
+                    parameterSet.IsDefault,
+                    new Collection<CommandParameterInfo>(updatedParameters)));
+            }
+
+            ParameterSets = new ReadOnlyCollection<CommandParameterSetInfo>(updatedParameterSets);
+
+            // register all parameter names in the lookup table
+            foreach (var namedParameter in discovery.NamedParameters.Values)
+            {
+                RegisterParameterInLookupTable(namedParameter);
             }
         }
 
-        private void GetOutputTypes(Type cmdletType)
+        private void InitializeOutputTypes(Type cmdletType)
         {
             var types = new List<PSTypeName>();
             foreach (OutputTypeAttribute attribute in cmdletType.GetCustomAttributes(typeof(OutputTypeAttribute), false))

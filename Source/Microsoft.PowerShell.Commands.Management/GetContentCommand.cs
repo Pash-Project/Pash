@@ -34,6 +34,8 @@ namespace Microsoft.PowerShell.Commands
         List<object> pendingItems = new List<object>();
         IContentReader contentReader;
 
+        // TODO: #DynamicParameter support
+
         protected override void ProcessRecord()
         {
             var readers = InvokeProvider.Content.GetReader(InternalPaths, ProviderRuntime);

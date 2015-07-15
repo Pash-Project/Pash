@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Management.Automation;
 using NUnit.Framework;
+using Pash.Implementation;
 
 namespace System.Management.Tests.ParameterTests
 {
@@ -28,14 +29,15 @@ namespace System.Management.Tests.ParameterTests
         [Test]
         public void ReflectionParameters()
         {
+            var numCommon = CommonCmdletParameters.ParameterDiscovery.AllParameters.Count;
             CommandParameterSetInfo allSet = info.GetParameterSetByName(ParameterAttribute.AllParameterSets);
             CommandParameterSetInfo fileSet = info.GetParameterSetByName("File");
             CommandParameterSetInfo variableSet = info.GetParameterSetByName("Variable");
 
 
-            Assert.AreEqual(3, allSet.Parameters.Count);
-            Assert.AreEqual(4, fileSet.Parameters.Count);
-            Assert.AreEqual(5, variableSet.Parameters.Count);
+            Assert.AreEqual(3 + numCommon, allSet.Parameters.Count);
+            Assert.AreEqual(4 + numCommon, fileSet.Parameters.Count);
+            Assert.AreEqual(5 + numCommon, variableSet.Parameters.Count);
 
             Assert.IsNotNull(allSet);
             Assert.IsNotNull(fileSet);

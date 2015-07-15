@@ -26,13 +26,18 @@ namespace System.Management.Automation
 			}
 		}
 
+        private static PSCredential _emptyCredential = new PSCredential();
 		public static PSCredential Empty
 		{
 			get
 			{
-				throw new NotImplementedException ();
+                return _emptyCredential;
 			}
 		}
+
+        private PSCredential()
+        {
+        }
 
 		public PSCredential(string userName, SecureString password)
 		{
@@ -43,7 +48,7 @@ namespace System.Management.Automation
         public PSCredential(PSCredential credential)
         {
             username = credential.username;
-            password = credential.Password.Copy();
+            password = credential.Password != null ? credential.Password.Copy() : null;
         }
 
 		public NetworkCredential GetNetworkCredential()

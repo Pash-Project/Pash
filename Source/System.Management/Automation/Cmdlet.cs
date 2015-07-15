@@ -15,11 +15,11 @@ namespace System.Management.Automation
     /// </summary>
     public class Cmdlet : InternalCommand
     {
-        internal CommonParametersCmdlet CommonParameters { get; set; }
+        internal CommonCmdletParameters CommonParameters { get; set; }
 
         protected Cmdlet()
         {
-            CommonParameters = new CommonParametersCmdlet();
+            CommonParameters = new CommonCmdletParameters();
         }
 
         public bool Stopping

@@ -16,6 +16,7 @@ namespace Pash.Implementation
         internal SwitchParameter AvoidGlobbing { get; set; }
         internal PSDriveInfo PSDriveInfo { get; set; }
         internal bool IgnoreFiltersForGlobbing { get; set; }
+        internal object DynamicParameters { get; set; }
 
         internal bool PassThru { get; set; }
 
@@ -47,6 +48,7 @@ namespace Pash.Implementation
             SessionState = sessionState;
             AvoidGlobbing = avoidWildcardExpansion;
             Force = force;
+            Credential = PSCredential.Empty;
         }
 
         public ProviderRuntime(ProviderRuntime runtime)
@@ -60,10 +62,8 @@ namespace Pash.Implementation
             Filter = runtime.Filter;
             AvoidGlobbing = runtime.AvoidGlobbing;
             IgnoreFiltersForGlobbing = runtime.IgnoreFiltersForGlobbing;
-            if (runtime.Credential != null)
-            {
-                Credential = new PSCredential(runtime.Credential);
-            }
+            Credential = new PSCredential(runtime.Credential);
+            DynamicParameters = runtime.DynamicParameters;
         }
 
         internal Collection<PSObject> RetreiveAllProviderData()

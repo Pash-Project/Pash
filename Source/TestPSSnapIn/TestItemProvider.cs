@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace TestPSSnapIn
 {
-    [CmdletProvider(TestItemProvider.ProviderName, ProviderCapabilities.ExpandWildcards)]
+    [CmdletProvider(TestItemProvider.ProviderName, ProviderCapabilities.ExpandWildcards | ProviderCapabilities.Credentials)]
     public class TestItemProvider : ItemCmdletProvider
     {
         public const string ProviderName = "TestItemProvider";
@@ -57,7 +57,12 @@ namespace TestPSSnapIn
         {
             if (_defaultDrive.Items.ContainsKey(path))
             {
-                WriteItemObject(_defaultDrive.Items[path], path, false);
+                var value = _defaultDrive.Items[path];
+                WriteItemObject(value, path, false);
+                if (Credential != null)
+                {
+                    WriteItemObject(Credential, path, false);
+                }
             }
         }
 

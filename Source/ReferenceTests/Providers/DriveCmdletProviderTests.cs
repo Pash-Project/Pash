@@ -15,9 +15,10 @@ namespace ReferenceTests.Providers
                 "$d = Get-PSDrive -PSProvider " + TestDriveProvider.ProviderName,
                 "$d.Name", // should be only one
                 "$d.Provider.GetType().FullName", // the custom provider info
-                "$d.Root" // is '/'
+                "$d.Root", // is '/'
+                "$d.Note" // is null
             );
-            ExecuteAndCompareTypedResult(cmd, TestDriveProvider.DefaultDriveName, typeof(TestProviderInfo).FullName, "/");
+            ExecuteAndCompareTypedResult(cmd, TestDriveProvider.DefaultDriveName, typeof(TestProviderInfo).FullName, "/", null);
         }
 
         [Test]
@@ -28,13 +29,35 @@ namespace ReferenceTests.Providers
                 "[object]::ReferenceEquals((Get-PSDrive -Name 'testDrive'), $d)", // make sure it's listed by Get-PSDrive
                 "$d.GetType().FullName", // is a custom type
                 "$d.Root", // check if correctly passed
-                "$d.IsRemoved" // property of the custom type
+                "$d.IsRemoved", // property of the custom type
+                "$d.Note" // unset dynamic parameter
             );
             ExecuteAndCompareTypedResult(cmd,
                 true, // listed by Get-PSDrive
                 typeof(TestDrive).FullName, // of correct custom type
                 "/test", // with correct root
-                false // correct value of custom property
+                false, // correct value of custom property
+                null
+            );
+        }
+
+        [Test]
+        public void DriveCmdletProviderCanCreateDriveWithDynamicParameters()
+        {
+            var cmd = NewlineJoin(
+                "$d = New-PSDrive -Name 'testDrive' -Root '/test' -PSProvider " + TestDriveProvider.ProviderName + " -Note 'Custom Note'",
+                "[object]::ReferenceEquals((Get-PSDrive -Name 'testDrive'), $d)", // make sure it's listed by Get-PSDrive
+                "$d.GetType().FullName", // is a custom type
+                "$d.Root", // check if correctly passed
+                "$d.IsRemoved", // property of the custom type
+                "$d.Note"
+            );
+            ExecuteAndCompareTypedResult(cmd,
+                true, // listed by Get-PSDrive
+                typeof(TestDrive).FullName, // of correct custom type
+                "/test", // with correct root
+                false, // correct value of custom property
+                "Custom Note"
             );
         }
 

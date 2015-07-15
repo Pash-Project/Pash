@@ -172,11 +172,15 @@ namespace System.Management.Automation
             try
             {
                 var parameterInfo = _cmdletInfo.LookupParameter(name);
+                if (parameterInfo == null) { // not found
+                    return false;
+                }
                 return parameterInfo.ParameterType == typeof(SwitchParameter);
             }
             catch (ParameterBindingException)
             {
-                // seems to be ambiguous. well, this is the wrong place to throw the error, it will be thrown later on
+                // seems to be ambiguous or not existing.
+                // maybe it's a dynamic parameter that's added later on
             }
             return false;
         }

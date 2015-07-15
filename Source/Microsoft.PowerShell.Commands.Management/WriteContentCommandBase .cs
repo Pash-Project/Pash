@@ -16,6 +16,8 @@ namespace Microsoft.PowerShell.Commands
 
         internal Collection<IContentWriter> Writers { get; set; }
 
+        // TODO: #DynamicParameter support
+
         protected override void ProcessRecord()
         {
             WriteValues();

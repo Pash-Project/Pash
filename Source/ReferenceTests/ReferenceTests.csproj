@@ -58,6 +58,7 @@
     <Compile Include="Commands\SplitPathTests.cs" />
     <Compile Include="Commands\WhereObjectTests.cs" />
     <Compile Include="Integration\RosettaCode.cs" />
+    <Compile Include="Language\CmdletDynamicParameterTests.cs" />
     <Compile Include="Language\FileRedirectionTests.cs" />
     <Compile Include="Language\HereStringTests.cs" />
     <Compile Include="Language\ObjectMemberTests.cs" />

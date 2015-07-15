@@ -5,12 +5,20 @@ using System.Collections.ObjectModel;
 
 namespace TestPSSnapIn
 {
+    public class TestDriveDynamicParameters
+    {
+        [Parameter]
+        public string Note { get; set; }
+    }
+
     public class TestDrive : PSDriveInfo
     {
         public bool IsRemoved { get; internal set; }
-        public TestDrive(PSDriveInfo driveInfo) : base(driveInfo)
+        public string Note { get; internal set; }
+        public TestDrive(PSDriveInfo driveInfo, string note) : base(driveInfo)
         {
             IsRemoved = false;
+            Note = note;
         }
     }
 
@@ -31,13 +39,20 @@ namespace TestPSSnapIn
 
         protected override PSDriveInfo NewDrive(PSDriveInfo drive)
         {
-            return new TestDrive(drive);
+            var dynamicParameters = DynamicParameters as TestDriveDynamicParameters;
+            return new TestDrive(drive, dynamicParameters == null ? null : dynamicParameters.Note);
         }
+
+        protected override object NewDriveDynamicParameters()
+        {
+            return new TestDriveDynamicParameters();
+        }
+
 
         protected override PSDriveInfo RemoveDrive(PSDriveInfo drive)
         {
             var testdrive = drive as TestDrive;
-            if (drive == null)
+            if (testdrive == null)
             {
                 throw new InvalidOperationException("Drive is not a TestDrive!");
             }
@@ -47,7 +62,7 @@ namespace TestPSSnapIn
 
         protected override Collection<PSDriveInfo> InitializeDefaultDrives()
         {
-            var defdrive = new TestDrive(new PSDriveInfo(DefaultDriveName, ProviderInfo, "/", "Test Default Drive", null));
+            var defdrive = new PSDriveInfo(DefaultDriveName, ProviderInfo, "/", "Test Default Drive", null);
             return new Collection<PSDriveInfo>(new [] { defdrive });
         }
 

@@ -10,6 +10,7 @@ namespace Microsoft.Commands.Management
     [CmdletAttribute(VerbsCommon.Add, "Content", DefaultParameterSetName = "Path" /* HelpUri = "http://go.microsoft.com/fwlink/?LinkID=113278"*/)]
     public class AddContentCommand : WriteContentCommandBase
     {
+        // TODO: #DynamicParameter support
         protected override void BeginProcessing()
         {
             Writers = InvokeProvider.Content.GetWriter(InternalPaths, ProviderRuntime);
