@@ -169,6 +169,30 @@ namespace ReferenceTests.Language
             Assert.AreEqual(NewlineJoin("c", "c", "d", "d"), result);
         }
 
+        [Test]
+        [Ignore]
+        public void ReadOnlyParameterizedPropertyCanBeAccessed()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(
+                "$a = Test-CreateParameterizedPropertiesObject -ReadOnly -FileNames 'abc.txt'",
+                "$a.FileNames(0)"
+            ));
+
+            Assert.AreEqual(NewlineJoin("abc.txt"), result);
+        }
+
+        [Test]
+        [Ignore]
+        public void ReadWriteParameterizedPropertyCanBeWrittenToAndReadFrom()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(
+                "$a = Test-CreateParameterizedPropertiesObject -FileNames 'a.txt'",
+                "$a.FileNames(0) = 'b.txt'",
+                "$a.FileNames(0)"
+            ));
+
+            Assert.AreEqual(NewlineJoin("b.txt"), result);
+        }
 
 
         public class XmlTests

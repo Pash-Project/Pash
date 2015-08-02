@@ -8,6 +8,7 @@ using System.Management.Automation;
 using System.Management.Automation.Provider;
 using Microsoft.PowerShell.Commands;
 using System.Runtime.InteropServices;
+using TestParameterizedProperties;
 
 namespace TestPSSnapIn
 {
@@ -751,6 +752,44 @@ namespace TestPSSnapIn
             WriteObject(UseParameters.IsPresent);
             WriteObject(DefaultMessage);
             WriteObject(_params);
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "CreateParameterizedPropertiesObject")]
+    public class TestCreateParameterizedPropertiesObject : PSCmdlet
+    {
+        [Parameter]
+        public string[] FileNames { get; set; }
+
+        [Parameter]
+        public SwitchParameter ReadOnly { get; set; }
+
+        [Parameter]
+        public SwitchParameter WriteOnly { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            if (ReadOnly)
+            {
+                WriteObject(new TestReadOnlyParameterizedProperty(GetFileNames()));
+            }
+            else if (WriteOnly)
+            {
+                WriteObject(new TestWriteOnlyParameterizedProperty());
+            }
+            else
+            {
+                WriteObject(new TestParameterizedProperty(GetFileNames()));
+            }
+        }
+
+        private string[] GetFileNames()
+        {
+            if (FileNames != null)
+            {
+                return FileNames;
+            }
+            return new string[0];
         }
     }
 }

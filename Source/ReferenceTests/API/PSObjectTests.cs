@@ -5,6 +5,7 @@ using NUnit.Framework;
 using System.Management.Automation;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using TestParameterizedProperties;
 
 namespace ReferenceTests.API
 {
@@ -159,6 +160,51 @@ namespace ReferenceTests.API
         public void PSObjectToStringUsesCurrentCulture()
         {
             Assert.AreEqual("1 2,5", new PSObject(new object[] { 1, 2.5 }).ToString());
+        }
+
+        [Test]
+        public void ObjectWithReadOnlyParameterizedProperty()
+        {
+            var obj = new TestReadOnlyParameterizedProperty();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            Assert.IsTrue(propertyInfo.IsGettable);
+            Assert.IsFalse(propertyInfo.IsSettable);
+            Assert.IsTrue(propertyInfo.IsInstance);
+            Assert.AreEqual(PSMemberTypes.ParameterizedProperty, propertyInfo.MemberType);
+            Assert.AreEqual("FileNames", propertyInfo.Name);
+            Assert.AreEqual("System.String", propertyInfo.TypeNameOfValue);
+            Assert.AreEqual(propertyInfo, propertyInfo.Value);
+            //Assert.AreEqual(1, propertyInfo.OverloadDefinitions.Count);
+            //Assert.AreEqual("string FileNames(int index) {get;}", propertyInfo.OverloadDefinitions[0]);
+        }
+
+        [Test]
+        public void ObjectWithWriteOnlyParameterizedProperty()
+        {
+            var obj = new TestWriteOnlyParameterizedProperty();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            Assert.IsFalse(propertyInfo.IsGettable);
+            Assert.IsTrue(propertyInfo.IsSettable);
+            //Assert.AreEqual("void FileNames(int index) {set;}", propertyInfo.OverloadDefinitions[0]);
+        }
+
+        [Test]
+        public void ObjectWithReadWriteOnlyParameterizedProperty()
+        {
+            var obj = new TestParameterizedProperty();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            Assert.IsTrue(propertyInfo.IsGettable);
+            Assert.IsTrue(propertyInfo.IsSettable);
+            //Assert.AreEqual("string FileNames(int index) {get;set;}", propertyInfo.OverloadDefinitions[0]);
         }
     }
 }

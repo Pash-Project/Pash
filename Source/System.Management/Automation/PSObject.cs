@@ -34,6 +34,7 @@ namespace System.Management.Automation
                 if (_properties == null)
                 {
                     InitProperties();
+                    InitParameterizedProperties();
                 }
                 if (_methods == null)
                 {
@@ -166,6 +167,9 @@ namespace System.Management.Automation
             // get properties of all interfaces explicitly, as properties of interfaces implemented by interfaces aren't
             // included in the normal GetProperties() call
             type.GetInterfaces().ToList().ForEach(i => propertyInfos.AddRange(i.GetProperties(flags)));
+            propertyInfos = (from propertyInfo in propertyInfos
+                             where !PSParameterizedProperty.IsParameterizedProperty(propertyInfo)
+                             select propertyInfo).ToList();
             // add a PSProperty for each propertInfo, ignoring duplicates (same name)
             var properties = (from property
                 in propertyInfos.GroupBy(prop => prop.Name).Select(grp => grp.First())
@@ -305,6 +309,24 @@ namespace System.Management.Automation
             return psobj.Members[memberName];
         }
 
+        private void InitParameterizedProperties()
+        {
+            var properties = GetParameterizedProperties(true);
+            properties.ForEach(_members.Add);
+        }
 
+        private List<PSParameterizedProperty> GetParameterizedProperties(bool isInstance)
+        {
+            var baseObject = ImmediateBaseObject;
+            var type = (baseObject is Type && !isInstance) ? (Type)baseObject : baseObject.GetType();
+            var instanceObject = isInstance ? baseObject : null;
+            BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy;
+            flags |= isInstance ? BindingFlags.Instance : BindingFlags.Static;
+            // get all properties
+            var propertyInfos = (from propertyInfo in type.GetProperties(flags)
+                                 where PSParameterizedProperty.IsParameterizedProperty(propertyInfo)
+                                 select new PSParameterizedProperty(propertyInfo, type, instanceObject, isInstance)).ToList();
+            return propertyInfos;
+        }
     }
 }

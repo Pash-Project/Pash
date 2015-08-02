@@ -43,6 +43,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="TestParameterizedProperties">
+      <HintPath>..\Source\TestParameterizedProperties\bin\TestParameterizedProperties.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Source\ReferenceTests\**\*.cs" Exclude="..\Source\ReferenceTests\obj\**\*.cs;..\Source\ReferenceTests\Properties\**\*.cs;..\Source\ReferenceTests\ReferenceTestInfo.cs;..\Source\ReferenceTests\Properties\AssemblyInfo.cs" />
