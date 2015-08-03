@@ -170,7 +170,6 @@ namespace ReferenceTests.Language
         }
 
         [Test]
-        [Ignore]
         public void ReadOnlyParameterizedPropertyCanBeAccessed()
         {
             string result = ReferenceHost.Execute(NewlineJoin(
