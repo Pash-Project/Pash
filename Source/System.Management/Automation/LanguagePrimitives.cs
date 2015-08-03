@@ -695,7 +695,7 @@ namespace System.Management.Automation
             if (enumerable != null)
             {
                 var runspace = Runspaces.Runspace.DefaultRunspace;
-                var ofsV = runspace.SessionStateProxy.GetVariable("OFS");
+                var ofsV = runspace != null ? runspace.SessionStateProxy.GetVariable("OFS") : null;
                 var ofs = ofsV != null ? ofsV.ToString() : " ";
 
                 // Linq handles flattening
