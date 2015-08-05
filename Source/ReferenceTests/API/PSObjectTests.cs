@@ -177,8 +177,8 @@ namespace ReferenceTests.API
             Assert.AreEqual("FileNames", propertyInfo.Name);
             Assert.AreEqual("System.String", propertyInfo.TypeNameOfValue);
             Assert.AreEqual(propertyInfo, propertyInfo.Value);
-            //Assert.AreEqual(1, propertyInfo.OverloadDefinitions.Count);
-            //Assert.AreEqual("string FileNames(int index) {get;}", propertyInfo.OverloadDefinitions[0]);
+            Assert.AreEqual(1, propertyInfo.OverloadDefinitions.Count);
+            Assert.AreEqual("string FileNames(int index) {get;}", propertyInfo.OverloadDefinitions[0]);
         }
 
         [Test]
@@ -191,7 +191,7 @@ namespace ReferenceTests.API
 
             Assert.IsFalse(propertyInfo.IsGettable);
             Assert.IsTrue(propertyInfo.IsSettable);
-            //Assert.AreEqual("void FileNames(int index) {set;}", propertyInfo.OverloadDefinitions[0]);
+            Assert.AreEqual("void FileNames(int index) {set;}", propertyInfo.OverloadDefinitions[0]);
         }
 
         [Test]
@@ -204,7 +204,7 @@ namespace ReferenceTests.API
 
             Assert.IsTrue(propertyInfo.IsGettable);
             Assert.IsTrue(propertyInfo.IsSettable);
-            //Assert.AreEqual("string FileNames(int index) {get;set;}", propertyInfo.OverloadDefinitions[0]);
+            Assert.AreEqual("string FileNames(int index) {get;set;}", propertyInfo.OverloadDefinitions[0]);
         }
     }
 }

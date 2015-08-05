@@ -404,6 +404,7 @@
     <Compile Include="Extensions\JoinStringExtensions.cs" />
     <Compile Include="Extensions\QueueExtensions.cs" />
     <Compile Include="Extensions\Reflection.cs" />
+    <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AddPSSnapinCommand.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AliasProvider.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AliasProviderDynamicParameters.cs" />

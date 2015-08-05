@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using Extensions.Types;
 
 namespace System.Management.Automation
 {
@@ -12,6 +14,7 @@ namespace System.Management.Automation
         private Type _classType;
         private object _instance;
         private PropertyInfo _propertyInfo;
+        private Collection<string> _overloadDefinitions;
 
         public bool IsGettable { get; private set; }
         public bool IsSettable { get; private set; }
@@ -47,7 +50,15 @@ namespace System.Management.Automation
 
         public override Collection<string> OverloadDefinitions
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                if (_overloadDefinitions == null)
+                {
+                    _overloadDefinitions = new Collection<string>();
+                    _overloadDefinitions.Add(GetDefinition());
+                }
+                return _overloadDefinitions;
+            }
         }
 
         /// <summary>
@@ -207,6 +218,59 @@ namespace System.Management.Automation
         private bool IsParamsParameter(ParameterInfo info)
         {
             return info.GetCustomAttributes(typeof(ParamArrayAttribute), true).Any();
+        }
+
+
+        private string GetDefinition()
+        {
+            MethodInfo getMethod = _propertyInfo.GetGetMethod();
+
+            var definition = new StringBuilder();
+            if (_propertyInfo.CanRead)
+            {
+                definition.Append(getMethod.ReturnType.FriendlyName());
+            }
+            else
+            {
+                definition.Append("void");
+            }
+            definition.Append(' ');
+
+            definition.Append(Name);
+
+            ParameterInfo[] parameters = null;
+            if (_propertyInfo.CanRead)
+            {
+                parameters = getMethod.GetParameters();
+            }
+            else
+            {
+                parameters = _propertyInfo.GetSetMethod().GetParameters();
+                parameters = parameters.Take(parameters.Length - 1).ToArray();
+            }
+
+            definition.Append('(');
+            definition.Append(string.Join(", ", parameters.Select(parameter => GetParameterDefinition(parameter))));
+            definition.Append(") ");
+
+            definition.Append('{');
+            if (_propertyInfo.CanRead)
+            {
+                definition.Append("get;");
+            }
+
+            if (_propertyInfo.CanWrite && _propertyInfo.GetSetMethod() != null)
+            {
+                definition.Append("set;");
+            }
+            definition.Append('}');
+
+            return definition.ToString();
+        }
+
+        private static string GetParameterDefinition(ParameterInfo parameter)
+        {
+            return parameter.ParameterType.FriendlyName() + " " + parameter.Name;
         }
     }
 }
