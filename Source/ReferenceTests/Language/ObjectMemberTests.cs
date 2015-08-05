@@ -181,7 +181,6 @@ namespace ReferenceTests.Language
         }
 
         [Test]
-        [Ignore]
         public void ReadWriteParameterizedPropertyCanBeWrittenToAndReadFrom()
         {
             string result = ReferenceHost.Execute(NewlineJoin(

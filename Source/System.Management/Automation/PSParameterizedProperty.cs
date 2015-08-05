@@ -128,6 +128,14 @@ namespace System.Management.Automation
 
         private MethodInfo GetMethod(Type[] argTypes)
         {
+            if (_propertyInfo.CanWrite)
+            {
+                var setMethod = _propertyInfo.GetSetMethod();
+                if (setMethod != null && setMethod.GetParameters().Count() == argTypes.Length)
+                {
+                    return setMethod;
+                }
+            }
             return _propertyInfo.GetGetMethod();
         }
 
