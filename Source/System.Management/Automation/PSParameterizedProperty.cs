@@ -80,6 +80,13 @@ namespace System.Management.Automation
             }
         }
 
+        public void InvokeSet(object valueToSet, params object[] arguments)
+        {
+            var modifiedArguments = new List<object>(arguments);
+            modifiedArguments.Add(valueToSet);
+            Invoke(modifiedArguments.ToArray());
+        }
+
         public override PSMemberInfo Copy()
         {
             return new PSParameterizedProperty(_propertyInfo, _classType, _instance, IsInstance);

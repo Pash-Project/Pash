@@ -227,5 +227,29 @@ namespace ReferenceTests.API
             Assert.AreEqual(1, propertyInfo.OverloadDefinitions.Count);
             Assert.AreEqual("string FileNames(int index) {get;}", propertyInfo.OverloadDefinitions[0]);
         }
+
+        [Test]
+        public void InvokeParameterizedPropertyGetter()
+        {
+            var obj = new TestParameterizedProperty(new string[] {"a.txt"});
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            object result = propertyInfo.Invoke(0);
+
+            Assert.AreEqual("a.txt", result);
+        }
+
+        [Test]
+        public void InvokeParameterizedPropertySetter()
+        {
+            var obj = new TestParameterizedProperty(new string[] { "a.txt" });
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            propertyInfo.InvokeSet("b.txt", 0);
+
+            Assert.AreEqual("b.txt", obj.get_FileNames(0));
+        }
     }
 }

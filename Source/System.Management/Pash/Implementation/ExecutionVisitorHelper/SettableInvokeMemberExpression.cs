@@ -42,13 +42,11 @@ namespace System.Management.Pash.Implementation
                 throw new PSArgumentException(msg);
             }
 
-            List<object> arguments = _expressionAst.Arguments.Select(CurrentExecution.EvaluateAst)
+            object[] arguments = _expressionAst.Arguments.Select(CurrentExecution.EvaluateAst)
                 .Select(obj => obj is PSObject ? ((PSObject)obj).BaseObject : obj)
-                .ToList();
+                .ToArray();
 
-            arguments.Add(value);
-
-            property.Invoke(arguments.ToArray());
+            property.InvokeSet(value, arguments.ToArray());
         }
     }
 }
