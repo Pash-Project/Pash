@@ -251,5 +251,58 @@ namespace ReferenceTests.API
 
             Assert.AreEqual("b.txt", obj.get_FileNames(0));
         }
+
+        [Test]
+        public void CannotInvokeParameterizedPropertySetterWithInvokeMethod()
+        {
+            var obj = new TestParameterizedProperty(new string[] { "a.txt" });
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            GetValueInvocationException ex = Assert.Throws<GetValueInvocationException>(() => propertyInfo.Invoke(0, "b.txt"));
+
+            var innerEx = ex.InnerException as MethodException;
+            StringAssert.StartsWith("Exception getting \"FileNames\": ", ex.Message);
+            Assert.AreEqual("Cannot find an overload for \"FileNames\" and the argument count: \"2\".", innerEx.Message);
+        }
+
+        [Test]
+        public void CannotInvokeParameterizedPropertyGetterWithInvokeSet()
+        {
+            var obj = new TestParameterizedProperty(new string[] { "a.txt" });
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            SetValueInvocationException ex = Assert.Throws<SetValueInvocationException>(() => propertyInfo.InvokeSet(0));
+
+            var innerEx = ex.InnerException as MethodException;
+            StringAssert.StartsWith("Exception setting \"FileNames\": ", ex.Message);
+            Assert.AreEqual("Cannot find an overload for \"FileNames\" and the argument count: \"0\".", innerEx.Message);
+        }
+
+        [Test]
+        public void TooManyArgumentsForParameterizedPropertyInvokeSet()
+        {
+            var obj = new TestParameterizedProperty(new string[] { "a.txt" });
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            SetValueInvocationException ex = Assert.Throws<SetValueInvocationException>(() => propertyInfo.InvokeSet(0, 1, 2, 3));
+
+            var innerEx = ex.InnerException as MethodException;
+            StringAssert.StartsWith("Exception setting \"FileNames\": ", ex.Message);
+            Assert.AreEqual("Cannot find an overload for \"FileNames\" and the argument count: \"3\".", innerEx.Message);
+        }
+
+        [Test]
+        public void TooManyArgumentsForPSMethodInvoke()
+        {
+            var obj = new Object();
+            var psObject = new PSObject(obj);
+            PSMethodInfo method = psObject.Methods.First(m => m.Name == "ToString");
+
+            MethodException ex = Assert.Throws<MethodException>(() => method.Invoke(1, 2, 3, 4, 5));
+            Assert.AreEqual("Cannot find an overload for \"ToString\" and the argument count: \"5\".", ex.Message);
+        }
     }
 }

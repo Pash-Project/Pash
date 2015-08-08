@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -15,6 +16,7 @@ namespace System.Management.Automation
         private object _instance;
         private PropertyInfo _propertyInfo;
         private Collection<string> _overloadDefinitions;
+        private bool _invokeSetter;
 
         public bool IsGettable { get; private set; }
         public bool IsSettable { get; private set; }
@@ -68,14 +70,32 @@ namespace System.Management.Automation
 
         public override object Invoke(params object[] arguments)
         {
-            return InvokeMethod(_instance, arguments);
+            try
+            {
+                _invokeSetter = false;
+                return InvokeMethod(_instance, arguments);
+            }
+            catch (MethodException ex)
+            {
+                throw new GetValueInvocationException(string.Format(CultureInfo.CurrentCulture,
+                    "Exception getting \"{0}\": \"{1}\"", Name, ex.Message), ex);
+            }
         }
 
         public void InvokeSet(object valueToSet, params object[] arguments)
         {
-            var modifiedArguments = new List<object>(arguments);
-            modifiedArguments.Add(valueToSet);
-            Invoke(modifiedArguments.ToArray());
+            try
+            {
+                _invokeSetter = true;
+                var modifiedArguments = new List<object>(arguments);
+                modifiedArguments.Add(valueToSet);
+                InvokeMethod(_instance, modifiedArguments.ToArray());
+            }
+            catch (MethodException ex)
+            {
+                throw new SetValueInvocationException(string.Format(CultureInfo.CurrentCulture,
+                    "Exception setting \"{0}\": \"{1}\"", Name, ex.Message), ex);
+            }
         }
 
         public override PSMemberInfo Copy()
@@ -108,14 +128,11 @@ namespace System.Management.Automation
 
         protected override MethodInfo GetMethod(Type[] argTypes)
         {
-            if (_propertyInfo.CanWrite)
+            if (_invokeSetter)
             {
-                var setMethod = _propertyInfo.GetSetMethod();
-                if (setMethod != null && setMethod.GetParameters().Count() == argTypes.Length)
-                {
-                    return setMethod;
-                }
+                return _propertyInfo.GetSetMethod();
             }
+
             return _propertyInfo.GetGetMethod();
         }
 
@@ -169,6 +186,15 @@ namespace System.Management.Automation
         private static string GetParameterDefinition(ParameterInfo parameter)
         {
             return parameter.ParameterType.FriendlyName() + " " + parameter.Name;
+        }
+
+        protected override int GetArgumentsLength(object[] arguments)
+        {
+            if (_invokeSetter)
+            {
+                return arguments.Length - 1;
+            }
+            return arguments.Length;
         }
     }
 }

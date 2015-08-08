@@ -171,7 +171,7 @@ namespace System.Management.Automation
             }
             if (candidates.Count < 1)
             {
-                throw new PSArgumentException("The method (or none of its overloads) takes the given arguments!");
+                throw new MethodException(string.Format("Cannot find an overload for \"{0}\" and the argument count: \"{1}\".", Name, GetArgumentsLength(arguments)));
             }
             else if (candidates.Count > 1)
             {
@@ -186,6 +186,11 @@ namespace System.Management.Automation
                 newArguments = tuple.Item2;
                 return tuple.Item1;
             }
+        }
+
+        protected virtual int GetArgumentsLength(object[] arguments)
+        {
+            return arguments.Length;
         }
 
         private string MethodWithParametersToString(MethodInfo method)
