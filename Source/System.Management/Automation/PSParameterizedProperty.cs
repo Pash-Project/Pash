@@ -82,7 +82,7 @@ namespace System.Management.Automation
 
         public override PSMemberInfo Copy()
         {
-            throw new NotImplementedException();
+            return new PSParameterizedProperty(_propertyInfo, _classType, _instance, IsInstance);
         }
 
         internal static bool IsParameterizedProperty(PropertyInfo propertyInfo)

@@ -206,5 +206,26 @@ namespace ReferenceTests.API
             Assert.IsTrue(propertyInfo.IsSettable);
             Assert.AreEqual("string FileNames(int index) {get;set;}", propertyInfo.OverloadDefinitions[0]);
         }
+
+        [Test]
+        public void ParameterizedPropertyCopy()
+        {
+            var obj = new TestReadOnlyParameterizedProperty();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            propertyInfo = propertyInfo.Copy() as PSParameterizedProperty;
+
+            Assert.IsTrue(propertyInfo.IsGettable);
+            Assert.IsFalse(propertyInfo.IsSettable);
+            Assert.IsTrue(propertyInfo.IsInstance);
+            Assert.AreEqual(PSMemberTypes.ParameterizedProperty, propertyInfo.MemberType);
+            Assert.AreEqual("FileNames", propertyInfo.Name);
+            Assert.AreEqual("System.String", propertyInfo.TypeNameOfValue);
+            Assert.AreEqual(propertyInfo, propertyInfo.Value);
+            Assert.AreEqual(1, propertyInfo.OverloadDefinitions.Count);
+            Assert.AreEqual("string FileNames(int index) {get;}", propertyInfo.OverloadDefinitions[0]);
+        }
     }
 }
