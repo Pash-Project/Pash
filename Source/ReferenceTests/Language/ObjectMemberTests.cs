@@ -192,6 +192,30 @@ namespace ReferenceTests.Language
             Assert.AreEqual(NewlineJoin("b.txt"), result);
         }
 
+        [Test]
+        public void OverloadedParameterizedPropertyCanBeAccessed()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(
+                "$a = Test-CreateOverloadedByArgumentNumbersParameterizedPropertiesObject",
+                "$a.Grid(1, 2)"
+            ));
+
+            Assert.AreEqual(NewlineJoin("1, 2"), result);
+        }
+
+        [Test]
+        [Ignore("Not currently working")]
+        public void OverloadedParameterizedPropertyCanBeWrittenToAndReadFrom()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(
+                "$a = Test-CreateOverloadedByArgumentNumbersParameterizedPropertiesObject",
+                "$a.Grid(1, 2) = 'b.txt'",
+                "$a.Grid(1, 2)"
+            ));
+
+            Assert.AreEqual(NewlineJoin("b.txt"), result);
+        }
+
 
         public class XmlTests
         {

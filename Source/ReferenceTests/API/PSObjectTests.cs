@@ -304,5 +304,77 @@ namespace ReferenceTests.API
             MethodException ex = Assert.Throws<MethodException>(() => method.Invoke(1, 2, 3, 4, 5));
             Assert.AreEqual("Cannot find an overload for \"ToString\" and the argument count: \"5\".", ex.Message);
         }
+
+        [Test]
+        public void ObjectWithOverloadedByTypeParameterizedProperty()
+        {
+            var obj = new TestOverloadedByTypeParameterizedProperty();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.Single(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            Assert.IsTrue(propertyInfo.IsGettable);
+            Assert.IsTrue(propertyInfo.IsSettable);
+            Assert.AreEqual("FileNames", propertyInfo.Name);
+            Assert.AreEqual("System.String", propertyInfo.TypeNameOfValue);
+            Assert.AreEqual(propertyInfo, propertyInfo.Value);
+            Assert.AreEqual(2, propertyInfo.OverloadDefinitions.Count);
+            Assert.AreEqual("string FileNames(int index) {get;set;}", propertyInfo.OverloadDefinitions[0]);
+            Assert.AreEqual("string FileNames(string fileName) {get;set;}", propertyInfo.OverloadDefinitions[1]);
+        }
+
+        [Test]
+        public void ObjectWithOverloadedByArgumentNumberParameterizedProperty()
+        {
+            var obj = new TestOverloadedByArgumentNumbersParameterizedProperty();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.Single(m => m.Name == "Grid") as PSParameterizedProperty;
+
+            Assert.IsTrue(propertyInfo.IsGettable);
+            Assert.IsTrue(propertyInfo.IsSettable);
+            Assert.AreEqual("Grid", propertyInfo.Name);
+            Assert.AreEqual("System.String", propertyInfo.TypeNameOfValue);
+            Assert.AreEqual(propertyInfo, propertyInfo.Value);
+            Assert.AreEqual(2, propertyInfo.OverloadDefinitions.Count);
+            Assert.AreEqual("string Grid(int x) {get;set;}", propertyInfo.OverloadDefinitions[0]);
+            Assert.AreEqual("string Grid(int x, int y) {get;set;}", propertyInfo.OverloadDefinitions[1]);
+        }
+
+        [Test]
+        public void InvokeOverloadedByTypeParameterizedPropertySetter()
+        {
+            var obj = new TestOverloadedByTypeParameterizedProperty(new [] {"a.txt"});
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.Single(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            propertyInfo.InvokeSet("b.txt", "a.txt");
+
+            Assert.AreEqual("b.txt", obj.get_FileNames(1));
+        }
+
+        [Test]
+        public void InvokeOverloadedByArgumentNumberParameterizedPropertyGetter()
+        {
+            var obj = new TestOverloadedByArgumentNumbersParameterizedProperty();
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.Single(m => m.Name == "Grid") as PSParameterizedProperty;
+
+            object result = propertyInfo.Invoke(1, 2);
+
+            Assert.AreEqual("1, 2", result);
+        }
+
+        [Test]
+        public void InvokeOverloadedByArgumentNumbersParameterizedPropertySetter()
+        {
+            var obj = new TestOverloadedByArgumentNumbersParameterizedProperty();
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.Single(m => m.Name == "Grid") as PSParameterizedProperty;
+
+            propertyInfo.InvokeSet("b.txt", 1, 2);
+
+            Assert.AreEqual("b.txt", obj.get_Grid(1, 2));
+        }
     }
 }

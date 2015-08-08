@@ -792,4 +792,13 @@ namespace TestPSSnapIn
             return new string[0];
         }
     }
+
+    [Cmdlet(VerbsDiagnostic.Test, "CreateOverloadedByArgumentNumbersParameterizedPropertiesObject")]
+    public class TestCreateOverloadedByArgumentNumbersParameterizedPropertiesObject : PSCmdlet
+    {
+        protected override void ProcessRecord()
+        {
+            WriteObject(new TestOverloadedByArgumentNumbersParameterizedProperty());
+        }
+    }
 }

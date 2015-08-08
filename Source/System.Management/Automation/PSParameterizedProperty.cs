@@ -56,16 +56,25 @@ namespace System.Management.Automation
             {
                 if (_overloadDefinitions == null)
                 {
-                    _overloadDefinitions = new Collection<string>();
-                    _overloadDefinitions.Add(GetDefinition());
+                    _overloadDefinitions = new Collection<string>(GetDefinitions().ToList());
                 }
                 return _overloadDefinitions;
             }
         }
 
+        private MethodInfo[] _overloads;
+
         protected override MethodInfo[] Overloads
         {
-            get { return new MethodInfo[0]; }
+            get
+            {
+                if (_overloads == null)
+                {
+                    _overloads = (from propertyInfo in GetProperties()
+                                  select GetMethod(propertyInfo, _invokeSetter)).ToArray();
+                }
+                return _overloads;
+            }
         }
 
         public override object Invoke(params object[] arguments)
@@ -126,22 +135,43 @@ namespace System.Management.Automation
             return false;
         }
 
-        protected override MethodInfo GetMethod(Type[] argTypes)
+        private IEnumerable<PropertyInfo> GetProperties()
         {
-            if (_invokeSetter)
-            {
-                return _propertyInfo.GetSetMethod();
-            }
+            BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy;
+            flags |= IsInstance ? BindingFlags.Instance : BindingFlags.Static;
 
-            return _propertyInfo.GetGetMethod();
+            return from propertyInfo in _classType.GetProperties(flags)
+                   where propertyInfo.Name == Name
+                   select propertyInfo;
         }
 
-        private string GetDefinition()
+        protected override MethodInfo GetMethod(Type[] argTypes)
         {
-            MethodInfo getMethod = _propertyInfo.GetGetMethod();
+            return GetMethod(_propertyInfo, _invokeSetter);
+        }
+
+        static private MethodInfo GetMethod(PropertyInfo propertyInfo, bool useSetter)
+        {
+            if (useSetter)
+            {
+                return propertyInfo.GetSetMethod();
+            }
+
+            return propertyInfo.GetGetMethod();
+        }
+
+        private IEnumerable<string> GetDefinitions()
+        {
+            return from propertyInfo in GetProperties()
+                   select GetDefinition(propertyInfo);
+        }
+
+        private string GetDefinition(PropertyInfo propertyInfo)
+        {
+            MethodInfo getMethod = propertyInfo.GetGetMethod();
 
             var definition = new StringBuilder();
-            if (_propertyInfo.CanRead)
+            if (propertyInfo.CanRead)
             {
                 definition.Append(getMethod.ReturnType.FriendlyName());
             }
@@ -154,13 +184,13 @@ namespace System.Management.Automation
             definition.Append(Name);
 
             ParameterInfo[] parameters = null;
-            if (_propertyInfo.CanRead)
+            if (propertyInfo.CanRead)
             {
                 parameters = getMethod.GetParameters();
             }
             else
             {
-                parameters = _propertyInfo.GetSetMethod().GetParameters();
+                parameters = propertyInfo.GetSetMethod().GetParameters();
                 parameters = parameters.Take(parameters.Length - 1).ToArray();
             }
 

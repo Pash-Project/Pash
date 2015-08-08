@@ -322,11 +322,14 @@ namespace System.Management.Automation
             var instanceObject = isInstance ? baseObject : null;
             BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy;
             flags |= isInstance ? BindingFlags.Instance : BindingFlags.Static;
-            // get all properties
+
             var propertyInfos = (from propertyInfo in type.GetProperties(flags)
                                  where PSParameterizedProperty.IsParameterizedProperty(propertyInfo)
-                                 select new PSParameterizedProperty(propertyInfo, type, instanceObject, isInstance)).ToList();
-            return propertyInfos;
+                                select propertyInfo).ToList();
+
+            return (from propertyInfo
+                in propertyInfos.GroupBy(prop => prop.Name).Select(grp => grp.First())
+                select new PSParameterizedProperty(propertyInfo, type, instanceObject, isInstance)).ToList();
         }
     }
 }

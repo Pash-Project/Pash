@@ -64,6 +64,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.vb" />
+    <Compile Include="TestOverloadedByArgumentNumbersParameterizedProperty.vb" />
+    <Compile Include="TestOverloadedByTypeParameterizedProperty.vb" />
     <Compile Include="TestParameterizedProperty.vb" />
     <Compile Include="TestReadOnlyParameterizedProperty.vb" />
     <Compile Include="TestWriteOnlyParameterizedProperty.vb" />
