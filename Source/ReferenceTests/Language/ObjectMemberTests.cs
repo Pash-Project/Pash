@@ -204,7 +204,6 @@ namespace ReferenceTests.Language
         }
 
         [Test]
-        [Ignore("Not currently working")]
         public void OverloadedParameterizedPropertyCanBeWrittenToAndReadFrom()
         {
             string result = ReferenceHost.Execute(NewlineJoin(

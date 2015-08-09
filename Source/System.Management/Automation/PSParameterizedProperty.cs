@@ -82,6 +82,8 @@ namespace System.Management.Automation
             try
             {
                 _invokeSetter = false;
+                _overloads = null;
+
                 return InvokeMethod(_instance, arguments);
             }
             catch (MethodException ex)
@@ -96,8 +98,11 @@ namespace System.Management.Automation
             try
             {
                 _invokeSetter = true;
+                _overloads = null;
+
                 var modifiedArguments = new List<object>(arguments);
                 modifiedArguments.Add(valueToSet);
+
                 InvokeMethod(_instance, modifiedArguments.ToArray());
             }
             catch (MethodException ex)
