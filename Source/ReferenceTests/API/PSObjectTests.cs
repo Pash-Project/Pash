@@ -6,6 +6,7 @@ using System.Management.Automation;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using TestParameterizedProperties;
+using TestPSSnapIn;
 
 namespace ReferenceTests.API
 {
@@ -249,7 +250,7 @@ namespace ReferenceTests.API
 
             propertyInfo.InvokeSet("b.txt", 0);
 
-            Assert.AreEqual("b.txt", obj.get_FileNames(0));
+            Assert.AreEqual("b.txt", obj[0]);
         }
 
         [Test]
@@ -350,7 +351,7 @@ namespace ReferenceTests.API
 
             propertyInfo.InvokeSet("b.txt", "a.txt");
 
-            Assert.AreEqual("b.txt", obj.get_FileNames(1));
+            Assert.AreEqual("b.txt", obj[1]);
         }
 
         [Test]

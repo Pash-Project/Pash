@@ -44,6 +44,7 @@
     <Compile Include="TestItemProvider.cs" />
     <Compile Include="TestNavigationProvider.cs" />
     <Compile Include="TestContainerProvider.cs" />
+    <Compile Include="TestParameterizedProperties.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
