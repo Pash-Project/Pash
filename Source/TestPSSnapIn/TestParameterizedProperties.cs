@@ -153,4 +153,44 @@ namespace TestPSSnapIn
         }
     }
 
+    public class TestDifferentReturnTypesParameterizedProperty
+    {
+        private List<string> _fileNames;
+
+        public TestDifferentReturnTypesParameterizedProperty()
+            : this(Enumerable.Empty<string>())
+        {
+        }
+
+        public TestDifferentReturnTypesParameterizedProperty(IEnumerable<string> fileNames)
+        {
+            _fileNames = fileNames.ToList();
+        }
+
+        [IndexerName("FileNames")]
+        public string this[int index]
+        {
+            get
+            {
+                return _fileNames[index];
+            }
+            set
+            {
+               _fileNames[index] = value;
+            }
+        }
+
+        [IndexerName("FileNames")]
+        public int this[string fileName]
+        {
+            get
+            {
+                return _fileNames.IndexOf(fileName);
+            }
+            set
+            {
+                _fileNames.Add(value.ToString());
+            }
+        }
+    }
 }

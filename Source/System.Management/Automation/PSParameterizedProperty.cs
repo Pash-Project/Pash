@@ -17,6 +17,7 @@ namespace System.Management.Automation
         private PropertyInfo _propertyInfo;
         private Collection<string> _overloadDefinitions;
         private bool _invokeSetter;
+        private string _typeNameOfValue;
 
         public bool IsGettable { get; private set; }
         public bool IsSettable { get; private set; }
@@ -46,8 +47,29 @@ namespace System.Management.Automation
         {
             get
             {
+                if (_typeNameOfValue == null)
+                {
+                    _typeNameOfValue = GetTypeNameOfValue();
+                }
+                return _typeNameOfValue;
+            }
+        }
+
+        private string GetTypeNameOfValue()
+        {
+            List<PropertyInfo> properties = GetProperties().ToList();
+            if (properties.Count == 1 || AllPropertiesHaveSameType(properties))
+            {
                 return _propertyInfo.PropertyType.FullName;
             }
+
+            return "System.Object";
+        }
+
+        private bool AllPropertiesHaveSameType(IEnumerable<PropertyInfo> properties)
+        {
+            List<Type> propertyTypes = properties.Select(property => property.PropertyType).ToList();
+            return !propertyTypes.Any(type => type != propertyTypes[0]);
         }
 
         public override Collection<string> OverloadDefinitions

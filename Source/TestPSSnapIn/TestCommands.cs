@@ -770,6 +770,12 @@ namespace TestPSSnapIn
         [Parameter]
         public SwitchParameter FromInterface { get; set; }
 
+        [Parameter]
+        public SwitchParameter OverloadedByType { get; set; }
+
+        [Parameter]
+        public SwitchParameter DifferentReturnType { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ReadOnly)
@@ -783,6 +789,14 @@ namespace TestPSSnapIn
             else if (FromInterface)
             {
                 WriteObject(new TestInterfaceParameterizedProperty(GetFileNames()));
+            }
+            else if (OverloadedByType)
+            {
+                WriteObject(new TestOverloadedByTypeParameterizedProperty(GetFileNames()));
+            }
+            else if (DifferentReturnType)
+            {
+                WriteObject(new TestDifferentReturnTypesParameterizedProperty(GetFileNames()));
             }
             else
             {

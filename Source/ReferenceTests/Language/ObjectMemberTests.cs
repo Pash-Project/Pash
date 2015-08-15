@@ -227,6 +227,41 @@ namespace ReferenceTests.Language
             Assert.AreEqual(NewlineJoin("b.txt"), result);
         }
 
+        [Test]
+        public void OverloadedByTypeParameterizedPropertyCanBeWrittenToAndReadUsingFirstOverload()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(
+                "$a = Test-CreateParameterizedPropertiesObject -OverloadedByType -FileNames 'a.txt'",
+                "$a.FileNames(0) = 'b.txt'",
+                "$a.FileNames(0)"
+            ));
+
+            Assert.AreEqual(NewlineJoin("b.txt"), result);
+        }
+
+        [Test]
+        public void OverloadedByTypeParameterizedPropertyCanBeWrittenToAndReadUsingSecondOverload()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(
+                "$a = Test-CreateParameterizedPropertiesObject -OverloadedByType -FileNames 'a.txt'",
+                "$a.FileNames('a.txt') = 'b.txt'",
+                "$a.FileNames('b.txt')"
+            ));
+
+            Assert.AreEqual(NewlineJoin("1"), result);
+        }
+
+        [Test]
+        public void OverloadedParameterizedPropertyWithDifferentReturnTypeCanBeReadFrom()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(
+                "$a = Test-CreateParameterizedPropertiesObject -DifferentReturnType -FileNames 'a.txt','b.txt'",
+                "$a.FileNames('b.txt')"
+            ));
+
+            Assert.AreEqual(NewlineJoin("1"), result);
+        }
+
         public class XmlTests
         {
             [Test]

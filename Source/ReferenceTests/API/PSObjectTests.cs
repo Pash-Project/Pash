@@ -393,5 +393,23 @@ namespace ReferenceTests.API
             Assert.AreEqual(1, propertyInfo.OverloadDefinitions.Count);
             Assert.AreEqual("string ITestParameterizedProperty.FileNames(int index) {get;set;}", propertyInfo.OverloadDefinitions[0]);
         }
+
+        [Test]
+        public void ObjectWithOverloadedParameterizedPropertiesWithDifferentReturnTypes()
+        {
+            var obj = new TestDifferentReturnTypesParameterizedProperty();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.Single(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            Assert.IsTrue(propertyInfo.IsGettable);
+            Assert.IsTrue(propertyInfo.IsSettable);
+            Assert.AreEqual("FileNames", propertyInfo.Name);
+            Assert.AreEqual("System.Object", propertyInfo.TypeNameOfValue);
+            Assert.AreEqual(propertyInfo, propertyInfo.Value);
+            Assert.AreEqual(2, propertyInfo.OverloadDefinitions.Count);
+            Assert.AreEqual("string FileNames(int index) {get;set;}", propertyInfo.OverloadDefinitions[0]);
+            Assert.AreEqual("int FileNames(string fileName) {get;set;}", propertyInfo.OverloadDefinitions[1]);
+        }
     }
 }
