@@ -377,5 +377,21 @@ namespace ReferenceTests.API
 
             Assert.AreEqual("b.txt", obj.get_Grid(1, 2));
         }
+
+        [Test]
+        public void ObjectWithTwoInterfacesOneWithParameterizedProperty()
+        {
+            var obj = new TestInterfaceParameterizedProperty();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.Single(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            Assert.IsTrue(propertyInfo.IsGettable);
+            Assert.IsTrue(propertyInfo.IsSettable);
+            Assert.AreEqual("FileNames", propertyInfo.Name);
+            Assert.AreEqual("System.String", propertyInfo.TypeNameOfValue);
+            Assert.AreEqual(1, propertyInfo.OverloadDefinitions.Count);
+            Assert.AreEqual("string ITestParameterizedProperty.FileNames(int index) {get;set;}", propertyInfo.OverloadDefinitions[0]);
+        }
     }
 }

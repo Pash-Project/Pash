@@ -767,6 +767,9 @@ namespace TestPSSnapIn
         [Parameter]
         public SwitchParameter WriteOnly { get; set; }
 
+        [Parameter]
+        public SwitchParameter FromInterface { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ReadOnly)
@@ -776,6 +779,10 @@ namespace TestPSSnapIn
             else if (WriteOnly)
             {
                 WriteObject(new TestWriteOnlyParameterizedProperty());
+            }
+            else if (FromInterface)
+            {
+                WriteObject(new TestInterfaceParameterizedProperty(GetFileNames()));
             }
             else
             {

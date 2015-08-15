@@ -325,7 +325,10 @@ namespace System.Management.Automation
 
             var propertyInfos = (from propertyInfo in type.GetProperties(flags)
                                  where PSParameterizedProperty.IsParameterizedProperty(propertyInfo)
-                                select propertyInfo).ToList();
+                                 select propertyInfo).ToList();
+
+            type.GetInterfaces().ToList().ForEach(i => propertyInfos.AddRange(i.GetProperties(flags)
+                .Where(p => PSParameterizedProperty.IsParameterizedProperty(p))));
 
             return (from propertyInfo
                 in propertyInfos.GroupBy(prop => prop.Name).Select(grp => grp.First())

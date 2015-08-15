@@ -145,9 +145,13 @@ namespace System.Management.Automation
             BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy;
             flags |= IsInstance ? BindingFlags.Instance : BindingFlags.Static;
 
-            return from propertyInfo in _classType.GetProperties(flags)
-                   where propertyInfo.Name == Name
-                   select propertyInfo;
+            var propertyInfos = (from propertyInfo in _classType.GetProperties(flags)
+                                 where propertyInfo.Name == Name
+                                 select propertyInfo).ToList();
+
+            _classType.GetInterfaces().ToList().ForEach(i => propertyInfos.AddRange(i.GetProperties(flags).Where(p => p.Name == Name)));
+
+            return propertyInfos;
         }
 
         protected override MethodInfo GetMethod(Type[] argTypes)
@@ -186,6 +190,11 @@ namespace System.Management.Automation
             }
             definition.Append(' ');
 
+            if (propertyInfo.DeclaringType.IsInterface)
+            {
+                definition.Append(propertyInfo.DeclaringType.Name);
+                definition.Append('.');
+            }
             definition.Append(Name);
 
             ParameterInfo[] parameters = null;

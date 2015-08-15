@@ -115,4 +115,42 @@ namespace TestPSSnapIn
             }
         }
     }
+
+    public interface ITestParameterizedProperty
+    {
+        [IndexerName("FileNames")]
+        string this[int index] { get; set; }
+    }
+
+    public interface ITestInheritedParameterizedProperty : ITestParameterizedProperty
+    {
+    }
+
+    public class TestInterfaceParameterizedProperty : ITestInheritedParameterizedProperty
+    {
+        private List<string> _fileNames;
+
+        public TestInterfaceParameterizedProperty()
+            : this(Enumerable.Empty<string>())
+        {
+        }
+
+        public TestInterfaceParameterizedProperty(IEnumerable<string> fileNames)
+        {
+            _fileNames = fileNames.ToList();
+        }
+
+        public string this[int index]
+        {
+            get
+            {
+                return _fileNames[index];
+            }
+            set
+            {
+                _fileNames[index] = value;
+            }
+        }
+    }
+
 }

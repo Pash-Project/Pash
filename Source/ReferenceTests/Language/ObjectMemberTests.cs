@@ -215,6 +215,17 @@ namespace ReferenceTests.Language
             Assert.AreEqual(NewlineJoin("b.txt"), result);
         }
 
+        [Test]
+        public void InterfaceParameterizedPropertyCanBeWrittenToAndReadFrom()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(
+                "$a = Test-CreateParameterizedPropertiesObject -FromInterface -FileNames 'a.txt'",
+                "$a.FileNames(0) = 'b.txt'",
+                "$a.FileNames(0)"
+            ));
+
+            Assert.AreEqual(NewlineJoin("b.txt"), result);
+        }
 
         public class XmlTests
         {
