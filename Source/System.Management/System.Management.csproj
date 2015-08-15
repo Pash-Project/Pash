@@ -462,6 +462,7 @@
     <Compile Include="Pash\Implementation\PipelineProcessor.cs" />
     <Compile Include="Pash\Implementation\ProviderRuntime.cs" />
     <Compile Include="Pash\Implementation\PSObjectPipelineReader.cs" />
+    <Compile Include="Pash\Implementation\PSObjectProperties.cs" />
     <Compile Include="Pash\Implementation\SessionStateGlobal.cs" />
     <Compile Include="Pash\NumericMultiplier.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstBuilder.cs" />
