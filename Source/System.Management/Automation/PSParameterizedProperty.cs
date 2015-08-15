@@ -171,9 +171,29 @@ namespace System.Management.Automation
                                  where propertyInfo.Name == Name
                                  select propertyInfo).ToList();
 
-            _classType.GetInterfaces().ToList().ForEach(i => propertyInfos.AddRange(i.GetProperties(flags).Where(p => p.Name == Name)));
+            _classType.GetInterfaces().ToList().ForEach(i => propertyInfos.AddRange(i.GetProperties(flags)
+                .Where(p => p.Name == Name)
+                .Where(p => !PropertyExists(propertyInfos, p))));
 
             return propertyInfos;
+        }
+
+        private bool PropertyExists(List<PropertyInfo> propertyInfos, PropertyInfo propertyInfo)
+        {
+            return (from existingPropertyInfo in propertyInfos
+                    where IsMatch(existingPropertyInfo, propertyInfo)
+                    select existingPropertyInfo).Any();
+        }
+
+        // TODO - Should check more than just the property type.
+        private bool IsMatch(PropertyInfo propertyInfo1, PropertyInfo propertyInfo2)
+        {
+            if (propertyInfo1.PropertyType != propertyInfo2.PropertyType)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         protected override MethodInfo GetMethod(Type[] argTypes)

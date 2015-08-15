@@ -20,7 +20,7 @@ namespace Extensions.Types
                     return "string";
             }
 
-            return type.Name;
+            return type.FullName;
         }
     }
 }
