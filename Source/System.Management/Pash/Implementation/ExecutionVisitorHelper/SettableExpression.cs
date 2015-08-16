@@ -10,7 +10,8 @@ namespace System.Management.Pash.Implementation
         internal ExecutionContext ExecutionContext { get { return CurrentExecution.ExecutionContext; } }
 
         public static readonly Type[] SupportedExpressions = new [] {
-            typeof(VariableExpressionAst), typeof(MemberExpressionAst), typeof(IndexExpressionAst)
+            typeof(VariableExpressionAst), typeof(MemberExpressionAst), typeof(IndexExpressionAst),
+            typeof(InvokeMemberExpressionAst)
         };
 
         internal SettableExpression(ExecutionVisitor currentExecution)
@@ -27,6 +28,10 @@ namespace System.Management.Pash.Implementation
             if (valueExpression is VariableExpressionAst)
             {
                 return new SettableVariableExpression((VariableExpressionAst)valueExpression, currentExecution);
+            }
+            else if (valueExpression is InvokeMemberExpressionAst)
+            {
+                return new SettableInvokeMemberExpression((InvokeMemberExpressionAst)valueExpression, currentExecution);
             }
             else if (valueExpression is MemberExpressionAst)
             {

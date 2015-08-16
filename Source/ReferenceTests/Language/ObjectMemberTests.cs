@@ -169,7 +169,98 @@ namespace ReferenceTests.Language
             Assert.AreEqual(NewlineJoin("c", "c", "d", "d"), result);
         }
 
+        [Test]
+        public void ReadOnlyParameterizedPropertyCanBeAccessed()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(
+                "$a = Test-CreateParameterizedPropertiesObject -ReadOnly -FileNames 'abc.txt'",
+                "$a.FileNames(0)"
+            ));
 
+            Assert.AreEqual(NewlineJoin("abc.txt"), result);
+        }
+
+        [Test]
+        public void ReadWriteParameterizedPropertyCanBeWrittenToAndReadFrom()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(
+                "$a = Test-CreateParameterizedPropertiesObject -FileNames 'a.txt'",
+                "$a.FileNames(0) = 'b.txt'",
+                "$a.FileNames(0)"
+            ));
+
+            Assert.AreEqual(NewlineJoin("b.txt"), result);
+        }
+
+        [Test]
+        public void OverloadedParameterizedPropertyCanBeAccessed()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(
+                "$a = Test-CreateOverloadedByArgumentNumbersParameterizedPropertiesObject",
+                "$a.Grid(1, 2)"
+            ));
+
+            Assert.AreEqual(NewlineJoin("1, 2"), result);
+        }
+
+        [Test]
+        public void OverloadedParameterizedPropertyCanBeWrittenToAndReadFrom()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(
+                "$a = Test-CreateOverloadedByArgumentNumbersParameterizedPropertiesObject",
+                "$a.Grid(1, 2) = 'b.txt'",
+                "$a.Grid(1, 2)"
+            ));
+
+            Assert.AreEqual(NewlineJoin("b.txt"), result);
+        }
+
+        [Test]
+        public void InterfaceParameterizedPropertyCanBeWrittenToAndReadFrom()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(
+                "$a = Test-CreateParameterizedPropertiesObject -FromInterface -FileNames 'a.txt'",
+                "$a.FileNames(0) = 'b.txt'",
+                "$a.FileNames(0)"
+            ));
+
+            Assert.AreEqual(NewlineJoin("b.txt"), result);
+        }
+
+        [Test]
+        public void OverloadedByTypeParameterizedPropertyCanBeWrittenToAndReadUsingFirstOverload()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(
+                "$a = Test-CreateParameterizedPropertiesObject -OverloadedByType -FileNames 'a.txt'",
+                "$a.FileNames(0) = 'b.txt'",
+                "$a.FileNames(0)"
+            ));
+
+            Assert.AreEqual(NewlineJoin("b.txt"), result);
+        }
+
+        [Test]
+        public void OverloadedByTypeParameterizedPropertyCanBeWrittenToAndReadUsingSecondOverload()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(
+                "$a = Test-CreateParameterizedPropertiesObject -OverloadedByType -FileNames 'a.txt'",
+                "$a.FileNames('a.txt') = 'b.txt'",
+                "$a.FileNames('b.txt')"
+            ));
+
+            Assert.AreEqual(NewlineJoin("1"), result);
+        }
+
+        [Test]
+        public void OverloadedParameterizedPropertyWithDifferentReturnTypeCanBeReadFrom()
+        {
+            string result = ReferenceHost.Execute(NewlineJoin(
+                "$a = Test-CreateParameterizedPropertiesObject -DifferentReturnType -FileNames 'a.txt','b.txt'",
+                "$a.FileNames('b.txt')"
+            ));
+
+            Assert.AreEqual(NewlineJoin("1"), result);
+        }
 
         public class XmlTests
         {

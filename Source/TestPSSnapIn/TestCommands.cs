@@ -8,6 +8,7 @@ using System.Management.Automation;
 using System.Management.Automation.Provider;
 using Microsoft.PowerShell.Commands;
 using System.Runtime.InteropServices;
+using TestParameterizedProperties;
 
 namespace TestPSSnapIn
 {
@@ -751,6 +752,74 @@ namespace TestPSSnapIn
             WriteObject(UseParameters.IsPresent);
             WriteObject(DefaultMessage);
             WriteObject(_params);
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "CreateParameterizedPropertiesObject")]
+    public class TestCreateParameterizedPropertiesObject : PSCmdlet
+    {
+        [Parameter]
+        public string[] FileNames { get; set; }
+
+        [Parameter]
+        public SwitchParameter ReadOnly { get; set; }
+
+        [Parameter]
+        public SwitchParameter WriteOnly { get; set; }
+
+        [Parameter]
+        public SwitchParameter FromInterface { get; set; }
+
+        [Parameter]
+        public SwitchParameter OverloadedByType { get; set; }
+
+        [Parameter]
+        public SwitchParameter DifferentReturnType { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            if (ReadOnly)
+            {
+                WriteObject(new TestReadOnlyParameterizedProperty(GetFileNames()));
+            }
+            else if (WriteOnly)
+            {
+                WriteObject(new TestWriteOnlyParameterizedProperty());
+            }
+            else if (FromInterface)
+            {
+                WriteObject(new TestInterfaceParameterizedProperty(GetFileNames()));
+            }
+            else if (OverloadedByType)
+            {
+                WriteObject(new TestOverloadedByTypeParameterizedProperty(GetFileNames()));
+            }
+            else if (DifferentReturnType)
+            {
+                WriteObject(new TestDifferentReturnTypesParameterizedProperty(GetFileNames()));
+            }
+            else
+            {
+                WriteObject(new TestParameterizedProperty(GetFileNames()));
+            }
+        }
+
+        private string[] GetFileNames()
+        {
+            if (FileNames != null)
+            {
+                return FileNames;
+            }
+            return new string[0];
+        }
+    }
+
+    [Cmdlet(VerbsDiagnostic.Test, "CreateOverloadedByArgumentNumbersParameterizedPropertiesObject")]
+    public class TestCreateOverloadedByArgumentNumbersParameterizedPropertiesObject : PSCmdlet
+    {
+        protected override void ProcessRecord()
+        {
+            WriteObject(new TestOverloadedByArgumentNumbersParameterizedProperty());
         }
     }
 }

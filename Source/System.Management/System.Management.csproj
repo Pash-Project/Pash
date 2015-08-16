@@ -85,6 +85,7 @@
     <Compile Include="Automation\AuthorizationManager.cs" />
     <Compile Include="Automation\ForEachObjectCommand.cs" />
     <Compile Include="Automation\OutputTypeAttribute.cs" />
+    <Compile Include="Automation\PSParameterizedProperty.cs" />
     <Compile Include="Automation\PSTypeName.cs" />
     <Compile Include="Automation\Runspaces\AssemblyConfigurationEntry.cs" />
     <Compile Include="Automation\Runspaces\FormatConfigurationEntry.cs" />
@@ -403,6 +404,7 @@
     <Compile Include="Extensions\JoinStringExtensions.cs" />
     <Compile Include="Extensions\QueueExtensions.cs" />
     <Compile Include="Extensions\Reflection.cs" />
+    <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AddPSSnapinCommand.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AliasProvider.cs" />
     <Compile Include="Microsoft.PowerShell\Commands\AliasProviderDynamicParameters.cs" />
@@ -437,6 +439,7 @@
     <Compile Include="Pash\Implementation\ExecutionVisitorHelper\FileRedirectionOperator.cs" />
     <Compile Include="Pash\Implementation\ExecutionVisitorHelper\FileRedirectionVisitor.cs" />
     <Compile Include="Pash\Implementation\ExecutionVisitorHelper\RedirectionVisitor.cs" />
+    <Compile Include="Pash\Implementation\ExecutionVisitorHelper\SettableInvokeMemberExpression.cs" />
     <Compile Include="Pash\Implementation\getline.cs" />
     <Compile Include="Pash\Implementation\CommandManager.cs" />
     <Compile Include="Pash\Implementation\CommandProcessor.cs" />
@@ -459,6 +462,7 @@
     <Compile Include="Pash\Implementation\PipelineProcessor.cs" />
     <Compile Include="Pash\Implementation\ProviderRuntime.cs" />
     <Compile Include="Pash\Implementation\PSObjectPipelineReader.cs" />
+    <Compile Include="Pash\Implementation\PSObjectProperties.cs" />
     <Compile Include="Pash\Implementation\SessionStateGlobal.cs" />
     <Compile Include="Pash\NumericMultiplier.cs" />
     <Compile Include="Pash\ParserIntrinsics\AstBuilder.cs" />

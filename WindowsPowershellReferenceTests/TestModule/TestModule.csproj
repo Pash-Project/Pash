@@ -40,6 +40,9 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Management.Automation" />
     <Reference Include="Microsoft.PowerShell.Commands.Management" />
+    <Reference Include="TestParameterizedProperties">
+      <HintPath>..\..\Source\TestParameterizedProperties\bin\TestParameterizedProperties.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />

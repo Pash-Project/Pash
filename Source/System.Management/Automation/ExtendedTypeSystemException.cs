@@ -42,6 +42,10 @@ namespace System.Management.Automation
         internal const string ReservedMemberNameMsg = "ReservedMemberName";
         internal const string ToStringExceptionMsg = "ToStringException";
         internal const string TypesXmlErrorMsg = "TypesXmlError";
+        internal const string CannotChangePSMethodInfoValue = "CannotChangePSMethodInfoValue";
+        internal const string CatchFromBaseParameterizedPropertyAdapterGetValue = "CatchFromBaseParameterizedPropertyAdapterGetValue";
+        internal const string CatchFromBaseAdapterParameterizedPropertySetValue = "CatchFromBaseAdapterParameterizedPropertySetValue";
+        internal const string MethodCountCouldNotFindBest = "MethodCountCouldNotFindBest";
 
         public ExtendedTypeSystemException()
             : base()
@@ -66,6 +70,26 @@ namespace System.Management.Automation
                                              string baseName, string resourceId, params object[] arguments)
         {
             throw new NotImplementedException(); 
+        }
+
+        internal ExtendedTypeSystemException(string message, string errorId, Exception innerException)
+            : base(message, innerException)
+        {
+            CreateErrorRecord(errorId);
+        }
+
+        internal ExtendedTypeSystemException(string message, string errorId)
+            : base(message)
+        {
+            CreateErrorRecord(errorId);
+        }
+
+        private void CreateErrorRecord(string errorId)
+        {
+            ErrorRecord = new ErrorRecord(new ParentContainsErrorRecordException(this),
+                errorId,
+                ErrorCategory.NotSpecified,
+                null);
         }
     }
 

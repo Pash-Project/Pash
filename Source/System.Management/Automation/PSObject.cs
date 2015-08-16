@@ -8,6 +8,7 @@ using System.Collections;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Threading;
+using Pash.Implementation;
 
 namespace System.Management.Automation
 {
@@ -34,6 +35,7 @@ namespace System.Management.Automation
                 if (_properties == null)
                 {
                     InitProperties();
+                    InitParameterizedProperties();
                 }
                 if (_methods == null)
                 {
@@ -151,32 +153,7 @@ namespace System.Management.Automation
 
         private List<PSProperty> GetProperties(bool isInstance)
         {
-            var baseObject = ImmediateBaseObject;
-            var type = (baseObject is Type && !isInstance) ? (Type) baseObject : baseObject.GetType();
-            var instanceObject = isInstance ? baseObject : null;
-            BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy;
-            flags |= isInstance ? BindingFlags.Instance : BindingFlags.Static;
-            // get all properties
-            var propertyInfos = type.GetProperties(flags).ToList();
-            // TODO: maybe the following isn't necessary. I investigated this, because I saw that in PS you can access
-            // an array's .Count property. However, I just read that they do this by adding this property through
-            // Types.ps1xml. So although the following code did the same (as it indeed implemnts/inherits a Count property)
-            // this did not seem to be the actual intention
-
-            // get properties of all interfaces explicitly, as properties of interfaces implemented by interfaces aren't
-            // included in the normal GetProperties() call
-            type.GetInterfaces().ToList().ForEach(i => propertyInfos.AddRange(i.GetProperties(flags)));
-            // add a PSProperty for each propertInfo, ignoring duplicates (same name)
-            var properties = (from property
-                in propertyInfos.GroupBy(prop => prop.Name).Select(grp => grp.First())
-                select new PSProperty(property, instanceObject, isInstance)).ToList();
-            // add a PSProperty for each field
-            properties.AddRange(
-                from field
-                in type.GetFields(flags)
-                select new PSFieldProperty(field, instanceObject, isInstance)
-            );
-            return properties;
+           return new PSObjectProperties(ImmediateBaseObject, isInstance).GetProperties();
         }
 
         private void InitMethods()
@@ -305,6 +282,15 @@ namespace System.Management.Automation
             return psobj.Members[memberName];
         }
 
+        private void InitParameterizedProperties()
+        {
+            var properties = GetParameterizedProperties(true);
+            properties.ForEach(_members.Add);
+        }
 
+        private List<PSParameterizedProperty> GetParameterizedProperties(bool isInstance)
+        {
+            return new PSObjectProperties(ImmediateBaseObject, isInstance).GetParameterizedProperties();
+        }
     }
 }

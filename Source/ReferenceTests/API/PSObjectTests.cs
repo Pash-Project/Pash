@@ -5,6 +5,8 @@ using NUnit.Framework;
 using System.Management.Automation;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using TestParameterizedProperties;
+using TestPSSnapIn;
 
 namespace ReferenceTests.API
 {
@@ -159,6 +161,337 @@ namespace ReferenceTests.API
         public void PSObjectToStringUsesCurrentCulture()
         {
             Assert.AreEqual("1 2,5", new PSObject(new object[] { 1, 2.5 }).ToString());
+        }
+
+        [Test]
+        public void ObjectWithReadOnlyParameterizedProperty()
+        {
+            var obj = new TestReadOnlyParameterizedProperty();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            Assert.IsTrue(propertyInfo.IsGettable);
+            Assert.IsFalse(propertyInfo.IsSettable);
+            Assert.IsTrue(propertyInfo.IsInstance);
+            Assert.AreEqual(PSMemberTypes.ParameterizedProperty, propertyInfo.MemberType);
+            Assert.AreEqual("FileNames", propertyInfo.Name);
+            Assert.AreEqual("System.String", propertyInfo.TypeNameOfValue);
+            Assert.AreEqual(propertyInfo, propertyInfo.Value);
+            Assert.AreEqual(1, propertyInfo.OverloadDefinitions.Count);
+            Assert.AreEqual("string FileNames(int index) {get;}", propertyInfo.OverloadDefinitions[0]);
+        }
+
+        [Test]
+        public void ObjectWithWriteOnlyParameterizedProperty()
+        {
+            var obj = new TestWriteOnlyParameterizedProperty();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            Assert.IsFalse(propertyInfo.IsGettable);
+            Assert.IsTrue(propertyInfo.IsSettable);
+            Assert.AreEqual("void FileNames(int index) {set;}", propertyInfo.OverloadDefinitions[0]);
+        }
+
+        [Test]
+        public void ObjectWithReadWriteOnlyParameterizedProperty()
+        {
+            var obj = new TestParameterizedProperty();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            Assert.IsTrue(propertyInfo.IsGettable);
+            Assert.IsTrue(propertyInfo.IsSettable);
+            Assert.AreEqual("string FileNames(int index) {get;set;}", propertyInfo.OverloadDefinitions[0]);
+        }
+
+        [Test]
+        public void ParameterizedPropertyCopy()
+        {
+            var obj = new TestReadOnlyParameterizedProperty();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            propertyInfo = propertyInfo.Copy() as PSParameterizedProperty;
+
+            Assert.IsTrue(propertyInfo.IsGettable);
+            Assert.IsFalse(propertyInfo.IsSettable);
+            Assert.IsTrue(propertyInfo.IsInstance);
+            Assert.AreEqual(PSMemberTypes.ParameterizedProperty, propertyInfo.MemberType);
+            Assert.AreEqual("FileNames", propertyInfo.Name);
+            Assert.AreEqual("System.String", propertyInfo.TypeNameOfValue);
+            Assert.AreEqual(propertyInfo, propertyInfo.Value);
+            Assert.AreEqual(1, propertyInfo.OverloadDefinitions.Count);
+            Assert.AreEqual("string FileNames(int index) {get;}", propertyInfo.OverloadDefinitions[0]);
+        }
+
+        [Test]
+        public void InvokeParameterizedPropertyGetter()
+        {
+            var obj = new TestParameterizedProperty(new string[] {"a.txt"});
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            object result = propertyInfo.Invoke(0);
+
+            Assert.AreEqual("a.txt", result);
+        }
+
+        [Test]
+        public void InvokeParameterizedPropertySetter()
+        {
+            var obj = new TestParameterizedProperty(new string[] { "a.txt" });
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            propertyInfo.InvokeSet("b.txt", 0);
+
+            Assert.AreEqual("b.txt", obj[0]);
+        }
+
+        [Test]
+        public void CannotInvokeParameterizedPropertySetterWithInvokeMethod()
+        {
+            var obj = new TestParameterizedProperty(new string[] { "a.txt" });
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            GetValueInvocationException ex = Assert.Throws<GetValueInvocationException>(() => propertyInfo.Invoke(0, "b.txt"));
+
+            var innerEx = ex.InnerException as MethodException;
+            StringAssert.StartsWith("Exception getting \"FileNames\": ", ex.Message);
+            Assert.AreEqual("Cannot find an overload for \"FileNames\" and the argument count: \"2\".", innerEx.Message);
+
+            StringAssert.StartsWith("Exception getting \"FileNames\": ", ex.ErrorRecord.Exception.Message);
+            Assert.AreEqual("CatchFromBaseParameterizedPropertyAdapterGetValue", ex.ErrorRecord.FullyQualifiedErrorId);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.NotSpecified, ex.ErrorRecord.CategoryInfo.Category);
+            Assert.AreEqual("ParentContainsErrorRecordException", ex.ErrorRecord.CategoryInfo.Reason);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.TargetName);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.TargetType);
+            Assert.IsNull(ex.ErrorRecord.TargetObject);
+            Assert.IsInstanceOf(typeof(ParentContainsErrorRecordException), ex.ErrorRecord.Exception);
+
+            StringAssert.StartsWith("Cannot find an overload for \"FileNames\"", innerEx.ErrorRecord.Exception.Message);
+            Assert.AreEqual("MethodCountCouldNotFindBest", innerEx.ErrorRecord.FullyQualifiedErrorId);
+            Assert.AreEqual("", innerEx.ErrorRecord.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.NotSpecified, innerEx.ErrorRecord.CategoryInfo.Category);
+            Assert.AreEqual("ParentContainsErrorRecordException", innerEx.ErrorRecord.CategoryInfo.Reason);
+            Assert.AreEqual("", innerEx.ErrorRecord.CategoryInfo.TargetName);
+            Assert.AreEqual("", innerEx.ErrorRecord.CategoryInfo.TargetType);
+            Assert.IsNull(innerEx.ErrorRecord.TargetObject);
+            Assert.IsInstanceOf(typeof(ParentContainsErrorRecordException), innerEx.ErrorRecord.Exception);
+        }
+
+        [Test]
+        public void CannotInvokeParameterizedPropertyGetterWithInvokeSet()
+        {
+            var obj = new TestParameterizedProperty(new string[] { "a.txt" });
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            SetValueInvocationException ex = Assert.Throws<SetValueInvocationException>(() => propertyInfo.InvokeSet(0));
+
+            var innerEx = ex.InnerException as MethodException;
+            StringAssert.StartsWith("Exception setting \"FileNames\": ", ex.Message);
+            Assert.AreEqual("Cannot find an overload for \"FileNames\" and the argument count: \"0\".", innerEx.Message);
+
+            StringAssert.StartsWith("Exception setting \"FileNames\": ", ex.ErrorRecord.Exception.Message);
+            Assert.AreEqual("CatchFromBaseAdapterParameterizedPropertySetValue", ex.ErrorRecord.FullyQualifiedErrorId);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.NotSpecified, ex.ErrorRecord.CategoryInfo.Category);
+            Assert.AreEqual("ParentContainsErrorRecordException", ex.ErrorRecord.CategoryInfo.Reason);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.TargetName);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.TargetType);
+            Assert.IsNull(ex.ErrorRecord.TargetObject);
+            Assert.IsInstanceOf(typeof(ParentContainsErrorRecordException), ex.ErrorRecord.Exception);
+
+            StringAssert.StartsWith("Cannot find an overload for \"FileNames\"", innerEx.ErrorRecord.Exception.Message);
+            Assert.AreEqual("MethodCountCouldNotFindBest", innerEx.ErrorRecord.FullyQualifiedErrorId);
+            Assert.AreEqual("", innerEx.ErrorRecord.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.NotSpecified, innerEx.ErrorRecord.CategoryInfo.Category);
+            Assert.AreEqual("ParentContainsErrorRecordException", innerEx.ErrorRecord.CategoryInfo.Reason);
+            Assert.AreEqual("", innerEx.ErrorRecord.CategoryInfo.TargetName);
+            Assert.AreEqual("", innerEx.ErrorRecord.CategoryInfo.TargetType);
+            Assert.IsNull(innerEx.ErrorRecord.TargetObject);
+            Assert.IsInstanceOf(typeof(ParentContainsErrorRecordException), innerEx.ErrorRecord.Exception);
+        }
+
+        [Test]
+        public void TooManyArgumentsForParameterizedPropertyInvokeSet()
+        {
+            var obj = new TestParameterizedProperty(new string[] { "a.txt" });
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            SetValueInvocationException ex = Assert.Throws<SetValueInvocationException>(() => propertyInfo.InvokeSet(0, 1, 2, 3));
+
+            var innerEx = ex.InnerException as MethodException;
+            StringAssert.StartsWith("Exception setting \"FileNames\": ", ex.Message);
+            Assert.AreEqual("Cannot find an overload for \"FileNames\" and the argument count: \"3\".", innerEx.Message);
+        }
+
+        [Test]
+        public void TooManyArgumentsForPSMethodInvoke()
+        {
+            var obj = new Object();
+            var psObject = new PSObject(obj);
+            PSMethodInfo method = psObject.Methods.First(m => m.Name == "ToString");
+
+            MethodException ex = Assert.Throws<MethodException>(() => method.Invoke(1, 2, 3, 4, 5));
+            Assert.AreEqual("Cannot find an overload for \"ToString\" and the argument count: \"5\".", ex.Message);
+        }
+
+        [Test]
+        public void ObjectWithOverloadedByTypeParameterizedProperty()
+        {
+            var obj = new TestOverloadedByTypeParameterizedProperty();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.Single(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            Assert.IsTrue(propertyInfo.IsGettable);
+            Assert.IsTrue(propertyInfo.IsSettable);
+            Assert.AreEqual("FileNames", propertyInfo.Name);
+            Assert.AreEqual("System.String", propertyInfo.TypeNameOfValue);
+            Assert.AreEqual(propertyInfo, propertyInfo.Value);
+            Assert.AreEqual(2, propertyInfo.OverloadDefinitions.Count);
+            Assert.AreEqual("string FileNames(int index) {get;set;}", propertyInfo.OverloadDefinitions[0]);
+            Assert.AreEqual("string FileNames(string fileName) {get;set;}", propertyInfo.OverloadDefinitions[1]);
+        }
+
+        [Test]
+        public void ObjectWithOverloadedByArgumentNumberParameterizedProperty()
+        {
+            var obj = new TestOverloadedByArgumentNumbersParameterizedProperty();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.Single(m => m.Name == "Grid") as PSParameterizedProperty;
+
+            Assert.IsTrue(propertyInfo.IsGettable);
+            Assert.IsTrue(propertyInfo.IsSettable);
+            Assert.AreEqual("Grid", propertyInfo.Name);
+            Assert.AreEqual("System.String", propertyInfo.TypeNameOfValue);
+            Assert.AreEqual(propertyInfo, propertyInfo.Value);
+            Assert.AreEqual(2, propertyInfo.OverloadDefinitions.Count);
+            Assert.AreEqual("string Grid(int x) {get;set;}", propertyInfo.OverloadDefinitions[0]);
+            Assert.AreEqual("string Grid(int x, int y) {get;set;}", propertyInfo.OverloadDefinitions[1]);
+        }
+
+        [Test]
+        public void InvokeOverloadedByTypeParameterizedPropertySetter()
+        {
+            var obj = new TestOverloadedByTypeParameterizedProperty(new [] {"a.txt"});
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.Single(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            propertyInfo.InvokeSet("b.txt", "a.txt");
+
+            Assert.AreEqual("b.txt", obj[1]);
+        }
+
+        [Test]
+        public void InvokeOverloadedByArgumentNumberParameterizedPropertyGetter()
+        {
+            var obj = new TestOverloadedByArgumentNumbersParameterizedProperty();
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.Single(m => m.Name == "Grid") as PSParameterizedProperty;
+
+            object result = propertyInfo.Invoke(1, 2);
+
+            Assert.AreEqual("1, 2", result);
+        }
+
+        [Test]
+        public void InvokeOverloadedByArgumentNumbersParameterizedPropertySetter()
+        {
+            var obj = new TestOverloadedByArgumentNumbersParameterizedProperty();
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.Single(m => m.Name == "Grid") as PSParameterizedProperty;
+
+            propertyInfo.InvokeSet("b.txt", 1, 2);
+
+            Assert.AreEqual("b.txt", obj.get_Grid(1, 2));
+        }
+
+        [Test]
+        public void ObjectWithTwoInterfacesOneWithParameterizedProperty()
+        {
+            var obj = new TestInterfaceParameterizedProperty();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.Single(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            Assert.IsTrue(propertyInfo.IsGettable);
+            Assert.IsTrue(propertyInfo.IsSettable);
+            Assert.AreEqual("FileNames", propertyInfo.Name);
+            Assert.AreEqual("System.String", propertyInfo.TypeNameOfValue);
+            Assert.AreEqual(1, propertyInfo.OverloadDefinitions.Count);
+            Assert.AreEqual("string ITestParameterizedProperty.FileNames(int index) {get;set;}", propertyInfo.OverloadDefinitions[0]);
+        }
+
+        [Test]
+        public void ObjectWithOverloadedParameterizedPropertiesWithDifferentReturnTypes()
+        {
+            var obj = new TestDifferentReturnTypesParameterizedProperty();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.Single(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            Assert.IsTrue(propertyInfo.IsGettable);
+            Assert.IsTrue(propertyInfo.IsSettable);
+            Assert.AreEqual("FileNames", propertyInfo.Name);
+            Assert.AreEqual("System.Object", propertyInfo.TypeNameOfValue);
+            Assert.AreEqual(propertyInfo, propertyInfo.Value);
+            Assert.AreEqual(2, propertyInfo.OverloadDefinitions.Count);
+            Assert.AreEqual("string FileNames(int index) {get;set;}", propertyInfo.OverloadDefinitions[0]);
+            Assert.AreEqual("int FileNames(string fileName) {get;set;}", propertyInfo.OverloadDefinitions[1]);
+        }
+
+        [Test]
+        public void DictionaryObjectInterfaceHasItemParameterizedProperty()
+        {
+            var obj = new Dictionary<string, int>();
+            var psObject = new PSObject(obj);
+
+            var propertyInfo = psObject.Members.Single(m => m.Name == "Item") as PSParameterizedProperty;
+
+            Assert.IsTrue(propertyInfo.IsGettable);
+            Assert.IsTrue(propertyInfo.IsSettable);
+            Assert.AreEqual("Item", propertyInfo.Name);
+            Assert.AreEqual("System.Object", propertyInfo.TypeNameOfValue);
+            Assert.AreEqual(propertyInfo, propertyInfo.Value);
+            Assert.AreEqual(2, propertyInfo.OverloadDefinitions.Count);
+            Assert.AreEqual("int Item(string key) {get;set;}", propertyInfo.OverloadDefinitions[0]);
+            Assert.AreEqual("System.Object IDictionary.Item(System.Object key) {get;set;}", propertyInfo.OverloadDefinitions[1]);
+        }
+
+        [Test]
+        public void SetParameterizedPropertyValue()
+        {
+            const string expectedErrorMessage = "Cannot set the Value property for PSMemberInfo object of type \"System.Management.Automation.PSParameterizedProperty\".";
+            var obj = new TestParameterizedProperty();
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            var ex = Assert.Throws<ExtendedTypeSystemException>(() => propertyInfo.Value = "a");
+            var errorRecordException = ex.ErrorRecord.Exception as ParentContainsErrorRecordException;
+
+            Assert.AreEqual(expectedErrorMessage, ex.Message);
+            Assert.IsNull(ex.InnerException);
+            Assert.AreEqual("CannotChangePSMethodInfoValue", ex.ErrorRecord.FullyQualifiedErrorId);
+            Assert.AreEqual(expectedErrorMessage, errorRecordException.Message);
+            Assert.IsNull(errorRecordException.InnerException);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.NotSpecified, ex.ErrorRecord.CategoryInfo.Category);
+            Assert.AreEqual("ParentContainsErrorRecordException", ex.ErrorRecord.CategoryInfo.Reason);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.TargetName);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.TargetType);
+            Assert.IsNull(ex.ErrorRecord.TargetObject);
         }
     }
 }
