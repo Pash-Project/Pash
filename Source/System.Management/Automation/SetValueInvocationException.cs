@@ -27,6 +27,11 @@ namespace System.Management.Automation
             : base(message, innerException)
         {
         }
+
+        internal SetValueInvocationException(string message, string errorId, Exception innerException)
+            : base(message, errorId, innerException)
+        {
+        }
     }
 }
 

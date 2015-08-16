@@ -37,15 +37,9 @@ namespace System.Management.Automation
             }
             set
             {
-                var ex = new ExtendedTypeSystemException(string.Format(CultureInfo.CurrentCulture,
-                    "Cannot set the Value property for PSMemberInfo object of type \"{0}\".", GetType().FullName));
-
-                ex.ErrorRecord = new ErrorRecord(new ParentContainsErrorRecordException(ex),
-                    ExtendedTypeSystemException.CannotChangePSMethodInfoValue,
-                    ErrorCategory.NotSpecified,
-                    null);
-
-                throw ex;
+                throw new ExtendedTypeSystemException(string.Format(CultureInfo.CurrentCulture,
+                    "Cannot set the Value property for PSMemberInfo object of type \"{0}\".", GetType().FullName),
+                    ExtendedTypeSystemException.CannotChangePSMethodInfoValue);
             }
         }
 

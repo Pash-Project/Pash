@@ -71,6 +71,26 @@ namespace System.Management.Automation
         {
             throw new NotImplementedException(); 
         }
+
+        internal ExtendedTypeSystemException(string message, string errorId, Exception innerException)
+            : base(message, innerException)
+        {
+            CreateErrorRecord(errorId);
+        }
+
+        internal ExtendedTypeSystemException(string message, string errorId)
+            : base(message)
+        {
+            CreateErrorRecord(errorId);
+        }
+
+        private void CreateErrorRecord(string errorId)
+        {
+            ErrorRecord = new ErrorRecord(new ParentContainsErrorRecordException(this),
+                errorId,
+                ErrorCategory.NotSpecified,
+                null);
+        }
     }
 
 }

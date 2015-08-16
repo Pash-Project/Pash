@@ -110,15 +110,10 @@ namespace System.Management.Automation
             }
             catch (MethodException ex)
             {
-                var getValueEx = new GetValueInvocationException(string.Format(CultureInfo.CurrentCulture,
-                    "Exception getting \"{0}\": \"{1}\"", Name, ex.Message), ex);
-
-                getValueEx.ErrorRecord = new ErrorRecord(new ParentContainsErrorRecordException(getValueEx),
+                throw new GetValueInvocationException(string.Format(CultureInfo.CurrentCulture,
+                    "Exception getting \"{0}\": \"{1}\"", Name, ex.Message),
                     ExtendedTypeSystemException.CatchFromBaseParameterizedPropertyAdapterGetValue,
-                    ErrorCategory.NotSpecified,
-                    null);
-
-                throw getValueEx;
+                    ex);
             }
         }
 
@@ -136,15 +131,10 @@ namespace System.Management.Automation
             }
             catch (MethodException ex)
             {
-                var setValueEx = new SetValueInvocationException(string.Format(CultureInfo.CurrentCulture,
-                    "Exception setting \"{0}\": \"{1}\"", Name, ex.Message), ex);
-
-                setValueEx.ErrorRecord = new ErrorRecord(new ParentContainsErrorRecordException(setValueEx),
+                throw new SetValueInvocationException(string.Format(CultureInfo.CurrentCulture,
+                    "Exception setting \"{0}\": \"{1}\"", Name, ex.Message),
                     ExtendedTypeSystemException.CatchFromBaseAdapterParameterizedPropertySetValue,
-                    ErrorCategory.NotSpecified,
-                    null);
-
-                throw setValueEx;
+                    ex);
             }
         }
 
