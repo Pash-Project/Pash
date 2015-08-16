@@ -180,7 +180,7 @@ namespace System.Management.Automation
             }
             if (candidates.Count < 1)
             {
-                throw new MethodException(string.Format("Cannot find an overload for \"{0}\" and the argument count: \"{1}\".", Name, GetArgumentsLength(arguments)));
+                throw CreateMethodException(GetArgumentsLength(arguments));
             }
             else if (candidates.Count > 1)
             {
@@ -195,6 +195,18 @@ namespace System.Management.Automation
                 newArguments = tuple.Item2;
                 return tuple.Item1;
             }
+        }
+
+        private MethodException CreateMethodException(int argumentCount)
+        {
+            var ex = new MethodException(string.Format("Cannot find an overload for \"{0}\" and the argument count: \"{1}\".", Name, argumentCount));
+
+            ex.ErrorRecord = new ErrorRecord(new ParentContainsErrorRecordException(ex),
+                ExtendedTypeSystemException.MethodCountCouldNotFindBest,
+                ErrorCategory.NotSpecified,
+                null);
+
+            return ex;
         }
 
         protected virtual int GetArgumentsLength(object[] arguments)

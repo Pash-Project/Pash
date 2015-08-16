@@ -265,6 +265,26 @@ namespace ReferenceTests.API
             var innerEx = ex.InnerException as MethodException;
             StringAssert.StartsWith("Exception getting \"FileNames\": ", ex.Message);
             Assert.AreEqual("Cannot find an overload for \"FileNames\" and the argument count: \"2\".", innerEx.Message);
+
+            StringAssert.StartsWith("Exception getting \"FileNames\": ", ex.ErrorRecord.Exception.Message);
+            Assert.AreEqual("CatchFromBaseParameterizedPropertyAdapterGetValue", ex.ErrorRecord.FullyQualifiedErrorId);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.NotSpecified, ex.ErrorRecord.CategoryInfo.Category);
+            Assert.AreEqual("ParentContainsErrorRecordException", ex.ErrorRecord.CategoryInfo.Reason);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.TargetName);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.TargetType);
+            Assert.IsNull(ex.ErrorRecord.TargetObject);
+            Assert.IsInstanceOf(typeof(ParentContainsErrorRecordException), ex.ErrorRecord.Exception);
+
+            StringAssert.StartsWith("Cannot find an overload for \"FileNames\"", innerEx.ErrorRecord.Exception.Message);
+            Assert.AreEqual("MethodCountCouldNotFindBest", innerEx.ErrorRecord.FullyQualifiedErrorId);
+            Assert.AreEqual("", innerEx.ErrorRecord.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.NotSpecified, innerEx.ErrorRecord.CategoryInfo.Category);
+            Assert.AreEqual("ParentContainsErrorRecordException", innerEx.ErrorRecord.CategoryInfo.Reason);
+            Assert.AreEqual("", innerEx.ErrorRecord.CategoryInfo.TargetName);
+            Assert.AreEqual("", innerEx.ErrorRecord.CategoryInfo.TargetType);
+            Assert.IsNull(innerEx.ErrorRecord.TargetObject);
+            Assert.IsInstanceOf(typeof(ParentContainsErrorRecordException), innerEx.ErrorRecord.Exception);
         }
 
         [Test]
@@ -279,6 +299,26 @@ namespace ReferenceTests.API
             var innerEx = ex.InnerException as MethodException;
             StringAssert.StartsWith("Exception setting \"FileNames\": ", ex.Message);
             Assert.AreEqual("Cannot find an overload for \"FileNames\" and the argument count: \"0\".", innerEx.Message);
+
+            StringAssert.StartsWith("Exception setting \"FileNames\": ", ex.ErrorRecord.Exception.Message);
+            Assert.AreEqual("CatchFromBaseAdapterParameterizedPropertySetValue", ex.ErrorRecord.FullyQualifiedErrorId);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.NotSpecified, ex.ErrorRecord.CategoryInfo.Category);
+            Assert.AreEqual("ParentContainsErrorRecordException", ex.ErrorRecord.CategoryInfo.Reason);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.TargetName);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.TargetType);
+            Assert.IsNull(ex.ErrorRecord.TargetObject);
+            Assert.IsInstanceOf(typeof(ParentContainsErrorRecordException), ex.ErrorRecord.Exception);
+
+            StringAssert.StartsWith("Cannot find an overload for \"FileNames\"", innerEx.ErrorRecord.Exception.Message);
+            Assert.AreEqual("MethodCountCouldNotFindBest", innerEx.ErrorRecord.FullyQualifiedErrorId);
+            Assert.AreEqual("", innerEx.ErrorRecord.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.NotSpecified, innerEx.ErrorRecord.CategoryInfo.Category);
+            Assert.AreEqual("ParentContainsErrorRecordException", innerEx.ErrorRecord.CategoryInfo.Reason);
+            Assert.AreEqual("", innerEx.ErrorRecord.CategoryInfo.TargetName);
+            Assert.AreEqual("", innerEx.ErrorRecord.CategoryInfo.TargetType);
+            Assert.IsNull(innerEx.ErrorRecord.TargetObject);
+            Assert.IsInstanceOf(typeof(ParentContainsErrorRecordException), innerEx.ErrorRecord.Exception);
         }
 
         [Test]

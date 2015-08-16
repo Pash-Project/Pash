@@ -43,6 +43,9 @@ namespace System.Management.Automation
         internal const string ToStringExceptionMsg = "ToStringException";
         internal const string TypesXmlErrorMsg = "TypesXmlError";
         internal const string CannotChangePSMethodInfoValue = "CannotChangePSMethodInfoValue";
+        internal const string CatchFromBaseParameterizedPropertyAdapterGetValue = "CatchFromBaseParameterizedPropertyAdapterGetValue";
+        internal const string CatchFromBaseAdapterParameterizedPropertySetValue = "CatchFromBaseAdapterParameterizedPropertySetValue";
+        internal const string MethodCountCouldNotFindBest = "MethodCountCouldNotFindBest";
 
         public ExtendedTypeSystemException()
             : base()
