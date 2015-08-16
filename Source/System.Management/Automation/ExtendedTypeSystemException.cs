@@ -42,6 +42,7 @@ namespace System.Management.Automation
         internal const string ReservedMemberNameMsg = "ReservedMemberName";
         internal const string ToStringExceptionMsg = "ToStringException";
         internal const string TypesXmlErrorMsg = "TypesXmlError";
+        internal const string CannotChangePSMethodInfoValue = "CannotChangePSMethodInfoValue";
 
         public ExtendedTypeSystemException()
             : base()

@@ -429,5 +429,29 @@ namespace ReferenceTests.API
             Assert.AreEqual("int Item(string key) {get;set;}", propertyInfo.OverloadDefinitions[0]);
             Assert.AreEqual("System.Object IDictionary.Item(System.Object key) {get;set;}", propertyInfo.OverloadDefinitions[1]);
         }
+
+        [Test]
+        public void SetParameterizedPropertyValue()
+        {
+            const string expectedErrorMessage = "Cannot set the Value property for PSMemberInfo object of type \"System.Management.Automation.PSParameterizedProperty\".";
+            var obj = new TestParameterizedProperty();
+            var psObject = new PSObject(obj);
+            var propertyInfo = psObject.Members.FirstOrDefault(m => m.Name == "FileNames") as PSParameterizedProperty;
+
+            var ex = Assert.Throws<ExtendedTypeSystemException>(() => propertyInfo.Value = "a");
+            var errorRecordException = ex.ErrorRecord.Exception as ParentContainsErrorRecordException;
+
+            Assert.AreEqual(expectedErrorMessage, ex.Message);
+            Assert.IsNull(ex.InnerException);
+            Assert.AreEqual("CannotChangePSMethodInfoValue", ex.ErrorRecord.FullyQualifiedErrorId);
+            Assert.AreEqual(expectedErrorMessage, errorRecordException.Message);
+            Assert.IsNull(errorRecordException.InnerException);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.NotSpecified, ex.ErrorRecord.CategoryInfo.Category);
+            Assert.AreEqual("ParentContainsErrorRecordException", ex.ErrorRecord.CategoryInfo.Reason);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.TargetName);
+            Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.TargetType);
+            Assert.IsNull(ex.ErrorRecord.TargetObject);
+        }
     }
 }

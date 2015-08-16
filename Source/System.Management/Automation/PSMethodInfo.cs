@@ -1,9 +1,10 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
-using System.Linq;
-using System.Collections.ObjectModel;
-using System.Reflection;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
 
 namespace System.Management.Automation
 {
@@ -36,7 +37,15 @@ namespace System.Management.Automation
             }
             set
             {
-                throw new SetValueException("Can't change Method");
+                var ex = new ExtendedTypeSystemException(string.Format(CultureInfo.CurrentCulture,
+                    "Cannot set the Value property for PSMemberInfo object of type \"{0}\".", GetType().FullName));
+
+                ex.ErrorRecord = new ErrorRecord(new ParentContainsErrorRecordException(ex),
+                    ExtendedTypeSystemException.CannotChangePSMethodInfoValue,
+                    ErrorCategory.NotSpecified,
+                    null);
+
+                throw ex;
             }
         }
 
