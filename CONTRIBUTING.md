@@ -106,4 +106,6 @@ Coding Style:
 
 - Use the default Visual Studio formatting settings. Keep files formatted that way at all times.
 
+We use [EditorConfig](http://editorconfig.org/) for keeping the settings consistent in another code editors. Go ahead and install the plugin for your text editor if you want.
+
 Beyond that, use your judgement to write the best code you know how.
