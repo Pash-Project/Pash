@@ -54,7 +54,7 @@ namespace System.Management.Automation.Language
 
         public override bool DelayMemberAccessExpansion
         {
-            get { return false; }
+            get { return StringConstantType == StringConstantType.BareWord; }
         }
     }
 }

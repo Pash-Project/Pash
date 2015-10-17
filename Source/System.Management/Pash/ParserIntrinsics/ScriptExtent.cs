@@ -89,11 +89,7 @@ namespace Pash.ParserIntrinsics
                     return _text;
                 }
 
-                if (_parseTreeNode == null)
-                {
-                    return string.Empty;
-                }
-                return this._parseTreeNode.FindTokenAndGetText() ?? string.Empty;
+                return GetParseTreeNodeText(_parseTreeNode);
             }
         }
 
@@ -105,6 +101,35 @@ namespace Pash.ParserIntrinsics
         private SourceSpan Span
         {
             get { return _span; }
+        }
+
+        private static string GetParseTreeNodeText(ParseTreeNode parseTreeNode)
+        {
+            if (parseTreeNode == null)
+            {
+                return string.Empty;
+            }
+
+            // We cannot use FindTokenAndGetText always because it will give us only the text of the root node in
+            // case of complex expressions. So we have to do that:
+            if (parseTreeNode.ChildNodes.Count > 0)
+            {
+                var result = new StringBuilder();
+                foreach (var node in parseTreeNode.ChildNodes)
+                {
+                    int offset = node.Span.Location.Position - parseTreeNode.Span.Location.Position;
+                    if (result.Length < offset)
+                    {
+                        result.Append(' ', offset - result.Length);
+                    }
+
+                    result.Append(GetParseTreeNodeText(node));
+                }
+
+                return result.ToString();
+            }
+
+            return parseTreeNode.FindTokenAndGetText() ?? string.Empty;
         }
     }
 }

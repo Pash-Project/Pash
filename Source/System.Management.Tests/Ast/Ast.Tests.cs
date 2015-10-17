@@ -2233,10 +2233,9 @@ ls
             }
 
             /// <summary>
-            /// <code>ping 8.8.8.8</code> parses as <code>ping ((8.8).8).8</code> or
-            /// <code>ping 8.8 .8 .8</code> according to the spec and initial implementation;
-            /// neither are good and neither matches PowerShell behavior. In reality it is
-            /// reasonable to represent it as <code>ping "8.8.8.8"</code>. 
+            /// <code>ping 8.8.8.8</code> parses as <code>ping ((8.8).8).8</code> or <code>ping 8.8 .8 .8</code>
+            /// according to the spec and initial implementation; neither are good and neither matches PowerShell
+            /// behavior. In reality it is reasonable to represent it as <code>ping "8.8.8.8"</code>.
             /// </summary>
             [Test]
             public void MergeCommandElementsTest()
@@ -2244,6 +2243,17 @@ ls
                 var commandAst = Parse("ping 8.8.8.8");
                 Assert.AreEqual(2, commandAst.CommandElements.Count);
                 Assert.AreEqual("8.8.8.8", commandAst.CommandElements[1].Value);
+            }
+
+            /// <summary>
+            /// The same as the previous, but with real member access operator instead of numeric literals.
+            /// </summary>
+            [Test]
+            public void MemberExpressionProcessing()
+            {
+                var commandAst = Parse("ping 8.8.ToString.ToString");
+                Assert.AreEqual(2, commandAst.CommandElements.Count);
+                Assert.AreEqual("8.8.ToString.ToString", commandAst.CommandElements[1].Value);
             }
         }
     }

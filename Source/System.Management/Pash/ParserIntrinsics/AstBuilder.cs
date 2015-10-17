@@ -2277,55 +2277,23 @@ namespace Pash.ParserIntrinsics
             while (queue.Count > 0)
             {
                 var element = queue.Dequeue();
-                var constant = element as ConstantExpressionAst;
-                if (constant != null && constant.DelayMemberAccessExpansion && queue.Count > 0)
+                var constant = GetRootConstantExpression(element);
+                if (constant != null && constant.DelayMemberAccessExpansion)
                 {
-                    // Is the member access should be delayed, then merge all subsequent arguments
-                    // that were started with . or :: and weren't separated with any space. It's a
-                    // deviation from the spec, but PowerShell does the same.
-                    var next = queue.Peek();
-                    while (next != null && CanMergeMemberAccessExpressions(element, next))
+                    // First of all, flatten expressions such as 8.8.ToString.ToString as PowerShell does.
+                    element = ExpressionAsStringConstant(element);
+                    while (queue.Count > 0 && CanMergeMemberAccessExpressions(element, queue.Peek()))
                     {
-                        next = queue.Dequeue();
-
+                        // If the member access should be delayed, then merge all subsequent arguments that were
+                        // started with . or :: and weren't separated with any space. It's a deviation from the spec,
+                        // but PowerShell does the same.
+                        var next = queue.Dequeue();
                         element = MergeMemberAccessExpressions(element, next);
-
-                        next = queue.Count > 0 ? queue.Peek() : null;
                     }
                 }
                 
                 yield return element;
             }
-        }
-
-        bool CanMergeMemberAccessExpressions(CommandElementAst left, CommandElementAst right)
-        {
-            var rightExtent = right.Extent;
-            return left.Extent.EndOffset == rightExtent.StartOffset
-                && (rightExtent.Text.StartsWith(".") || rightExtent.Text.StartsWith("::"));
-        }
-
-        CommandElementAst MergeMemberAccessExpressions(CommandElementAst left, CommandElementAst right)
-        {
-            var leftExtent = left.Extent;
-            var rightExtent = right.Extent;
-            if (leftExtent.EndOffset != rightExtent.StartOffset)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
-            string value = leftExtent.Text + rightExtent.Text;
-            var extent = new ScriptExtent(
-                new SourceSpan(
-                    new SourceLocation(leftExtent.StartOffset, leftExtent.StartLineNumber,
-                        leftExtent.StartColumnNumber), right.Extent.EndOffset - leftExtent.StartOffset),
-                0,
-                0,
-                value);
-            return new StringConstantExpressionAst(
-                extent,
-                value,
-                StringConstantType.BareWord);
         }
 
         IEnumerable<RedirectionAst> BuildCommandElementRedirectionAsts(ParseTreeNode parseTreeNode)
@@ -2345,6 +2313,52 @@ namespace Pash.ParserIntrinsics
             }
 
             return redirectionAsts;
+        }
+
+        private static IScriptExtent MergeExtents(IScriptExtent left, IScriptExtent right)
+        {
+            if (left.EndOffset != right.StartOffset)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            string value = left.Text + right.Text;
+            return new ScriptExtent(
+                new SourceSpan(
+                    new SourceLocation(left.StartOffset, left.StartLineNumber,
+                        left.StartColumnNumber), right.EndOffset - left.StartOffset),
+                0,
+                0,
+                value);
+        }
+
+        private static ConstantExpressionAst GetRootConstantExpression(CommandElementAst element)
+        {
+            while (element is MemberExpressionAst)
+            {
+                var memberExpression = (MemberExpressionAst)element;
+                element = memberExpression.Expression;
+            }
+
+            return element as ConstantExpressionAst;
+        }
+
+        private static ConstantExpressionAst ExpressionAsStringConstant(Ast element)
+        {
+            return new StringConstantExpressionAst(element.Extent, element.Extent.Text, StringConstantType.BareWord);
+        }
+
+        private static bool CanMergeMemberAccessExpressions(Ast left, Ast right)
+        {
+            var rightExtent = right.Extent;
+            return left.Extent.EndOffset == rightExtent.StartOffset
+                && (rightExtent.Text.StartsWith(".") || rightExtent.Text.StartsWith("::"));
+        }
+
+        private static StringConstantExpressionAst MergeMemberAccessExpressions(Ast left, CommandElementAst right)
+        {
+            var extent = MergeExtents(left.Extent, right.Extent);
+            return new StringConstantExpressionAst(extent, extent.Text, StringConstantType.BareWord);
         }
 
         private IEnumerable<RedirectionAst> BuildRedirectionsAst(ParseTreeNode parseTreeNode)
