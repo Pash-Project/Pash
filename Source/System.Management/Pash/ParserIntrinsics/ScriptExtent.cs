@@ -98,7 +98,7 @@ namespace Pash.ParserIntrinsics
 
         string IScriptExtent.FullText
         {
-            get { return GetParseTreeNodeText(_parseTreeNode); }
+            get { return _text ?? GetParseTreeNodeText(_parseTreeNode); }
         }
 
         private SourceLocation Location

@@ -2322,7 +2322,7 @@ namespace Pash.ParserIntrinsics
                 throw new ArgumentOutOfRangeException();
             }
 
-            string value = left.Text + right.Text;
+            string value = left.FullText + right.FullText;
             return new ScriptExtent(
                 new SourceSpan(
                     new SourceLocation(left.StartOffset, left.StartLineNumber,
