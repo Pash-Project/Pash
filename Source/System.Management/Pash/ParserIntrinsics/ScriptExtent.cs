@@ -12,9 +12,11 @@ namespace Pash.ParserIntrinsics
     {
         readonly ParseTreeNode _parseTreeNode;
         readonly SourceSpan _span;
+        private readonly string _text;
 
-        public ScriptExtent(SourceSpan origSpan, int startOffset, int endOffset)
+        public ScriptExtent(SourceSpan origSpan, int startOffset, int endOffset, string textValue = null)
         {
+            _text = textValue;
             if (startOffset == 0 && endOffset == 0)
             {
                 _span = origSpan;
@@ -82,6 +84,11 @@ namespace Pash.ParserIntrinsics
         {
             get
             {
+                if (_text != null)
+                {
+                    return _text;
+                }
+
                 if (_parseTreeNode == null)
                 {
                     return string.Empty;

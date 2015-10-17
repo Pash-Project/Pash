@@ -51,5 +51,10 @@ namespace System.Management.Automation.Language
                     throw new InvalidOperationException();
             }
         }
+
+        public override bool DelayMemberAccessExpansion
+        {
+            get { return false; }
+        }
     }
 }
