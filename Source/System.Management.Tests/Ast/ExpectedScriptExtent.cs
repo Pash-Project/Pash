@@ -14,6 +14,7 @@ namespace ParserTests
         public int StartLineNumber { get; set; }
         public int StartOffset { get; set; }
         public string Text { get; set; }
+        public string FullText { get { return Text; } }
 
         public void AssertAreEqual(IScriptExtent extent)
         {

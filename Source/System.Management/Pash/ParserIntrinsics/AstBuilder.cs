@@ -2281,7 +2281,7 @@ namespace Pash.ParserIntrinsics
                 if (constant != null && constant.DelayMemberAccessExpansion)
                 {
                     // First of all, flatten expressions such as 8.8.ToString.ToString as PowerShell does.
-                    element = ExpressionAsStringConstant(element);
+                    element = ToConstantExpression(element);
                     while (queue.Count > 0 && CanMergeMemberAccessExpressions(element, queue.Peek()))
                     {
                         // If the member access should be delayed, then merge all subsequent arguments that were
@@ -2343,9 +2343,12 @@ namespace Pash.ParserIntrinsics
             return element as ConstantExpressionAst;
         }
 
-        private static ConstantExpressionAst ExpressionAsStringConstant(Ast element)
+        private static ConstantExpressionAst ToConstantExpression(Ast element)
         {
-            return new StringConstantExpressionAst(element.Extent, element.Extent.Text, StringConstantType.BareWord);
+            return element as ConstantExpressionAst ?? new StringConstantExpressionAst(
+                element.Extent,
+                element.Extent.FullText,
+                StringConstantType.BareWord);
         }
 
         private static bool CanMergeMemberAccessExpressions(Ast left, Ast right)

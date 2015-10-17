@@ -1,7 +1,5 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Management.Automation.Language;
 using Irony.Parsing;
@@ -89,8 +87,18 @@ namespace Pash.ParserIntrinsics
                     return _text;
                 }
 
-                return GetParseTreeNodeText(_parseTreeNode);
+                if (_parseTreeNode == null)
+                {
+                    return string.Empty;
+                }
+
+                return _parseTreeNode.FindTokenAndGetText() ?? string.Empty;
             }
+        }
+
+        string IScriptExtent.FullText
+        {
+            get { return GetParseTreeNodeText(_parseTreeNode); }
         }
 
         private SourceLocation Location
