@@ -14,6 +14,15 @@ namespace System.Management.Automation.Language
         int StartLineNumber { get; }
         int StartOffset { get; }
         IScriptPosition StartScriptPosition { get; }
+
+        /// <summary>
+        /// Text of the root element.
+        /// </summary>
         string Text { get; }
+
+        /// <summary>
+        /// Text of the whole subtree.
+        /// </summary>
+        string FullText { get; }
     }
 }

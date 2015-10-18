@@ -20,7 +20,7 @@ namespace TestHost.FileSystemTests
         [Platform("Unix")]
         [TestCase("file.sh", "123", "./file.sh", Ignore = true, IgnoreReason = "Ignored because of bug in command parser.")]
         [TestCase("directory/file.sh", "123", "directory/file.sh")]
-        [TestCase("directory/file.sh", "123", "directory/file.sh 127.0.0.1", Ignore = true, IgnoreReason = "Ignored because of bug in argument parser.")]
+        [TestCase("directory/file.sh", "123", "directory/file.sh 127.0.0.1")]
         public void UnixFileShouldBeExecutedByRelativePath(string executableName, string executableResult, string command)
         {
             FileShouldBeExecutedByRelativePath(executableName, executableResult, command);
@@ -46,7 +46,7 @@ namespace TestHost.FileSystemTests
         [Platform("Win")]
         [TestCase("file.bat", "123", @".\file.bat", Ignore = true, IgnoreReason = "Ignored because of bug in command parser.")]
         [TestCase(@"directory\file.bat", "123", @"directory\file.bat")]
-        [TestCase(@"directory\file.bat", "123", @"directory\file.bat 127.0.0.1", Ignore = true, IgnoreReason = "Ignored because of bug in argument parser.")]
+        [TestCase(@"directory\file.bat", "123", @"directory\file.bat 127.0.0.1")]
         public void WinFileShouldBeExecutedByRelativePath(string executableName, string executableResult, string command)
         {
             FileShouldBeExecutedByRelativePath(executableName, executableResult, command);

@@ -21,5 +21,17 @@ namespace System.Management.Automation.Language
         {
             return this.Value.ToString();
         }
+
+        /// <summary>
+        /// Member access expansion will be delayed when the constant literal is a part of command
+        /// parameters. This property should return <c>true</c> for numeric constants so commands
+        /// like <code>ping 8.8.8.8</code> will be processed correctly (it will be casted to
+        /// string instead of treating it as a two member accessors a-la <code>(((8.8).8).8)</code>
+        /// or subsequent numeric literals such as <code>8.8 .8 .8</code>.
+        /// </summary>
+        public virtual bool DelayMemberAccessExpansion
+        {
+            get { return true; }
+        }
     }
 }

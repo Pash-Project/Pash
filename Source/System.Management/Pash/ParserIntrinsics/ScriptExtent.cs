@@ -1,7 +1,5 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Management.Automation.Language;
 using Irony.Parsing;
@@ -12,9 +10,11 @@ namespace Pash.ParserIntrinsics
     {
         readonly ParseTreeNode _parseTreeNode;
         readonly SourceSpan _span;
+        private readonly string _text;
 
-        public ScriptExtent(SourceSpan origSpan, int startOffset, int endOffset)
+        public ScriptExtent(SourceSpan origSpan, int startOffset, int endOffset, string textValue = null)
         {
+            _text = textValue;
             if (startOffset == 0 && endOffset == 0)
             {
                 _span = origSpan;
@@ -82,12 +82,23 @@ namespace Pash.ParserIntrinsics
         {
             get
             {
+                if (_text != null)
+                {
+                    return _text;
+                }
+
                 if (_parseTreeNode == null)
                 {
                     return string.Empty;
                 }
-                return this._parseTreeNode.FindTokenAndGetText() ?? string.Empty;
+
+                return _parseTreeNode.FindTokenAndGetText() ?? string.Empty;
             }
+        }
+
+        string IScriptExtent.FullText
+        {
+            get { return _text ?? GetParseTreeNodeText(_parseTreeNode); }
         }
 
         private SourceLocation Location
@@ -98,6 +109,35 @@ namespace Pash.ParserIntrinsics
         private SourceSpan Span
         {
             get { return _span; }
+        }
+
+        private static string GetParseTreeNodeText(ParseTreeNode parseTreeNode)
+        {
+            if (parseTreeNode == null)
+            {
+                return string.Empty;
+            }
+
+            // We cannot use FindTokenAndGetText always because it will give us only the text of the root node in
+            // case of complex expressions. So we have to do that:
+            if (parseTreeNode.ChildNodes.Count > 0)
+            {
+                var result = new StringBuilder();
+                foreach (var node in parseTreeNode.ChildNodes)
+                {
+                    int offset = node.Span.Location.Position - parseTreeNode.Span.Location.Position;
+                    if (result.Length < offset)
+                    {
+                        result.Append(' ', offset - result.Length);
+                    }
+
+                    result.Append(GetParseTreeNodeText(node));
+                }
+
+                return result.ToString();
+            }
+
+            return parseTreeNode.FindTokenAndGetText() ?? string.Empty;
         }
     }
 }
