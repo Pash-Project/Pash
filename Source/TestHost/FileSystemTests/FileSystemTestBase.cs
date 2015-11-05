@@ -96,6 +96,18 @@ namespace TestHost.FileSystemTests
         /// <returns>Test environment root path.</returns>
         protected string SetupExecutableWithResult(string fileName, string result)
         {
+            var isWindows = Environment.OSVersion.Platform == PlatformID.Win32NT;
+
+            var content = isWindows ?
+                "@echo off\necho {0}\n" :
+                "#!/bin/sh\necho {0}\n";
+            content = string.Format(content, result);
+
+            return SetupExecutable(fileName, content);
+        }
+
+        protected string SetupExecutable(string fileName, string content)
+        {
             var directory = System.IO.Path.GetDirectoryName(fileName);
             var subPath = string.IsNullOrEmpty(directory)
                 ? Enumerable.Empty<string>()
@@ -108,10 +120,7 @@ namespace TestHost.FileSystemTests
 
             var isWindows = Environment.OSVersion.Platform == PlatformID.Win32NT;
 
-            var text = string.Format(
-                isWindows ? "@echo off\necho {0}\n" : "#!/bin/sh\necho {0}\n",
-                result);
-            File.WriteAllText(filePath, text);
+            File.WriteAllText(filePath, content);
             _filesCreated.Add(filePath);
 
             if (!isWindows)

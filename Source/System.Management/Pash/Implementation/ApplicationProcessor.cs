@@ -1,5 +1,6 @@
 // Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Collections;
 using System.Diagnostics;
 using System.Management.Automation;
 using System.Runtime.InteropServices;
@@ -165,16 +166,31 @@ namespace Pash.Implementation
 
                 if (parameter.Value != null)
                 {
-                    var argument = parameter.Value.ToString();
-                    if (argument.Contains(" ") && !argument.StartsWith("\""))
+                    IEnumerable values;
+
+                    if( parameter.Value is PSObject &&
+                        ((PSObject)parameter.Value).BaseObject is IEnumerable )
                     {
-                        arguments.AppendFormat("\"{0}\"", argument);
+                        values = (IEnumerable)((PSObject)parameter.Value).BaseObject;
                     }
                     else
                     {
-                        arguments.Append(argument);
+                        values = new object[] { parameter.Value };
                     }
-                    arguments.Append(' ');
+
+                    foreach (var value in values)
+                    {
+                        var argument = value.ToString();
+                        if (argument.Contains(" ") && !argument.StartsWith("\""))
+                        {
+                            arguments.AppendFormat("\"{0}\"", argument);
+                        }
+                        else
+                        {
+                            arguments.Append(argument);
+                        }
+                        arguments.Append(' ');
+                    }
                 }
             }
 
