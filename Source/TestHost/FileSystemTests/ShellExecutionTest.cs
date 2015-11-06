@@ -1,6 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
 
 namespace TestHost.FileSystemTests
@@ -86,6 +87,29 @@ namespace TestHost.FileSystemTests
             CatchCommandResult(command).Trim().ShouldEqual(executableResult);
         }
 
+        [Test]
+        [TestCase("123", new string[] { "123" })] // simple value
+        [TestCase("123 456", new string[] { "123", "456" })] // 2 arguments
+        [TestCase("\"123 456\"", new string[] { "123 456" })] // quoted string
+        [TestCase("\"123\",\"456\"", new string[] { "123", "456" })] // array with 2 elements is passed as 2 arguments
+        public void PassArgumentsToExternalApplication(string argument, string[] expectedResults)
+        {
+            var isWindows = Environment.OSVersion.Platform == PlatformID.Win32NT;
+
+            string executableName = isWindows ? "file.bat" : "file.sh";
+            var root = SetupExecutableWithArguments(executableName, numArguments: expectedResults.Length);
+
+            var absolutePath = Path.Combine(Path.GetFullPath(root), executableName);
+            string command = string.Format("{0} {1}", absolutePath, argument);
+
+            var results = CatchCommandResult(command).Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+
+            for (int i = 0; i < results.Length; i++)
+            {
+                results[i].ShouldEqual(expectedResults[i]);
+            }
+        }
+
         /// <summary>
         /// Catches the executable result and echoes it to the output.
         /// </summary>
@@ -95,6 +119,18 @@ namespace TestHost.FileSystemTests
         {
             var result = TestHost.ExecuteWithZeroErrors(string.Format("$result = ({0})", command), "$result");
             return result;
+        }
+
+        protected string SetupExecutableWithArguments(string fileName, int numArguments)
+        {
+            var isWindows = Environment.OSVersion.Platform == PlatformID.Win32NT;
+
+            // %~1 - expands %1 removing any surrounding quotes (")
+            var content = isWindows ?
+                "@echo off\n" + string.Join("\n", Enumerable.Range(1, numArguments).Select(x => string.Format("echo %~{0}", x))) :
+                "#!/bin/sh\n" + string.Join("\n", Enumerable.Range(1, numArguments).Select(x => string.Format("echo ${0}", x)));
+
+            return SetupExecutable(fileName, content);
         }
     }
 }
