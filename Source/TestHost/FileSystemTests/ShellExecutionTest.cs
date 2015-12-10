@@ -110,14 +110,37 @@ namespace TestHost.FileSystemTests
             }
         }
 
+        [Test]
+        public void PassStringVariableToExternalApplication()
+        {
+            var isWindows = Environment.OSVersion.Platform == PlatformID.Win32NT;
+
+            string executableName = isWindows ? "file.bat" : "file.sh";
+            var root = SetupExecutableWithArguments(executableName, numArguments: 1);
+
+            var absolutePath = Path.Combine(Path.GetFullPath(root), executableName);
+
+            var commands = new System.Collections.Generic.List<string>();
+            commands.Add("$foo = \"foobar\"");
+            commands.Add(string.Format("{0} $foo", absolutePath));
+
+            CatchCommandResult(commands.ToArray()).Trim().ShouldEqual("foobar");
+        }
+
         /// <summary>
         /// Catches the executable result and echoes it to the output.
         /// </summary>
-        /// <param name="command">Execution command.</param>
+        /// <param name="statements">statements to execute. The last statement has to return the result.</param>
         /// <returns>Executed command result.</returns>
-        private static string CatchCommandResult(string command)
+        private static string CatchCommandResult(params string[] statements)
         {
-            var result = TestHost.ExecuteWithZeroErrors(string.Format("$result = ({0})", command), "$result");
+            string[] temp = new string[ statements.Length + 1 ];
+
+            Array.Copy( statements, temp, statements.Length - 1 );
+            temp[ temp.Length - 2 ] = string.Format( "$result = ({0})", statements[ statements.Length - 1 ] );
+            temp[ temp.Length - 1 ] = "$result";
+
+            var result = TestHost.ExecuteWithZeroErrors(temp);
             return result;
         }
 
