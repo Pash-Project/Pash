@@ -56,7 +56,7 @@ namespace TestHost.FileSystemTests
         [Test]
         [Platform("Win")]
         [TestCase("file.bat", "123", "file.bat")]
-        [TestCase("file.bat", "123", "file")]
+        [TestCase("test_file.bat", "123", "test_file")]
         public void WinFileShouldBeExecutedFromSystemPath(string executableName, string executableResult, string command)
         {
             FileShouldBeExecutedFromSystemPath(executableName, executableResult, command);
