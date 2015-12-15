@@ -166,16 +166,23 @@ namespace Pash.Implementation
 
                 if (parameter.Value != null)
                 {
+                    object pValue = parameter.Value;
+
+                    if (pValue is PSObject)
+                    {
+                        pValue = ((PSObject)pValue).BaseObject;
+                    }
+
                     IEnumerable values;
 
-                    if( parameter.Value is PSObject &&
-                        ((PSObject)parameter.Value).BaseObject is IEnumerable )
+                    if (pValue is IEnumerable &&
+                        !(pValue is string))
                     {
-                        values = (IEnumerable)((PSObject)parameter.Value).BaseObject;
+                        values = (IEnumerable)pValue;
                     }
                     else
                     {
-                        values = new object[] { parameter.Value };
+                        values = new object[] { pValue };
                     }
 
                     foreach (var value in values)
