@@ -1,4 +1,5 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using System.Collections.Generic;
 using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands
@@ -29,6 +30,12 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
+            if (Name == null)
+            {
+                WriteAllVariables();
+                return;
+            }
+
             foreach (string name in Name)
             {
                 PSVariable variable = Scope == null ? SessionState.PSVariable.Get(name)
@@ -36,15 +43,37 @@ namespace Microsoft.PowerShell.Commands
 
                 if (variable != null)
                 {
-                    if (ValueOnly.ToBool())
-                    {
-                        WriteObject(variable.Value);
-                    }
-                    else
-                    {
-                        WriteObject(variable);
-                    }
+                    WriteVariable(variable);
                 }
+            }
+        }
+
+        private void WriteAllVariables()
+        {
+            foreach (PSVariable variable in GetAllVariables())
+            {
+                WriteVariable(variable);
+            }
+        }
+
+        private IEnumerable<PSVariable> GetAllVariables()
+        {
+            if (Scope == null)
+            {
+                return SessionState.PSVariable.GetAll().Values;
+            }
+            return SessionState.PSVariable.GetAllAtScope(Scope).Values;
+        }
+
+        private void WriteVariable(PSVariable variable)
+        {
+            if (ValueOnly.ToBool())
+            {
+                WriteObject(variable.Value);
+            }
+            else
+            {
+                WriteObject(variable);
             }
         }
     }

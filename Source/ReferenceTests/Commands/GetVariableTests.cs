@@ -101,5 +101,51 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual("test-global" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void NoParametersReturnsAllParameters()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$foo = 'bar'",
+                "Get-Variable| % { $_.Value }"
+            });
+
+            StringAssert.Contains("bar" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void NoNameAndValueOnlyReturnsAllParameterValues()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$foo = 'bar'",
+                "Get-Variable -ValueOnly"
+            });
+
+            StringAssert.Contains("bar" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void NoNameAndLocalScope()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$test = 'test-global'",
+                "function foo { $test = 'test-local'; Get-Variable -Scope local; }",
+                "foo | ? { $_.Name -eq 'test' } | % { $_.Value }"
+            });
+
+            Assert.AreEqual("test-local" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void NoNameAndGlobalScope()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$test = 'test-global'",
+                "function foo { $test = 'test-local'; Get-Variable -Scope global; }",
+                "foo | ? { $_.Name -eq 'test' } | % { $_.Value }"
+            });
+
+            Assert.AreEqual("test-global" + Environment.NewLine, result);
+        }
     }
 }

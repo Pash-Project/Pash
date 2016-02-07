@@ -111,5 +111,10 @@ namespace System.Management.Automation
         {
             return _intrinsics.GetAllLocal();
         }
+
+        internal Dictionary<string, PSVariable> GetAllAtScope(string scope)
+        {
+            return _intrinsics.GetAllAtScope(scope);
+        }
     }
 }
