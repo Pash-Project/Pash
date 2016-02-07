@@ -147,5 +147,17 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual("test-global" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void FunctionNoScopeSpecifiedUsesLocalScope()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$test = 'test-global'",
+                "function foo { $test = 'test-local'; Get-Variable test -valueonly; }",
+                "foo"
+            });
+
+            Assert.AreEqual("test-local" + Environment.NewLine, result);
+        }
     }
 }
