@@ -159,5 +159,13 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual("test-local" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void HostVariableName()
+        {
+            string result = ReferenceHost.Execute("(Get-Variable host).Name");
+
+            Assert.AreEqual("Host" + Environment.NewLine, result);
+        }
     }
 }

@@ -193,12 +193,14 @@ namespace Pash.Implementation
 
         private void InitializeSession()
         {
-            if (_initialSessionState == null)
-                return;
+            if (_initialSessionState != null)
+            {
+                AddInitialSessionVariables();
+                AddInitialSessionCommands();
+                AddInitialSessionModules();
+            }
 
-            AddInitialSessionVariables();
-            AddInitialSessionCommands();
-            AddInitialSessionModules();
+            AddSessionVariables();
         }
 
         void AddInitialSessionModules()
@@ -239,6 +241,11 @@ namespace Pash.Implementation
             {
                 SetVariable(variableEntry.Name, variableEntry.Value);
             }
+        }
+
+        private void AddSessionVariables()
+        {
+            SetVariable("Host", PSHost);
         }
     }
 }
