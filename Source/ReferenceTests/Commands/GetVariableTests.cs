@@ -244,5 +244,29 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual(String.Empty, result);
         }
+
+        [Test]
+        public void NameIsWildcard()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$testbar = 'bar'",
+                "$testfoo = 'foo'",
+                "Get-Variable test* -valueonly"
+            });
+
+            Assert.AreEqual(NewlineJoin("bar", "foo"), result);
+        }
+
+        [Test]
+        public void NameIsWildcardAndLocalScope()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$test = 'test-global'",
+                "function foo { $test = 'test-local'; Get-Variable test* -Scope local -valueonly; }",
+                "foo"
+            });
+
+            Assert.AreEqual("test-local" + Environment.NewLine, result);
+        }
     }
 }

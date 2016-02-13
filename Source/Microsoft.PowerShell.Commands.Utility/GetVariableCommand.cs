@@ -40,15 +40,50 @@ namespace Microsoft.PowerShell.Commands
 
             foreach (string name in Name)
             {
-                PSVariable variable = Scope == null ? SessionState.PSVariable.Get(name)
-                                                    : SessionState.PSVariable.GetAtScope(name, Scope);
-
-                if (variable != null)
+                foreach (PSVariable variable in GetVariables(name))
                 {
                     if (!IsExcluded(variable))
                     {
                         WriteVariable(variable);
                     }
+                }
+            }
+        }
+
+        private IEnumerable<PSVariable> GetVariables(string name)
+        {
+            if (WildcardPattern.ContainsWildcardCharacters(name))
+            {
+                foreach (PSVariable variable in GetVariablesUsingWildcard(name))
+                {
+                    yield return variable;
+                }
+            }
+            else
+            {
+                PSVariable variable = Scope == null ? SessionState.PSVariable.Get(name)
+                                                    : SessionState.PSVariable.GetAtScope(name, Scope);
+                if (variable != null)
+                {
+                    yield return variable;
+                }
+            }
+        }
+
+        private IEnumerable<PSVariable> GetVariablesUsingWildcard(string pattern)
+        {
+            if (Scope == null)
+            {
+                foreach (PSVariable variable in SessionState.PSVariable.Find(pattern).Values)
+                {
+                    yield return variable;
+                }
+            }
+            else
+            {
+                foreach (PSVariable variable in SessionState.PSVariable.FindAtScope(pattern, Scope).Values)
+                {
+                    yield return variable;
                 }
             }
         }

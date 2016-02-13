@@ -241,6 +241,12 @@ namespace Pash.Implementation
             return affectedScope.Items;
         }
 
+        public Dictionary<string, T> FindAtScope(string pattern, bool isQualified, string scope)
+        {
+            var affectedScope = GetScope(scope, true, this);
+            return affectedScope.Find(pattern, isQualified);
+        }
+
         #endregion
            
         #region local scope only

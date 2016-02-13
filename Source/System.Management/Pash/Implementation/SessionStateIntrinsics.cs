@@ -44,6 +44,11 @@ namespace Pash.Implementation
         {
             return Scope.Find(name, SupportsScopedName);
         }
+
+        public virtual Dictionary<string, T> FindAtScope(string name, string scope)
+        {
+            return Scope.FindAtScope(name, SupportsScopedName, scope);
+        }
     }
 }
 

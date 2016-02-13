@@ -116,5 +116,10 @@ namespace System.Management.Automation
         {
             return _intrinsics.GetAllAtScope(scope);
         }
+
+        internal Dictionary<string, PSVariable> FindAtScope(string pattern, string scope)
+        {
+            return _intrinsics.FindAtScope(pattern, scope);
+        }
     }
 }
