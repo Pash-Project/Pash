@@ -32,20 +32,31 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
+            foreach (PSVariable variable in GetVariables())
+            {
+                if (!IsExcluded(variable))
+                {
+                    WriteVariable(variable);
+                }
+            }
+        }
+
+        private IEnumerable<PSVariable> GetVariables()
+        {
             if (Name == null)
             {
-                WriteAllVariables();
-                return;
+                return GetAllVariables();
             }
+            return GetAllVariablesByName();
+        }
 
+        private IEnumerable<PSVariable> GetAllVariablesByName()
+        {
             foreach (string name in Name)
             {
                 foreach (PSVariable variable in GetVariables(name))
                 {
-                    if (!IsExcluded(variable))
-                    {
-                        WriteVariable(variable);
-                    }
+                    yield return variable;
                 }
             }
         }
@@ -74,29 +85,9 @@ namespace Microsoft.PowerShell.Commands
         {
             if (Scope == null)
             {
-                foreach (PSVariable variable in SessionState.PSVariable.Find(pattern).Values)
-                {
-                    yield return variable;
-                }
+                return SessionState.PSVariable.Find(pattern).Values;
             }
-            else
-            {
-                foreach (PSVariable variable in SessionState.PSVariable.FindAtScope(pattern, Scope).Values)
-                {
-                    yield return variable;
-                }
-            }
-        }
-
-        private void WriteAllVariables()
-        {
-            foreach (PSVariable variable in GetAllVariables())
-            {
-                if (!IsExcluded(variable))
-                {
-                    WriteVariable(variable);
-                }
-            }
+            return SessionState.PSVariable.FindAtScope(pattern, Scope).Values;
         }
 
         private IEnumerable<PSVariable> GetAllVariables()
