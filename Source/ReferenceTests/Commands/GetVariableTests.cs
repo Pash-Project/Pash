@@ -167,5 +167,82 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual("Host" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void IncludeTwoVariables()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$testabc = 'abc'",
+                "$testbar = 'bar'",
+                "$testfoo = 'foo'",
+                "gv -Include testfoo,testbar -valueonly"
+            });
+
+            Assert.AreEqual(NewlineJoin("bar", "foo"), result);
+        }
+
+        [Test]
+        public void ExcludeTwoVariables()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$testfoo = 'foo'",
+                "$testbar = 'bar'",
+                "$testabc = 'abc'",
+                "gv -exclude testfoo,testbar -valueonly"
+            });
+
+            StringAssert.Contains("abc" + Environment.NewLine, result);
+            StringAssert.DoesNotContain("foo", result);
+            StringAssert.DoesNotContain("bar", result);
+        }
+
+        [Test]
+        public void IncludeIsCaseInsensitive()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$testbar = 'bar'",
+                "$testfoo = 'foo'",
+                "Get-Variable -Include TESTFOO -valueonly"
+            });
+
+            Assert.AreEqual("foo" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void ExcludeIsCaseInsensitive()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$testfoo = 'foo'",
+                "$testbar = 'bar'",
+                "Get-Variable -exclude TESTFOO -valueonly"
+            });
+
+            StringAssert.Contains("bar" + Environment.NewLine, result);
+            StringAssert.DoesNotContain("foo", result);
+        }
+
+        [Test]
+        public void NameAndIncludeSpecified()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$testfoo = 'foo'",
+                "$testbar = 'bar'",
+                "Get-Variable testfoo -include testbar -valueonly"
+            });
+
+            Assert.AreEqual(String.Empty, result);
+        }
+
+        [Test]
+        public void NameAndExcludeSpecified()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$testfoo = 'foo'",
+                "$testbar = 'bar'",
+                "Get-Variable testfoo -exclude TESTFOO -valueonly"
+            });
+
+            Assert.AreEqual(String.Empty, result);
+        }
     }
 }

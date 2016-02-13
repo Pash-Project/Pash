@@ -1,5 +1,7 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands
@@ -43,7 +45,10 @@ namespace Microsoft.PowerShell.Commands
 
                 if (variable != null)
                 {
-                    WriteVariable(variable);
+                    if (!IsExcluded(variable))
+                    {
+                        WriteVariable(variable);
+                    }
                 }
             }
         }
@@ -52,7 +57,10 @@ namespace Microsoft.PowerShell.Commands
         {
             foreach (PSVariable variable in GetAllVariables())
             {
-                WriteVariable(variable);
+                if (!IsExcluded(variable))
+                {
+                    WriteVariable(variable);
+                }
             }
         }
 
@@ -63,6 +71,32 @@ namespace Microsoft.PowerShell.Commands
                 return SessionState.PSVariable.GetAll().Values;
             }
             return SessionState.PSVariable.GetAllAtScope(Scope).Values;
+        }
+
+        private bool IsExcluded(PSVariable variable)
+        {
+            if (Include != null)
+            {
+                if (!Include.Any(name => IsMatch(name, variable)))
+                {
+                    return true;
+                }
+            }
+
+            if (Exclude != null)
+            {
+                if (Exclude.Any(name => IsMatch(name, variable)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        static bool IsMatch(string name, PSVariable variable)
+        {
+            return variable.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase);
         }
 
         private void WriteVariable(PSVariable variable)
