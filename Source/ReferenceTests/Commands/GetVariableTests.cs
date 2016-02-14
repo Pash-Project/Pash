@@ -268,5 +268,30 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual("test-local" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void IncludeIsWildcard()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$testbar = 'bar'",
+                "$testfoo = 'foo'",
+                "Get-Variable -include TESTF* -valueonly"
+            });
+
+            Assert.AreEqual("foo" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void ExcludeIsWildcard()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$testabc = 'abc'",
+                "$testbar = 'bar'",
+                "$testfoo = 'foo'",
+                "Get-Variable -include test* -exclude TESTA* -valueonly"
+            });
+
+            Assert.AreEqual(NewlineJoin("bar", "foo"), result);
+        }
     }
 }

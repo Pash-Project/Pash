@@ -122,6 +122,11 @@ namespace Microsoft.PowerShell.Commands
 
         static bool IsMatch(string name, PSVariable variable)
         {
+            if (WildcardPattern.ContainsWildcardCharacters(name))
+            {
+                var wildcard = new WildcardPattern(name, WildcardOptions.IgnoreCase);
+                return wildcard.IsMatch(variable.Name);
+            }
             return variable.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase);
         }
 
