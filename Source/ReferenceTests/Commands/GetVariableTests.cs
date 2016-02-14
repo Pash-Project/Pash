@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Management.Automation;
 using NUnit.Framework;
 
 namespace ReferenceTests.Commands
@@ -292,6 +293,26 @@ namespace ReferenceTests.Commands
             });
 
             Assert.AreEqual(NewlineJoin("bar", "foo"), result);
+        }
+
+        [Test]
+        public void UnknownNameCausesError()
+        {
+            Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute("Get-Variable unknownvariable");
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            Assert.AreEqual("Cannot find a variable with name 'unknownvariable'.", error.Exception.Message);
+            Assert.AreEqual("VariableNotFound,Microsoft.PowerShell.Commands.GetVariableCommand", error.FullyQualifiedErrorId);
+            Assert.AreEqual("unknownvariable", error.TargetObject);
+            Assert.IsInstanceOf<ItemNotFoundException>(error.Exception);
+            Assert.AreEqual("Get-Variable", error.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.ObjectNotFound, error.CategoryInfo.Category);
+            Assert.AreEqual("ItemNotFoundException", error.CategoryInfo.Reason);
+            Assert.AreEqual("unknownvariable", error.CategoryInfo.TargetName);
+            Assert.AreEqual("String", error.CategoryInfo.TargetType);
         }
     }
 }

@@ -78,6 +78,10 @@ namespace Microsoft.PowerShell.Commands
                 {
                     yield return variable;
                 }
+                else
+                {
+                    WriteVariableNotFoundError(name);
+                }
             }
         }
 
@@ -140,6 +144,17 @@ namespace Microsoft.PowerShell.Commands
             {
                 WriteObject(variable);
             }
+        }
+
+        private void WriteVariableNotFoundError(string name)
+        {
+            var exception = new ItemNotFoundException(String.Format("Cannot find a variable with name '{0}'.", name));
+            string errorId = "VariableNotFound," + typeof(GetVariableCommand).FullName;
+            var error = new ErrorRecord(exception, errorId, ErrorCategory.ObjectNotFound, name);
+            error.CategoryInfo.Activity = "Get-Variable";
+            error.CategoryInfo.TargetName = name;
+            error.CategoryInfo.TargetType = "String";
+            WriteError(error);
         }
     }
 }
