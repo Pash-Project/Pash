@@ -239,7 +239,7 @@ namespace Pash.Implementation
         {
             foreach (SessionStateVariableEntry variableEntry in _initialSessionState.Variables)
             {
-                SetVariable(variableEntry.Name, variableEntry.Value);
+                CreateVariable(variableEntry.Name, variableEntry.Value, variableEntry.Options);
             }
         }
 

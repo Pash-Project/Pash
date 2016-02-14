@@ -23,5 +23,29 @@ namespace ReferenceTests.API
 
             Assert.AreEqual("Constant, AllScope" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void ErrorVariableIsConstant()
+        {
+            string result = ReferenceHost.Execute("(Get-Variable error).Options.ToString()");
+
+            Assert.AreEqual("Constant" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void TrueVariableIsConstant()
+        {
+            string result = ReferenceHost.Execute("(Get-Variable true).Options.ToString()");
+
+            Assert.AreEqual("Constant, AllScope" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void FalseVariableIsConstant()
+        {
+            string result = ReferenceHost.Execute("(Get-Variable false).Options.ToString()");
+
+            Assert.AreEqual("Constant, AllScope" + Environment.NewLine, result);
+        }
     }
 }
