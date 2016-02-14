@@ -15,5 +15,13 @@ namespace ReferenceTests.API
 
             Assert.AreEqual("False" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void HostVariableIsConstant()
+        {
+            string result = ReferenceHost.Execute("(Get-Variable host).Options.ToString()");
+
+            Assert.AreEqual("Constant, AllScope" + Environment.NewLine, result);
+        }
     }
 }

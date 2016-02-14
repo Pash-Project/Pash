@@ -245,7 +245,13 @@ namespace Pash.Implementation
 
         private void AddSessionVariables()
         {
-            SetVariable("Host", PSHost);
+            CreateVariable("Host", PSHost, ScopedItemOptions.Constant | ScopedItemOptions.AllScope);
+        }
+
+        private void CreateVariable(string name, object value, ScopedItemOptions options = ScopedItemOptions.None)
+        {
+            var variable = new PSVariable(name, value, options);
+            ExecutionContext.SessionState.PSVariable.Set(variable);
         }
     }
 }
