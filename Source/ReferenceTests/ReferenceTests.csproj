@@ -57,6 +57,7 @@
     <Compile Include="Commands\GetContentTests.cs" />
     <Compile Include="Commands\GetVariableTests.cs" />
     <Compile Include="Commands\ImportModuleTests.cs" />
+    <Compile Include="Commands\NewVariableTests.cs" />
     <Compile Include="Commands\RemoveModuleTests.cs" />
     <Compile Include="Commands\SelectStringTests.cs" />
     <Compile Include="Commands\SetContentTests.cs" />
