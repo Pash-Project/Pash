@@ -56,5 +56,13 @@ namespace ReferenceTests.API
 
             Assert.AreEqual("Constant, AllScope" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void QuestionMarkVariableIsReadOnly()
+        {
+            string result = ReferenceHost.Execute("(Get-Variable '?' | ? { $_.Name -eq '?' }).Options.ToString()");
+
+            Assert.AreEqual("ReadOnly, AllScope" + Environment.NewLine, result);
+        }
     }
 }
