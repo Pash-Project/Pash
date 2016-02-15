@@ -88,7 +88,8 @@ namespace System.Management.Automation
                 return;
             }
             // make sure it's not read only
-            if (variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly))
+            if (variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly) ||
+                variable.ItemOptions.HasFlag(ScopedItemOptions.Constant))
             {
                 throw new SessionStateUnauthorizedAccessException(variable.Name, SessionStateCategory.Variable,
                                                                   String.Empty, null);

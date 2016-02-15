@@ -148,7 +148,11 @@ namespace Pash.Implementation
 
         internal void SetSuccessVariable(bool success)
         {
-            SetVariable("global:?", success);
+            PSVariable questionMarkVariable = SessionState.PSVariable.GetAtScope("?", "global");
+            if (questionMarkVariable != null)
+            {
+                questionMarkVariable.Value = success;
+            }
         }
     }
 }

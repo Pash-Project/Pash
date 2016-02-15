@@ -88,6 +88,38 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
+        public void CannotModifyReadOnlyVariable()
+        {
+            var ex = Assert.Throws<SessionStateUnauthorizedAccessException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "New-Variable foo 'bar' -option readonly",
+                    "$foo = 'abc'"
+                });
+            });
+
+            //Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", ex.Message);
+            //Assert.AreEqual("foo", ex.ItemName);
+            Assert.AreEqual(SessionStateCategory.Variable, ex.SessionStateCategory);
+        }
+
+        [Test]
+        public void CannotModifyConstantVariable()
+        {
+            var ex = Assert.Throws<SessionStateUnauthorizedAccessException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "New-Variable foo 'bar' -option constant",
+                    "$foo = 'abc'"
+                });
+            });
+
+            //Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", ex.Message);
+            //Assert.AreEqual("foo", ex.ItemName);
+            Assert.AreEqual(SessionStateCategory.Variable, ex.SessionStateCategory);
+        }
+
+        [Test]
         [Explicit("Not supported in Pash")]
         public void CreateReadOnlyVariableThenTryToCreateWritableVariableWithSameName()
         {

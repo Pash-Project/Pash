@@ -25,6 +25,15 @@ namespace ReferenceTests.API
         }
 
         [Test]
+        public void CannotModifyHostVariableValue()
+        {
+            Assert.Throws<SessionStateUnauthorizedAccessException>(delegate
+            {
+                ReferenceHost.Execute("$host = 'abc'");
+            });
+        }
+
+        [Test]
         public void ErrorVariableIsConstant()
         {
             string result = ReferenceHost.Execute("(Get-Variable error).Options.ToString()");
