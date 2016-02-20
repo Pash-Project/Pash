@@ -89,6 +89,54 @@ namespace ReferenceTests.Language
 
             Assert.AreEqual("ReadOnly, AllScope" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void NullVariableHasNoOptionsSet()
+        {
+            string result = ReferenceHost.Execute("(Get-Variable null).Options.ToString()");
+
+            Assert.AreEqual("None" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void NullVariableCanBeSetButValueIsUnchanged()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$null = 'abc'",
+                "$null"
+            });
+
+            Assert.AreEqual(Environment.NewLine, result);
+        }
+
+        [Test]
+        [Explicit("Not possible to convert string to enum in Pash.")]
+        public void NullVariableOptionsCanBeSetButValueIsUnchanged()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$a = get-variable null",
+                "$a.Options = 'AllScope'",
+                "$a.Options.ToString()"
+            });
+
+            Assert.AreEqual("None" + Environment.NewLine, result);
+        }
+
+        /// <summary>
+        /// Not sure why PowerShell allows this.
+        /// </summary>
+        [Test]
+        [Explicit("PSVariable does not have a Visibility property in Pash.")]
+        public void NullVariableVisibilityCanBeSetAndValueIsChanged()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$a = get-variable null",
+                "$a.Visibility = 'Private'",
+                "$a.Visibility.ToString()"
+            });
+
+            Assert.AreEqual("Private" + Environment.NewLine, result);
+        }
     }
 }
 

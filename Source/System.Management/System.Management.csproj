@@ -461,6 +461,7 @@
     <Compile Include="Pash\Implementation\PipelineCommandRuntime.cs" />
     <Compile Include="Pash\Implementation\PipelineProcessor.cs" />
     <Compile Include="Pash\Implementation\ProviderRuntime.cs" />
+    <Compile Include="Pash\Implementation\PSNullVariable.cs" />
     <Compile Include="Pash\Implementation\PSObjectPipelineReader.cs" />
     <Compile Include="Pash\Implementation\PSObjectProperties.cs" />
     <Compile Include="Pash\Implementation\SessionStateGlobal.cs" />
