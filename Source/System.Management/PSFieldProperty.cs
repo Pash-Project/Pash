@@ -25,7 +25,8 @@ namespace System.Management.Automation
             {
                 try
                 {
-                    _fieldInfo.SetValue(Owner, value);
+                    object convertedValue = LanguagePrimitives.ConvertTo(value, _fieldInfo.FieldType);
+                    _fieldInfo.SetValue(Owner, convertedValue);
                 }
                 catch (Exception e)
                 {

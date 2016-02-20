@@ -493,5 +493,36 @@ namespace ReferenceTests.API
             Assert.AreEqual("", ex.ErrorRecord.CategoryInfo.TargetType);
             Assert.IsNull(ex.ErrorRecord.TargetObject);
         }
+
+        [Test]
+        public void EnumPropertyCanBeSetWithString()
+        {
+            var variable = new PSVariable("foo");
+            variable.Options = ScopedItemOptions.None;
+            var obj = new PSObject(variable);
+            var optionsProperty = obj.Properties.OfType<PSProperty>().First(p => p.Name == "Options");
+
+            optionsProperty.Value = "AllScope";
+
+            Assert.AreEqual(ScopedItemOptions.AllScope, variable.Options);
+        }
+
+        class EnumFieldTestClass
+        {
+            public SessionStateEntryVisibility Visibility = SessionStateEntryVisibility.Public;
+        }
+
+        [Test]
+        public void EnumFieldCanBeSetWithString()
+        {
+            var testClass = new EnumFieldTestClass();
+            testClass.Visibility = SessionStateEntryVisibility.Public;
+            var obj = new PSObject(testClass);
+            var property = obj.Properties.OfType<PSProperty>().First(p => p.Name == "Visibility");
+
+            property.Value = "Private";
+
+            Assert.AreEqual(SessionStateEntryVisibility.Private, testClass.Visibility);
+        }
     }
 }
