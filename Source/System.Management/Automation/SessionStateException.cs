@@ -39,6 +39,16 @@ namespace System.Management.Automation
             ErrorRecord = new ErrorRecord(this, errorIdAndResourceId, errorCategory, null);
         }
 
+        internal SessionStateException(
+            string message,
+            string itemName,
+            SessionStateCategory sessionStateCategory)
+            : base(message)
+        {
+            ItemName = itemName;
+            SessionStateCategory = sessionStateCategory;
+        }
+
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {

@@ -22,6 +22,35 @@ namespace System.Management.Automation
             : base(itemName, sessionStateCategory, errorIdAndResourceId, ErrorCategory.WriteError, messageArgs)
         {
         }
+
+        internal SessionStateUnauthorizedAccessException(
+            string message,
+            string itemName,
+            SessionStateCategory sessionStateCategory)
+            : base(message, itemName, sessionStateCategory)
+        {
+        }
+
+        internal static SessionStateUnauthorizedAccessException CreateVariableNotWritableError(PSVariable variable)
+        {
+            var ex = new SessionStateUnauthorizedAccessException(
+                String.Format("Cannot overwrite variable {0} because it is read-only or constant.", variable.Name),
+                variable.Name,
+                SessionStateCategory.Variable);
+
+            var error = new ErrorRecord(
+                new ParentContainsErrorRecordException(ex),
+                "VariableNotWritable",
+                ErrorCategory.WriteError,
+                variable.Name);
+            error.CategoryInfo.TargetName = variable.Name;
+            error.CategoryInfo.TargetType = "String";
+
+            ex.ErrorRecord = error;
+            ex.Source = typeof(PSVariable).Namespace;
+
+            return ex;
+        }
     }
 }
 

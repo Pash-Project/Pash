@@ -91,8 +91,8 @@ namespace System.Management.Automation
             if (variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly) ||
                 variable.ItemOptions.HasFlag(ScopedItemOptions.Constant))
             {
-                throw new SessionStateUnauthorizedAccessException(variable.Name, SessionStateCategory.Variable,
-                                                                  String.Empty, null);
+                var ex = SessionStateUnauthorizedAccessException.CreateVariableNotWritableError(variable);
+                throw ex;
             }
             // only modify the value of the old one
             variable.Value = value;

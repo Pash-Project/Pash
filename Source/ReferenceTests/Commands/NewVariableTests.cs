@@ -98,8 +98,8 @@ namespace ReferenceTests.Commands
                 });
             });
 
-            //Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", ex.Message);
-            //Assert.AreEqual("foo", ex.ItemName);
+            Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", ex.Message);
+            Assert.AreEqual("foo", ex.ItemName);
             Assert.AreEqual(SessionStateCategory.Variable, ex.SessionStateCategory);
         }
 
@@ -114,9 +114,20 @@ namespace ReferenceTests.Commands
                 });
             });
 
-            //Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", ex.Message);
-            //Assert.AreEqual("foo", ex.ItemName);
+            Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", ex.Message);
+            Assert.AreEqual("foo", ex.ItemName);
+            Assert.AreEqual("System.Management.Automation", ex.Source);
             Assert.AreEqual(SessionStateCategory.Variable, ex.SessionStateCategory);
+            Assert.AreEqual(String.Empty, ex.ErrorRecord.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.WriteError, ex.ErrorRecord.CategoryInfo.Category);
+            Assert.AreEqual("ParentContainsErrorRecordException", ex.ErrorRecord.CategoryInfo.Reason);
+            Assert.AreEqual("foo", ex.ErrorRecord.CategoryInfo.TargetName);
+            Assert.AreEqual("String", ex.ErrorRecord.CategoryInfo.TargetType);
+            Assert.IsNull(ex.ErrorRecord.ErrorDetails);
+            Assert.IsInstanceOf<ParentContainsErrorRecordException>(ex.ErrorRecord.Exception);
+            Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", ex.ErrorRecord.Exception.Message);
+            Assert.AreEqual("VariableNotWritable", ex.ErrorRecord.FullyQualifiedErrorId);
+            Assert.AreEqual("foo", ex.ErrorRecord.TargetObject);
         }
 
         [Test]
