@@ -22,5 +22,16 @@ namespace Pash.Implementation
             {
             }
         }
+
+        public override ScopedItemOptions Options
+        {
+            get
+            {
+                return ScopedItemOptions.None;
+            }
+            set
+            {
+            }
+        }
     }
 }

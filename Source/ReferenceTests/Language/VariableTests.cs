@@ -110,7 +110,6 @@ namespace ReferenceTests.Language
         }
 
         [Test]
-        [Explicit("Not possible to convert string to enum in Pash.")]
         public void NullVariableOptionsCanBeSetButValueIsUnchanged()
         {
             string result = ReferenceHost.Execute(new string[] {
