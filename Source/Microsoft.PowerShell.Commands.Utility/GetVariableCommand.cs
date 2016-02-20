@@ -32,7 +32,7 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            foreach (PSVariable variable in GetVariables())
+            foreach (PSVariable variable in GetVariables().OrderBy(v => v.Name))
             {
                 if (!IsExcluded(variable))
                 {

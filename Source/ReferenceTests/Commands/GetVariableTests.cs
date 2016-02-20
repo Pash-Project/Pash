@@ -344,5 +344,19 @@ namespace ReferenceTests.Commands
             Assert.AreEqual("`?unknown`?", error.TargetObject);
             Assert.AreEqual("`?unknown`?", error.CategoryInfo.TargetName);
         }
+
+        [Test]
+        public void VariablesSortedByName()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$testfoo = 'foo'",
+                "$testbar = 'bar'",
+                "$testzzz = 'bar'",
+                "$testabc = 'abc'",
+                "Get-Variable -include test* | % { $_.Name }"
+            });
+
+            Assert.AreEqual(NewlineJoin("testabc", "testbar", "testfoo", "testzzz"), result);
+        }
     }
 }
