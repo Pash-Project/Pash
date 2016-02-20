@@ -72,8 +72,10 @@ namespace Microsoft.PowerShell.Commands
             }
             else
             {
-                PSVariable variable = Scope == null ? SessionState.PSVariable.Get(name)
-                                                    : SessionState.PSVariable.GetAtScope(name, Scope);
+                string unescapedName = WildcardPattern.Unescape(name);
+
+                PSVariable variable = Scope == null ? SessionState.PSVariable.Get(unescapedName)
+                                                    : SessionState.PSVariable.GetAtScope(unescapedName, Scope);
                 if (variable != null)
                 {
                     yield return variable;

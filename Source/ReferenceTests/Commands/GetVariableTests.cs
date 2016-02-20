@@ -314,5 +314,35 @@ namespace ReferenceTests.Commands
             Assert.AreEqual("unknownvariable", error.CategoryInfo.TargetName);
             Assert.AreEqual("String", error.CategoryInfo.TargetType);
         }
+
+        [Test]
+        public void WildcardEscapedToGetQuestionMarkVariable()
+        {
+            string result = ReferenceHost.Execute("(Get-Variable '`?').Name");
+
+            Assert.AreEqual("?" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void WildcardEscapedAndScopeToGetQuestionMarkVariable()
+        {
+            string result = ReferenceHost.Execute("(Get-Variable '`?' -Scope global).Name");
+
+            Assert.AreEqual("?" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void UnknownVariableWithWildcardEscaped()
+        {
+            Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                 ReferenceHost.Execute("Get-Variable '`?unknown`?'");
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            Assert.AreEqual("Cannot find a variable with name '`?unknown`?'.", error.Exception.Message);
+            Assert.AreEqual("`?unknown`?", error.TargetObject);
+            Assert.AreEqual("`?unknown`?", error.CategoryInfo.TargetName);
+        }
     }
 }
