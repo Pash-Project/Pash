@@ -82,8 +82,6 @@ namespace Microsoft.PowerShell.Commands
             string errorId = String.Format("VariableAlreadyExists,{0}", typeof(NewVariableCommand).FullName);
             var error = new ErrorRecord(ex, errorId, ErrorCategory.ResourceExists, variable.Name);
             error.CategoryInfo.Activity = "New-Variable";
-            error.CategoryInfo.TargetName = variable.Name;
-            error.CategoryInfo.TargetType = "String";
 
             WriteError(error);
         }

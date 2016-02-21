@@ -154,8 +154,6 @@ namespace Microsoft.PowerShell.Commands
             string errorId = "VariableNotFound," + typeof(GetVariableCommand).FullName;
             var error = new ErrorRecord(exception, errorId, ErrorCategory.ObjectNotFound, name);
             error.CategoryInfo.Activity = "Get-Variable";
-            error.CategoryInfo.TargetName = name;
-            error.CategoryInfo.TargetType = "String";
             WriteError(error);
         }
     }
