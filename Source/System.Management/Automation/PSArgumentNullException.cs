@@ -17,6 +17,7 @@ namespace System.Management.Automation
         // To be used by the international support.
         internal string id;
         private ErrorRecord error;
+        private string message;
 
         public PSArgumentNullException()
         {
@@ -66,12 +67,15 @@ namespace System.Management.Automation
             }
         }
 
-        //todo: implement
         public override string Message
         {
             get
             {
-                return null;
+                if (message == null)
+                {
+                    message = String.Format("Cannot process argument because the value of argument \"{0}\" is null. Change the value of argument \"{0}\" to a non-null value.", ParamName);
+                }
+                return message;
             }
         }
     }

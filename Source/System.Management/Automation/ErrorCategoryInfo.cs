@@ -25,7 +25,6 @@ namespace System.Management.Automation
 
         public string GetMessage()
         {
-            //TODO: fix this
             return ToString();
         }
 
@@ -36,12 +35,12 @@ namespace System.Management.Automation
 
         public override string ToString()
         {
-            var targetInfo = "";
-            if (!String.IsNullOrEmpty(TargetName))
-            {
-                targetInfo = String.Format(" {0}:{1},", TargetType, TargetName);
-            }
-            return String.Format("{0},{1} Reason: {2}", Category, targetInfo, Reason);
+            return String.Format("{0}: ({1}:{2}) [{3}], {4}",
+                Category,
+                TargetName,
+                TargetType,
+                Activity,
+                Reason);
         }
     }
 }
