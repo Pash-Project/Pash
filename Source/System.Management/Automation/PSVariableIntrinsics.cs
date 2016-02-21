@@ -57,7 +57,7 @@ namespace System.Management.Automation
             _intrinsics.Scope.Remove(name, true);
         }
 
-        public void Set(PSVariable variable)
+        public void Set(PSVariable variable, bool force = false)
         {
             if (variable == null)
             {
@@ -69,6 +69,7 @@ namespace System.Management.Automation
                 _intrinsics.Scope.SetLocal(variable, true);
                 return;
             }
+            CheckVariableCanBeChanged(original, force);
             original.Value = variable.Value;
             original.Description = variable.Description;
             original.Options = variable.Options;
@@ -88,12 +89,7 @@ namespace System.Management.Automation
                 return;
             }
             // make sure it's not read only
-            if (variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly) ||
-                variable.ItemOptions.HasFlag(ScopedItemOptions.Constant))
-            {
-                var ex = SessionStateUnauthorizedAccessException.CreateVariableNotWritableError(variable);
-                throw ex;
-            }
+            CheckVariableCanBeChanged(variable);
             // only modify the value of the old one
             variable.Value = value;
         }
@@ -121,6 +117,16 @@ namespace System.Management.Automation
         internal Dictionary<string, PSVariable> FindAtScope(string pattern, string scope)
         {
             return _intrinsics.FindAtScope(pattern, scope);
+        }
+
+        private static void CheckVariableCanBeChanged(PSVariable variable, bool force = false)
+        {
+            if ((variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly) && !force) ||
+                variable.ItemOptions.HasFlag(ScopedItemOptions.Constant))
+            {
+                var ex = SessionStateUnauthorizedAccessException.CreateVariableNotWritableError(variable);
+                throw ex;
+            }
         }
     }
 }

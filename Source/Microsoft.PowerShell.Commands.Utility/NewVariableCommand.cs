@@ -39,22 +39,53 @@ namespace Microsoft.PowerShell.Commands
             {
                 variable.Description = Description;
             }
-            //TODO: check if variable already exists and check if force has influence on behavior
-            //implement also an overloaded Get method in PSVariableIntrniscs that allow to pass a scope
+
             try
             {
-                //TODO: create a new overloaded method in PSVariableIntrinsics that allows to pass (bool)this.Force
-                SessionState.PSVariable.Set(variable);
+                if (!Force && VariableAlreadyExists(variable))
+                {
+                    WriteVariableAlreadyExistsError(variable);
+                    return;
+                }
+                SessionState.PSVariable.Set(variable, Force);
+            }
+            catch (SessionStateUnauthorizedAccessException ex)
+            {
+                WriteError(ex.ErrorRecord);
+                return;
             }
             catch (Exception ex)
             {
                 WriteError(new ErrorRecord(ex, "", ErrorCategory.InvalidOperation, variable));
                 return;
             }
+
             if (PassThru.ToBool())
             {
                 WriteObject(variable);
             }
+        }
+
+        private bool VariableAlreadyExists(PSVariable variable)
+        {
+            PSVariable originalVariable = SessionState.PSVariable.Get(variable.Name);
+            return originalVariable != null;
+        }
+
+        private void WriteVariableAlreadyExistsError(PSVariable variable)
+        {
+            var ex = new SessionStateException(
+                String.Format("A variable with name '{0}' already exists.", variable.Name),
+                variable.Name,
+                SessionStateCategory.Variable);
+
+            string errorId = String.Format("VariableAlreadyExists,{0}", typeof(NewVariableCommand).FullName);
+            var error = new ErrorRecord(ex, errorId, ErrorCategory.ResourceExists, variable.Name);
+            error.CategoryInfo.Activity = "New-Variable";
+            error.CategoryInfo.TargetName = variable.Name;
+            error.CategoryInfo.TargetType = "String";
+
+            WriteError(error);
         }
     }
 }

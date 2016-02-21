@@ -131,10 +131,9 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
-        [Explicit("Not supported in Pash")]
         public void CreateReadOnlyVariableThenTryToCreateWritableVariableWithSameName()
         {
-            Assert.Throws<ExecutionWithErrorsException>(delegate
+            var ex = Assert.Throws<ExecutionWithErrorsException>(delegate
             {
                 ReferenceHost.Execute(new string[] {
                     "New-Variable foo 'bar' -option readonly",
@@ -143,6 +142,76 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            var sessionStateException = error.Exception as SessionStateException;
+
+            Assert.AreEqual("foo", error.TargetObject);
+            Assert.AreEqual("A variable with name 'foo' already exists.", error.Exception.Message);
+            Assert.IsInstanceOf<SessionStateException>(error.Exception);
+            Assert.AreEqual("foo", sessionStateException.ItemName);
+            Assert.AreEqual(SessionStateCategory.Variable, sessionStateException.SessionStateCategory);
+            Assert.IsNull(sessionStateException.Source);
+            Assert.AreEqual("New-Variable", error.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.ResourceExists, error.CategoryInfo.Category);
+            Assert.AreEqual("SessionStateException", error.CategoryInfo.Reason);
+            Assert.AreEqual("foo", error.CategoryInfo.TargetName);
+            Assert.AreEqual("String", error.CategoryInfo.TargetType);
+            Assert.AreEqual("VariableAlreadyExists,Microsoft.PowerShell.Commands.NewVariableCommand", error.FullyQualifiedErrorId);
+            Assert.AreEqual("foo", error.TargetObject);
+        }
+
+        [Test]
+        public void CreateVariableWithSameNameTwice()
+        {
+            var ex = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "New-Variable foo 'bar'",
+                    "New-Variable foo 'abc'"
+                });
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            Assert.AreEqual("A variable with name 'foo' already exists.", error.Exception.Message);
+            Assert.AreEqual("foo", error.TargetObject);
+        }
+
+        [Test]
+        public void CreateVariableWithSameNameTwiceUsingForce()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "New-Variable foo 'bar'",
+                "New-Variable foo 'abc' -force",
+                "$foo"
+            });
+
+            Assert.AreEqual("abc" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void CreateReadOnlyVariableThenTryToCreateWritableVariableWithSameNameUsingForce()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "New-Variable foo 'bar' -option readonly",
+                "New-Variable foo 'abc' -force",
+                "$foo"
+            });
+
+            Assert.AreEqual("abc" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void TryToForceCreateConstVariableWithSameName()
+        {
+            var ex = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "New-Variable foo 'bar' -option constant",
+                    "New-Variable foo 'abc' -force"
+                });
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", error.Exception.Message);
             Assert.AreEqual("foo", error.TargetObject);
         }
     }
