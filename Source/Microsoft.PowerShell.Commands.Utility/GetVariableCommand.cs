@@ -32,7 +32,9 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            foreach (PSVariable variable in GetVariables().OrderBy(v => v.Name))
+            foreach (PSVariable variable in GetVariables()
+                .Where(v => v.Visibility == SessionStateEntryVisibility.Public)
+                .OrderBy(v => v.Name))
             {
                 if (!IsExcluded(variable))
                 {
@@ -78,7 +80,14 @@ namespace Microsoft.PowerShell.Commands
                                                     : SessionState.PSVariable.GetAtScope(unescapedName, Scope);
                 if (variable != null)
                 {
-                    yield return variable;
+                    if (variable.Visibility == SessionStateEntryVisibility.Public)
+                    {
+                        yield return variable;
+                    }
+                    else
+                    {
+                        WriteVariableIsPrivateError(variable.Name);
+                    }
                 }
                 else
                 {
@@ -153,6 +162,15 @@ namespace Microsoft.PowerShell.Commands
             var exception = new ItemNotFoundException(String.Format("Cannot find a variable with name '{0}'.", name));
             string errorId = "VariableNotFound," + typeof(GetVariableCommand).FullName;
             var error = new ErrorRecord(exception, errorId, ErrorCategory.ObjectNotFound, name);
+            error.CategoryInfo.Activity = "Get-Variable";
+            WriteError(error);
+        }
+
+        private void WriteVariableIsPrivateError(string name)
+        {
+            var exception = new SessionStateException(String.Format("Cannot access the variable '${0}' because it is a private variable", name));
+            string errorId = "VariableIsPrivate," + typeof(GetVariableCommand).FullName;
+            var error = new ErrorRecord(exception, errorId, ErrorCategory.PermissionDenied, name);
             error.CategoryInfo.Activity = "Get-Variable";
             WriteError(error);
         }

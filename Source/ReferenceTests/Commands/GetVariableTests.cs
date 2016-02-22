@@ -358,5 +358,39 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual(NewlineJoin("testabc", "testbar", "testfoo", "testzzz"), result);
         }
+
+        [Test]
+        public void GetPrivateVariableByName()
+        {
+            Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "New-Variable -name foo -visibility private",
+                    "Get-Variable foo"
+                });
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            Assert.AreEqual("Cannot access the variable '$foo' because it is a private variable", error.Exception.Message);
+            Assert.AreEqual("VariableIsPrivate,Microsoft.PowerShell.Commands.GetVariableCommand", error.FullyQualifiedErrorId);
+            Assert.AreEqual("foo", error.TargetObject);
+            Assert.IsInstanceOf<SessionStateException>(error.Exception);
+            Assert.AreEqual("Get-Variable", error.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.PermissionDenied, error.CategoryInfo.Category);
+            Assert.AreEqual("SessionStateException", error.CategoryInfo.Reason);
+            Assert.AreEqual("foo", error.CategoryInfo.TargetName);
+            Assert.AreEqual("String", error.CategoryInfo.TargetType);
+        }
+
+        [Test]
+        public void PrivateVariableNotReturnedInWildcardSearch()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "New-Variable -name foo -visibility private",
+                "Get-Variable fo?"
+            });
+
+            Assert.AreEqual(String.Empty, result);
+        }
     }
 }
