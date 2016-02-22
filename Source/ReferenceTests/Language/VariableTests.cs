@@ -125,7 +125,6 @@ namespace ReferenceTests.Language
         /// Not sure why PowerShell allows this.
         /// </summary>
         [Test]
-        [Explicit("PSVariable does not have a Visibility property in Pash.")]
         public void NullVariableVisibilityCanBeSetAndValueIsChanged()
         {
             string result = ReferenceHost.Execute(new string[] {

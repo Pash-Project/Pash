@@ -214,5 +214,56 @@ namespace ReferenceTests.Commands
             Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", error.Exception.Message);
             Assert.AreEqual("foo", error.TargetObject);
         }
+
+        [Test]
+        [Explicit("Not supported by Pash currently")]
+        public void VisibilityIsPrivate()
+        {
+            var ex = Assert.Throws<SessionStateException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "nv -name foo -visibility private",
+                    "$foo"
+                });
+            });
+
+            ErrorRecord error = ex.ErrorRecord;
+            Assert.AreEqual(0, ReferenceHost.GetLastRawErrorRecords().Count());
+            Assert.AreEqual("foo", error.TargetObject);
+            Assert.AreEqual("Cannot access the variable '$foo' because it is a private variable", error.Exception.Message);
+            Assert.IsInstanceOf<ParentContainsErrorRecordException>(error.Exception);
+            Assert.AreEqual("foo", ex.ItemName);
+            Assert.AreEqual(SessionStateCategory.Variable, ex.SessionStateCategory);
+            Assert.AreEqual("System.Management.Automation", ex.Source);
+            Assert.AreEqual(String.Empty, error.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.PermissionDenied, error.CategoryInfo.Category);
+            Assert.AreEqual("ParentContainsErrorRecordException", error.CategoryInfo.Reason);
+            Assert.AreEqual("foo", error.CategoryInfo.TargetName);
+            Assert.AreEqual("String", error.CategoryInfo.TargetType);
+            Assert.AreEqual("VariableIsPrivate", error.FullyQualifiedErrorId);
+            Assert.AreEqual("foo", error.TargetObject);
+        }
+
+        [Test]
+        public void DefaultVisibilityIsPublic()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "nv -name foo",
+                "(Get-Variable foo).Visibility.ToString()"
+            });
+
+            Assert.AreEqual("Public" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void VisibilityIsPrivatePassThru()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$a = New-Variable -name foo -passthru -visibility private",
+                "$a.Visibility.ToString()"
+            });
+
+            Assert.AreEqual("Private" + Environment.NewLine, result);
+        }
     }
 }

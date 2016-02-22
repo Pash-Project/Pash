@@ -19,6 +19,9 @@ namespace Microsoft.PowerShell.Commands
         [Parameter]
         public ScopedItemOptions Option { get; set; }
 
+        [ParameterAttribute]
+        public SessionStateEntryVisibility Visibility { get; set; }
+
         [Parameter]
         public SwitchParameter PassThru { get; set; }
 
@@ -31,10 +34,10 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            // TODO: deal with Force
             // TODO: deal with ShouldProcess
 
-            PSVariable variable = new PSVariable(Name, Value, Option);
+            var variable = new PSVariable(Name, Value, Option);
+            variable.Visibility = Visibility;
             if (Description != null)
             {
                 variable.Description = Description;
