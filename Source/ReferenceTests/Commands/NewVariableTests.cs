@@ -216,7 +216,6 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
-        [Explicit("Not supported by Pash currently")]
         public void VisibilityIsPrivate()
         {
             var ex = Assert.Throws<SessionStateException>(delegate
@@ -264,6 +263,34 @@ namespace ReferenceTests.Commands
             });
 
             Assert.AreEqual("Private" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void CannotSetPrivateVariableValue()
+        {
+            var ex = Assert.Throws<SessionStateException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "New-Variable -name foo -visibility private",
+                    "$foo = 'abc'"
+                });
+            });
+
+            ErrorRecord error = ex.ErrorRecord;
+            Assert.AreEqual(0, ReferenceHost.GetLastRawErrorRecords().Count());
+            Assert.AreEqual("foo", error.TargetObject);
+            Assert.AreEqual("Cannot access the variable '$foo' because it is a private variable", error.Exception.Message);
+            Assert.IsInstanceOf<ParentContainsErrorRecordException>(error.Exception);
+            Assert.AreEqual("foo", ex.ItemName);
+            Assert.AreEqual(SessionStateCategory.Variable, ex.SessionStateCategory);
+            Assert.AreEqual("System.Management.Automation", ex.Source);
+            Assert.AreEqual(String.Empty, error.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.PermissionDenied, error.CategoryInfo.Category);
+            Assert.AreEqual("ParentContainsErrorRecordException", error.CategoryInfo.Reason);
+            Assert.AreEqual("foo", error.CategoryInfo.TargetName);
+            Assert.AreEqual("String", error.CategoryInfo.TargetType);
+            Assert.AreEqual("VariableIsPrivate", error.FullyQualifiedErrorId);
+            Assert.AreEqual("foo", error.TargetObject);
         }
     }
 }

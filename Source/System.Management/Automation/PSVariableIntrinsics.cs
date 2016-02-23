@@ -22,12 +22,32 @@ namespace System.Management.Automation
 
         public PSVariable Get(string name)
         {
-            return _intrinsics.Get(name);
+            return Get(name, true);
+        }
+
+        internal PSVariable Get(string name, bool throwIfPrivate)
+        {
+            var variable = _intrinsics.Get(name);
+            if (throwIfPrivate && variable != null)
+            {
+                ThrowIfVariableIsPrivate(variable);
+            }
+            return variable;
         }
 
         public PSVariable GetAtScope(string name, string scope)
         {
             return _intrinsics.GetAtScope(name, scope);
+        }
+
+        internal PSVariable GetAtScope(string name, string scope, bool throwIfPrivate)
+        {
+            var variable = _intrinsics.GetAtScope(name, scope);
+            if (throwIfPrivate && variable != null)
+            {
+                ThrowIfVariableIsPrivate(variable);
+            }
+            return variable;
         }
 
         public object GetValue(string name)
@@ -127,6 +147,28 @@ namespace System.Management.Automation
                 var ex = SessionStateUnauthorizedAccessException.CreateVariableNotWritableError(variable);
                 throw ex;
             }
+
+            ThrowIfVariableIsPrivate(variable);
+        }
+
+        private static void ThrowIfVariableIsPrivate(PSVariable variable)
+        {
+            if (variable.Visibility != SessionStateEntryVisibility.Private)
+            {
+                return;
+            }
+
+            var exception = new SessionStateException(
+                String.Format("Cannot access the variable '${0}' because it is a private variable", variable.Name),
+                variable.ItemName,
+                SessionStateCategory.Variable);
+
+            string errorId = "VariableIsPrivate";
+            var parentException = new ParentContainsErrorRecordException(exception);
+            var error = new ErrorRecord(parentException, errorId, ErrorCategory.PermissionDenied, variable.Name);
+            exception.ErrorRecord = error;
+
+            throw exception;
         }
     }
 }

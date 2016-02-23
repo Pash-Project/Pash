@@ -76,8 +76,8 @@ namespace Microsoft.PowerShell.Commands
             {
                 string unescapedName = WildcardPattern.Unescape(name);
 
-                PSVariable variable = Scope == null ? SessionState.PSVariable.Get(unescapedName)
-                                                    : SessionState.PSVariable.GetAtScope(unescapedName, Scope);
+                PSVariable variable = Scope == null ? SessionState.PSVariable.Get(unescapedName, false)
+                                                    : SessionState.PSVariable.GetAtScope(unescapedName, Scope, false);
                 if (variable != null)
                 {
                     if (variable.Visibility == SessionStateEntryVisibility.Public)

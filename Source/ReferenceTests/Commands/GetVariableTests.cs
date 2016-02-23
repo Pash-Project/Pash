@@ -392,5 +392,22 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual(String.Empty, result);
         }
+
+        [Test]
+        public void GetPrivateVariableByNameAndScope()
+        {
+            Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "New-Variable -name foo -visibility private",
+                    "Get-Variable foo -scope global"
+                });
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            Assert.AreEqual("Cannot access the variable '$foo' because it is a private variable", error.Exception.Message);
+            Assert.AreEqual("VariableIsPrivate,Microsoft.PowerShell.Commands.GetVariableCommand", error.FullyQualifiedErrorId);
+        }
+
     }
 }
