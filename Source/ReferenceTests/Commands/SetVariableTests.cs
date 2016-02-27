@@ -277,5 +277,57 @@ namespace ReferenceTests.Commands
             Assert.AreEqual("foo", sessionStateException.ItemName);
             Assert.AreEqual(SessionStateCategory.Variable, sessionStateException.SessionStateCategory);
         }
+
+        [Test]
+        public void CreateReadOnlyVariableThenTryToCreateWritableVariableWithSameNameUsingForce()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "Set-Variable foo 'bar' -option readonly",
+                "Set-Variable foo 'abc' -force",
+                "$foo"
+            });
+
+            Assert.AreEqual("abc" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void TryToForceCreateConstVariableWithSameName()
+        {
+            var ex = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "Set-Variable foo 'bar' -option constant",
+                    "Set-Variable foo 'abc' -force"
+                });
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", error.Exception.Message);
+            Assert.AreEqual("foo", error.TargetObject);
+        }
+
+        [Test]
+        public void ForceReadOnlyValueToChangeDoesNotChangeOptionIfNotSpecified()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "Set-Variable foo 'bar' -option readonly",
+                "Set-Variable foo 'abc' -force",
+                "(Get-Variable foo).Options.ToString()"
+            });
+
+            Assert.AreEqual("ReadOnly" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void ForceReadOnlyVariableToChangeOption()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "Set-Variable foo 'bar' -option readonly",
+                "Set-Variable foo 'abc' -force -option None",
+                "(Get-Variable foo).Options.ToString()"
+            });
+
+            Assert.AreEqual("None" + Environment.NewLine, result);
+        }
     }
 }

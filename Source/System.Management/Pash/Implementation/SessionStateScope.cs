@@ -278,7 +278,7 @@ namespace Pash.Implementation
             return default(T);
         }
 
-        public void SetLocal(T item, bool overwrite)
+        public void SetLocal(T item, bool overwrite, bool force = false)
         {
             if (item == null)
             {
@@ -292,7 +292,7 @@ namespace Pash.Implementation
                     throw new SessionStateException(item.ItemName, SessionStateCategory, String.Empty,
                                                     ErrorCategory.ResourceExists, null);
                 }
-                if (original.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly))
+                if (original.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly) && !force)
                 {
                     throw new SessionStateUnauthorizedAccessException(item.ItemName, SessionStateCategory,
                                                                       String.Empty, null);

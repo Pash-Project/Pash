@@ -83,7 +83,7 @@ namespace System.Management.Automation
             original.Value = variable.Value;
             original.Description = variable.Description;
             original.Options = variable.Options;
-            _intrinsics.Scope.SetLocal(original, true);
+            _intrinsics.Scope.SetLocal(original, true, force);
         }
 
         public void Set(string name, object value)

@@ -25,7 +25,10 @@ namespace Microsoft.PowerShell.Commands
         public string[] Name { get; set; }
 
         [Parameter]
-        public ScopedItemOptions Option { get; set; }
+        public ScopedItemOptions Option {
+            get { return _option ?? ScopedItemOptions.None; }
+            set { _option = value; }
+        }
 
         [Parameter]
         public SwitchParameter PassThru { get; set; }
@@ -38,6 +41,7 @@ namespace Microsoft.PowerShell.Commands
 
         private PSObject _default;
         private ArrayList _values;
+        private ScopedItemOptions? _option;
 
         public SetVariableCommand()
         {
@@ -102,36 +106,43 @@ namespace Microsoft.PowerShell.Commands
             }
             else
             {
+                CheckVariableCanBeChanged(variable);
                 variable.Value = value;
                 SetVariableOptions(variable);
             }
 
             variable.Description = Description ?? String.Empty;
 
-            SessionState.PSVariable.Set(variable);
+            SessionState.PSVariable.Set(variable, Force);
 
             return variable;
         }
 
         private void SetVariableOptions(PSVariable variable)
         {
-            if (variable.Options != Option)
+            if (_option.HasValue && variable.Options != _option.Value)
             {
                 CheckVariableOptionCanBeChanged(variable);
-                variable.Options = Option;
+                variable.Options = _option.Value;
             }
         }
 
         private void CheckVariableOptionCanBeChanged(PSVariable variable)
         {
-            if ((variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly)) ||
+            CheckVariableCanBeChanged(variable);
+
+            if (_option == ScopedItemOptions.Constant)
+            {
+                throw SessionStateUnauthorizedAccessException.CreateVariableCannotBeMadeConstantError(variable);
+            }
+        }
+
+        private void CheckVariableCanBeChanged(PSVariable variable)
+        {
+            if ((variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly) && !Force) ||
                 variable.ItemOptions.HasFlag(ScopedItemOptions.Constant))
             {
                 throw SessionStateUnauthorizedAccessException.CreateVariableNotWritableError(variable);
-            }
-            else if (Option == ScopedItemOptions.Constant)
-            {
-                throw SessionStateUnauthorizedAccessException.CreateVariableCannotBeMadeConstantError(variable);
             }
         }
 
