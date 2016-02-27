@@ -1,5 +1,6 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Linq;
 using System.Management.Automation;
 using NUnit.Framework;
 
@@ -151,6 +152,86 @@ namespace ReferenceTests.Commands
             });
 
             Assert.AreEqual("Variable Description" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void VariableOptionsIsNoneByDefault()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "Set-Variable foo 'bar'",
+                "(Get-Variable foo).Options.ToString()"
+            });
+
+            Assert.AreEqual("None" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void ReadOnlyVariable()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "Set-Variable foo 'bar' -option readonly",
+                "(Get-Variable foo).Options.ToString()"
+            });
+
+            Assert.AreEqual("ReadOnly" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void CreateReadOnlyVariableThenTryToCreateWritableVariableWithSameName()
+        {
+            var ex = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "Set-Variable foo 'bar' -option readonly",
+                    "Set-Variable foo 'abc'"
+                });
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            var sessionStateException = error.Exception as SessionStateUnauthorizedAccessException;
+
+            Assert.AreEqual("foo", error.TargetObject);
+            Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", error.Exception.Message);
+            Assert.IsInstanceOf<SessionStateUnauthorizedAccessException>(error.Exception);
+            Assert.AreEqual("foo", sessionStateException.ItemName);
+            Assert.AreEqual(SessionStateCategory.Variable, sessionStateException.SessionStateCategory);
+            Assert.AreEqual("System.Management.Automation", sessionStateException.Source);
+            Assert.AreEqual("Set-Variable", error.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.WriteError, error.CategoryInfo.Category);
+            Assert.AreEqual("SessionStateUnauthorizedAccessException", error.CategoryInfo.Reason);
+            Assert.AreEqual("foo", error.CategoryInfo.TargetName);
+            Assert.AreEqual("String", error.CategoryInfo.TargetType);
+            Assert.AreEqual("VariableNotWritable,Microsoft.PowerShell.Commands.SetVariableCommand", error.FullyQualifiedErrorId);
+            Assert.AreEqual("foo", error.TargetObject);
+        }
+
+        [Test]
+        public void CreateVariableThenTryToCreateConstantVariableWithSameName()
+        {
+            var ex = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "Set-Variable foo 'bar'",
+                    "Set-Variable foo 'abc' -option constant"
+                });
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            var sessionStateException = error.Exception as SessionStateUnauthorizedAccessException;
+
+            Assert.AreEqual("foo", error.TargetObject);
+            Assert.AreEqual("Existing variable foo cannot be made constant. Variables can be made constant only at creation time.", error.Exception.Message);
+            Assert.IsInstanceOf<SessionStateUnauthorizedAccessException>(error.Exception);
+            Assert.AreEqual("foo", sessionStateException.ItemName);
+            Assert.AreEqual(SessionStateCategory.Variable, sessionStateException.SessionStateCategory);
+            Assert.AreEqual("System.Management.Automation", sessionStateException.Source);
+            Assert.AreEqual("Set-Variable", error.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.WriteError, error.CategoryInfo.Category);
+            Assert.AreEqual("SessionStateUnauthorizedAccessException", error.CategoryInfo.Reason);
+            Assert.AreEqual("foo", error.CategoryInfo.TargetName);
+            Assert.AreEqual("String", error.CategoryInfo.TargetType);
+            Assert.AreEqual("VariableCannotBeMadeConstant,Microsoft.PowerShell.Commands.SetVariableCommand", error.FullyQualifiedErrorId);
+            Assert.AreEqual("foo", error.TargetObject);
         }
     }
 }

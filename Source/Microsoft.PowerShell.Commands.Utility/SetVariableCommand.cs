@@ -62,24 +62,19 @@ namespace Microsoft.PowerShell.Commands
 
             foreach (string name in Name)
             {
-                PSVariable variable = SessionState.PSVariable.Get(name);
-
-                if (variable == null)
+                try
                 {
-                    variable = new PSVariable(name, value);
+                    PSVariable variable = SetVariable(name, value);
+
+                    if (PassThru.ToBool())
+                    {
+                        WriteObject(variable);
+                    }
                 }
-                else
+                catch (SessionStateUnauthorizedAccessException ex)
                 {
-                    variable.Value = value;
-                }
-
-                variable.Description = Description ?? String.Empty;
-
-                SessionState.PSVariable.Set(variable);
-
-                if (PassThru.ToBool())
-                {
-                    WriteObject(variable);
+                    WriteUnauthorizedError(ex, name);
+                    return;
                 }
             }
         }
@@ -96,6 +91,58 @@ namespace Microsoft.PowerShell.Commands
             }
 
             return _values.ToArray();
+        }
+
+        private PSVariable SetVariable(string name, object value)
+        {
+            PSVariable variable = SessionState.PSVariable.Get(name);
+
+            if (variable == null)
+            {
+                variable = new PSVariable(name, value, Option);
+            }
+            else
+            {
+                variable.Value = value;
+                SetVariableOptions(variable);
+            }
+
+            variable.Description = Description ?? String.Empty;
+
+            SessionState.PSVariable.Set(variable);
+
+            return variable;
+        }
+
+        private void SetVariableOptions(PSVariable variable)
+        {
+            if (variable.Options != Option)
+            {
+                CheckVariableOptionCanBeChanged(variable);
+                variable.Options = Option;
+            }
+        }
+
+        private void CheckVariableOptionCanBeChanged(PSVariable variable)
+        {
+            if ((variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly)) ||
+                variable.ItemOptions.HasFlag(ScopedItemOptions.Constant))
+            {
+                throw SessionStateUnauthorizedAccessException.CreateVariableNotWritableError(variable);
+            }
+            else if (Option == ScopedItemOptions.Constant)
+            {
+                throw SessionStateUnauthorizedAccessException.CreateVariableCannotBeMadeConstantError(variable);
+            }
+        }
+
+        private void WriteUnauthorizedError(SessionStateUnauthorizedAccessException ex, string name)
+        {
+            string errorId = String.Format("{0},{1}", ex.ErrorRecord.ErrorId, typeof(SetVariableCommand).FullName);
+            var error = new ErrorRecord(ex, errorId, ErrorCategory.WriteError, name);
+            error.CategoryInfo.Activity = "Set-Variable";
+
+            WriteError(error);
         }
     }
 }
