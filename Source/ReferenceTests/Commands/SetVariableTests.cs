@@ -96,5 +96,27 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual("foo, bar - Type=Object[]" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void Passthru()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$output = Set-Variable foo 'bar' -passthru",
+                "'Name=' + $output.Name + ', Value=' + $output.Value + ', Type=' + $output.GetType().Name"
+            });
+
+            Assert.AreEqual("Name=foo, Value=bar, Type=PSVariable" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void PassthruTwoVariablesCreated()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$v= Set-Variable foo,bar 'abc' -passthru",
+                "'Names=' + $v[0].Name + ',' + $v[1].Name + ' Values=' + $v[0].Value + ',' + $v[1].Value + ' Type=' + $v.GetType().Name + ' ' + $v[0].GetType().Name"
+            });
+
+            Assert.AreEqual("Names=foo,bar Values=abc,abc Type=Object[] PSVariable" + Environment.NewLine, result);
+        }
     }
 }

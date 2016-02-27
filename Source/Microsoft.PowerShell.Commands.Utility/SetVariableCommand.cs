@@ -74,6 +74,11 @@ namespace Microsoft.PowerShell.Commands
                 }
 
                 SessionState.PSVariable.Set(variable);
+
+                if (PassThru.ToBool())
+                {
+                    WriteObject(variable);
+                }
             }
         }
 
