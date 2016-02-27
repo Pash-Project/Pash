@@ -33,13 +33,11 @@ namespace Microsoft.PowerShell.Commands
         [Parameter(Position = 1, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
         public object Value { get; set; }
 
+        [ParameterAttribute]
+        public SessionStateEntryVisibility Visibility { get; set; }
+
         private PSObject _default;
         private ArrayList _values;
-
-        //private bool nameIsFormalParameter;
-        //private ScopedItemOptions? options;
-        //private bool valueIsFormalParameter;
-        //private ArrayList valueList;
 
         public SetVariableCommand()
         {
@@ -71,9 +69,9 @@ namespace Microsoft.PowerShell.Commands
                         WriteObject(variable);
                     }
                 }
-                catch (SessionStateUnauthorizedAccessException ex)
+                catch (SessionStateException ex)
                 {
-                    WriteUnauthorizedError(ex, name);
+                    WriteError(ex, name);
                     return;
                 }
             }
@@ -100,6 +98,7 @@ namespace Microsoft.PowerShell.Commands
             if (variable == null)
             {
                 variable = new PSVariable(name, value, Option);
+                variable.Visibility = Visibility;
             }
             else
             {
@@ -136,10 +135,10 @@ namespace Microsoft.PowerShell.Commands
             }
         }
 
-        private void WriteUnauthorizedError(SessionStateUnauthorizedAccessException ex, string name)
+        private void WriteError(SessionStateException ex, string name)
         {
             string errorId = String.Format("{0},{1}", ex.ErrorRecord.ErrorId, typeof(SetVariableCommand).FullName);
-            var error = new ErrorRecord(ex, errorId, ErrorCategory.WriteError, name);
+            var error = new ErrorRecord(ex, errorId, ex.ErrorRecord.CategoryInfo.Category, name);
             error.CategoryInfo.Activity = "Set-Variable";
 
             WriteError(error);

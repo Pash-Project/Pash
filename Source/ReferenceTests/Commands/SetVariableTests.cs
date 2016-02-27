@@ -233,5 +233,49 @@ namespace ReferenceTests.Commands
             Assert.AreEqual("VariableCannotBeMadeConstant,Microsoft.PowerShell.Commands.SetVariableCommand", error.FullyQualifiedErrorId);
             Assert.AreEqual("foo", error.TargetObject);
         }
+
+        [Test]
+        public void DefaultVisibilityIsPublic()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "Set-Variable -name foo",
+                "(Get-Variable foo).Visibility.ToString()"
+            });
+
+            Assert.AreEqual("Public" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void VisibilityIsPrivatePassThru()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$a = Set-Variable -name foo -passthru -visibility private",
+                "$a.Visibility.ToString()"
+            });
+
+            Assert.AreEqual("Private" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void CreateVisibilityPrivateVariableThenTryToChangeDescription()
+        {
+            var ex = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "Set-Variable -name foo -visibility private",
+                    "Set-Variable -name foo -description 'private'"
+                });
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            var sessionStateException = error.Exception as SessionStateException;
+
+            Assert.AreEqual("foo", error.TargetObject);
+            Assert.AreEqual("Cannot access the variable '$foo' because it is a private variable", error.Exception.Message);
+            Assert.AreEqual("VariableIsPrivate,Microsoft.PowerShell.Commands.SetVariableCommand", error.FullyQualifiedErrorId);
+            Assert.AreEqual(ErrorCategory.PermissionDenied, error.CategoryInfo.Category);
+            Assert.AreEqual("foo", sessionStateException.ItemName);
+            Assert.AreEqual(SessionStateCategory.Variable, sessionStateException.SessionStateCategory);
+        }
     }
 }
