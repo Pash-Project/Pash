@@ -87,15 +87,14 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
-        [Explicit("Does not work with Pash")]
         public void SingleNameMultipleValuesOnPipeline()
         {
             string result = ReferenceHost.Execute(new string[] {
                 "'foo','bar' | Set-Variable a",
-                "$a[0] + \", \" + $a[1]"
+                "$a[0] + \", \" + $a[1] + \" - Type=\" + $a.GetType().Name"
             });
 
-            Assert.AreEqual("foo, bar" + Environment.NewLine, result);
+            Assert.AreEqual("foo, bar - Type=Object[]" + Environment.NewLine, result);
         }
     }
 }

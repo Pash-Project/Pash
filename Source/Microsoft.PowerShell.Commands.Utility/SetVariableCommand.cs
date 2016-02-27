@@ -58,29 +58,37 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void EndProcessing()
         {
+            object value = GetVariableValue();
+
             foreach (string name in Name)
             {
-                foreach (object value in _values)
+                PSVariable variable = SessionState.PSVariable.Get(name);
+
+                if (variable == null)
                 {
-                    PSVariable variable = SessionState.PSVariable.Get(name);
-
-                    if (variable == null)
-                    {
-                        variable = new PSVariable(name, value);
-                    }
-                    else
-                    {
-                        variable.Value = value;
-                    }
-
-                    SessionState.PSVariable.Set(variable);
+                    variable = new PSVariable(name, value);
                 }
+                else
+                {
+                    variable.Value = value;
+                }
+
+                SessionState.PSVariable.Set(variable);
             }
         }
 
-        private void SetVariable(string[] varNames, object varValue)
+        private object GetVariableValue()
         {
-            throw new NotImplementedException();
+            if (_values.Count == 1)
+            {
+                return _values[0];
+            }
+            else if (_values.Count == 0)
+            {
+                return null;
+            }
+
+            return _values.ToArray();
         }
     }
 }
