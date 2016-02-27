@@ -32,14 +32,21 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            foreach (PSVariable variable in GetVariables()
-                .Where(v => v.Visibility == SessionStateEntryVisibility.Public)
-                .OrderBy(v => v.Name))
+            try
             {
-                if (!IsExcluded(variable))
+                foreach (PSVariable variable in GetVariables()
+                    .Where(v => v.Visibility == SessionStateEntryVisibility.Public)
+                    .OrderBy(v => v.Name))
                 {
-                    WriteVariable(variable);
+                    if (!IsExcluded(variable))
+                    {
+                        WriteVariable(variable);
+                    }
                 }
+            }
+            catch (SessionStateException ex)
+            {
+                WriteError(ex);
             }
         }
 
@@ -76,18 +83,11 @@ namespace Microsoft.PowerShell.Commands
             {
                 string unescapedName = WildcardPattern.Unescape(name);
 
-                PSVariable variable = Scope == null ? SessionState.PSVariable.Get(unescapedName, false)
-                                                    : SessionState.PSVariable.GetAtScope(unescapedName, Scope, false);
+                PSVariable variable = Scope == null ? SessionState.PSVariable.Get(unescapedName)
+                                                    : SessionState.PSVariable.GetAtScope(unescapedName, Scope);
                 if (variable != null)
                 {
-                    if (variable.Visibility == SessionStateEntryVisibility.Public)
-                    {
-                        yield return variable;
-                    }
-                    else
-                    {
-                        WriteVariableIsPrivateError(variable.Name);
-                    }
+                    yield return variable;
                 }
                 else
                 {
@@ -166,12 +166,12 @@ namespace Microsoft.PowerShell.Commands
             WriteError(error);
         }
 
-        private void WriteVariableIsPrivateError(string name)
+        private void WriteError(SessionStateException ex)
         {
-            var exception = new SessionStateException(String.Format("Cannot access the variable '${0}' because it is a private variable", name));
-            string errorId = "VariableIsPrivate," + typeof(GetVariableCommand).FullName;
-            var error = new ErrorRecord(exception, errorId, ErrorCategory.PermissionDenied, name);
+            string errorId = String.Format("{0},{1}", ex.ErrorRecord.ErrorId, typeof(GetVariableCommand).FullName);
+            var error = new ErrorRecord(ex, errorId, ex.ErrorRecord.CategoryInfo.Category, ex.ItemName);
             error.CategoryInfo.Activity = "Get-Variable";
+
             WriteError(error);
         }
     }

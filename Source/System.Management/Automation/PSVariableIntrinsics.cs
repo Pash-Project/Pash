@@ -22,13 +22,8 @@ namespace System.Management.Automation
 
         public PSVariable Get(string name)
         {
-            return Get(name, true);
-        }
-
-        internal PSVariable Get(string name, bool throwIfPrivate)
-        {
             var variable = _intrinsics.Get(name);
-            if (throwIfPrivate && variable != null)
+            if (variable != null)
             {
                 ThrowIfVariableIsPrivate(variable);
             }
@@ -37,13 +32,8 @@ namespace System.Management.Automation
 
         public PSVariable GetAtScope(string name, string scope)
         {
-            return _intrinsics.GetAtScope(name, scope);
-        }
-
-        internal PSVariable GetAtScope(string name, string scope, bool throwIfPrivate)
-        {
             var variable = _intrinsics.GetAtScope(name, scope);
-            if (throwIfPrivate && variable != null)
+            if (variable != null)
             {
                 ThrowIfVariableIsPrivate(variable);
             }
