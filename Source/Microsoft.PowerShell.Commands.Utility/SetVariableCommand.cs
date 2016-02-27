@@ -73,6 +73,8 @@ namespace Microsoft.PowerShell.Commands
                     variable.Value = value;
                 }
 
+                variable.Description = Description ?? String.Empty;
+
                 SessionState.PSVariable.Set(variable);
 
                 if (PassThru.ToBool())

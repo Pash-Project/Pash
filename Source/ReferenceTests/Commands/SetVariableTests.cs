@@ -118,5 +118,39 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual("Names=foo,bar Values=abc,abc Type=Object[] PSVariable" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void VariableDescription()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "Set-Variable foo 'bar' -description 'Variable Description'",
+                "(Get-Variable foo).Description"
+            });
+
+            Assert.AreEqual("Variable Description" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void DefaultVariableDescriptionIsEmptyString()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "Set-Variable foo 'bar'",
+                "(Get-Variable foo).Description"
+            });
+
+            Assert.AreEqual(String.Empty + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void VariableDescriptionForExistingVariable()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "Set-Variable foo 'bar' -description 'desc 1'",
+                "Set-Variable foo 'bar' -description 'Variable Description'",
+                "(Get-Variable foo).Description"
+            });
+
+            Assert.AreEqual("Variable Description" + Environment.NewLine, result);
+        }
     }
 }
