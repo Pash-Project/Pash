@@ -104,6 +104,7 @@
     <Compile Include="StyleInfo.cs" />
     <Compile Include="TeeObjectCommand.cs" />
     <Compile Include="PropertyEqualityComparer.cs" />
+    <Compile Include="VariableCommandBase.cs" />
     <Compile Include="WhereObjectCommand.cs" />
     <Compile Include="WriteDebugCommand.cs" />
     <Compile Include="WriteErrorCommand.cs" />

@@ -9,19 +9,27 @@ namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Set", "Variable", SupportsShouldProcess = true)]
     [OutputType(typeof(PSVariable))]
-    public sealed class SetVariableCommand : PSCmdlet
+    public sealed class SetVariableCommand : VariableCommandBase
     {
         [Parameter]
         public string Description { get; set; }
 
         [Parameter]
-        public string[] Exclude { get; set; }
+        public string[] Exclude
+        {
+            get { return ExcludeFilters; }
+            set { ExcludeFilters = value; }
+        }
 
         [Parameter]
         public SwitchParameter Force { get; set; }
 
         [Parameter]
-        public string[] Include { get; set; }
+        public string[] Include
+        {
+            get { return IncludeFilters; }
+            set { IncludeFilters = value; }
+        }
 
         [Parameter(Position = 0, ValueFromPipelineByPropertyName = true, Mandatory = true)]
         public string[] Name { get; set; }
@@ -163,37 +171,6 @@ namespace Microsoft.PowerShell.Commands
             error.CategoryInfo.Activity = "Set-Variable";
 
             WriteError(error);
-        }
-
-        private bool IsExcluded(string variableName)
-        {
-            if (Include != null)
-            {
-                if (!Include.Any(name => IsMatch(name, variableName)))
-                {
-                    return true;
-                }
-            }
-
-            if (Exclude != null)
-            {
-                if (Exclude.Any(name => IsMatch(name, variableName)))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        static bool IsMatch(string name, string variableName)
-        {
-            if (WildcardPattern.ContainsWildcardCharacters(name))
-            {
-                var wildcard = new WildcardPattern(name, WildcardOptions.IgnoreCase);
-                return wildcard.IsMatch(variableName);
-            }
-            return variableName.Equals(name, StringComparison.CurrentCultureIgnoreCase);
         }
     }
 }

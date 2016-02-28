@@ -8,13 +8,21 @@ namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Get", "Variable")]
     [OutputType(typeof(PSVariable))]
-    public class GetVariableCommand : PSCmdlet
+    public class GetVariableCommand : VariableCommandBase
     {
         [Parameter]
-        public string[] Exclude { get; set; }
+        public string[] Exclude
+        {
+            get { return ExcludeFilters; }
+            set { ExcludeFilters = value; }
+        }
 
         [Parameter]
-        public string[] Include { get; set; }
+        public string[] Include
+        {
+            get { return IncludeFilters; }
+            set { IncludeFilters = value; }
+        }
 
         [Parameter(Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true), ValidateNotNull]
         public string[] Name { get; set; }
@@ -38,7 +46,7 @@ namespace Microsoft.PowerShell.Commands
                     .Where(v => v.Visibility == SessionStateEntryVisibility.Public)
                     .OrderBy(v => v.Name))
                 {
-                    if (!IsExcluded(variable))
+                    if (!IsExcluded(variable.Name))
                     {
                         WriteVariable(variable);
                     }
@@ -112,37 +120,6 @@ namespace Microsoft.PowerShell.Commands
                 return SessionState.PSVariable.GetAll().Values;
             }
             return SessionState.PSVariable.GetAllAtScope(Scope).Values;
-        }
-
-        private bool IsExcluded(PSVariable variable)
-        {
-            if (Include != null)
-            {
-                if (!Include.Any(name => IsMatch(name, variable)))
-                {
-                    return true;
-                }
-            }
-
-            if (Exclude != null)
-            {
-                if (Exclude.Any(name => IsMatch(name, variable)))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        static bool IsMatch(string name, PSVariable variable)
-        {
-            if (WildcardPattern.ContainsWildcardCharacters(name))
-            {
-                var wildcard = new WildcardPattern(name, WildcardOptions.IgnoreCase);
-                return wildcard.IsMatch(variable.Name);
-            }
-            return variable.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase);
         }
 
         private void WriteVariable(PSVariable variable)
