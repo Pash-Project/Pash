@@ -329,5 +329,122 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual("None" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void NewVariableInsideFunctionHasLocalScopeByDefault()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "function foo { Set-Variable test 'test-local' -scope local }",
+                "foo",
+                "$test"
+            });
+
+            Assert.AreEqual(Environment.NewLine, result);
+        }
+
+        [Test]
+        public void FunctionLocalScopeVariable()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "function foo { Set-Variable test 'test-local' -scope local }",
+                "foo",
+                "$test"
+            });
+
+            Assert.AreEqual(Environment.NewLine, result);
+        }
+
+        [Test]
+        public void FunctionGlobalScopeVariable()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "function foo { Set-Variable test 'test-global' -scope global }",
+                "foo",
+                "$test"
+            });
+
+            Assert.AreEqual("test-global" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void CreateGlobalScopeVariableInFunctionWhenConstantGlobalVariableAlreadyDefined()
+        {
+            var ex = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "Set-Variable a 'bar' -option constant",
+                    "function foo { Set-Variable a 'abc' -scope global }",
+                    "foo"
+                });
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            Assert.AreEqual("Cannot overwrite variable a because it is read-only or constant.", error.Exception.Message);
+            Assert.AreEqual("a", error.TargetObject);
+        }
+
+        [Test]
+        public void CreateLocalScopeVariableInFunctionWhenVariableAlreadyDefinedGlobally()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$a = 'bar'",
+                "function foo { Set-Variable a 'abc' -scope local; $a }",
+                "foo"
+            });
+
+            Assert.AreEqual("abc" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void CreateVariableInFunctionWhenVariableAlreadyDefinedGlobally()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$a = 'bar'",
+                "function foo { Set-Variable a 'abc'; $a }",
+                "foo"
+            });
+
+            Assert.AreEqual("abc" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void TryToCreateGlobalScopeConstVariableWithSameName()
+        {
+            var ex = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "function foo { Set-Variable a 'bar' -scope global -option constant; Set-Variable a 'abc' -scope global }",
+                    "foo"
+                });
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            Assert.AreEqual("Cannot overwrite variable a because it is read-only or constant.", error.Exception.Message);
+            Assert.AreEqual("a", error.TargetObject);
+        }
+
+        [Test]
+        public void CreateGlobalScopeConstVariableAndLocalScopeConstWithSameName()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "function foo { Set-Variable a 'bar' -scope global -option constant; Set-Variable a 'abc' -option constant }",
+                "foo",
+                "$a"
+            });
+
+            Assert.AreEqual("bar" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void GlobalConstVariableExistsWhenCreatingLocalVariableSameName()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "Set-Variable a 'bar' -scope global -option constant",
+                "function foo { Set-Variable a 'abc' -scope local }",
+                "$a"
+            });
+
+            Assert.AreEqual("bar" + Environment.NewLine, result);
+        }
     }
 }

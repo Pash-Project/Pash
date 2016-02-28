@@ -53,7 +53,7 @@ namespace Microsoft.PowerShell.Commands
                     WriteVariableAlreadyExistsError(variable);
                     return;
                 }
-                SetVariable(variable);
+                SessionState.PSVariable.SetAtScope(variable, Scope, Force);
             }
             catch (SessionStateUnauthorizedAccessException ex)
             {
@@ -69,18 +69,6 @@ namespace Microsoft.PowerShell.Commands
             if (PassThru.ToBool())
             {
                 WriteObject(variable);
-            }
-        }
-
-        private void SetVariable(PSVariable variable)
-        {
-            if (Scope != null)
-            {
-                SessionState.PSVariable.SetAtScope(variable, Scope, Force);
-            }
-            else
-            {
-                SessionState.PSVariable.Set(variable, Force);
             }
         }
 

@@ -39,6 +39,9 @@ namespace Microsoft.PowerShell.Commands
         [ParameterAttribute]
         public SessionStateEntryVisibility Visibility { get; set; }
 
+        [ParameterAttribute]
+        public string Scope { get; set; }
+
         private PSObject _default;
         private ArrayList _values;
         private ScopedItemOptions? _option;
@@ -97,7 +100,7 @@ namespace Microsoft.PowerShell.Commands
 
         private PSVariable SetVariable(string name, object value)
         {
-            PSVariable variable = SessionState.PSVariable.Get(name);
+            PSVariable variable = SessionState.PSVariable.GetAtScope(name, Scope);
 
             if (variable == null)
             {
@@ -113,7 +116,7 @@ namespace Microsoft.PowerShell.Commands
 
             variable.Description = Description ?? String.Empty;
 
-            SessionState.PSVariable.Set(variable, Force);
+            SessionState.PSVariable.SetAtScope(variable, Scope, Force);
 
             return variable;
         }
