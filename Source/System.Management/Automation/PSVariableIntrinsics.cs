@@ -86,6 +86,26 @@ namespace System.Management.Automation
             _intrinsics.Scope.SetLocal(original, true, force);
         }
 
+        internal void SetAtScope(PSVariable variable, string scope, bool force = false)
+        {
+            if (variable == null)
+            {
+                throw new ArgumentNullException("The variable is null.");
+            }
+
+            var original = _intrinsics.Scope.GetLocal(variable.Name);
+            if (original == null)
+            {
+                _intrinsics.Scope.SetAtScope(variable, scope, true);
+                return;
+            }
+            //CheckVariableCanBeChanged(original, force);
+            //original.Value = variable.Value;
+            //original.Description = variable.Description;
+            //original.Options = variable.Options;
+            //_intrinsics.Scope.SetLocal(original, true, force);
+        }
+
         public void Set(string name, object value)
         {
             var qualName = new SessionStateScope<PSVariable>.QualifiedName(name);

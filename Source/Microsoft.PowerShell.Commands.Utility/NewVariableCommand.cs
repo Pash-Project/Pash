@@ -25,6 +25,9 @@ namespace Microsoft.PowerShell.Commands
         [Parameter]
         public SwitchParameter PassThru { get; set; }
 
+        [ParameterAttribute]
+        public string Scope { get; set; }
+
         [Parameter(Position = 1, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
         public object Value { get; set; }
 
@@ -50,7 +53,7 @@ namespace Microsoft.PowerShell.Commands
                     WriteVariableAlreadyExistsError(variable);
                     return;
                 }
-                SessionState.PSVariable.Set(variable, Force);
+                SetVariable(variable);
             }
             catch (SessionStateUnauthorizedAccessException ex)
             {
@@ -69,9 +72,21 @@ namespace Microsoft.PowerShell.Commands
             }
         }
 
+        private void SetVariable(PSVariable variable)
+        {
+            if (Scope != null)
+            {
+                SessionState.PSVariable.SetAtScope(variable, Scope, Force);
+            }
+            else
+            {
+                SessionState.PSVariable.Set(variable, Force);
+            }
+        }
+
         private bool VariableAlreadyExists(PSVariable variable)
         {
-            PSVariable originalVariable = SessionState.PSVariable.Get(variable.Name);
+            PSVariable originalVariable = SessionState.PSVariable.GetAtScope(variable.Name, Scope);
             return originalVariable != null;
         }
 

@@ -292,5 +292,82 @@ namespace ReferenceTests.Commands
             Assert.AreEqual("VariableIsPrivate", error.FullyQualifiedErrorId);
             Assert.AreEqual("foo", error.TargetObject);
         }
+
+        [Test]
+        public void NewVariableInsideFunctionHasLocalScopeByDefault()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "function foo { New-Variable test 'test-local' -scope local }",
+                "foo",
+                "$test"
+            });
+
+            Assert.AreEqual(Environment.NewLine, result);
+        }
+
+        [Test]
+        public void FunctionLocalScopeVariable()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "function foo { New-Variable test 'test-local' -scope local }",
+                "foo",
+                "$test"
+            });
+
+            Assert.AreEqual(Environment.NewLine, result);
+        }
+
+        [Test]
+        public void FunctionGlobalScopeVariable()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "function foo {  New-Variable test 'test-global' -scope global }",
+                "foo",
+                "$test"
+            });
+
+            Assert.AreEqual("test-global" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void CreateGlobalScopeVariableInFunctionWhenVariableAlreadyDefined()
+        {
+            var ex = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "$a = 'bar'",
+                    "function foo { New-Variable a 'abc' -scope global }",
+                    "foo"
+                });
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            Assert.AreEqual("A variable with name 'a' already exists.", error.Exception.Message);
+            Assert.AreEqual("a", error.TargetObject);
+        }
+
+        [Test]
+        public void CreateLocalScopeVariableInFunctionWhenVariableAlreadyDefinedGlobally()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$a = 'bar'",
+                "function foo { New-Variable a 'abc' -scope local; $a }",
+                "foo"
+            });
+
+            Assert.AreEqual("abc" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void CreateVariableInFunctionWhenVariableAlreadyDefinedGlobally()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$a = 'bar'",
+                "function foo { New-Variable a 'abc'; $a }",
+                "foo"
+            });
+
+            Assert.AreEqual("abc" + Environment.NewLine, result);
+        }
     }
 }
