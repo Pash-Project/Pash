@@ -446,5 +446,27 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual("bar" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void IncludeNamesByWildcard()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "Set-Variable aa,ba 'bar' -include b*",
+                "$aa + \", \" + $ba"
+            });
+
+            Assert.AreEqual(", bar" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void ExcludeNamesByWildcard()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "Set-Variable aa,ba 'bar' -exclude b*",
+                "$aa + \", \" + $ba"
+            });
+
+            Assert.AreEqual("bar, " + Environment.NewLine, result);
+        }
     }
 }

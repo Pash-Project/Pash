@@ -1,6 +1,8 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands
@@ -65,7 +67,7 @@ namespace Microsoft.PowerShell.Commands
         {
             object value = GetVariableValue();
 
-            foreach (string name in Name)
+            foreach (string name in GetNames())
             {
                 try
                 {
@@ -82,6 +84,11 @@ namespace Microsoft.PowerShell.Commands
                     return;
                 }
             }
+        }
+
+        private IEnumerable<string> GetNames()
+        {
+            return Name.Where(name => !IsExcluded(name));
         }
 
         private object GetVariableValue()
@@ -156,6 +163,37 @@ namespace Microsoft.PowerShell.Commands
             error.CategoryInfo.Activity = "Set-Variable";
 
             WriteError(error);
+        }
+
+        private bool IsExcluded(string variableName)
+        {
+            if (Include != null)
+            {
+                if (!Include.Any(name => IsMatch(name, variableName)))
+                {
+                    return true;
+                }
+            }
+
+            if (Exclude != null)
+            {
+                if (Exclude.Any(name => IsMatch(name, variableName)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        static bool IsMatch(string name, string variableName)
+        {
+            if (WildcardPattern.ContainsWildcardCharacters(name))
+            {
+                var wildcard = new WildcardPattern(name, WildcardOptions.IgnoreCase);
+                return wildcard.IsMatch(variableName);
+            }
+            return variableName.Equals(name, StringComparison.CurrentCultureIgnoreCase);
         }
     }
 }
