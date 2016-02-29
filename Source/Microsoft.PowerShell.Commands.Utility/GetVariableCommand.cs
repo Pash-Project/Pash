@@ -40,21 +40,14 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            try
+            foreach (PSVariable variable in GetVariables()
+                .Where(v => v.Visibility == SessionStateEntryVisibility.Public)
+                .OrderBy(v => v.Name))
             {
-                foreach (PSVariable variable in GetVariables()
-                    .Where(v => v.Visibility == SessionStateEntryVisibility.Public)
-                    .OrderBy(v => v.Name))
+                if (!IsExcluded(variable.Name))
                 {
-                    if (!IsExcluded(variable.Name))
-                    {
-                        WriteVariable(variable);
-                    }
+                    WriteVariable(variable);
                 }
-            }
-            catch (SessionStateException ex)
-            {
-                WriteError(ex);
             }
         }
 
@@ -89,19 +82,37 @@ namespace Microsoft.PowerShell.Commands
             }
             else
             {
+                PSVariable variable = GetVariable(name);
+                if (variable != null)
+                {
+                    yield return variable;
+                }
+            }
+        }
+
+        private PSVariable GetVariable(string name)
+        {
+            try
+            {
                 string unescapedName = WildcardPattern.Unescape(name);
 
                 PSVariable variable = Scope == null ? SessionState.PSVariable.Get(unescapedName)
                                                     : SessionState.PSVariable.GetAtScope(unescapedName, Scope);
                 if (variable != null)
                 {
-                    yield return variable;
+                    return variable;
                 }
                 else
                 {
                     WriteVariableNotFoundError(name);
                 }
+                return variable;
             }
+            catch (SessionStateException ex)
+            {
+                WriteError(ex);
+            }
+            return null;
         }
 
         private IEnumerable<PSVariable> GetVariablesUsingWildcard(string pattern)

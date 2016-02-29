@@ -383,6 +383,25 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
+        public void GetTwoPrivateVariablesByName()
+        {
+            Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "New-Variable -name foo -visibility private",
+                    "New-Variable -name bar -visibility private",
+                    "Get-Variable foo,bar"
+                });
+            });
+
+            ErrorRecord error1 = ReferenceHost.GetLastRawErrorRecords().First();
+            ErrorRecord error2 = ReferenceHost.GetLastRawErrorRecords().Last();
+            Assert.AreEqual(2, ReferenceHost.GetLastRawErrorRecords().Count());
+            Assert.AreEqual("Cannot access the variable '$foo' because it is a private variable", error1.Exception.Message);
+            Assert.AreEqual("Cannot access the variable '$bar' because it is a private variable", error2.Exception.Message);
+        }
+
+        [Test]
         public void PrivateVariableNotReturnedInWildcardSearch()
         {
             string result = ReferenceHost.Execute(new string[] {
@@ -409,5 +428,23 @@ namespace ReferenceTests.Commands
             Assert.AreEqual("VariableIsPrivate,Microsoft.PowerShell.Commands.GetVariableCommand", error.FullyQualifiedErrorId);
         }
 
+        [Test]
+        public void GetTwoPrivateVariablesByNameAndScope()
+        {
+            Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "New-Variable -name foo -visibility private",
+                    "New-Variable -name bar -visibility private",
+                    "Get-Variable foo,bar -scope global"
+                });
+            });
+
+            ErrorRecord error1 = ReferenceHost.GetLastRawErrorRecords().First();
+            ErrorRecord error2 = ReferenceHost.GetLastRawErrorRecords().Last();
+            Assert.AreEqual(2, ReferenceHost.GetLastRawErrorRecords().Count());
+            Assert.AreEqual("Cannot access the variable '$foo' because it is a private variable", error1.Exception.Message);
+            Assert.AreEqual("Cannot access the variable '$bar' because it is a private variable", error2.Exception.Message);
+        }
     }
 }
