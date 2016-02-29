@@ -279,6 +279,25 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
+        public void CreateTwoVisibilityPrivateVariablesThenTryToChangeDescriptionOfBothInOneCall()
+        {
+            var ex = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "Set-Variable -name foo -visibility private",
+                    "Set-Variable -name bar -visibility private",
+                    "Set-Variable -name foo,bar -description 'private'"
+                });
+            });
+
+            ErrorRecord error1 = ReferenceHost.GetLastRawErrorRecords().First();
+            ErrorRecord error2 = ReferenceHost.GetLastRawErrorRecords().Last();
+            Assert.AreEqual(2, ReferenceHost.GetLastRawErrorRecords().Count());
+            Assert.AreEqual("Cannot access the variable '$foo' because it is a private variable", error1.Exception.Message);
+            Assert.AreEqual("Cannot access the variable '$bar' because it is a private variable", error2.Exception.Message);
+        }
+
+        [Test]
         public void CreateReadOnlyVariableThenTryToCreateWritableVariableWithSameNameUsingForce()
         {
             string result = ReferenceHost.Execute(new string[] {

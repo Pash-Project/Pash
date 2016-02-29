@@ -89,7 +89,6 @@ namespace Microsoft.PowerShell.Commands
                 catch (SessionStateException ex)
                 {
                     WriteError(ex, name);
-                    return;
                 }
             }
         }
