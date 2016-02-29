@@ -41,5 +41,28 @@ namespace Microsoft.PowerShell.Commands
             }
             return variableName.Equals(name, StringComparison.CurrentCultureIgnoreCase);
         }
+
+        protected internal void WriteVariableNotFoundError(string name)
+        {
+            var exception = new ItemNotFoundException(String.Format("Cannot find a variable with name '{0}'.", name));
+            string errorId = "VariableNotFound," + GetType().FullName;
+            var error = new ErrorRecord(exception, errorId, ErrorCategory.ObjectNotFound, name);
+            error.CategoryInfo.Activity = GetActivityName();
+            WriteError(error);
+        }
+
+        private string GetActivityName()
+        {
+            return GetType().Name.Replace("VariableCommand", "-Variable");
+        }
+
+        protected internal void WriteError(SessionStateException ex)
+        {
+            string errorId = String.Format("{0},{1}", ex.ErrorRecord.ErrorId, GetType().FullName);
+            var error = new ErrorRecord(ex, errorId, ex.ErrorRecord.CategoryInfo.Category, ex.ItemName);
+            error.CategoryInfo.Activity = GetActivityName();
+
+            WriteError(error);
+        }
     }
 }

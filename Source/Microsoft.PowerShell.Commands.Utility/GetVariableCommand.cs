@@ -144,23 +144,5 @@ namespace Microsoft.PowerShell.Commands
                 WriteObject(variable);
             }
         }
-
-        private void WriteVariableNotFoundError(string name)
-        {
-            var exception = new ItemNotFoundException(String.Format("Cannot find a variable with name '{0}'.", name));
-            string errorId = "VariableNotFound," + typeof(GetVariableCommand).FullName;
-            var error = new ErrorRecord(exception, errorId, ErrorCategory.ObjectNotFound, name);
-            error.CategoryInfo.Activity = "Get-Variable";
-            WriteError(error);
-        }
-
-        private void WriteError(SessionStateException ex)
-        {
-            string errorId = String.Format("{0},{1}", ex.ErrorRecord.ErrorId, typeof(GetVariableCommand).FullName);
-            var error = new ErrorRecord(ex, errorId, ex.ErrorRecord.CategoryInfo.Category, ex.ItemName);
-            error.CategoryInfo.Activity = "Get-Variable";
-
-            WriteError(error);
-        }
     }
 }

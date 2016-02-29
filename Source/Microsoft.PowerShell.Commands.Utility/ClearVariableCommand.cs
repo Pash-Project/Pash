@@ -7,7 +7,7 @@ namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Clear", "Variable", SupportsShouldProcess = true)]
     [OutputType(typeof(PSVariable))]
-    public sealed class ClearVariableCommand : PSCmdlet
+    public sealed class ClearVariableCommand : VariableCommandBase
     {
         [Parameter]
         public string[] Exclude { get; set; }
@@ -61,15 +61,6 @@ namespace Microsoft.PowerShell.Commands
                     WriteObject(variable);
                 }
             }
-        }
-
-        private void WriteVariableNotFoundError(string name)
-        {
-            var exception = new ItemNotFoundException(String.Format("Cannot find a variable with name '{0}'.", name));
-            string errorId = "VariableNotFound," + typeof(ClearVariableCommand).FullName;
-            var error = new ErrorRecord(exception, errorId, ErrorCategory.ObjectNotFound, name);
-            error.CategoryInfo.Activity = "Clear-Variable";
-            WriteError(error);
         }
     }
 }

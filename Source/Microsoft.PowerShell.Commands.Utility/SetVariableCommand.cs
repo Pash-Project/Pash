@@ -88,7 +88,7 @@ namespace Microsoft.PowerShell.Commands
                 }
                 catch (SessionStateException ex)
                 {
-                    WriteError(ex, name);
+                    WriteError(ex);
                 }
             }
         }
@@ -161,15 +161,6 @@ namespace Microsoft.PowerShell.Commands
             {
                 throw SessionStateUnauthorizedAccessException.CreateVariableNotWritableError(variable);
             }
-        }
-
-        private void WriteError(SessionStateException ex, string name)
-        {
-            string errorId = String.Format("{0},{1}", ex.ErrorRecord.ErrorId, typeof(SetVariableCommand).FullName);
-            var error = new ErrorRecord(ex, errorId, ex.ErrorRecord.CategoryInfo.Category, name);
-            error.CategoryInfo.Activity = "Set-Variable";
-
-            WriteError(error);
         }
     }
 }
