@@ -70,5 +70,40 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual("Names=foo,bar Values are null=True,True Type=Object[] PSVariable" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void UnknownNameCausesError()
+        {
+            Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute("Clear-Variable unknownvariable");
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            Assert.AreEqual("Cannot find a variable with name 'unknownvariable'.", error.Exception.Message);
+            Assert.AreEqual("VariableNotFound,Microsoft.PowerShell.Commands.ClearVariableCommand", error.FullyQualifiedErrorId);
+            Assert.AreEqual("unknownvariable", error.TargetObject);
+            Assert.IsInstanceOf<ItemNotFoundException>(error.Exception);
+            Assert.AreEqual("Clear-Variable", error.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.ObjectNotFound, error.CategoryInfo.Category);
+            Assert.AreEqual("ItemNotFoundException", error.CategoryInfo.Reason);
+            Assert.AreEqual("unknownvariable", error.CategoryInfo.TargetName);
+            Assert.AreEqual("String", error.CategoryInfo.TargetType);
+        }
+
+        [Test]
+        public void TwoUnknownNamesCausesTwoErrors()
+        {
+            Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute("Clear-Variable unknownvariable1,unknownvariable2");
+            });
+
+            ErrorRecord error1 = ReferenceHost.GetLastRawErrorRecords().First();
+            ErrorRecord error2 = ReferenceHost.GetLastRawErrorRecords().Last();
+            Assert.AreEqual(2, ReferenceHost.GetLastRawErrorRecords().Count());
+            Assert.AreEqual("Cannot find a variable with name 'unknownvariable1'.", error1.Exception.Message);
+            Assert.AreEqual("Cannot find a variable with name 'unknownvariable2'.", error2.Exception.Message);
+        }
     }
 }

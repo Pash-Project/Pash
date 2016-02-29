@@ -41,6 +41,12 @@ namespace Microsoft.PowerShell.Commands
             {
                 PSVariable variable = SessionState.PSVariable.Get(name);
 
+                if (variable == null)
+                {
+                    WriteVariableNotFoundError(name);
+                    continue;
+                }
+
                 try
                 {
                     SessionState.PSVariable.Set(variable.Name, null);
@@ -55,6 +61,15 @@ namespace Microsoft.PowerShell.Commands
                     WriteObject(variable);
                 }
             }
+        }
+
+        private void WriteVariableNotFoundError(string name)
+        {
+            var exception = new ItemNotFoundException(String.Format("Cannot find a variable with name '{0}'.", name));
+            string errorId = "VariableNotFound," + typeof(ClearVariableCommand).FullName;
+            var error = new ErrorRecord(exception, errorId, ErrorCategory.ObjectNotFound, name);
+            error.CategoryInfo.Activity = "Clear-Variable";
+            WriteError(error);
         }
     }
 }
