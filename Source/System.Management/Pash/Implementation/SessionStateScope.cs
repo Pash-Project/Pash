@@ -229,6 +229,12 @@ namespace Pash.Implementation
             affectedScope.SetLocal(value, overwrite);
         }
 
+        internal void SetAtScope(T value, string scope, bool overwrite, bool force)
+        {
+            var affectedScope = GetScope(scope, true, this);
+            affectedScope.SetLocal(value, overwrite, force);
+        }
+
         public void RemoveAtScope(string name, string scope)
         {
             var affectedScope = GetScope(scope, true, this);

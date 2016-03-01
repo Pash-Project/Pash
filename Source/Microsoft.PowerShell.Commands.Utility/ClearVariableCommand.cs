@@ -24,6 +24,9 @@ namespace Microsoft.PowerShell.Commands
         [Parameter]
         public SwitchParameter PassThru { get; set; }
 
+        [ParameterAttribute]
+        public string Scope { get; set; }
+
         public ClearVariableCommand()
         {
             // MUST: take these out into the base
@@ -33,13 +36,11 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            // TODO: deal with scope
             // TODO: deal with ShouldProcess
-            // TODO: deal with read-only variables
 
             foreach (string name in Name)
             {
-                PSVariable variable = SessionState.PSVariable.Get(name);
+                PSVariable variable = SessionState.PSVariable.GetAtScope(name, Scope);
 
                 if (variable == null)
                 {
@@ -51,7 +52,7 @@ namespace Microsoft.PowerShell.Commands
                 {
                     CheckVariableCanBeChanged(variable);
                     variable.Value = null;
-                    SessionState.PSVariable.Set(variable, Force);
+                    SessionState.PSVariable.SetAtScope(variable, Scope, Force);
                 }
                 catch (SessionStateException ex)
                 {

@@ -79,7 +79,7 @@ namespace System.Management.Automation
                 throw new ArgumentNullException("The variable is null.");
             }
 
-            var original = _intrinsics.Scope.GetLocal(variable.Name);
+            var original = _intrinsics.Scope.GetAtScope(variable.Name, scope);
             if (original == null)
             {
                 _intrinsics.Scope.SetAtScope(variable, scope, true);
@@ -89,7 +89,7 @@ namespace System.Management.Automation
             original.Value = variable.Value;
             original.Description = variable.Description;
             original.Options = variable.Options;
-            _intrinsics.Scope.SetLocal(original, true, force);
+            _intrinsics.Scope.SetAtScope(original, scope, true, force);
         }
 
         public void Set(string name, object value)

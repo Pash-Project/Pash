@@ -196,5 +196,31 @@ namespace ReferenceTests.Commands
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
             Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", error.Exception.Message);
         }
+
+        [Test]
+        public void ClearLocalScopeVariable()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$test = 'test-global'",
+                "function foo { $test = 'test-local'; Clear-Variable test -Scope local; return $test; }",
+                "$a = foo",
+                "($a -eq $null).ToString() + ', ' + $test"
+            });
+
+            Assert.AreEqual("True, test-global" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void ClearGlobalScopeVariable()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$test = 'test-global'",
+                "function foo { $test = 'test-local'; Clear-Variable test -Scope global; return $test; }",
+                "$a = foo",
+                "$a + ', ' + ($test -eq $null).ToString()"
+            });
+
+            Assert.AreEqual("test-local, True" + Environment.NewLine, result);
+        }
     }
 }
