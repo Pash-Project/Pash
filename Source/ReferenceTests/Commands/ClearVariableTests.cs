@@ -105,5 +105,69 @@ namespace ReferenceTests.Commands
             Assert.AreEqual("Cannot find a variable with name 'unknownvariable1'.", error1.Exception.Message);
             Assert.AreEqual("Cannot find a variable with name 'unknownvariable2'.", error2.Exception.Message);
         }
+
+        [Test]
+        public void TryToClearReadOnlyVariable()
+        {
+            var ex = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "Set-Variable foo 'bar' -option readonly",
+                    "Clear-Variable foo"
+                });
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            var sessionStateException = error.Exception as SessionStateUnauthorizedAccessException;
+
+            Assert.AreEqual("foo", error.TargetObject);
+            Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", error.Exception.Message);
+            Assert.IsInstanceOf<SessionStateUnauthorizedAccessException>(error.Exception);
+            Assert.AreEqual("foo", sessionStateException.ItemName);
+            Assert.AreEqual(SessionStateCategory.Variable, sessionStateException.SessionStateCategory);
+            Assert.AreEqual("System.Management.Automation", sessionStateException.Source);
+            Assert.AreEqual("Clear-Variable", error.CategoryInfo.Activity);
+            Assert.AreEqual(ErrorCategory.WriteError, error.CategoryInfo.Category);
+            Assert.AreEqual("SessionStateUnauthorizedAccessException", error.CategoryInfo.Reason);
+            Assert.AreEqual("foo", error.CategoryInfo.TargetName);
+            Assert.AreEqual("String", error.CategoryInfo.TargetType);
+            Assert.AreEqual("VariableNotWritable,Microsoft.PowerShell.Commands.ClearVariableCommand", error.FullyQualifiedErrorId);
+            Assert.AreEqual("foo", error.TargetObject);
+        }
+
+        [Test]
+        public void TryToClearConstVariable()
+        {
+            var ex = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "Set-Variable foo 'bar' -option constant",
+                    "Clear-Variable foo"
+                });
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", error.Exception.Message);
+            Assert.AreEqual("foo", error.TargetObject);
+        }
+
+        [Test]
+        public void TryToClearTwoConstantVariables()
+        {
+            var ex = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "Set-Variable -name foo -option constant",
+                    "Set-Variable -name bar -option constant",
+                    "Clear-Variable -name foo,bar"
+                });
+            });
+
+            ErrorRecord error1 = ReferenceHost.GetLastRawErrorRecords().First();
+            ErrorRecord error2 = ReferenceHost.GetLastRawErrorRecords().Last();
+            Assert.AreEqual(2, ReferenceHost.GetLastRawErrorRecords().Count());
+            Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", error1.Exception.Message);
+            Assert.AreEqual("Cannot overwrite variable bar because it is read-only or constant.", error2.Exception.Message);
+        }
     }
 }

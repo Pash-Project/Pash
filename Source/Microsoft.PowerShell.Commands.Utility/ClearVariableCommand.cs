@@ -49,17 +49,27 @@ namespace Microsoft.PowerShell.Commands
 
                 try
                 {
+                    CheckVariableCanBeChanged(variable);
                     SessionState.PSVariable.Set(variable.Name, null);
                 }
-                catch (Exception ex)
+                catch (SessionStateException ex)
                 {
-                    WriteError(new ErrorRecord(ex, "", ErrorCategory.InvalidOperation, variable));
+                    WriteError(ex);
                     continue;
                 }
                 if (PassThru.ToBool())
                 {
                     WriteObject(variable);
                 }
+            }
+        }
+
+        private void CheckVariableCanBeChanged(PSVariable variable)
+        {
+            if (variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly) ||
+                variable.ItemOptions.HasFlag(ScopedItemOptions.Constant))
+            {
+                throw SessionStateUnauthorizedAccessException.CreateVariableNotWritableError(variable);
             }
         }
     }
