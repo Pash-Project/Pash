@@ -169,5 +169,32 @@ namespace ReferenceTests.Commands
             Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", error1.Exception.Message);
             Assert.AreEqual("Cannot overwrite variable bar because it is read-only or constant.", error2.Exception.Message);
         }
+
+        [Test]
+        public void ClearReadOnlyVariableUsingForce()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "Set-Variable foo 'bar' -option readonly",
+                "Clear-Variable foo -force",
+                "($foo -eq $null).ToString()"
+            });
+
+            Assert.AreEqual("True" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void TryToClearConstantVariableWithForce()
+        {
+            var ex = Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute(new string[] {
+                    "Set-Variable -name foo -option constant",
+                    "Clear-Variable -name foo"
+                });
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            Assert.AreEqual("Cannot overwrite variable foo because it is read-only or constant.", error.Exception.Message);
+        }
     }
 }

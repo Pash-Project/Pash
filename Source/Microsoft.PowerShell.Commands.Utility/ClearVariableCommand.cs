@@ -50,7 +50,8 @@ namespace Microsoft.PowerShell.Commands
                 try
                 {
                     CheckVariableCanBeChanged(variable);
-                    SessionState.PSVariable.Set(variable.Name, null);
+                    variable.Value = null;
+                    SessionState.PSVariable.Set(variable, Force);
                 }
                 catch (SessionStateException ex)
                 {
@@ -66,7 +67,7 @@ namespace Microsoft.PowerShell.Commands
 
         private void CheckVariableCanBeChanged(PSVariable variable)
         {
-            if (variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly) ||
+            if ((variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly) && !Force) ||
                 variable.ItemOptions.HasFlag(ScopedItemOptions.Constant))
             {
                 throw SessionStateUnauthorizedAccessException.CreateVariableNotWritableError(variable);
