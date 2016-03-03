@@ -132,6 +132,7 @@
     <Compile Include="TestUtil.cs" />
     <Compile Include="Commands\ConvertToSecureStringTests.cs" />
     <Compile Include="Language\ExpressionTests.cs" />
+    <Compile Include="Language\TryCatchFinallyTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Management\System.Management.csproj">
