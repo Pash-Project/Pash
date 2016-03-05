@@ -37,6 +37,12 @@ namespace System.Management.Automation
             return CreateError(variable, message, "VariableNotWritable");
         }
 
+        internal static SessionStateUnauthorizedAccessException CreateVariableNotRemovableError(PSVariable variable)
+        {
+            string message = String.Format("Cannot remove variable {0} because it is constant or read-only. If the variable is read-only, try the operation again specifying the Force option.", variable.Name);
+            return CreateError(variable, message, "VariableNotRemovable");
+        }
+
         static SessionStateUnauthorizedAccessException CreateError(
             PSVariable variable,
             string message,
