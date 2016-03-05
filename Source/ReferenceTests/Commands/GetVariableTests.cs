@@ -259,8 +259,20 @@ namespace ReferenceTests.Commands
         }
 
         [Test]
-        [Explicit("Does not work with Pash. Global variable should not be returned.")]
         public void NameIsWildcardAndLocalScope()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$test = 'test-global'",
+                "function foo { $test = 'test-local'; Get-Variable test* -Scope local -valueonly; }",
+                "foo"
+            });
+
+            Assert.AreEqual("test-local" + Environment.NewLine, result);
+        }
+
+        [Test]
+        [Explicit("Does not work with Pash. Global variable should not be returned.")]
+        public void NameIsWildcardAndLocalScopeWithDifferentVariableNamesInLocalAndGlobalScope()
         {
             string result = ReferenceHost.Execute(new string[] {
                 "$test1 = 'test-global'",
