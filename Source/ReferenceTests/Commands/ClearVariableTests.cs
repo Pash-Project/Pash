@@ -222,5 +222,86 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual("test-local, True" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void WildcardClearsMultipleVariableValues()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$a = 'abc'",
+                "$aa= 'abc'",
+                "$ab = 'abc'",
+                "$b = 'abc'",
+                "Clear-Variable a*",
+                "($a -eq $null).ToString() + \", \" + ($aa -eq $null).ToString() + \", \" + ($ab -eq $null).ToString() + \", \" + ($b -eq $null).ToString()"
+            });
+
+            Assert.AreEqual("True, True, True, False" + Environment.NewLine, result);
+        }
+
+        [Test]
+        [Explicit("Does not work with Pash. Global variable should not be cleared.")]
+        public void NameIsWildcardAndLocalScope()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$test1 = 'test-global'",
+                "function foo { $test2 = 'test-local'; Clear-Variable test* -Scope local; $test2}",
+                "$result = foo",
+                "($result -eq $null).ToString() + ', ' + $test1"
+            });
+
+            Assert.AreEqual("True, test-global" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void NameIsWildcardAndGlobalScope()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$test1 = 'test-global'",
+                "function foo { $test2 = 'test-local'; Clear-Variable test* -Scope global; $test2}",
+                "$result = foo",
+                "($test1 -eq $null).ToString() + ', ' + $result"
+            });
+
+            Assert.AreEqual("True, test-local" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void PrivateVariableWithWildcardNoErrorsReportedAndPrivateVariableNotCleared()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$createdVariable = New-Variable -name foo1 -value 'foo1' -visibility private -passthru",
+                "$foo2 = 'abc'",
+                "Clear-Variable foo?",
+                "$createdVariable.Value + ', ' + ($foo2 -eq $null).ToString()"
+            });
+
+            Assert.AreEqual("foo1, True" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void UnknownVariableWithWildcardEscaped()
+        {
+            Assert.Throws<ExecutionWithErrorsException>(delegate
+            {
+                ReferenceHost.Execute("Clear-Variable '`?unknown`?'");
+            });
+
+            ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
+            Assert.AreEqual("Cannot find a variable with name '`?unknown`?'.", error.Exception.Message);
+            Assert.AreEqual("`?unknown`?", error.TargetObject);
+            Assert.AreEqual("`?unknown`?", error.CategoryInfo.TargetName);
+        }
+
+        [Test]
+        public void WildcardEscapedToClearVariableWithWildcardInName()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "New-Variable -name 'a?b' -value 'a'",
+                "Clear-Variable a`?b",
+                "($a?b -eq $null).ToString()"
+            });
+
+            Assert.AreEqual("True" + Environment.NewLine, result);
+        }
     }
 }

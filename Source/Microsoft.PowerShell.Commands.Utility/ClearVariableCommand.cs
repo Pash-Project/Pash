@@ -1,6 +1,8 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands
@@ -40,28 +42,42 @@ namespace Microsoft.PowerShell.Commands
 
             foreach (string name in Name)
             {
-                PSVariable variable = SessionState.PSVariable.GetAtScope(name, Scope);
+                foreach (PSVariable variable in GetVariables(name)
+                    .Where(v => v.Visibility == SessionStateEntryVisibility.Public))
+                {
+                    try
+                    {
+                        CheckVariableCanBeChanged(variable);
+                        variable.Value = null;
+                    }
+                    catch (SessionStateException ex)
+                    {
+                        WriteError(ex);
+                        continue;
+                    }
+                    if (PassThru.ToBool())
+                    {
+                        WriteObject(variable);
+                    }
+                }
+            }
+        }
 
-                if (variable == null)
+        IEnumerable<PSVariable> GetVariables(string name)
+        {
+            if (WildcardPattern.ContainsWildcardCharacters(name))
+            {
+                foreach (PSVariable variable in GetVariablesUsingWildcard(name))
                 {
-                    WriteVariableNotFoundError(name);
-                    continue;
+                    yield return variable;
                 }
-
-                try
+            }
+            else
+            {
+                PSVariable variable = GetVariable(name);
+                if (variable != null)
                 {
-                    CheckVariableCanBeChanged(variable);
-                    variable.Value = null;
-                    SessionState.PSVariable.SetAtScope(variable, Scope, Force);
-                }
-                catch (SessionStateException ex)
-                {
-                    WriteError(ex);
-                    continue;
-                }
-                if (PassThru.ToBool())
-                {
-                    WriteObject(variable);
+                    yield return variable;
                 }
             }
         }
@@ -73,6 +89,26 @@ namespace Microsoft.PowerShell.Commands
             {
                 throw SessionStateUnauthorizedAccessException.CreateVariableNotWritableError(variable);
             }
+        }
+
+        private IEnumerable<PSVariable> GetVariablesUsingWildcard(string pattern)
+        {
+            if (Scope == null)
+            {
+                return SessionState.PSVariable.Find(pattern).Values;
+            }
+            return SessionState.PSVariable.FindAtScope(pattern, Scope).Values;
+        }
+
+        private PSVariable GetVariable(string name)
+        {
+            string unescapedName = WildcardPattern.Unescape(name);
+            PSVariable variable = SessionState.PSVariable.GetAtScope(unescapedName, Scope);
+            if (variable == null)
+            {
+                WriteVariableNotFoundError(name);
+            }
+            return variable;
         }
     }
 }
