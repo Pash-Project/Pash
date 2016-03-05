@@ -30,10 +30,6 @@ namespace Microsoft.PowerShell.Commands
         [Parameter]
         public SwitchParameter ValueOnly { get; set; }
 
-        [Parameter]
-        [ValidateNotNullOrEmpty]
-        public string Scope { get; set; }
-
         public GetVariableCommand()
         {
         }
@@ -69,59 +65,6 @@ namespace Microsoft.PowerShell.Commands
                     yield return variable;
                 }
             }
-        }
-
-        private IEnumerable<PSVariable> GetVariables(string name)
-        {
-            if (WildcardPattern.ContainsWildcardCharacters(name))
-            {
-                foreach (PSVariable variable in GetVariablesUsingWildcard(name))
-                {
-                    yield return variable;
-                }
-            }
-            else
-            {
-                PSVariable variable = GetVariable(name);
-                if (variable != null)
-                {
-                    yield return variable;
-                }
-            }
-        }
-
-        private PSVariable GetVariable(string name)
-        {
-            try
-            {
-                string unescapedName = WildcardPattern.Unescape(name);
-
-                PSVariable variable = Scope == null ? SessionState.PSVariable.Get(unescapedName)
-                                                    : SessionState.PSVariable.GetAtScope(unescapedName, Scope);
-                if (variable != null)
-                {
-                    return variable;
-                }
-                else
-                {
-                    WriteVariableNotFoundError(name);
-                }
-                return variable;
-            }
-            catch (SessionStateException ex)
-            {
-                WriteError(ex);
-            }
-            return null;
-        }
-
-        private IEnumerable<PSVariable> GetVariablesUsingWildcard(string pattern)
-        {
-            if (Scope == null)
-            {
-                return SessionState.PSVariable.Find(pattern).Values;
-            }
-            return SessionState.PSVariable.FindAtScope(pattern, Scope).Values;
         }
 
         private IEnumerable<PSVariable> GetAllVariables()

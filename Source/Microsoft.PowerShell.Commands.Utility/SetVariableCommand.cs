@@ -49,9 +49,6 @@ namespace Microsoft.PowerShell.Commands
         [ParameterAttribute]
         public SessionStateEntryVisibility Visibility { get; set; }
 
-        [ParameterAttribute]
-        public string Scope { get; set; }
-
         private PSObject _default;
         private ArrayList _values;
         private ScopedItemOptions? _option;
@@ -123,7 +120,7 @@ namespace Microsoft.PowerShell.Commands
             }
             else
             {
-                CheckVariableCanBeChanged(variable);
+                CheckVariableCanBeChanged(variable, Force);
                 variable.Value = value;
                 SetVariableOptions(variable);
             }
@@ -146,20 +143,11 @@ namespace Microsoft.PowerShell.Commands
 
         private void CheckVariableOptionCanBeChanged(PSVariable variable)
         {
-            CheckVariableCanBeChanged(variable);
+            CheckVariableCanBeChanged(variable, Force);
 
             if (_option == ScopedItemOptions.Constant)
             {
                 throw SessionStateUnauthorizedAccessException.CreateVariableCannotBeMadeConstantError(variable);
-            }
-        }
-
-        private void CheckVariableCanBeChanged(PSVariable variable)
-        {
-            if ((variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly) && !Force) ||
-                variable.ItemOptions.HasFlag(ScopedItemOptions.Constant))
-            {
-                throw SessionStateUnauthorizedAccessException.CreateVariableNotWritableError(variable);
             }
         }
     }

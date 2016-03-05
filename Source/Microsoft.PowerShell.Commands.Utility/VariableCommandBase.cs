@@ -8,6 +8,10 @@ namespace Microsoft.PowerShell.Commands
 {
     public abstract class VariableCommandBase : PSCmdlet
     {
+        [Parameter]
+        [ValidateNotNullOrEmpty]
+        public string Scope { get; set; }
+
         protected string[] ExcludeFilters { get; set; }
         protected string[] IncludeFilters { get; set; }
 
@@ -63,6 +67,67 @@ namespace Microsoft.PowerShell.Commands
             error.CategoryInfo.Activity = GetActivityName();
 
             WriteError(error);
+        }
+
+        protected internal IEnumerable<PSVariable> GetVariables(string name)
+        {
+            if (WildcardPattern.ContainsWildcardCharacters(name))
+            {
+                foreach (PSVariable variable in GetVariablesUsingWildcard(name))
+                {
+                    yield return variable;
+                }
+            }
+            else
+            {
+                PSVariable variable = GetVariable(name);
+                if (variable != null)
+                {
+                    yield return variable;
+                }
+            }
+        }
+
+        private PSVariable GetVariable(string name)
+        {
+            try
+            {
+                string unescapedName = WildcardPattern.Unescape(name);
+
+                PSVariable variable = SessionState.PSVariable.GetAtScope(unescapedName, Scope);
+                if (variable != null)
+                {
+                    return variable;
+                }
+                else
+                {
+                    WriteVariableNotFoundError(name);
+                }
+                return variable;
+            }
+            catch (SessionStateException ex)
+            {
+                WriteError(ex);
+            }
+            return null;
+        }
+
+        private IEnumerable<PSVariable> GetVariablesUsingWildcard(string pattern)
+        {
+            if (Scope == null)
+            {
+                return SessionState.PSVariable.Find(pattern).Values;
+            }
+            return SessionState.PSVariable.FindAtScope(pattern, Scope).Values;
+        }
+
+        protected internal void CheckVariableCanBeChanged(PSVariable variable, bool force)
+        {
+            if ((variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly) && !force) ||
+                variable.ItemOptions.HasFlag(ScopedItemOptions.Constant))
+            {
+                throw SessionStateUnauthorizedAccessException.CreateVariableNotWritableError(variable);
+            }
         }
     }
 }

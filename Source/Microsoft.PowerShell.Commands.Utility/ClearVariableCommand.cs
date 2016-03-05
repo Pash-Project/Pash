@@ -34,9 +34,6 @@ namespace Microsoft.PowerShell.Commands
         [Parameter]
         public SwitchParameter PassThru { get; set; }
 
-        [ParameterAttribute]
-        public string Scope { get; set; }
-
         public ClearVariableCommand()
         {
         }
@@ -52,7 +49,7 @@ namespace Microsoft.PowerShell.Commands
                 {
                     try
                     {
-                        CheckVariableCanBeChanged(variable);
+                        CheckVariableCanBeChanged(variable, Force);
                         variable.Value = null;
                     }
                     catch (SessionStateException ex)
@@ -68,58 +65,10 @@ namespace Microsoft.PowerShell.Commands
             }
         }
 
-        IEnumerable<PSVariable> GetVariables(string name)
-        {
-            if (WildcardPattern.ContainsWildcardCharacters(name))
-            {
-                foreach (PSVariable variable in GetVariablesUsingWildcard(name))
-                {
-                    yield return variable;
-                }
-            }
-            else
-            {
-                PSVariable variable = GetVariable(name);
-                if (variable != null)
-                {
-                    yield return variable;
-                }
-            }
-        }
-
         private bool IsExcluded(PSVariable variable)
         {
             return variable.Visibility != SessionStateEntryVisibility.Public ||
                 IsExcluded(variable.Name);
-        }
-
-        private void CheckVariableCanBeChanged(PSVariable variable)
-        {
-            if ((variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly) && !Force) ||
-                variable.ItemOptions.HasFlag(ScopedItemOptions.Constant))
-            {
-                throw SessionStateUnauthorizedAccessException.CreateVariableNotWritableError(variable);
-            }
-        }
-
-        private IEnumerable<PSVariable> GetVariablesUsingWildcard(string pattern)
-        {
-            if (Scope == null)
-            {
-                return SessionState.PSVariable.Find(pattern).Values;
-            }
-            return SessionState.PSVariable.FindAtScope(pattern, Scope).Values;
-        }
-
-        private PSVariable GetVariable(string name)
-        {
-            string unescapedName = WildcardPattern.Unescape(name);
-            PSVariable variable = SessionState.PSVariable.GetAtScope(unescapedName, Scope);
-            if (variable == null)
-            {
-                WriteVariableNotFoundError(name);
-            }
-            return variable;
         }
     }
 }
