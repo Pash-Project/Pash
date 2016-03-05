@@ -60,6 +60,7 @@
     <Compile Include="Commands\ImportModuleTests.cs" />
     <Compile Include="Commands\NewVariableTests.cs" />
     <Compile Include="Commands\RemoveModuleTests.cs" />
+    <Compile Include="Commands\RemoveVariableTests.cs" />
     <Compile Include="Commands\SelectStringTests.cs" />
     <Compile Include="Commands\SetContentTests.cs" />
     <Compile Include="Commands\SetVariableTests.cs" />
