@@ -303,5 +303,44 @@ namespace ReferenceTests.Commands
 
             Assert.AreEqual("True" + Environment.NewLine, result);
         }
+
+        [Test]
+        public void IncludeNamesByWildcard()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$aa = 'aa'",
+                "$ba = 'ba'",
+                "Clear-Variable aa,ba -include b*",
+                "$aa + \", \" + ($ba -eq $null).ToString()"
+            });
+
+            Assert.AreEqual("aa, True" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void ExcludeNamesByWildcard()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$aa = 'aa'",
+                "$ba = 'ba'",
+                "Clear-Variable aa,ba -exclude b*",
+                "($aa -eq $null).ToString() + \", \" + $ba"
+            });
+
+            Assert.AreEqual("True, ba" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void WildcardAndExcludeOneVariableName()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$aa = 'aa'",
+                "$ab = 'ab'",
+                "Clear-Variable a* -exclude aa",
+                "$aa + \", \" + ($ab -eq $null).ToString()"
+            });
+
+            Assert.AreEqual("aa, True" + Environment.NewLine, result);
+        }
     }
 }

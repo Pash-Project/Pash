@@ -12,13 +12,21 @@ namespace Microsoft.PowerShell.Commands
     public sealed class ClearVariableCommand : VariableCommandBase
     {
         [Parameter]
-        public string[] Exclude { get; set; }
+        public string[] Exclude
+        {
+            get { return ExcludeFilters; }
+            set { ExcludeFilters = value; }
+        }
 
         [Parameter]
         public SwitchParameter Force { get; set; }
 
         [Parameter]
-        public string[] Include { get; set; }
+        public string[] Include
+        {
+            get { return IncludeFilters; }
+            set { IncludeFilters = value; }
+        }
 
         [Parameter(Position = 0, ValueFromPipelineByPropertyName = true, Mandatory = true)]
         public string[] Name { get; set; }
@@ -31,9 +39,6 @@ namespace Microsoft.PowerShell.Commands
 
         public ClearVariableCommand()
         {
-            // MUST: take these out into the base
-            Include = new string[0];
-            Exclude = new string[0];
         }
 
         protected override void ProcessRecord()
@@ -43,7 +48,7 @@ namespace Microsoft.PowerShell.Commands
             foreach (string name in Name)
             {
                 foreach (PSVariable variable in GetVariables(name)
-                    .Where(v => v.Visibility == SessionStateEntryVisibility.Public))
+                    .Where(v => !IsExcluded(v)))
                 {
                     try
                     {
@@ -80,6 +85,12 @@ namespace Microsoft.PowerShell.Commands
                     yield return variable;
                 }
             }
+        }
+
+        private bool IsExcluded(PSVariable variable)
+        {
+            return variable.Visibility != SessionStateEntryVisibility.Public ||
+                IsExcluded(variable.Name);
         }
 
         private void CheckVariableCanBeChanged(PSVariable variable)
