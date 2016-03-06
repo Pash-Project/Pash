@@ -329,7 +329,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name 'unknownvariable'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name 'unknownvariable'.", error.Exception.Message);
             Assert.AreEqual("VariableNotFound,Microsoft.PowerShell.Commands.GetVariableCommand", error.FullyQualifiedErrorId);
             Assert.AreEqual("unknownvariable", error.TargetObject);
             Assert.IsInstanceOf<ItemNotFoundException>(error.Exception);
@@ -365,7 +366,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name '`?unknown`?'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name '`?unknown`?'.", error.Exception.Message);
             Assert.AreEqual("`?unknown`?", error.TargetObject);
             Assert.AreEqual("`?unknown`?", error.CategoryInfo.TargetName);
         }
@@ -396,7 +398,7 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot access the variable '$foo' because it is a private variable", error.Exception.Message);
+            StringAssert.Contains("Cannot access the variable '$foo' because it is a private variable", error.Exception.Message);
             Assert.AreEqual("VariableIsPrivate,Microsoft.PowerShell.Commands.GetVariableCommand", error.FullyQualifiedErrorId);
             Assert.AreEqual("foo", error.TargetObject);
             Assert.IsInstanceOf<SessionStateException>(error.Exception);
@@ -422,8 +424,8 @@ namespace ReferenceTests.Commands
             ErrorRecord error1 = ReferenceHost.GetLastRawErrorRecords().First();
             ErrorRecord error2 = ReferenceHost.GetLastRawErrorRecords().Last();
             Assert.AreEqual(2, ReferenceHost.GetLastRawErrorRecords().Count());
-            Assert.AreEqual("Cannot access the variable '$foo' because it is a private variable", error1.Exception.Message);
-            Assert.AreEqual("Cannot access the variable '$bar' because it is a private variable", error2.Exception.Message);
+            StringAssert.Contains("Cannot access the variable '$foo' because it is a private variable", error1.Exception.Message);
+            StringAssert.Contains("Cannot access the variable '$bar' because it is a private variable", error2.Exception.Message);
         }
 
         [Test]
@@ -449,7 +451,7 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot access the variable '$foo' because it is a private variable", error.Exception.Message);
+            StringAssert.Contains("Cannot access the variable '$foo' because it is a private variable", error.Exception.Message);
             Assert.AreEqual("VariableIsPrivate,Microsoft.PowerShell.Commands.GetVariableCommand", error.FullyQualifiedErrorId);
         }
 
@@ -468,8 +470,8 @@ namespace ReferenceTests.Commands
             ErrorRecord error1 = ReferenceHost.GetLastRawErrorRecords().First();
             ErrorRecord error2 = ReferenceHost.GetLastRawErrorRecords().Last();
             Assert.AreEqual(2, ReferenceHost.GetLastRawErrorRecords().Count());
-            Assert.AreEqual("Cannot access the variable '$foo' because it is a private variable", error1.Exception.Message);
-            Assert.AreEqual("Cannot access the variable '$bar' because it is a private variable", error2.Exception.Message);
+            StringAssert.Contains("Cannot access the variable '$foo' because it is a private variable", error1.Exception.Message);
+            StringAssert.Contains("Cannot access the variable '$bar' because it is a private variable", error2.Exception.Message);
         }
     }
 }

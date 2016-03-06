@@ -80,7 +80,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name 'unknownvariable'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name 'unknownvariable'.", error.Exception.Message);
             Assert.AreEqual("VariableNotFound,Microsoft.PowerShell.Commands.ClearVariableCommand", error.FullyQualifiedErrorId);
             Assert.AreEqual("unknownvariable", error.TargetObject);
             Assert.IsInstanceOf<ItemNotFoundException>(error.Exception);
@@ -102,8 +103,10 @@ namespace ReferenceTests.Commands
             ErrorRecord error1 = ReferenceHost.GetLastRawErrorRecords().First();
             ErrorRecord error2 = ReferenceHost.GetLastRawErrorRecords().Last();
             Assert.AreEqual(2, ReferenceHost.GetLastRawErrorRecords().Count());
-            Assert.AreEqual("Cannot find a variable with name 'unknownvariable1'.", error1.Exception.Message);
-            Assert.AreEqual("Cannot find a variable with name 'unknownvariable2'.", error2.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error1.Exception.Message);
+            StringAssert.Contains("name 'unknownvariable1'.", error1.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error2.Exception.Message);
+            StringAssert.Contains("name 'unknownvariable2'.", error2.Exception.Message);
         }
 
         [Test]
@@ -287,7 +290,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name '`?unknown`?'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name '`?unknown`?'.", error.Exception.Message);
             Assert.AreEqual("`?unknown`?", error.TargetObject);
             Assert.AreEqual("`?unknown`?", error.CategoryInfo.TargetName);
         }

@@ -229,7 +229,7 @@ namespace ReferenceTests.Commands
             ErrorRecord error = ex.ErrorRecord;
             Assert.AreEqual(0, ReferenceHost.GetLastRawErrorRecords().Count());
             Assert.AreEqual("foo", error.TargetObject);
-            Assert.AreEqual("Cannot access the variable '$foo' because it is a private variable", error.Exception.Message);
+            StringAssert.Contains("Cannot access the variable '$foo' because it is a private variable", error.Exception.Message);
             Assert.IsInstanceOf<ParentContainsErrorRecordException>(error.Exception);
             Assert.AreEqual("foo", ex.ItemName);
             Assert.AreEqual(SessionStateCategory.Variable, ex.SessionStateCategory);
@@ -279,7 +279,7 @@ namespace ReferenceTests.Commands
             ErrorRecord error = ex.ErrorRecord;
             Assert.AreEqual(0, ReferenceHost.GetLastRawErrorRecords().Count());
             Assert.AreEqual("foo", error.TargetObject);
-            Assert.AreEqual("Cannot access the variable '$foo' because it is a private variable", error.Exception.Message);
+            StringAssert.Contains("Cannot access the variable '$foo' because it is a private variable", error.Exception.Message);
             Assert.IsInstanceOf<ParentContainsErrorRecordException>(error.Exception);
             Assert.AreEqual("foo", ex.ItemName);
             Assert.AreEqual(SessionStateCategory.Variable, ex.SessionStateCategory);

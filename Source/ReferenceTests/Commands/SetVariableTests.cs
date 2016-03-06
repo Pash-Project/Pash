@@ -271,7 +271,7 @@ namespace ReferenceTests.Commands
             var sessionStateException = error.Exception as SessionStateException;
 
             Assert.AreEqual("foo", error.TargetObject);
-            Assert.AreEqual("Cannot access the variable '$foo' because it is a private variable", error.Exception.Message);
+            StringAssert.Contains("Cannot access the variable '$foo' because it is a private variable", error.Exception.Message);
             Assert.AreEqual("VariableIsPrivate,Microsoft.PowerShell.Commands.SetVariableCommand", error.FullyQualifiedErrorId);
             Assert.AreEqual(ErrorCategory.PermissionDenied, error.CategoryInfo.Category);
             Assert.AreEqual("foo", sessionStateException.ItemName);
@@ -293,8 +293,8 @@ namespace ReferenceTests.Commands
             ErrorRecord error1 = ReferenceHost.GetLastRawErrorRecords().First();
             ErrorRecord error2 = ReferenceHost.GetLastRawErrorRecords().Last();
             Assert.AreEqual(2, ReferenceHost.GetLastRawErrorRecords().Count());
-            Assert.AreEqual("Cannot access the variable '$foo' because it is a private variable", error1.Exception.Message);
-            Assert.AreEqual("Cannot access the variable '$bar' because it is a private variable", error2.Exception.Message);
+            StringAssert.Contains("Cannot access the variable '$foo' because it is a private variable", error1.Exception.Message);
+            StringAssert.Contains("Cannot access the variable '$bar' because it is a private variable", error2.Exception.Message);
         }
 
         [Test]

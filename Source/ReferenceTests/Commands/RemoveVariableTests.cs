@@ -22,7 +22,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name 'foo'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name 'foo'.", error.Exception.Message);
         }
 
         [Test]
@@ -38,7 +39,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name 'foo'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name 'foo'.", error.Exception.Message);
         }
 
         [Test]
@@ -56,8 +58,10 @@ namespace ReferenceTests.Commands
 
             ErrorRecord error1 = ReferenceHost.GetLastRawErrorRecords().First();
             ErrorRecord error2 = ReferenceHost.GetLastRawErrorRecords().Last();
-            Assert.AreEqual("Cannot find a variable with name 'a'.", error1.Exception.Message);
-            Assert.AreEqual("Cannot find a variable with name 'b'.", error2.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error1.Exception.Message);
+            StringAssert.Contains("name 'a'.", error1.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error2.Exception.Message);
+            StringAssert.Contains("name 'b'.", error2.Exception.Message);
         }
 
         [Test]
@@ -69,7 +73,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name 'unknownvariable'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name 'unknownvariable'.", error.Exception.Message);
             Assert.AreEqual("VariableNotFound,Microsoft.PowerShell.Commands.RemoveVariableCommand", error.FullyQualifiedErrorId);
             Assert.AreEqual("unknownvariable", error.TargetObject);
             Assert.IsInstanceOf<ItemNotFoundException>(error.Exception);
@@ -157,7 +162,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name 'foo'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name 'foo'.", error.Exception.Message);
         }
 
         [Test]
@@ -188,7 +194,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name 'test'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name 'test'.", error.Exception.Message);
         }
 
         [Test]
@@ -205,7 +212,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name 'test'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name 'test'.", error.Exception.Message);
         }
 
         [Test]
@@ -223,8 +231,10 @@ namespace ReferenceTests.Commands
 
             ErrorRecord error1 = ReferenceHost.GetLastRawErrorRecords().First();
             ErrorRecord error2 = ReferenceHost.GetLastRawErrorRecords().Last();
-            Assert.AreEqual("Cannot find a variable with name 'testaa'.", error1.Exception.Message);
-            Assert.AreEqual("Cannot find a variable with name 'testab'.", error2.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error1.Exception.Message);
+            StringAssert.Contains("name 'testaa'.", error1.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error2.Exception.Message);
+            StringAssert.Contains("name 'testab'.", error2.Exception.Message);
         }
 
         [Test]
@@ -241,7 +251,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name 'test2'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name 'test2'.", error.Exception.Message);
         }
 
         [Test]
@@ -257,7 +268,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name 'test1'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name 'test1'.", error.Exception.Message);
         }
 
         [Test]
@@ -281,7 +293,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name '`?unknown`?'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name '`?unknown`?'.", error.Exception.Message);
             Assert.AreEqual("`?unknown`?", error.TargetObject);
             Assert.AreEqual("`?unknown`?", error.CategoryInfo.TargetName);
         }
@@ -299,7 +312,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name 'a`?b'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name 'a`?b'.", error.Exception.Message);
         }
 
         [Test]
@@ -316,7 +330,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name 'ba'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name 'ba'.", error.Exception.Message);
         }
 
         [Test]
@@ -333,7 +348,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name 'aa'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name 'aa'.", error.Exception.Message);
         }
 
         [Test]
@@ -350,7 +366,8 @@ namespace ReferenceTests.Commands
             });
 
             ErrorRecord error = ReferenceHost.GetLastRawErrorRecords().Single();
-            Assert.AreEqual("Cannot find a variable with name 'testab'.", error.Exception.Message);
+            StringAssert.Contains("Cannot find a variable", error.Exception.Message);
+            StringAssert.Contains("name 'testab'.", error.Exception.Message);
         }
     }
 }
