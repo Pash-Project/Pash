@@ -35,9 +35,19 @@ namespace Pash.Implementation
             return new Dictionary<string, T>(Scope.Items);
         }
 
+        public virtual Dictionary<string, T>GetAllAtScope(string scope)
+        {
+            return Scope.GetAllAtScope(scope);
+        }
+
         public virtual Dictionary<string, T> Find(string name)
         {
             return Scope.Find(name, SupportsScopedName);
+        }
+
+        public virtual Dictionary<string, T> FindAtScope(string name, string scope)
+        {
+            return Scope.FindAtScope(name, SupportsScopedName, scope);
         }
     }
 }

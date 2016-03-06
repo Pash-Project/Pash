@@ -193,12 +193,14 @@ namespace Pash.Implementation
 
         private void InitializeSession()
         {
-            if (_initialSessionState == null)
-                return;
+            if (_initialSessionState != null)
+            {
+                AddInitialSessionVariables();
+                AddInitialSessionCommands();
+                AddInitialSessionModules();
+            }
 
-            AddInitialSessionVariables();
-            AddInitialSessionCommands();
-            AddInitialSessionModules();
+            AddSessionVariables();
         }
 
         void AddInitialSessionModules()
@@ -237,8 +239,20 @@ namespace Pash.Implementation
         {
             foreach (SessionStateVariableEntry variableEntry in _initialSessionState.Variables)
             {
-                SetVariable(variableEntry.Name, variableEntry.Value);
+                CreateVariable(variableEntry.Name, variableEntry.Value, variableEntry.Options);
             }
+        }
+
+        private void AddSessionVariables()
+        {
+            ExecutionContext.SessionState.PSVariable.Set(new PSNullVariable());
+            CreateVariable("Host", PSHost, ScopedItemOptions.Constant | ScopedItemOptions.AllScope);
+        }
+
+        private void CreateVariable(string name, object value, ScopedItemOptions options = ScopedItemOptions.None)
+        {
+            var variable = new PSVariable(name, value, options);
+            ExecutionContext.SessionState.PSVariable.Set(variable);
         }
     }
 }

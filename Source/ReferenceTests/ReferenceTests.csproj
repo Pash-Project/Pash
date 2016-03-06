@@ -48,16 +48,22 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\ErrorRecordTests.cs" />
     <Compile Include="Commands\AddContentTests.cs" />
     <Compile Include="Commands\AddMemberTests.cs" />
     <Compile Include="Commands\AddTypeTests.cs" />
     <Compile Include="Commands\ClearContentTests.cs" />
+    <Compile Include="Commands\ClearVariableTests.cs" />
     <Compile Include="Commands\GetCommandTests.cs" />
     <Compile Include="Commands\GetContentTests.cs" />
+    <Compile Include="Commands\GetVariableTests.cs" />
     <Compile Include="Commands\ImportModuleTests.cs" />
+    <Compile Include="Commands\NewVariableTests.cs" />
     <Compile Include="Commands\RemoveModuleTests.cs" />
+    <Compile Include="Commands\RemoveVariableTests.cs" />
     <Compile Include="Commands\SelectStringTests.cs" />
     <Compile Include="Commands\SetContentTests.cs" />
+    <Compile Include="Commands\SetVariableTests.cs" />
     <Compile Include="Commands\SplitPathTests.cs" />
     <Compile Include="Commands\WhereObjectTests.cs" />
     <Compile Include="Integration\RosettaCode.cs" />

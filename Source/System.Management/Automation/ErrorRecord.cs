@@ -17,10 +17,21 @@ namespace System.Management.Automation
 
         public ErrorRecord(Exception exception, string errorId, ErrorCategory errorCategory, object targetObject)
         {
+            if (exception == null)
+            {
+                throw new PSArgumentNullException("exception");
+            }
+
             Exception = exception;
             ErrorId = errorId;
             TargetObject = targetObject;
             CategoryInfo = new ErrorCategoryInfo(exception, errorCategory);
+
+            if (targetObject != null)
+            {
+                CategoryInfo.TargetName = targetObject.ToString();
+                CategoryInfo.TargetType = targetObject.GetType().Name;
+            };
         }
 
         internal ErrorRecord(ErrorRecord errorRecord, Exception exception)
@@ -42,8 +53,7 @@ namespace System.Management.Automation
 
         public override string ToString()
         {
-            // TODO: implement ErrorRecord.ToString
-            return Exception.ToString();
+            return Exception.Message;
         }
 
         #region ISerializable Members

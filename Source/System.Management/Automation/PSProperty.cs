@@ -52,7 +52,8 @@ namespace System.Management.Automation
             {
                 try
                 {
-                    _propertyInfo.SetValue(Owner, value, null);
+                    object convertedValue = LanguagePrimitives.ConvertTo(value, _propertyInfo.PropertyType);
+                    _propertyInfo.SetValue(Owner, convertedValue, null);
                 }
                 catch (Exception e)
                 {

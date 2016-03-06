@@ -19,8 +19,14 @@ namespace Microsoft.PowerShell.Commands
         [Parameter]
         public ScopedItemOptions Option { get; set; }
 
+        [ParameterAttribute]
+        public SessionStateEntryVisibility Visibility { get; set; }
+
         [Parameter]
         public SwitchParameter PassThru { get; set; }
+
+        [ParameterAttribute]
+        public string Scope { get; set; }
 
         [Parameter(Position = 1, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
         public object Value { get; set; }
@@ -31,30 +37,59 @@ namespace Microsoft.PowerShell.Commands
 
         protected override void ProcessRecord()
         {
-            // TODO: deal with Force
             // TODO: deal with ShouldProcess
 
-            PSVariable variable = new PSVariable(Name, Value, Option);
+            var variable = new PSVariable(Name, Value, Option);
+            variable.Visibility = Visibility;
             if (Description != null)
             {
                 variable.Description = Description;
             }
-            //TODO: check if variable already exists and check if force has influence on behavior
-            //implement also an overloaded Get method in PSVariableIntrniscs that allow to pass a scope
+
             try
             {
-                //TODO: create a new overloaded method in PSVariableIntrinsics that allows to pass (bool)this.Force
-                SessionState.PSVariable.Set(variable);
+                if (!Force && VariableAlreadyExists(variable))
+                {
+                    WriteVariableAlreadyExistsError(variable);
+                    return;
+                }
+                SessionState.PSVariable.SetAtScope(variable, Scope, Force);
+            }
+            catch (SessionStateUnauthorizedAccessException ex)
+            {
+                WriteError(ex.ErrorRecord);
+                return;
             }
             catch (Exception ex)
             {
                 WriteError(new ErrorRecord(ex, "", ErrorCategory.InvalidOperation, variable));
                 return;
             }
+
             if (PassThru.ToBool())
             {
                 WriteObject(variable);
             }
+        }
+
+        private bool VariableAlreadyExists(PSVariable variable)
+        {
+            PSVariable originalVariable = SessionState.PSVariable.GetAtScope(variable.Name, Scope);
+            return originalVariable != null;
+        }
+
+        private void WriteVariableAlreadyExistsError(PSVariable variable)
+        {
+            var ex = new SessionStateException(
+                String.Format("A variable with name '{0}' already exists.", variable.Name),
+                variable.Name,
+                SessionStateCategory.Variable);
+
+            string errorId = String.Format("VariableAlreadyExists,{0}", typeof(NewVariableCommand).FullName);
+            var error = new ErrorRecord(ex, errorId, ErrorCategory.ResourceExists, variable.Name);
+            error.CategoryInfo.Activity = "New-Variable";
+
+            WriteError(error);
         }
     }
 }

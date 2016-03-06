@@ -1,22 +1,32 @@
 ﻿// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Management.Automation;
 
 namespace Microsoft.PowerShell.Commands
 {
     [Cmdlet("Clear", "Variable", SupportsShouldProcess = true)]
     [OutputType(typeof(PSVariable))]
-    public sealed class ClearVariableCommand : PSCmdlet
+    public sealed class ClearVariableCommand : VariableCommandBase
     {
         [Parameter]
-        public string[] Exclude { get; set; }
+        public string[] Exclude
+        {
+            get { return ExcludeFilters; }
+            set { ExcludeFilters = value; }
+        }
 
         [Parameter]
         public SwitchParameter Force { get; set; }
 
         [Parameter]
-        public string[] Include { get; set; }
+        public string[] Include
+        {
+            get { return IncludeFilters; }
+            set { IncludeFilters = value; }
+        }
 
         [Parameter(Position = 0, ValueFromPipelineByPropertyName = true, Mandatory = true)]
         public string[] Name { get; set; }
@@ -26,35 +36,39 @@ namespace Microsoft.PowerShell.Commands
 
         public ClearVariableCommand()
         {
-            // MUST: take these out into the base
-            Include = new string[0];
-            Exclude = new string[0];
         }
 
         protected override void ProcessRecord()
         {
-            // TODO: deal with scope
             // TODO: deal with ShouldProcess
-            // TODO: deal with read-only variables
 
             foreach (string name in Name)
             {
-                PSVariable variable = SessionState.PSVariable.Get(name);
-
-                try
+                foreach (PSVariable variable in GetVariables(name)
+                    .Where(v => !IsExcluded(v)))
                 {
-                    SessionState.PSVariable.Set(variable.Name, null);
-                }
-                catch (Exception ex)
-                {
-                    WriteError(new ErrorRecord(ex, "", ErrorCategory.InvalidOperation, variable));
-                    continue;
-                }
-                if (PassThru.ToBool())
-                {
-                    WriteObject(variable);
+                    try
+                    {
+                        CheckVariableCanBeChanged(variable, Force);
+                        variable.Value = null;
+                    }
+                    catch (SessionStateException ex)
+                    {
+                        WriteError(ex);
+                        continue;
+                    }
+                    if (PassThru.ToBool())
+                    {
+                        WriteObject(variable);
+                    }
                 }
             }
+        }
+
+        private bool IsExcluded(PSVariable variable)
+        {
+            return variable.Visibility != SessionStateEntryVisibility.Public ||
+                IsExcluded(variable.Name);
         }
     }
 }

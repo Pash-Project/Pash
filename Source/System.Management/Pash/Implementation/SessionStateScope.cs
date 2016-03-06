@@ -229,6 +229,12 @@ namespace Pash.Implementation
             affectedScope.SetLocal(value, overwrite);
         }
 
+        internal void SetAtScope(T value, string scope, bool overwrite, bool force)
+        {
+            var affectedScope = GetScope(scope, true, this);
+            affectedScope.SetLocal(value, overwrite, force);
+        }
+
         public void RemoveAtScope(string name, string scope)
         {
             var affectedScope = GetScope(scope, true, this);
@@ -239,6 +245,12 @@ namespace Pash.Implementation
         {
             var affectedScope = GetScope(scope, true, this);
             return affectedScope.Items;
+        }
+
+        public Dictionary<string, T> FindAtScope(string pattern, bool isQualified, string scope)
+        {
+            var affectedScope = GetScope(scope, true, this);
+            return affectedScope.Find(pattern, isQualified);
         }
 
         #endregion
@@ -272,7 +284,7 @@ namespace Pash.Implementation
             return default(T);
         }
 
-        public void SetLocal(T item, bool overwrite)
+        public void SetLocal(T item, bool overwrite, bool force = false)
         {
             if (item == null)
             {
@@ -286,7 +298,7 @@ namespace Pash.Implementation
                     throw new SessionStateException(item.ItemName, SessionStateCategory, String.Empty,
                                                     ErrorCategory.ResourceExists, null);
                 }
-                if (original.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly))
+                if (original.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly) && !force)
                 {
                     throw new SessionStateUnauthorizedAccessException(item.ItemName, SessionStateCategory,
                                                                       String.Empty, null);

@@ -1,4 +1,6 @@
+// Copyright (C) Pash Contributors. License: GPL/BSD. See https://github.com/Pash-Project/Pash/
 using System;
+using System.Management.Automation;
 using NUnit.Framework;
 
 namespace ReferenceTests.Language
@@ -6,7 +8,6 @@ namespace ReferenceTests.Language
     [TestFixture]
     public class VariableTests : ReferenceTestBase
     {
-
         [TestCase("$x")] // normal
         [TestCase("$global:x")] // scope qualified
         [TestCase("$foo:x")] // drive qualified
@@ -32,6 +33,108 @@ namespace ReferenceTests.Language
             ExecuteAndCompareTypedResult(cmd, 2);
         }
 
+        [Test]
+        public void HostVariableIsAvailable()
+        {
+            string result = ReferenceHost.Execute("$host -eq $null");
+
+            Assert.AreEqual("False" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void HostVariableIsConstant()
+        {
+            string result = ReferenceHost.Execute("(Get-Variable host).Options.ToString()");
+
+            Assert.AreEqual("Constant, AllScope" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void CannotModifyHostVariableValue()
+        {
+            Assert.Throws<SessionStateUnauthorizedAccessException>(delegate
+            {
+                ReferenceHost.Execute("$host = 'abc'");
+            });
+        }
+
+        [Test]
+        public void ErrorVariableIsConstant()
+        {
+            string result = ReferenceHost.Execute("(Get-Variable error).Options.ToString()");
+
+            Assert.AreEqual("Constant" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void TrueVariableIsConstant()
+        {
+            string result = ReferenceHost.Execute("(Get-Variable true).Options.ToString()");
+
+            Assert.AreEqual("Constant, AllScope" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void FalseVariableIsConstant()
+        {
+            string result = ReferenceHost.Execute("(Get-Variable false).Options.ToString()");
+
+            Assert.AreEqual("Constant, AllScope" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void QuestionMarkVariableIsReadOnly()
+        {
+            string result = ReferenceHost.Execute("(Get-Variable '?' | ? { $_.Name -eq '?' }).Options.ToString()");
+
+            Assert.AreEqual("ReadOnly, AllScope" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void NullVariableHasNoOptionsSet()
+        {
+            string result = ReferenceHost.Execute("(Get-Variable null).Options.ToString()");
+
+            Assert.AreEqual("None" + Environment.NewLine, result);
+        }
+
+        [Test]
+        public void NullVariableCanBeSetButValueIsUnchanged()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$null = 'abc'",
+                "$null"
+            });
+
+            Assert.AreEqual(Environment.NewLine, result);
+        }
+
+        [Test]
+        public void NullVariableOptionsCanBeSetButValueIsUnchanged()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$a = get-variable null",
+                "$a.Options = 'AllScope'",
+                "$a.Options.ToString()"
+            });
+
+            Assert.AreEqual("None" + Environment.NewLine, result);
+        }
+
+        /// <summary>
+        /// Not sure why PowerShell allows this.
+        /// </summary>
+        [Test]
+        public void NullVariableVisibilityCanBeSetAndValueIsChanged()
+        {
+            string result = ReferenceHost.Execute(new string[] {
+                "$a = get-variable null",
+                "$a.Visibility = 'Private'",
+                "$a.Visibility.ToString()"
+            });
+
+            Assert.AreEqual("Private" + Environment.NewLine, result);
+        }
     }
 }
 

@@ -22,12 +22,22 @@ namespace System.Management.Automation
 
         public PSVariable Get(string name)
         {
-            return _intrinsics.Get(name);
+            var variable = _intrinsics.Get(name);
+            if (variable != null)
+            {
+                ThrowIfVariableIsPrivate(variable);
+            }
+            return variable;
         }
 
         public PSVariable GetAtScope(string name, string scope)
         {
-            return _intrinsics.GetAtScope(name, scope);
+            var variable = _intrinsics.GetAtScope(name, scope);
+            if (variable != null)
+            {
+                ThrowIfVariableIsPrivate(variable);
+            }
+            return variable;
         }
 
         public object GetValue(string name)
@@ -57,22 +67,29 @@ namespace System.Management.Automation
             _intrinsics.Scope.Remove(name, true);
         }
 
-        public void Set(PSVariable variable)
+        public void Set(PSVariable variable, bool force = false)
+        {
+            SetAtScope(variable, null, force);
+        }
+
+        internal void SetAtScope(PSVariable variable, string scope, bool force = false)
         {
             if (variable == null)
             {
                 throw new ArgumentNullException("The variable is null.");
             }
-            var original = _intrinsics.Scope.GetLocal(variable.Name);
+
+            var original = _intrinsics.Scope.GetAtScope(variable.Name, scope);
             if (original == null)
             {
-                _intrinsics.Scope.SetLocal(variable, true);
+                _intrinsics.Scope.SetAtScope(variable, scope, true);
                 return;
             }
+            CheckVariableCanBeChanged(original, force);
             original.Value = variable.Value;
             original.Description = variable.Description;
             original.Options = variable.Options;
-            _intrinsics.Scope.SetLocal(original, true);
+            _intrinsics.Scope.SetAtScope(original, scope, true, force);
         }
 
         public void Set(string name, object value)
@@ -88,11 +105,7 @@ namespace System.Management.Automation
                 return;
             }
             // make sure it's not read only
-            if (variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly))
-            {
-                throw new SessionStateUnauthorizedAccessException(variable.Name, SessionStateCategory.Variable,
-                                                                  String.Empty, null);
-            }
+            CheckVariableCanBeChanged(variable);
             // only modify the value of the old one
             variable.Value = value;
         }
@@ -110,6 +123,48 @@ namespace System.Management.Automation
         public Dictionary<string, PSVariable> GetAllLocal()
         {
             return _intrinsics.GetAllLocal();
+        }
+
+        internal Dictionary<string, PSVariable> GetAllAtScope(string scope)
+        {
+            return _intrinsics.GetAllAtScope(scope);
+        }
+
+        internal Dictionary<string, PSVariable> FindAtScope(string pattern, string scope)
+        {
+            return _intrinsics.FindAtScope(pattern, scope);
+        }
+
+        private static void CheckVariableCanBeChanged(PSVariable variable, bool force = false)
+        {
+            if ((variable.ItemOptions.HasFlag(ScopedItemOptions.ReadOnly) && !force) ||
+                variable.ItemOptions.HasFlag(ScopedItemOptions.Constant))
+            {
+                var ex = SessionStateUnauthorizedAccessException.CreateVariableNotWritableError(variable);
+                throw ex;
+            }
+
+            ThrowIfVariableIsPrivate(variable);
+        }
+
+        private static void ThrowIfVariableIsPrivate(PSVariable variable)
+        {
+            if (variable.Visibility != SessionStateEntryVisibility.Private)
+            {
+                return;
+            }
+
+            var exception = new SessionStateException(
+                String.Format("Cannot access the variable '${0}' because it is a private variable", variable.Name),
+                variable.ItemName,
+                SessionStateCategory.Variable);
+
+            string errorId = "VariableIsPrivate";
+            var parentException = new ParentContainsErrorRecordException(exception);
+            var error = new ErrorRecord(parentException, errorId, ErrorCategory.PermissionDenied, variable.Name);
+            exception.ErrorRecord = error;
+
+            throw exception;
         }
     }
 }

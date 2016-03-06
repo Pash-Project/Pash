@@ -12,6 +12,7 @@ namespace System.Management.Automation
         public virtual string Description { get; set; }
         public virtual object Value { get; set; }
         public virtual ScopedItemOptions Options { get; set; }
+        public SessionStateEntryVisibility Visibility { get; set; }
         public Collection<Attribute> Attributes { get; private set; }
 
         public PSModuleInfo Module { get; set; }
