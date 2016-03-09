@@ -15,6 +15,26 @@ namespace ReferenceTests.Language
                 0
             );                
         }
+
+        [Test]
+        public void TryCatchFinally()
+        {
+            ExecuteAndCompareTypedResult(
+                "try { 2 + 2 } catch { -1 } finally { 0 }",
+                4,
+                0
+            );
+        }
+
+        [Test]
+        public void TryCatchFinallyWithException()
+        {
+            ExecuteAndCompareTypedResult(
+                "try { 2 / 0 } catch { -1 } finally { 3 }",
+                -1,
+                3
+            );
+        }
     }
 }
 

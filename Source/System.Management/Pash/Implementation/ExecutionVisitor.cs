@@ -1322,7 +1322,15 @@ namespace System.Management.Pash.Implementation
             {
                 SetUnderscoreVariable(ex);
 
+                // not yet considered: no catches, special catches!
                 tryStatementAst.CatchClauses.Last().Body.Visit(this);
+            }
+            finally
+            {
+                if (tryStatementAst.Finally != null)
+                {
+                    tryStatementAst.Finally.Visit(this);
+                }
             }
 
             return AstVisitAction.SkipChildren;
