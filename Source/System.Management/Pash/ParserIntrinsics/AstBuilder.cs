@@ -424,11 +424,20 @@ namespace Pash.ParserIntrinsics
 
         StatementAst BuildTryStatementAst(ParseTreeNode parseTreeNode)
         {
+            var subClauses = parseTreeNode.ChildNodes[0].ChildNodes;
+            var catchClauses = subClauses[2];
+            var finallyClause = subClauses.Count > 3 ? subClauses[3] : null;
+            // there might be no catch clauses, then a finally clause could follow directly
+            if (catchClauses.Term == this._grammar.finally_clause)
+            {
+                finallyClause = catchClauses;
+                catchClauses = null;
+            }
             return new TryStatementAst(
                 new ScriptExtent(parseTreeNode),
-                BuildStatementBlockAst(parseTreeNode.ChildNodes[0].ChildNodes[1]),
-                BuildCatchClausesAst(parseTreeNode.ChildNodes[0].ChildNodes[2]),
-                null
+                BuildStatementBlockAst(subClauses[1]),
+                catchClauses == null ? Enumerable.Empty<CatchClauseAst>() : BuildCatchClausesAst(catchClauses),
+                finallyClause == null ? null : BuildFinallyClauseAst(finallyClause)
                 );
         }
 
@@ -450,6 +459,13 @@ namespace Pash.ParserIntrinsics
                 new TypeConstraintAst[0],
                 BuildStatementBlockAst(parseTreeNode.ChildNodes[1])
                 );
+        }
+
+        StatementBlockAst BuildFinallyClauseAst(ParseTreeNode finallyClause)
+        {
+            VerifyTerm(finallyClause, this._grammar.finally_clause);
+
+            return BuildStatementBlockAst(finallyClause.ChildNodes[1]);
         }
 
         StatementAst BuildDataStatementAst(ParseTreeNode parseTreeNode)
