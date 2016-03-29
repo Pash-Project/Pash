@@ -1,37 +1,11 @@
-using System;
 using System.Management.Automation.Language;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System.Text;
 
 namespace System.Management.Automation
 {
-    // that class allows easy initialization
-    class RegexReplacementTable : List<Tuple<Regex, string>>
-    {
-        public void Add(string regexPattern, string replacement)
-        {
-            Add(new Tuple<Regex, string>(new Regex(regexPattern), replacement));
-        }
-    }
-
     internal class StringExpressionHelper
     {
-        private static RegexReplacementTable _escapeCharacterReplacements = new RegexReplacementTable() {
-            {"(?<!`)`0", "\0"},
-            {"(?<!`)`t", "\t"},
-            {"(?<!`)`b", "\b"},
-            {"(?<!`)`f", "\f"},
-            {"(?<!`)`v", "\v"},
-            {"(?<!`)`n", "\n"},
-            {"(?<!`)`r", "\r"},
-            {"(?<!`)`a", "\a"},
-            {"(?<!`)`\'", "\'"},
-            {"(?<!`)`\\$", "$"},
-            {"(?<!`)\"\"", "\""},
-            {"(?<!`)`\"", "\""},
-            {"``", "`"}
-        };
-
         public static  string ResolveEscapeCharacters(string orig, StringConstantType quoteType)
         {
             // look at this: http://technet.microsoft.com/en-us/library/hh847755.aspx
@@ -39,10 +13,47 @@ namespace System.Management.Automation
             var value = orig;
             if (quoteType.Equals(StringConstantType.DoubleQuoted))
             {
-                foreach (var tuple in _escapeCharacterReplacements)
+                var sb = new StringBuilder(value.Length);
+                for (int i = 0; i < value.Length; i++)
                 {
-                    value = tuple.Item1.Replace(value, tuple.Item2);
+                    // TODO: It *should* be safe here to use the index i + 1 because we cannot have a string
+                    // literal ending in ` or " when it's not part of an escape sequence.
+                    // Should we check anyway? If so, how?
+                    if (value[i] == '"' && value[i + 1] == '"')
+                    {
+                        sb.Append('"');
+                        // Skip the next character
+                        i++;
+                    }
+                    else if (value[i] == '`')
+                    {
+                        switch (value[i + 1])
+                        {
+                            case '0': sb.Append('\0'); break;
+                            case 't': sb.Append('\t'); break;
+                            case 'b': sb.Append('\b'); break;
+                            case 'f': sb.Append('\f'); break;
+                            case 'v': sb.Append('\v'); break;
+                            case 'n': sb.Append('\n'); break;
+                            case 'r': sb.Append('\r'); break;
+                            case 'a': sb.Append('\a'); break;
+                            case '\'':
+                            case '$':
+                            case '"':
+                            case '`':
+                            default:
+                                sb.Append(value[i + 1]);
+                                break;
+                        }
+                        // Skip the next character
+                        i++;
+                    }
+                    else
+                    {
+                        sb.Append(value[i]);
+                    }
                 }
+                value = sb.ToString();
             }
             else if (quoteType.Equals(StringConstantType.SingleQuoted))
             {

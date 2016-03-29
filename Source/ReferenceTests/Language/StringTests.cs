@@ -29,6 +29,7 @@ namespace ReferenceTests.Language
         [TestCase("\"foo\\nbar\"", "foo\\nbar")]
         [TestCase("\"foo\\rbar\"", "foo\\rbar")]
         [TestCase("\"foo\\tbar\"", "foo\\tbar")]
+        [TestCase("\"?[^```n`r\\(]\"", "?[^`\n\r\\(]")] // came up via the mailing list, escapes after `` didn't work
         public void StringWithAccentEscaped(string psStr, string expected)
         {
             var res = ReferenceHost.Execute(psStr);
