@@ -5,7 +5,6 @@ sudo: false   # use the new container-based Travis infrastructure
 mono:
   - latest
   - 3.2.8
-  - 2.10.8
 
 notifications:
   email:
