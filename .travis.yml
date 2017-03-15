@@ -6,6 +6,9 @@ mono:
   - latest
   - 3.2.8
 
+# use Travis Containers - http://docs.travis-ci.com/user/workers/container-based-infrastructure/
+sudo: false
+
 notifications:
   email:
     on_success: always
