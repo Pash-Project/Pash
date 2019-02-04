@@ -1,6 +1,7 @@
-[![Linux Build Status (Travis-CI)](https://secure.travis-ci.org/Pash-Project/Pash.png?branch=master )](http://travis-ci.org/Pash-Project/Pash)
-[![Windows Build Status (AppVeyor)](https://ci.appveyor.com/api/projects/status/w6027t7hoqblsvow/branch/master)](https://ci.appveyor.com/project/JayBazuzi/pash/branch/master)
-[![Pull Request Stats](http://issuestats.com/github/Pash-Project/Pash/badge/pr)](http://issuestats.com/github/Pash-Project/Pash)
+Archived
+====
+Now that Windows PowerShell is open source, this project has archived. See [issue #429](https://github.com/Pash-Project/Pash/issues/429).
+
 
 [Pash](https://github.com/Pash-Project/Pash/)
 ====
