@@ -174,7 +174,10 @@ namespace System.Management.Pash.Implementation
                         var right = LanguagePrimitives.ConvertTo<object[]>(rightOperand);
                         return string.Format(left, right);
                     }
-
+                case TokenKind.Is:
+                    return IsInstanceOfType(leftOperand, rightOperand);
+                case TokenKind.IsNot:
+                    return !IsInstanceOfType(leftOperand, rightOperand);
                 case TokenKind.Equals:
                 case TokenKind.PlusEquals:
                 case TokenKind.MinusEquals:
@@ -200,8 +203,6 @@ namespace System.Management.Pash.Implementation
                 case TokenKind.Cin:
                 case TokenKind.Cnotin:
                 case TokenKind.Csplit:
-                case TokenKind.Is:
-                case TokenKind.IsNot:
                 case TokenKind.As:
                 case TokenKind.Shl:
                 case TokenKind.Shr:
@@ -210,6 +211,17 @@ namespace System.Management.Pash.Implementation
                 default:
                     throw new InvalidOperationException(binaryExpressionAst.ToString());
             }
+        }
+
+        private static bool IsInstanceOfType(object leftOperand, object rightOperand)
+        {
+            var type = rightOperand as Type;
+            if (type == null)
+            {
+                throw new InvalidOperationException(@"The right operand of '-is' must be a type.");
+            }
+
+            return type.IsInstanceOfType(leftOperand);
         }
 
         private bool Match(object leftOperand, object rightOperand, RegexOptions regexOptions)
