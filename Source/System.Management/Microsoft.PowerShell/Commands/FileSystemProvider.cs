@@ -347,6 +347,13 @@ namespace Microsoft.PowerShell.Commands
 
         protected override PSDriveInfo NewDrive(PSDriveInfo drive)
         {
+            // The special drive for *nix systems is always valid
+            if (drive.Name == FallbackDriveName &&
+                drive.Root == System.IO.Path.GetPathRoot(Environment.CurrentDirectory))
+            {
+                return drive;
+            }
+
             try
             {
                 var driveInfo = new System.IO.DriveInfo(System.IO.Path.GetPathRoot(drive.Root));
